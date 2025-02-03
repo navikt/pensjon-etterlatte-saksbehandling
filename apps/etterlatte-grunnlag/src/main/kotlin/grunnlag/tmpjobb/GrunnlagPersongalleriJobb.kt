@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.isDev
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
+import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 class GrunnlagPersongalleriJobb(
@@ -30,6 +31,8 @@ class GrunnlagPersongalleriJobb(
             if (erLeader() && isDev()) {
                 measureTimedValue {
                     grunnlagPersongalleriService.kjoer()
+                }.let { (_, varighet) ->
+                    logger.info("Varigthet for $jobbNavn ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }
             }
         }

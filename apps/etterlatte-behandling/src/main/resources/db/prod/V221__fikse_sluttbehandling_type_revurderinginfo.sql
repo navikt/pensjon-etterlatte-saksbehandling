@@ -10,6 +10,7 @@ BEGIN
     update revurdering_info set info = jsonb_set(info, '{type}', '"SLUTTBEHANDLING"'::JSONB) where info->>'type' = 'SLUTTBEHANDLING_UTLAND';
 
     antallSluttbehandlingerRiktig := (select count(*) from revurdering_info where info->>'type' = 'SLUTTBEHANDLING');
+    RAISE NOTICE 'Antallfeil % antall sluttbehandlinger totalt: % Antall med SLUTTBEHANDLING etter oppdatering: %', antallfeil, antallSluttbehandling, antallSluttbehandlingerRiktig;
     if (antallfeil + antallSluttbehandling) = antallSluttbehandlingerRiktig then
         commit;
     else

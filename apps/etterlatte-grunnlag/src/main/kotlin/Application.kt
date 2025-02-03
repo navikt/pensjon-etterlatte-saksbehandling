@@ -21,10 +21,8 @@ import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.grunnlag.tmpjobb.GrunnlagJobbDao
-import no.nav.etterlatte.grunnlag.tmpjobb.GrunnlagPersongalleriJobb
 import no.nav.etterlatte.grunnlag.tmpjobb.GrunnlagPersongalleriService
 import no.nav.etterlatte.klienter.GrunnlagBackupKlient
-import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -35,11 +33,8 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import rapidsandrivers.initRogR
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -85,6 +80,7 @@ class ApplicationBuilder {
     private val grunnagBackupKlient = GrunnlagBackupKlient(grunnlagBackupClientCredentials)
     private val grunnlagPersongalleriService = GrunnlagPersongalleriService(grunnlagJobbDao, grunnagBackupKlient)
 
+    /*
     val grunnlagPersongalleriJobb: GrunnlagPersongalleriJobb by lazy {
         GrunnlagPersongalleriJobb(
             grunnlagPersongalleriService,
@@ -93,6 +89,8 @@ class ApplicationBuilder {
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.DAYS),
         )
     }
+
+     */
 
     fun init() =
         initRogR(
@@ -111,13 +109,5 @@ class ApplicationBuilder {
         ) { rapidsConnection, _ ->
             GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
             GrunnlagHendelserRiver(rapidsConnection, grunnlagService)
-            rapidsConnection.register(
-                object : RapidsConnection.StatusListener {
-                    override fun onStartup(rapidsConnection: RapidsConnection) {
-                        val timer = grunnlagPersongalleriJobb.schedule()
-                        addShutdownHook(timer)
-                    }
-                },
-            )
         }
 }

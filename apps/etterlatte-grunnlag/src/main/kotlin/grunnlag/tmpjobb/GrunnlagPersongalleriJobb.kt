@@ -26,7 +26,6 @@ class GrunnlagPersongalleriJobb(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
-               /*
                 measureTimedValue {
                     try {
                         grunnlagPersongalleriService.kjoer()
@@ -36,7 +35,6 @@ class GrunnlagPersongalleriJobb(
                 }.let { (_, varighet) ->
                     logger.info("Varighet for $jobbNavn ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }
-                */
             } else {
                 logger.info("Er ikke leader og kjører ikke $jobbNavn")
             }

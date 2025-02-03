@@ -17,8 +17,6 @@ import javax.sql.DataSource
 class OpplysningDao(
     private val datasource: DataSource,
 ) {
-    private val connection get() = datasource.connection
-
     data class GrunnlagHendelse(
         val opplysning: Grunnlagsopplysning<JsonNode>,
         val sakId: SakId,
@@ -50,7 +48,7 @@ class OpplysningDao(
         )
 
     fun hent(opplysningId: UUID): GrunnlagHendelse =
-        connection.use {
+        datasource.connection.use {
             it
                 .prepareStatement("SELECT * FROM grunnlagshendelse WHERE opplysning_id = ?::uuid")
                 .apply { setObject(1, opplysningId) }

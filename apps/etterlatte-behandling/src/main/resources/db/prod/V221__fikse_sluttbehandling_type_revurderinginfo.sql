@@ -11,9 +11,7 @@ BEGIN
 
     antallSluttbehandlingerRiktig := (select count(*) from revurdering_info where info->>'type' = 'SLUTTBEHANDLING');
     RAISE NOTICE 'Antallfeil % antall sluttbehandlinger totalt: % Antall med SLUTTBEHANDLING etter oppdatering: %', antallfeil, antallSluttbehandling, antallSluttbehandlingerRiktig;
-    if (antallfeil + antallSluttbehandling) = antallSluttbehandlingerRiktig then
-        commit;
-    else
+    if (antallfeil + antallSluttbehandling) != antallSluttbehandlingerRiktig then
         RAISE EXCEPTION 'Feil antall oppdatert, committer ikke migrering';
     end if;
 END;

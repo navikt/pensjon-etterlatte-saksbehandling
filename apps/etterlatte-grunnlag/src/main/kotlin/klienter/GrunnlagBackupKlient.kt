@@ -16,7 +16,7 @@ class GrunnlagBackupKlient(
     private val url = "http://etterlatte-grunnlag-backup"
 
     fun hentPersonGallerierFraBackup(opplysningsId: String): OpplysningDao.GrunnlagHendelse {
-        logger.info("Henter backup persongalleri for id: opplysningsId")
+        logger.info("Henter backup persongalleri for id: $opplysningsId")
         return runBlocking {
             httpClient
                 .get("$url/grunnlag/$opplysningsId") {

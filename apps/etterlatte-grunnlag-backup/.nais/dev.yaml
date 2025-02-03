@@ -35,3 +35,6 @@ spec:
         thresholdPercentage: 90
     max: 2
     min: 1
+  azure:
+    application:
+      enabled: true

@@ -176,7 +176,6 @@ spec:
         - application: etterlatte-migrering
         - application: etterlatte-beregning
         - application: etterlatte-tilbakekreving
-        - application: etterlatte-vilkaarsvurdering
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
         - application: digdir-krr-proxy

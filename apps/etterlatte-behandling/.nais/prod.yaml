@@ -177,7 +177,6 @@ spec:
       rules:
         - application: kodeverk-api
           namespace: team-rocket
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-api
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag

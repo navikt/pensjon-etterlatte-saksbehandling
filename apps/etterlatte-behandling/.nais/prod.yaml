@@ -208,7 +208,6 @@ spec:
         - application: etterlatte-hendelser-joark
         - application: etterlatte-hendelser-ufoere
         - application: etterlatte-statistikk
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-tidshendelser
         - application: etterlatte-grunnlag

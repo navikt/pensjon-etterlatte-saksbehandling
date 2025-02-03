@@ -202,7 +202,6 @@ spec:
         - application: etterlatte-behandling-kafka
         - application: etterlatte-hendelser-joark
         - application: etterlatte-statistikk
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid

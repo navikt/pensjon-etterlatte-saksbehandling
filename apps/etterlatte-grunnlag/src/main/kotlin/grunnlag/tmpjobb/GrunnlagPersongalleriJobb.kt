@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.isDev
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
+import kotlin.time.measureTimedValue
 
 class GrunnlagPersongalleriJobb(
     private val grunnlagPersongalleriService: GrunnlagPersongalleriService,
@@ -27,7 +28,9 @@ class GrunnlagPersongalleriJobb(
             period = interval.toMillis(),
         ) {
             if (erLeader() && isDev()) {
-                grunnlagPersongalleriService.kjoer()
+                measureTimedValue {
+                    grunnlagPersongalleriService.kjoer()
+                }
             }
         }
     }

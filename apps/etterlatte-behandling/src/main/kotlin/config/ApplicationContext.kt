@@ -649,8 +649,8 @@ internal class ApplicationContext(
         AktivitetspliktOppgaveUnntakUtloeperJob(
             aktivitetspliktOppgaveUnntakUtloeperJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = if (isProd()) Duration.of(3, ChronoUnit.MINUTES).toMillis() else Duration.of(20, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

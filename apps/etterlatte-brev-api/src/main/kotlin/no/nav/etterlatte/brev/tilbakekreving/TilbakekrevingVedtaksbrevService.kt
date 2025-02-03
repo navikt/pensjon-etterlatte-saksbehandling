@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.tilbakekreving
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.AvsenderRequest
@@ -15,6 +16,7 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
@@ -23,17 +25,23 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -61,7 +69,7 @@ class TilbakekrevingVedtaksbrevService(
 
         val brevSendeData = utledBrevSendeData(bruker, brevSakData)
 
-        return opprettBrev(bruker, behandlingId, brevSendeData, brevSakData.sak)
+        return opprettBrev(bruker, behandlingId, brevSendeData, ManueltBrevData(), brevSakData.sak)
     }
 
     suspend fun genererPdf(
@@ -79,11 +87,14 @@ class TilbakekrevingVedtaksbrevService(
 
         val brevSendeData = utledBrevSendeData(bruker, brevSakData)
 
+        val brevInnholdData = utledBrevInnholdData(brev, brevSakData, brevSendeData)
+
         val pdf =
             genererPdf(
                 sak = brevSakData.sak,
                 brev,
                 brevSendeData,
+                brevInnholdData,
             )
 
         // logger.info("PDF generert ok. Sjekker om den skal lagres og ferdigstilles")
@@ -144,7 +155,6 @@ class TilbakekrevingVedtaksbrevService(
     private suspend fun utledBrevSendeData(
         bruker: BrukerTokenInfo,
         brevdata: BrevSakData,
-        brevInnholdData: BrevData = ManueltBrevData(),
         overstyrtSpraak: Spraak? = null, // TODO skal benyttes ved tilbakestilling av brev
     ): BrevSendeData {
         val (sak, vedtak, grunnlag, verge) = brevdata
@@ -173,10 +183,41 @@ class TilbakekrevingVedtaksbrevService(
 
         return BrevSendeData(
             brevKode = Brevkoder.TILBAKEKREVING,
-            brevinnholdData = brevInnholdData,
+            // brevinnholdData = brevInnholdData,
             avsender = avsender,
             personerISak = personerISak,
             spraak = spraak,
+        )
+    }
+
+    private fun utledBrevInnholdData(
+        brev: Brev,
+        brevSakData: BrevSakData,
+        brevSendeData: BrevSendeData,
+    ): BrevData {
+        val innholdMedVedlegg =
+            InnholdMedVedlegg(
+                {
+                    krevIkkeNull(
+                        db.hentBrevPayload(brev.id),
+                    ) { "Fant ikke payload for brev ${brev.id}" }.elements
+                },
+                {
+                    krevIkkeNull(db.hentBrevPayloadVedlegg(brev.id)) {
+                        "Fant ikke payloadvedlegg for brev ${brev.id}"
+                    }
+                },
+            )
+
+        return TilbakekrevingBrevDTO.fra(
+            redigerbart = innholdMedVedlegg.innhold(),
+            muligTilbakekreving =
+                objectMapper.readValue(
+                    (brevSakData.vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
+                ),
+            sakType = brevSakData.sak.sakType,
+            utlandstilknytningType = null, // TODO må hente behandling...
+            soekerNavn = brevSendeData.personerISak.soeker.formaterNavn(),
         )
     }
 
@@ -184,15 +225,16 @@ class TilbakekrevingVedtaksbrevService(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
         brevSendeData: BrevSendeData,
+        brevInnholdData: BrevData,
         sak: Sak,
     ): Brev {
-        val (brevKode, brevinnholdData, personerISak, spraak, avsender) = brevSendeData
+        val (brevKode, personerISak, spraak, avsender) = brevSendeData
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
                 BrevbakerRequest.fra(
                     brevKode = brevKode.redigering,
-                    brevData = brevinnholdData,
+                    brevData = brevInnholdData,
                     avsender = avsender,
                     soekerOgEventuellVerge = personerISak.soekerOgEventuellVerge(),
                     sakId = sak.id,
@@ -227,13 +269,14 @@ class TilbakekrevingVedtaksbrevService(
         sak: Sak,
         brev: Brev,
         brevSendeData: BrevSendeData,
+        brevInnholdData: BrevData,
     ): Pdf {
-        val (brevKode, brevinnholdData, personerISak, spraak, avsender) = brevSendeData
+        val (brevKode, personerISak, spraak, avsender) = brevSendeData
 
         val brevRequest =
             BrevbakerRequest.fra(
                 brevKode = brevKode.ferdigstilling,
-                brevData = brevinnholdData,
+                brevData = brevInnholdData,
                 avsender = avsender,
                 soekerOgEventuellVerge = personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,
@@ -254,7 +297,7 @@ data class BrevSakData(
 
 data class BrevSendeData(
     val brevKode: Brevkoder,
-    val brevinnholdData: BrevData,
+    // val brevinnholdData: BrevData,
     val personerISak: PersonerISak,
     val spraak: Spraak,
     val avsender: Avsender,

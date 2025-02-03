@@ -18,6 +18,10 @@ class GrunnlagPersongalleriService(
                 logger.info("Fant ingen flere persongallerier")
                 break
             }
+            if (count == 100) {
+                logger.info("avsluttet etter 100 for å sjekke performance")
+                break
+            }
             logger.info("Henter data for opplysningsid $opplysningsid")
             val hentetDataForOpplysningId = grunnlagBackupKlient.hentPersonGallerierFraBackup(opplysningsid)
             grunnlagJobbDao.oppdaterTomtPersongalleri(hentetDataForOpplysningId)

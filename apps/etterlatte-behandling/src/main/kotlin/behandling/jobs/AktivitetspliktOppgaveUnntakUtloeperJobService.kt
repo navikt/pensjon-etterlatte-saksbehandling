@@ -65,10 +65,12 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
                     .map { it.referanse }
 
             sak.unntak
-                .filter { it.tom != null && it.tom <= tomDato }
+                // filtrere ut unntak som allerede er utløpt, eller utløper utover 2 mnd frem i tid
+                .filter { it.tom != null && it.tom >= LocalDate.now() && it.tom <= tomDato }
                 .forEach { unntak ->
                     val harOppave = oppgaveReferanser.any { unntak.id.toString() == it }
                     if (harOppave) {
+                        logger.debug("Sak har allerede oppfølgingsoppgave for unntak ${unntak.id}")
                         return@forEach
                     } else {
                         logger.info("Oppretter oppfølgingsoppgave for sak $sakId for unntak ${unntak.id}")
@@ -77,7 +79,7 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
                             sakId = sakId,
                             kilde = OppgaveKilde.SAKSBEHANDLER,
                             type = OppgaveType.OPPFOELGING,
-                            merknad = "Unntak ${unntak.unntak.lesbartNavn} utløper",
+                            merknad = "Unntak ${unntak.unntak.lesbartNavn.lowercase()} utløper",
                             frist =
                                 unntak.tom!!
                                     .minusMonths(1)

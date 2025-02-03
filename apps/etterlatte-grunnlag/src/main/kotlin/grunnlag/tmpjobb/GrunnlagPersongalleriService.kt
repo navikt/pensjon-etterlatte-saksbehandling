@@ -1,5 +1,8 @@
 package no.nav.etterlatte.grunnlag.tmpjobb
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.klienter.GrunnlagBackupKlient
 import org.slf4j.LoggerFactory
 
@@ -18,13 +21,22 @@ class GrunnlagPersongalleriService(
                 break
             }
             val opplysningsid = grunnlagJobbDao.hentTommePersongalleriV1()
-            if (opplysningsid == null) {
+            if (opplysningsid.isEmpty()) {
                 logger.info("Fant ingen flere persongallerier")
                 break
             }
-            logger.info("Henter data for opplysningsid $opplysningsid")
-            val hentetDataForOpplysningId = grunnlagBackupKlient.hentPersonGallerierFraBackup(opplysningsid)
-            grunnlagJobbDao.oppdaterTomtPersongalleri(hentetDataForOpplysningId)
+            runBlocking {
+                val asyncs =
+                    opplysningsid.map { it ->
+                        async {
+                            logger.info("Henter data for opplysningsid $opplysningsid")
+                            val hentetDataForOpplysningId = grunnlagBackupKlient.hentPersonGallerierFraBackup(it)
+                            grunnlagJobbDao.oppdaterTomtPersongalleri(hentetDataForOpplysningId)
+                        }
+                    }
+                asyncs.awaitAll()
+                logger.info("Oppdaterte ${opplysningsid.size} opplysninsgider")
+            }
             count += 1
         }
 

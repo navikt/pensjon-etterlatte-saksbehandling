@@ -107,6 +107,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
+        # TODO: Slette denne når backup er OK
+        - application: etterlatte-grunnlag-backup
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
 

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.time.YearMonth
 import java.util.UUID
@@ -54,6 +55,16 @@ class OpplysningDao(
                 .apply { setObject(1, opplysningId) }
                 .executeQuery()
                 .single { asGrunnlagshendelse() }
+        }
+
+    fun hentBulk(opplysningId: List<UUID>): List<GrunnlagHendelse> =
+        datasource.connection.use {
+            it
+                .prepareStatement("SELECT * FROM grunnlagshendelse WHERE opplysning_id = ANY(?::uuid[])")
+                .apply {
+                    setArray(1, it.createArrayOf("text", opplysningId.toTypedArray()))
+                }.executeQuery()
+                .toList { asGrunnlagshendelse() }
         }
 }
 

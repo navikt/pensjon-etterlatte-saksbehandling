@@ -21,6 +21,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/OppfoelgingsOppgaveModal'
+import { MeldtInnEndringOppgaveModal } from '~components/oppgavebenk/oppgaveModal/MeldtInnEndringOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -193,7 +194,8 @@ export const HandlingerForOppgave = ({
       })
     case Oppgavetype.OPPFOELGING:
       return <OppfoelgingAvOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
-
+    case Oppgavetype.MELDT_INN_ENDRING:
+      return <MeldtInnEndringOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     default:
       return null
   }

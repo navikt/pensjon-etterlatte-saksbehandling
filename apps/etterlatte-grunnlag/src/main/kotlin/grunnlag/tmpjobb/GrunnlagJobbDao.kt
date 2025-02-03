@@ -3,21 +3,21 @@ package no.nav.etterlatte.grunnlag.tmpjobb
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.database.singleOrNull
 import javax.sql.DataSource
 
 class GrunnlagJobbDao(
     private val datasource: DataSource,
 ) {
-    fun hentTommePersongalleriV1(): List<String> =
+    fun hentTommePersongalleriV1(): String? =
         datasource.connection.use {
             it
                 .prepareStatement(
                     """
-                    select opplysning_id from grunnlagshendelse where opplysning_type = 'PERSONGALLERI_V1' AND opplysning is null limit 10;
+                    select opplysning_id from grunnlagshendelse where opplysning_type = 'PERSONGALLERI_V1' AND opplysning is null limit 1;
                     """.trimIndent(),
                 ).executeQuery()
-                .toList { getString("opplysning_id") }
+                .singleOrNull { getString("opplysning_id") }
         }
 
     fun oppdaterTomtPersongalleri(opplysning: OpplysningDao.GrunnlagHendelse) =

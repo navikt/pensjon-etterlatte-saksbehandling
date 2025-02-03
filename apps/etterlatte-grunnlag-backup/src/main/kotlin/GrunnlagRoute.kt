@@ -5,11 +5,19 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.helse.rapids_rivers.toUUID
+import kotlin.time.DurationUnit
+import kotlin.time.measureTimedValue
 
 fun Route.grunnlagRoute(dao: OpplysningDao) {
     get("/grunnlag/{opplysning_id}") {
-        val hendelse = dao.hent(call.parameters["opplysning_id"]!!.toUUID())
+        val opplysningId = call.parameters["opplysning_id"]!!.toUUID()
 
-        call.respond(hendelse)
+        measureTimedValue {
+            dao.hent(opplysningId)
+        }.let { (hendelse, varighet) ->
+            logger.info("Hentet hendelse med id $opplysningId tok: ${varighet.toString(DurationUnit.SECONDS, 2)}")
+
+            call.respond(hendelse)
+        }
     }
 }

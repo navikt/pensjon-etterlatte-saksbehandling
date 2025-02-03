@@ -19,8 +19,8 @@ class GrunnlagBackupKlient(
 
     fun hentPersonGallerierFraBackup(opplysningsId: String): OpplysningDao.GrunnlagHendelse {
         logger.info("Henter backup persongalleri for id: $opplysningsId")
-        try {
-            runBlocking {
+        return try {
+            return runBlocking {
                 val response =
                     httpClient
                         .get("$url/grunnlag/$opplysningsId") {
@@ -30,6 +30,7 @@ class GrunnlagBackupKlient(
                     return@runBlocking response.body()
                 } else {
                     logger.error("Fikk feil fra backup body: ${response.bodyAsText()}")
+                    throw RuntimeException("Feilet mot grunnlag backup. Svar")
                 }
             }
         } catch (e: Exception) {

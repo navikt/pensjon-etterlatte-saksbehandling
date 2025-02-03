@@ -76,6 +76,10 @@ spec:
         flags:
           - name: max_connections
             value: "100"
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write'
   env:
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default

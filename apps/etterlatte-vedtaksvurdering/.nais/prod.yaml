@@ -29,6 +29,11 @@ spec:
         databases:
           - name: vedtaksvurdering
             envVarPrefix: DB
+        flags:
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write'
   liveness:
     initialDelay: 5
     path: /health/isalive

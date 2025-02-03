@@ -89,7 +89,7 @@ class ApplicationBuilder {
         GrunnlagPersongalleriJobb(
             grunnlagPersongalleriService,
             { leaderElectionKlient.isLeader() },
-            Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(10, ChronoUnit.SECONDS).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.DAYS),
         )
     }

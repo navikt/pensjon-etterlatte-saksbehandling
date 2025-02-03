@@ -10,20 +10,16 @@ class GrunnlagPersongalleriService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun kjoer() {
-        var harFlere = true
         logger.info("Kjører jobb for å hente tomme persongallerier")
-        while (harFlere) {
-            val opplysningsider = grunnlagJobbDao.hentTommePersongalleriV1()
-            logger.info("Fant antall tomme PERSONGALLERIER: ${opplysningsider.size}")
-            val opplysningsid = opplysningsider.first()
+        while (true) {
+            val opplysningsid = grunnlagJobbDao.hentTommePersongalleriV1()
+            if (opplysningsid == null) {
+                logger.info("Fant ingen flere PERSONGALLERIER")
+                break
+            }
             logger.info("Henter data for opplysningsid $opplysningsid")
             val hentetDataForOpplysningId = grunnlagBackupKlient.hentPersonGallerierFraBackup(opplysningsid)
             grunnlagJobbDao.oppdaterTomtPersongalleri(hentetDataForOpplysningId)
-            if (opplysningsider.isEmpty()) {
-                logger.info("Fant ingen flere PERSONGALLERIER")
-                harFlere = false
-            }
-            logger.info("Kjorer igjen")
         }
 
         logger.info("Avsluttet jobb, fant ingen flere tomme persongallerier")

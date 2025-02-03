@@ -49,3 +49,7 @@ spec:
   azure:
     application:
       enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-grunnlag

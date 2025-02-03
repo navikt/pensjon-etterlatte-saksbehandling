@@ -363,7 +363,7 @@ class AktivitetspliktDao(
         }
     }
 
-    fun finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper(tom: LocalDate?) =
+    fun finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper(tom: LocalDate) =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =

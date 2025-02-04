@@ -13,7 +13,6 @@ dependencies {
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
-    implementation(project(":libs:etterlatte-jobs"))
 
     implementation(libs.database.kotliquery)
     implementation(libs.cache.caffeine)

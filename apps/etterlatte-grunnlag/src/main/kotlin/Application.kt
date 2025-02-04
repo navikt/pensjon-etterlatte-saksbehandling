@@ -20,9 +20,14 @@ import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
+import no.nav.etterlatte.grunnlag.tmpjobb.GrunnlagJobbDao
+import no.nav.etterlatte.grunnlag.tmpjobb.GrunnlagPersongalleriService
+import no.nav.etterlatte.klienter.GrunnlagBackupKlient
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
@@ -50,9 +55,12 @@ class ApplicationBuilder {
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
+    val leaderElectionHttpClient: HttpClient = httpClient()
+    val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env[PDLTJENESTER_URL]!!)
     private val opplysningDao = OpplysningDao(ds)
+    private val grunnlagJobbDao = GrunnlagJobbDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)
     private val grunnlagService =
@@ -60,6 +68,29 @@ class ApplicationBuilder {
 
     private val aldersovergangDao = AldersovergangDao(ds)
     private val aldersovergangService = AldersovergangService(aldersovergangDao)
+
+    private val grunnlagBackupClientCredentials: HttpClient by lazy {
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("grunnlagbackup.azure.scope"),
+        )
+    }
+    private val grunnagBackupKlient = GrunnlagBackupKlient(grunnlagBackupClientCredentials)
+    private val grunnlagPersongalleriService = GrunnlagPersongalleriService(grunnlagJobbDao, grunnagBackupKlient)
+
+    /*
+    val grunnlagPersongalleriJobb: GrunnlagPersongalleriJobb by lazy {
+        GrunnlagPersongalleriJobb(
+            grunnlagPersongalleriService,
+            { leaderElectionKlient.isLeader() },
+            Duration.of(1, ChronoUnit.HOURS).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.DAYS),
+        )
+    }
+
+     */
 
     fun init() =
         initRogR(

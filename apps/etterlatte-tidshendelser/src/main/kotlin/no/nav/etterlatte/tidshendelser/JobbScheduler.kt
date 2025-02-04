@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
-import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.YearMonth
@@ -30,7 +29,7 @@ class JobbSchedulerTask(
             loggerInfo = LoggerInfo(logger = logger),
             openingHours = openingHours,
         ) {
-            jobbScheduler.poll()
+            jobbScheduler.scheduleMaanedligeJobber()
         }
     }
 }
@@ -40,28 +39,24 @@ class JobbScheduler(
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
-    fun poll() {
+    fun scheduleMaanedligeJobber() {
         val nesteMaaned = YearMonth.now().plusMonths(1)
         logger.info("Sjekker for jobber å legge til for måned: $nesteMaaned")
 
         val planlagteJobberNesteMnd = hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned)
 
-        // Ta bort de periodiske jobbene som allerede er lagt inn for neste mnd
-        filtrerBortPlanlagteJobber(planlagteJobberNesteMnd).forEach { fasteJobber ->
-            // For de periodiske jobbene som mangler, opprett jobb for neste mnd
-            hendelseDao.opprettJobb(fasteJobber, nesteMaaned)
-        }
+        PeriodiskeMaanedligeJobber.entries
+            // filtrere bort jobber som allerede er planlagt for neste måned
+            .filter { periodiskJobb ->
+                planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
+            }
+            // opprett jobb for neste måned
+            .forEach { periodiskJobb ->
+                hendelseDao.opprettMaanedligJobb(periodiskJobb, nesteMaaned)
+            }
     }
 
-    private fun filtrerBortPlanlagteJobber(kjoreringNesteMaaned: List<HendelserJobb>) =
-        PeriodiskeJobber.entries.filter { fastJobb ->
-            kjoreringNesteMaaned.none { kjoringNesteMaaned ->
-                kjoringNesteMaaned.type ==
-                    fastJobb.jobbType
-            }
-        }
-
-    enum class PeriodiskeJobber(
+    enum class PeriodiskeMaanedligeJobber(
         val jobbType: JobbType,
         val dagIMaaned: Int,
         // Merk at justering av behandlingMaaned kan medføre uønsket oppførsel (f.eks. har løpende ytelse sjekker feil måned)

@@ -3,7 +3,7 @@ package no.nav.etterlatte.tidshendelser
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.libs.tidshendelser.JobbType
-import no.nav.etterlatte.tidshendelser.JobbScheduler.PeriodiskeJobber
+import no.nav.etterlatte.tidshendelser.JobbScheduler.PeriodiskeMaanedligeJobber
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -40,8 +40,8 @@ class JobberIntegrationTestScheduler(
 
     @Test
     fun `skal lage jobber om de ikke er laget fra før`() {
-        jobbScheduler.poll()
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeJobber.entries.size
+        jobbScheduler.scheduleMaanedligeJobber()
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeMaanedligeJobber.entries.size
     }
 
     @Test
@@ -51,9 +51,9 @@ class JobberIntegrationTestScheduler(
             nesteMaaned,
             nesteMaaned.atDay(5),
         )
-        jobbScheduler.poll()
+        jobbScheduler.scheduleMaanedligeJobber()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeJobber.entries.size
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeMaanedligeJobber.entries.size
     }
 
     @Test
@@ -63,8 +63,8 @@ class JobberIntegrationTestScheduler(
             nesteMaaned,
             nesteMaaned.atDay(5),
         )
-        jobbScheduler.poll()
+        jobbScheduler.scheduleMaanedligeJobber()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeJobber.entries.size + 1
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeMaanedligeJobber.entries.size + 1
     }
 }

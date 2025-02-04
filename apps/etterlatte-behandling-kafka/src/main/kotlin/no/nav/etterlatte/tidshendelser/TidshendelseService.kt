@@ -194,6 +194,7 @@ class TidshendelseService(
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
+
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: ${hendelse.jobbtype}")
         }
 
@@ -211,6 +212,7 @@ class TidshendelseService(
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
+
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: $type")
         }
 }

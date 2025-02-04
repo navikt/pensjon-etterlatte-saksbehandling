@@ -31,10 +31,13 @@ import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -151,7 +154,8 @@ internal class NySoeknadRiverTest {
     @Test
     fun `BARNEPENSJON - Bruker har sendt søknad nummer 2`() {
         val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enhetsnummer("4808"))
-        val journalpostResponse = OpprettJournalpostResponse("123", true)
+        val journalpostId = "123"
+        val journalpostResponse = OpprettJournalpostResponse(journalpostId, true)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -163,6 +167,7 @@ internal class NySoeknadRiverTest {
                 ),
             )
         coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns UUID.randomUUID()
+        coEvery { behandlingKlientMock.finnOppgaverForReferanse(journalpostId) } returns emptyList()
 
         val inspector =
             testRapid {
@@ -180,6 +185,7 @@ internal class NySoeknadRiverTest {
         val request = slot<OpprettJournalpostRequest>()
 
         coVerify(exactly = 1) {
+            behandlingKlientMock.finnOppgaverForReferanse(journalpostId)
             behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON)
             behandlingKlientMock.hentSakMedBehandlinger(sak.id)
             pdfgenKlient.genererPdf(any(), "barnepensjon_v2")
@@ -203,6 +209,85 @@ internal class NySoeknadRiverTest {
             assertEquals(sak.enhet, this.journalfoerendeEnhet)
             assertEquals(AvsenderMottaker("25478323363"), this.avsenderMottaker)
             assertEquals(Bruker("25478323363"), this.bruker)
+            assertEquals("etterlatte:barnepensjon:621", this.eksternReferanseId)
+            assertEquals(JournalpostSak(sak.id.toString()), this.sak)
+        }
+    }
+
+    fun lagNyOppgave(
+        sak: Sak,
+        oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
+        oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+        gruppeId: String? = null,
+    ) = OppgaveIntern(
+        id = UUID.randomUUID(),
+        status = Status.NY,
+        enhet = sak.enhet,
+        sakId = sak.id,
+        kilde = oppgaveKilde,
+        referanse = "referanse",
+        gruppeId = gruppeId,
+        merknad = "merknad",
+        opprettet = Tidspunkt.now(),
+        sakType = sak.sakType,
+        fnr = sak.ident,
+        frist = null,
+        type = oppgaveType,
+    )
+
+    @Test
+    fun `BARNEPENSJON - Bruker har sendt søknad nummer 2 og nysoeknad prøver for andre gang å opprette oppgave men den finnes allerede`() {
+        val ident = "25478323363"
+        val sak = Sak(ident, SakType.BARNEPENSJON, randomSakId(), Enhetsnummer("4808"))
+        val journalpostId = "123"
+        val journalpostResponse = OpprettJournalpostResponse(journalpostId, true)
+
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
+        coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns journalpostResponse
+        coEvery { behandlingKlientMock.hentSakMedBehandlinger(any()) } returns
+            opprettSakMedBehandlinger(
+                listOf(
+                    mockk<BehandlingSammendrag> { every { status } returns BehandlingStatus.OPPRETTET },
+                ),
+            )
+        coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns UUID.randomUUID()
+        coEvery { behandlingKlientMock.finnOppgaverForReferanse(journalpostId) } returns listOf(lagNyOppgave(sak))
+
+        val inspector =
+            testRapid {
+                sendTestMessage(BARNEPENSJON_SOEKNAD)
+            }
+
+        val melding = inspector.message(0)
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            melding.get(EVENT_NAME_KEY).asText(),
+        )
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
+        assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
+
+        val request = slot<OpprettJournalpostRequest>()
+
+        coVerify(exactly = 1) {
+            behandlingKlientMock.finnOppgaverForReferanse(journalpostId)
+            behandlingKlientMock.finnEllerOpprettSak(ident, SakType.BARNEPENSJON)
+            behandlingKlientMock.hentSakMedBehandlinger(sak.id)
+            behandlingKlientMock.hentSakMedBehandlinger(sak.id)
+            pdfgenKlient.genererPdf(any(), "barnepensjon_v2")
+            dokarkivKlientMock.opprettJournalpost(capture(request))
+        }
+
+        coVerify(exactly = 0) {
+            behandlingKlientMock.opprettOppgave(any(), any())
+        }
+
+        with(request.captured) {
+            assertEquals("Søknad om barnepensjon", this.tittel)
+            assertEquals(sak.sakType.tema, this.tema)
+            assertEquals(sak.enhet, this.journalfoerendeEnhet)
+            assertEquals(AvsenderMottaker(ident), this.avsenderMottaker)
+            assertEquals(Bruker(ident), this.bruker)
             assertEquals("etterlatte:barnepensjon:621", this.eksternReferanseId)
             assertEquals(JournalpostSak(sak.id.toString()), this.sak)
         }

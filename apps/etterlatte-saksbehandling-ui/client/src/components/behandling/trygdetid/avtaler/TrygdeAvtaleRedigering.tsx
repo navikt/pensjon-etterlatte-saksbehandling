@@ -307,7 +307,9 @@ export function TrygdeAvtaleRedigering(props: {
                     <BodyLong size="small">
                       Fremtidig trygdetid skal avkortes. De automatiske beregningene av fremtidig trygdetid i Gjenny
                       støtter ikke dette. Du må derfor beregne fremtidig trygdetid manuelt og registrere en periode som
-                      tilsvarer det antall år avdøde skal ha på fremtidig trygdetid.
+                      tilsvarer det antall år avdøde skal ha på fremtidig trygdetid. Husk å skrive om avkortet fremtidig
+                      trygdetid som følge av nordisk konvensjon art. 9 under trygdetid i beregningsvedlegget. Husk å
+                      skrive hvorfor du endrer i begrunnelsesfeltet under fremtidig trygdetid.
                     </BodyLong>
                     <BodyLong size="small">
                       <strong>Formel: </strong>

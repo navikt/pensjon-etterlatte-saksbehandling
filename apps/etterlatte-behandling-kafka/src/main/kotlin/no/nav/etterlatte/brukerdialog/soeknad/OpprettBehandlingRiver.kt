@@ -25,6 +25,7 @@ internal class OpprettBehandlingRiver(
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
+            validate { it.interestedIn(GyldigSoeknadVurdert.lagretSoeknadIdKey) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }
     }
@@ -35,6 +36,7 @@ internal class OpprettBehandlingRiver(
     ) {
         try {
             val soeknad = packet.soeknad()
+            val soeknadId = packet[GyldigSoeknadVurdert.lagretSoeknadIdKey].asText().takeIf { it.isNotBlank() }
 
             val personGalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
 
@@ -57,18 +59,25 @@ internal class OpprettBehandlingRiver(
                             .find { it.status.aapenBehandling() }
 
                     if (aapenBehandling == null) {
-                        logger.error("Opprett behandling feilet, uten at det finnes åpen behandling", e)
+                        logger.error(
+                            "Opprettelse av behandling feilet, uten at det finnes åpen behandling (soeknadId=$soeknadId)",
+                            e,
+                        )
+
                         throw e
                     } else {
                         logger.error(
-                            "Finnes allerede en åpen behandling på sak ${sak.id} (behandlingId=${aapenBehandling.id}). " +
-                                "Dette burde ikke skje og må kontrolleres manuelt.",
+                            "Mottok søknad med id=$soeknadId, men det finnes allerede en åpen behandling på sak ${sak.id} " +
+                                "(behandlingId=${aapenBehandling.id}). Dette burde ikke skje og må kontrolleres manuelt.",
                         )
                         aapenBehandling.id
                     }
                 }
 
-            logger.info("Behandling $behandlingId startet på sak ${sak.id}")
+            logger.info(
+                "Opprettelse av behandling fullført " +
+                    "(sakId=${sak.id}, behandlingId=$behandlingId, soeknadId=$soeknadId)",
+            )
 
             context.publish(
                 packet
@@ -77,9 +86,8 @@ internal class OpprettBehandlingRiver(
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                     }.toJson(),
             )
-            logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
         } catch (e: Exception) {
-            logger.error("Gyldighetsvurdering av søknad om omstillingsstønad feilet", e)
+            logger.error("Uhåndtert feil ved opprettelse av behandling for søknad", e)
             throw e
         }
     }

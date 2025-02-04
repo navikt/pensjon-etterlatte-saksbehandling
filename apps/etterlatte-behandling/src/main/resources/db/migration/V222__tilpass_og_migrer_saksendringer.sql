@@ -28,10 +28,11 @@ UPDATE saksendring
 SET sak_id = CAST(etter ->> 'id' AS BIGINT);
 
 ALTER TABLE saksendring
-    ALTER COLUMN kallendemetode DROP NOT NULL;
-ALTER TABLE saksendring
     ALTER COLUMN endringstype SET NOT NULL;
 ALTER TABLE saksendring
     ALTER COLUMN identtype SET NOT NULL;
 ALTER TABLE saksendring
     ALTER COLUMN sak_id SET NOT NULL;
+
+ALTER TABLE saksendring
+    DROP COLUMN kallendemetode;

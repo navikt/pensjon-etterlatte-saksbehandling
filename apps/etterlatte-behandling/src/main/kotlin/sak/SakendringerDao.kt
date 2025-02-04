@@ -36,9 +36,9 @@ class SakendringerDao(
             }.also { sak ->
                 lagreSaksendring(
                     saksendring(
-                        endringstype,
-                        null,
-                        krevIkkeNull(hentKomplettSak(sak.id)) { "Sak med ID ${sak.id} ble ikke funnet etter oppretting" },
+                        endringstype = endringstype,
+                        sakFoer = null,
+                        sakEtter = krevIkkeNull(hentKomplettSak(sak.id)) { "Sak med ID ${sak.id} ble ikke funnet etter oppretting" },
                     ),
                 )
             }

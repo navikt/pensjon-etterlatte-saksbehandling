@@ -1,3 +1,5 @@
+ALTER TABLE endringer RENAME TO saksendring;
+
 ALTER TABLE saksendring DROP COLUMN tabell;
 ALTER TABLE saksendring RENAME saksbehandler TO ident;
 ALTER TABLE saksendring

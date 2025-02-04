@@ -93,7 +93,6 @@ spec:
         - application: azure-token-generator
           namespace: aura
           cluster: dev-gcp
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-kafka
         - application: etterlatte-trygdetid
         - application: etterlatte-brev-api

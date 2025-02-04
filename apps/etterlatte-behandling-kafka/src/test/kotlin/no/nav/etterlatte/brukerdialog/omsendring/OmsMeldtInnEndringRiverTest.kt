@@ -94,7 +94,7 @@ class OmsMeldtInnEndringRiverTest {
                 withArg {
                     it.oppgaveKilde shouldBe OppgaveKilde.BRUKERDIALOG_SELVBETJENING
                     it.oppgaveType shouldBe OppgaveType.MELDT_INN_ENDRING
-                    it.merknad shouldBe "" // TODO
+                    it.merknad shouldBe "Endring meldt inn fra selvbetjening skjema"
                 },
             )
         }

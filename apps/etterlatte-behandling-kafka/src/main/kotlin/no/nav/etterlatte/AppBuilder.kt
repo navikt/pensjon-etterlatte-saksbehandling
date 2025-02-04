@@ -10,7 +10,7 @@ import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.brukerdialog.inntektsjustering.JournalfoerInntektsjusteringService
-import no.nav.etterlatte.brukerdialog.omsendring.JournalfoerOmsMeldtInnEndringService
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.JournalfoerOmsMeldtInnEndringService
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.JournalfoerSoeknadService

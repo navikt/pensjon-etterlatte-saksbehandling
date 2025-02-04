@@ -2,7 +2,7 @@ import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
-import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/aktivitetsplikt/AktivitetspliktRevurderingModal'
@@ -21,6 +21,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/OppfoelgingsOppgaveModal'
+import { MeldtInnEndringOppgaveModal } from '~components/oppgavebenk/oppgaveModal/MeldtInnEndringOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -193,7 +194,12 @@ export const HandlingerForOppgave = ({
       })
     case Oppgavetype.OPPFOELGING:
       return <OppfoelgingAvOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
-
+    case Oppgavetype.MELDT_INN_ENDRING:
+      return (
+        erOppgaveRedigerbar(oppgave.status) && (
+          <MeldtInnEndringOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
     default:
       return null
   }

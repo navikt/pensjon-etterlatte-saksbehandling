@@ -7,19 +7,19 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 jackson-version = "2.18.2"
 jupiter-version = "5.11.4"
 ktor2-version = "2.3.13"
-navfelles-token-version = "5.0.13"
+navfelles-token-version = "5.0.16"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.20.4"
 tjenestespesifikasjoner-version = "1.1436e29"
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.1.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.1.0" }
-database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
-database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.3.0" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.3.0" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
+database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
 jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
@@ -61,7 +61,7 @@ etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "20
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.15" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.16" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.14.3" }
@@ -85,14 +85,14 @@ test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.9.1" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.14" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.16" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.27.1" }
-unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.6" }
-openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.6.0" }
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "10.0.0" }
+openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "4.1.6" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

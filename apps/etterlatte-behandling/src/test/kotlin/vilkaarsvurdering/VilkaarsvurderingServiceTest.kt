@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -767,7 +768,7 @@ internal class VilkaarsvurderingServiceTest(
     }
 
     @Test
-    fun `skal ikke ha vilkaar OMS_SIVILSTAND ved foerstegangsbehandling, men ved revurdering av omstillingsstoenad`() {
+    fun `skal kun inkludere vilkaar OMS_SIVILSTAND ved revurdering`() {
         val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.now())
         val foerstegangsbehandling =
             foerstegangsbehandling(
@@ -797,7 +798,10 @@ internal class VilkaarsvurderingServiceTest(
             runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(revurdering.id, brukerTokenInfo) }
 
         vilkaarsvurderingFoerstegangsbehandling.vilkaarsvurdering.vilkaar.size shouldBe OmstillingstoenadVilkaar.inngangsvilkaar().size
+        vilkaarsvurderingFoerstegangsbehandling.vilkaarsvurdering.vilkaar.map { it.hovedvilkaar.type } shouldNotContain
+            VilkaarType.OMS_SIVILSTAND
         vilkaarsvurderingRevurdering.vilkaarsvurdering.vilkaar.size shouldBe OmstillingstoenadVilkaar.loependevilkaar().size
+        vilkaarsvurderingRevurdering.vilkaarsvurdering.vilkaar.map { it.hovedvilkaar.type } shouldContain VilkaarType.OMS_SIVILSTAND
     }
 
     @Test

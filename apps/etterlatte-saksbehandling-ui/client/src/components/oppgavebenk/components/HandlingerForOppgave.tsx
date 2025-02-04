@@ -171,7 +171,7 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.GENERELL_OPPGAVE:
-      return <MeldtInnEndringOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+      return <GeneriskOppgaveModal heading="Generell oppgave" oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.MANUELL_UTSENDING_BREV:
       return <BrevOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:

@@ -66,7 +66,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                             to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
                             target="_blank"
                           >
-                            <Button as="a" icon={<ExternalLinkIcon aria-hidden />} size="small">
+                            <Button icon={<ExternalLinkIcon aria-hidden />} size="small">
                               Vis (åpnes i ny fane)
                             </Button>
                           </Link>
@@ -87,14 +87,28 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                 <>
                   {handlingValgt === HandlingValgt.INGEN && (
                     <HStack gap="4">
-                      <Button variant="secondary">Avslutt oppgave</Button>
-                      <Button>Opprett revurdering</Button>
+                      <Button variant="secondary" onClick={() => setHandlingValgt(HandlingValgt.AVSLUTT_OPPGAVE)}>
+                        Avslutt oppgave
+                      </Button>
+                      <Button onClick={() => setHandlingValgt(HandlingValgt.OPPRETT_REVURDERING)}>
+                        Opprett revurdering
+                      </Button>
                     </HStack>
                   )}
                   {handlingValgt === HandlingValgt.AVSLUTT_OPPGAVE && (
                     <HStack gap="4">
-                      <Button variant="secondary">Tilbake</Button>
+                      <Button variant="secondary" onClick={() => setHandlingValgt(HandlingValgt.INGEN)}>
+                        Tilbake
+                      </Button>
                       <Button>Avslutt</Button>
+                    </HStack>
+                  )}
+                  {handlingValgt === HandlingValgt.OPPRETT_REVURDERING && (
+                    <HStack gap="4">
+                      <Button variant="secondary" onClick={() => setHandlingValgt(HandlingValgt.INGEN)}>
+                        Tilbake
+                      </Button>
+                      <Button>Opprett</Button>
                     </HStack>
                   )}
                 </>

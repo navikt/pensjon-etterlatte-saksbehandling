@@ -92,8 +92,8 @@ class OmsMeldtInnEndringRiverTest {
             behandlingKlientMock.opprettOppgave(
                 sakId = SakId(321L),
                 withArg {
-                    it.oppgaveKilde shouldBe OppgaveKilde.HENDELSE
-                    it.oppgaveType shouldBe OppgaveType.GENERELL_OPPGAVE
+                    it.oppgaveKilde shouldBe OppgaveKilde.BRUKERDIALOG_SELVBETJENING
+                    it.oppgaveType shouldBe OppgaveType.MELDT_INN_ENDRING
                     it.merknad shouldBe "" // TODO
                 },
             )

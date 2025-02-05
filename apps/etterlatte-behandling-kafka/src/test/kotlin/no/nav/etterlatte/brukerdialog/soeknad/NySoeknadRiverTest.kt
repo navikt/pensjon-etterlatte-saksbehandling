@@ -301,6 +301,7 @@ internal class NySoeknadRiverTest {
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
         coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns journalpostResponse
+        coEvery { behandlingKlientMock.finnOppgaverForReferanse(any()) } returns emptyList()
         coEvery { behandlingKlientMock.hentSakMedBehandlinger(any()) } returns
             opprettSakMedBehandlinger(
                 listOf(
@@ -325,6 +326,7 @@ internal class NySoeknadRiverTest {
         val request = slot<OpprettJournalpostRequest>()
 
         coVerify(exactly = 1) {
+            behandlingKlientMock.finnOppgaverForReferanse(any())
             behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD)
             behandlingKlientMock.hentSakMedBehandlinger(sak.id)
             pdfgenKlient.genererPdf(any(), "omstillingsstoenad_v1")

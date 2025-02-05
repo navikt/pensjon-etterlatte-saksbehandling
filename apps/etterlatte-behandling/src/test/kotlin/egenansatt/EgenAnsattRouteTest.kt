@@ -281,7 +281,6 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     }
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
-            // TODO: hvorfor beholder ikke denne skjermingen? av en eller annen grunn forsvrinner saken som ble opprettet underveis i testen. sykt
             Assertions.assertEquals(Enheter.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)
         }
     }

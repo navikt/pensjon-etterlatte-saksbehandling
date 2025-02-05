@@ -18,7 +18,8 @@ import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 fun Route.tilbakekrevingBrevRoute(
-    service: TilbakekrevingVedtaksbrevService,
+    // service: TilbakekrevingVedtaksbrevService,
+    service: SkalTilBehandling, // TODO
     tilgangssjekker: Tilgangssjekker,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.tilbakekreving.TilbakekrevingBrevRoute")

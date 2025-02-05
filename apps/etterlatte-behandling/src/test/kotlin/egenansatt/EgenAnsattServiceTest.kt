@@ -23,7 +23,6 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -33,16 +32,13 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
+import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -75,15 +71,7 @@ internal class EgenAnsattServiceTest(
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
-    private val soeker = "11057523044"
-    private val persongalleri =
-        Persongalleri(
-            soeker,
-            INNSENDER_FOEDSELSNUMMER.value,
-            listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
-            listOf(AVDOED_FOEDSELSNUMMER.value),
-            listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
-        )
+    private val persongalleri = persongalleri()
 
     @BeforeAll
     fun beforeAll() {

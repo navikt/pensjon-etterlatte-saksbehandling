@@ -19,6 +19,7 @@ import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAv
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
+import { OpprettOppfoelgingsoppgaveModal } from '~components/person/sakOgBehandling/OpprettOppfoelgingsoppgaveModal'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -67,6 +68,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                   error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
                   success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
                 })}
+                <OpprettOppfoelgingsoppgaveModal sak={sak} />
               </VStack>
 
               <VStack gap="4">

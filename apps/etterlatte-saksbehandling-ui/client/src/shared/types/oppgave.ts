@@ -45,6 +45,7 @@ export interface NyOppgaveDto {
   oppgaveKilde?: OppgaveKilde
   oppgaveType: Oppgavetype
   merknad?: string
+  frist?: string
   referanse?: string
   saksbehandler?: string
 }

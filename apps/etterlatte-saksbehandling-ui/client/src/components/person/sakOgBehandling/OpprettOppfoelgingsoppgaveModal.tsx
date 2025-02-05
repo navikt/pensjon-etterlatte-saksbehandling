@@ -130,7 +130,7 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
               ) : (
                 <>
                   <Button variant="primary" type="submit" loading={isPending(opprettOppgaveStatus)}>
-                    Lag oppgave
+                    Opprett oppgave
                   </Button>
                   <Button variant="tertiary" onClick={() => setOpen(false)} disabled={isPending(opprettOppgaveStatus)}>
                     Avbryt

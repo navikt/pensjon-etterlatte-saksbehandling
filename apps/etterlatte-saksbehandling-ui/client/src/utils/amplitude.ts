@@ -36,6 +36,8 @@ export enum ClickEvent {
   OPPRETT_GENERELL_OPPGAVE = 'opprett generell oppgave',
   OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
   TILDEL_TILKNYTTEDE_OPPGAVER = 'tildel tilknyttede oppgaver',
+  AAPNE_OPPFOELGINGSOPPGAVE_MODAL = 'åpne opprett oppfølgingsoppgave modal',
+  OPPRETT_OPPFOELGINGSOPPGAVE = 'opprett oppfølgingsoppgave',
 
   // Avkorting
   AVKORTING_FORVENTET_INNTEKT_HJELPETEKST = 'avkorting forventet inntekt hjelpetekst',

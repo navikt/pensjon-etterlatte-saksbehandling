@@ -20,6 +20,7 @@ export const enum FeatureToggle {
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
   pensjon_etterlatte_oppdater_ident_paa_sak = 'pensjon-etterlatte.oppdater-ident-paa-sak',
   trygdetid_fra_pesys = 'trygdetid-fra-pesys',
+  opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
 }
 
 export interface Toggle {
@@ -71,6 +72,10 @@ const pensjon_etterlatte_oppdater_ident_paa_sak: Toggle = {
   togglename: FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak,
   enabled: false,
 }
+const opprette_oppfoelgingsoppgave: Toggle = {
+  togglename: FeatureToggle.opprette_oppfoelgingsoppgave,
+  enabled: false,
+}
 
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
@@ -86,6 +91,7 @@ export const unleashStartState: Record<string, Toggle> = {
     pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   [FeatureToggle.overstyr_beregning_knapp]: overstyr_beregning_knapp,
   [FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak]: pensjon_etterlatte_oppdater_ident_paa_sak,
+  [FeatureToggle.opprette_oppfoelgingsoppgave]: opprette_oppfoelgingsoppgave,
 }
 
 export const Unleashcontext = createContext<{

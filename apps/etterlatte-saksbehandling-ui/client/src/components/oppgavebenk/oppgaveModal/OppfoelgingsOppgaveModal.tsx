@@ -1,5 +1,5 @@
 import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
-import { Alert, BodyLong, BodyShort, Box, Button, Heading, Modal, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, Modal, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad, hentOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
@@ -7,6 +7,8 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useForm } from 'react-hook-form'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 interface FormData {
   merknad: string
@@ -70,10 +72,10 @@ export function OppfoelgingAvOppgaveModal(props: {
             <form onSubmit={handleSubmit(ferdigstill)}>
               <Modal.Body>
                 <VStack gap="4">
-                  <BodyLong>
+                  <BodyShort>
                     Dette er en oppfølgingsoppgave for saken.{' '}
                     {erRedigerbar && 'Når oppfølgingen er gjort kan oppgaven ferdigstilles med en beskrivelse.'}
-                  </BodyLong>
+                  </BodyShort>
 
                   {isFailureHandler({
                     apiResult: ferdigstillOppgaveStatus,
@@ -91,7 +93,12 @@ export function OppfoelgingAvOppgaveModal(props: {
                   })}
                   <div>
                     <Heading size="xsmall">{erRedigerbar ? 'Hva skal følges opp?' : 'Hva ble fulgt opp'}</Heading>
-                    <BodyShort>{oppgave.merknad}</BodyShort>
+                    <BodyShort>
+                      {oppgave.merknad}.{' '}
+                      <PersonLink fnr={oppgave.fnr!!} target="_blank" rel="noreferrer noopener">
+                        Gå til saksoversikten <ExternalLinkIcon title="a11y-title" fontSize="1.3rem" />
+                      </PersonLink>
+                    </BodyShort>
                   </div>
 
                   {erRedigerbar &&

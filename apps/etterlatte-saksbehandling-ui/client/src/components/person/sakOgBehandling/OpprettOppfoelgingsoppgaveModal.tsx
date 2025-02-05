@@ -89,7 +89,7 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
                   pending: <Spinner label="Oppretter oppfølgingsoppgaven" />,
                   success: (opprettetOppgave) => (
                     <Alert variant="success">
-                      Oppfølgingsoppgaven er opprettet, med merknad {opprettetOppgave.merknad} og frist{' '}
+                      Oppfølgingsoppgaven er opprettet, med merknad &quot;{opprettetOppgave.merknad}&quot; og frist{' '}
                       {formaterDato(opprettetOppgave.frist)}.
                     </Alert>
                   ),

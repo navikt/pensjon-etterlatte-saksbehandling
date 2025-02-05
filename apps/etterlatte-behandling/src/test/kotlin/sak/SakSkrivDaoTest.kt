@@ -37,6 +37,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.opprettBehandling
 import org.junit.jupiter.api.AfterEach
@@ -594,7 +596,7 @@ internal class SakSkrivDaoTest(
 
     @Test
     fun `skal opprette sak med lagring av endring`() {
-        val sak = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
 
         val endringForSak = sakendringerDao.hentEndringerForSak(sak.id).single()
 
@@ -611,7 +613,7 @@ internal class SakSkrivDaoTest(
 
     @Test
     fun `skal oppdatere adressebeskyttelse med lagring av endring`() {
-        val sak = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
         val komplettSakFoer = sakendringerDao.hentKomplettSak(sak.id)!!
 
         sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.FORTROLIG)
@@ -632,9 +634,53 @@ internal class SakSkrivDaoTest(
     }
 
     @Test
+    fun `skal oppdatere skjerming med lagring av endring`() {
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val komplettSakFoer = sakendringerDao.hentKomplettSak(sak.id)!!
+
+        sakSkrivDao.markerSakerMedSkjerming(listOf(sak.id), true)
+
+        val endringForOppdatering =
+            sakendringerDao
+                .hentEndringerForSak(sak.id)
+                .single { it.foer != null }
+
+        with(endringForOppdatering) {
+            foer?.id shouldBe sak.id
+            etter.id shouldBe sak.id
+            foer!! shouldBeEqual komplettSakFoer
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
+            foer?.erSkjermet shouldBe null
+            etter.erSkjermet shouldBe true
+        }
+    }
+
+    @Test
+    fun `skal oppdatere ident med lagring av endring`() {
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val komplettSakFoer = sakendringerDao.hentKomplettSak(sak.id)!!
+
+        sakSkrivDao.oppdaterIdent(sak.id, SOEKER2_FOEDSELSNUMMER)
+
+        val endringForOppdatering =
+            sakendringerDao
+                .hentEndringerForSak(sak.id)
+                .single { it.foer != null }
+
+        with(endringForOppdatering) {
+            foer?.id shouldBe sak.id
+            etter.id shouldBe sak.id
+            foer!! shouldBeEqual komplettSakFoer
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
+            foer?.ident shouldBe SOEKER_FOEDSELSNUMMER.value
+            etter.ident shouldBe SOEKER2_FOEDSELSNUMMER.value
+        }
+    }
+
+    @Test
     fun `skal oppdatere enhet på flere saker med lagring av endring`() {
-        val sak1 = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
-        val sak2 = sakSkrivDao.opprettSak("25018012345", SakType.OMSTILLINGSSTOENAD, Enheter.NORDLAND_BODOE.enhetNr)
+        val sak1 = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakSkrivDao.opprettSak(SOEKER2_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.NORDLAND_BODOE.enhetNr)
         sakSkrivDao.oppdaterEnheterPaaSaker(
             listOf(
                 SakMedEnhet(sak1.id, Enheter.AALESUND.enhetNr),

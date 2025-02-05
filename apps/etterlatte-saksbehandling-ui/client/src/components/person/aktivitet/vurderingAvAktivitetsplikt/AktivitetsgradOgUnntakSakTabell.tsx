@@ -1,10 +1,9 @@
 import React from 'react'
 import { IAktivitetspliktAktivitetsgrad, IAktivitetspliktUnntak } from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Label } from '@navikt/ds-react'
+import { AktivitetsgradOgUnntakTabell } from '~components/aktivitetsplikt/AktivitetsgradOgUnntakTabell'
 
-import { AktivitetsgradOgUnntakTabell } from '~components/behandling/aktivitetsplikt/aktivitetsgrad/AktivitetsgradOgUnntakTabellBehandling'
-
-export const AktivitetsgradSakTabell = ({
+export const AktivitetsgradOgUnntakSakTabell = ({
   aktiviteter,
   unntak,
 }: {

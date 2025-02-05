@@ -30,7 +30,7 @@ export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiR
 
 export const opprettVedtaksbrev = async (args: { sakId: number; behandlingId: string }): Promise<ApiResponse<IBrev>> =>
   //apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
-  apiClient.post(`/brev/tilbakekreving/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+  apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 
 export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>
   apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, {})
@@ -81,7 +81,8 @@ export const genererPdf = async (props: {
   tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<ArrayBuffer>> => {
   if (props.tilbakekrevingBrev) {
-    return apiClient.get(`/brev/tilbakekreving/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}`)
+    // TODO
+    return apiClient.get(`/behandling/brev/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}`)
   }
   if (props.brevtype === Brevtype.VEDTAK) {
     return apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}`)

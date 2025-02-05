@@ -80,6 +80,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
+import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
@@ -274,7 +275,11 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val skjermingKlient: SkjermingKlient = SkjermingKlientImpl(skjermingHttpClient(config), env.requireEnvValue(SKJERMING_URL)),
+    val skjermingKlient: SkjermingKlient =
+        SkjermingKlientImpl(
+            skjermingHttpClient(config),
+            env.requireEnvValue(SKJERMING_URL),
+        ),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -623,6 +628,8 @@ internal class ApplicationContext(
             unleashFeatureToggleService = featureToggleService,
         )
 
+    val brevService = BrevKlient(config, httpClient(forventSuksess = true))
+
     // Jobs
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
@@ -638,7 +645,13 @@ internal class ApplicationContext(
         DoedsmeldingJob(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
-            if (isProd()) Duration.of(3, ChronoUnit.MINUTES).toMillis() else Duration.of(20, ChronoUnit.MINUTES).toMillis(),
+            if (isProd()) {
+                Duration.of(3, ChronoUnit.MINUTES).toMillis()
+            } else {
+                Duration
+                    .of(20, ChronoUnit.MINUTES)
+                    .toMillis()
+            },
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(2, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,

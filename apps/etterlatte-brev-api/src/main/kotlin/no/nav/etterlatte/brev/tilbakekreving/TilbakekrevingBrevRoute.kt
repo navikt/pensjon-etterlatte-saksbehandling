@@ -50,7 +50,7 @@ fun Route.tilbakekrevingBrevRoute(
                     logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
 
                     measureTimedValue {
-                        service.genererPdf(brevId, brukerTokenInfo).bytes
+                        service.genererPdf(brevId, brukerTokenInfo)
                     }.let { (pdf, varighet) ->
                         logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                         call.respond(pdf)

@@ -52,7 +52,9 @@ class KrrKlientImpl(
                     .body<DigitalKontaktinformasjon?>()
                     .also {
                         logger.info("Hentet kontaktinformasjon fra KRR")
-                        cache.put(fnr, it)
+                        if (it != null) {
+                            cache.put(fnr, it)
+                        }
                     }
             } else {
                 throw ClientRequestException(response, response.toString())

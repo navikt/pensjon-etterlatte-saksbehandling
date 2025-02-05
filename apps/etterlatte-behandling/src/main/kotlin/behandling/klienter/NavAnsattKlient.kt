@@ -42,7 +42,11 @@ class NavAnsattKlientImpl(
 
                 retryOgPakkUt<SaksbehandlerInfo?> {
                     client.get("$url/navansatt/$ident").body()
-                }.also { navneCache.put(ident, it) }
+                }.also {
+                    if (it != null) {
+                        navneCache.put(ident, it)
+                    }
+                }
             }
         } catch (exception: Exception) {
             throw RuntimeException("Feil i kall mot navansatt navn med ident: $ident", exception)

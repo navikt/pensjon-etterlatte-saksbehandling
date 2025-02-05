@@ -186,8 +186,8 @@ private fun <T : TokenRequest> asyncCache(): AsyncCache<T, AccessToken> =
 class TokenBasedExpiration : Expiry<TokenRequest, AccessToken> {
     // Fallback 5 sek (som tidligere var normal exp)
     override fun expireAfterCreate(
-        key: TokenRequest?,
-        value: AccessToken?,
+        key: TokenRequest,
+        value: AccessToken,
         currentTime: Long,
     ): Long {
         val seconds: Long = value?.expiresIn?.minus(5)?.toLong() ?: 5
@@ -195,15 +195,15 @@ class TokenBasedExpiration : Expiry<TokenRequest, AccessToken> {
     }
 
     override fun expireAfterUpdate(
-        key: TokenRequest?,
-        value: AccessToken?,
+        key: TokenRequest,
+        value: AccessToken,
         currentTime: Long,
         currentDuration: Long,
     ): Long = currentDuration
 
     override fun expireAfterRead(
-        key: TokenRequest?,
-        value: AccessToken?,
+        key: TokenRequest,
+        value: AccessToken,
         currentTime: Long,
         currentDuration: Long,
     ): Long = currentDuration

@@ -353,10 +353,8 @@ class VilkaarsvurderingService(
 
             SakType.OMSTILLINGSSTOENAD ->
                 when (behandlingType) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING,
-                    BehandlingType.REVURDERING,
-                    ->
-                        OmstillingstoenadVilkaar.inngangsvilkaar()
+                    BehandlingType.FØRSTEGANGSBEHANDLING -> OmstillingstoenadVilkaar.inngangsvilkaar()
+                    BehandlingType.REVURDERING -> OmstillingstoenadVilkaar.loependevilkaar()
                 }
         }
 
@@ -435,7 +433,10 @@ class VilkaarsvurderingService(
     private fun finnRelevanteTyper(behandlingId: UUID): List<Vilkaar> {
         val behandling = behandlingService.hentBehandling(behandlingId)!!
         if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            return OmstillingstoenadVilkaar.inngangsvilkaar()
+            return when (behandling.type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> OmstillingstoenadVilkaar.inngangsvilkaar()
+                BehandlingType.REVURDERING -> OmstillingstoenadVilkaar.loependevilkaar()
+            }
         }
         return if (behandling.virkningstidspunkt!!.erPaaNyttRegelverk()) {
             BarnepensjonVilkaar2024.inngangsvilkaar()

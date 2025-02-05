@@ -246,7 +246,13 @@ class BehandlingFactory(
                     merknad =
                         when (kilde) {
                             Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else -> opprettMerknad(request.sak, persongalleri, behandling.id, brukerTokenInfo)
+                            else ->
+                                opprettMerknad(
+                                    request.sak,
+                                    persongalleri,
+                                    behandling.id,
+                                    HardkodaSystembruker.opprettGrunnlag,
+                                )
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                 )

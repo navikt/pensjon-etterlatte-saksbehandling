@@ -24,22 +24,17 @@ class EgenAnsattService(
     fun haandterSkjerming(skjermetHendelse: EgenAnsattSkjermet) {
         logger.info("Haandterer skjermet hendelse")
         val saker = sakService.finnSaker(skjermetHendelse.fnr)
-        if (skjermetHendelse.skjermet) {
-            saker
-                .map {
-                    val pg = runBlocking { grunnlagKlient.hentPersongalleri(it.id) }
-                    SakIdOgPersongalleri(sakId = it.id, persongalleri = pg)
-                }.forEach {
-                    oppdaterTilgangService.haandtergraderingOgEgenAnsatt(
-                        sakId = it.sakId,
-                        persongalleri = it.persongalleri,
-                    )
-                }
-        } else {
-            saker.forEach {
-                oppdaterTilgangService.fjernSkjermingFraSak(it, skjermetHendelse.fnr)
+        saker
+            .map {
+                val pg = runBlocking { grunnlagKlient.hentPersongalleri(it.id) }
+                SakIdOgPersongalleri(sakId = it.id, persongalleri = pg)
+            }.forEach {
+                oppdaterTilgangService.haandtergraderingOgEgenAnsatt(
+                    sakId = it.sakId,
+                    persongalleri = it.persongalleri,
+                )
             }
-        }
+
         logger.info("Ferdighåndtert skjermet hendelse")
     }
 }

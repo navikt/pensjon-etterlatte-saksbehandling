@@ -68,7 +68,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                   error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
                   success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
                 })}
-                <OpprettOppfoelgingsoppgaveModal sak={sak} />
+                <OpprettOppfoelgingsoppgaveModal sak={sak} vedOpprettelse={() => oppgaverFetch(sak.id)} />
               </VStack>
 
               <VStack gap="4">

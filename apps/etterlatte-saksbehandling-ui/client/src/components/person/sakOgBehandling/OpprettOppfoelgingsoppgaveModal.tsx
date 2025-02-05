@@ -19,8 +19,8 @@ interface OppfoelgingsOpppgaveForm {
   tildelMeg: boolean
 }
 
-export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak }) {
-  const { sak } = props
+export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettelse?: () => void }) {
+  const { sak, vedOpprettelse } = props
   const [open, setOpen] = useState(false)
   const [opprettOppgaveStatus, opprettOppgaveApi, resetOpprettOppgaveStatus] = useApiCall(opprettOppgave)
   const saksbehandler = useInnloggetSaksbehandler()
@@ -44,16 +44,19 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak }) {
     const justertFrist = new Date(formdata.frist)
     justertFrist.setHours(12)
     trackClick(ClickEvent.OPPRETT_OPPFOELGINGSOPPGAVE)
-    opprettOppgaveApi({
-      sakId: sak.id,
-      request: {
-        oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
-        oppgaveType: Oppgavetype.OPPFOELGING,
-        merknad: formdata.merknad,
-        frist: justertFrist.toISOString(),
-        saksbehandler: formdata.tildelMeg ? saksbehandler.ident : undefined,
+    opprettOppgaveApi(
+      {
+        sakId: sak.id,
+        request: {
+          oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+          oppgaveType: Oppgavetype.OPPFOELGING,
+          merknad: formdata.merknad,
+          frist: justertFrist.toISOString(),
+          saksbehandler: formdata.tildelMeg ? saksbehandler.ident : undefined,
+        },
       },
-    })
+      vedOpprettelse
+    )
   }
 
   if (!kanOppretteOppfoelgingsoppgave) {
@@ -112,7 +115,7 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak }) {
                       disabled={isPending(opprettOppgaveStatus)}
                     />
 
-                    <CheckboxGroup legend="Tildel meg" description="Skal oppfølgingsoppgaven være tildelt til deg?">
+                    <CheckboxGroup legend="Tildel meg" description="Skal oppfølgingsoppgaven være tildelt deg?">
                       <Checkbox {...register('tildelMeg')}>Tildel oppgaven til meg</Checkbox>
                     </CheckboxGroup>
                   </>

@@ -1,22 +1,36 @@
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { opprettAktivitspliktAktivitetsgradOgUnntakForBehandling } from '~shared/api/aktivitetsplikt'
+import {
+  opprettAktivitspliktAktivitetsgradOgUnntakForBehandling,
+  slettUnntakForBehandling,
+} from '~shared/api/aktivitetsplikt'
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { AktivitetspliktOppgaveVurderingType, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
+import {
+  AktivitetspliktOppgaveVurderingType,
+  AktivitetspliktUnntakType,
+  IAktivitetspliktUnntak,
+  IAktivitetspliktVurderingNyDto,
+} from '~shared/types/Aktivitetsplikt'
 import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
 import { Box, Button } from '@navikt/ds-react'
 import { PlusIcon } from '@navikt/aksel-icons'
 import {
   NyVurderingAktivitetsgradOgUnntak,
   VurderingAktivitetsgradOgUnntak,
+  VurderingKilde,
 } from '~components/aktivitetsplikt/vurdering/VurderingAktivitetsgradOgUnntak'
 import { typeVurderingFraDoedsdato } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering'
 
-export function VurderAktivitetspliktWrapperBehandling(props: { doedsdato: Date; behandling: IDetaljertBehandling }) {
-  const { doedsdato, behandling } = props
+export function VurderAktivitetspliktWrapperBehandling(props: {
+  doedsdato: Date
+  behandling: IDetaljertBehandling
+  defaultOpen: boolean
+  varigeUnntak: IAktivitetspliktUnntak[]
+}) {
+  const { doedsdato, behandling, varigeUnntak } = props
   const [lagreStatus, lagreVurdering] = useApiCall(opprettAktivitspliktAktivitetsgradOgUnntakForBehandling)
-  const [leggerTilVurdering, setLeggerTilVurdering] = useState(false)
+  const [leggerTilVurdering, setLeggerTilVurdering] = useState(props.defaultOpen)
   const dispatch = useDispatch()
 
   function oppdaterStateVedLagring(data: IAktivitetspliktVurderingNyDto) {
@@ -28,7 +42,7 @@ export function VurderAktivitetspliktWrapperBehandling(props: { doedsdato: Date;
     return (
       <Box>
         <Button size="small" icon={<PlusIcon aria-hidden />} onClick={() => setLeggerTilVurdering(true)}>
-          Legg til ny vurdering av aktivitetsplikt
+          Legg til ny vurdering
         </Button>
       </Box>
     )
@@ -51,7 +65,24 @@ export function VurderAktivitetspliktWrapperBehandling(props: { doedsdato: Date;
           unntak: formdata.unntak,
         },
       },
-      oppdaterStateVedLagring
+      (state) => {
+        Promise.all(
+          varigeUnntak.map((unntak) =>
+            slettUnntakForBehandling({
+              sakId: behandling.sakId,
+              behandlingId: behandling.id,
+              unntakId: unntak.id,
+            })
+          )
+        ).finally(() =>
+          oppdaterStateVedLagring({
+            aktivitet: state.aktivitet,
+            unntak: state.unntak.filter(
+              (unntak) => unntak.unntak !== AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+            ),
+          })
+        )
+      }
     )
   }
 
@@ -61,7 +92,12 @@ export function VurderAktivitetspliktWrapperBehandling(props: { doedsdato: Date;
       onSubmit={lagreOgOppdater}
       typeVurdering={typeVurderingFraDoedsdato(doedsdato)}
       doedsdato={doedsdato}
-      onAvbryt={() => {}}
+      onAvbryt={() => setLeggerTilVurdering(false)}
+      vurderingKilde={
+        behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+          ? VurderingKilde.FOERSTEGANGSBEHANDLING
+          : VurderingKilde.REVURDERING
+      }
     />
   )
 }

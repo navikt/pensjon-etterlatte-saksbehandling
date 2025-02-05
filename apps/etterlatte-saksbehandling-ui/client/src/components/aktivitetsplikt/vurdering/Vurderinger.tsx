@@ -3,9 +3,8 @@ import React from 'react'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 
-import { AktivitetsgradIOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/AktivitetsgradIOppgave'
+import { AktivitetsgradOgUnntakIOppgave } from '~components/aktivitetsplikt/vurdering/AktivitetsgradOgUnntakIOppgave'
 import { LeggTilNyVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/LeggTilNyVurdering'
-import { UnntakIOppgave } from '~components/aktivitetsplikt/vurdering/unntak/UnntakIOppgave'
 
 export function Vurderinger(props: { doedsdato: Date }) {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
@@ -19,8 +18,7 @@ export function Vurderinger(props: { doedsdato: Date }) {
           <Heading size="medium">Vurdering av aktivitetsplikt</Heading>
           <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
         </VStack>
-        <AktivitetsgradIOppgave />
-        <UnntakIOppgave />
+        <AktivitetsgradOgUnntakIOppgave />
 
         {oppgaveErRedigerbar && <LeggTilNyVurdering doedsdato={doedsdato} />}
       </VStack>

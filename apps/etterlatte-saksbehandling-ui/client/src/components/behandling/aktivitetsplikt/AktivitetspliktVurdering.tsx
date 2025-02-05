@@ -1,21 +1,19 @@
-import { BodyShort, Box, Button, Heading, HStack, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, Label, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   AktivitetspliktOppgaveVurderingType,
   AktivitetspliktUnntakType,
   IAktivitetspliktVurderingNyDto,
-  tekstAktivitetspliktUnntakType,
 } from '~shared/types/Aktivitetsplikt'
 import { hentAktivitspliktVurderingForBehandling, redigerUnntakForBehandling } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useDispatch } from 'react-redux'
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { UnntakTabellBehandling } from '~components/behandling/aktivitetsplikt/unntak/UnntakTabellBehandling'
-import { AktivitetsgradTabellBehandling } from '~components/behandling/aktivitetsplikt/aktivitetsgrad/AktivitetsgradTabellBehandling'
+import { AktivitetsgradOgUnntakTabellBehandling } from '~components/behandling/aktivitetsplikt/aktivitetsgrad/AktivitetsgradOgUnntakTabellBehandling'
 import {
   setVurderingBehandling,
   useAktivitetspliktBehandlingState,
@@ -23,7 +21,10 @@ import {
 import { VurderAktivitetspliktWrapperBehandling } from '~components/behandling/aktivitetsplikt/VurderAktivitetspliktWrapperBehandling'
 import { isBefore, subMonths } from 'date-fns'
 import { JaNei } from '~shared/types/ISvar'
-import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+import { useAppDispatch } from '~store/Store'
+import { useForm } from 'react-hook-form'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 
 const vurderingHarInnhold = (vurdering: IAktivitetspliktVurderingNyDto): boolean => {
   return !!vurdering.unntak.length || !!vurdering.aktivitet.length
@@ -38,73 +39,61 @@ const harVarigUnntak = (vurdering: IAktivitetspliktVurderingNyDto): boolean => {
   )
 }
 
-export const AktivitetspliktVurdering = ({
-  behandling,
-  setManglerAktivitetspliktVurdering,
-  doedsdato,
-}: {
-  behandling: IDetaljertBehandling
-  setManglerAktivitetspliktVurdering: (manglerVurdering: boolean) => void
-  doedsdato: Date
-}) => {
-  const [vurdering, setVurdering] = useState<IAktivitetspliktVurderingNyDto>()
-  const [manglerVurdering, setManglerVurdering] = useState<boolean>(false)
-  const [harAktivitetsplikt, setHarAktivitetsplikt] = useState<JaNei | undefined>(undefined)
-  const [beskrivelseVarigUnntak, setBeskrivelseVarigUnntak] = useState<string | undefined>()
+const formvaluesFraVurdering = (vurdering: IAktivitetspliktVurderingNyDto): Partial<HarBrukerVarigUnntakFormdata> => ({
+  harAktivitetsplikt: harAktivitetspliktFraVurdering(vurdering),
+  beskrivelse: vurdering.unntak.find(
+    (u) => u.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+  )?.beskrivelse,
+})
+
+function harAktivitetspliktFraVurdering(vurdering: IAktivitetspliktVurderingNyDto): JaNei | undefined {
+  if (!vurderingHarInnhold(vurdering)) {
+    return undefined
+  }
+  if (harVarigUnntak(vurdering)) {
+    return JaNei.NEI
+  } else {
+    return JaNei.JA
+  }
+}
+
+interface HarBrukerVarigUnntakFormdata {
+  harAktivitetsplikt: JaNei
+  beskrivelse: string
+}
+
+function HarBrukerVarigUnntak(props: { behandling: IDetaljertBehandling; doedsdato: Date; redigerbar: boolean }) {
+  const { behandling, redigerbar, doedsdato } = props
+  const dispatch = useAppDispatch()
+  const vurdering = useAktivitetspliktBehandlingState()
   const [lagreUnntakVarigStatus, lagreUnntakVarig] = useApiCall(redigerUnntakForBehandling)
-  const [hentetVurdering, hentVurdering] = useApiCall(hentAktivitspliktVurderingForBehandling)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const dispatch = useDispatch()
-  const redigerbar = behandlingErRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
-  const updated = useAktivitetspliktBehandlingState()
-  useEffect(() => {
-    if (!vurdering) {
-      hentVurdering(
-        { sakId: behandling.sakId, behandlingId: behandling.id },
-        (result) => {
-          dispatch(setVurderingBehandling(result))
-          setVurdering(result)
-          if (harVarigUnntak(result)) {
-            setManglerVurdering(false)
-            setHarAktivitetsplikt(JaNei.NEI)
-          } else {
-            if (vurderingHarInnhold(result)) {
-              setManglerVurdering(false)
-              setHarAktivitetsplikt(JaNei.JA)
-            } else {
-              setManglerVurdering(true)
-            }
-          }
-        },
-        (error) => {
-          if (error.status === 404) {
-            //NO-OP - error visning?
-          }
-        }
-      )
-    }
-  }, [])
+  const [redigerer, setRedigerer] = useState<boolean>(!harAktivitetspliktFraVurdering(vurdering))
+
+  const {
+    handleSubmit,
+    register,
+    watch,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<HarBrukerVarigUnntakFormdata>({
+    defaultValues: formvaluesFraVurdering(vurdering),
+  })
 
   useEffect(() => {
-    setVurdering(updated)
-    if (!vurderingHarInnhold(updated)) {
-      setManglerVurdering(true)
-    }
-    if (vurderingHarInnhold(updated)) {
-      setManglerVurdering(false)
-    }
-  }, [updated])
+    setRedigerer(!harAktivitetspliktFraVurdering(vurdering))
+    reset(formvaluesFraVurdering(vurdering))
+  }, [vurdering])
 
-  useEffect(() => {
-    setManglerAktivitetspliktVurdering(manglerVurdering)
-  }, [manglerVurdering])
+  function avbrytRedigering() {
+    reset(formvaluesFraVurdering(vurdering))
+    setRedigerer(false)
+  }
 
-  const lagreVarigUnntak = () => {
-    if (harAktivitetsplikt == JaNei.NEI) {
+  const jaHarAktivitetsplikt = watch('harAktivitetsplikt') === JaNei.JA
+
+  const lagreVarigUnntak = (formdata: HarBrukerVarigUnntakFormdata) => {
+    if (formdata.harAktivitetsplikt === JaNei.NEI) {
       lagreUnntakVarig(
         {
           sakId: behandling.sakId,
@@ -114,19 +103,149 @@ export const AktivitetspliktVurdering = ({
             unntak: AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT,
             fom: new Date().toISOString(),
             tom: undefined,
-            beskrivelse: beskrivelseVarigUnntak || '',
+            beskrivelse: formdata.beskrivelse,
           },
         },
         (data) => {
           dispatch(setVurderingBehandling(data))
-          setManglerVurdering(false)
+          avbrytRedigering()
         }
       )
-    } else {
-      setManglerVurdering(false)
     }
   }
-  const valgHarAktivitetsplikt = harAktivitetsplikt == JaNei.JA
+
+  return redigerbar && redigerer ? (
+    <>
+      <form onSubmit={handleSubmit(lagreVarigUnntak)}>
+        <VStack maxWidth="32.5rem" gap="4">
+          <ControlledRadioGruppe
+            control={control}
+            name="harAktivitetsplikt"
+            legend="Har bruker aktivitetsplikt etter overgangsperioden?"
+            description={
+              <BodyShort>
+                Vurder om bruker fra 6 måneder etter dødsfallet må være i aktivitet, eller har varig unntak.
+              </BodyShort>
+            }
+            radios={
+              <>
+                <Radio size="small" value={JaNei.JA}>
+                  Ja, bruker har aktivitetsplikt
+                </Radio>
+                <Radio size="small" value={JaNei.NEI}>
+                  Nei, bruker er født i 1963 eller tidligere og har lav inntekt
+                </Radio>
+              </>
+            }
+            errorVedTomInput="Du må velge om bruker har aktivitetsplikt"
+          />
+          {watch('harAktivitetsplikt') === JaNei.NEI && (
+            <>
+              <Box maxWidth="60rem" paddingBlock="2 2">
+                <Textarea
+                  {...register('beskrivelse', {
+                    required: {
+                      value: true,
+                      message: 'Du må beskrive hvorfor bruker er unntatt fra aktivitetsplikten',
+                    },
+                  })}
+                  label="Beskrivelse"
+                  description="Beskriv hvorfor bruker er unntatt fra aktivitetsplikten"
+                  error={errors.beskrivelse?.message}
+                />
+              </Box>
+              <HStack gap="4">
+                <Button
+                  variant="secondary"
+                  size="small"
+                  disabled={isPending(lagreUnntakVarigStatus)}
+                  onClick={avbrytRedigering}
+                >
+                  Avbryt
+                </Button>
+                <Button loading={isPending(lagreUnntakVarigStatus)} variant="primary" type="submit" size="small">
+                  Lagre
+                </Button>
+              </HStack>
+            </>
+          )}
+        </VStack>
+      </form>
+
+      {jaHarAktivitetsplikt &&
+        (vurderingHarInnhold(vurdering) ? (
+          <HStack gap="4">
+            <Button variant="secondary" size="small" onClick={avbrytRedigering}>
+              Avbryt
+            </Button>
+            <Button size="small" variant="primary" onClick={avbrytRedigering}>
+              Lagre
+            </Button>
+          </HStack>
+        ) : (
+          <VurderAktivitetspliktWrapperBehandling
+            doedsdato={doedsdato}
+            behandling={behandling}
+            defaultOpen={true}
+            varigeUnntak={vurdering.unntak.filter(
+              (unntak) => unntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+            )}
+          />
+        ))}
+    </>
+  ) : (
+    <VStack gap="4" maxWidth="32.5rem">
+      <div>
+        <Label size="medium">Har bruker aktivitetsplikt?</Label>
+        {jaHarAktivitetsplikt ? (
+          <BodyShort>Ja</BodyShort>
+        ) : (
+          <BodyShort>Nei, bruker er født i 1963 eller tidligere og har lav inntekt</BodyShort>
+        )}
+      </div>
+      {watch('harAktivitetsplikt') === JaNei.NEI && (
+        <div>
+          <Label>Begrunnelse</Label>
+          <BodyShort>{watch('beskrivelse')}</BodyShort>
+        </div>
+      )}
+      {redigerbar && (
+        <div>
+          <Button variant="secondary" size="small" onClick={() => setRedigerer(true)}>
+            Rediger
+          </Button>
+        </div>
+      )}
+    </VStack>
+  )
+}
+
+export const AktivitetspliktVurdering = ({
+  behandling,
+  setManglerAktivitetspliktVurdering,
+  doedsdato,
+}: {
+  behandling: IDetaljertBehandling
+  setManglerAktivitetspliktVurdering: (manglerVurdering: boolean) => void
+  doedsdato: Date
+}) => {
+  const [hentetVurdering, hentVurdering] = useApiCall(hentAktivitspliktVurderingForBehandling)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const dispatch = useDispatch()
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
+  const vurdering = useAktivitetspliktBehandlingState()
+  useEffect(() => {
+    hentVurdering({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
+      dispatch(setVurderingBehandling(result))
+    })
+  }, [behandling.id])
+  useEffect(() => {
+    setManglerAktivitetspliktVurdering(!vurderingHarInnhold(vurdering))
+  }, [vurdering])
 
   if (isPending(hentetVurdering)) {
     return <Spinner label="Henter aktivitetspliktsvurdering" />
@@ -137,81 +256,40 @@ export const AktivitetspliktVurdering = ({
     <Box maxWidth="120rem" paddingBlock="4 0" borderWidth="1 0 0 0">
       <VStack gap="6">
         <VStack gap="3">
-          <Heading size="medium">Vurdering av aktivitetsplikt</Heading>
-          <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
-          {redigerbar && manglerVurdering && (
-            <Box maxWidth="32.5rem">
-              <RadioGroupWrapper>
-                <RadioGroup
-                  disabled={!redigerbar}
-                  legend="Har bruker aktivitetsplikt"
-                  size="small"
-                  className="radioGroup"
-                  onChange={(event) => setHarAktivitetsplikt(event as JaNei)}
-                >
-                  <HStack gap="4" wrap={false} justify="space-between">
-                    <Radio size="small" value={JaNei.JA}>
-                      Ja
-                    </Radio>
-                    <Radio size="small" value={JaNei.NEI}>
-                      {
-                        tekstAktivitetspliktUnntakType[
-                          AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-                        ]
-                      }
-                    </Radio>
-                  </HStack>
-                </RadioGroup>
-              </RadioGroupWrapper>
-              {harAktivitetsplikt === JaNei.NEI && vurdering && !harVarigUnntak(vurdering) && (
-                <>
-                  <Box maxWidth="60rem" paddingBlock="2 2">
-                    <Textarea
-                      label="Beskrivelse"
-                      description="Beskriv hvordan du har vurdert brukers situasjon"
-                      onChange={(event) => setBeskrivelseVarigUnntak(event.target.value)}
-                    />
-                  </Box>
-                  <Button
-                    loading={isPending(lagreUnntakVarigStatus)}
-                    variant="primary"
-                    type="button"
-                    size="small"
-                    onClick={lagreVarigUnntak}
-                  >
-                    Lagre varig unntak
-                  </Button>
-                </>
-              )}
-            </Box>
-          )}
-          {isSuccess(hentetVurdering) && vurdering && harVarigUnntak(vurdering) && harAktivitetsplikt === JaNei.NEI && (
-            <UnntakTabellBehandling
-              behandling={behandling}
-              unntak={vurdering?.unntak}
-              typeVurdering={typeVurdering6eller12MndVurdering}
-            />
+          <Heading size="medium" level="2">
+            Vurdering av aktivitetsplikt
+          </Heading>
+          <HjemmelLenke
+            tittel="Folketrygdloven § 17-7"
+            lenke="https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7"
+          />
+          {!!vurdering && (
+            <HarBrukerVarigUnntak behandling={behandling} doedsdato={doedsdato} redigerbar={redigerbar} />
           )}
         </VStack>
-        {valgHarAktivitetsplikt && isSuccess(hentetVurdering) && (
-          <>
-            {vurdering && (
-              <>
-                <AktivitetsgradTabellBehandling
+
+        {vurdering &&
+          !harVarigUnntak(vurdering!!) &&
+          (vurdering.aktivitet.length > 0 || vurdering.unntak.length > 0) && (
+            <>
+              <AktivitetsgradOgUnntakTabellBehandling
+                unntak={vurdering.unntak}
+                aktiviteter={vurdering.aktivitet}
+                behandling={behandling}
+                typeVurdering={typeVurdering6eller12MndVurdering}
+              />
+              {redigerbar && (
+                <VurderAktivitetspliktWrapperBehandling
+                  doedsdato={doedsdato}
                   behandling={behandling}
-                  aktiviteter={vurdering?.aktivitet}
-                  typeVurdering={typeVurdering6eller12MndVurdering}
+                  defaultOpen={false}
+                  varigeUnntak={vurdering.unntak.filter(
+                    (unntak) => unntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                  )}
                 />
-                <UnntakTabellBehandling
-                  behandling={behandling}
-                  unntak={vurdering?.unntak}
-                  typeVurdering={typeVurdering6eller12MndVurdering}
-                />
-              </>
-            )}
-            {redigerbar && <VurderAktivitetspliktWrapperBehandling doedsdato={doedsdato} behandling={behandling} />}
-          </>
-        )}
+              )}
+            </>
+          )}
       </VStack>
     </Box>
   )

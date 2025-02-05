@@ -3,6 +3,7 @@ package no.nav.etterlatte.brukerdialog.soeknad
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.JournalfoerSoeknadService
@@ -30,7 +31,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class NySoeknadRiver(
     rapidsConnection: RapidsConnection,
@@ -127,18 +127,24 @@ internal class NySoeknadRiver(
     private fun opprettOppgaveTilleggsinformasjon(
         sakId: SakId,
         journalpostId: String,
-    ): UUID {
-        val nyOppgaveDto =
-            NyOppgaveDto(
-                oppgaveKilde = OppgaveKilde.BRUKERDIALOG,
-                oppgaveType = OppgaveType.TILLEGGSINFORMASJON,
-                merknad = "Ny søknad mottatt mens førstegangsbehandling pågår. Kontroller innholdet og vurder konsekvens.",
-                referanse = journalpostId,
+    ) {
+        val oppgaverForReferanse = behandlingKlient.finnOppgaverForReferanse(journalpostId)
+        if (oppgaverForReferanse.isEmpty()) {
+            val nyOppgaveDto =
+                NyOppgaveDto(
+                    oppgaveKilde = OppgaveKilde.BRUKERDIALOG,
+                    oppgaveType = OppgaveType.TILLEGGSINFORMASJON,
+                    merknad = "Ny søknad mottatt mens førstegangsbehandling pågår. Kontroller innholdet og vurder konsekvens.",
+                    referanse = journalpostId,
+                )
+            behandlingKlient
+                .opprettOppgave(sakId, nyOppgaveDto)
+                .also { logger.info("Opprettet ny oppgave ${OppgaveType.TILLEGGSINFORMASJON} for sak=$sakId") }
+        } else {
+            logger.info(
+                "Oppretter ikke tilleggsinformasjon for åpen behandling i sakid=$sakId for journalpost=$journalpostId da den har en behandling under behandling",
             )
-
-        return behandlingKlient
-            .opprettOppgave(sakId, nyOppgaveDto)
-            .also { logger.info("Opprettet ny oppgave ${OppgaveType.TILLEGGSINFORMASJON} for sak=$sakId") }
+        }
     }
 
     private fun finnEllerOpprettSak(
@@ -152,6 +158,11 @@ internal class NySoeknadRiver(
                 behandlingKlient.finnEllerOpprettSak(fnr, sakType)
             }
         } catch (e: ResponseException) {
+            logger.error("Avbrutt fordeling - kunne ikke hente eller opprette sak: ${e.message}")
+
+            // Svelg slik at Innsendt søknad vil retrye
+            null
+        } catch (e: ServerResponseException) {
             logger.error("Avbrutt fordeling - kunne ikke hente eller opprette sak: ${e.message}")
 
             // Svelg slik at Innsendt søknad vil retrye

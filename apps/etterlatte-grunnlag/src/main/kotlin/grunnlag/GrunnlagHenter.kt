@@ -153,6 +153,7 @@ class GrunnlagHenter(
                     if (this.innsender == null) {
                         this.toJsonNode()
                     } else {
+                        // TODO: Denne skal slettes om vi ikke får noen flere i loggen, ref V24__fjerne_innsender_systemsaker.sql
                         logger.error("Ugyldig ident er lagret, se relatert for opplysninstypeid: $opplysningid")
                         this.copy(innsender = null).toJsonNode()
                     }

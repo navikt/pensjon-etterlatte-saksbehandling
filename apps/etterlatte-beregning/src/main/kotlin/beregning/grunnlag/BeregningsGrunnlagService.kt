@@ -342,7 +342,7 @@ class BeregningsGrunnlagService(
                     if (overstyrtePerioderForrigeBehandling.isNotEmpty()) {
                         beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                             behandlingId,
-                            overstyrtePerioderForrigeBehandling,
+                            overstyrtePerioderForrigeBehandling.map { it.copy(id = UUID.randomUUID()) },
                         )
                     }
                 }

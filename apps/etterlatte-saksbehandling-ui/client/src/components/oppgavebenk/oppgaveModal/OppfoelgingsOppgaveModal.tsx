@@ -113,7 +113,7 @@ export function OppfoelgingAvOppgaveModal(props: {
               </Modal.Body>
               <Modal.Footer>
                 {erRedigerbar &&
-                  (!erSaksbehandlersOppgave ? (
+                  (erSaksbehandlersOppgave ? (
                     <Button variant="primary" type="submit" loading={isPending(ferdigstillOppgaveStatus)}>
                       Ferdigstill
                     </Button>

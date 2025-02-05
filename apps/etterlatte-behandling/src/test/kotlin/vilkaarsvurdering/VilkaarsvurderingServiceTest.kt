@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -68,6 +69,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
@@ -76,6 +78,7 @@ import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingManglerResul
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.service.VirkningstidspunktSamsvarerIkke
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -253,7 +256,7 @@ internal class VilkaarsvurderingServiceTest(
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe behandlingId
-        vilkaarsvurdering.vilkaar shouldHaveSize 12
+        vilkaarsvurdering.vilkaar shouldHaveSize OmstillingstoenadVilkaar.inngangsvilkaar().size
     }
 
     @Test
@@ -762,6 +765,43 @@ internal class VilkaarsvurderingServiceTest(
 
         verify(exactly = 3) { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, true) }
         verify(exactly = 2) { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false) }
+    }
+
+    @Test
+    fun `skal kun inkludere vilkaar OMS_SIVILSTAND ved revurdering`() {
+        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.now())
+        val foerstegangsbehandling =
+            foerstegangsbehandling(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                virkningstidspunkt = virkningstidspunkt,
+            )
+        val revurdering =
+            revurdering(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                virkningstidspunkt = virkningstidspunkt,
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+            )
+
+        coEvery { behandlingService.hentBehandling(foerstegangsbehandling.id) } returns foerstegangsbehandling
+        coEvery { behandlingService.hentBehandling(revurdering.id) } returns revurdering
+        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns foerstegangsbehandling
+
+        every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
+        every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
+
+        val vilkaarsvurderingFoerstegangsbehandling =
+            runBlocking { opprettVilkaarsvurderingOgFyllUtAlleVurderinger(foerstegangsbehandling.id) }
+
+        val vilkaarsvurderingRevurdering =
+            runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(revurdering.id, brukerTokenInfo) }
+
+        vilkaarsvurderingFoerstegangsbehandling.vilkaarsvurdering.vilkaar.size shouldBe OmstillingstoenadVilkaar.inngangsvilkaar().size
+        vilkaarsvurderingFoerstegangsbehandling.vilkaarsvurdering.vilkaar.map { it.hovedvilkaar.type } shouldNotContain
+            VilkaarType.OMS_SIVILSTAND
+        vilkaarsvurderingRevurdering.vilkaarsvurdering.vilkaar.size shouldBe OmstillingstoenadVilkaar.loependevilkaar().size
+        vilkaarsvurderingRevurdering.vilkaarsvurdering.vilkaar.map { it.hovedvilkaar.type } shouldContain VilkaarType.OMS_SIVILSTAND
     }
 
     @Test

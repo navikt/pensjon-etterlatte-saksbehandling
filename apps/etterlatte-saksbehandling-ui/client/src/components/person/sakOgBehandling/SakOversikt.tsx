@@ -66,7 +66,13 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 {mapResult(oppgaverResult, {
                   pending: <Spinner label="Henter oppgaver for sak..." />,
                   error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                  success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                  success: (oppgaver) => (
+                    <ForenkletOppgaverTable
+                      oppgaver={oppgaver}
+                      oppgaveValg={oppgaveValg}
+                      refreshOppgaver={() => oppgaverFetch(sak.id)}
+                    />
+                  ),
                 })}
                 <OpprettOppfoelgingsoppgaveModal sak={sak} vedOpprettelse={() => oppgaverFetch(sak.id)} />
               </VStack>

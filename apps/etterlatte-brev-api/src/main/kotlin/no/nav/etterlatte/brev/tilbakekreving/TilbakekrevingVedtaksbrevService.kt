@@ -4,7 +4,6 @@ import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
 import no.nav.etterlatte.brev.BrevInnholdData
-import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
@@ -30,7 +29,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 data class BrevRequest(
-    val brevKode: Brevkoder,
     val spraak: Spraak, // TODO ?
     val sak: Sak,
     val personerISak: PersonerISak,
@@ -53,12 +51,12 @@ class TilbakekrevingVedtaksbrevService(
 
         val avsender = utledAvsender(bruker, brevRequest.vedtak, brevRequest.sak.enhet)
 
-        val (brevKode, spraak, sak, personerISak) = brevRequest
+        val (spraak, sak, personerISak, lok) = brevRequest
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
                 BrevbakerRequest.fra(
-                    brevKode = brevKode.redigering,
+                    brevKode = brevRequest.brevInnholdData.brevKode.redigering,
                     brevData = ManueltBrevData(),
                     avsender = avsender,
                     soekerOgEventuellVerge = personerISak.soekerOgEventuellVerge(),
@@ -68,6 +66,7 @@ class TilbakekrevingVedtaksbrevService(
                 ),
             )
 
+        val brevKode = brevRequest.brevInnholdData.brevKode
         val nyttBrev =
             OpprettNyttBrev(
                 sakId = sak.id,
@@ -127,7 +126,7 @@ class TilbakekrevingVedtaksbrevService(
 
         return BrevDataFerdigstillingNy(
             innhold = innholdMedVedlegg.innhold(),
-            brevInnholdData = brevRequest.brevInnholdData,
+            data = brevRequest.brevInnholdData,
         )
     }
 
@@ -159,7 +158,7 @@ class TilbakekrevingVedtaksbrevService(
     ): Pdf {
         val brevbakerRequest =
             BrevbakerRequest.fra(
-                brevKode = brevRequest.brevKode.ferdigstilling,
+                brevKode = brevRequest.brevInnholdData.brevKode.ferdigstilling,
                 brevData = brevInnholdData,
                 avsender = avsender,
                 soekerOgEventuellVerge = brevRequest.personerISak.soekerOgEventuellVerge(),

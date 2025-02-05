@@ -121,7 +121,6 @@ class SkalTilBehandling(
                 }
 
             BrevRequest(
-                brevKode = Brevkoder.TILBAKEKREVING,
                 sak = sak.await(),
                 personerISak = personerISak,
                 vedtak = vedtak,
@@ -137,9 +136,11 @@ class SkalTilBehandling(
         }
 }
 
+// TODO på tide men en lib for disse? litt mas med dupklater på tvers?
 data class TilbakekrevingBrevInnholdData(
+    override val brevKode: Brevkoder = Brevkoder.TILBAKEKREVING,
     val sakType: SakType,
-    val bosattUtland: Boolean?,
+    val bosattUtland: Boolean,
     val brukerNavn: String,
     val doedsbo: Boolean,
     val varsel: TilbakekrevingVarsel,
@@ -162,7 +163,7 @@ data class TilbakekrevingBrevInnholdData(
 
             return TilbakekrevingBrevInnholdData(
                 sakType = sakType,
-                bosattUtland = null, // TODO må hente behandling...
+                bosattUtland = false, // TODO må hente behandling...
                 brukerNavn = personerISak.soeker.formaterNavn(),
                 doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
                 varsel = tilbakekreving.vurdering?.forhaandsvarsel ?: throw TilbakeKrevingManglerVarsel(),

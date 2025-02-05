@@ -29,11 +29,13 @@ data class ManueltBrevMedTittelData(
 
 data class BrevDataFerdigstillingNy(
     override val innhold: List<Slate.Element>,
-    val brevInnholdData: BrevInnholdData,
+    val data: BrevInnholdData,
 ) : BrevDataFerdigstilling
 
 data class BrevDataRedigerbarNy(
     val brevInnholdData: BrevInnholdData,
 ) : BrevData
 
-interface BrevInnholdData
+interface BrevInnholdData {
+    val brevKode: Brevkoder
+}

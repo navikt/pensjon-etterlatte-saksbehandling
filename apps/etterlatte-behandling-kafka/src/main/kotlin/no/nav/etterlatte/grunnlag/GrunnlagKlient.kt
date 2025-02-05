@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyePersonopplysninger
@@ -29,6 +31,7 @@ class GrunnlagKlient(
 
         runBlocking {
             klient.post("$url/grunnlag/person/behandling/$behandlingId/nye-opplysninger") {
+                contentType(ContentType.Application.Json)
                 setBody(NyePersonopplysninger(sakId, fnr, nyeOpplysninger))
             }
         }
@@ -43,6 +46,7 @@ class GrunnlagKlient(
 
         runBlocking {
             klient.post("$url/grunnlag/behandling/$behandlingId/nye-opplysninger") {
+                contentType(ContentType.Application.Json)
                 setBody(NyeSaksopplysninger(sakId, nyeOpplysninger))
             }
         }
@@ -52,7 +56,9 @@ class GrunnlagKlient(
         logger.info("Låser grunnlagsversjon for behandling (id=$behandlingId)")
 
         runBlocking {
-            klient.post("$url/grunnlag/behandling/$behandlingId/laas")
+            klient.post("$url/grunnlag/behandling/$behandlingId/laas") {
+                contentType(ContentType.Application.Json)
+            }
         }
     }
 }

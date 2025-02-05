@@ -260,7 +260,7 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val tempGrunnlagKlient: TempGrunnlagKlient = TempGrunnlagKlient(httpClient()),
+    val tempGrunnlagKlient: TempGrunnlagKlient = TempGrunnlagKlient(config, httpClient()),
     val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),

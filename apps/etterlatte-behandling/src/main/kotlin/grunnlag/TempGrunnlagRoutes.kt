@@ -11,12 +11,13 @@ import no.nav.etterlatte.libs.common.grunnlag.NyePersonopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 fun Route.tempGrunnlagRoutes(grunnlagKlient: TempGrunnlagKlient) {
     route("/grunnlag") {
         route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
             post("/laas") {
-                grunnlagKlient.laasVersjonForBehandling(behandlingId)
+                grunnlagKlient.laasVersjonForBehandling(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
 
@@ -27,6 +28,7 @@ fun Route.tempGrunnlagRoutes(grunnlagKlient: TempGrunnlagKlient) {
                     opplysningsbehov.sakId,
                     behandlingId,
                     opplysningsbehov.opplysninger,
+                    brukerTokenInfo,
                 )
                 call.respond(HttpStatusCode.OK)
             }
@@ -40,6 +42,7 @@ fun Route.tempGrunnlagRoutes(grunnlagKlient: TempGrunnlagKlient) {
                 behandlingId = behandlingId,
                 fnr = nyePersonopplysninger.fnr,
                 nyeOpplysninger = nyePersonopplysninger.opplysninger,
+                brukerTokenInfo = brukerTokenInfo,
             )
 
             call.respond(HttpStatusCode.OK)

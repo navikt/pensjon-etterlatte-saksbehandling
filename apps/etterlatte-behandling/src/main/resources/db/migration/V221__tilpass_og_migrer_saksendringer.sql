@@ -1,3 +1,6 @@
+-- Tar backup av endringer før den endres og migreres
+CREATE TABLE endringer_backup AS TABLE endringer;
+
 ALTER TABLE endringer RENAME TO saksendring;
 
 ALTER TABLE saksendring DROP COLUMN tabell;

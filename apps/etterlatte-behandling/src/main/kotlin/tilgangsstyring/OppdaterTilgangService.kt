@@ -16,10 +16,34 @@ import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
+
+fun SakMedGraderingOgSkjermet.erSpesialSak(): Boolean {
+    val harAdressebeskyttelse =
+        this.adressebeskyttelseGradering?.let { gradering ->
+            when (gradering) {
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> true
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG -> true
+                AdressebeskyttelseGradering.FORTROLIG -> true
+                AdressebeskyttelseGradering.UGRADERT -> false
+            }
+        } ?: false
+
+    val erEgenansatt =
+        this.erSkjermet?.let { skjerming ->
+            when (skjerming) {
+                true -> true
+                false -> false
+            }
+        } ?: false
+
+    return harAdressebeskyttelse || erEgenansatt
+}
 
 class OppdaterTilgangService(
     private val sakService: SakService,
@@ -41,6 +65,7 @@ class OppdaterTilgangService(
     ) {
         logger.info("Håndterer tilganger for sakid $sakId")
         val sak = sakService.finnSak(sakId) ?: throw PersonManglerSak()
+        // TODO: må hente ut om saken er egen ansatt eller gradering for hvis ingen og ingen ny har vil vi ikke ooppdatere enhet
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
         val identerMedGradering =
@@ -72,18 +97,24 @@ class OppdaterTilgangService(
             }
         } else {
             val egenAnsattSkjerming = alleIdenter.map { fnr -> sjekkOmIdentErSkjermet(fnr) }
-            sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
+            sakService.oppdaterAdressebeskyttelse(sakId, identerMedGradering.hentPrioritertGradering())
             if (egenAnsattSkjerming.any { it }) {
                 sakService.markerSakerMedSkjerming(listOf(sakId), true)
                 val sakMedEnhet = listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
                 sakService.oppdaterEnhetForSaker(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
             } else {
-                val enhetsNummer = hentEnhet(fnr = sak.ident, sak = sak)
-                val sakMedEnhet = listOf(SakMedEnhet(sakId, enhetsNummer))
-                sakService.oppdaterEnhetForSaker(sakMedEnhet)
-                sakService.markerSakerMedSkjerming(listOf(sakId), false)
-                oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                val tilgangSak = sakService.hentGraderingForSak(sakId, HardkodaSystembruker.tilgang)
+                /*
+                    Vi vil kun tilbakestille en sak som har vært egen anstt, strengt fortrolig(/utland) eller fortrolig
+                 */
+                if (tilgangSak.erSpesialSak()) {
+                    val enhetsNummer = hentEnhet(fnr = sak.ident, sak = sak)
+                    val sakMedEnhet = listOf(SakMedEnhet(sakId, enhetsNummer))
+                    sakService.oppdaterEnhetForSaker(sakMedEnhet)
+                    sakService.markerSakerMedSkjerming(listOf(sakId), false)
+                    oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                }
             }
         }
     }

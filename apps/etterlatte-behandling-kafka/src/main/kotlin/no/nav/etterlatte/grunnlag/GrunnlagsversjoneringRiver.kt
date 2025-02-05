@@ -1,6 +1,5 @@
-package no.nav.etterlatte.grunnlag.rivers
+package no.nav.etterlatte.grunnlag
 
-import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -12,9 +11,9 @@ import java.util.UUID
 
 class GrunnlagsversjoneringRiver(
     rapidsConnection: RapidsConnection,
-    private val grunnlagService: GrunnlagService,
+    private val grunnlagKlient: GrunnlagKlient,
 ) : ListenerMedLogging() {
-    private val logger: Logger = LoggerFactory.getLogger(GrunnlagsversjoneringRiver::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
@@ -29,10 +28,10 @@ class GrunnlagsversjoneringRiver(
         val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
 
         try {
-            logger.info("Mottok melding om attestert behandling (id=$behandlingId)")
-            grunnlagService.laasVersjonForBehandling(behandlingId)
+            logger.info("Mottok melding om attestert behandling (id=$behandlingId). Forsøker å låse grunnlagsversjon..")
+            grunnlagKlient.laasVersjonForBehandling(behandlingId)
         } catch (e: Exception) {
-            logger.error("Feil oppsto ved låsing av attestert behandling (id=$): ", e)
+            logger.error("Feil oppsto ved låsing av attestert behandling (id=$behandlingId): ", e)
         }
     }
 }

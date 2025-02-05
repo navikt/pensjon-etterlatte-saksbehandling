@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.PDLTJENESTER_URL
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -17,8 +17,6 @@ import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.personRoute
-import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
-import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.grunnlag.tmpjobb.GrunnlagJobbDao
 import no.nav.etterlatte.grunnlag.tmpjobb.GrunnlagPersongalleriService
@@ -30,16 +28,15 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import org.slf4j.Logger
-import rapidsandrivers.initRogR
 
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    ApplicationBuilder().init()
+    ApplicationBuilder().run()
 }
 
 class ApplicationBuilder {
@@ -92,22 +89,19 @@ class ApplicationBuilder {
 
      */
 
-    fun init() =
-        initRogR(
-            applikasjonsnavn = "grunnlag",
-            restModule = {
-                restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    route("grunnlag") {
-                        sakGrunnlagRoute(grunnlagService, behandlingKlient)
-                        behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
-                        personRoute(grunnlagService, behandlingKlient)
-                        aldersovergangRoutes(behandlingKlient, aldersovergangService)
-                    }
-                }
-            },
-            configFromEnvironment = { configFromEnvironment(it) },
-        ) { rapidsConnection, _ ->
-            GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
-            GrunnlagHendelserRiver(rapidsConnection, grunnlagService)
+    private val engine =
+        initEmbeddedServer(
+            routePrefix = "/api",
+            httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt(),
+            applicationConfig = config,
+        ) {
+            route("grunnlag") {
+                sakGrunnlagRoute(grunnlagService, behandlingKlient)
+                behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
+                personRoute(grunnlagService, behandlingKlient)
+                aldersovergangRoutes(behandlingKlient, aldersovergangService)
+            }
         }
+
+    fun run() = engine.run()
 }

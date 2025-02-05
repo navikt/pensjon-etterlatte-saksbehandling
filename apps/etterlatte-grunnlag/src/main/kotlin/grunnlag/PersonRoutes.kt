@@ -1,11 +1,16 @@
 package no.nav.etterlatte.grunnlag
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.grunnlag.NyePersonopplysninger
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 
 fun Route.personRoute(
@@ -24,6 +29,21 @@ fun Route.personRoute(
             withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
                 val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
                 call.respond(personMedSakOgRoller)
+            }
+        }
+
+        post("/behandling/{$BEHANDLINGID_CALL_PARAMETER}/nye-opplysninger") {
+            withBehandlingId(behandlingKlient, skrivetilgang = false) { behandlingId ->
+                val nyePersonopplysninger = call.receive<NyePersonopplysninger>()
+
+                grunnlagService.lagreNyePersonopplysninger(
+                    sakId = nyePersonopplysninger.sakId,
+                    behandlingId = behandlingId,
+                    fnr = nyePersonopplysninger.fnr,
+                    nyeOpplysninger = nyePersonopplysninger.opplysninger,
+                )
+
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

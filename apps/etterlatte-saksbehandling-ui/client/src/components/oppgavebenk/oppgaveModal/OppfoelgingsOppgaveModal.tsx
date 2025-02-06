@@ -72,10 +72,9 @@ export function OppfoelgingAvOppgaveModal(props: {
             <form onSubmit={handleSubmit(ferdigstill)}>
               <Modal.Body>
                 <VStack gap="4">
-                  <BodyShort>
-                    Dette er en oppfølgingsoppgave for saken.{' '}
-                    {erRedigerbar && 'Når oppfølgingen er gjort kan oppgaven ferdigstilles med en beskrivelse.'}
-                  </BodyShort>
+                  {erRedigerbar && (
+                    <BodyShort>Når oppfølgingen er gjort kan oppgaven ferdigstilles med en beskrivelse.</BodyShort>
+                  )}
 
                   {isFailureHandler({
                     apiResult: ferdigstillOppgaveStatus,

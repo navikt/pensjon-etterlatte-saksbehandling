@@ -81,6 +81,8 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.brev.BrevKlient
+import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
@@ -628,7 +630,18 @@ internal class ApplicationContext(
             unleashFeatureToggleService = featureToggleService,
         )
 
-    val brevService = BrevKlient(config, httpClient(forventSuksess = true))
+    val brevKlient = BrevKlient(config, httpClient(forventSuksess = true))
+    val tilbakekrevingBrevService =
+        TilbakekrevingBrevService(
+            sakService,
+            brevKlient,
+            vedtakKlient,
+            grunnlagKlientImpl,
+        )
+    val brevService =
+        BrevService(
+            tilbakekrevingBrevService,
+        )
 
     // Jobs
     val metrikkerJob: MetrikkerJob by lazy {

@@ -43,7 +43,7 @@ private class Server(
             notatRoute(context.notatService, context.nyNotatService, context.tilgangssjekker)
             oversendelseBrevRoute(context.oversendelseBrevService, context.tilgangssjekker)
 
-            tilbakekrevingBrevRoute(context.skalTilBehandling, context.tilgangssjekker)
+            tilbakekrevingBrevRoute(context.tilbakekrevingBrevService, context.tilgangssjekker)
         }
 
     fun run() =

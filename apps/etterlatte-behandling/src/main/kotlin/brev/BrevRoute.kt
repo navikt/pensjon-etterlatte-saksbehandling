@@ -14,10 +14,7 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
-fun Route.brevRoute(
-    // brevService: BrevService TODO
-    service: BrevKlient,
-) {
+fun Route.brevRoute(service: BrevService) {
     val logger = LoggerFactory.getLogger("BrevRoute")
 
     route("api/behandling/brev/{$BEHANDLINGID_CALL_PARAMETER}/vedtak") {
@@ -34,7 +31,7 @@ fun Route.brevRoute(
                 }
             logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
 
-            val pdf = service.genererPdf(behandlingId, brevId, brukerTokenInfo).bytes
+            val pdf = service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
             call.respond(pdf)
         }
     }

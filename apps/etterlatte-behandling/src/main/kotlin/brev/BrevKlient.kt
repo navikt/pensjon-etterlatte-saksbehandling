@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -31,27 +30,30 @@ class BrevKlient(
 
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
     ): Brev =
         post(
-            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak?sakId=${sakId.sakId}",
+            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
+            postBody = brevRequest,
         )
 
     suspend fun genererPdf(
-        behandlingId: UUID,
         brevID: BrevID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
     ): Pdf =
-        get(
+        post(
             url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak/pdf?brevId=$brevID",
             onSuccess = { resource ->
                 resource.response?.let { deserialize(it.toJson()) }
                     ?: throw InternfeilException("Feil ved generering av pdf vedtaksbrev")
             },
             brukerTokenInfo = brukerTokenInfo,
+            postBody = brevRequest,
         )
 
     private suspend fun <T> get(

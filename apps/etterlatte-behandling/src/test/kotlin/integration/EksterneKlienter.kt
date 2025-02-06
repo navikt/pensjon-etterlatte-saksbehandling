@@ -317,6 +317,13 @@ class VedtakKlientTest : VedtakKlient {
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO = LoependeYtelseDTO(true, false, LocalDate.now())
+
+    override suspend fun hentVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto? {
+        TODO("Not yet implemented")
+    }
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {

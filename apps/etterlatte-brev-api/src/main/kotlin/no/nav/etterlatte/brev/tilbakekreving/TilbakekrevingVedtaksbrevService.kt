@@ -3,13 +3,14 @@ package no.nav.etterlatte.brev.tilbakekreving
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
-import no.nav.etterlatte.brev.BrevInnholdData
+import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -18,23 +19,11 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
-
-data class BrevRequest(
-    val spraak: Spraak, // TODO ?
-    val sak: Sak,
-    val personerISak: PersonerISak,
-    val vedtak: VedtakDto,
-    val brevInnholdData: BrevInnholdData,
-)
 
 class TilbakekrevingVedtaksbrevService(
     private val brevbaker: BrevbakerService,
@@ -49,31 +38,42 @@ class TilbakekrevingVedtaksbrevService(
         // TODO valider at ikke finnes fra før etc..
         // TODO flytte henting av data til behandling?
 
-        val avsender = utledAvsender(bruker, brevRequest.vedtak, brevRequest.sak.enhet)
+        val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest
 
-        val (spraak, sak, personerISak, lok) = brevRequest
+        val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
+
+        val brevKode = brevRequest.brevInnholdData.brevKode
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
                 BrevbakerRequest.fra(
-                    brevKode = brevRequest.brevInnholdData.brevKode.redigering,
+                    brevKode = brevKode.redigering,
                     brevData = ManueltBrevData(),
                     avsender = avsender,
-                    soekerOgEventuellVerge = personerISak.soekerOgEventuellVerge(),
+                    soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
                     sakId = sak.id,
                     spraak = spraak,
                     sakType = sak.sakType,
                 ),
             )
 
-        val brevKode = brevRequest.brevInnholdData.brevKode
         val nyttBrev =
             OpprettNyttBrev(
                 sakId = sak.id,
                 behandlingId = behandlingId,
                 prosessType = BrevProsessType.REDIGERBAR,
-                soekerFnr = personerISak.soeker.fnr.value,
-                mottakere = adresseService.hentMottakere(sak.sakType, personerISak, bruker),
+                soekerFnr = soeker.fnr.value,
+                mottakere =
+                    adresseService.hentMottakere(
+                        sak.sakType,
+                        PersonerISak(
+                            innsender,
+                            soeker,
+                            avdoede,
+                            verge,
+                        ),
+                        bruker,
+                    ),
                 opprettet = Tidspunkt.now(),
                 innhold =
                     BrevInnhold(
@@ -101,9 +101,10 @@ class TilbakekrevingVedtaksbrevService(
         val brevInnholdData = utledBrevInnholdData(brev, brevRequest)
 
         // TODO Må dette hentes på nytt ved forhåndsvisning? Det kan endre seg?
-        val avsender = utledAvsender(bruker, brevRequest.vedtak, brevRequest.sak.enhet)
+        val avsender =
+            utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
 
-        return opprettPdfOgLagre(bruker, brev, brevRequest, brevInnholdData, avsender)
+        return opprettPdf(brev, brevRequest, brevInnholdData, avsender)
     }
 
     private fun utledBrevInnholdData(
@@ -132,16 +133,16 @@ class TilbakekrevingVedtaksbrevService(
 
     private suspend fun utledAvsender(
         bruker: BrukerTokenInfo,
-        vedtak: VedtakDto,
+        saksbehandlerIdent: String,
+        attestantIdent: String,
         enhet: Enhetsnummer,
     ): Avsender {
-        val innloggetSaksbehandlerIdent = bruker.ident() // TODO bør ikke være nødvendig for kun vedtaksbrev?
         val avsender =
             adresseService.hentAvsender(
                 request =
                     AvsenderRequest(
-                        saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent,
-                        attestantIdent = vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
+                        saksbehandlerIdent = saksbehandlerIdent,
+                        attestantIdent = attestantIdent,
                         sakenhet = enhet,
                     ),
                 bruker = bruker,
@@ -149,8 +150,7 @@ class TilbakekrevingVedtaksbrevService(
         return avsender
     }
 
-    private suspend fun opprettPdfOgLagre(
-        bruker: BrukerTokenInfo,
+    private suspend fun opprettPdf(
         brev: Brev,
         brevRequest: BrevRequest,
         brevInnholdData: BrevData,
@@ -161,7 +161,7 @@ class TilbakekrevingVedtaksbrevService(
                 brevKode = brevRequest.brevInnholdData.brevKode.ferdigstilling,
                 brevData = brevInnholdData,
                 avsender = avsender,
-                soekerOgEventuellVerge = brevRequest.personerISak.soekerOgEventuellVerge(),
+                soekerOgEventuellVerge = SoekerOgEventuellVerge(brevRequest.soeker, brevRequest.verge),
                 sakId = brevRequest.sak.id,
                 spraak = brev.spraak, // TODO godt nok?,
                 sakType = brevRequest.sak.sakType,
@@ -171,6 +171,8 @@ class TilbakekrevingVedtaksbrevService(
         // logger.info("PDF generert ok. Sjekker om den skal lagres og ferdigstilles")
         brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
 
+        /*
+        TODO skal vi lagre pdf her eller samme sted som ferdigstilling?
         if (brevRequest.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
             // logger.info("Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=$brevId)")
         } else {
@@ -184,9 +186,10 @@ class TilbakekrevingVedtaksbrevService(
                     "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerVedtak)" +
                         " og attestant (${brukerTokenInfo.ident()}) er samme person.",
                 )
-                 */
+         */
             }
         }
+         */
         return pdf
     }
 }

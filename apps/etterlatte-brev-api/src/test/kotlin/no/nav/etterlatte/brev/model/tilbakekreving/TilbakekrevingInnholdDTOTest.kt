@@ -69,7 +69,7 @@ class TilbakekrevingInnholdDTOTest {
         with(data.tilbakekreving.perioder[0]) {
             maaned shouldBe YearMonth.of(2023, 1).atDay(1)
             beloeper shouldBe
-                TilbakekrevingBeloeperData(
+                TilbakekrevingBeloeperDataNy(
                     feilutbetaling = Kroner(100),
                     bruttoTilbakekreving = Kroner(200),
                     nettoTilbakekreving = Kroner(300),
@@ -111,7 +111,7 @@ class TilbakekrevingInnholdDTOTest {
                 brevData.utlandstilknytning?.type,
                 brevData.personerISak.soeker.formaterNavn(),
             ).tilbakekreving.summer shouldBe
-            TilbakekrevingBeloeperData(
+            TilbakekrevingBeloeperDataNy(
                 feilutbetaling = Kroner(200),
                 bruttoTilbakekreving = Kroner(400),
                 nettoTilbakekreving = Kroner(600),

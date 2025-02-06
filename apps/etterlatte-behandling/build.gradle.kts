@@ -26,6 +26,8 @@ dependencies {
     implementation(project(":libs:etterlatte-beregning-model"))
     implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:etterlatte-inntektsjustering-model"))
+    implementation(project(":libs:etterlatte-brev-model"))
+    implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     implementation(libs.cache.caffeine)
     implementation(libs.navfelles.tokenvalidationktor2) {

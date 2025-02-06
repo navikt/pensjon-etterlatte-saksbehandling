@@ -59,7 +59,7 @@ class OppdatererTilgangServiceTest {
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
         every { sakService.finnSak(sakId) } returns sak
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
         every { sakService.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
 
@@ -85,7 +85,7 @@ class OppdatererTilgangServiceTest {
         every { sakService.markerSakerMedSkjerming(any(), any()) } just Runs
         every { sakService.oppdaterEnhetForSaker(any()) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
@@ -120,7 +120,7 @@ class OppdatererTilgangServiceTest {
                 false,
                 Enheter.PORSGRUNN.enhetNr,
             )
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
         every { sakService.oppdaterEnhetForSaker(any()) } just Runs
         every { sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
@@ -161,7 +161,7 @@ class OppdatererTilgangServiceTest {
                 true,
                 Enheter.EGNE_ANSATTE.enhetNr,
             )
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
         every { sakService.oppdaterEnhetForSaker(any()) } just Runs
         every { sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
@@ -222,7 +222,7 @@ class OppdatererTilgangServiceTest {
                 false,
                 graderingOgEnhet.second,
             )
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
         every { sakService.oppdaterEnhetForSaker(any()) } just Runs
         every { sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs

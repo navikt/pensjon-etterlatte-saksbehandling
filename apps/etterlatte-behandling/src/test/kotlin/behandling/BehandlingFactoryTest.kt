@@ -102,7 +102,7 @@ internal class BehandlingFactoryTest {
         }
     private val sakServiceMock =
         mockk<SakService> {
-            every { oppdaterAdressebeskyttelse(any(), any()) } returns 1
+            every { oppdaterAdressebeskyttelse(any(), any()) } just Runs
             every { oppdaterEnhetForSaker(any()) } just Runs
             every { markerSakerMedSkjerming(any(), any()) } just Runs
         }

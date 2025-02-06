@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
@@ -55,7 +54,7 @@ internal class GrunnlagsendringshendelseDaoTest(
     @BeforeAll
     fun beforeAll() {
         Kontekst.set(null)
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),

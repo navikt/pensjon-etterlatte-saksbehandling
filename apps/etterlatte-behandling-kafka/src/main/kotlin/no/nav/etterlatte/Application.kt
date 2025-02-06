@@ -5,6 +5,8 @@ import no.nav.etterlatte.brukerdialog.inntektsjustering.InntektsjusteringRiver
 import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringRiver
 import no.nav.etterlatte.brukerdialog.soeknad.NySoeknadRiver
 import no.nav.etterlatte.brukerdialog.soeknad.OpprettBehandlingRiver
+import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
+import no.nav.etterlatte.grunnlag.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbRiver
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
 import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknadRiver
@@ -75,4 +77,7 @@ private fun settOppRivers(
         behandlingKlient = appBuilder.behandlingKlient,
         journalfoerService = appBuilder.journalfoerOmsMeldtInnEndringService,
     )
+
+    GrunnlagHendelserRiver(rapidsConnection, appBuilder.grunnlagKlient)
+    GrunnlagsversjoneringRiver(rapidsConnection, appBuilder.grunnlagKlient)
 }

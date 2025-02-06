@@ -4,7 +4,6 @@ import io.kotest.assertions.asClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
@@ -28,7 +27,7 @@ class AktivitetspliktDaoTest(
     ds: DataSource,
 ) {
     private val dao = AktivitetspliktDao(ConnectionAutoclosingTest(ds))
-    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
+    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)))
 
     @Test
     fun `skal opprette ny aktivitet for behandling`() {

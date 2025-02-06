@@ -45,7 +45,7 @@ internal class OppgaveDaoTest(
     fun beforeAll() {
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         val sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         saktilgangDao = SakTilgangDao(dataSource)
         val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns "SB1" }
         Kontekst.set(

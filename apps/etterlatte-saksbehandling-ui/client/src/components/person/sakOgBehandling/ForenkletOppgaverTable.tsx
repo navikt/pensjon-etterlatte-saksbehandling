@@ -20,14 +20,16 @@ import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import { formaterDato } from '~utils/formatering/dato'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
-import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
+import { OppgaveFrist } from '~components/oppgavebenk/frist/OppgaveFrist'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,
   oppgaveValg,
+  refreshOppgaver,
 }: {
   oppgaver: OppgaveDTO[]
   oppgaveValg: OppgaveValg
+  refreshOppgaver: () => void
 }): ReactNode => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -85,7 +87,7 @@ export const ForenkletOppgaverTable = ({
           <Table.Row key={oppgave.id}>
             <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
             <Table.DataCell>
-              <StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />
+              <OppgaveFrist oppgave={oppgave} oppdaterFrist={refreshOppgaver} />
             </Table.DataCell>
             <Table.DataCell>
               <HStack align="center">

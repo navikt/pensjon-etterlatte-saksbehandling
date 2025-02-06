@@ -101,7 +101,7 @@ internal class EgenAnsattServiceTest(
         grunnlagKlient = mockk()
         oppdaterTilgangService = mockk()
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))
         val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)

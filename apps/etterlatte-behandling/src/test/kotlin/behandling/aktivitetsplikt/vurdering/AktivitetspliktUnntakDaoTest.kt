@@ -49,7 +49,7 @@ class AktivitetspliktUnntakDaoTest(
     ds: DataSource,
 ) {
     private val dao = AktivitetspliktUnntakDao(ConnectionAutoclosingTest(ds))
-    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
+    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)))
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
     private val behandlingDao =
         BehandlingDao(

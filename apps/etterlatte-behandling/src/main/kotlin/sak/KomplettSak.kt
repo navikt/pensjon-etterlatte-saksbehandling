@@ -15,5 +15,6 @@ data class KomplettSak(
     val erSkjermet: Boolean?,
     val enhet: Enhetsnummer,
     val flyktning: Flyktning?,
-    val opprettet: Tidspunkt,
+    // TODO: Denne burde være non-nullable, men det krever opprydding i databasen
+    val opprettet: Tidspunkt?,
 )

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -97,7 +98,7 @@ class SakendringerDao(
                             erSkjermet = if (getObject("erskjermet") != null) getBoolean("erskjermet") else null,
                             enhet = Enhetsnummer(getString("enhet")),
                             flyktning = getString("flyktning")?.let { objectMapper.readValue(it) },
-                            opprettet = getTidspunkt("opprettet"),
+                            opprettet = getTidspunktOrNull("opprettet"),
                         )
                     }
             }

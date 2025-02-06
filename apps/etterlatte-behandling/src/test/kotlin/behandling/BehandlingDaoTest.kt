@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
@@ -55,7 +54,7 @@ internal class BehandlingDaoTest(
 
     @BeforeAll
     fun beforeAll() {
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(

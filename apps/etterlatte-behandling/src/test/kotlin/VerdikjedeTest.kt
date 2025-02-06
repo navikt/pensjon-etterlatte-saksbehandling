@@ -11,8 +11,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -65,7 +67,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
@@ -83,6 +84,8 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VerdikjedeTest : BehandlingIntegrationTest() {
+    private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
+
     @BeforeAll
     fun start() {
         startServer(
@@ -92,6 +95,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 mockk<FeatureToggleService> {
                     every { isEnabled(any(), any()) } returns true
                 },
+            pdlTjenesterKlient = pdltjenesterKlient,
         )
     }
 
@@ -100,7 +104,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
     @Test
     fun verdikjedetest() {
-        val fnr = SOEKER_FOEDSELSNUMMER.value
+        val fnr = soeker
         var behandlingOpprettet: UUID? = null
 
         testApplication {
@@ -605,6 +609,9 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }
 
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             client
                 .post("/grunnlagsendringshendelse/adressebeskyttelse") {
                     addAuthToken(this@VerdikjedeTest.systemBruker)
@@ -614,7 +621,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                             hendelseId = "1",
                             endringstype = Endringstype.OPPRETTET,
                             fnr = fnr,
-                            adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                            adressebeskyttelseGradering = adressebeskyttelseGradering,
                         ),
                     )
                 }.also {

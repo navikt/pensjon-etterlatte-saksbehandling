@@ -13,7 +13,6 @@ include(
     "apps:etterlatte-vedtaksvurdering",
     "apps:etterlatte-vedtaksvurdering-kafka",
     "apps:etterlatte-grunnlag",
-    "apps:etterlatte-grunnlag-backup",
     "apps:etterlatte-brev-api",
     "apps:etterlatte-brev-kafka",
     "apps:etterlatte-klage",

@@ -114,7 +114,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                               to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
                               target="_blank"
                             >
-                              <Button icon={<ExternalLinkIcon aria-hidden />} size="small">
+                              <Button as="a" icon={<ExternalLinkIcon aria-hidden />} size="small">
                                 Vis (åpnes i ny fane)
                               </Button>
                             </Link>

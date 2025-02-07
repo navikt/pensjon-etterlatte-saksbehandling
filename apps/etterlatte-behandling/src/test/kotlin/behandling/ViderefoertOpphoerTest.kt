@@ -82,7 +82,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `lagrer viderefoert opphoer`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -110,7 +110,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `inaktiverer opphør`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -156,7 +156,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `lagrer aktiv og inaktive opphoer paa samme behandling`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -220,7 +220,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `feiler ved oppretting hvis det skal viderefoeres og vilkaar mangler`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,

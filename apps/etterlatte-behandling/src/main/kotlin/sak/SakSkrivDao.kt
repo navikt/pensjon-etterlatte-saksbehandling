@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -14,46 +15,40 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.ktor.route.logger
-import java.sql.ResultSet
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_ADRESSEBESKYTTELSE
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_ENHET
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_IDENT
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_SKJERMING
+import no.nav.etterlatte.sak.Saksendring.Endringstype.OPPRETT_SAK
 
 class SakSkrivDao(
     private val sakendringerDao: SakendringerDao,
 ) {
-    private val mapTilSak: ResultSet.() -> Sak = {
-        Sak(
-            sakType = enumValueOf(getString("sakType")),
-            ident = getString("fnr"),
-            id = SakId(getLong("id")),
-            enhet = Enhetsnummer(getString("enhet")),
-        )
-    }
-
     fun oppdaterAdresseBeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int =
-        sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterAdresseBeskyttelse") { connection ->
-            with(connection) {
-                val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
-                statement.setString(1, adressebeskyttelseGradering.name)
-                statement.setSakId(2, sakId)
-                statement.executeUpdate().also {
-                    logger.info(
-                        "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
-                    )
-                    krev(it > 0) {
-                        "Kunne ikke oppdaterAdresseBeskyttelse for id sakid $sakId"
-                    }
+    ) = sakendringerDao.oppdaterSak(sakId, ENDRE_ADRESSEBESKYTTELSE) { connection ->
+        with(connection) {
+            val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
+            statement.setString(1, adressebeskyttelseGradering.name)
+            statement.setSakId(2, sakId)
+            statement.executeUpdate().also {
+                logger.info(
+                    "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
+                )
+                krev(it > 0) {
+                    "Kunne ikke oppdaterAdresseBeskyttelse for id sakid $sakId"
                 }
             }
         }
+    }
 
     fun opprettSak(
         fnr: String,
         type: SakType,
         enhet: Enhetsnummer,
     ): Sak =
-        sakendringerDao.opprettSak("opprettSak") { connection ->
+        sakendringerDao.opprettSak(OPPRETT_SAK) { connection ->
             with(connection) {
                 val statement =
                     prepareStatement(
@@ -67,7 +62,7 @@ class SakSkrivDao(
                     statement
                         .executeQuery()
                         .singleOrNull(mapTilSak),
-                ) { "Kunne ikke opprette sak for fnr: $fnr" }
+                ) { "Kunne ikke opprette sak for fnr: ${fnr.maskerFnr()}" }
             }
         }
 
@@ -75,7 +70,7 @@ class SakSkrivDao(
         sakId: SakId,
         nyIdent: Folkeregisteridentifikator,
     ) {
-        sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterIdent") {
+        sakendringerDao.oppdaterSak(sakId, ENDRE_IDENT) {
             it
                 .prepareStatement(
                     """
@@ -91,7 +86,7 @@ class SakSkrivDao(
     }
 
     fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
-        sakendringerDao.lagreEndringerPaaSaker(saker.map { it.id }, "oppdaterEnheterPaaSaker") {
+        sakendringerDao.oppdaterSaker(saker.map { it.id }, ENDRE_ENHET) {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -113,7 +108,7 @@ class SakSkrivDao(
     fun markerSakerMedSkjerming(
         sakIder: List<SakId>,
         skjermet: Boolean,
-    ) = sakendringerDao.lagreEndringerPaaSaker(sakIder, "markerSakerMedSkjerming") {
+    ) = sakendringerDao.oppdaterSaker(sakIder, ENDRE_SKJERMING) {
         with(it) {
             val statement =
                 prepareStatement(

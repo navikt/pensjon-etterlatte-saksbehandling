@@ -363,6 +363,23 @@ class AktivitetspliktDao(
         }
     }
 
+    fun finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper(tom: LocalDate) =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT DISTINCT sak_id 
+                        FROM aktivitetsplikt_unntak 
+                        WHERE tom IS NOT NULL
+                            AND tom <= ?
+                        """.trimMargin(),
+                    )
+                stmt.setDate(1, Date.valueOf(tom))
+                stmt.executeQuery().toList { SakId(getLong("sak_id")) }
+            }
+        }
+
     private fun ResultSet.toAktivitet() =
         AktivitetspliktAktivitetPeriode(
             id = getUUID("id"),

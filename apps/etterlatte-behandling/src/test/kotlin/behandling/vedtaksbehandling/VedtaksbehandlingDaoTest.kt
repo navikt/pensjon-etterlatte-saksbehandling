@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -54,7 +53,7 @@ internal class VedtaksbehandlingDaoTest(
     fun beforeAll() {
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         val revurderingDao = RevurderingDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         vedtaksbehandlingDao = VedtaksbehandlingDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, ConnectionAutoclosingTest(dataSource))
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))

@@ -148,7 +148,7 @@ internal class PersonHendelseFordelerTest {
     }
 
     @Test
-    fun `skal ignorere hendelser om adressebeskyttelse dersom det er UGRADERT eller ingen`() {
+    fun `skal ikke ignorere hendelser om adressebeskyttelse dersom det er UGRADERT eller ingen`() {
         val personHendelse: Personhendelse =
             Personhendelse().apply {
                 hendelseId = "1"
@@ -164,7 +164,7 @@ internal class PersonHendelseFordelerTest {
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
         coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
-        coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
+        coVerify(exactly = 1) { kafkaProduser.publiser(any(), any()) }
 
         confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }

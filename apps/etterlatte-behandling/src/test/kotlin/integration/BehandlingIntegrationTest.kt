@@ -8,6 +8,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
+import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -103,6 +104,7 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientImpl = grunnlagklient ?: GrunnlagKlientTest(),
+                tempGrunnlagKlient = mockk(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),

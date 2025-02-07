@@ -32,6 +32,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
+import no.nav.etterlatte.grunnlag.tempGrunnlagRoutes
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.inntektsjustering.aarligInntektsjusteringRoute
@@ -95,6 +96,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
+        context.aktivitetspliktOppgaveUnntakUtloeperJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -226,6 +228,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     kodeverk(applicationContext.kodeverkService)
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
+    tempGrunnlagRoutes(applicationContext.tempGrunnlagKlient)
 }
 
 private fun Route.settOppTilganger(

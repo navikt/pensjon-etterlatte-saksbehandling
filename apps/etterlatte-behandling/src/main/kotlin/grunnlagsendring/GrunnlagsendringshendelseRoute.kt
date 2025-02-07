@@ -34,7 +34,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/doedshendelse") {
             kunSystembruker {
                 val doedshendelse = call.receive<DoedshendelsePdl>()
-                logger.info("Mottar en doedshendelse fra PDL for ${doedshendelse.fnr.maskerFnr()}")
+                logger.info("Mottar en doedshendelse fra PDL for ${doedshendelse.fnr.maskerFnr()} hendelsesid: ${doedshendelse.hendelseId}")
                 grunnlagsendringshendelseService.opprettDoedshendelse(doedshendelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -43,7 +43,9 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/utflyttingshendelse") {
             kunSystembruker {
                 val utflyttingsHendelse = call.receive<UtflyttingsHendelse>()
-                logger.info("Mottar en utflyttingshendelse fra PDL for ${utflyttingsHendelse.fnr.maskerFnr()}")
+                logger.info(
+                    "Mottar en utflyttingshendelse fra PDL for ${utflyttingsHendelse.fnr.maskerFnr()} hendelsesid: ${utflyttingsHendelse.hendelseId}",
+                )
                 grunnlagsendringshendelseService.opprettUtflyttingshendelse(utflyttingsHendelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -52,16 +54,19 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/forelderbarnrelasjonhendelse") {
             kunSystembruker {
                 val forelderBarnRelasjonHendelse = call.receive<ForelderBarnRelasjonHendelse>()
-                logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL for ${forelderBarnRelasjonHendelse.fnr.maskerFnr()}")
+                logger.info(
+                    "Mottar en forelder-barn-relasjon-hendelse fra PDL for ${forelderBarnRelasjonHendelse.fnr.maskerFnr()} hendelsesid: ${forelderBarnRelasjonHendelse.hendelseId}",
+                )
                 grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse)
                 call.respond(HttpStatusCode.OK)
             }
         }
 
+        // Merk at denne endepunktet i seg selv gir ikke ny gradering, denne baserer seg på hva PDL sier om personen og 3-parter
         post("/adressebeskyttelse") {
             kunSystembruker {
                 val adressebeskyttelse = call.receive<Adressebeskyttelse>()
-                logger.info("Mottar en adressebeskyttelse-hendelse fra PDL")
+                logger.info("Mottar en adressebeskyttelse-hendelse fra PDL hendelsesid: ${adressebeskyttelse.hendelseId}")
                 grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -70,7 +75,9 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/bostedsadresse") {
             kunSystembruker {
                 val bostedsadresse = call.receive<Bostedsadresse>()
-                logger.info("Mottar en adresse-hendelse fra PDL for ${bostedsadresse.fnr.maskerFnr()}")
+                logger.info(
+                    "Mottar en adresse-hendelse fra PDL for ${bostedsadresse.fnr.maskerFnr()} hendelsesid: ${bostedsadresse.hendelseId}",
+                )
                 grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -80,7 +87,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
             kunSystembruker {
                 val vergeMaalEllerFremtidsfullmakt = call.receive<VergeMaalEllerFremtidsfullmakt>()
                 logger.info(
-                    "Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL for ${vergeMaalEllerFremtidsfullmakt.fnr.maskerFnr()}",
+                    "Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL for ${vergeMaalEllerFremtidsfullmakt.fnr.maskerFnr()} hendelsesid: ${vergeMaalEllerFremtidsfullmakt.hendelseId}",
                 )
                 grunnlagsendringshendelseService.opprettVergemaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
                 call.respond(HttpStatusCode.OK)
@@ -90,7 +97,9 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/sivilstandhendelse") {
             kunSystembruker {
                 val sivilstandHendelse = call.receive<SivilstandHendelse>()
-                logger.info("Mottar en sivilstand-hendelse fra PDL for ${sivilstandHendelse.fnr.maskerFnr()}")
+                logger.info(
+                    "Mottar en sivilstand-hendelse fra PDL for ${sivilstandHendelse.fnr.maskerFnr()} hendelsesid: ${sivilstandHendelse.hendelseId}",
+                )
                 grunnlagsendringshendelseService.opprettSivilstandHendelse(sivilstandHendelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -99,7 +108,9 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/folkeregisteridentifikatorhendelse") {
             kunSystembruker {
                 val hendelse = call.receive<Folkeregisteridentifikatorhendelse>()
-                logger.info("Mottar en folkeregisteridentifikator-hendelse fra PDL for ${hendelse.fnr.maskerFnr()}")
+                logger.info(
+                    "Mottar en folkeregisteridentifikator-hendelse fra PDL for ${hendelse.fnr.maskerFnr()} hendelsesid: ${hendelse.hendelseId}",
+                )
                 grunnlagsendringshendelseService.opprettFolkeregisteridentifikatorhendelse(hendelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -108,7 +119,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/institusjonsopphold") {
             kunSystembruker {
                 val oppholdsHendelse = call.receive<InstitusjonsoppholdHendelseBeriket>()
-                logger.info("Mottar en institusjons-hendelse fra inst2")
+                logger.info("Mottar en institusjons-hendelse fra inst2 hendelsesid: ${oppholdsHendelse.hendelseId}")
                 grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
                 call.respond(HttpStatusCode.OK)
             }

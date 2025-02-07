@@ -36,7 +36,7 @@ class TilbakekrevingDaoTest(
 
     @BeforeAll
     fun setup() {
-        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
 
         nyKontekstMedBrukerOgDatabase(mockk<User>().also { every { it.name() } returns this::class.java.simpleName }, dataSource)

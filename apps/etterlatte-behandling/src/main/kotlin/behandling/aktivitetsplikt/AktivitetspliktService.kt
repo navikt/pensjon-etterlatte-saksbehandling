@@ -171,7 +171,7 @@ class AktivitetspliktService(
                             separator = ", ",
                             prefix = "\"",
                             postfix = "\"",
-                        ) { it.unntak.navn }
+                        ) { it.unntak.lesbartNavn }
                     } har ikke til og med dato.",
                     frist =
                         LocalDate

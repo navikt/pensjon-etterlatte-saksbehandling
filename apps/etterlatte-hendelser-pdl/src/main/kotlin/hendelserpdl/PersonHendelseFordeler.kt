@@ -29,7 +29,6 @@ import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.SIVILSTAND_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
 import no.nav.person.pdl.leesah.Personhendelse
-import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -145,10 +144,6 @@ class PersonHendelseFordeler(
         personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) {
         val gradering = hendelse.adressebeskyttelse?.gradering
-        if (gradering == null || gradering == Gradering.UGRADERT) {
-            logger.info("Ignorerer person med tom eller ugradert gradering, krever ingen tiltak.")
-            return
-        }
 
         publiserPaaRapid(
             opplysningstype = ADRESSEBESKYTTELSE_V1,

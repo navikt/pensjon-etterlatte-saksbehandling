@@ -263,10 +263,10 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             tilgangsService =
                 OppdaterTilgangService(
                     applicationContext.sakService,
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
+                    applicationContext.skjermingKlient,
+                    applicationContext.pdlTjenesterKlient,
+                    applicationContext.brukerService,
+                    applicationContext.oppgaveService,
                 ),
         )
 }

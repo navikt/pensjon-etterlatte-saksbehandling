@@ -618,12 +618,14 @@ class TilbakekrevingService(
     ) {
         val oppgaveUnderBehandling =
             oppgaveService.hentOppgaveUnderBehandling(tilbakekrevingId.toString())
-                ?: throw TilbakekrevingFeilTilstandException(
+                ?: throw TilbakekrevingFeilTilstandUgyldig(
+                    code = "OPPGAVE_IKKE_UNDER_BEHANDLING",
                     "Oppgaven tilknyttet tilbakekreving $tilbakekrevingId er ikke under behandling",
                 )
 
         if (oppgaveUnderBehandling.saksbehandler?.ident != saksbehandler.ident()) {
-            throw TilbakekrevingFeilTilstandException(
+            throw TilbakekrevingFeilTilstandUgyldig(
+                code = "SAKSBEHANDLER_IKKE_TILDELT_OPPGAVE",
                 "Saksbehandler ${saksbehandler.ident()} er ikke tilknyttet oppgave ${oppgaveUnderBehandling.id}",
             )
         }

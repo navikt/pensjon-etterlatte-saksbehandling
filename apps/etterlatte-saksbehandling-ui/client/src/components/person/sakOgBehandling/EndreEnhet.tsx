@@ -3,37 +3,33 @@ import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 import { byttEnhetPaaSak } from '~shared/api/sak'
-import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
+import { ENHETER } from '~shared/types/Enhet'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useForm } from 'react-hook-form'
 
-export const EndreEnhet = ({ sakId }: { sakId: number }) => {
+interface EndreEnhetSkjema {
+  enhet: string
+  kommentar?: string
+}
+
+export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldendeEnhet: string }) => {
   const [open, setOpen] = useState(false)
   const [endreEnhetStatus, endreEnhetKall, resetApiCall] = useApiCall(byttEnhetPaaSak)
-  const [enhetViByttetTil, setEnhetViByttetTil] = useState<string>('VELGENHET')
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
-  const harTilgangPaaNyEnhet = innloggetSaksbehandler.enheter.includes(enhetViByttetTil)
-
-  interface EndreEnhetSkjema {
-    enhet: EnhetFilterKeys
-    kommentar?: string
-  }
-
   const {
     formState: { errors },
     handleSubmit,
     register,
     reset,
     watch,
-  } = useForm<EndreEnhetSkjema>({ defaultValues: { enhet: 'VELGENHET', kommentar: '' } })
+  } = useForm<EndreEnhetSkjema>({ defaultValues: { enhet: gjeldendeEnhet, kommentar: '' } })
+
+  const harTilgangPaaNyEnhet = innloggetSaksbehandler.enheter.includes(watch('enhet') ?? '')
 
   const endreEnhet = (data: EndreEnhetSkjema) => {
-    endreEnhetKall({ sakId: sakId, enhet: filtrerEnhet(data.enhet), kommentar: data.kommentar }, () => {
-      setEnhetViByttetTil(filtrerEnhet(data.enhet))
-    })
+    endreEnhetKall({ sakId: sakId, enhet: data.enhet, kommentar: data.kommentar })
   }
 
   const closeAndReset = () => {
@@ -63,7 +59,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
         <Modal.Body>
           {isSuccess(endreEnhetStatus) ? (
             <VStack gap="4">
-              <Alert variant="success">Saken er flyttet til enhet {enhetViByttetTil}.</Alert>
+              <Alert variant="success">Saken er flyttet til enhet &quot;{ENHETER[watch('enhet')]}&quot;.</Alert>
 
               {!harTilgangPaaNyEnhet && (
                 <Alert variant="warning">
@@ -100,19 +96,19 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
                     label="Enhet"
                     error={errors.enhet?.message}
                   >
-                    {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
-                      <option key={status} value={status === 'VELGENHET' ? '' : status}>
-                        {statusbeskrivelse}
+                    {Object.entries(ENHETER).map(([id, navn]) => (
+                      <option key={id} value={id}>
+                        {navn}
                       </option>
                     ))}
                   </Select>
 
-                  {watch('enhet') !== 'VELGENHET' &&
-                    !innloggetSaksbehandler.enheter.includes(filtrerEnhet(watch('enhet'))) && (
-                      <Alert variant="warning">
-                        Du har ikke tilgang til enhet {watch('enhet')}, og vil ikke kunne se saken etter flytting.
-                      </Alert>
-                    )}
+                  {watch('enhet') !== gjeldendeEnhet && !innloggetSaksbehandler.enheter.includes(watch('enhet')) && (
+                    <Alert variant="warning">
+                      Du har ikke tilgang til &quot;{ENHETER[watch('enhet')]}&quot;, og vil ikke kunne se saken etter
+                      flytting.
+                    </Alert>
+                  )}
 
                   <Textarea
                     {...register('kommentar', {
@@ -128,7 +124,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
                   <HStack gap="2" justify="end">
                     {isFailure(endreEnhetStatus) && (
                       <ApiErrorAlert>
-                        Kunne ikke endre sakens enhet til {watch('enhet')} på grunn av feil:{' '}
+                        Kunne ikke endre sakens enhet til &quot;{watch('enhet')}&quot; på grunn av feil:{' '}
                         {endreEnhetStatus.error.detail}
                       </ApiErrorAlert>
                     )}

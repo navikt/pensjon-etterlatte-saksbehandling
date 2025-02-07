@@ -19,7 +19,7 @@ import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettS
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
-import { tekstEnhet } from '~shared/types/Enhet'
+import { ENHETER } from '~shared/types/Enhet'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -76,9 +76,9 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
       </HStack>
       <HStack gap="4" wrap={false} align="center">
         <Buildings3Icon aria-hidden width="1.75rem" height="1.75rem" />
-        <BodyShort>Enhet: {tekstEnhet[sak.enhet] ?? sak.enhet}</BodyShort>
+        <BodyShort>Enhet: {ENHETER[sak.enhet] ?? sak.enhet}</BodyShort>
         {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
-          <EndreEnhet sakId={sak.id} enhet={sak.enhet} />
+          <EndreEnhet sakId={sak.id} gjeldendeEnhet={sak.enhet} />
         )}
       </HStack>
 

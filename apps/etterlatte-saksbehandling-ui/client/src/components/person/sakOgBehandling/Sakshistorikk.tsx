@@ -6,8 +6,8 @@ import Spinner from '~shared/Spinner'
 import { BodyShort, Box, Detail, List } from '@navikt/ds-react'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { Endringstype, Identtype, ISaksendring, tekstEndringstype } from '~shared/types/sak'
-import { tekstEnhet } from '~shared/types/Enhet'
 import { BagdeIcon, Buildings3Icon, FolderIcon } from '@navikt/aksel-icons'
+import { ENHETER } from '~shared/types/Enhet'
 
 const Ikon = ({ endringstype }: { endringstype: Endringstype }) => {
   if (endringstype == Endringstype.ENDRE_ENHET) {
@@ -22,15 +22,15 @@ const Ikon = ({ endringstype }: { endringstype: Endringstype }) => {
 const Endringstekst = ({ endring }: { endring: ISaksendring }) => {
   if (endring.endringstype == Endringstype.ENDRE_ENHET) {
     return (
-      <BodyShort size="small">
-        Fra {tekstEnhet[endring.foer.enhet]} til {tekstEnhet[endring.etter.enhet]}
-      </BodyShort>
+      <>
+        Fra {ENHETER[endring.foer.enhet]} til {ENHETER[endring.etter.enhet]}
+      </>
     )
   } else if (endring.endringstype == Endringstype.ENDRE_IDENT) {
     return (
-      <BodyShort size="small">
-        Identitetsnummer {tekstEnhet[endring.foer.ident]} er erstattet med {tekstEnhet[endring.etter.ident]}
-      </BodyShort>
+      <>
+        Identitetsnummer {ENHETER[endring.foer.ident]} er erstattet med {ENHETER[endring.etter.ident]}
+      </>
     )
   }
 }
@@ -55,7 +55,9 @@ export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
                 key={endring.id}
               >
                 <Box maxWidth="18rem" borderWidth="0 0 1 0" paddingBlock="0 2" borderColor="border-subtle">
-                  <Endringstekst endring={endring} />
+                  <BodyShort size="small">
+                    <Endringstekst endring={endring} />
+                  </BodyShort>
                   {endring.kommentar && (
                     <Box marginBlock="3 3">
                       <BodyShort size="small">{endring.kommentar}</BodyShort>

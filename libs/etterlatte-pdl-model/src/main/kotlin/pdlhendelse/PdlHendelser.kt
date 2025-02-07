@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.pdlhendelse
 
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import java.time.LocalDate
 
 sealed interface PdlHendelse {
@@ -54,7 +53,6 @@ data class Adressebeskyttelse(
     override val hendelseId: String,
     override val endringstype: Endringstype,
     override val fnr: String,
-    val adressebeskyttelseGradering: AdressebeskyttelseGradering,
 ) : PdlHendelse
 
 data class Bostedsadresse(

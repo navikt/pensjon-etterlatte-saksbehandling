@@ -25,7 +25,6 @@ interface HarBrukerVarigUnntakFormdata {
   beskrivelse: string
 }
 const vurderingHarInnholdUnntattVarigUnntak = (vurdering: IAktivitetspliktVurderingNyDto) => {
-  console.log('vurdering', vurdering)
   return (
     vurdering.aktivitet.length > 0 ||
     vurdering.unntak.filter(

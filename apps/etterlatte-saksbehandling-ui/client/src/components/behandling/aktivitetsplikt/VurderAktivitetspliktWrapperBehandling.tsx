@@ -66,7 +66,8 @@ export function VurderAktivitetspliktWrapperBehandling(props: {
       },
       (state) => {
         if (varigUnntak) {
-          // Vi må slette eksisterende varig unntak
+          // Vi må slette eksisterende varig unntak, siden vi nå har vurdert at bruker har aktivitetsplikt men
+          // det lå allerede inne at de hadde varig unntak
           slettUnntakForBehandling({
             sakId: behandling.sakId,
             behandlingId: behandling.id,

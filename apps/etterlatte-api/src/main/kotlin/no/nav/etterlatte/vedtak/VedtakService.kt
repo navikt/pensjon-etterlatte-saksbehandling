@@ -27,7 +27,7 @@ fun VedtakDto.fromDto(): Vedtak {
             vedtakInnhold.utbetalingsperioder.map { utbetaling ->
                 VedtakUtbetaling(
                     fraOgMed = utbetaling.periode.fom.atStartOfMonth(),
-                    tilOgMed = utbetaling.periode.fom.atEndOfMonth(),
+                    tilOgMed = utbetaling.periode.tom?.atEndOfMonth(),
                     beloep = utbetaling.beloep,
                 )
             },

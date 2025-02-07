@@ -89,6 +89,7 @@ components:
         tilOgMed:
           type: string
           format: date
+          nullable: true
           example: "2025-01-31"
           description: "Vil alltid være siste dag i måned"
         beloep:

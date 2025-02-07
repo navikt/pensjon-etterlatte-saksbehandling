@@ -294,6 +294,27 @@ class AktivitetspliktOppgaveService(
         }
     }
 
+    fun ferdigstillOppgaveUtenBrev(
+        oppgaveId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OppgaveIntern {
+        val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
+        if (brevData.skalSendeBrev) {
+            throw UgyldigForespoerselException(
+                "FEIL_I_BREVDATA",
+                "Kan ikke ferdigstille oppgave for aktivitetsplikt uten å sende brev hvis det er valgt at brev skal sendes.",
+            )
+        }
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+
+        if (unleashFeatureToggleService.isEnabled(AktivitetspliktOppgaveToggles.UNNTAK_UTEN_FRIST, false)) {
+            val unntakIOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId).unntak
+            aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(oppgaveId, unntakIOppgave, sak)
+        }
+        return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+    }
+
     fun ferdigstillBrevOgOppgave(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

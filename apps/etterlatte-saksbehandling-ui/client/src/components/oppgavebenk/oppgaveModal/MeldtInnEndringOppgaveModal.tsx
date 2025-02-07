@@ -110,14 +110,17 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                               Bruker har meldt inn en endring. Velg mellom å opprette en revurdering eller å avslutte
                               oppgaven dersom den ikke skal behandles
                             </BodyShort>
-                            <Link
-                              to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
-                              target="_blank"
-                            >
-                              <Button as="a" icon={<ExternalLinkIcon aria-hidden />} size="small">
+                            <div>
+                              <Button
+                                as={Link}
+                                icon={<ExternalLinkIcon aria-hidden />}
+                                size="small"
+                                to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
+                                target="_blank"
+                              >
                                 Vis (åpnes i ny fane)
                               </Button>
-                            </Link>
+                            </div>
                           </VStack>
                         </Alert>
                       ),

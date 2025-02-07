@@ -8,7 +8,6 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import {
   AktivitetspliktOppgaveVurderingType,
-  AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
 } from '~shared/types/Aktivitetsplikt'
@@ -26,9 +25,9 @@ export function VurderAktivitetspliktWrapperBehandling(props: {
   doedsdato: Date
   behandling: IDetaljertBehandling
   defaultOpen: boolean
-  varigeUnntak: IAktivitetspliktUnntak[]
+  varigUnntak?: IAktivitetspliktUnntak
 }) {
-  const { doedsdato, behandling, varigeUnntak } = props
+  const { doedsdato, behandling, varigUnntak } = props
   const [lagreStatus, lagreVurdering] = useApiCall(opprettAktivitspliktAktivitetsgradOgUnntakForBehandling)
   const [leggerTilVurdering, setLeggerTilVurdering] = useState(props.defaultOpen)
   const dispatch = useDispatch()
@@ -66,22 +65,22 @@ export function VurderAktivitetspliktWrapperBehandling(props: {
         },
       },
       (state) => {
-        Promise.all(
-          varigeUnntak.map((unntak) =>
-            slettUnntakForBehandling({
-              sakId: behandling.sakId,
-              behandlingId: behandling.id,
-              unntakId: unntak.id,
+        if (varigUnntak) {
+          // Vi må slette eksisterende varig unntak
+          slettUnntakForBehandling({
+            sakId: behandling.sakId,
+            behandlingId: behandling.id,
+            unntakId: varigUnntak.id,
+          }).finally(() =>
+            oppdaterStateVedLagring({
+              aktivitet: state.aktivitet,
+              unntak: state.unntak.filter((unntak) => unntak.id !== varigUnntak.id),
             })
           )
-        ).finally(() =>
-          oppdaterStateVedLagring({
-            aktivitet: state.aktivitet,
-            unntak: state.unntak.filter(
-              (unntak) => unntak.unntak !== AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-            ),
-          })
-        )
+        } else {
+          // Vi har ikke noe eksisterende varig unntak å slette
+          oppdaterStateVedLagring(state)
+        }
       }
     )
   }

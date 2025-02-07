@@ -18,6 +18,8 @@ import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTy
 import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettSaksgrunnlag'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { usePerson } from '~shared/statusbar/usePerson'
+import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
+import { tekstEnhet } from '~shared/types/Enhet'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -61,7 +63,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         <SakStatus sakId={sak.id} />
       </VStack>
 
-      <HStack gap="4" wrap={false}>
+      <HStack gap="4" wrap={false} align="center">
         <LocationPinIcon aria-hidden width="1.75rem" height="1.75rem" />
         <BodyShort>
           Navkontor:{' '}
@@ -72,26 +74,17 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
           })}
         </BodyShort>
       </HStack>
-
-      <HStack gap="4" wrap={false}>
+      <HStack gap="4" wrap={false} align="center">
         <Buildings3Icon aria-hidden width="1.75rem" height="1.75rem" />
-        <BodyShort>Denne saken tilhører enhet {sak.enhet}</BodyShort>
+        <BodyShort>Enhet: {tekstEnhet[sak.enhet] ?? sak.enhet}</BodyShort>
+        {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
+          <EndreEnhet sakId={sak.id} enhet={sak.enhet} />
+        )}
       </HStack>
-      {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
-        <>
-        <EndreEnhet sakId={sak.id} />
-        <ReadMore header="Ønsker du å bytte enhet?">
-          <ol>
-            <li>
-              Skriv i kommentarfeltet i sjekklisten inne i behandlingen hvilken enhet saken overføres til og hvorfor.
-            </li>
-            <li>Deretter går du til saksoversikten og klikker på knappen ovenfor for å endre enhet.</li>
-            <li>Overfør til riktig behandlende enhet.</li>
-          </ol>
-        </ReadMore>
-          
-        </>
-      )}
+
+      <ReadMore header="Historikk">
+        <Sakshistorikk sakId={sak.id} />
+      </ReadMore>
 
       {mapResult(flyktningResult, {
         success: (data) =>

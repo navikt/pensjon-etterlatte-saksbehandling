@@ -15,5 +15,5 @@ data class KomplettSak(
     val erSkjermet: Boolean?,
     val enhet: Enhetsnummer,
     val flyktning: Flyktning?,
-    val opprettet: Tidspunkt,
+    val opprettet: Tidspunkt?,
 )

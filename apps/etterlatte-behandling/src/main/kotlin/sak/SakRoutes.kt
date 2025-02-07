@@ -250,6 +250,20 @@ internal fun Route.sakWebRoutes(
                 call.respond(sisteIverksatteBehandling)
             }
 
+            get("/endringshistorikk") {
+                kunSaksbehandler {
+                    logger.info("Henter endringshistorikk for sak ${sakId.sakId}")
+
+                    val saksendringer =
+                        inTransaction {
+                            sakService.hentSakshistorikk(sakId)
+                        }
+
+                    // TODO her må vi fjerne sensitive felter (kanskje allerede fra dao?)
+                    call.respond(saksendringer)
+                }
+            }
+
             post("/oppdater-ident") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     val request = call.receive<OppdaterIdentRequest>()
@@ -309,7 +323,7 @@ internal fun Route.sakWebRoutes(
                             )
 
                         inTransaction {
-                            sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
+                            sakService.oppdaterEnhetForSak(sakMedEnhet, enhetrequest.kommentar)
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                         }
 
@@ -428,12 +442,6 @@ data class EnhetRequest(
             throw UgyldigForespoerselException(
                 code = "ENHET IKKE GYLDIG",
                 detail = "Enhet $enhet er ikke i listen over gyldige enheter",
-            )
-        }
-        if (enhet == Enheter.PORSGRUNN.enhetNr) {
-            throw UgyldigForespoerselException(
-                code = "ENHET IKKE GYLDIG",
-                detail = "Porsgrunn?",
             )
         }
         return this

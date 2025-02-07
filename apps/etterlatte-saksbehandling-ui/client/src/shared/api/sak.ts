@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { ISak, SakType } from '~shared/types/sak'
+import { ISak, ISaksendring, SakType } from '~shared/types/sak'
 import { SakMedBehandlinger } from '~components/person/typer'
 
 export interface Navkontor {
@@ -49,8 +49,16 @@ export const hentSakForPerson = async (args: {
   }
 }
 
-export const byttEnhetPaaSak = async (args: { sakId: number; enhet: string }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`sak/${args.sakId}/endre-enhet`, { enhet: args.enhet })
+export const byttEnhetPaaSak = async (args: {
+  sakId: number
+  enhet: string
+  kommentar?: string
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`sak/${args.sakId}/endre-enhet`, { enhet: args.enhet, kommentar: args.kommentar })
+}
+
+export const hentSaksendringer = async (sakId: number): Promise<ApiResponse<ISaksendring[]>> => {
+  return apiClient.get(`sak/${sakId}/endringshistorikk`)
 }
 
 export const oppdaterIdentPaaSak = async (args: {

@@ -79,8 +79,9 @@ class SakendringerDao(
     internal fun oppdaterSak(
         id: SakId,
         endringstype: Endringstype,
+        kommentar: String? = null,
         block: (connection: Connection) -> Unit,
-    ) = oppdaterSaker(listOf(id), endringstype, null, block)
+    ) = oppdaterSaker(listOf(id), endringstype, kommentar, block)
 
     internal fun hentKomplettSak(sakId: SakId): KomplettSak? =
         connectionAutoclosing.hentConnection { connection ->
@@ -124,7 +125,7 @@ class SakendringerDao(
                             identtype = enumValueOf(getString("identtype")),
                             kommentar = getString("kommentar"),
                         )
-                    }
+                    }.filter { it.endringstype !in listOf(Endringstype.ENDRE_ADRESSEBESKYTTELSE, Endringstype.ENDRE_SKJERMING) }
             }
         }
 
@@ -137,8 +138,8 @@ class SakendringerDao(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO saksendring(id, sak_id, endringstype, foer, etter, tidspunkt, ident, identtype)
-                        VALUES(?::UUID, ?, ?, ?::JSONB, ?::JSONB, ?, ?, ?)
+                        INSERT INTO saksendring(id, sak_id, endringstype, foer, etter, tidspunkt, ident, identtype, kommentar)
+                        VALUES(?::UUID, ?, ?, ?::JSONB, ?::JSONB, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setObject(1, saksendring.id)
@@ -149,6 +150,7 @@ class SakendringerDao(
                 statement.setTidspunkt(6, saksendring.tidspunkt)
                 statement.setString(7, saksendring.ident)
                 statement.setString(8, saksendring.identtype.name)
+                statement.setString(9, saksendring.kommentar)
 
                 statement.executeUpdate()
             }

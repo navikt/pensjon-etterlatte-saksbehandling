@@ -31,15 +31,12 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   } = useForm<EndreEnhetSkjema>({ defaultValues: { enhet: 'VELGENHET', kommentar: '' } })
 
   const endreEnhet = (data: EndreEnhetSkjema) => {
-    console.log('Endrer til ' + data.enhet)
-
-    endreEnhetKall({ sakId: sakId, enhet: filtrerEnhet(data.enhet) }, () => {
+    endreEnhetKall({ sakId: sakId, enhet: filtrerEnhet(data.enhet), kommentar: data.kommentar }, () => {
       setEnhetViByttetTil(filtrerEnhet(data.enhet))
     })
   }
 
   const closeAndReset = () => {
-    console.log('Resetting')
     reset()
     resetApiCall()
   }
@@ -53,7 +50,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
         icon={<PencilIcon aria-hidden />}
         iconPosition="right"
       >
-        Endre enhet
+        Endre
       </Button>
 
       <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
@@ -91,47 +88,59 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
                 Hvis du endrer til en enhet du selv ikke har tilgang til, vil du ikke kunne flytte saken tilbake
               </Alert>
 
-              {isFailure(endreEnhetStatus) && (
-                <ApiErrorAlert>
-                  Kunne ikke endre sakens enhet til {watch('enhet')} på grunn av feil: {endreEnhetStatus.error.detail}
-                </ApiErrorAlert>
-              )}
-
               <form onSubmit={handleSubmit(endreEnhet)}>
-                <Select
-                  {...register('enhet', {
-                    required: {
-                      value: true,
-                      message: 'Du må velge en enhet',
-                    },
-                  })}
-                  label="Enhet"
-                  error={errors.enhet?.message}
-                >
-                  {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
-                    <option key={status} value={status === 'VELGENHET' ? '' : status}>
-                      {statusbeskrivelse}
-                    </option>
-                  ))}
-                </Select>
+                <VStack gap="5">
+                  <Select
+                    {...register('enhet', {
+                      required: {
+                        value: true,
+                        message: 'Du må velge en enhet',
+                      },
+                    })}
+                    label="Enhet"
+                    error={errors.enhet?.message}
+                  >
+                    {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
+                      <option key={status} value={status === 'VELGENHET' ? '' : status}>
+                        {statusbeskrivelse}
+                      </option>
+                    ))}
+                  </Select>
 
-                <Textarea {...register('kommentar')} label="Kommentar" />
+                  {watch('enhet') !== 'VELGENHET' &&
+                    !innloggetSaksbehandler.enheter.includes(filtrerEnhet(watch('enhet'))) && (
+                      <Alert variant="warning">
+                        Du har ikke tilgang til enhet {watch('enhet')}, og vil ikke kunne se saken etter flytting.
+                      </Alert>
+                    )}
 
-                {watch('enhet') !== 'VELGENHET' &&
-                  !innloggetSaksbehandler.enheter.includes(filtrerEnhet(watch('enhet'))) && (
-                    <Alert variant="warning">
-                      Du har ikke tilgang til enhet {watch('enhet')}, og vil ikke kunne se saken etter flytting.
-                    </Alert>
-                  )}
+                  <Textarea
+                    {...register('kommentar', {
+                      required: {
+                        value: true,
+                        message: 'Du må begrunne hvorfor enhet endres',
+                      },
+                    })}
+                    error={errors.kommentar?.message}
+                    label="Kommentar"
+                  />
 
-                <HStack gap="2" justify="end">
-                  <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
-                    Avbryt
-                  </Button>
-                  <Button type="submit" loading={isPending(endreEnhetStatus)}>
-                    Endre
-                  </Button>
-                </HStack>
+                  <HStack gap="2" justify="end">
+                    {isFailure(endreEnhetStatus) && (
+                      <ApiErrorAlert>
+                        Kunne ikke endre sakens enhet til {watch('enhet')} på grunn av feil:{' '}
+                        {endreEnhetStatus.error.detail}
+                      </ApiErrorAlert>
+                    )}
+
+                    <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+                      Avbryt
+                    </Button>
+                    <Button type="submit" loading={isPending(endreEnhetStatus)}>
+                      Endre
+                    </Button>
+                  </HStack>
+                </VStack>
               </form>
             </VStack>
           )}

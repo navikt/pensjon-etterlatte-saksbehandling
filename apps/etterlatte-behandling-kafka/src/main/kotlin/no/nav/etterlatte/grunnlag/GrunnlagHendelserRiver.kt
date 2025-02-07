@@ -1,8 +1,7 @@
-package no.nav.etterlatte.grunnlag.rivers
+package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -21,12 +20,15 @@ import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class GrunnlagHendelserRiver(
     rapidsConnection: RapidsConnection,
-    private val grunnlagService: GrunnlagService,
+    private val grunnlagKlient: GrunnlagKlient,
 ) : ListenerMedLogging() {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         initialiserRiver(rapidsConnection, EventNames.NY_OPPLYSNING) {
             validate { it.interestedIn(FNR_KEY) }
@@ -43,7 +45,7 @@ class GrunnlagHendelserRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakId = packet[SAK_ID_KEY].asLong().let { SakId(it) }
+        val sakId = SakId(packet[SAK_ID_KEY].asLong())
         val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
 
         val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
@@ -51,13 +53,17 @@ class GrunnlagHendelserRiver(
 
         val fnr = packet[FNR_KEY].textValue()
         if (fnr == null) {
-            grunnlagService.lagreNyeSaksopplysninger(
+            logger.info("Lagrer nye saksopplysninger på sak $sakId")
+
+            grunnlagKlient.lagreNyeSaksopplysninger(
                 sakId,
                 behandlingId,
                 opplysninger,
             )
         } else {
-            grunnlagService.lagreNyePersonopplysninger(
+            logger.info("Lagrer nye personopplysninger på sak $sakId")
+
+            grunnlagKlient.lagreNyePersonopplysninger(
                 sakId,
                 behandlingId,
                 Folkeregisteridentifikator.of(fnr),
@@ -66,5 +72,7 @@ class GrunnlagHendelserRiver(
         }
         packet.eventName = GRUNNLAG_OPPDATERT
         context.publish(packet.toJson())
+
+        logger.info("Grunnlag opppdatert på sak $sakId")
     }
 }

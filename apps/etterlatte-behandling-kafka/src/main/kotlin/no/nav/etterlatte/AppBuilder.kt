@@ -17,6 +17,7 @@ import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.JournalfoerSoeknadS
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
@@ -34,6 +35,10 @@ class AppBuilder(
             behandlingApp,
             "http://etterlatte-behandling",
         )
+    }
+
+    val grunnlagKlient: GrunnlagKlient by lazy {
+        GrunnlagKlient(behandlingApp, "http://etterlatte-behandling")
     }
 
     val tidshendelserService: TidshendelseService by lazy {

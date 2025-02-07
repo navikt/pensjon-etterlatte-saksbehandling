@@ -92,8 +92,6 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
-    - name: GRUNNLAGBACKUP_AZURE_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-grunnlag-backup/.default
     - name: PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
   envFrom:
@@ -112,8 +110,6 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        # TODO: Slette denne når backup er OK
-        - application: etterlatte-grunnlag-backup
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
 

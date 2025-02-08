@@ -56,6 +56,17 @@ class BrevKlient(
             postBody = brevRequest,
         )
 
+    suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        post(
+            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak/ferdigstill",
+            onSuccess = { _ -> },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
     private suspend fun <T> get(
         url: String,
         onSuccess: (Resource) -> T,

@@ -58,6 +58,19 @@ fun Route.vedtaksbrevRouteNy(
                     }
                 }
             }
+
+            post("ferdigstill") {
+                withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
+                    logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
+
+                    measureTimedValue {
+                        service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                    }.also { (_, varighet) ->
+                        logger.info("Ferdigstilling av vedtaksbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
         }
     }
 }

@@ -19,12 +19,14 @@ fun Route.brevRoute(service: BrevService) {
 
     route("api/behandling/brev/{$BEHANDLINGID_CALL_PARAMETER}/vedtak") {
         post {
+            // TODO tilgangsjekk?
             logger.info("Oppretter vedtaksbrev for tilbakekreving behandling (sakId=$sakId, behandlingId=$behandlingId)")
             val brev = service.opprettVedtaksbrev(behandlingId, sakId, brukerTokenInfo)
             call.respond(HttpStatusCode.Created, brev)
         }
 
         get("pdf") {
+            // TODO tilgangsjekk?
             val brevId =
                 krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
                     "Kan ikke generere PDF uten brevId"
@@ -33,6 +35,13 @@ fun Route.brevRoute(service: BrevService) {
 
             val pdf = service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
             call.respond(pdf)
+        }
+
+        post("ferdigstill") {
+            // TODO tilgangsjekk?
+            logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
+            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

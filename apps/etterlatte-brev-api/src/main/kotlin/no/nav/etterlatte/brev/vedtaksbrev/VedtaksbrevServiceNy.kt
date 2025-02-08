@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
 import no.nav.etterlatte.brev.BrevRequest
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
@@ -19,10 +20,14 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtaksbrevServiceNy(
@@ -30,6 +35,15 @@ class VedtaksbrevServiceNy(
     private val adresseService: AdresseService,
     private val db: BrevRepository,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogger = sikkerlogger()
+
+    fun hentVedtaksbrev(behandlingId: UUID): Brev? {
+        logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
+
+        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull()
+    }
+
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
@@ -106,6 +120,38 @@ class VedtaksbrevServiceNy(
 
         return opprettPdf(brev, brevRequest, brevInnholdData, avsender)
     }
+
+    fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brev =
+            krevIkkeNull(hentVedtaksbrev(behandlingId)) {
+                "Fant ingen brev for behandling (id=$behandlingId)"
+            }
+
+        if (brev.status == Status.FERDIGSTILT) {
+            logger.warn("Brev (id=${brev.id}) er allerede ferdigstilt. Avbryter ferdigstilling...")
+            return
+        } else if (!brev.kanEndres()) {
+            throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
+        } else if (brev.mottakere.size !in 1..2) {
+            logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            throw UgyldigAntallMottakere()
+        } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
+            sikkerlogger.error("Ugyldig mottaker(e): ${brev.mottakere.toJson()}")
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
+        }
+
+        logger.info("Ferdigstiller brev med id=${brev.id}")
+        if (db.hentPdf(brev.id) == null) {
+            throw BrevManglerPDF(brev.id)
+        } else {
+            db.settBrevFerdigstilt(brev.id, brukerTokenInfo)
+        }
+    }
+
+    // TODO tilbakestill
 
     private fun utledBrevInnholdData(
         brev: Brev,

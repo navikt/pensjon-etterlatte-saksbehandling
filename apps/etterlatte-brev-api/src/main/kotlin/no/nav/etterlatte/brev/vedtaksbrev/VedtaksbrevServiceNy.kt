@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.tilbakekreving
+package no.nav.etterlatte.brev.vedtaksbrev
 
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevData
@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
-class TilbakekrevingVedtaksbrevService(
+class VedtaksbrevServiceNy(
     private val brevbaker: BrevbakerService,
     private val adresseService: AdresseService,
     private val db: BrevRepository,

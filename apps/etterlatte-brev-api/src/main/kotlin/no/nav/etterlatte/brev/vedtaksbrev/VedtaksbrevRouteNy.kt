@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.tilbakekreving
+package no.nav.etterlatte.brev.vedtaksbrev
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -18,11 +18,11 @@ import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
-fun Route.tilbakekrevingBrevRoute(
-    service: TilbakekrevingVedtaksbrevService,
+fun Route.vedtaksbrevRouteNy(
+    service: VedtaksbrevServiceNy,
     tilgangssjekker: Tilgangssjekker,
 ) {
-    val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.tilbakekreving.TilbakekrevingBrevRoute")
+    val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.tilbakekreving.VedtaksbrevRouteNy")
     route("brev/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
         route("vedtak") {
             post {

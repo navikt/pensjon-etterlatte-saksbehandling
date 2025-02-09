@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
-import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -26,7 +25,7 @@ fun Route.vedtaksbrevRouteNy(
             post {
                 withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                     val request = call.receive<BrevRequest>()
-                    logger.info("Oppretter vedtaksbrev for tilbakekreving behandling (sakId=$sakId, behandlingId=$behandlingId)")
+                    logger.info("Oppretter vedtaksbrev for tilbakekreving behandling (behandlingId=$behandlingId)")
                     val brev = service.opprettVedtaksbrev(behandlingId, brukerTokenInfo, request)
                     call.respond(HttpStatusCode.Created, brev)
                 }

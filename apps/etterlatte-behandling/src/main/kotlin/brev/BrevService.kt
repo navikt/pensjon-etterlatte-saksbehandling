@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -27,7 +28,10 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ) {
         if (bruker is Saksbehandler) {
-            val kanRedigeres = vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
+            val kanRedigeres =
+                inTransaction {
+                    vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
+                }
             if (!kanRedigeres) {
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }

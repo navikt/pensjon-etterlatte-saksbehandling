@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -42,6 +43,7 @@ class TilbakekrevingService(
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
     private val brevApiKlient: BrevApiKlient,
+    private val brevService: BrevService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val tilbakekrevinghendelser: TilbakekrevingHendelserService,
 ) {
@@ -333,7 +335,7 @@ class TilbakekrevingService(
         }
     }
 
-    suspend fun fattVedtak(
+    fun fattVedtak(
         tilbakekrevingId: UUID,
         saksbehandler: Saksbehandler,
     ) = inTransaction {
@@ -386,7 +388,7 @@ class TilbakekrevingService(
         oppdatertTilbakekreving
     }
 
-    suspend fun attesterVedtak(
+    fun attesterVedtak(
         tilbakekrevingId: UUID,
         kommentar: String,
         saksbehandler: Saksbehandler,
@@ -401,7 +403,7 @@ class TilbakekrevingService(
 
             if (sendeBrev) {
                 logger.info("Ferdigstiller vedtaksbrev for tilbakekreving=$tilbakekrevingId")
-                runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, tilbakekreving.sak.id, saksbehandler) }
+                runBlocking { brevService.ferdigstillVedtaksbrev(tilbakekrevingId, saksbehandler) }
             } else {
                 logger.info("Skal ikke sende vedtaksbrev for tilbakekreving=$tilbakekrevingId")
             }
@@ -428,7 +430,13 @@ class TilbakekrevingService(
                 )
             }
 
-            lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.ATTESTERT, vedtak.id, saksbehandler, kommentar)
+            lagreTilbakekrevingHendelse(
+                tilbakekreving,
+                TilbakekrevingHendelseType.ATTESTERT,
+                vedtak.id,
+                saksbehandler,
+                kommentar,
+            )
 
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 referanse = tilbakekreving.id.toString(),

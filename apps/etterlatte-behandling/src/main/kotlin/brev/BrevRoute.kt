@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
+import kotlin.time.DurationUnit
+import kotlin.time.measureTimedValue
 
 fun Route.brevRoute(service: BrevService) {
     val logger = LoggerFactory.getLogger("BrevRoute")
@@ -21,8 +23,13 @@ fun Route.brevRoute(service: BrevService) {
         post {
             // TODO tilgangsjekk?
             logger.info("Oppretter vedtaksbrev for tilbakekreving behandling (sakId=$sakId, behandlingId=$behandlingId)")
-            val brev = service.opprettVedtaksbrev(behandlingId, sakId, brukerTokenInfo)
-            call.respond(HttpStatusCode.Created, brev)
+
+            measureTimedValue {
+                service.opprettVedtaksbrev(behandlingId, sakId, brukerTokenInfo)
+            }.let { (brev, varighet) ->
+                logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                call.respond(HttpStatusCode.Created, brev)
+            }
         }
 
         get("pdf") {
@@ -33,15 +40,23 @@ fun Route.brevRoute(service: BrevService) {
                 }
             logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
 
-            val pdf = service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
-            call.respond(pdf)
+            measureTimedValue {
+                service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
+            }.let { (pdf, varighet) ->
+                logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                call.respond(pdf)
+            }
         }
 
         post("ferdigstill") {
             // TODO tilgangsjekk?
             logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
-            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
-            call.respond(HttpStatusCode.OK)
+            measureTimedValue {
+                service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+            }.also { (_, varighet) ->
+                logger.info("Ferdigstilling av vedtaksbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

@@ -73,10 +73,11 @@ class TilbakekrevingBrevService(
         behandlingId: UUID,
         sakId: SakId,
         bruker: BrukerTokenInfo,
+        skalLagres: Boolean,
     ): Pdf {
         val brevRequest =
             retryOgPakkUt {
-                utledBrevRequest(bruker, behandlingId, sakId)
+                utledBrevRequest(bruker, behandlingId, sakId, skalLagres)
             }
 
         return brevKlient.genererPdf(brevID, behandlingId, bruker, brevRequest)
@@ -86,6 +87,7 @@ class TilbakekrevingBrevService(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
         sakId: SakId,
+        skalLagres: Boolean = false,
     ): BrevRequest =
         coroutineScope {
             val sak =
@@ -125,6 +127,7 @@ class TilbakekrevingBrevService(
                 spraak = grunnlag.mapSpraak(),
                 saksbehandlerIdent = saksbehandlerIdent,
                 attestantIdent = attestantIdent,
+                skalLagre = skalLagres,
                 // TODO kun nødvendig ved foråhdsvisning/ferdigstilling?
                 brevInnholdData =
                     utledBrevInnholdData(

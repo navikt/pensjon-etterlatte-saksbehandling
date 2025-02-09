@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -49,8 +50,9 @@ class VedtaksbrevServiceNy(
         bruker: BrukerTokenInfo,
         brevRequest: BrevRequest,
     ): Brev {
-        // TODO valider at ikke finnes fra før etc..
-        // TODO flytte henting av data til behandling?
+        krev(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
+            "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
+        }
 
         val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest
 
@@ -104,13 +106,11 @@ class VedtaksbrevServiceNy(
     }
 
     suspend fun genererPdf(
-        id: BrevID,
+        brevId: BrevID,
         bruker: BrukerTokenInfo,
         brevRequest: BrevRequest,
     ): Pdf {
-        // TODO valider
-
-        val brev = db.hentBrev(id)
+        val brev = db.hentBrev(brevId)
 
         val brevInnholdData = utledBrevInnholdData(brev, brevRequest)
 
@@ -118,7 +118,17 @@ class VedtaksbrevServiceNy(
         val avsender =
             utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
 
-        return opprettPdf(brev, brevRequest, brevInnholdData, avsender)
+        val pdf = opprettPdf(brev, brevRequest, brevInnholdData, avsender)
+
+        // TODO ferdigstilles vel aldri her?
+        logger.info("PDF generert ok. Sjekker om den skal lagres og ferdigstilles")
+        brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
+        if (brevRequest.skalLagre) {
+            logger.info("Lagrer PDF for brev med id=$brevId")
+            db.lagrePdf(brevId, pdf)
+        }
+
+        return pdf
     }
 
     fun ferdigstillVedtaksbrev(
@@ -212,30 +222,6 @@ class VedtaksbrevServiceNy(
                 spraak = brev.spraak, // TODO godt nok?,
                 sakType = brevRequest.sak.sakType,
             )
-        val pdf = brevbaker.genererPdf(brev.id, brevbakerRequest)
-
-        // logger.info("PDF generert ok. Sjekker om den skal lagres og ferdigstilles")
-        brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
-
-        /*
-        TODO skal vi lagre pdf her eller samme sted som ferdigstilling?
-        if (brevRequest.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
-            // logger.info("Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=$brevId)")
-        } else {
-            val saksbehandlerident: String = brevRequest.vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
-            if (!bruker.erSammePerson(saksbehandlerident)) {
-                // logger.info("Lagrer PDF for brev med id=$brevId")
-                db.lagrePdf(brev.id, pdf)
-            } else {
-                /*
-                logger.warn(
-                    "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerVedtak)" +
-                        " og attestant (${brukerTokenInfo.ident()}) er samme person.",
-                )
-         */
-            }
-        }
-         */
-        return pdf
+        return brevbaker.genererPdf(brev.id, brevbakerRequest)
     }
 }

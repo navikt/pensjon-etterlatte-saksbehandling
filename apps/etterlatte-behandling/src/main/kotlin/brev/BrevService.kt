@@ -1,28 +1,39 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BrevService(
-    // val vedtaksbehandlingService: VedtaksbehandlingService, TODO
+    val vedtaksbehandlingService: VedtaksbehandlingService,
     val brevKlient: BrevKlient,
     val vedtakKlient: VedtakKlient,
     val tilbakekrevingBrevService: TilbakekrevingBrevService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: SakId,
         bruker: BrukerTokenInfo,
     ) {
-        // vedtaksbehandlingService.erBehandlingRedigerbar() // TODO..
-        // TODO finn ut hva slags behandling
+        if (bruker is Saksbehandler) {
+            val kanRedigeres = vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
+            if (!kanRedigeres) {
+                throw KanIkkeOppretteVedtaksbrev(behandlingId)
+            }
+        }
 
+        // TODO finn ut hva slags behandling
         tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
     }
 
@@ -32,9 +43,28 @@ class BrevService(
         sakId: SakId,
         bruker: BrukerTokenInfo,
     ): Pdf {
-        // vedtaksbehandlingService.erBehandlingRedigerbar() // TODO..
+        val vedtak =
+            vedtakKlient.hentVedtak(behandlingId, bruker)
+                ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
+        val saksbehandlerident: String = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
+
+        // TODO skal kun lagring skje ved ferdigstillin? i så fall kan dette flyttes til ferdigstillinskode?
+        val skalLagrePdf =
+            if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+                logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (behandlingId=$behandlingId)")
+                false
+            } else if (bruker.erSammePerson(saksbehandlerident)) {
+                logger.warn(
+                    "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerident)" +
+                        " og attestant (${bruker.ident()}) er samme person.",
+                )
+                false
+            } else {
+                true
+            }
+
         // TODO finn ut hva slags behandling
-        return tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker)
+        return tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
     }
 
     suspend fun ferdigstillVedtaksbrev(
@@ -59,6 +89,14 @@ class BrevService(
         brevKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
     }
 }
+
+class KanIkkeOppretteVedtaksbrev(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
+        detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
+        meta = mapOf("behandlingId" to behandlingId),
+    )
 
 class SaksbehandlerOgAttestantSammePerson(
     saksbehandler: String,

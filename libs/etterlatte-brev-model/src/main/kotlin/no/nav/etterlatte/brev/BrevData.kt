@@ -55,6 +55,7 @@ data class BrevRequest(
     val verge: Verge?,
     val saksbehandlerIdent: String,
     val attestantIdent: String,
+    val skalLagre: Boolean,
     val brevInnholdData: BrevInnholdData,
 )
 

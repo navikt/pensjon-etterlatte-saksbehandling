@@ -282,7 +282,11 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val skjermingKlient: SkjermingKlient = SkjermingKlientImpl(skjermingHttpClient(config), env.requireEnvValue(SKJERMING_URL)),
+    val skjermingKlient: SkjermingKlient =
+        SkjermingKlientImpl(
+            skjermingHttpClient(config),
+            env.requireEnvValue(SKJERMING_URL),
+        ),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
@@ -651,9 +655,7 @@ internal class ApplicationContext(
             grunnlagKlientImpl,
         )
     val brevService =
-        BrevService(
-            tilbakekrevingBrevService,
-        )
+        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
 
     // Jobs
     val metrikkerJob: MetrikkerJob by lazy {

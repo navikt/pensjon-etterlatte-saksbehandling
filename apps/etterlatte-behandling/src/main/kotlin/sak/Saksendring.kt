@@ -53,5 +53,5 @@ data class SaksendringBegrenset(
     }
 }
 
-// KomplettSak inneholder sensitive felter - fjerer disse med denne konverteringen
+// KomplettSak inneholder sensitive felter adressebeskyttelse og erSkjermet - fjerner disse med denne konverteringen
 private fun KomplettSak.toSak() = Sak(ident, sakType, id, enhet)

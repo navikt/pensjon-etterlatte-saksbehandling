@@ -414,7 +414,36 @@ class SakServiceImpl(
         }
     }
 
-    override fun hentSaksendringer(sakId: SakId): List<Saksendring> = endringerDao.hentEndringerForSak(sakId)
+    override fun hentSaksendringer(sakId: SakId): List<Saksendring> {
+        val saksendringer = endringerDao.hentEndringerForSak(sakId)
+
+        // Inntil vi har gått opp om det er greit å vise adressebeskyttelse og skjerming, så ønsker vi ikke å eksponere
+        // dette. Verken som egne endringstyper eller som en del av andre endringstyper.
+        val saksendringerUtenSensitiveEndringer =
+            saksendringer
+                .filter {
+                    it.endringstype !in
+                        listOf(
+                            Saksendring.Endringstype.ENDRE_ADRESSEBESKYTTELSE,
+                            Saksendring.Endringstype.ENDRE_SKJERMING,
+                        )
+                }.map {
+                    it.copy(
+                        foer =
+                            it.foer?.copy(
+                                adressebeskyttelse = null,
+                                erSkjermet = null,
+                            ),
+                        etter =
+                            it.etter.copy(
+                                adressebeskyttelse = null,
+                                erSkjermet = null,
+                            ),
+                    )
+                }
+
+        return saksendringerUtenSensitiveEndringer
+    }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
         sak.gradertEnhetsnummerErIkkeAlene()

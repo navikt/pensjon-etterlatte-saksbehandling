@@ -259,28 +259,7 @@ internal fun Route.sakWebRoutes(
                             sakService.hentSaksendringer(sakId)
                         }
 
-                    // TODO midlertidig fiks for å fjerne sensitive endringer - burde dette gjøres lenger ned i koden?
-                    val saksendringerUtenSensitiveEndringer =
-                        saksendringer
-                            .filter {
-                                it.endringstype !in
-                                    listOf(Saksendring.Endringstype.ENDRE_ADRESSEBESKYTTELSE, Saksendring.Endringstype.ENDRE_SKJERMING)
-                            }.map {
-                                it.copy(
-                                    foer =
-                                        it.foer?.copy(
-                                            adressebeskyttelse = null,
-                                            erSkjermet = null,
-                                        ),
-                                    etter =
-                                        it.etter.copy(
-                                            adressebeskyttelse = null,
-                                            erSkjermet = null,
-                                        ),
-                                )
-                            }
-
-                    call.respond(saksendringerUtenSensitiveEndringer)
+                    call.respond(saksendringer)
                 }
             }
 

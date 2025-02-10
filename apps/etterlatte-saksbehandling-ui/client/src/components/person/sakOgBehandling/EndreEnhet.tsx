@@ -8,6 +8,7 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useForm } from 'react-hook-form'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 interface EndreEnhetSkjema {
   enhet: string
@@ -29,7 +30,9 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
   const harTilgangPaaNyEnhet = innloggetSaksbehandler.enheter.includes(watch('enhet') ?? '')
 
   const endreEnhet = (data: EndreEnhetSkjema) => {
-    endreEnhetKall({ sakId: sakId, enhet: data.enhet, kommentar: data.kommentar })
+    endreEnhetKall({ sakId: sakId, enhet: data.enhet, kommentar: data.kommentar }, () => {
+      trackClick(ClickEvent.MANUELT_ENDRET_ENHET)
+    })
   }
 
   const closeAndReset = () => {

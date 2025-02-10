@@ -126,7 +126,7 @@ class SakendringerDao(
                             identtype = enumValueOf(getString("identtype")),
                             kommentar = getString("kommentar"),
                         )
-                    } // .filter { it.endringstype !in listOf(Endringstype.ENDRE_ADRESSEBESKYTTELSE, Endringstype.ENDRE_SKJERMING) }
+                    }
             }
         }
 

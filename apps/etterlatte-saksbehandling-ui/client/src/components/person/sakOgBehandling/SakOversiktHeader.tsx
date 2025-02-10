@@ -20,6 +20,7 @@ import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentMo
 import { usePerson } from '~shared/statusbar/usePerson'
 import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
 import { ENHETER } from '~shared/types/Enhet'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -82,7 +83,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         )}
       </HStack>
 
-      <ReadMore header="Historikk">
+      <ReadMore header="Historikk" onClick={() => trackClick(ClickEvent.VIS_SAKSHISTORIKK)}>
         <Sakshistorikk sakId={sak.id} />
       </ReadMore>
 

@@ -621,7 +621,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                             hendelseId = "1",
                             endringstype = Endringstype.OPPRETTET,
                             fnr = fnr,
-                            adressebeskyttelseGradering = adressebeskyttelseGradering,
                         ),
                     )
                 }.also {

@@ -86,6 +86,7 @@ interface GrunnlagService {
     ): Grunnlag
 }
 
+@Deprecated("Slå sammen med [TempGrunnlagServiceProxy]", ReplaceWith("TempGrunnlagServiceProxy"))
 class GrunnlagServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
 ) : GrunnlagService {

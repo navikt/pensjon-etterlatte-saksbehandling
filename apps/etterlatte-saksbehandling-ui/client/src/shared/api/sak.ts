@@ -58,7 +58,7 @@ export const byttEnhetPaaSak = async (args: {
 }
 
 export const hentSaksendringer = async (sakId: number): Promise<ApiResponse<ISaksendring[]>> => {
-  return apiClient.get(`sak/${sakId}/endringshistorikk`)
+  return apiClient.get(`sak/${sakId}/endringer`)
 }
 
 export const oppdaterIdentPaaSak = async (args: {

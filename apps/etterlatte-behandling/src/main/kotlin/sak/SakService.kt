@@ -125,7 +125,7 @@ interface SakService {
         gradering: AdressebeskyttelseGradering,
     )
 
-    fun hentSakshistorikk(sakId: SakId): List<Saksendring>
+    fun hentSaksendringer(sakId: SakId): List<Saksendring>
 }
 
 class ManglerTilgangTilEnhet(
@@ -414,7 +414,7 @@ class SakServiceImpl(
         }
     }
 
-    override fun hentSakshistorikk(sakId: SakId): List<Saksendring> = endringerDao.hentEndringerForSak(sakId)
+    override fun hentSaksendringer(sakId: SakId): List<Saksendring> = endringerDao.hentEndringerForSak(sakId)
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
         sak.gradertEnhetsnummerErIkkeAlene()

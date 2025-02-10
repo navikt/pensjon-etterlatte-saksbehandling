@@ -4,4 +4,6 @@ export const ENHETER: Record<string, string> = {
   '4817': 'Steinkjer - 4817',
   '4862': 'Ålesund utland - 4862',
   '0001': 'Utland - 0001',
+  '4883': 'Egne ansatte - 4883',
+  '2103': 'Vikafossen - 2103',
 }

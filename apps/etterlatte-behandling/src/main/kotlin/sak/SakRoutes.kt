@@ -250,17 +250,37 @@ internal fun Route.sakWebRoutes(
                 call.respond(sisteIverksatteBehandling)
             }
 
-            get("/endringshistorikk") {
+            get("/endringer") {
                 kunSaksbehandler {
-                    logger.info("Henter endringshistorikk for sak ${sakId.sakId}")
+                    logger.info("Henter endringer for sak ${sakId.sakId}")
 
                     val saksendringer =
                         inTransaction {
-                            sakService.hentSakshistorikk(sakId)
+                            sakService.hentSaksendringer(sakId)
                         }
 
-                    // TODO her må vi fjerne sensitive felter (kanskje allerede fra dao?)
-                    call.respond(saksendringer)
+                    // TODO midlertidig fiks for å fjerne sensitive endringer - burde dette gjøres lenger ned i koden?
+                    val saksendringerUtenSensitiveEndringer =
+                        saksendringer
+                            .filter {
+                                it.endringstype !in
+                                    listOf(Saksendring.Endringstype.ENDRE_ADRESSEBESKYTTELSE, Saksendring.Endringstype.ENDRE_SKJERMING)
+                            }.map {
+                                it.copy(
+                                    foer =
+                                        it.foer?.copy(
+                                            adressebeskyttelse = null,
+                                            erSkjermet = null,
+                                        ),
+                                    etter =
+                                        it.etter.copy(
+                                            adressebeskyttelse = null,
+                                            erSkjermet = null,
+                                        ),
+                                )
+                            }
+
+                    call.respond(saksendringerUtenSensitiveEndringer)
                 }
             }
 

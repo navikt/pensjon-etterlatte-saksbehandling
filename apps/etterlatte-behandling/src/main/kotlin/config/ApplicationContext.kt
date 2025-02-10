@@ -84,6 +84,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.brev.BrevKlient
+import no.nav.etterlatte.brev.BrevKlientImpl
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
@@ -270,6 +271,7 @@ internal class ApplicationContext(
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val brevKlient: BrevKlient = BrevKlientImpl(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
         TilbakekrevingKlientImpl(
@@ -573,7 +575,6 @@ internal class ApplicationContext(
 
     val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
 
-    val brevKlient = BrevKlient(config, httpClient(forventSuksess = true))
     val tilbakekrevingBrevService =
         TilbakekrevingBrevService(
             sakService,

@@ -95,6 +95,7 @@ abstract class BehandlingIntegrationTest {
                             "vedtak.resource.url" to "http://localhost",
                             "krr.url" to "http://localhost",
                             "azure.app.well.known.url" to "wellKnownUrl",
+                            "brev-api.resource.url" to "http://localhost",
                         ),
                     ),
                 rapid = testProdusent ?: TestProdusent(),
@@ -117,6 +118,7 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
+                brevKlient = BrevKlientTest(),
             )
     }
 

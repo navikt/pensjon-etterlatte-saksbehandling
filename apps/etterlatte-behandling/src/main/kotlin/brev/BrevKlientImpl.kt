@@ -18,17 +18,44 @@ class Pdf(
     val bytes: ByteArray,
 )
 
-class BrevKlient(
+interface BrevKlient {
+    suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): BrevPayload
+
+    suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): Pdf
+
+    suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): Brev
+}
+
+class BrevKlientImpl(
     config: Config,
     client: HttpClient,
-) {
+) : BrevKlient {
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, client)
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
 
-    suspend fun opprettVedtaksbrev(
+    override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
@@ -40,7 +67,7 @@ class BrevKlient(
             postBody = brevRequest,
         )
 
-    suspend fun genererPdf(
+    override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -56,7 +83,7 @@ class BrevKlient(
             postBody = brevRequest,
         )
 
-    suspend fun ferdigstillVedtaksbrev(
+    override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
@@ -67,7 +94,7 @@ class BrevKlient(
         )
     }
 
-    suspend fun tilbakestillVedtaksbrev(
+    override suspend fun tilbakestillVedtaksbrev(
         brevID: BrevID,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

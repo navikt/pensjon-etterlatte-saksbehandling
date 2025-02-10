@@ -183,7 +183,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                                 kilde = nyOppgaveDto.oppgaveKilde,
                                 type = nyOppgaveDto.oppgaveType,
                                 merknad = nyOppgaveDto.merknad,
-                                frist = null,
+                                frist = nyOppgaveDto.frist,
                                 saksbehandler = nyOppgaveDto.saksbehandler,
                             )
                         }

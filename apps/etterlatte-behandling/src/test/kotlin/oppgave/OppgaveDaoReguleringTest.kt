@@ -51,7 +51,7 @@ internal class OppgaveDaoReguleringTest(
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakLesDao, mockk(), mockk())
 
         saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))

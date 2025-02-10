@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
@@ -67,6 +68,7 @@ internal class BehandlingStatusServiceTest {
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
     private val behandlingDao = mockk<BehandlingDao>(relaxUnitFun = true)
+    private val aktivitetspliktService = mockk<AktivitetspliktService>(relaxUnitFun = true)
     private val saksbehandlerService: SaksbehandlerService = mockk()
 
     private val brukerTokenInfo = simpleSaksbehandler("Z123456")
@@ -79,6 +81,7 @@ internal class BehandlingStatusServiceTest {
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
+            aktivitetspliktService,
             saksbehandlerService,
         )
 

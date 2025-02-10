@@ -23,6 +23,7 @@ import { VurderAktivitetspliktWrapperBehandling } from '~components/behandling/a
 import { isBefore, subMonths } from 'date-fns'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { HarBrukerVarigUnntak } from '~components/behandling/aktivitetsplikt/unntak/HarBrukerVarigUnntak'
+import { InformasjonUnntakOppfoelging } from '~components/aktivitetsplikt/vurdering/InformasjonUnntakOppfoelging'
 
 export const vurderingHarInnhold = (vurdering: IAktivitetspliktVurderingNyDto): boolean => {
   return !!vurdering.unntak.length || !!vurdering.aktivitet.length
@@ -93,11 +94,14 @@ export const AktivitetspliktVurdering = ({
                 typeVurdering={typeVurdering6eller12MndVurdering}
               />
               {redigerbar && (
-                <VurderAktivitetspliktWrapperBehandling
-                  doedsdato={doedsdato}
-                  behandling={behandling}
-                  defaultOpen={false}
-                />
+                <>
+                  <VurderAktivitetspliktWrapperBehandling
+                    doedsdato={doedsdato}
+                    behandling={behandling}
+                    defaultOpen={false}
+                  />
+                  <InformasjonUnntakOppfoelging vurdering={vurdering} />
+                </>
               )}
             </>
           )}

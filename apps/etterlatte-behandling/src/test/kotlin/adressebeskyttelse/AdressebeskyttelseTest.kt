@@ -10,6 +10,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.spyk
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.PdltjenesterKlientTest
@@ -47,6 +50,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
     @AfterEach
     fun afterEach() {
+        clearMocks(pdltjenesterKlient)
         resetDatabase()
     }
 
@@ -109,6 +113,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 }
 
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -117,7 +124,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                         hendelseId = "1",
                         endringstype = Endringstype.OPPRETTET,
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                     ),
                 )
             }
@@ -142,6 +149,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 }
+        }
+        coVerify(exactly = 3) {
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
         }
     }
 
@@ -190,7 +200,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 }
-
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -198,11 +210,14 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
             }
+        }
+        coVerify(exactly = 3) {
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
         }
     }
 
@@ -262,6 +277,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     }
             Assertions.assertTrue(harTilgang)
 
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -269,7 +287,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
@@ -284,6 +302,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                         it.body()
                     }
             Assertions.assertFalse(harIkkeTilgang)
+        }
+        coVerify(exactly = 3) {
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
         }
     }
 
@@ -305,6 +326,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Assertions.assertEquals(HttpStatusCode.OK, status)
                 }.body<Sak>()
 
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -312,7 +336,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
@@ -326,6 +350,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }.apply {
                     Assertions.assertEquals(HttpStatusCode.NotFound, status)
                 }
+        }
+        coVerify(exactly = 2) {
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
         }
     }
 }

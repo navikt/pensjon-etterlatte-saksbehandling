@@ -284,6 +284,7 @@ fun foerstegangsbehandling(
 fun revurdering(
     id: UUID = UUID.randomUUID(),
     sakId: SakId,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -306,7 +307,7 @@ fun revurdering(
     sak =
         Sak(
             ident = persongalleri.soeker,
-            sakType = SakType.BARNEPENSJON,
+            sakType = sakType,
             id = sakId,
             enhet = enhet,
         ),

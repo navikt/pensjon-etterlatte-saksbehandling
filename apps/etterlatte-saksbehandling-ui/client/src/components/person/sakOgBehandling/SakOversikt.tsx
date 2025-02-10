@@ -19,6 +19,7 @@ import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAv
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
+import { OpprettOppfoelgingsoppgaveModal } from '~components/person/sakOgBehandling/OpprettOppfoelgingsoppgaveModal'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -65,8 +66,15 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 {mapResult(oppgaverResult, {
                   pending: <Spinner label="Henter oppgaver for sak..." />,
                   error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                  success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                  success: (oppgaver) => (
+                    <ForenkletOppgaverTable
+                      oppgaver={oppgaver}
+                      oppgaveValg={oppgaveValg}
+                      refreshOppgaver={() => oppgaverFetch(sak.id)}
+                    />
+                  ),
                 })}
+                <OpprettOppfoelgingsoppgaveModal sak={sak} vedOpprettelse={() => oppgaverFetch(sak.id)} />
               </VStack>
 
               <VStack gap="4">

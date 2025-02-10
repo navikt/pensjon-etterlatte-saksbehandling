@@ -53,9 +53,7 @@ class OmregningServiceTest(
 
         val sak =
             SakSkrivDao(
-                SakendringerDao(connection) {
-                    mockk()
-                },
+                SakendringerDao(connection),
             ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
 
         val service =
@@ -132,9 +130,7 @@ class OmregningServiceTest(
 
         val sak =
             SakSkrivDao(
-                SakendringerDao(connection) {
-                    mockk()
-                },
+                SakendringerDao(connection),
             ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
 
         val behandlingId = UUID.randomUUID()
@@ -180,9 +176,7 @@ class OmregningServiceTest(
 
         val sak =
             SakSkrivDao(
-                SakendringerDao(connection) {
-                    mockk()
-                },
+                SakendringerDao(connection),
             ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
 
         val behandlingId = UUID.randomUUID()

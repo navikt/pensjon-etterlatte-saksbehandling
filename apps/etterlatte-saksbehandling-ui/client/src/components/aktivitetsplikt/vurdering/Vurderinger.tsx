@@ -5,9 +5,10 @@ import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 
 import { AktivitetsgradOgUnntakIOppgave } from '~components/aktivitetsplikt/vurdering/AktivitetsgradOgUnntakIOppgave'
 import { LeggTilNyVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/LeggTilNyVurdering'
+import { InformasjonUnntakOppfoelging } from '~components/aktivitetsplikt/vurdering/InformasjonUnntakOppfoelging'
 
 export function Vurderinger(props: { doedsdato: Date }) {
-  const { oppgave } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
   const { doedsdato } = props
   const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
@@ -20,7 +21,12 @@ export function Vurderinger(props: { doedsdato: Date }) {
         </VStack>
         <AktivitetsgradOgUnntakIOppgave />
 
-        {oppgaveErRedigerbar && <LeggTilNyVurdering doedsdato={doedsdato} />}
+        {oppgaveErRedigerbar && (
+          <>
+            <InformasjonUnntakOppfoelging vurdering={vurdering} />
+            <LeggTilNyVurdering doedsdato={doedsdato} />
+          </>
+        )}
       </VStack>
     </Box>
   )

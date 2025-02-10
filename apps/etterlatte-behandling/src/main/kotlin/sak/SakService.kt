@@ -125,7 +125,7 @@ interface SakService {
         gradering: AdressebeskyttelseGradering,
     )
 
-    fun hentSaksendringer(sakId: SakId): List<Saksendring>
+    fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset>
 }
 
 class ManglerTilgangTilEnhet(
@@ -414,7 +414,7 @@ class SakServiceImpl(
         }
     }
 
-    override fun hentSaksendringer(sakId: SakId): List<Saksendring> {
+    override fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset> {
         val saksendringer = endringerDao.hentEndringerForSak(sakId)
 
         // Inntil vi har gått opp om det er greit å vise adressebeskyttelse og skjerming, så ønsker vi ikke å eksponere
@@ -422,25 +422,13 @@ class SakServiceImpl(
         val saksendringerUtenSensitiveEndringer =
             saksendringer
                 .filter {
-                    it.endringstype !in
+                    it.endringstype in
                         listOf(
-                            Saksendring.Endringstype.ENDRE_ADRESSEBESKYTTELSE,
-                            Saksendring.Endringstype.ENDRE_SKJERMING,
+                            Endringstype.OPPRETT_SAK,
+                            Endringstype.ENDRE_ENHET,
+                            Endringstype.ENDRE_IDENT,
                         )
-                }.map {
-                    it.copy(
-                        foer =
-                            it.foer?.copy(
-                                adressebeskyttelse = null,
-                                erSkjermet = null,
-                            ),
-                        etter =
-                            it.etter.copy(
-                                adressebeskyttelse = null,
-                                erSkjermet = null,
-                            ),
-                    )
-                }
+                }.map(Saksendring::toSaksendringBegrenset)
 
         return saksendringerUtenSensitiveEndringer
     }

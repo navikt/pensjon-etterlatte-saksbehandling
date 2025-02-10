@@ -18,8 +18,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import no.nav.etterlatte.sak.Saksendring.Endringstype
-import no.nav.etterlatte.sak.Saksendring.Identtype
 import sak.KomplettSak
 import java.sql.Connection
 import java.util.UUID

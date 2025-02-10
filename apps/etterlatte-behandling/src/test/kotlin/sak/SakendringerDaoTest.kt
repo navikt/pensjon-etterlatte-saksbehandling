@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.sak.Endringstype
+import no.nav.etterlatte.sak.Identtype
 import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.sak.Saksendring
 import org.junit.jupiter.api.AfterEach
@@ -42,12 +44,12 @@ internal class SakendringerDaoTest(
     @Test
     fun `skal hente det samme som lagres i DB`() {
         val saksendringId = UUID.randomUUID()
-        val endringstype = Saksendring.Endringstype.ENDRE_IDENT
+        val endringstype = Endringstype.ENDRE_IDENT
         val sakFoer = komplettSak("fnr1")
         val sakEtter = komplettSak("fnr2")
         val tidspunkt = Tidspunkt.now()
         val ident = "JABO"
-        val identtype = Saksendring.Identtype.SAKSBEHANDLER
+        val identtype = Identtype.SAKSBEHANDLER
         val kommentar = "kommentar"
 
         sakendringerDao.lagreSaksendring(

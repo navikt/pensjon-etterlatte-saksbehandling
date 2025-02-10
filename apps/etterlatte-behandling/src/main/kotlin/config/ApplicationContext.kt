@@ -468,6 +468,7 @@ internal class ApplicationContext(
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagsService,

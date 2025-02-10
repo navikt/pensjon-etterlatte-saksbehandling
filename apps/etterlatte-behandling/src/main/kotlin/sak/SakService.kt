@@ -83,6 +83,11 @@ interface SakService {
 
     fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
 
+    fun oppdaterEnhetForSak(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    )
+
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
@@ -119,6 +124,8 @@ interface SakService {
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     )
+
+    fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset>
 }
 
 class ManglerTilgangTilEnhet(
@@ -131,6 +138,7 @@ class ManglerTilgangTilEnhet(
 class SakServiceImpl(
     private val dao: SakSkrivDao,
     private val lesDao: SakLesDao,
+    private val endringerDao: SakendringerDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
     private val grunnlagService: GrunnlagService,
@@ -406,6 +414,25 @@ class SakServiceImpl(
         }
     }
 
+    override fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset> {
+        val saksendringer = endringerDao.hentEndringerForSak(sakId)
+
+        // Inntil vi har gått opp om det er greit å vise adressebeskyttelse og skjerming, så ønsker vi ikke å eksponere
+        // dette. Verken som egne endringstyper eller som en del av andre endringstyper.
+        val saksendringerUtenSensitiveEndringer =
+            saksendringer
+                .filter {
+                    it.endringstype in
+                        listOf(
+                            Endringstype.OPPRETT_SAK,
+                            Endringstype.ENDRE_ENHET,
+                            Endringstype.ENDRE_IDENT,
+                        )
+                }.map(Saksendring::toSaksendringBegrenset)
+
+        return saksendringerUtenSensitiveEndringer
+    }
+
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
         sak.gradertEnhetsnummerErIkkeAlene()
         sak.egenAnsattStemmer()
@@ -519,6 +546,13 @@ class SakServiceImpl(
 
     override fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>) {
         dao.oppdaterEnheterPaaSaker(saker)
+    }
+
+    override fun oppdaterEnhetForSak(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    ) {
+        dao.oppdaterEnheterPaaSaker(listOf(sak), kommentar)
     }
 
     override fun finnSak(

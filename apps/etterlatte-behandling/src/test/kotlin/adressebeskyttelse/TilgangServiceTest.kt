@@ -62,6 +62,7 @@ internal class TilgangServiceTest(
     private lateinit var sakService: SakService
     private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
+    private lateinit var sakendringerDao: SakendringerDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var klageDao: KlageDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
@@ -77,11 +78,13 @@ internal class TilgangServiceTest(
         tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
         sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
 
         sakService =
             SakServiceImpl(
                 sakRepo,
                 sakLesDao,
+                sakendringerDao,
                 skjermingKlient,
                 brukerService,
                 grunnlagservice,

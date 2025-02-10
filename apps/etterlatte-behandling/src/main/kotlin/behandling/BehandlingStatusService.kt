@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
@@ -109,6 +110,7 @@ class BehandlingStatusServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val generellBehandlingService: GenerellBehandlingService,
+    private val aktivitetspliktService: AktivitetspliktService,
     private val saksbehandlerService: SaksbehandlerService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
@@ -290,6 +292,7 @@ class BehandlingStatusServiceImpl(
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
+        haandterAktivitetspliktOppgave(behandling)
         if (behandling.type == BehandlingType.REVURDERING) {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
@@ -312,6 +315,17 @@ class BehandlingStatusServiceImpl(
             }
         } else {
             logger.info("Behandlingtype: ${behandling.type} får ikke utlandsoppgave")
+        }
+    }
+
+    private fun haandterAktivitetspliktOppgave(behandling: Behandling) {
+        if (behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            try {
+                val unntakIBehandling = aktivitetspliktService.hentVurderingForBehandlingNy(behandling.id).unntak
+                aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIBehandling, behandling.sak.id)
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke opprette oppfølgingsoppgaver for unntak i behandling med id ${behandling.id}", e)
+            }
         }
     }
 

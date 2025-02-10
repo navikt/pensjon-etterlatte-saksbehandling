@@ -80,6 +80,7 @@ export const opprettOmgjoeringKlage = async (args: {
 interface OmgjoeringRequest {
   skalKopiere: boolean
   erSluttbehandlingUtland: boolean
+  omgjoeringsOppgaveId?: string
 }
 
 export const opprettOmgjoeringFoerstegangsbehandling = async (args: {

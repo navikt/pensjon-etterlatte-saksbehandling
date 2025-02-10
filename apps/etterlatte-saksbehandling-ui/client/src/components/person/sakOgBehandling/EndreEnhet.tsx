@@ -27,7 +27,8 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
     watch,
   } = useForm<EndreEnhetSkjema>({ defaultValues: { enhet: gjeldendeEnhet, kommentar: '' } })
 
-  const harTilgangPaaNyEnhet = innloggetSaksbehandler.enheter.includes(watch('enhet') ?? '')
+  const valgtEnhet = watch('enhet')
+  const harTilgangPaaNyEnhet = innloggetSaksbehandler.enheter.includes(valgtEnhet ?? '')
 
   const endreEnhet = (data: EndreEnhetSkjema) => {
     endreEnhetKall({ sakId: sakId, enhet: data.enhet, kommentar: data.kommentar }, () => {
@@ -62,7 +63,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
         <Modal.Body>
           {isSuccess(endreEnhetStatus) ? (
             <VStack gap="4">
-              <Alert variant="success">Saken er flyttet til enhet &quot;{ENHETER[watch('enhet')]}&quot;.</Alert>
+              <Alert variant="success">Saken er flyttet til enhet &quot;{ENHETER[valgtEnhet]}&quot;.</Alert>
 
               {!harTilgangPaaNyEnhet && (
                 <Alert variant="warning">
@@ -102,9 +103,9 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                     ))}
                   </Select>
 
-                  {watch('enhet') !== gjeldendeEnhet && !innloggetSaksbehandler.enheter.includes(watch('enhet')) && (
+                  {valgtEnhet !== gjeldendeEnhet && !innloggetSaksbehandler.enheter.includes(valgtEnhet) && (
                     <Alert variant="warning">
-                      Du har ikke tilgang til &quot;{ENHETER[watch('enhet')]}&quot;, og vil ikke kunne se saken etter
+                      Du har ikke tilgang til &quot;{ENHETER[valgtEnhet]}&quot;, og vil ikke kunne se saken etter
                       flytting.
                     </Alert>
                   )}
@@ -123,7 +124,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                   <HStack gap="2" justify="end">
                     {isFailure(endreEnhetStatus) && (
                       <ApiErrorAlert>
-                        Kunne ikke endre sakens enhet til &quot;{watch('enhet')}&quot; på grunn av feil:{' '}
+                        Kunne ikke endre sakens enhet til &quot;{valgtEnhet}&quot; på grunn av feil:{' '}
                         {endreEnhetStatus.error.detail}
                       </ApiErrorAlert>
                     )}

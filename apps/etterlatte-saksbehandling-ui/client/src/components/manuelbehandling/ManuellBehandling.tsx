@@ -140,7 +140,10 @@ export default function ManuellBehandling() {
         </Box>
 
         <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">
-          {[['', 'Velg enhet'], ...Object.entries(ENHETER)].map(([id, navn]) => (
+          <option key="" value="">
+            Velg enhet
+          </option>
+          {Object.entries(ENHETER).map(([id, navn]) => (
             <option key={id} value={id}>
               {navn}
             </option>

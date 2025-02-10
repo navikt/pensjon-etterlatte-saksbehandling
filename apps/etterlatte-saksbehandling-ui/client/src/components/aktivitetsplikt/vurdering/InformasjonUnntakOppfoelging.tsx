@@ -20,7 +20,7 @@ export function InformasjonUnntakOppfoelging(props: { vurdering: IAktivitetsplik
       {oppgaveFristUtloeper && !!unntakMedFrist && (
         <Box width="fit-content">
           <Alert variant="info">
-            Du har lagt til et unntak med utløp {formaterDato(unntakMedFrist.tom)}. To måneder før fristen blir det
+            Du har lagt til et unntak med utløpsdato {formaterDato(unntakMedFrist.tom)}. To måneder før fristen blir det
             opprettet en oppfølgingsoppgave.
           </Alert>
         </Box>
@@ -28,8 +28,8 @@ export function InformasjonUnntakOppfoelging(props: { vurdering: IAktivitetsplik
       {oppgaveIngenFrist && !!unntakIngenFrist && (
         <Box width="fit-content">
           <Alert variant="info">
-            Du har lagt til et unntak uten frist. Når denne behandlingen om aktivtetplikt er ferdig blir det opprettet
-            en oppfølgingsoppgave med frist to måneder fram i tid.
+            Du har lagt til et unntak uten frist. Når denne behandlingen er ferdig blir det opprettet en
+            oppfølgingsoppgave med frist to måneder fram i tid.
           </Alert>
         </Box>
       )}

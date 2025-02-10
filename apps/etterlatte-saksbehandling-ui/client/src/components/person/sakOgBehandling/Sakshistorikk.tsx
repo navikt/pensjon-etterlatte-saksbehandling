@@ -10,23 +10,23 @@ import { BagdeIcon, Buildings3Icon, FolderIcon } from '@navikt/aksel-icons'
 import { ENHETER } from '~shared/types/Enhet'
 
 const Ikon = ({ endringstype }: { endringstype: Endringstype }) => {
-  if (endringstype == Endringstype.ENDRE_ENHET) {
+  if (endringstype === Endringstype.ENDRE_ENHET) {
     return <Buildings3Icon aria-hidden width="1rem" height="1rem" />
-  } else if (endringstype == Endringstype.ENDRE_IDENT) {
+  } else if (endringstype === Endringstype.ENDRE_IDENT) {
     return <BagdeIcon aria-hidden width="1rem" height="1rem" />
-  } else if (endringstype == Endringstype.OPPRETT_SAK) {
+  } else if (endringstype === Endringstype.OPPRETT_SAK) {
     return <FolderIcon aria-hidden width="1rem" height="1rem" />
   }
 }
 
 const Endringstekst = ({ endring }: { endring: ISaksendring }) => {
-  if (endring.endringstype == Endringstype.ENDRE_ENHET) {
+  if (endring.endringstype === Endringstype.ENDRE_ENHET) {
     return (
       <>
         Fra {ENHETER[endring.foer.enhet]} til {ENHETER[endring.etter.enhet]}
       </>
     )
-  } else if (endring.endringstype == Endringstype.ENDRE_IDENT) {
+  } else if (endring.endringstype === Endringstype.ENDRE_IDENT) {
     return (
       <>
         Identitetsnummer {ENHETER[endring.foer.ident]} er erstattet med {ENHETER[endring.etter.ident]}

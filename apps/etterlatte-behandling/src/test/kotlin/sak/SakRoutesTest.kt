@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -142,16 +143,20 @@ internal class SakRoutesTest {
                     frist = null,
                 ),
             )
+
+        val sakMedEnhet = SakMedEnhet(SakId(1), Enheter.PORSGRUNN.enhetNr)
+        val kommentar = "Lorem ipsum"
+
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/endre-enhet") {
+                client.post("/api/sak/${sakMedEnhet.id.sakId}/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr, kommentar = "Lorem ipsum"))
+                    setBody(EnhetRequest(enhet = sakMedEnhet.enhet, kommentar = kommentar))
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
-            verify(exactly = 1) { sakService.oppdaterEnhetForSaker(any()) }
+            verify(exactly = 1) { sakService.oppdaterEnhetForSak(sakMedEnhet, kommentar) }
         }
     }
 

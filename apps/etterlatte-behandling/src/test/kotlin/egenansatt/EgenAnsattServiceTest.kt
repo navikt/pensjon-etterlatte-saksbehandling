@@ -61,6 +61,7 @@ internal class EgenAnsattServiceTest(
 ) {
     private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
+    private lateinit var sakendringerDao: SakendringerDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
     private lateinit var sakService: SakService
@@ -102,6 +103,7 @@ internal class EgenAnsattServiceTest(
         oppdaterTilgangService = mockk()
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
         sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
         oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))
         val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
@@ -110,6 +112,7 @@ internal class EgenAnsattServiceTest(
                 SakServiceImpl(
                     sakRepo,
                     sakLesDao,
+                    sakendringerDao,
                     skjermingKlient,
                     brukerService,
                     grunnlagservice,

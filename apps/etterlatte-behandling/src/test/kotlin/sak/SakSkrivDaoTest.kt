@@ -516,7 +516,7 @@ internal class SakSkrivDaoTest(
                     .prepareStatement(
                         """
                         SELECT foer, etter
-                        FROM saksendring_bak
+                        FROM saksendring
                         WHERE foer ->> 'id' = '${sak.id}'
                         """.trimIndent(),
                     ).executeQuery()

@@ -48,6 +48,7 @@ internal class SakendringerDaoTest(
         val tidspunkt = Tidspunkt.now()
         val ident = "JABO"
         val identtype = Saksendring.Identtype.SAKSBEHANDLER
+        val kommentar = "kommentar"
 
         sakendringerDao.lagreSaksendring(
             Saksendring(
@@ -58,6 +59,7 @@ internal class SakendringerDaoTest(
                 tidspunkt = tidspunkt,
                 ident = ident,
                 identtype = identtype,
+                kommentar = kommentar,
             ),
         )
 
@@ -69,6 +71,7 @@ internal class SakendringerDaoTest(
         endringForSak.tidspunkt shouldBeEqual tidspunkt
         endringForSak.ident shouldBeEqual ident
         endringForSak.identtype shouldBeEqual identtype
+        endringForSak.kommentar!! shouldBeEqual kommentar
     }
 
     private fun komplettSak(fnr: String) =

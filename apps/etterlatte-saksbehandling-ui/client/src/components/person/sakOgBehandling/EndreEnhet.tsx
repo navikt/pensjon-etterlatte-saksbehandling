@@ -28,6 +28,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
   } = useForm<EndreEnhetSkjema>({ defaultValues: { enhet: gjeldendeEnhet, kommentar: '' } })
 
   const valgtEnhet = watch('enhet')
+  const valgtEnhetNavn = ENHETER[valgtEnhet]
   const harTilgangPaaNyEnhet = innloggetSaksbehandler.enheter.includes(valgtEnhet ?? '')
 
   const endreEnhet = (data: EndreEnhetSkjema) => {
@@ -63,7 +64,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
         <Modal.Body>
           {isSuccess(endreEnhetStatus) ? (
             <VStack gap="4">
-              <Alert variant="success">Saken er flyttet til enhet &quot;{ENHETER[valgtEnhet]}&quot;.</Alert>
+              <Alert variant="success">Saken er flyttet til enhet &quot;{valgtEnhetNavn}&quot;.</Alert>
 
               {!harTilgangPaaNyEnhet && (
                 <Alert variant="warning">
@@ -105,8 +106,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
 
                   {valgtEnhet !== gjeldendeEnhet && !innloggetSaksbehandler.enheter.includes(valgtEnhet) && (
                     <Alert variant="warning">
-                      Du har ikke tilgang til &quot;{ENHETER[valgtEnhet]}&quot;, og vil ikke kunne se saken etter
-                      flytting.
+                      Du har ikke tilgang til &quot;{valgtEnhetNavn}&quot;, og vil ikke kunne se saken etter flytting.
                     </Alert>
                   )}
 
@@ -124,7 +124,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                   <HStack gap="2" justify="end">
                     {isFailure(endreEnhetStatus) && (
                       <ApiErrorAlert>
-                        Kunne ikke endre sakens enhet til &quot;{valgtEnhet}&quot; på grunn av feil:{' '}
+                        Kunne ikke endre sakens enhet til &quot;{valgtEnhetNavn}&quot; på grunn av feil:{' '}
                         {endreEnhetStatus.error.detail}
                       </ApiErrorAlert>
                     )}

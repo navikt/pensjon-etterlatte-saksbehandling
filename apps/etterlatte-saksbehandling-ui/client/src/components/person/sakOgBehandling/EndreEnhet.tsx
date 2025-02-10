@@ -52,7 +52,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
         Endre
       </Button>
 
-      <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
+      <Modal open={open} onClose={closeAndReset} width="40rem" aria-labelledby="modal-heading">
         <Modal.Header closeButton={false}>
           <Heading spacing level="2" size="medium" id="modal-heading">
             Endre enhet
@@ -83,10 +83,6 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
             </VStack>
           ) : (
             <VStack gap="4">
-              <Alert variant="warning">
-                Hvis du endrer til en enhet du selv ikke har tilgang til, vil du ikke kunne flytte saken tilbake
-              </Alert>
-
               <form onSubmit={handleSubmit(endreEnhet)}>
                 <VStack gap="5">
                   <Select

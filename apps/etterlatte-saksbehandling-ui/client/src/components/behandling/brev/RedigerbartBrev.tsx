@@ -30,7 +30,7 @@ interface RedigerbartBrevProps {
   kanRedigeres: boolean
   lukkAdvarselBehandlingEndret?: () => void
   tilbakestillingsaction: () => void
-  tilbakekrevingBrev: boolean
+  tilbakekrevingBrev: boolean // TODO midlertidig
 }
 
 export default function RedigerbartBrev({
@@ -75,7 +75,13 @@ export default function RedigerbartBrev({
     }
 
     apiTilbakestillManuellPayload(
-      { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId, brevtype: brev.brevtype },
+      {
+        brevId: brev.id,
+        sakId: brev.sakId,
+        behandlingId: brev.behandlingId,
+        brevtype: brev.brevtype,
+        tilbakekrevingBrev,
+      },
       (payload: any) => {
         setContent(payload.hoveddel)
         setVedlegg(payload.vedlegg)

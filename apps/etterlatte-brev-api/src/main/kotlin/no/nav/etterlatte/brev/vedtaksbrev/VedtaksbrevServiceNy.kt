@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
 import no.nav.etterlatte.brev.BrevRequest
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -22,6 +23,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -161,7 +163,64 @@ class VedtaksbrevServiceNy(
         }
     }
 
-    // TODO tilbakestill
+    suspend fun tilbakestillVedtaksbrev(
+        brevId: Long,
+        bruker: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): BrevService.BrevPayload {
+        val brev = db.hentBrev(brevId)
+        if (!brev.kanEndres()) {
+            throw UgyldigForespoerselException(
+                "BREVET_KAN_IKKE_ENDRES",
+                "Kan ikke oppdatere brevet med id=$brevId, fordi brevet har status (${brev.status})",
+            )
+        }
+
+        val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent, _, brevInnholdData) = brevRequest
+
+        val brevKode = brevInnholdData.brevKode
+        val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
+
+        // val spraak = db.hentBrevInnhold(brevId)?.spraak TODO ??
+
+        val brevinnhold =
+            BrevInnhold(
+                brevKode.titlerPaaSpraak[spraak] ?: brevKode.tittel,
+                spraak,
+                brevbaker.hentRedigerbarTekstFraBrevbakeren(
+                    BrevbakerRequest.fra(
+                        brevKode = brevKode.redigering,
+                        brevData = ManueltBrevData(),
+                        avsender = avsender,
+                        soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
+                        sakId = sak.id,
+                        spraak = spraak,
+                        sakType = sak.sakType,
+                    ),
+                ),
+            )
+
+        if (brevinnhold.payload != null) {
+            db.oppdaterPayload(brevId, brevinnhold.payload, bruker)
+        }
+
+        /* TODO vedlegg er ikke redigerbare for tilbakereving?
+        if (innholdVedlegg != null) {
+            db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
+        }
+
+        // TODO kan brevkode endre seg?
+        if (opprinneligBrevkoder != brevkode) {
+            db.oppdaterBrevkoder(brevId, brevkode)
+            db.oppdaterTittel(brevId, brevinnhold.tittel, bruker)
+        }
+         */
+
+        return BrevService.BrevPayload(
+            brevinnhold.payload ?: db.hentBrevPayload(brevId),
+            emptyList(),
+        )
+    }
 
     private fun utledBrevInnholdData(
         brev: Brev,

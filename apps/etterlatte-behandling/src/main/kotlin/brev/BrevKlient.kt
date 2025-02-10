@@ -67,6 +67,22 @@ class BrevKlient(
         )
     }
 
+    suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): BrevPayload =
+        put(
+            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak/tilbakestill?brevId=$brevID",
+            onSuccess = { resource ->
+                resource.response?.let { deserialize(it.toJson()) }
+                    ?: throw InternfeilException("Feil ved tilbakestilling av pdf vedtaksbrev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+            putBody = brevRequest,
+        )
+
     private suspend fun <T> get(
         url: String,
         onSuccess: (Resource) -> T,
@@ -96,4 +112,39 @@ class BrevKlient(
                 success = onSuccess,
                 failure = { errorResponse -> throw errorResponse },
             )
+
+    private suspend fun <T> put(
+        url: String,
+        putBody: Any = Unit,
+        onSuccess: (Resource) -> T,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): T =
+        downstreamResourceClient
+            .put(
+                resource = Resource(clientId = clientId, url = url),
+                brukerTokenInfo = brukerTokenInfo,
+                putBody = putBody,
+            ).mapBoth(
+                success = onSuccess,
+                failure = { errorResponse -> throw errorResponse },
+            )
+}
+
+// TODO i lib..
+data class BrevPayload(
+    val hoveddel: Slate?,
+    val vedlegg: List<BrevInnholdVedlegg>?,
+)
+
+data class BrevInnholdVedlegg(
+    val tittel: String,
+    val key: BrevVedleggKey,
+    val payload: Slate? = null,
+)
+
+enum class BrevVedleggKey {
+    OMS_BEREGNING,
+    OMS_FORHAANDSVARSEL_FEILUTBETALING,
+    BP_BEREGNING_TRYGDETID,
+    BP_FORHAANDSVARSEL_FEILUTBETALING,
 }

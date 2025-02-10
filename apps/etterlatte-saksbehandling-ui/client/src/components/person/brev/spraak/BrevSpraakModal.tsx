@@ -16,6 +16,7 @@ interface Props {
   sakId: number
   behandlingId?: string
   brevtype: Brevtype
+  tilbakekrevingBrev: boolean // TODO midlertidig
 }
 
 export const BrevSpraakModal = ({
@@ -25,6 +26,7 @@ export const BrevSpraakModal = ({
   sakId,
   behandlingId,
   brevtype,
+  tilbakekrevingBrev,
 }: Props): ReactNode => {
   const [isOpen, setIsOpen] = useState(false)
   const [oppdaterSpraakStatus, apiOppdaterSpraak] = useApiCall(oppdaterSpraak)
@@ -46,7 +48,7 @@ export const BrevSpraakModal = ({
     if (spraak) {
       apiOppdaterSpraak({ brevId, sakId, spraak }, () => {
         if (!!behandlingId) {
-          apiTilbakestillBrev({ brevId, sakId, behandlingId, brevtype }, () => {
+          apiTilbakestillBrev({ brevId, sakId, behandlingId, brevtype, tilbakekrevingBrev }, () => {
             window.location.reload()
           })
         } else {

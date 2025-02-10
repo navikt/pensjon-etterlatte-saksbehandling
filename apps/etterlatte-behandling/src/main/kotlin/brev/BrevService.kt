@@ -92,6 +92,26 @@ class BrevService(
 
         brevKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
     }
+
+    suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): BrevPayload {
+        if (bruker is Saksbehandler) {
+            val kanRedigeres =
+                inTransaction {
+                    vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
+                }
+            if (!kanRedigeres) {
+                throw KanIkkeOppretteVedtaksbrev(behandlingId)
+            }
+        }
+
+        // TODO finn ut hva slags behandling
+        return tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+    }
 }
 
 class KanIkkeOppretteVedtaksbrev(

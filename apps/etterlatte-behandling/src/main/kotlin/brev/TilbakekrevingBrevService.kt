@@ -83,6 +83,25 @@ class TilbakekrevingBrevService(
         return brevKlient.genererPdf(brevID, behandlingId, bruker, brevRequest)
     }
 
+    suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): BrevPayload {
+        val brevRequest =
+            retryOgPakkUt {
+                utledBrevRequest(bruker, behandlingId, sakId)
+            }
+
+        return brevKlient.tilbakestillVedtaksbrev(
+            brevID,
+            behandlingId,
+            bruker,
+            brevRequest,
+        )
+    }
+
     private suspend fun utledBrevRequest(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,

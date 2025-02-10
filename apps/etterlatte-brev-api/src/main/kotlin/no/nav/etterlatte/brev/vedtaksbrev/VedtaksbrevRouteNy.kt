@@ -6,6 +6,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -50,6 +51,21 @@ fun Route.vedtaksbrevRouteNy(
                     logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
                     service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
                     call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            put("tilbakestill") {
+                withBehandlingId(tilgangssjekker, skrivetilgang = true) {
+                    val brevId =
+                        krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                            "Kan ikke tilbakestille PDF uten brevId"
+                        }
+                    val brevRequest = call.receive<BrevRequest>()
+
+                    logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
+
+                    val paylod = service.tilbakestillVedtaksbrev(brevId, brukerTokenInfo, brevRequest)
+                    call.respond(paylod)
                 }
             }
         }

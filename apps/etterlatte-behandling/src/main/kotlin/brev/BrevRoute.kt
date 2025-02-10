@@ -6,6 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -56,6 +57,29 @@ fun Route.brevRoute(service: BrevService) {
             }.also { (_, varighet) ->
                 logger.info("Ferdigstilling av vedtaksbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        put("tilbakestill") {
+            // TODO tilgangsjekk?
+            val brevId =
+                krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                    "Kan ikke tilbaketille PDF uten brevId"
+                }
+            logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
+
+            measureTimedValue {
+                service.tilbakestillVedtaksbrev(brevId, behandlingId, sakId, brukerTokenInfo)
+            }.let { (brevPayload, varighet) ->
+                logger.info(
+                    "Oppretting av nytt innhold til brev (id=$brevId) tok ${
+                        varighet.toString(
+                            DurationUnit.SECONDS,
+                            2,
+                        )
+                    }",
+                )
+                call.respond(brevPayload)
             }
         }
     }

@@ -70,7 +70,7 @@ export function TilbakekrevingBrev({
 
               {vedtaksbrev && (
                 <>
-                  <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                  <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} tilbakekrevingBrev={true} />
 
                   <BrevMottakerWrapper brev={vedtaksbrev} kanRedigeres={redigerbar} />
                 </>

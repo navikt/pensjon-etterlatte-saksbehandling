@@ -571,6 +571,17 @@ internal class ApplicationContext(
 
     val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
 
+    val brevKlient = BrevKlient(config, httpClient(forventSuksess = true))
+    val tilbakekrevingBrevService =
+        TilbakekrevingBrevService(
+            sakService,
+            brevKlient,
+            vedtakKlient,
+            grunnlagKlientImpl,
+        )
+    val brevService =
+        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
+
     val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
@@ -580,6 +591,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
             brevApiKlient = brevApiKlient,
+            brevService = brevService,
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekrevingHendelserService,
         )
@@ -645,17 +657,6 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             unleashFeatureToggleService = featureToggleService,
         )
-
-    val brevKlient = BrevKlient(config, httpClient(forventSuksess = true))
-    val tilbakekrevingBrevService =
-        TilbakekrevingBrevService(
-            sakService,
-            brevKlient,
-            vedtakKlient,
-            grunnlagKlientImpl,
-        )
-    val brevService =
-        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
 
     // Jobs
     val metrikkerJob: MetrikkerJob by lazy {

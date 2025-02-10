@@ -70,6 +70,7 @@ export const oppdaterSpraak = async (args: {
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${args.brevId}/spraak?sakId=${args.sakId}`, { spraak: args.spraak })
 
+// TODO
 export const slettBrev = async (args: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.delete(`/brev/${args.brevId}?sakId=${args.sakId}`)
 
@@ -111,12 +112,21 @@ export const tilbakestillManuellPayload = async (props: {
   sakId: number
   behandlingId: string
   brevtype: Brevtype
-}): Promise<ApiResponse<any>> =>
-  apiClient.put(`/brev/behandling/${props.behandlingId}/payload/tilbakestill`, {
+  tilbakekrevingBrev: boolean
+}): Promise<ApiResponse<any>> => {
+  if (props.tilbakekrevingBrev) {
+    // TODO
+    return apiClient.put(
+      `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}`,
+      {}
+    )
+  }
+  return apiClient.put(`/brev/behandling/${props.behandlingId}/payload/tilbakestill`, {
     brevId: props.brevId,
     sakId: props.sakId,
     brevtype: props.brevtype,
   })
+}
 
 export const lagreManuellPayload = async (props: {
   brevId: number

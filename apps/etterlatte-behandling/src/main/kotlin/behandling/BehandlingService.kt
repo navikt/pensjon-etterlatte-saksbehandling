@@ -376,7 +376,17 @@ internal class BehandlingServiceImpl(
                 )
             }
 
-            if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+            val erBehandlingOmgjoeringEtterKlage =
+                when (behandling) {
+                    is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+
+                    is Foerstegangsbehandling ->
+                        behandling.relatertBehandlingId?.let { klageId ->
+                            oppgaveService.hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE).any { it.id.toString() == klageId }
+                        } ?: false
+                }
+
+            if (erBehandlingOmgjoeringEtterKlage) {
                 val omgjoeringsoppgaveForKlage =
                     oppgaveService
                         .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)

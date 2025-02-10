@@ -30,7 +30,7 @@ interface RedigerbartBrevProps {
   kanRedigeres: boolean
   lukkAdvarselBehandlingEndret?: () => void
   tilbakestillingsaction: () => void
-  tilbakekrevingBrev: boolean // TODO midlertidig
+  tilbakekrevingBrev?: boolean // TODO midlertidig
 }
 
 export default function RedigerbartBrev({

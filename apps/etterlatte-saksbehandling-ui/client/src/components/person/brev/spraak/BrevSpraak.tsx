@@ -7,7 +7,7 @@ import { formaterSpraak } from '~utils/formatering/formatering'
 interface Props {
   brev: IBrev
   kanRedigeres: boolean
-  tilbakekrevingBrev: boolean // TODO
+  tilbakekrevingBrev?: boolean // TODO
 }
 
 export default function BrevSpraak({ brev, kanRedigeres, tilbakekrevingBrev = false }: Props) {

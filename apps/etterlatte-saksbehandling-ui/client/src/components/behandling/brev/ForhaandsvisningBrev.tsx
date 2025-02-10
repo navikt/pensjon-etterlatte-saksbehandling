@@ -13,7 +13,7 @@ export default function ForhaandsvisningBrev({
   tilbakekrevingBrev = false,
 }: {
   brev: IBrev
-  tilbakekrevingBrev: boolean
+  tilbakekrevingBrev?: boolean
 }) {
   const [fileURL, setFileURL] = useState<string>()
   const [pdf, genererBrevPdf] = useApiCall(genererPdf)

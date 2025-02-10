@@ -42,12 +42,15 @@ export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
     hentSaksendringerKall(sakId)
   }, [])
 
+  const sorterNyligsteFoerstOgBakover = (a: ISaksendring, b: ISaksendring) =>
+    new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime()
+
   return mapResult(hentSaksendringerStatus, {
     pending: <Spinner label="Henter historikk..." />,
     success: (sakshistorikk) => {
       return (
         <List as="ul" size="small">
-          {sakshistorikk.map((endring) => {
+          {sakshistorikk.sort(sorterNyligsteFoerstOgBakover).map((endring) => {
             return (
               <List.Item
                 title={tekstEndringstype[endring.endringstype]}

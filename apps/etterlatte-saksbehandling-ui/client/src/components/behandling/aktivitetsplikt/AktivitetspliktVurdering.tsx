@@ -24,6 +24,7 @@ import { VurderAktivitetspliktWrapperBehandling } from '~components/behandling/a
 import { isBefore, subMonths } from 'date-fns'
 import { JaNei } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
+import { InformasjonUnntakOppfoelging } from '~components/aktivitetsplikt/vurdering/InformasjonUnntakOppfoelging'
 
 const vurderingHarInnhold = (vurdering: IAktivitetspliktVurderingNyDto): boolean => {
   return !!vurdering.unntak.length || !!vurdering.aktivitet.length
@@ -209,6 +210,7 @@ export const AktivitetspliktVurdering = ({
                 />
               </>
             )}
+            {redigerbar && vurdering && <InformasjonUnntakOppfoelging vurdering={vurdering} />}
             {redigerbar && <VurderAktivitetspliktWrapperBehandling doedsdato={doedsdato} behandling={behandling} />}
           </>
         )}

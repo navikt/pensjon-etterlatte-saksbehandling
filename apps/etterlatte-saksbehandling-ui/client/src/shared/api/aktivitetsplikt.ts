@@ -2,13 +2,13 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
   AktivitetspliktOppfolging,
   AktivitetspliktOppgaveVurdering,
-  IAktivitetPeriode,
   IAktivitetHendelse,
+  IAktivitetPeriode,
+  IAktivitetPerioderOgHendelser,
   IAktivitetspliktVurderingNyDto,
-  SkrivAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
-  IAktivitetPerioderOgHendelser,
+  SkrivAktivitet,
   SkrivHendelse,
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
@@ -205,6 +205,11 @@ export const ferdigstillBrevOgOppgaveAktivitetsplikt = async (args: {
   oppgaveId: string
 }): Promise<ApiResponse<OppgaveDTO>> =>
   apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/ferdigstillbrev-og-oppgave`, {})
+
+export const ferdigstillOppgaveUtenBrevAktivitetsplikt = async (args: {
+  oppgaveId: string
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/ferdigstill-oppgave`, {})
 
 interface BrevId {
   brevId: number

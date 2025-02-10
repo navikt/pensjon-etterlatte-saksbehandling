@@ -21,6 +21,8 @@ export const enum FeatureToggle {
   pensjon_etterlatte_oppdater_ident_paa_sak = 'pensjon-etterlatte.oppdater-ident-paa-sak',
   trygdetid_fra_pesys = 'trygdetid-fra-pesys',
   opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
+  aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
+  aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
 }
 
 export interface Toggle {
@@ -77,6 +79,15 @@ const opprette_oppfoelgingsoppgave: Toggle = {
   enabled: false,
 }
 
+const aktivitetsplikt_oppgave_unntak_uten_frist: Toggle = {
+  togglename: FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist,
+  enabled: false,
+}
+
+const aktivitetsplikt_oppgave_unntak_med_frist: Toggle = {
+  togglename: FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist,
+  enabled: false,
+}
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
@@ -92,6 +103,8 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.overstyr_beregning_knapp]: overstyr_beregning_knapp,
   [FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak]: pensjon_etterlatte_oppdater_ident_paa_sak,
   [FeatureToggle.opprette_oppfoelgingsoppgave]: opprette_oppfoelgingsoppgave,
+  [FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist]: aktivitetsplikt_oppgave_unntak_med_frist,
+  [FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist]: aktivitetsplikt_oppgave_unntak_uten_frist,
 }
 
 export const Unleashcontext = createContext<{

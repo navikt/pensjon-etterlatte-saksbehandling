@@ -43,11 +43,6 @@ interface TilgangServiceSjekker {
     ): Boolean
 }
 
-data class SakMedGradering(
-    val id: SakId,
-    val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
-)
-
 class TilgangServiceSjekkerImpl(
     private val dao: SakTilgangDao,
 ) : TilgangServiceSjekker {

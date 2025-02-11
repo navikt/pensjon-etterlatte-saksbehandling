@@ -304,7 +304,7 @@ internal class TilgangServiceTest(
 
         Assertions.assertEquals(true, hartilgangtilvanligsak)
 
-        sakRepo.markerSakerMedSkjerming(listOf(sakId), true)
+        sakRepo.oppdaterSkjerming(sakId, true)
 
         val hartilgangSomStrengtFortroligMotEgenAnsattSak =
             tilgangService.harTilgangTilBehandling(

@@ -1,23 +1,20 @@
-package sak
+package no.nav.etterlatte.sak
 
-import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.sak.Endringstype
-import no.nav.etterlatte.sak.Identtype
-import no.nav.etterlatte.sak.SakendringerDao
-import no.nav.etterlatte.sak.Saksendring
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
-import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,10 +27,12 @@ internal class SakendringerDaoTest(
     }
 
     private lateinit var sakendringerDao: SakendringerDao
+    private lateinit var sakSkrivDao: SakSkrivDao
 
     @BeforeEach
     fun beforeEach() {
         sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(sakendringerDao)
     }
 
     @AfterEach
@@ -42,49 +41,84 @@ internal class SakendringerDaoTest(
     }
 
     @Test
-    fun `skal hente det samme som lagres i DB`() {
-        val saksendringId = UUID.randomUUID()
-        val endringstype = Endringstype.ENDRE_IDENT
-        val sakFoer = komplettSak("fnr1")
-        val sakEtter = komplettSak("fnr2")
-        val tidspunkt = Tidspunkt.now()
-        val ident = "JABO"
-        val identtype = Identtype.SAKSBEHANDLER
-        val kommentar = "kommentar"
+    fun `skal lagre endring ved opprettelse av sak`() {
+        val soeker = SOEKER_FOEDSELSNUMMER
+        val enhet = Enheter.PORSGRUNN.enhetNr
 
-        sakendringerDao.lagreSaksendring(
-            Saksendring(
-                id = saksendringId,
-                endringstype = endringstype,
-                foer = sakFoer,
-                etter = sakEtter,
-                tidspunkt = tidspunkt,
-                ident = ident,
-                identtype = identtype,
-                kommentar = kommentar,
-            ),
-        )
+        val sak = sakSkrivDao.opprettSak(soeker.value, SakType.BARNEPENSJON, enhet)
+        val endringForSak = sakendringerDao.hentEndringerForSak(sak.id).first { it.endringstype == Endringstype.OPPRETT_SAK }
 
-        val endringForSak = sakendringerDao.hentEndringerForSak(sakEtter.id).single()
-        endringForSak.id shouldBeEqual saksendringId
-        endringForSak.endringstype shouldBeEqual endringstype
-        endringForSak.foer!! shouldBeEqual sakFoer
-        endringForSak.etter shouldBeEqual sakEtter
-        endringForSak.tidspunkt shouldBeEqual tidspunkt
-        endringForSak.ident shouldBeEqual ident
-        endringForSak.identtype shouldBeEqual identtype
-        endringForSak.kommentar!! shouldBeEqual kommentar
+        endringForSak.id shouldNotBe null
+        endringForSak.endringstype shouldBe Endringstype.OPPRETT_SAK
+        endringForSak.foer shouldBe null
+        endringForSak.etter.id shouldBe sak.id
+        endringForSak.etter.sakType shouldBe SakType.BARNEPENSJON
+        endringForSak.etter.ident shouldBe soeker.value
+        endringForSak.etter.enhet shouldBe enhet
+        endringForSak.etter.erSkjermet shouldBe null
+        endringForSak.etter.adressebeskyttelse shouldBe null
+        endringForSak.etter.opprettet shouldNotBe null
+        endringForSak.tidspunkt shouldNotBe null
+        endringForSak.ident shouldBe "ConnectionAutoclosingTest"
+        endringForSak.identtype shouldBe Identtype.GJENNY
     }
 
-    private fun komplettSak(fnr: String) =
-        KomplettSak(
-            SakId(2),
-            fnr,
-            SakType.OMSTILLINGSSTOENAD,
-            AdressebeskyttelseGradering.UGRADERT,
-            false,
-            Enheter.AALESUND.enhetNr,
-            null,
-            Tidspunkt.now(),
-        )
+    @Test
+    fun `skal lagre endring av enhet`() {
+        val soeker = SOEKER_FOEDSELSNUMMER
+        val enhet = Enheter.PORSGRUNN.enhetNr
+        val enhetNy = Enheter.AALESUND.enhetNr
+
+        val sak = sakSkrivDao.opprettSak(soeker.value, SakType.BARNEPENSJON, enhet)
+        sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.AALESUND.enhetNr), "en kommentar")
+        val endringForSakEnhet =
+            sakendringerDao.hentEndringerForSak(sak.id).first { it.endringstype == Endringstype.ENDRE_ENHET }
+
+        endringForSakEnhet.foer?.enhet shouldBe enhet
+        endringForSakEnhet.etter.enhet shouldBe enhetNy
+    }
+
+    @Test
+    fun `skal lagre endring av skjerming`() {
+        val soeker = SOEKER_FOEDSELSNUMMER
+        val enhet = Enheter.PORSGRUNN.enhetNr
+
+        val sak = sakSkrivDao.opprettSak(soeker.value, SakType.BARNEPENSJON, enhet)
+        sakSkrivDao.oppdaterSkjerming(sak.id, true)
+        val endringForSakSkjerming = sakendringerDao.hentEndringerForSak(sak.id).first { it.endringstype == Endringstype.ENDRE_SKJERMING }
+
+        endringForSakSkjerming.foer?.erSkjermet shouldBe null
+        endringForSakSkjerming.etter.erSkjermet shouldBe true
+    }
+
+    @Test
+    fun `skal lagre endring av adressebeskyttelse`() {
+        val soeker = SOEKER_FOEDSELSNUMMER
+        val enhet = Enheter.PORSGRUNN.enhetNr
+
+        val sak = sakSkrivDao.opprettSak(soeker.value, SakType.BARNEPENSJON, enhet)
+        sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        val endringForSakAdressebeskyttelse =
+            sakendringerDao.hentEndringerForSak(sak.id).first {
+                it.endringstype ==
+                    Endringstype.ENDRE_ADRESSEBESKYTTELSE
+            }
+
+        endringForSakAdressebeskyttelse.foer?.adressebeskyttelse shouldBe null
+        endringForSakAdressebeskyttelse.etter.adressebeskyttelse shouldBe AdressebeskyttelseGradering.STRENGT_FORTROLIG
+    }
+
+    @Test
+    fun `skal lagre endring av ident`() {
+        val soeker = SOEKER_FOEDSELSNUMMER
+        val soeker2 = SOEKER2_FOEDSELSNUMMER
+        val enhet = Enheter.PORSGRUNN.enhetNr
+
+        val sak = sakSkrivDao.opprettSak(soeker.value, SakType.BARNEPENSJON, enhet)
+        sakSkrivDao.oppdaterIdent(sak.id, soeker2)
+        val endringForSakNyIdent = sakendringerDao.hentEndringerForSak(sak.id).first { it.endringstype == Endringstype.ENDRE_IDENT }
+
+        endringForSakNyIdent.foer?.ident shouldBe soeker.value
+        endringForSakNyIdent.etter.ident shouldBe soeker2.value
+    }
 }

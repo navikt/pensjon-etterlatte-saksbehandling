@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAnyOf
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -18,11 +19,13 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -34,8 +37,10 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -210,18 +215,10 @@ internal class SakSkrivDaoTest(
         val funnetSaker = sakLesDao.finnSaker(fnr)
         Assertions.assertEquals(1, funnetSaker.size)
         Assertions.assertEquals(sak.id, funnetSaker[0].id)
-        sakSkrivDao.opprettSak(fnr, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).also {
-            Assertions.assertNotNull(it)
-        }
-        val funnetSakermed2saker = sakLesDao.finnSaker(fnr)
-        Assertions.assertEquals(2, funnetSakermed2saker.size)
 
-        val sakerMedNyEnhet =
-            funnetSakermed2saker.map {
-                SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
-            }
+        val sakerMedNyEnhet = SakMedEnhet(sak.id, Enheter.EGNE_ANSATTE.enhetNr)
 
-        sakSkrivDao.oppdaterEnheterPaaSaker(sakerMedNyEnhet)
+        sakSkrivDao.oppdaterEnhet(sakerMedNyEnhet)
 
         val sakerMedEgenAnsattEnhet = sakLesDao.finnSaker(fnr)
         sakerMedEgenAnsattEnhet.forEach {
@@ -230,33 +227,12 @@ internal class SakSkrivDaoTest(
     }
 
     @Test
-    fun `Skal kunne markere flere saker med skjerming`() {
+    fun `Skal kunne markere sak med skjerming`() {
         val sak1 = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.OMSTILLINGSSTOENAD, Enheter.AALESUND.enhetNr)
 
-        sakSkrivDao.markerSakerMedSkjerming(listOf(sak1.id, sak2.id), true)
-        sakSkrivDao.markerSakerMedSkjerming(listOf(sak1.id), false)
+        sakSkrivDao.oppdaterSkjerming(sak1.id, true)
 
-        sakendringerDao.hentKomplettSak(sak1.id)?.erSkjermet shouldBe false
-        sakendringerDao.hentKomplettSak(sak2.id)?.erSkjermet shouldBe true
-
-        sakendringerDao
-            .hentEndringerForSak(sak1.id)
-            .sortedBy { it.tidspunkt }
-            .map { Pair(it.foer?.erSkjermet, it.etter.erSkjermet) } shouldBe
-            listOf(
-                Pair(null, null),
-                Pair(null, true),
-                Pair(true, false),
-            )
-        sakendringerDao
-            .hentEndringerForSak(sak2.id)
-            .sortedBy { it.tidspunkt }
-            .map { Pair(it.foer?.erSkjermet, it.etter.erSkjermet) } shouldBe
-            listOf(
-                Pair(null, null),
-                Pair(null, true),
-            )
+        hentKomplettSak(sak1.id)?.erSkjermet shouldBe true
     }
 
     @Nested
@@ -602,7 +578,7 @@ internal class SakSkrivDaoTest(
 
         with(endringForSak) {
             foer shouldBe null
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
             endringstype shouldBe Endringstype.OPPRETT_SAK
             identtype shouldBe Identtype.SAKSBEHANDLER
             ident shouldBe "Børre"
@@ -614,7 +590,7 @@ internal class SakSkrivDaoTest(
     @Test
     fun `skal oppdatere adressebeskyttelse med lagring av endring`() {
         val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
-        val komplettSakFoer = sakendringerDao.hentKomplettSak(sak.id)!!
+        val komplettSakFoer = hentKomplettSak(sak.id)!!
 
         sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.FORTROLIG)
 
@@ -627,7 +603,7 @@ internal class SakSkrivDaoTest(
             foer?.id shouldBe sak.id
             etter.id shouldBe sak.id
             foer!! shouldBeEqual komplettSakFoer
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
             foer?.adressebeskyttelse shouldBe null
             etter.adressebeskyttelse shouldBe AdressebeskyttelseGradering.FORTROLIG
         }
@@ -636,9 +612,9 @@ internal class SakSkrivDaoTest(
     @Test
     fun `skal oppdatere skjerming med lagring av endring`() {
         val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
-        val komplettSakFoer = sakendringerDao.hentKomplettSak(sak.id)!!
+        val komplettSakFoer = hentKomplettSak(sak.id)!!
 
-        sakSkrivDao.markerSakerMedSkjerming(listOf(sak.id), true)
+        sakSkrivDao.oppdaterSkjerming(sak.id, true)
 
         val endringForOppdatering =
             sakendringerDao
@@ -649,7 +625,7 @@ internal class SakSkrivDaoTest(
             foer?.id shouldBe sak.id
             etter.id shouldBe sak.id
             foer!! shouldBeEqual komplettSakFoer
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
             foer?.erSkjermet shouldBe null
             etter.erSkjermet shouldBe true
         }
@@ -658,7 +634,7 @@ internal class SakSkrivDaoTest(
     @Test
     fun `skal oppdatere ident med lagring av endring`() {
         val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
-        val komplettSakFoer = sakendringerDao.hentKomplettSak(sak.id)!!
+        val komplettSakFoer = hentKomplettSak(sak.id)!!
 
         sakSkrivDao.oppdaterIdent(sak.id, SOEKER2_FOEDSELSNUMMER)
 
@@ -671,22 +647,18 @@ internal class SakSkrivDaoTest(
             foer?.id shouldBe sak.id
             etter.id shouldBe sak.id
             foer!! shouldBeEqual komplettSakFoer
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
             foer?.ident shouldBe SOEKER_FOEDSELSNUMMER.value
             etter.ident shouldBe SOEKER2_FOEDSELSNUMMER.value
         }
     }
 
     @Test
-    fun `skal oppdatere enhet på flere saker med lagring av endring`() {
+    fun `skal oppdatere enhet sak med lagring av endring`() {
         val sak1 = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
         val sak2 = sakSkrivDao.opprettSak(SOEKER2_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.NORDLAND_BODOE.enhetNr)
-        sakSkrivDao.oppdaterEnheterPaaSaker(
-            listOf(
-                SakMedEnhet(sak1.id, Enheter.AALESUND.enhetNr),
-                SakMedEnhet(sak2.id, Enheter.KLAGE_VEST.enhetNr),
-            ),
-        )
+        sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak1.id, Enheter.AALESUND.enhetNr))
+        sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak2.id, Enheter.KLAGE_VEST.enhetNr))
 
         val endringForSak1 =
             sakendringerDao
@@ -695,7 +667,7 @@ internal class SakSkrivDaoTest(
         with(endringForSak1) {
             foer?.enhet shouldBe Enheter.PORSGRUNN.enhetNr
             etter.enhet shouldBe Enheter.AALESUND.enhetNr
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak1.id)!!
+            etter shouldBeEqual hentKomplettSak(sak1.id)!!
         }
         val endringForSak2 =
             sakendringerDao
@@ -704,7 +676,35 @@ internal class SakSkrivDaoTest(
         with(endringForSak2) {
             foer?.enhet shouldBe Enheter.NORDLAND_BODOE.enhetNr
             etter.enhet shouldBe Enheter.KLAGE_VEST.enhetNr
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak2.id)!!
+            etter shouldBeEqual hentKomplettSak(sak2.id)!!
         }
     }
+
+    private fun hentKomplettSak(sakId: SakId): KomplettSak? =
+        ConnectionAutoclosingTest(dataSource).hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("SELECT * FROM sak WHERE id = ?")
+                statement.setLong(1, sakId.sakId)
+                statement
+                    .executeQuery()
+                    .singleOrNull {
+                        KomplettSak(
+                            id = SakId(getLong("id")),
+                            ident = getString("fnr"),
+                            sakType = enumValueOf(getString("sakType")),
+                            adressebeskyttelse =
+                                getString("adressebeskyttelse")
+                                    ?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
+                            erSkjermet = if (getObject("erskjermet") != null) getBoolean("erskjermet") else null,
+                            enhet = Enhetsnummer(getString("enhet")),
+                            flyktning =
+                                getString("flyktning")?.let {
+                                    no.nav.etterlatte.behandling.objectMapper
+                                        .readValue(it)
+                                },
+                            opprettet = getTidspunktOrNull("opprettet"),
+                        )
+                    }
+            }
+        }
 }

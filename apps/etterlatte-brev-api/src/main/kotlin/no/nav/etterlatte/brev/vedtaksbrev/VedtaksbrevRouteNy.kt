@@ -21,7 +21,7 @@ fun Route.vedtaksbrevRouteNy(
     tilgangssjekker: Tilgangssjekker,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.tilbakekreving.VedtaksbrevRouteNy")
-    route("brev/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
+    route("brev/vedtak/{$BEHANDLINGID_CALL_PARAMETER}") {
         route("vedtak") {
             post {
                 withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->

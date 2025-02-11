@@ -61,7 +61,7 @@ class BrevKlientImpl(
         brevRequest: BrevRequest,
     ): Brev =
         post(
-            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak",
+            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
             postBody = brevRequest,
@@ -74,7 +74,7 @@ class BrevKlientImpl(
         brevRequest: BrevRequest,
     ): Pdf =
         post(
-            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak/pdf?brevId=$brevID",
+            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak/pdf?brevId=$brevID",
             onSuccess = { resource ->
                 resource.response?.let { deserialize(it.toJson()) }
                     ?: throw InternfeilException("Feil ved generering av pdf vedtaksbrev")
@@ -88,7 +88,7 @@ class BrevKlientImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak/ferdigstill",
+            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak/ferdigstill",
             onSuccess = { _ -> },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -101,7 +101,7 @@ class BrevKlientImpl(
         brevRequest: BrevRequest,
     ): BrevPayload =
         put(
-            url = "$resourceUrl/api/brev/tilbakekreving/$behandlingId/vedtak/tilbakestill?brevId=$brevID",
+            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak/tilbakestill?brevId=$brevID",
             onSuccess = { resource ->
                 resource.response?.let { deserialize(it.toJson()) }
                     ?: throw InternfeilException("Feil ved tilbakestilling av pdf vedtaksbrev")
@@ -157,7 +157,8 @@ class BrevKlientImpl(
             )
 }
 
-// TODO i lib..
+// TODO Finnes nå i etterlatte-behandling og brev-api - bør ligge i en lib men er ikke helt landet hvilket lib
+// som bør brukes mellom behandling og brev
 data class BrevPayload(
     val hoveddel: Slate?,
     val vedlegg: List<BrevInnholdVedlegg>?,

@@ -174,7 +174,6 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         behandlingFactory = applicationContext.behandlingFactory,
     )
 
-    // TODO
     brevRoute(service = applicationContext.brevService)
 
     aktivitetspliktRoutes(

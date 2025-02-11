@@ -204,7 +204,7 @@ class AktivitetspliktService(
         }
     }
 
-    private fun harVarigUnntak(sakId: SakId): Boolean {
+    fun harVarigUnntak(sakId: SakId): Boolean {
         val varigUnntak =
             hentVurderingForSak(sakId)
                 .unntak

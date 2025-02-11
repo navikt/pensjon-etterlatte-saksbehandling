@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
+import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -9,6 +10,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveKanIkkeEndres
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -37,6 +40,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.util.UUID
 
@@ -46,6 +51,7 @@ class AktivitetspliktOppgaveServiceTest {
     private val sakService: SakService = mockk()
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao = mockk()
     private val brevApiKlient: BrevApiKlient = mockk()
+    private val behandlingService: BehandlingService = mockk()
     private val service =
         AktivitetspliktOppgaveService(
             aktivitetspliktService = aktivitetspliktService,
@@ -53,12 +59,12 @@ class AktivitetspliktOppgaveServiceTest {
             sakService = sakService,
             aktivitetspliktBrevDao,
             brevApiKlient,
-            mockk(relaxed = true),
+            behandlingService = behandlingService,
         )
 
     private val sak =
         Sak(
-            "en ident",
+            SOEKER_FOEDSELSNUMMER.value,
             sakType = SakType.OMSTILLINGSSTOENAD,
             id = randomSakId(),
             enhet = Enheter.defaultEnhet.enhetNr,
@@ -72,6 +78,121 @@ class AktivitetspliktOppgaveServiceTest {
     @BeforeEach
     fun beforeEach() {
         every { sakService.finnSak(sak.id) } returns sak
+    }
+
+    @Test
+    fun `Kan ikke opprette oppfølgingsoppgave hvis det finnes varig unntak på saken`() {
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns true
+        assertThrows<HarVarigUnntak> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
+        }
+
+        verify(exactly = 1) {
+            aktivitetspliktService.harVarigUnntak(sak.id)
+        }
+    }
+
+    @Test
+    fun `Kan ikke opprette oppfølgingsoppgave hvis samme oppgavetype allerede finnes under behandling`() {
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT)) } returns
+            listOf(
+                mockk {
+                    every { erUnderBehandling() } returns true
+                    every { status } returns Status.UNDER_BEHANDLING
+                    every { type } returns OppgaveType.AKTIVITETSPLIKT
+                },
+            )
+
+        assertThrows<HarOppfoelgingsOppgaveUnderbehandling> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
+        }
+
+        verify(exactly = 1) {
+            aktivitetspliktService.harVarigUnntak(sak.id)
+            oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT))
+        }
+    }
+
+    @Test
+    fun `Kan ikke opprette oppfølgingsoppgave hvis det ikke finnes en iverksatt behandling`() {
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT)) } returns
+            listOf(
+                mockk {
+                    every { erUnderBehandling() } returns false
+                    every { status } returns Status.FERDIGSTILT
+                    every { type } returns OppgaveType.AKTIVITETSPLIKT
+                },
+            )
+        every { behandlingService.hentSisteIverksatte(sak.id) } returns null
+
+        assertThrows<ManglerIverksattBehandling> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
+        }
+
+        verify(exactly = 1) {
+            aktivitetspliktService.harVarigUnntak(sak.id)
+            oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT))
+            behandlingService.hentSisteIverksatte(sak.id)
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(VurderingType::class)
+    fun `Kan opprette oppfølgingsoppgave`(vurderingType: VurderingType) {
+        val oppgaveType =
+            when (vurderingType) {
+                VurderingType.SEKS_MAANEDER -> OppgaveType.AKTIVITETSPLIKT
+                VurderingType.TOLV_MAANEDER -> OppgaveType.AKTIVITETSPLIKT_12MND
+            }
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(oppgaveType)) } returns
+            listOf(
+                mockk {
+                    every { erUnderBehandling() } returns false
+                    every { status } returns Status.FERDIGSTILT
+                    every { type } returns oppgaveType
+                },
+            )
+
+        val sisteIverksatteBehandlingId = UUID.randomUUID()
+        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+            mockk {
+                every { id } returns sisteIverksatteBehandlingId
+            }
+
+        val oppgaveId = UUID.randomUUID()
+        every {
+            oppgaveService.opprettOppgave(
+                sakId = sak.id,
+                referanse = sisteIverksatteBehandlingId.toString(),
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = oppgaveType,
+                merknad = any(),
+                frist = any(),
+            )
+        } returns
+            mockk {
+                every { id } returns oppgaveId
+            }
+
+        val hentetOppgaveId = service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(vurderingType, sak.id))
+        hentetOppgaveId shouldBe oppgaveId
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                sakId = sak.id,
+                referanse = sisteIverksatteBehandlingId.toString(),
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = oppgaveType,
+                merknad = any(),
+                frist = any(),
+            )
+            aktivitetspliktService.harVarigUnntak(sak.id)
+            oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(oppgaveType))
+            behandlingService.hentSisteIverksatte(sak.id)
+        }
     }
 
     @Test

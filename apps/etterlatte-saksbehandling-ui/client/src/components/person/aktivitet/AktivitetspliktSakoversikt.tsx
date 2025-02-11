@@ -1,7 +1,7 @@
 import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
-import { BodyShort, Box, Heading, Label, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, Label, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitspliktVurderingForSak } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
@@ -77,6 +77,11 @@ export const AktivitetspliktSakoversikt = ({
           </>
         ),
       })}
+
+      <Box>
+        <Button>Opprett 6 månderers oppfølgingsoppgave</Button>
+        <Button>Opprett 6 månderers oppfølgingsoppgave</Button>
+      </Box>
     </Box>
   )
 }

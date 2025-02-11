@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -23,16 +24,19 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 enum class AktivitetspliktOppgaveToggles(
@@ -45,6 +49,11 @@ enum class AktivitetspliktOppgaveToggles(
     override fun key(): String = key
 }
 
+data class OppfoelgingsOppgavFerdigstilt(
+    val erFerdigstilt: Boolean,
+    val oppgaveType: OppgaveType,
+)
+
 class AktivitetspliktOppgaveService(
     private val aktivitetspliktService: AktivitetspliktService,
     private val oppgaveService: OppgaveService,
@@ -55,16 +64,75 @@ class AktivitetspliktOppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    private fun hentSistEndretAktivitetspliktSomErRelevantForBrev(
-        brevdata: AktivitetspliktInformasjonBrevdata?,
-        vurderinger: AktivitetspliktVurdering?,
-    ): Tidspunkt? =
-        listOfNotNull(
-            brevdata?.kilde?.tidspunkt,
-            vurderinger?.aktivitet?.maxOfOrNull {
-                it.endret.tidspunkt
-            },
-        ).maxOrNull()
+    fun hentOppfoelgingsoppgaver(sakId: SakId): List<OppfoelgingsOppgavFerdigstilt> {
+        val oppgaverForSak =
+            oppgaveService.hentOppgaverForSakAvType(
+                sakId,
+                listOf(OppgaveType.AKTIVITETSPLIKT, OppgaveType.AKTIVITETSPLIKT_12MND),
+            )
+
+        return oppgaverForSak.map { OppfoelgingsOppgavFerdigstilt(it.erFerdigstilt(), it.type) }
+    }
+
+    fun opprettOppfoelgingsoppgave(request: OpprettOppfoelgingsoppgave): UUID {
+        val sakId = request.sakId
+        val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
+
+        if (sak.sakType == SakType.BARNEPENSJON) {
+            throw SakErIKkeOmstilling("Sak er ikke omstillingsstønad. sakid=$sakId")
+        }
+        if (aktivitetspliktService.harVarigUnntak(sakId)) {
+            throw HarVarigUnntak("Har varig unntak i sak. sakid=$sakId")
+        }
+
+        val oppgaveType =
+            when (request.type) {
+                VurderingType.SEKS_MAANEDER -> OppgaveType.AKTIVITETSPLIKT
+                VurderingType.TOLV_MAANEDER -> OppgaveType.AKTIVITETSPLIKT_12MND
+            }
+        val oppgaverForSak = oppgaveService.hentOppgaverForSakAvType(sakId, listOf(oppgaveType))
+
+        val harOppfoelgingsOppgaveUnderbehandling =
+            oppgaverForSak.filter {
+                it.erUnderBehandling() ||
+                    it.status == no.nav.etterlatte.libs.common.oppgave.Status.AVBRUTT
+            }
+        // TODO: må sjekke om avbrutt gir mening, kan ikke huske at vi satt noen til det i flyten :O
+
+        if (harOppfoelgingsOppgaveUnderbehandling.isNotEmpty()) {
+            throw HarOppfoelgingsOppgaveUnderbehandling(
+                "Det finnes allerede en oppgave som ikke er ferdigbehandlet for denne saken. Sakid=$sakId",
+            )
+        }
+
+        val sisteIverksatte =
+            behandlingService.hentSisteIverksatte(sakId)
+                ?: throw ManglerIverksattBehandling("Har ingen iverksatt behandling for sak. Sakid=$sakId")
+
+        // Dette er de samme som beskrivelse i de korresponderende jobbtypene OMS_DOED_6/12MND
+        val merknad =
+            when (request.type) {
+                VurderingType.SEKS_MAANEDER -> "Vurdering av aktivitetsplikt ved 6 måneder"
+                VurderingType.TOLV_MAANEDER -> "Vurdering av aktivitetsplikt ved 12 måneder"
+            }
+
+        val opprettetOppfoelgingsoppgave =
+            oppgaveService.opprettOppgave(
+                sakId = sakId,
+                referanse = sisteIverksatte.id.toString(),
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = oppgaveType,
+                merknad = merknad,
+                frist =
+                    LocalDate
+                        .now()
+                        .plusMonths(2)
+                        .atStartOfDay()
+                        .toTidspunkt(),
+            )
+
+        return opprettetOppfoelgingsoppgave.id
+    }
 
     fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktOppgaveVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
@@ -99,6 +167,17 @@ class AktivitetspliktOppgaveService(
             vurdering = vurderinger,
         )
     }
+
+    private fun hentSistEndretAktivitetspliktSomErRelevantForBrev(
+        brevdata: AktivitetspliktInformasjonBrevdata?,
+        vurderinger: AktivitetspliktVurdering?,
+    ): Tidspunkt? =
+        listOfNotNull(
+            brevdata?.kilde?.tidspunkt,
+            vurderinger?.aktivitet?.maxOfOrNull {
+                it.endret.tidspunkt
+            },
+        ).maxOrNull()
 
     fun lagreBrevdata(
         oppgaveId: UUID,
@@ -346,6 +425,34 @@ class AktivitetspliktOppgaveService(
     }
 }
 
+class SakErIKkeOmstilling(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "SAK_ER_IKKE_OMSTILLING",
+        detail = msg,
+    )
+
+class HarVarigUnntak(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "HAR_VARIG_UNNTAK",
+        detail = msg,
+    )
+
+class HarOppfoelgingsOppgaveUnderbehandling(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "HAR_OPPFOELGINGSOPPGAVE",
+        detail = msg,
+    )
+
+class ManglerIverksattBehandling(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "HAR_INGEN_IVERKSATT_BEHANDLING",
+        detail = msg,
+    )
+
 class FeilIOppgave(
     msg: String,
     override val cause: Throwable? = null,
@@ -467,3 +574,8 @@ enum class VurderingType {
     SEKS_MAANEDER,
     TOLV_MAANEDER,
 }
+
+data class OpprettOppfoelgingsoppgave(
+    val type: VurderingType,
+    val sakId: SakId,
+)

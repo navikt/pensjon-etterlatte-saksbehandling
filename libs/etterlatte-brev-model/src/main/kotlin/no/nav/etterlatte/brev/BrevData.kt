@@ -35,7 +35,7 @@ data class ManueltBrevMedTittelData(
     val tittel: String? = null,
 ) : BrevDataFerdigstilling
 
-// TODO
+// TODO Når alt er over på ny løsning bør gamle klasser slettes og nye renames
 
 data class BrevDataFerdigstillingNy(
     override val innhold: List<Slate.Element>,

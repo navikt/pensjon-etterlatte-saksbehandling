@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -96,7 +95,6 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                         Adressebeskyttelse(
                             hendelseId = "1",
                             fnr = fnr,
-                            adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                             endringstype = Endringstype.OPPRETTET,
                         ),
                     )
@@ -112,7 +110,6 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                         Adressebeskyttelse(
                             hendelseId = "1",
                             fnr = fnr,
-                            adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
                             endringstype = Endringstype.OPPRETTET,
                         ),
                     )
@@ -128,7 +125,6 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                         Adressebeskyttelse(
                             hendelseId = "1",
                             fnr = fnr,
-                            adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
                             endringstype = Endringstype.OPPRETTET,
                         ),
                     )

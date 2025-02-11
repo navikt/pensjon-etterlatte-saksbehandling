@@ -124,7 +124,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                         hendelseId = "1",
                         endringstype = Endringstype.OPPRETTET,
                         fnr = fnr,
-                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                     ),
                 )
             }
@@ -210,7 +209,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
@@ -287,7 +285,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
@@ -336,7 +333,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )

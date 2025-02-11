@@ -18,8 +18,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import no.nav.etterlatte.sak.Saksendring.Endringstype
-import no.nav.etterlatte.sak.Saksendring.Identtype
 import sak.KomplettSak
 import java.sql.Connection
 import java.util.UUID
@@ -40,6 +38,7 @@ class SakendringerDao(
                         endringstype = endringstype,
                         sakFoer = null,
                         sakEtter = krevIkkeNull(hentKomplettSak(sak.id)) { "Sak med ID ${sak.id} ble ikke funnet etter oppretting" },
+                        kommentar = null,
                     ),
                 )
             }
@@ -47,6 +46,7 @@ class SakendringerDao(
     internal fun oppdaterSaker(
         sakIdList: Collection<SakId>,
         endringstype: Endringstype,
+        kommentar: String?,
         block: (connection: Connection) -> Unit,
     ) {
         val sakerFoer =
@@ -69,6 +69,7 @@ class SakendringerDao(
                     endringstype,
                     sakerFoer.singleOrNull { it.id == sakEtter.id },
                     sakEtter,
+                    kommentar,
                 ),
             )
         }
@@ -77,8 +78,9 @@ class SakendringerDao(
     internal fun oppdaterSak(
         id: SakId,
         endringstype: Endringstype,
+        kommentar: String? = null,
         block: (connection: Connection) -> Unit,
-    ) = oppdaterSaker(listOf(id), endringstype, block)
+    ) = oppdaterSaker(listOf(id), endringstype, kommentar, block)
 
     internal fun hentKomplettSak(sakId: SakId): KomplettSak? =
         connectionAutoclosing.hentConnection { connection ->
@@ -120,6 +122,7 @@ class SakendringerDao(
                             tidspunkt = getTidspunkt("tidspunkt"),
                             ident = getString("ident"),
                             identtype = enumValueOf(getString("identtype")),
+                            kommentar = getString("kommentar"),
                         )
                     }
             }
@@ -134,8 +137,8 @@ class SakendringerDao(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO saksendring(id, sak_id, endringstype, foer, etter, tidspunkt, ident, identtype)
-                        VALUES(?::UUID, ?, ?, ?::JSONB, ?::JSONB, ?, ?, ?)
+                        INSERT INTO saksendring(id, sak_id, endringstype, foer, etter, tidspunkt, ident, identtype, kommentar)
+                        VALUES(?::UUID, ?, ?, ?::JSONB, ?::JSONB, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setObject(1, saksendring.id)
@@ -146,6 +149,7 @@ class SakendringerDao(
                 statement.setTidspunkt(6, saksendring.tidspunkt)
                 statement.setString(7, saksendring.ident)
                 statement.setString(8, saksendring.identtype.name)
+                statement.setString(9, saksendring.kommentar)
 
                 statement.executeUpdate()
             }
@@ -156,6 +160,7 @@ class SakendringerDao(
         endringstype: Endringstype,
         sakFoer: KomplettSak?,
         sakEtter: KomplettSak,
+        kommentar: String?,
     ): Saksendring {
         val appUser = Kontekst.get().AppUser
 
@@ -171,6 +176,7 @@ class SakendringerDao(
                     is SaksbehandlerMedEnheterOgRoller -> Identtype.SAKSBEHANDLER
                     else -> Identtype.GJENNY
                 },
+            kommentar = kommentar,
         )
     }
 }

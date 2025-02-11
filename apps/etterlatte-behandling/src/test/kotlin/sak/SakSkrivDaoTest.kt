@@ -603,8 +603,8 @@ internal class SakSkrivDaoTest(
         with(endringForSak) {
             foer shouldBe null
             etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
-            endringstype shouldBe Saksendring.Endringstype.OPPRETT_SAK
-            identtype shouldBe Saksendring.Identtype.SAKSBEHANDLER
+            endringstype shouldBe Endringstype.OPPRETT_SAK
+            identtype shouldBe Identtype.SAKSBEHANDLER
             ident shouldBe "Børre"
             assertTrue(tidspunkt.isAfter(Tidspunkt.now().minus(2, ChronoUnit.SECONDS)))
             assertTrue(tidspunkt.isBefore(Tidspunkt.now()))

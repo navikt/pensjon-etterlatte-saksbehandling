@@ -450,6 +450,7 @@ internal class ApplicationContext(
             statistikkKafkaProducer = behandlingsHendelser,
             oppgaveService = oppgaveService,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
+            featureToggleService = featureToggleService,
         )
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
@@ -481,6 +482,7 @@ internal class ApplicationContext(
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagsService,
@@ -571,6 +573,7 @@ internal class ApplicationContext(
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
+            aktivitetspliktService,
             saksbehandlerService,
         )
 
@@ -650,7 +653,6 @@ internal class ApplicationContext(
             aktivitetspliktBrevDao = aktivitetspliktBrevDao,
             brevApiKlient = brevApiKlient,
             behandlingService = behandlingService,
-            unleashFeatureToggleService = featureToggleService,
         )
 
     // Jobs

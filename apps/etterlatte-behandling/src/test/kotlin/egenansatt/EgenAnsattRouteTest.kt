@@ -240,7 +240,6 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )

@@ -683,6 +683,8 @@ internal class BehandlingFactoryTest {
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any()) } just runs
 
+        every { oppgaveService.hentOppgaverForSak(any(), any()) } returns emptyList()
+
         val opprettetBehandling =
             behandlingFactory.opprettOmgjoeringAvslag(
                 sak.id,
@@ -762,6 +764,8 @@ internal class BehandlingFactoryTest {
             )
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any()) } just runs
+
+        every { oppgaveService.hentOppgaverForSak(any(), any()) } returns emptyList()
 
         val opprettetBehandling =
             behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false))

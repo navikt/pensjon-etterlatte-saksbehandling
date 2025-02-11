@@ -49,7 +49,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
     fun shutdown() = afterAll()
 
     @Test
-    fun `kan hente oppgaver fra referanse`() {
+    fun `Kan hente oppgaver fra referanse`() {
         testApplication {
             val client =
                 runServerWithModule(mockOAuth2Server) {
@@ -100,7 +100,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
 
             // Støtter deserialisering av liste og godtar saksbehandler
             client
-                .get("oppgaver/referanse/${oppgave.referanse}") {
+                .get("api/oppgaver/referanse/${oppgave.referanse}") {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }.let {

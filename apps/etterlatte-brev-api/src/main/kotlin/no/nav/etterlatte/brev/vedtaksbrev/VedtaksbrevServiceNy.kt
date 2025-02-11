@@ -175,7 +175,7 @@ class VedtaksbrevServiceNy(
             )
         }
 
-        val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent, _, brevInnholdData) = brevRequest
+        val (spraak, sak, _, soeker, _, verge, saksbehandlerIdent, attestantIdent, _, brevInnholdData) = brevRequest
 
         val brevKode = brevInnholdData.brevKode
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
@@ -203,12 +203,11 @@ class VedtaksbrevServiceNy(
             db.oppdaterPayload(brevId, brevinnhold.payload, bruker)
         }
 
-        /* TODO vedlegg er ikke redigerbare for tilbakereving?
+        /* TODO Ta stilling til disse ved implementasjon av ny tilfeller enn tilbakekreving
         if (innholdVedlegg != null) {
             db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
         }
 
-        // TODO kan brevkode endre seg?
         if (opprinneligBrevkoder != brevkode) {
             db.oppdaterBrevkoder(brevId, brevkode)
             db.oppdaterTittel(brevId, brevinnhold.tittel, bruker)

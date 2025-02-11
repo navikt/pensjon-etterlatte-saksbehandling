@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.ApplicationContext
@@ -48,6 +49,7 @@ abstract class BehandlingIntegrationTest {
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
         brevApiKlient: BrevApiKlient? = null,
+        brevKlient: BrevKlient? = null,
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
@@ -110,6 +112,7 @@ abstract class BehandlingIntegrationTest {
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
+                brevKlient = brevKlient ?: BrevKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingKlient = tilbakekrevingKlient ?: TilbakekrevingKlientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
@@ -118,7 +121,6 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
-                brevKlient = BrevKlientTest(),
             )
     }
 

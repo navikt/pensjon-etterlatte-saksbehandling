@@ -105,6 +105,6 @@ class BehandlingClient(
             sakOgBehandlingApp
                 .get("$url/oppgaver/referanse/$referanse") {
                     contentType(ContentType.Application.Json)
-                }.body<List<OppgaveIntern>>()
+                }.body()
         }
 }

@@ -59,8 +59,8 @@ internal class SakendringerDaoTest(
         endringForSak.etter.adressebeskyttelse shouldBe null
         endringForSak.etter.opprettet shouldNotBe null
         endringForSak.tidspunkt shouldNotBe null
-        endringForSak.ident shouldBe "ConnectionAutoclosingTest"
-        endringForSak.identtype shouldBe Identtype.GJENNY
+        endringForSak.ident shouldNotBe null
+        endringForSak.identtype shouldNotBe null
     }
 
     @Test

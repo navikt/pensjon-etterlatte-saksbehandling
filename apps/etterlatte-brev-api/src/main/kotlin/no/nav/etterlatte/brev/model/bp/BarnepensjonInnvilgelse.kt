@@ -12,6 +12,7 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.kodeverk.LandDto
@@ -31,6 +32,7 @@ data class BarnepensjonInnvilgelse(
     val erMigrertYrkesskade: Boolean,
     val erSluttbehandling: Boolean,
     val erEtterbetaling: Boolean,
+    val datoVedtakOmgjoering: LocalDate?,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -48,6 +50,7 @@ data class BarnepensjonInnvilgelse(
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
             landKodeverk: List<LandDto>,
+            klage: Klage?,
         ): BarnepensjonInnvilgelse =
             BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
@@ -65,6 +68,7 @@ data class BarnepensjonInnvilgelse(
                     },
                 erSluttbehandling = erSluttbehandling,
                 erEtterbetaling = etterbetaling != null,
+                datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
             )
     }
 }

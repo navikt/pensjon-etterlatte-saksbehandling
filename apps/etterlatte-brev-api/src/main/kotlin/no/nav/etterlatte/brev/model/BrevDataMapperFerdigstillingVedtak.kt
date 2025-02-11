@@ -28,6 +28,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseForeldreloes
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOmregnetNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoer
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurdering
+import no.nav.etterlatte.brev.model.bp.datoVedtakOmgjoering
 import no.nav.etterlatte.brev.model.klage.AvvistKlageFerdigData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjusteringVedtak
@@ -123,6 +124,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         loependeIPesys,
                         avdoede,
                         systemkilde,
+                        klage,
                     )
 
                 BP_AVSLAG ->
@@ -151,6 +153,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         vedtakType!!,
                         avdoede,
                         utlandstilknytningType,
+                        klage,
                     )
 
                 OMS_REVURDERING ->
@@ -252,6 +255,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 loependeIPesys,
                 avdoede,
                 systemkilde,
+                null,
             )
         } else {
             BarnepensjonOmregnetNyttRegelverk.fra(
@@ -305,13 +309,6 @@ class BrevDataMapperFerdigstillingVedtak(
 
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
 
-        val datoVedtakOmgjoering =
-            klage
-                ?.formkrav
-                ?.formkrav
-                ?.vedtaketKlagenGjelder
-                ?.datoAttestert
-                ?.toLocalDate()
         BarnepensjonRevurdering.fra(
             innholdMedVedlegg,
             utbetalingsinfo.await(),
@@ -324,7 +321,7 @@ class BrevDataMapperFerdigstillingVedtak(
             revurderingaarsak,
             erForeldreloes,
             avdoede,
-            datoVedtakOmgjoering,
+            klage?.datoVedtakOmgjoering(),
             erMigrertYrkesskade.await(),
             landKodeverk.await(),
         )
@@ -340,6 +337,7 @@ class BrevDataMapperFerdigstillingVedtak(
         loependeIPesys: Boolean,
         avdoede: List<Avdoed>,
         systemkilde: Vedtaksloesning,
+        klage: Klage?,
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
@@ -372,6 +370,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
                 erSluttbehandling = behandling.erSluttbehandling,
                 landKodeverk = landKodeverk,
+                klage = klage,
             )
         } else {
             BarnepensjonInnvilgelse.fra(
@@ -387,6 +386,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
                 erSluttbehandling = behandling.erSluttbehandling,
                 landKodeverk = landKodeverk,
+                klage = klage,
             )
         }
     }
@@ -431,6 +431,7 @@ class BrevDataMapperFerdigstillingVedtak(
         vedtakType: VedtakType,
         avdoede: List<Avdoed>,
         utlandstilknytningType: UtlandstilknytningType?,
+        klage: Klage?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -458,6 +459,7 @@ class BrevDataMapperFerdigstillingVedtak(
             utlandstilknytningType,
             behandling.await(),
             land.await(),
+            klage,
         )
     }
 
@@ -498,14 +500,6 @@ class BrevDataMapperFerdigstillingVedtak(
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
         val land = async { behandlingService.hentLand(bruker) }
 
-        val datoVedtakOmgjoering =
-            klage
-                ?.formkrav
-                ?.formkrav
-                ?.vedtaketKlagenGjelder
-                ?.datoAttestert
-                ?.toLocalDate()
-
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
             avkortingsinfo.await(),
@@ -513,7 +507,7 @@ class BrevDataMapperFerdigstillingVedtak(
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
             revurderingaarsak,
             krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
-            datoVedtakOmgjoering,
+            klage?.datoVedtakOmgjoering(),
             utlandstilknytningType,
             behandling,
             land.await(),

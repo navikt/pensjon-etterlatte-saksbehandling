@@ -28,9 +28,17 @@ export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse
 export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/behandling/${behandlingId}/vedtak/ferdigstill`, {})
 
-export const opprettVedtaksbrev = async (args: { sakId: number; behandlingId: string }): Promise<ApiResponse<IBrev>> =>
-  //apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
-  apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+export const opprettVedtaksbrev = async (args: {
+  sakId: number
+  behandlingId: string
+  tilbakekrevingBrev: boolean
+}): Promise<ApiResponse<IBrev>> => {
+  if (args.tilbakekrevingBrev) {
+    // TODO midlertidig - skal hånderes backend på sikt
+    return apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+  }
+  return apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+}
 
 export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>
   apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, {})
@@ -70,7 +78,7 @@ export const oppdaterSpraak = async (args: {
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${args.brevId}/spraak?sakId=${args.sakId}`, { spraak: args.spraak })
 
-// TODO
+// TODO ikke impl
 export const slettBrev = async (args: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.delete(`/brev/${args.brevId}?sakId=${args.sakId}`)
 
@@ -82,7 +90,7 @@ export const genererPdf = async (props: {
   tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<ArrayBuffer>> => {
   if (props.tilbakekrevingBrev) {
-    // TODO
+    // TODO midlertidig - skal hånderes backend på sikt
     return apiClient.get(
       `/behandling/brev/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}&sakId=${props.sakId}`
     )
@@ -115,7 +123,7 @@ export const tilbakestillManuellPayload = async (props: {
   tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<any>> => {
   if (props.tilbakekrevingBrev) {
-    // TODO
+    // TODO midlertidig - skal hånderes backend på sikt
     return apiClient.put(
       `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}`,
       {}

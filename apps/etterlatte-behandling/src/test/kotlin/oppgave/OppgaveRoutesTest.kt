@@ -98,7 +98,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                         lestOppgave
                     }
 
-            // Støtter deserialisering av liste og godtar saksbehandler
+            // Støtter deserialisering av liste og godtar saksbehandler(obs prefikset api)
             client
                 .get("api/oppgaver/referanse/${oppgave.referanse}") {
                     addAuthToken(tokenSaksbehandler)

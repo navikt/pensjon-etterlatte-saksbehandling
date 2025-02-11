@@ -116,7 +116,6 @@ class VedtaksbrevServiceNy(
 
         val brevInnholdData = utledBrevInnholdData(brev, brevRequest)
 
-        // TODO Må dette hentes på nytt ved forhåndsvisning? Det kan endre seg?
         val avsender =
             utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
 

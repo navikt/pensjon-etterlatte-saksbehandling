@@ -52,7 +52,6 @@ class BrevService(
                 ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
         val saksbehandlerident: String = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
 
-        // TODO skal kun lagring skje ved ferdigstillin? i så fall kan dette flyttes til ferdigstillinskode?
         val skalLagrePdf =
             if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
                 logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (behandlingId=$behandlingId)")

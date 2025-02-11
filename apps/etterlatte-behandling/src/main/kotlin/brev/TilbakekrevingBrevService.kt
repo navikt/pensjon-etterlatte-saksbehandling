@@ -120,7 +120,7 @@ class TilbakekrevingBrevService(
                 }
             val grunnlagDef =
                 async {
-                    grunnlagKlient.hentGrunnlagForSak(sak.id, bruker) // TODO må være hentGrunnlag for vanlig behandling
+                    grunnlagKlient.hentGrunnlagForSak(sak.id, bruker)
                 }
 
             // TODO trenger vi egt async?

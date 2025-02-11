@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brukerdialog.soeknad.client
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -13,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -102,9 +104,12 @@ class BehandlingClient(
 
     fun finnOppgaverForReferanse(referanse: String): List<OppgaveIntern> =
         runBlocking {
-            sakOgBehandlingApp
-                .get("$url/oppgaver/referanse/$referanse") {
-                    contentType(ContentType.Application.Json)
-                }.body<List<OppgaveIntern>>()
+            val resp =
+                sakOgBehandlingApp
+                    .get("$url/oppgaver/referanse/$referanse") {
+                        contentType(ContentType.Application.Json)
+                    }
+            val anylol = resp.body<JsonNode>().toString()
+            deserialize(anylol)
         }
 }

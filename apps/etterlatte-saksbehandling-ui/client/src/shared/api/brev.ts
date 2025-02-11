@@ -78,7 +78,6 @@ export const oppdaterSpraak = async (args: {
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${args.brevId}/spraak?sakId=${args.sakId}`, { spraak: args.spraak })
 
-// TODO ikke impl
 export const slettBrev = async (args: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.delete(`/brev/${args.brevId}?sakId=${args.sakId}`)
 

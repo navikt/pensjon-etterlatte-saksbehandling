@@ -180,12 +180,12 @@ class VedtaksbrevServiceNy(
         val brevKode = brevInnholdData.brevKode
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
 
-        // val spraak = db.hentBrevInnhold(brevId)?.spraak TODO ??
+        val spraakIBrev = db.hentBrevInnhold(brevId)?.spraak ?: spraak
 
         val brevinnhold =
             BrevInnhold(
-                brevKode.titlerPaaSpraak[spraak] ?: brevKode.tittel,
-                spraak,
+                brevKode.titlerPaaSpraak[spraakIBrev] ?: brevKode.tittel,
+                spraakIBrev,
                 brevbaker.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(
                         brevKode = brevKode.redigering,
@@ -193,7 +193,7 @@ class VedtaksbrevServiceNy(
                         avsender = avsender,
                         soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
                         sakId = sak.id,
-                        spraak = spraak,
+                        spraak = spraakIBrev,
                         sakType = sak.sakType,
                     ),
                 ),
@@ -276,7 +276,7 @@ class VedtaksbrevServiceNy(
                 avsender = avsender,
                 soekerOgEventuellVerge = SoekerOgEventuellVerge(brevRequest.soeker, brevRequest.verge),
                 sakId = brevRequest.sak.id,
-                spraak = brev.spraak, // TODO godt nok?,
+                spraak = brev.spraak,
                 sakType = brevRequest.sak.sakType,
             )
         return brevbaker.genererPdf(brev.id, brevbakerRequest)

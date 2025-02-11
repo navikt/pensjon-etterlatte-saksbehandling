@@ -1,6 +1,6 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
+
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper

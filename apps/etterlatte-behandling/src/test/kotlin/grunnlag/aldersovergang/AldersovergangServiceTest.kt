@@ -1,11 +1,9 @@
-package grunnlag.aldersovergang
+package no.nav.etterlatte.grunnlag.aldersovergang
 
-import grunnlag.GrunnlagDbExtension
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
+import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.insert
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType

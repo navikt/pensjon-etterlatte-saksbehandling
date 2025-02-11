@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -16,8 +16,6 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.grunnlag.GrunnlagServiceImpl
-import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken

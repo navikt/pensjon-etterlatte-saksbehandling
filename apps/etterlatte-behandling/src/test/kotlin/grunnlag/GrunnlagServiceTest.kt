@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -13,12 +13,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
-import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
-import no.nav.etterlatte.grunnlag.GrunnlagHenter
-import no.nav.etterlatte.grunnlag.GrunnlagServiceImpl
-import no.nav.etterlatte.grunnlag.HentetGrunnlag
-import no.nav.etterlatte.grunnlag.MismatchPersongalleri
-import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Persongalleri

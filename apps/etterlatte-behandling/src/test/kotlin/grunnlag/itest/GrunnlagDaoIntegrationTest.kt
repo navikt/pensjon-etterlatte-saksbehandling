@@ -1,9 +1,7 @@
-package grunnlag.itest
+package no.nav.etterlatte.grunnlag.itest
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import grunnlag.GrunnlagDbExtension
-import grunnlag.lagGrunnlagsopplysning
 import io.mockk.clearAllMocks
 import io.mockk.spyk
 import io.mockk.verify
@@ -12,7 +10,9 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
+import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.grunnlag.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype

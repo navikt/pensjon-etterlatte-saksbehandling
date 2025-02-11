@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 import no.nav.etterlatte.GenerellDatabaseExtension
 import no.nav.etterlatte.ResetDatabaseStatement

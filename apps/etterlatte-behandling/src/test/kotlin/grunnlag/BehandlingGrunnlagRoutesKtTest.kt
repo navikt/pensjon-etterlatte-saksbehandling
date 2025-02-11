@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
@@ -22,8 +22,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -80,8 +78,6 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
-
-//        coVerify(exactly = 1) { behandlingKlient wasNot Called }
     }
 
     @Test

@@ -1,7 +1,6 @@
-package grunnlag.aldersovergang
+package no.nav.etterlatte.grunnlag.aldersovergang
 
 import com.fasterxml.jackson.databind.node.TextNode
-import grunnlag.GrunnlagDbExtension
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -13,10 +12,8 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
-import no.nav.etterlatte.grunnlag.aldersovergang.aldersovergangRoutes
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken

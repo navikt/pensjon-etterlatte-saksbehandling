@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -20,8 +20,6 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
-import no.nav.etterlatte.grunnlag.GrunnlagServiceImpl
-import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken

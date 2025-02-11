@@ -291,7 +291,7 @@ class VedtaksbrevKanIkkeSlettes(
 class UgyldigAntallMottakere :
     UgyldigForespoerselException(
         code = "FOR_MANGE_MOTTAKERE",
-        detail = "Ugyldig antall mottakere på brevet. Må ma minst 1 og maks 2 mottakere per brev (hoved og kopi).",
+        detail = "Brevet må ha minst 1, maks 2 mottakere.",
     )
 
 class UgyldigMottakerKanIkkeFerdigstilles(

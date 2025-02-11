@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
@@ -379,7 +378,6 @@ internal class PersonHendelseFordelerTest {
                         hendelseId = personHendelse.hendelseId,
                         endringstype = OPPRETTET,
                         fnr = personHendelse.personidenter.first(),
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
                     ),
             )
 

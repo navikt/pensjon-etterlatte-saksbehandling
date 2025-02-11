@@ -7,7 +7,10 @@ const initialState: IAktivitetspliktVurderingNyDto = { aktivitet: [], unntak: []
 export const setVurderingBehandling = createAction<IAktivitetspliktVurderingNyDto>('set/IAktivitetspliktVurderingNyDto')
 
 export const aktivitetspliktBehandlingReducer = createReducer(initialState, (builder) => {
-  builder.addCase(setVurderingBehandling, (_, action) => action.payload)
+  builder.addCase(setVurderingBehandling, (_, action) => ({
+    aktivitet: action.payload.aktivitet,
+    unntak: action.payload.unntak,
+  }))
 })
 
 export function useAktivitetspliktBehandlingState(): IAktivitetspliktVurderingNyDto {

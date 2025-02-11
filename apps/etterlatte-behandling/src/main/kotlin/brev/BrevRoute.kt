@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
@@ -22,64 +23,68 @@ fun Route.brevRoute(service: BrevService) {
 
     route("api/behandling/brev/{$BEHANDLINGID_CALL_PARAMETER}/vedtak") {
         post {
-            // TODO tilgangsjekk?
-            logger.info("Oppretter vedtaksbrev for tilbakekreving behandling (sakId=$sakId, behandlingId=$behandlingId)")
+            kunSkrivetilgang {
+                logger.info("Oppretter vedtaksbrev for tilbakekreving behandling (sakId=$sakId, behandlingId=$behandlingId)")
 
-            measureTimedValue {
-                service.opprettVedtaksbrev(behandlingId, sakId, brukerTokenInfo)
-            }.let { (brev, varighet) ->
-                logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
-                call.respond(HttpStatusCode.Created, brev)
+                measureTimedValue {
+                    service.opprettVedtaksbrev(behandlingId, sakId, brukerTokenInfo)
+                }.let { (brev, varighet) ->
+                    logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(HttpStatusCode.Created, brev)
+                }
             }
         }
 
         get("pdf") {
-            // TODO tilgangsjekk?
-            val brevId =
-                krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
-                    "Kan ikke generere PDF uten brevId"
-                }
-            logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
+            kunSkrivetilgang {
+                val brevId =
+                    krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                        "Kan ikke generere PDF uten brevId"
+                    }
+                logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
 
-            measureTimedValue {
-                service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
-            }.let { (pdf, varighet) ->
-                logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
-                call.respond(pdf)
+                measureTimedValue {
+                    service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
+                }.let { (pdf, varighet) ->
+                    logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(pdf)
+                }
             }
         }
 
         post("ferdigstill") {
-            // TODO tilgangsjekk?
-            logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
-            measureTimedValue {
-                service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
-            }.also { (_, varighet) ->
-                logger.info("Ferdigstilling av vedtaksbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
-                call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
+                measureTimedValue {
+                    service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                }.also { (_, varighet) ->
+                    logger.info("Ferdigstilling av vedtaksbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 
         put("tilbakestill") {
-            // TODO tilgangsjekk?
-            val brevId =
-                krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
-                    "Kan ikke tilbaketille PDF uten brevId"
-                }
-            logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
+            kunSkrivetilgang {
+                val brevId =
+                    krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                        "Kan ikke tilbaketille PDF uten brevId"
+                    }
+                logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
 
-            measureTimedValue {
-                service.tilbakestillVedtaksbrev(brevId, behandlingId, sakId, brukerTokenInfo)
-            }.let { (brevPayload, varighet) ->
-                logger.info(
-                    "Oppretting av nytt innhold til brev (id=$brevId) tok ${
-                        varighet.toString(
-                            DurationUnit.SECONDS,
-                            2,
-                        )
-                    }",
-                )
-                call.respond(brevPayload)
+                measureTimedValue {
+                    service.tilbakestillVedtaksbrev(brevId, behandlingId, sakId, brukerTokenInfo)
+                }.let { (brevPayload, varighet) ->
+                    logger.info(
+                        "Oppretting av nytt innhold til brev (id=$brevId) tok ${
+                            varighet.toString(
+                                DurationUnit.SECONDS,
+                                2,
+                            )
+                        }",
+                    )
+                    call.respond(brevPayload)
+                }
             }
         }
     }

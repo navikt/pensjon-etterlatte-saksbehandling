@@ -104,7 +104,7 @@ class VedtaksbrevServiceNy(
                 brevkoder = brevKode,
             )
 
-        return db.opprettBrev(nyttBrev, bruker)
+        return db.opprettBrev(nyttBrev, bruker, true)
     }
 
     suspend fun genererPdf(

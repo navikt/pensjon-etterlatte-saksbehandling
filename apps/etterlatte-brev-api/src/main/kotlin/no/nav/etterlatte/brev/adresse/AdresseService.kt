@@ -52,7 +52,17 @@ class AdresseService(
             // Søker er gjenlevende hvis OMS
             val gjenlevendeAdresse =
                 if (sakType == SakType.BARNEPENSJON && gjenlevende.isNotEmpty()) {
-                    hentMottakerAdresse(sakType, gjenlevende.first(), MottakerType.KOPI)
+                    hentMottakerAdresse(
+                        sakType,
+                        gjenlevende.first(),
+                        if (soekerFoedselsdato == null ||
+                            soekerFoedselsdato.hentAlder() > 18
+                        ) {
+                            MottakerType.KOPI
+                        } else {
+                            MottakerType.HOVED
+                        },
+                    )
                 } else {
                     null
                 }

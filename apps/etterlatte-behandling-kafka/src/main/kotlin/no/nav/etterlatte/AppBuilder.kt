@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
@@ -88,7 +87,6 @@ class AppBuilder(
             azureAppJwk = props.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = props.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = props.requireEnvValue(BEHANDLING_AZURE_SCOPE),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
 
@@ -101,7 +99,6 @@ class AppBuilder(
             azureAppJwk = props.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = props.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = props.requireEnvValue(scope),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
 }
 

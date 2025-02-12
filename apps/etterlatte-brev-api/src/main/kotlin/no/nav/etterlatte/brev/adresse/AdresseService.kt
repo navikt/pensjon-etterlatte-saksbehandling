@@ -40,7 +40,6 @@ class AdresseService(
         with(personerISak) {
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
 
-            // TODO: hvis BP og barn under 18 år så bør vi sjekke gjenlevende
             val soekerAdresse =
                 if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() > 18) {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.HOVED)

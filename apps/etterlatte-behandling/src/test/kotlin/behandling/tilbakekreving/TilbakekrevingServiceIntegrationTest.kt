@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingUnderBehandlingFinnesAlleredeException
+import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
@@ -43,6 +44,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
@@ -53,10 +55,15 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.toUUID30
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -83,6 +90,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private lateinit var vedtakKlient: VedtakKlient
 
     private val brevApiKlient: BrevApiKlient = mockk()
+    private val brevKlient: BrevKlient = mockk()
     private val tilbakekrevingKlient: TilbakekrevingKlient = mockk()
     private val rapid: TestProdusent<String, String> = spyk(TestProdusent())
 
@@ -118,6 +126,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         startServer(
             featureToggleService = DummyFeatureToggleService(),
             brevApiKlient = brevApiKlient,
+            brevKlient = brevKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
             testProdusent = rapid,
         )
@@ -221,7 +230,8 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         service.endreTilbakekrevingOppgaveStatus(sak.id, paaVent = true)
 
-        val oppgavePaaVent = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+        val oppgavePaaVent =
+            inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
         oppgavePaaVent.status shouldBe Status.PAA_VENT
 
         service.endreTilbakekrevingOppgaveStatus(sak.id, paaVent = false)
@@ -402,13 +412,34 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     @Test
     fun `skal fatte og attestere vedtak for tilbakekrevingsbehandling`() {
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
-        coEvery { brevApiKlient.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
+
+        coEvery { brevKlient.ferdigstillVedtaksbrev(any(), any()) } just runs
         coEvery { tilbakekrevingKlient.sendTilbakekrevingsvedtak(any(), any()) } just runs
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
         val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        coEvery { vedtakKlient.hentVedtak(any(), any()) } returns
+            VedtakDto(
+                123L,
+                tilbakekreving.id,
+                VedtakStatus.FATTET_VEDTAK,
+                VedtakSak("", SakType.OMSTILLINGSSTOENAD, sak.id),
+                VedtakType.TILBAKEKREVING,
+                VedtakFattet(
+                    "fattet",
+                    Enhetsnummer.ingenTilknytning,
+                    Tidspunkt.now(),
+                ),
+                Attestasjon(
+                    "attestert",
+                    Enhetsnummer.ingenTilknytning,
+                    Tidspunkt.now(),
+                ),
+                VedtakInnholdDto.VedtakTilbakekrevingDto(tilbakekreving.tilbakekreving.toObjectNode()),
+            )
 
         coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns
             tilbakekrevingsvedtak(saksbehandler, tilbakekreving.id, enhet)
@@ -428,7 +459,8 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, attestant.ident()) }
 
         // Attesterer vedtaket
-        val tilbakekrevingMedAttestertVedtak = runBlocking { service.attesterVedtak(tilbakekreving.id, "kommentar", attestant) }
+        val tilbakekrevingMedAttestertVedtak =
+            runBlocking { service.attesterVedtak(tilbakekreving.id, "kommentar", attestant) }
         val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
         val oppgaveFerdigstilt = inTransaction { oppgaveService.hentOppgave(oppgave.id) }
 
@@ -441,7 +473,8 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
 
             vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet)
-            brevApiKlient.ferdigstillVedtaksbrev(tilbakekreving.id, sak.id, attestant)
+            vedtakKlient.hentVedtak(tilbakekreving.id, attestant)
+            brevKlient.ferdigstillVedtaksbrev(tilbakekreving.id, attestant)
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(attestant, any())
         }
 

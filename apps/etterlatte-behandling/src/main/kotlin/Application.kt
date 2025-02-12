@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
+import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
@@ -172,6 +173,9 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         behandlingFactory = applicationContext.behandlingFactory,
     )
+
+    brevRoute(service = applicationContext.brevService)
+
     aktivitetspliktRoutes(
         aktivitetspliktService = applicationContext.aktivitetspliktService,
         aktivitetspliktOppgaveService = applicationContext.aktivitetspliktOppgaveService,
@@ -224,6 +228,17 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
     tempGrunnlagRoutes(applicationContext.tempGrunnlagKlient)
+
+/*
+    TODO 👇
+
+    route("/grunnlag") {
+        behandlingGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
+        personRoute(applicationContext.tempGrunnlagServiceProxy, applicationContext.tilgangService)
+        sakGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
+        aldersovergangRoutes(applicationContext.tempAldersovergangServiceProxy)
+    }
+*/
 }
 
 private fun Route.settOppTilganger(

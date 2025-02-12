@@ -349,6 +349,7 @@ class BrevRepository(
     fun opprettBrev(
         ulagretBrev: OpprettNyttBrev,
         bruker: BrukerTokenInfo,
+        nyBrevloesning: Boolean = false,
     ): Brev =
         ds.transaction(true) { tx ->
             val brevId =
@@ -363,6 +364,7 @@ class BrevRepository(
                             "opprettet" to ulagretBrev.opprettet.toTimestamp(),
                             "brevtype" to ulagretBrev.brevtype.name,
                             "brevkoder" to ulagretBrev.brevkoder.name,
+                            "ny_brevloesning" to nyBrevloesning,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -625,8 +627,8 @@ class BrevRepository(
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype, brevkoder) 
-            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype, :brevkoder) 
+            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype, brevkoder, ny_brevloesning) 
+            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype, :brevkoder, :ny_brevloesning) 
             ON CONFLICT DO NOTHING;
         """
 

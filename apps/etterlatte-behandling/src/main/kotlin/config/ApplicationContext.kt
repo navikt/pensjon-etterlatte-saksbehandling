@@ -83,6 +83,10 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
+import no.nav.etterlatte.brev.BrevKlient
+import no.nav.etterlatte.brev.BrevKlientImpl
+import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
@@ -96,6 +100,8 @@ import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.TempGrunnlagKlient
+import no.nav.etterlatte.grunnlag.TempGrunnlagServiceProxy
+import no.nav.etterlatte.grunnlag.aldersovergang.TempAldersovergangServiceProxy
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -261,12 +267,21 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
+    // TODO: Fjerne denne etter tabeller er opprettet i behandling
     val tempGrunnlagKlient: TempGrunnlagKlient = TempGrunnlagKlient(config, httpClient()),
+    // TODO: Ta disse i bruk
+    val tempGrunnlagServiceProxy: TempGrunnlagServiceProxy = TempGrunnlagServiceProxy(config, httpClient()),
+    val tempAldersovergangServiceProxy: TempAldersovergangServiceProxy =
+        TempAldersovergangServiceProxy(
+            config,
+            httpClient(),
+        ),
     val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val brevKlient: BrevKlient = BrevKlientImpl(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
         TilbakekrevingKlientImpl(
@@ -279,7 +294,11 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val skjermingKlient: SkjermingKlient = SkjermingKlientImpl(skjermingHttpClient(config), env.requireEnvValue(SKJERMING_URL)),
+    val skjermingKlient: SkjermingKlient =
+        SkjermingKlientImpl(
+            skjermingHttpClient(config),
+            env.requireEnvValue(SKJERMING_URL),
+        ),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
@@ -468,6 +487,7 @@ internal class ApplicationContext(
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagsService,
@@ -566,6 +586,16 @@ internal class ApplicationContext(
 
     val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
 
+    val tilbakekrevingBrevService =
+        TilbakekrevingBrevService(
+            sakService,
+            brevKlient,
+            vedtakKlient,
+            grunnlagKlientImpl,
+        )
+    val brevService =
+        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
+
     val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
@@ -575,6 +605,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
             brevApiKlient = brevApiKlient,
+            brevService = brevService,
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekrevingHendelserService,
         )
@@ -664,7 +695,13 @@ internal class ApplicationContext(
         DoedsmeldingJob(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
-            if (isProd()) Duration.of(3, ChronoUnit.MINUTES).toMillis() else Duration.of(20, ChronoUnit.MINUTES).toMillis(),
+            if (isProd()) {
+                Duration.of(3, ChronoUnit.MINUTES).toMillis()
+            } else {
+                Duration
+                    .of(20, ChronoUnit.MINUTES)
+                    .toMillis()
+            },
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(2, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,

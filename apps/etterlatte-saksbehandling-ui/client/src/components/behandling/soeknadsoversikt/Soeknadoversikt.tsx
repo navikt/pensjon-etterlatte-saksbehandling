@@ -85,6 +85,11 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         </Heading>
         {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
       </Box>
+
+      <Box paddingBlock="4 0" borderWidth="0 0 1 0" borderColor="border-subtle">
+        <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
+      </Box>
+
       <Box paddingBlock="8" paddingInline="16 8">
         {redigerbar && (
           <HStack justify="end">
@@ -95,6 +100,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             />
           </HStack>
         )}
+
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
 
         {personopplysninger && (
@@ -137,9 +143,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </Box>
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-        <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
-      </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>

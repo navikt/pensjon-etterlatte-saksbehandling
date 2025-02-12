@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.JsonValue
@@ -210,18 +211,30 @@ data class GeografiskTilknytning(
         }
 }
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Vergemaal::class, name = "Vergemaal"),
+    JsonSubTypes.Type(value = Vergemaal::class, name = "UkjentVergemaal"),
+    JsonSubTypes.Type(value = Vergemaal::class, name = "ForelderVerge"),
+)
 interface Verge {
     fun navn(): String?
+
+    val type: String
 }
 
 data class Vergemaal(
     val navn: String,
     val foedselsnummer: Folkeregisteridentifikator,
 ) : Verge {
+    override val type: String = "Vergemaal"
+
     override fun navn(): String = navn
 }
 
 class UkjentVergemaal : Verge {
+    override val type: String = "UkjentVergemaal"
+
     override fun navn(): String? = null
 }
 
@@ -229,6 +242,8 @@ data class ForelderVerge(
     val foedselsnummer: Folkeregisteridentifikator,
     val navn: String,
 ) : Verge {
+    override val type: String = "ForelderVerge"
+
     override fun navn(): String = navn
 }
 

@@ -66,14 +66,17 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
 
   if (!erOppgaveRedigerbar(oppgave?.status)) return null
 
+  const klage = mapSuccess(klageResult, (hentetKlage) => hentetKlage)
+
   useEffect(() => {
     if (oppgave.referanse) {
       fetchKlage(oppgave.referanse)
     }
-    setDisabledOpprett(false)
-  }, [oppgave.referanse])
 
-  const klage = mapSuccess(klageResult, (hentetKlage) => hentetKlage)
+    if (klage) {
+      setDisabledOpprett(finnOmgjoeringsHandlingForKlage(klage) == OmgjoerHandling.IKKE_STOETTET)
+    }
+  }, [oppgave.referanse])
 
   function opprett() {
     if (!klage) {
@@ -97,8 +100,6 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
           omgjoeringsOppgaveId: oppgave.id,
         },
       })
-    } else {
-      setDisabledOpprett(true)
     }
   }
 

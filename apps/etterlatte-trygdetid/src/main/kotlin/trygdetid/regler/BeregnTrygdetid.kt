@@ -44,8 +44,8 @@ data class TotalTrygdetidGrunnlag(
  * fordi regel DSL klarer bare tre parameter per regel.
  */
 data class TrygdetidPar<T>(
-    val nasjonal: T?,
-    val teoretisk: T?,
+    val nasjonal: T,
+    val teoretisk: T,
 )
 
 data class TrygdetidGrunnlagMedAvdoed(
@@ -189,9 +189,7 @@ val fremtidigTrygdetidFra =
         beskrivelse = "Henter ut periode for fremtidig trygdetid",
         regelReferanse = RegelReferanse(id = "REGEL-FINN-START-FREMTIDIG-TRYGDETIDSPERIODE"),
     ) benytter normalisertTrygdetidGrunnlagListe med { trygdetidPerioder ->
-        trygdetidPerioder.singleOrNull { it.type == TrygdetidType.FREMTIDIG }?.let {
-            it.periode.fra
-        }
+        trygdetidPerioder.singleOrNull { it.type == TrygdetidType.FREMTIDIG }?.periode?.fra
     }
 
 /**
@@ -232,7 +230,7 @@ val summerFaktiskNorge =
         dagerPrMaaned,
         ->
 
-        trygdetidPerioder.takeIf { it.isNotEmpty() }?.let { perioder ->
+        trygdetidPerioder.let { perioder ->
             val summert = perioder.summer(dagerPrMaaned).oppjustertMaaneder()
 
             FaktiskTrygdetid(
@@ -321,7 +319,7 @@ val nordiskEllerFireFemtedeler =
         opptjening,
         nordisk,
         ->
-        val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) * 5) < opptjening * 4
+        val mindreEnnFireFemtedelerAvOpptjeningstiden = (faktisk.antallMaaneder * 5) < opptjening * 4
         mindreEnnFireFemtedelerAvOpptjeningstiden && !nordisk
     }
 
@@ -428,7 +426,7 @@ val avrundetTrygdetid =
             TrygdetidPar(
                 nasjonal =
                     minOf(
-                        faktisk.nasjonal.verdiOrZero().plus(fremtidig?.nasjonal.verdiOrZero()).normalized().let {
+                        faktisk.nasjonal.periode.plus(fremtidig?.nasjonal.verdiOrZero()).normalized().let {
                             if (it.months >= 6) {
                                 it.years + 1
                             } else {
@@ -439,7 +437,7 @@ val avrundetTrygdetid =
                     ),
                 teoretisk =
                     minOf(
-                        faktisk.teoretisk.verdiOrZero().plus(fremtidig?.teoretisk.verdiOrZero()).normalized().let {
+                        faktisk.teoretisk.periode.plus(fremtidig?.teoretisk.verdiOrZero()).normalized().let {
                             if (it.months >= 6) {
                                 it.years + 1
                             } else {
@@ -461,8 +459,7 @@ val avrundetBroek =
         beskrivelse = "Avrunder trygdetid broek basert på måneder - maks 40 år",
         regelReferanse = RegelReferanse(id = "REGEL-AVRUNDET-PRORATA-BROEK"),
     ) benytter beregnetFaktiskTrygdetid med { faktisk ->
-        if (faktisk.nasjonal?.antallMaaneder != null &&
-            faktisk.teoretisk?.antallMaaneder != null &&
+        if (faktisk.teoretisk.antallMaaneder.toInt() != 0 &&
             faktisk.nasjonal.antallMaaneder != faktisk.teoretisk.antallMaaneder
         ) {
             IntBroek.fra(
@@ -500,12 +497,12 @@ val beregnDetaljertBeregnetTrygdetid =
         beregnetFremtidigTrygdetid og avrundetTrygdetidOgBroek med { faktisk, fremtidig, avrundet ->
 
             DetaljertBeregnetTrygdetidResultat(
-                faktiskTrygdetidNorge = faktisk.nasjonal.takeIf { !it.verdiOrZero().isZero },
-                faktiskTrygdetidTeoretisk = faktisk.teoretisk.takeIf { !it.verdiOrZero().isZero },
-                fremtidigTrygdetidNorge = fremtidig?.nasjonal.takeIf { !it.verdiOrZero().isZero },
-                fremtidigTrygdetidTeoretisk = fremtidig?.teoretisk.takeIf { !it.verdiOrZero().isZero },
-                samletTrygdetidNorge = avrundet.first.nasjonal.takeIf { it != null && it > 0 },
-                samletTrygdetidTeoretisk = avrundet.first.teoretisk.takeIf { it != null && it > 0 },
+                faktiskTrygdetidNorge = faktisk.nasjonal,
+                faktiskTrygdetidTeoretisk = faktisk.teoretisk,
+                fremtidigTrygdetidNorge = fremtidig?.nasjonal,
+                fremtidigTrygdetidTeoretisk = fremtidig?.teoretisk,
+                samletTrygdetidNorge = avrundet.first.nasjonal,
+                samletTrygdetidTeoretisk = avrundet.first.teoretisk,
                 prorataBroek = avrundet.second,
                 overstyrt = false,
                 yrkesskade = false,
@@ -539,21 +536,19 @@ val beregnDetaljertBeregnetTrygdetidMedYrkesskade =
 
 private fun FremtidigTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
 
-private fun FaktiskTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
-
 /**
  * Summer periodene fra alle trygdetid grunnlag i listen med riktig oppjustering av dager il slutt.
  */
 private fun List<TrygdetidGrunnlag>.summer(antallDagerEnMaanedTrygdetid: Int) =
     this
         .map { Period.between(it.periode.fra, it.periode.til) }
-        .reduce { acc, period ->
+        .reduceOrNull { acc, period ->
             acc.plus(period)
-        }.let {
+        }?.let {
             val dagerResterende = it.days.mod(antallDagerEnMaanedTrygdetid)
             val maanederOppjustert = it.months + (it.days - dagerResterende).div(antallDagerEnMaanedTrygdetid)
             Period.of(it.years, maanederOppjustert, dagerResterende).normalized()
-        }
+        } ?: Period.ZERO
 
 /**
  * Juster en periode mtp regel om redusering av fremtidig trygdetid for de som har ikke nok opptjeningstid.

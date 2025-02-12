@@ -21,7 +21,13 @@ export const UtsendingsinfoModal = ({ journalpost }: { journalpost: Journalpost 
 
   return (
     <>
-      <Button variant="tertiary" title="Utsendingsinfo" size="small" icon={<InformationSquareIcon />} onClick={open} />
+      <Button
+        variant="tertiary"
+        title="Utsendingsinfo"
+        size="small"
+        icon={<InformationSquareIcon title="Åpne utsendingsinfo" />}
+        onClick={open}
+      />
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Utsendingsinfo">
         <Modal.Header>

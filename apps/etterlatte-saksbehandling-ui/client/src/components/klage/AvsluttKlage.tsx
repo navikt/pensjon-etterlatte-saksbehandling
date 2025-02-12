@@ -45,7 +45,11 @@ export default function AvsluttKlage() {
         {!showAvsluttForm && (
           <SidebarPanel>
             <div>
-              <Button variant="secondary" icon={<TrashIcon />} onClick={() => setShowAvsluttForm(!showAvsluttForm)}>
+              <Button
+                variant="secondary"
+                icon={<TrashIcon aria-hidden />}
+                onClick={() => setShowAvsluttForm(!showAvsluttForm)}
+              >
                 Avslutt sak
               </Button>
             </div>
@@ -134,7 +138,7 @@ export default function AvsluttKlage() {
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Header>
           <Heading level="1" spacing size="medium" id="modal-heading">
-            <TrashIcon />
+            <TrashIcon aria-hidden />
             Avslutt sak
           </Heading>
         </Modal.Header>

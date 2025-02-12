@@ -57,7 +57,7 @@ export default function SluttbehandlingUtland({
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
-    hentRevurderingerForSakMedAarsakFetch({ sakId, revurderingsaarsak: Revurderingaarsak.SLUTTBEHANDLING_UTLAND })
+    hentRevurderingerForSakMedAarsakFetch({ sakId, revurderingsaarsak: Revurderingaarsak.SLUTTBEHANDLING })
   }, [])
 
   const lagreRevurderingsinfo = () => {
@@ -66,7 +66,7 @@ export default function SluttbehandlingUtland({
       lagreRevurderingsinfoApi(
         {
           behandlingId: revurderingId,
-          revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
+          revurderingInfo: { type: 'SLUTTBEHANDLING', landMedDokumenter: landMedDokumenter },
         },
         () => {
           setVisLagretOk(true)
@@ -149,7 +149,7 @@ export default function SluttbehandlingUtland({
         </ErrorSummary>
       ) : null}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
-        Mottatt krav fra utland
+        Mottatt svar fra utland
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
       {redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length ? (

@@ -13,10 +13,11 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.kodeverk.BeskrivelseDto
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -40,6 +41,7 @@ internal class BarnepensjonInnvilgetDTOTest {
             BarnepensjonInnvilgelse.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
+                        false,
                         antallBarn = 1,
                         beloep = Kroner(1234),
                         virkningsdato = LocalDate.of(2023, Month.JANUARY, 1),
@@ -58,9 +60,6 @@ internal class BarnepensjonInnvilgetDTOTest {
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
                         datoTom = LocalDate.of(2022, Month.MARCH, 31),
-                        inneholderKrav = true,
-                        frivilligSkattetrekk = true,
-                        etterbetalingPeriodeValg = EtterbetalingPeriodeValg.FRA_3_MND,
                     ),
                 trygdetid =
                     listOf(
@@ -122,6 +121,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
                 erMigrertYrkesskade = false,
                 erSluttbehandling = false,
+                landKodeverk = landKodeverk(),
             )
 
         Assertions.assertEquals(
@@ -189,6 +189,7 @@ internal class BarnepensjonInnvilgetDTOTest {
         beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
         trygdetidForIdent = "123",
         avdoedeForeldre = if (datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) null else listOf("123"),
+        harForeldreloessats = false,
     )
 
     private fun lagInnholdMedVedlegg() =
@@ -202,5 +203,15 @@ internal class BarnepensjonInnvilgetDTOTest {
             )
         })
 
-    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() = BarnepensjonBeregningsperiode.fra(this)
+    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() =
+        BarnepensjonBeregningsperiode.fra(
+            this,
+            false,
+        )
+
+    private fun landKodeverk() =
+        listOf(
+            LandDto("SWE", "2020-01-01", "2999-01-01", BeskrivelseDto("SVERIGE", "Sverige")),
+            LandDto("NOR", "2020-01-01", "2999-01-01", BeskrivelseDto("NORGE", "Norge")),
+        )
 }

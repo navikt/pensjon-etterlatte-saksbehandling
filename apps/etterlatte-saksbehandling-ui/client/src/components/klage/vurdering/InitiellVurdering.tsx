@@ -8,12 +8,12 @@ import { isPending } from '~shared/api/apiUtils'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { FieldOrNull } from '~shared/types/util'
 import { useForm } from 'react-hook-form'
 import { ButtonNavigerTilBrev } from '~components/klage/vurdering/KlageVurderingFelles'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 const getTextFromutfall = (utfall: Utfall): string => {
   switch (utfall) {
@@ -69,7 +69,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
     )
   }
 
-  const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
+  const stoetterDelvisOmgjoering = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering)
 
   return (
     <VStack gap="4" width="30rem">
@@ -79,7 +79,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
       <>
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
-            <VStack gap="4" width="30rem">
+            <VStack gap="4" width="41.5rem">
               <ControlledRadioGruppe
                 name="utfall"
                 control={control}
@@ -118,7 +118,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
             <Button
               type="button"
               size="small"
-              icon={<PencilIcon />}
+              icon={<PencilIcon aria-hidden />}
               variant="secondary"
               onClick={() => setRedigeres(true)}
             >
@@ -129,11 +129,11 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
         {klage.initieltUtfall?.utfallMedBegrunnelse?.utfall === Utfall.STADFESTE_VEDTAK && !klage.utfall && (
           <Alert variant="info">
             <Heading level="2" size="small">
-              Du må sende brev til klager
+              Informer om saksbehandlingstid
             </Heading>
             <BodyLong spacing>
-              Siden vurderingen er satt til {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]} må du opprette et manuelt
-              kvitteringsbrev til klager for å opplyse om saksbehandlingstid.
+              Siden vurderingen er satt til &quot;{teksterKlageutfall[Utfall.STADFESTE_VEDTAK].toLowerCase()}&quot; må
+              du manuelt informere klager om saksbehandlingstid hvis den går ut over 4 uker.
             </BodyLong>
             <ButtonNavigerTilBrev klage={klage} />
           </Alert>

@@ -4,6 +4,7 @@ import { TrashIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNotat: (id: number) => void }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,6 +12,8 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
   const [slettStatus, apiSlettNotat] = useApiCall(slettNotat)
 
   const slett = () => {
+    trackClick(ClickEvent.SLETT_NOTAT)
+
     apiSlettNotat(notat.id, () => {
       fjernNotat(notat.id)
     })
@@ -18,7 +21,7 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
 
   return (
     <>
-      <Button variant="danger" size="small" icon={<TrashIcon />} onClick={() => setIsOpen(true)}>
+      <Button variant="danger" size="small" icon={<TrashIcon aria-hidden />} onClick={() => setIsOpen(true)}>
         Slett
       </Button>
 
@@ -35,7 +38,7 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
               Lukk
             </Button>
 
-            <Button variant="danger" icon={<TrashIcon />} onClick={slett} loading={isPending(slettStatus)}>
+            <Button variant="danger" icon={<TrashIcon aria-hidden />} onClick={slett} loading={isPending(slettStatus)}>
               Slett
             </Button>
           </HStack>

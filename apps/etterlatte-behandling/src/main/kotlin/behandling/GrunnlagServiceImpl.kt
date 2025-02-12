@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -7,54 +8,63 @@ import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import java.time.YearMonth
 import java.util.UUID
 
 interface GrunnlagService {
+    suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
     suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun leggInnNyttGrunnlag(
         behandling: Behandling,
         persongalleri: Persongalleri,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         sakId: SakId,
         sakType: SakType,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun leggTilNyeOpplysninger(
         behandlingId: UUID,
         opplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun leggTilNyeOpplysningerBareSak(
         sakId: SakId,
         opplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun laasTilGrunnlagIBehandling(
         revurdering: Revurdering,
         forrigeBehandling: UUID,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
-    suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
+    suspend fun hentPersongalleri(sakId: SakId): Persongalleri
 
     suspend fun hentAlleSakerForPerson(fnr: String): PersonMedSakerOgRoller
 
@@ -69,26 +79,42 @@ interface GrunnlagService {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): YearMonth
+
+    suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag
 }
 
 class GrunnlagServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
 ) : GrunnlagService {
+    override suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag = grunnlagKlient.hentGrunnlagForBehandling(behandlingId, brukerTokenInfo)
+
+    override suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = grunnlagKlient.grunnlagFinnes(sakId, brukerTokenInfo)
+
+    // TODO: legg inn test for systembruker her
     override suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val grunnlagsbehov = grunnlagsbehovSak(sak, persongalleri)
+        val grunnlagsbehov = grunnlagsbehov(sak, persongalleri, brukerTokenInfo)
         grunnlagKlient.leggInnNyttGrunnlagSak(sak.id, grunnlagsbehov, brukerTokenInfo)
     }
 
     override suspend fun leggInnNyttGrunnlag(
         behandling: Behandling,
         persongalleri: Persongalleri,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val grunnlagsbehov = grunnlagsbehov(behandling, persongalleri)
+        val grunnlagsbehov = grunnlagsbehov(behandling.sak, persongalleri, brukerTokenInfo)
         grunnlagKlient.leggInnNyttGrunnlag(behandling.id, grunnlagsbehov, brukerTokenInfo)
     }
 
@@ -96,7 +122,7 @@ class GrunnlagServiceImpl(
         behandlingId: UUID,
         sakId: SakId,
         sakType: SakType,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         grunnlagKlient.oppdaterGrunnlag(
             behandlingId,
@@ -108,25 +134,21 @@ class GrunnlagServiceImpl(
     override suspend fun leggTilNyeOpplysninger(
         behandlingId: UUID,
         opplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) = grunnlagKlient.lagreNyeSaksopplysninger(behandlingId, opplysninger, brukerTokenInfo)
 
     override suspend fun leggTilNyeOpplysningerBareSak(
         sakId: SakId,
         opplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) = grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger, brukerTokenInfo)
 
-    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri =
-        grunnlagKlient
-            .hentPersongalleri(behandlingId)
-            ?.opplysning
-            ?: throw NoSuchElementException("Persongalleri mangler for behandling id=$behandlingId")
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri = grunnlagKlient.hentPersongalleri(sakId)
 
     override suspend fun laasTilGrunnlagIBehandling(
         revurdering: Revurdering,
         forrigeBehandling: UUID,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) = grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling)
 
     override suspend fun hentAlleSakerForPerson(fnr: String) = grunnlagKlient.hentPersonSakOgRolle(fnr)
@@ -143,23 +165,19 @@ class GrunnlagServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ) = grunnlagKlient.aldersovergangMaaned(sakId, sakType, brukerTokenInfo)
 
-    private fun grunnlagsbehovSak(
+    private fun grunnlagsbehov(
         sak: Sak,
         persongalleri: Persongalleri,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Opplysningsbehov =
         Opplysningsbehov(
             sakId = sak.id,
             sakType = sak.sakType,
             persongalleri = persongalleri,
-        )
-
-    private fun grunnlagsbehov(
-        behandling: Behandling,
-        persongalleri: Persongalleri,
-    ): Opplysningsbehov =
-        Opplysningsbehov(
-            sakId = behandling.sak.id,
-            sakType = behandling.sak.sakType,
-            persongalleri = persongalleri,
+            kilde =
+                when (Kontekst.get().brukerTokenInfo) {
+                    is Saksbehandler -> Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+                    else -> Grunnlagsopplysning.Gjenny(brukerTokenInfo.ident(), Tidspunkt.now())
+                },
         )
 }

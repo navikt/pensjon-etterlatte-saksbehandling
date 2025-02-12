@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { ISak, SakType } from '~shared/types/sak'
+import { ISak, ISaksendring, SakType } from '~shared/types/sak'
 import { SakMedBehandlinger } from '~components/person/typer'
 
 export interface Navkontor {
@@ -17,6 +17,16 @@ export const hentNavkontorForPerson = async (fnr: string): Promise<ApiResponse<N
 
 export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<SakMedBehandlinger>> => {
   return apiClient.post(`/personer/behandlingerforsak`, { foedselsnummer: fnr })
+}
+
+interface SisteIverksatteBehandling {
+  id: string
+}
+
+export const hentSisteIverksatteBehandlingId = async (
+  sakId: number
+): Promise<ApiResponse<SisteIverksatteBehandling>> => {
+  return apiClient.get(`/sak/${sakId}/behandlinger/sisteIverksatte`)
 }
 
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {
@@ -39,6 +49,25 @@ export const hentSakForPerson = async (args: {
   }
 }
 
-export const byttEnhetPaaSak = async (args: { sakId: number; enhet: string }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`sak/${args.sakId}/endre_enhet`, { enhet: args.enhet })
+export const byttEnhetPaaSak = async (args: {
+  sakId: number
+  enhet: string
+  kommentar?: string
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`sak/${args.sakId}/endre-enhet`, { enhet: args.enhet, kommentar: args.kommentar })
+}
+
+export const hentSaksendringer = async (sakId: number): Promise<ApiResponse<ISaksendring[]>> => {
+  return apiClient.get(`sak/${sakId}/endringer`)
+}
+
+export const oppdaterIdentPaaSak = async (args: {
+  sakId: number
+  hendelseId?: string
+  utenHendelse: boolean
+}): Promise<ApiResponse<ISak>> => {
+  return apiClient.post(`sak/${args.sakId}/oppdater-ident`, {
+    hendelseId: args.hendelseId,
+    utenHendelse: args.utenHendelse,
+  })
 }

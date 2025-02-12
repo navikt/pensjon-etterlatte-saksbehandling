@@ -1,5 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -17,12 +18,12 @@ import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
@@ -37,11 +38,13 @@ import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
+import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
@@ -49,7 +52,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import org.slf4j.Logger
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -57,18 +59,20 @@ import javax.sql.DataSource
 internal class EgenAnsattServiceTest(
     val dataSource: DataSource,
 ) {
-    private val sikkerLogg: Logger = sikkerlogger()
-
     private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
+    private lateinit var sakendringerDao: SakendringerDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
     private lateinit var sakService: SakService
     private lateinit var oppgaveService: OppgaveService
+    private lateinit var grunnlagKlient: GrunnlagKlient
     private lateinit var egenAnsattService: EgenAnsattService
+    private lateinit var oppdaterTilgangService: OppdaterTilgangService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
+    private val persongalleri = persongalleri()
 
     @BeforeAll
     fun beforeAll() {
@@ -91,11 +95,15 @@ internal class EgenAnsattServiceTest(
             mockk<GrunnlagService> {
                 coEvery { leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
                 coEvery { leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
+                coEvery { grunnlagFinnes(any(), any()) } returns false
             }
         val featureToggleService = mockk<FeatureToggleService>()
-        val skjermingKlient = mockk<SkjermingKlient>()
+        val skjermingKlient = mockk<SkjermingKlientImpl>()
+        grunnlagKlient = mockk()
+        oppdaterTilgangService = mockk()
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
         oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))
         val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
@@ -104,18 +112,20 @@ internal class EgenAnsattServiceTest(
                 SakServiceImpl(
                     sakRepo,
                     sakLesDao,
+                    sakendringerDao,
                     skjermingKlient,
                     brukerService,
                     grunnlagservice,
                     krrKlient,
                     pdlTjenesterKlient,
+                    featureToggleService,
                 ),
             )
         oppgaveService =
             spyk(
                 OppgaveService(oppgaveRepoMedSporing, sakLesDao, mockk(), hendelser),
             )
-        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, brukerService)
+        egenAnsattService = EgenAnsattService(sakService, grunnlagKlient, oppdaterTilgangService)
 
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
         val saksbehandlerMedRoller =
@@ -164,8 +174,10 @@ internal class EgenAnsattServiceTest(
             )
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
-        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
+        val bruktSak = sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
+        coEvery { grunnlagKlient.hentPersongalleri(bruktSak.id) } returns persongalleri
+        every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) } just Runs
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))
@@ -173,6 +185,7 @@ internal class EgenAnsattServiceTest(
         val egenAnsattSkjermet = EgenAnsattSkjermet(fnr, Tidspunkt.now(), true)
         egenAnsattService.haandterSkjerming(egenAnsattSkjermet)
 
-        verify { sakService.markerSakerMedSkjerming(any(), any()) }
+        verify(exactly = 1) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }
+        verify(exactly = 0) { sakService.markerSakerMedSkjerming(any(), any()) }
     }
 }

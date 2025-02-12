@@ -25,6 +25,7 @@ sealed class Revurdering(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
+    override val soeknadMottattDato: LocalDateTime?,
     open val revurderingsaarsak: Revurderingaarsak?,
     open val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val prosesstype: Prosesstype,
@@ -40,7 +41,7 @@ sealed class Revurdering(
 
     override fun begrunnelse() = begrunnelse
 
-    override fun erSluttbehandling(): Boolean = this.revurderingsaarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND
+    override fun erSluttbehandling(): Boolean = this.revurderingsaarsak == Revurderingaarsak.SLUTTBEHANDLING
 
     companion object {
         fun opprett(
@@ -53,6 +54,7 @@ sealed class Revurdering(
             virkningstidspunkt: Virkningstidspunkt?,
             utlandstilknytning: Utlandstilknytning?,
             boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
+            soeknadMottattDato: LocalDateTime? = null,
             revurderingsaarsak: Revurderingaarsak,
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning,
@@ -60,8 +62,8 @@ sealed class Revurdering(
             relatertBehandlingId: String?,
             begrunnelse: String?,
             sendeBrev: Boolean,
-            opphoerFraOgMed: YearMonth? = null,
-            tidligereFamiliepleier: TidligereFamiliepleier? = null,
+            opphoerFraOgMed: YearMonth?,
+            tidligereFamiliepleier: TidligereFamiliepleier?,
         ) = when (prosesstype) {
             Prosesstype.MANUELL ->
                 ManuellRevurdering(
@@ -74,6 +76,7 @@ sealed class Revurdering(
                     virkningstidspunkt = virkningstidspunkt,
                     utlandstilknytning = utlandstilknytning,
                     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+                    soeknadMottattDato = soeknadMottattDato,
                     revurderingsaarsak = revurderingsaarsak,
                     revurderingInfo = revurderingInfo,
                     kilde = kilde,
@@ -95,6 +98,7 @@ sealed class Revurdering(
                     virkningstidspunkt = virkningstidspunkt,
                     utlandstilknytning = utlandstilknytning,
                     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+                    soeknadMottattDato = soeknadMottattDato,
                     revurderingsaarsak = revurderingsaarsak,
                     revurderingInfo = revurderingInfo,
                     kilde = kilde,

@@ -17,7 +17,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
-import { isValid, parse } from 'date-fns'
+import { isBefore, isValid, parse, subMonths } from 'date-fns'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
@@ -46,31 +46,39 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const avdoedesDoedsdato = avdoede?.opplysning?.doedsdato
   const [aktivitetOppfolging, setAktivitetOppfolging] = useState<AktivitetspliktOppfolging>()
   const [manglerAktivitetspliktVurdering, setManglerAktivitetspliktVurdering] = useState<boolean | undefined>(undefined)
+  const [visFeilmelding, setVisFeilmelding] = useState<boolean>(false)
 
-  const [hentet, hent] = useApiCall(hentAktivitetspliktOppfolging)
+  const [hentetAktivitetspliktOppfoelgingStatus, hentAktivitetspliktOppfoelging] =
+    useApiCall(hentAktivitetspliktOppfolging)
 
   const configContext = useContext(ConfigContext)
 
   useEffect(() => {
-    hent({ behandlingId: behandling.id }, (aktivitetOppfolging) => {
+    hentAktivitetspliktOppfoelging({ behandlingId: behandling.id }, (aktivitetOppfolging) => {
       setAktivitetOppfolging(aktivitetOppfolging)
     })
   }, [])
 
   const erFerdigUtfylt = () => {
     if (manglerAktivitetspliktVurdering === undefined || manglerAktivitetspliktVurdering) {
-      setManglerAktivitetspliktVurdering(true)
+      setVisFeilmelding(true)
       return
     }
 
     next()
   }
 
+  useEffect(() => {
+    if (!manglerAktivitetspliktVurdering) {
+      setVisFeilmelding(false)
+    }
+  }, [manglerAktivitetspliktVurdering])
+
   return (
     <>
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av data',
-        apiResult: hentet,
+        apiResult: hentetAktivitetspliktOppfoelgingStatus,
       })}
 
       <Box paddingInline="16" paddingBlock="16 4">
@@ -78,7 +86,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           Oppfølging av aktivitet
         </Heading>
         <BodyShort spacing>
-          <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(avdoedesDoedsdato)}
+          <strong>Avdødeds dødsdato: </strong> {avdoedesDoedsdato ? formaterDato(avdoedesDoedsdato) : 'Fant ingen dato'}
         </BodyShort>
       </Box>
 
@@ -87,20 +95,42 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           <Heading level="1" spacing size="medium">
             Gjenlevende sin situasjon
           </Heading>
-          <BodyLong spacing>
-            Det stilles ulike krav til aktivitet utifra tid etter dødsfallet. Seks måneder etter dødsfallet må
-            gjenlevende være i minst 50 % aktivitet for å ha rett til omstillingsstønad. Videre kan det stilles krav til
-            100 % aktivitet etter 12 måneder. I visse tilfeller kan man ha rett på omstillingsstønad selv om
-            aktivitetskravet ikke er oppfylt.
-          </BodyLong>
+          <ReadMore header="Slik vurderer du gjenlevendes situasjon">
+            <BodyLong spacing>
+              Det stilles ulike krav til aktivitet basert på tiden som har gått etter dødsfallet. Seks måneder etter
+              dødsfallet må den gjenlevende være i minst 50 % aktivitet for å ha rett til omstillingsstønad. Videre kan
+              det kreves 100 % aktivitet etter tolv måneder. I enkelte tilfeller kan man likevel ha rett til
+              omstillingsstønad, selv om aktivitetskravet ikke er oppfylt.
+            </BodyLong>
+            <BodyLong spacing>
+              Selv om de første seks månedene er fritatt, er det viktig å kartlegge situasjonen tidlig for å sikre
+              riktig oppfølging og forberede brukeren på kravene som følger.
+            </BodyLong>
+          </ReadMore>
         </TekstWrapper>
 
-        {isValidDateOfDeath(avdoedesDoedsdato!!) && (
-          <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} />
+        {isValidDateOfDeath(avdoedesDoedsdato!!) && ( // https://jira.adeo.no/browse/EY-4939 todo denne valideringen burde skje et annet sted vel og si noe om den ikke er gyldig
+          <>
+            <AktivitetspliktTidslinje
+              behandling={behandling}
+              doedsdato={avdoedesDoedsdato!!}
+              sakId={behandling.sakId}
+            />
+          </>
         )}
+        {isBefore(avdoedesDoedsdato!!, subMonths(Date.now(), 4)) && (
+          <Box maxWidth="42.5rem">
+            <Alert variant="info">
+              Det har gått mer enn 4 måneder siden dødsfallet, det har derfor ikke blitt opprettet oppgave om
+              aktivtetsplikt ved 6 måneder. Vurder om du må manuelt sende informasjonsbrev og følg opp svar fra bruker.
+            </Alert>
+          </Box>
+        )}
+
         <AktivitetspliktVurdering
           behandling={behandling}
-          resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+          setManglerAktivitetspliktVurdering={setManglerAktivitetspliktVurdering}
+          doedsdato={avdoedesDoedsdato!!}
         />
 
         {aktivitetOppfolging && (
@@ -110,7 +140,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               Dette er en vurdering som ble gjort før juni 2024
             </Detail>
 
-            {isPending(hentet) ? (
+            {isPending(hentetAktivitetspliktOppfoelgingStatus) ? (
               <Spinner label="Henter data" />
             ) : (
               <>
@@ -122,38 +152,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             )}
           </div>
         )}
-
-        <TekstWrapper>
-          <Heading size="small">Oppfølging</Heading>
-          <Box paddingBlock="4">
-            <ReadMore header="Mer om oppfølging">
-              <BodyLong spacing>
-                Etterlatte skal følges opp og minnes på aktivitetskravet med informasjonsbrev rundt 4 måneder og igjen
-                rundt 10 måneder etter dødsfallet. Interne oppfølgingsoppgaver opprettes automatisk ut fra
-                dødstidspunktet, og brukers situasjon må vurderes før informasjonsbrevet sendes ut. Automatiske oppgaver
-                blir opprettet som følge av hva du registrerer om brukers situasjon.
-              </BodyLong>
-              <BodyLong spacing>
-                Det skal sendes et eget informasjonsbrev til de som ikke har aktivitetsplikt. Det opprettes en
-                automatisk oppgave for å sende ut disse brevene rundt 6 måneder etter dødsfallet.
-              </BodyLong>
-              <BodyLong spacing>
-                Er det andre grunner til at den etterlatte skal følges opp utenfor normalen, blant annet om bruker er
-                midlertidig unntatt fra aktivitetsplikten, så må du opprette oppfølgingsoppgave i Gosys.
-              </BodyLong>
-            </ReadMore>
-          </Box>
-          <Button
-            variant="secondary"
-            disabled={!redigerbar}
-            size="small"
-            as="a"
-            href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
-            target="_blank"
-          >
-            Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
-          </Button>
-        </TekstWrapper>
 
         {behandling.behandlingType === IBehandlingsType.REVURDERING && (
           <TekstWrapper>
@@ -195,11 +193,11 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
             target="_blank"
           >
-            Lag oppgave til lokalkontor <ExternalLinkIcon />
+            Lag oppgave til lokalkontor <ExternalLinkIcon aria-hidden />
           </Button>
         </TekstWrapper>
 
-        {manglerAktivitetspliktVurdering && (
+        {visFeilmelding && (
           <Alert style={{ maxWidth: '16em' }} variant="error">
             Du må fylle ut vurdering om aktivitetsplikt
           </Alert>

@@ -5,6 +5,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { NOK } from '~utils/formatering/formatering'
 import { Beregning } from '~shared/types/Beregning'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
+import { BenyttetTrygdetid } from '~components/behandling/beregne/BenyttetTrygdetid'
 
 interface Props {
   beregning: Beregning
@@ -41,7 +42,9 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
                 }`}
               </Table.DataCell>
               <Table.DataCell>Omstillingsstønad</Table.DataCell>
-              <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
+              <Table.DataCell>
+                <BenyttetTrygdetid {...beregningsperiode} />
+              </Table.DataCell>
               <Table.DataCell>
                 {beregningsperiode.broek && beregningsperiode.beregningsMetode === 'PRORATA' && (
                   <ProrataBroek broek={beregningsperiode.broek} />

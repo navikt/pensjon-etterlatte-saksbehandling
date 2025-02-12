@@ -12,8 +12,7 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkNotNullOrThrowException
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
@@ -69,6 +68,8 @@ interface GrunnlagService {
     )
 
     fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag?
+
+    fun hentPersongalleri(sakId: SakId): Persongalleri?
 
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
@@ -142,6 +143,17 @@ class RealGrunnlagService(
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
     }
 
+    override fun hentPersongalleri(sakId: SakId): Persongalleri? {
+        val persongalleriJsonNode =
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Fant ikke persongalleri i sak=$sakId")
+            return null
+        }
+        return objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
+    }
+
     override fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag? {
         val persongalleriJsonNode =
             opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, PERSONGALLERI_V1)?.opplysning
@@ -211,10 +223,10 @@ class RealGrunnlagService(
 
     private fun Persongalleri.inkluderer(it: Grunnlagsopplysning<JsonNode>) =
         when (it.opplysningType) {
-            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } ?: false
-            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } ?: false
-            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } ?: false
-            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } ?: false
+            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } == true
+            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } == true
+            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } == true
+            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } == true
             else -> false
         }
 
@@ -377,8 +389,8 @@ class RealGrunnlagService(
         )
         opplysningDao.laasGrunnlagVersjonForBehandling(skalLaasesId)
 
-        return checkNotNullOrThrowException(opplysningDao.hentBehandlingVersjon(skalLaasesId)) {
-            InternfeilException("Fant ikke låst grunnlagsversjon vi akkurat la inn :(")
+        return sjekkIkkeNull(opplysningDao.hentBehandlingVersjon(skalLaasesId)) {
+            "Fant ikke låst grunnlagsversjon vi akkurat la inn :("
         }
     }
 
@@ -625,8 +637,10 @@ private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
                 tidspunkt = this.tidspunkt,
                 detalj = this.ident,
             )
-        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
-        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Alderspensjon -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Ufoeretrygd -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
     }
 
 data class GrunnlagsopplysningerPersonPdl(

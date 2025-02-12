@@ -13,6 +13,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const NasjonalEllerUtlandRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledRadioGruppe
@@ -84,6 +85,24 @@ const SoeknadMottattDato = ({ control }: { control: Control<FilledFormData, any>
   />
 )
 
+const VedtakDato = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledDatoVelger
+    name="datoForVedtak"
+    label="Når ble vedtaket gjort?"
+    control={control}
+    errorVedTomInput="Du må velge dato for vedtaket"
+  />
+)
+
+const KlageMotattDato = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledDatoVelger
+    name="datoMottatKlage"
+    label="Når ble klagen mottatt?"
+    control={control}
+    errorVedTomInput="Du må velge når klagen ble mottatt"
+  />
+)
+
 export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
@@ -106,7 +125,9 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
   const skjemaet = watch()
 
   const opprettBrev = (formData: FilledFormData) => {
-    const brevParametre = mapFormdataToBrevParametre(formData)
+    const brevParametre = mapFormdataToBrevParametre(formData, sakType)
+
+    trackClick(ClickEvent.OPPRETT_NYTT_BREV)
 
     opprettBrevApiCall({ sakId: sakId, body: brevParametre }, (brev) => {
       setOpen(false)
@@ -120,7 +141,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
   return (
     <>
-      <Button variant="primary" icon={<DocPencilIcon />} iconPosition="right" onClick={() => setOpen(true)}>
+      <Button variant="primary" icon={<DocPencilIcon aria-hidden />} iconPosition="right" onClick={() => setOpen(true)}>
         Nytt brev
       </Button>
 
@@ -142,13 +163,14 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                 })}
               >
                 <option value={FormType.TOMT_BREV}>Manuelt brev</option>
+                <option value={FormType.KLAGE_SAKSBEHANDLINGSTID}>Klage saksbehandlingstid informasjon</option>
                 {sakType === SakType.OMSTILLINGSSTOENAD && (
                   <>
                     <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
-                      Informasjon om aktivitetsplikt ved 4 måneder
+                      Informasjon om aktivitetsplikt ved 6 måneder
                     </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND}>
-                      Informasjon om aktivitetsplikt ved 6 måneder - varig unntak
+                      Informasjon ved 6 måneder - varig unntak for aktivitetsplikt
                     </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
                       Informasjon om dødsfall
@@ -190,6 +212,13 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   </option>
                 ))}
               </Select>
+              {skjemaet.type === FormType.KLAGE_SAKSBEHANDLINGSTID && (
+                <>
+                  <NasjonalEllerUtlandRadio control={control} />
+                  <VedtakDato control={control} />
+                  <KlageMotattDato control={control} />
+                </>
+              )}
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (
                 <>
                   <Select
@@ -354,6 +383,14 @@ export type BrevParametre =
       erOver18aar: boolean
     }
   | {
+      type: FormType.KLAGE_SAKSBEHANDLINGSTID
+      spraak: Spraak
+      datoMottatKlage: Date
+      datoForVedtak: Date
+      borIUtlandet: boolean
+      sakType: SakType
+    }
+  | {
       type: FormType.TOMT_BREV
       spraak: Spraak
     }
@@ -369,6 +406,8 @@ type FilledFormData = {
   erOver18Aar?: JaNei | ''
   mottattDato?: Date
   borINorgeEllerIkkeAvtaleland?: JaNei
+  datoForVedtak?: Date
+  datoMottatKlage?: Date
 }
 
 export enum NasjonalEllerUtland {
@@ -378,6 +417,7 @@ export enum NasjonalEllerUtland {
 
 enum FormType {
   TOMT_BREV = 'TOMT_BREV',
+  KLAGE_SAKSBEHANDLINGSTID = 'KLAGE_SAKSBEHANDLINGSTID',
   OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND',
   OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND',
   OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD = 'OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD',
@@ -388,7 +428,7 @@ enum FormType {
   BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
 }
 
-function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
+function mapFormdataToBrevParametre(formdata: FilledFormData, sakType: SakType): BrevParametre {
   switch (formdata.type) {
     case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND:
       return {
@@ -449,6 +489,15 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         spraak: formdata.spraak,
         borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         erOver18aar: formdata.erOver18Aar === JaNei.JA,
+      }
+    case FormType.KLAGE_SAKSBEHANDLINGSTID:
+      return {
+        type: formdata.type,
+        spraak: formdata.spraak,
+        sakType: sakType,
+        datoForVedtak: formdata.datoForVedtak!!,
+        datoMottatKlage: formdata.datoMottatKlage!!,
+        borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
       }
     case FormType.TOMT_BREV:
       return {

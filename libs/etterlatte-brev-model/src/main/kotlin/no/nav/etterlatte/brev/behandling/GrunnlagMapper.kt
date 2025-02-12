@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -24,19 +25,15 @@ import java.time.LocalDate
 private val logger = LoggerFactory.getLogger(Grunnlag::class.java)
 
 fun Grunnlag.mapAvdoede(): List<Avdoed> =
-    with(this.familie) {
-        val avdoede = hentAvdoede()
-
-        return avdoede
-            .filter { it.hentDoedsdato() != null }
-            .map { avdoed ->
-                Avdoed(
-                    fnr = Foedselsnummer(avdoed.hentFoedselsnummer()!!.verdi.value),
-                    navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
-                    doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
-                )
-            }
-    }
+    hentAvdoede()
+        .filter { it.hentDoedsdato() != null }
+        .map { avdoed ->
+            Avdoed(
+                fnr = Foedselsnummer(avdoed.hentFoedselsnummer()!!.verdi.value),
+                navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
+                doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
+            )
+        }
 
 fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
 
@@ -47,11 +44,11 @@ fun String.storForbokstavEtter(delim: String) =
         it.replaceFirstChar { c -> c.uppercase() }
     }
 
-fun Grunnlag.mapSoeker(aldersgruppe: Aldersgruppe?): no.nav.etterlatte.brev.behandling.Soeker =
+fun Grunnlag.mapSoeker(aldersgruppe: Aldersgruppe?): Soeker =
     with(this.soeker) {
         val navn = hentNavn()!!.verdi
 
-        no.nav.etterlatte.brev.behandling.Soeker(
+        Soeker(
             fornavn = navn.fornavn.storForbokstav(),
             mellomnavn = navn.mellomnavn?.storForbokstav(),
             etternavn = navn.etternavn.storForbokstav(),
@@ -62,18 +59,17 @@ fun Grunnlag.mapSoeker(aldersgruppe: Aldersgruppe?): no.nav.etterlatte.brev.beha
         )
     }
 
-fun Grunnlag.mapInnsender(): no.nav.etterlatte.brev.behandling.Innsender? =
+fun Grunnlag.mapInnsender(): Innsender? =
     with(this.sak) {
         val opplysning = hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)
 
         val persongalleri =
-            requireNotNull(opplysning?.verdi) {
+            krevIkkeNull(opplysning?.verdi) {
                 "Sak (id=${metadata.sakId}) mangler opplysningstype PERSONGALLERI_V1"
             }
 
         persongalleri.innsender?.let {
-            no.nav.etterlatte.brev.behandling
-                .Innsender(fnr = Foedselsnummer(it))
+            Innsender(fnr = Foedselsnummer(it))
         }
     }
 
@@ -81,7 +77,7 @@ fun Grunnlag.mapSpraak(): Spraak =
     with(this.sak) {
         val opplysning = hentKonstantOpplysning<Spraak>(Opplysningstype.SPRAAK)
 
-        requireNotNull(opplysning?.verdi) {
+        krevIkkeNull(opplysning?.verdi) {
             "Sak (id=${metadata.sakId}) mangler opplysningstype SPRAAK"
         }
     }
@@ -132,7 +128,7 @@ fun Grunnlag.erOver18(aldersgruppe: Aldersgruppe?): Boolean {
     // TODO henting fra PDL skal fjernes når migrering er unnagjort. Da kan vi alltid bruke brevutfall
     // TODO denne brukes nå også midlertidig av avslagsbrev siden vi ikke har noe brevutfall der enda
     val dato18Aar =
-        requireNotNull(this.soeker.hentFoedselsdato()) {
+        krevIkkeNull(this.soeker.hentFoedselsdato()) {
             "Barnet har ikke fødselsdato i grunnlag. Dette skal ikke skje, vi " +
                 "klarer ikke å avgjøre hvor gammelt barnet er"
         }.verdi.plusYears(18)

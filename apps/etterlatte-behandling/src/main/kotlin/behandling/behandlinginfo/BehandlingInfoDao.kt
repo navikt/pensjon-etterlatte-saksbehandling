@@ -1,11 +1,11 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
+import no.nav.etterlatte.behandling.utland.SluttbehandlingBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -14,15 +14,15 @@ import java.util.UUID
 class BehandlingInfoDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun lagreErOmgjoeringSluttbehandlingUtland(id: UUID) {
+    fun lagreErOmgjoeringSluttbehandling(id: UUID) {
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
                     """
-                    INSERT INTO behandling_info(behandling_id, omgjoering_sluttbehandling_utland)
+                    INSERT INTO behandling_info(behandling_id, omgjoering_sluttbehandling)
                     VALUES (?, ?)
                     ON CONFLICT (behandling_id) DO 
-                    UPDATE SET omgjoering_sluttbehandling_utland = excluded.omgjoering_sluttbehandling_utland
+                    UPDATE SET omgjoering_sluttbehandling = excluded.omgjoering_sluttbehandling
                     """.trimIndent(),
                 ).apply {
                     setObject(1, id)
@@ -34,7 +34,7 @@ class BehandlingInfoDao(
 
     fun lagreSluttbehandling(
         behandlingId: UUID,
-        sluttbehandling: SluttbehandlingUtlandBehandlinginfo,
+        sluttbehandling: SluttbehandlingBehandlinginfo,
     ) {
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -54,7 +54,7 @@ class BehandlingInfoDao(
         }
     }
 
-    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingUtlandBehandlinginfo? =
+    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingBehandlinginfo? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
@@ -72,7 +72,7 @@ class BehandlingInfoDao(
             }
         }
 
-    fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
+    fun lagreBrevutfall(brevutfall: BrevutfallDto): BrevutfallDto =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
@@ -87,7 +87,7 @@ class BehandlingInfoDao(
                     setJsonb(2, brevutfall)
                 }.run { executeUpdate() }
                     .also {
-                        checkInternFeil(it == 1) {
+                        krev(it == 1) {
                             "Kunne ikke lagreBrevutfall behandling for ${brevutfall.behandlingId}"
                         }
                     }.let {
@@ -97,7 +97,7 @@ class BehandlingInfoDao(
             }
         }
 
-    fun hentBrevutfall(behandlingId: UUID): Brevutfall? =
+    fun hentBrevutfall(behandlingId: UUID): BrevutfallDto? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
@@ -130,7 +130,7 @@ class BehandlingInfoDao(
                     setJsonb(2, etterbetaling)
                 }.run { executeUpdate() }
                     .also {
-                        checkInternFeil(it == 1) {
+                        krev(it == 1) {
                             "Kunne ikke lagreBrevutfall behandling for ${etterbetaling.behandlingId}"
                         }
                     }.let {
@@ -153,7 +153,7 @@ class BehandlingInfoDao(
                     setObject(2, behandlingId)
                 }.run { executeUpdate() }
                     .also {
-                        checkInternFeil(it == 1) {
+                        krev(it == 1) {
                             "Kunne ikke slettEtterbetaling behandling for $behandlingId"
                         }
                     }

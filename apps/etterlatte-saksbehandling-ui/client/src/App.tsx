@@ -26,8 +26,10 @@ import { setDefaultOptions } from 'date-fns'
 import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
 import { initAmplitude } from '~utils/amplitude'
+import { Unleashcontext, useUnleash } from '~useUnleash'
 
 initAmplitude()
+
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
   setDefaultOptions({ locale: nb })
@@ -42,34 +44,38 @@ function App() {
     })
   }, [])
 
+  const unleashUpdater = useUnleash()
+
   return mapResult(hentConfigStatus, {
     error: () => <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>,
     success: (config) =>
       innloggetbrukerHentet && (
         <div className="app">
-          <Versioncheck />
-          <BrowserRouter basename="/">
-            <ScrollToTop />
-            <ConfigContext.Provider value={config}>
-              <HeaderBanner />
-              <ErrorBoundary>
-                <Routes>
-                  <Route path="/" element={<Oppgavebenk />} />
-                  <Route path="/person" element={<Person />} />
-                  <Route path="/person/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
-                  <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
-                  <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
-                  <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
-                  <Route path="/generelloppgave/*" element={<GenerellOppgave />} />
-                  <Route path="/klage/:klageId/*" element={<Klagebehandling />} />
-                  <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
-                  <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
-                  <Route path="/aktivitet-vurdering/:oppgaveId/*" element={<VurderAktivitetspliktOppgave />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </ErrorBoundary>
-            </ConfigContext.Provider>
-          </BrowserRouter>
+          <Unleashcontext.Provider value={unleashUpdater}>
+            <Versioncheck />
+            <BrowserRouter basename="/">
+              <ScrollToTop />
+              <ConfigContext.Provider value={config}>
+                <HeaderBanner />
+                <ErrorBoundary>
+                  <Routes>
+                    <Route path="/" element={<Oppgavebenk />} />
+                    <Route path="/person" element={<Person />} />
+                    <Route path="/person/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
+                    <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
+                    <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
+                    <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
+                    <Route path="/generelloppgave/*" element={<GenerellOppgave />} />
+                    <Route path="/klage/:klageId/*" element={<Klagebehandling />} />
+                    <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
+                    <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
+                    <Route path="/aktivitet-vurdering/:oppgaveId/*" element={<VurderAktivitetspliktOppgave />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </ErrorBoundary>
+              </ConfigContext.Provider>
+            </BrowserRouter>
+          </Unleashcontext.Provider>
         </div>
       ),
   })

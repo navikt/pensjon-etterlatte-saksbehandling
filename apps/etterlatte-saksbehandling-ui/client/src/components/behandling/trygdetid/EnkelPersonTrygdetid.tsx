@@ -13,7 +13,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { TrygdetidPerioder } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
-import { VStack } from '@navikt/ds-react'
+import { Alert, Box, VStack } from '@navikt/ds-react'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
 import { ILand } from '~utils/kodeverk'
@@ -25,11 +25,25 @@ interface Props {
   virkningstidspunktEtterNyRegelDato: boolean
   landListe: ILand[]
   fetchTrygdetider: (behandlingId: string) => void
+  setTrygdetider: (trygdetider: ITrygdetid[]) => void
+}
+
+function harTrygdetidFlereForskjelligeProrataLand(trygdetid: ITrygdetid): boolean {
+  return (
+    new Set([
+      ...trygdetid.trygdetidGrunnlag
+        .filter(
+          (periode) => !!periode.prorata && periode.type === ITrygdetidGrunnlagType.FAKTISK && periode.bosted !== 'NOR'
+        )
+        .map((periode) => periode.bosted),
+    ]).size > 1
+  )
 }
 
 export const EnkelPersonTrygdetid = (props: Props) => {
   const dispatch = useAppDispatch()
-  const { redigerbar, behandling, virkningstidspunktEtterNyRegelDato, landListe, fetchTrygdetider } = props
+  const { redigerbar, behandling, virkningstidspunktEtterNyRegelDato, landListe, fetchTrygdetider, setTrygdetider } =
+    props
   const [trygdetid, setTrygdetid] = useState<ITrygdetid | undefined>()
   const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
   const [oppdaterYrkesskadeRequest, requestOppdaterYrkesskade] = useApiCall(setTrygdetidYrkesskade)
@@ -90,6 +104,8 @@ export const EnkelPersonTrygdetid = (props: Props) => {
     )
   }
 
+  const flereLandProrata = !!trygdetid && harTrygdetidFlereForskjelligeProrataLand(trygdetid)
+
   return (
     <>
       {trygdetid && (
@@ -107,7 +123,21 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
             landListe={landListe}
             redigerbar={redigerbar}
+            behandling={behandling}
+            setTrygdetider={setTrygdetider}
           />
+
+          {flereLandProrata && (
+            <Box maxWidth="41.5rem">
+              {redigerbar ? (
+                <Alert variant="warning">
+                  Det er lagt inn flere land i prorata. Dobbeltsjekk at disse landene er med i samme trygdeavtale.
+                </Alert>
+              ) : (
+                <Alert variant="info">Det er lagt inn flere land i prorata.</Alert>
+              )}
+            </Box>
+          )}
 
           <TrygdetidPerioder
             trygdetid={trygdetid}
@@ -115,6 +145,8 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
             landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             redigerbar={redigerbar}
+            behandling={behandling}
+            setTrygdetider={setTrygdetider}
           />
 
           <OverstyrtTrygdetid

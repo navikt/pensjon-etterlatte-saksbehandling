@@ -9,17 +9,17 @@ import React, { useRef, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
 import { isFailure, isInitial, mapResult } from '~shared/api/apiUtils'
-import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import ForhaandsvisningBrev, { PdfViewer } from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
 import { useKlage } from '~components/klage/useKlage'
 import { forhaandsvisBlankettKa } from '~shared/api/klage'
-import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { EnvelopeClosedIcon, EyeIcon } from '@navikt/aksel-icons'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
-import { BodyShortMedNewlines } from '~shared/BodyShortMedNewlines'
+import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -60,59 +60,64 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
 
   return (
     <Maksbredde>
-      <Heading size="small" level="3">
-        Innstilling til KA
-      </Heading>
-      <BodyShort spacing>
-        Vedtak opprettholdes med følgende hovedhjemmel: <strong>{TEKSTER_LOVHJEMLER[innstilling.lovhjemmel]}.</strong>
-      </BodyShort>
-      <Heading size="xsmall" level="4">
-        Innstillingstekst:
-      </Heading>
-      <BodyShort spacing>{innstilling.innstillingTekst}</BodyShort>
-      <Heading size="xsmall" level="4">
-        Intern kommentar:
-      </Heading>
-      <BodyShort spacing>{innstilling.internKommentar || 'Ikke registrert'}</BodyShort>
+      <VStack gap="6">
+        <Box>
+          <Heading size="small" level="3">
+            Innstilling til KA
+          </Heading>
+          <BodyShort>
+            Vedtak opprettholdes med følgende hovedhjemmel:{' '}
+            <strong>{TEKSTER_LOVHJEMLER[innstilling.lovhjemmel]}.</strong>
+          </BodyShort>
+        </Box>
+        <Box>
+          <Heading size="xsmall" level="4">
+            Innstillingstekst:
+          </Heading>
+          <TekstMedMellomrom>{innstilling.innstillingTekst}</TekstMedMellomrom>
+        </Box>
+        <Box>
+          <Heading size="xsmall" level="4">
+            Intern kommentar:
+          </Heading>
+          <TekstMedMellomrom>{innstilling.internKommentar || 'Ikke registrert'}</TekstMedMellomrom>
+        </Box>
+        <HStack gap="2">
+          <Button icon={<EyeIcon />} size="small" variant="secondary" onClick={visOversendelseModal}>
+            Oversendelsesbrev til klager
+          </Button>
+          <Button icon={<EyeIcon />} size="small" variant="secondary" onClick={visBlankettModal}>
+            Innstillingsbrev til KA
+          </Button>
+        </HStack>
 
-      <BodyShort spacing>
-        <Button size="small" variant="primary" onClick={visOversendelseModal}>
-          Se innstillingsbrevet
-        </Button>
-      </BodyShort>
+        {kanRedigere && (
+          <Alert variant="info">
+            Når klagen ferdigstilles vil oversendelsesbrevet bli sendt til klager, og klagen blir videresendt for
+            behandling i klageinstans.
+          </Alert>
+        )}
 
-      <BodyShort spacing>
-        <Button size="small" variant="primary" onClick={visBlankettModal}>
-          Se blankett til KA
-        </Button>
-      </BodyShort>
+        <Modal width="medium" ref={oversendelseRef} header={{ heading: 'Oversendelsesbrev til klager' }}>
+          <Modal.Body>
+            {mapResult(oversendelseBrev, {
+              pending: <Spinner label="Laster brevet" />,
+              success: (hentetBrev) => <ForhaandsvisningBrev brev={hentetBrev} />,
+              error: <ApiErrorAlert>Kunne ikke hente brevet, prøv å laste siden på nytt.</ApiErrorAlert>,
+            })}
+          </Modal.Body>
+        </Modal>
 
-      {kanRedigere && (
-        <Alert variant="info">
-          Når klagen ferdigstilles vil innstillingsbrevet bli sendt til mottaker, og klagen blir videresendt for
-          behandling av KA.
-        </Alert>
-      )}
-
-      <Modal width="medium" ref={oversendelseRef} header={{ heading: 'Innstillingsbrev' }}>
-        <Modal.Body>
-          {mapResult(oversendelseBrev, {
-            pending: <Spinner label="Laster brevet" />,
-            success: (hentetBrev) => <ForhaandsvisningBrev brev={hentetBrev} />,
-            error: <ApiErrorAlert>Kunne ikke hente brevet, prøv å laste siden på nytt.</ApiErrorAlert>,
-          })}
-        </Modal.Body>
-      </Modal>
-
-      <Modal width="medium" ref={blankettRef} header={{ heading: 'Blankett til KA' }}>
-        <Modal.Body>
-          {mapResult(forhaandsvisningBlankett, {
-            pending: <Spinner label="Henter pdf" />,
-            success: () => (blankettFileUrl ? <PdfViewer src={`${blankettFileUrl}#toolbar=0`} /> : null),
-            error: <ApiErrorAlert>Kunne ikke forhåndsvise blanketten. Prøv å laste siden på nytt</ApiErrorAlert>,
-          })}
-        </Modal.Body>
-      </Modal>
+        <Modal width="medium" ref={blankettRef} header={{ heading: 'Innstillingsbrev til KA' }}>
+          <Modal.Body>
+            {mapResult(forhaandsvisningBlankett, {
+              pending: <Spinner label="Henter pdf" />,
+              success: () => (blankettFileUrl ? <PdfViewer src={`${blankettFileUrl}#toolbar=0`} /> : null),
+              error: <ApiErrorAlert>Kunne ikke forhåndsvise blanketten. Prøv å laste siden på nytt</ApiErrorAlert>,
+            })}
+          </Modal.Body>
+        </Modal>
+      </VStack>
     </Maksbredde>
   )
 }
@@ -122,20 +127,25 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
 
   return (
     <Maksbredde>
-      <Heading size="small" level="3">
-        Omgjøring
-      </Heading>
-      <BodyShort spacing as="div">
-        Vedtaket omgjøres på grunn av <strong>{TEKSTER_AARSAK_OMGJOERING[omgjoering.grunnForOmgjoering]}.</strong>
-      </BodyShort>
-      <BodyShort>
-        <strong>Begrunnelse:</strong>
-      </BodyShort>
-      <BodyShortMedNewlines spacing>{omgjoering.begrunnelse}</BodyShortMedNewlines>
-
-      {kanRedigere && (
-        <Alert variant="info">Når klagen ferdigstilles vil det opprettes en oppgave for omgjøring av vedtaket.</Alert>
-      )}
+      <VStack gap="6">
+        <Box>
+          <Heading size="small" level="3">
+            Omgjøring
+          </Heading>
+          <BodyShort>
+            Vedtaket omgjøres på grunn av <strong>{TEKSTER_AARSAK_OMGJOERING[omgjoering.grunnForOmgjoering]}.</strong>
+          </BodyShort>
+        </Box>
+        <Box>
+          <Heading size="xsmall" level="4">
+            Begrunnelse:
+          </Heading>
+          <TekstMedMellomrom>{omgjoering.begrunnelse}</TekstMedMellomrom>
+        </Box>
+        {kanRedigere && (
+          <Alert variant="info">Når klagen ferdigstilles vil det opprettes en oppgave for omgjøring av vedtaket.</Alert>
+        )}
+      </VStack>
     </Maksbredde>
   )
 }
@@ -167,7 +177,7 @@ export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
       fnr={props.klage.sak.ident}
       fane={PersonOversiktFane.BREV}
       variant="primary"
-      icon={<EnvelopeClosedIcon />}
+      icon={<EnvelopeClosedIcon aria-hidden />}
       target="_blank"
       rel="noreferrer noopener"
     >

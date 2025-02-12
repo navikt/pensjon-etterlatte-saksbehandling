@@ -11,8 +11,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -48,10 +50,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
@@ -69,7 +67,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
@@ -87,6 +84,8 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VerdikjedeTest : BehandlingIntegrationTest() {
+    private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
+
     @BeforeAll
     fun start() {
         startServer(
@@ -96,6 +95,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 mockk<FeatureToggleService> {
                     every { isEnabled(any(), any()) } returns true
                 },
+            pdlTjenesterKlient = pdltjenesterKlient,
         )
     }
 
@@ -104,7 +104,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
     @Test
     fun verdikjedetest() {
-        val fnr = SOEKER_FOEDSELSNUMMER.value
+        val fnr = soeker
         var behandlingOpprettet: UUID? = null
 
         testApplication {
@@ -188,22 +188,10 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }
 
             client
-                .post("/behandlinger/$behandlingId/gyldigfremsatt") {
+                .post("/api/behandling/$behandlingId/gyldigfremsatt") {
                     addAuthToken(tokenSaksbehandler)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(
-                        GyldighetsResultat(
-                            VurderingsResultat.OPPFYLT,
-                            listOf(
-                                VurdertGyldighet(
-                                    GyldighetsTyper.INNSENDER_ER_FORELDER,
-                                    VurderingsResultat.OPPFYLT,
-                                    "innsenderFnr",
-                                ),
-                            ),
-                            Tidspunkt.now().toLocalDatetimeUTC(),
-                        ),
-                    )
+                    contentType(ContentType.Application.Json)
+                    setBody(JaNeiMedBegrunnelse(JaNei.JA, "Alt ser bra ut"))
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }
@@ -216,7 +204,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val behandling: DetaljertBehandling = it.body()
                     assertNotNull(behandling.id)
-                    assertEquals("soeker", behandling.soeker)
+                    assertEquals(defaultPersongalleriGydligeFnr.soeker, behandling.soeker)
                 }
 
             client
@@ -621,6 +609,9 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }
 
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             client
                 .post("/grunnlagsendringshendelse/adressebeskyttelse") {
                     addAuthToken(this@VerdikjedeTest.systemBruker)
@@ -630,7 +621,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                             hendelseId = "1",
                             endringstype = Endringstype.OPPRETTET,
                             fnr = fnr,
-                            adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                         ),
                     )
                 }.also {

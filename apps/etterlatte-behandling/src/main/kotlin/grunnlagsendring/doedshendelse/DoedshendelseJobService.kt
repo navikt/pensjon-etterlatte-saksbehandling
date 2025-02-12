@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.util.toLowerCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
@@ -17,7 +18,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -35,9 +36,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
+import java.net.SocketException
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -96,17 +99,33 @@ class DoedshendelseJobService(
                 )
             } catch (e: Exception) {
                 val sak = doedshendelse.sakId?.toString() ?: "mangler"
-                logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak", e)
-                throw e
+                when (e) {
+                    is SocketException, is SocketTimeoutException -> {
+                        logger.error(
+                            "Kontrollerpunkter feilet på nettverksproblemer, Burde løses på neste retry sak: $sak.",
+                            e,
+                        )
+                        throw e
+                    }
+
+                    else -> {
+                        logger.error(
+                            "Kunne ikke identifisere kontrollpunkter dødshendelse id=${doedshendelse.id} for sak $sak. " +
+                                "Ukjent feil: msg: ${e.message}",
+                            e,
+                        )
+                        throw e
+                    }
+                }
             }
 
         when (kontrollpunkter.any { it.avbryt }) {
             true -> {
                 logger.info(
                     "Avbryter behandling av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} med avdød " +
-                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
-                        kontrollpunkter.joinToString(","),
+                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkter, se sikker logg for mer info",
                 )
+                sikkerlogger().info("kontrollpunkter: " + kontrollpunkter.joinToString(","))
 
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilAvbrutt(
@@ -149,7 +168,7 @@ class DoedshendelseJobService(
     }
 
     private fun opprettSakOgLagGrunnlag(doedshendelse: DoedshendelseInternal): Sak {
-        logger.info("Oppretter sak for dødshendelse ${doedshendelse.id} avdøed ${doedshendelse.avdoedFnr.maskerFnr()}")
+        logger.info("Oppretter sak for dødshendelse ${doedshendelse.id} avdøde ${doedshendelse.avdoedFnr.maskerFnr()}")
         val opprettetSak =
             sakService.finnEllerOpprettSakMedGrunnlag(
                 fnr = doedshendelse.beroertFnr,
@@ -161,15 +180,20 @@ class DoedshendelseJobService(
                 SakType.BARNEPENSJON -> hentAnnenForelder(doedshendelse)
                 SakType.OMSTILLINGSSTOENAD -> null
             }
-        val galleri =
+        val persongalleri =
             Persongalleri(
                 soeker = doedshendelse.beroertFnr,
                 avdoed = listOf(doedshendelse.avdoedFnr),
                 gjenlevende = listOfNotNull(gjenlevende),
-                innsender = Vedtaksloesning.GJENNY.name,
             )
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri) }
+        runBlocking {
+            grunnlagService.leggInnNyttGrunnlagSak(
+                sak = opprettetSak,
+                persongalleri,
+                HardkodaSystembruker.doedshendelse,
+            )
+        }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
 
         val spraak = hentSpraak(doedshendelse)
@@ -178,6 +202,7 @@ class DoedshendelseJobService(
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = opprettetSak.id,
                 opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
+                HardkodaSystembruker.doedshendelse,
             )
         }
         return opprettetSak
@@ -229,6 +254,7 @@ class DoedshendelseJobService(
                     val under18aar = sjekkUnder18aar(doedshendelse)
                     deodshendelserProducer.sendBrevRequestBP(sak, borIUtlandet, !under18aar)
                 }
+
                 SakType.OMSTILLINGSSTOENAD -> deodshendelserProducer.sendBrevRequestOMS(sak, borIUtlandet)
             }
             return true
@@ -256,6 +282,7 @@ class DoedshendelseJobService(
                         saktype = SakType.BARNEPENSJON,
                     )
                 }
+
                 SakType.OMSTILLINGSSTOENAD -> {
                     pdlTjenesterKlient.hentPdlModellForSaktype(
                         foedselsnummer = doedshendelse.beroertFnr,

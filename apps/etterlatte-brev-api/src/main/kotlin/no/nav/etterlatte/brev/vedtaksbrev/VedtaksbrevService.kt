@@ -21,7 +21,8 @@ import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
@@ -61,7 +62,7 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        checkInternFeil(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
+        krev(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
@@ -135,7 +136,7 @@ class VedtaksbrevService(
         migrering: Boolean = false,
     ) {
         val brev =
-            requireNotNull(hentVedtaksbrev(behandlingId)) {
+            krevIkkeNull(hentVedtaksbrev(behandlingId)) {
                 "Fant ingen brev for behandling (id=$behandlingId)"
             }
 
@@ -183,8 +184,16 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         brevtype: Brevtype,
-    ): BrevService.BrevPayload =
-        brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
+    ): BrevService.BrevPayload {
+        val brev = db.hentBrev(brevId)
+        if (!brev.kanEndres()) {
+            throw UgyldigForespoerselException(
+                "BREVET_KAN_IKKE_ENDRES",
+                "Kan ikke oppdatere brevet med id=$brevId i sak=$sakId, fordi brevet har status (${brev.status})",
+            )
+        }
+
+        return brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
             when (brevtype) {
                 Brevtype.VARSEL ->
                     if (it.sakType === SakType.BARNEPENSJON) {
@@ -211,6 +220,7 @@ class VedtaksbrevService(
                 brevDataMapperRedigerbartUtfallVedtak.brevData(it)
             }
         }
+    }
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,
@@ -281,7 +291,7 @@ class VedtaksbrevKanIkkeSlettes(
 class UgyldigAntallMottakere :
     UgyldigForespoerselException(
         code = "FOR_MANGE_MOTTAKERE",
-        detail = "Ugyldig antall mottakere på brevet. Må ma minst 1 og maks 2 mottakere per brev (hoved og kopi).",
+        detail = "Brevet må ha minst 1, maks 2 mottakere.",
     )
 
 class UgyldigMottakerKanIkkeFerdigstilles(

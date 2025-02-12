@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -94,7 +95,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 brukerTokenInfo,
                 behandlingId,
                 virkningstidspunkt,
-                sakType,
                 true,
                 systemkilde,
                 loependeIPesys,
@@ -136,7 +136,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             brukerTokenInfo,
                             behandlingId,
                             virkningstidspunkt,
-                            sakType,
                             erForeldreloes,
                             systemkilde,
                             loependeIPesys,
@@ -187,6 +186,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                                 virkningstidspunkt!!,
                                 sakType,
                                 vedtakType,
+                                revurderingaarsak,
                             )
                         }
                     }
@@ -219,7 +219,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
         virkningstidspunkt: YearMonth?,
-        sakType: SakType,
         erForeldreloes: Boolean,
         systemkilde: Vedtaksloesning,
         loependeIPesys: Boolean,
@@ -234,6 +233,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 )
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
+        val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }.await()
 
         if (erForeldreloes) {
             BarnepensjonForeldreloesRedigerbar.fra(
@@ -249,6 +249,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 etterbetaling.await(),
                 avdoede,
                 systemkilde,
+                erSluttbehandling = behandling.erSluttbehandling,
             )
         }
     }
@@ -329,7 +330,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
             utbetalingsinfo.await(),
-            requireNotNull(avkortingsinfo.await()),
+            krevIkkeNull(avkortingsinfo.await()) { "Avkortingsinfo mangler i brevutfall" },
             etterbetaling.await(),
             behandling.tidligereFamiliepleier?.svar ?: false,
         )
@@ -341,6 +342,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         virkningstidspunkt: YearMonth,
         sakType: SakType,
         vedtakType: VedtakType,
+        revurderingaarsak: Revurderingaarsak?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -354,11 +356,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
-            requireNotNull(avkortingsinfo.await()),
-            etterbetaling.await(),
+            krevIkkeNull(avkortingsinfo.await()) { "Avkortingsinfo mangler i brevutfall" },
+            behandling,
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+            etterbetaling.await(),
+            revurderingaarsak,
         )
     }
 
@@ -379,11 +384,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     bruker,
                 )
             }
-        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall.fra(
             avkortingsinfo = avkortingsinfo.await(),
-            opphoerDato = behandling.opphoerFraOgMed?.atDay(1),
+            virkningstidspunkt = virkningstidspunkt,
         )
     }
 

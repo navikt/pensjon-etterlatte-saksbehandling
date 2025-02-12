@@ -17,7 +17,9 @@ import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlFoedselsdato
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
+import no.nav.etterlatte.pdl.PdlHentFoedselsdato
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
@@ -211,6 +213,9 @@ class ParallelleSannheterService(
             )
         }
 
+    suspend fun mapFoedselsdato(hentFoedselsdato: PdlHentFoedselsdato): PdlFoedselsdato =
+        ppsKlient.avklarFoedselsdato(hentFoedselsdato.foedselsdato)
+
     suspend fun mapPersonSoek(
         ident: String,
         soekPerson: SoekPersonTreff,
@@ -239,6 +244,21 @@ class ParallelleSannheterService(
         request: HentPersonRequest,
     ): PersonDTO =
         runBlocking {
+            val folkeregisteridentifikator =
+                if (hentPerson.folkeregisteridentifikator == null) {
+                    logger.warn(
+                        "Fikk person som mangler folkeregisteridentifikator i PDL. Se sikkerlogg for fnr som oppslaget ble utført med.",
+                    )
+                    sikkerLogg.warn(
+                        "Person med fnr=${request.foedselsnummer} og mangler folkeregisteridentifikator i PDL",
+                    )
+                    request.foedselsnummer
+                } else {
+                    ppsKlient
+                        .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                        .let { Folkeregisteridentifikator.of(it.identifikasjonsnummer) }
+                }
+
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
             val (statsborgerskap, statsborgerskapPdl) =
@@ -266,7 +286,7 @@ class ParallelleSannheterService(
                 fornavn = OpplysningDTO(navn.fornavn, navn.metadata.opplysningsId),
                 mellomnavn = navn.mellomnavn?.let { OpplysningDTO(navn.mellomnavn, navn.metadata.opplysningsId) },
                 etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
-                foedselsnummer = OpplysningDTO(request.foedselsnummer, null),
+                foedselsnummer = OpplysningDTO(folkeregisteridentifikator, null),
                 foedselsdato =
                     foedselsdato.foedselsdato?.let {
                         OpplysningDTO(

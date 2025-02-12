@@ -1,14 +1,15 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.HarVedlegg
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.trygdetid.TrygdetidType
@@ -17,9 +18,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class BarnepensjonEtterbetaling(
-    val inneholderKrav: Boolean?,
     val frivilligSkattetrekk: Boolean?,
-    val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
 )
 
 data class OmstillingsstoenadEtterbetaling(
@@ -37,8 +36,9 @@ data class BarnepensjonBeregning(
     val sisteBeregningsperiode: BarnepensjonBeregningsperiode,
     val bruktTrygdetid: TrygdetidMedBeregningsmetode,
     val trygdetid: List<TrygdetidMedBeregningsmetode>,
-    val erForeldreloes: Boolean = false,
-    val forskjelligTrygdetid: ForskjelligTrygdetid? = null,
+    val erForeldreloes: Boolean,
+    val forskjelligTrygdetid: ForskjelligTrygdetid?,
+    val erYrkesskade: Boolean,
 ) : HarVedlegg
 
 data class BarnepensjonBeregningsperiode(
@@ -49,9 +49,13 @@ data class BarnepensjonBeregningsperiode(
     val avdoedeForeldre: List<String?>?,
     val trygdetidForIdent: String?,
     var utbetaltBeloep: Kroner,
+    val harForeldreloessats: Boolean,
 ) {
     companion object {
-        fun fra(beregningsperiode: Beregningsperiode): BarnepensjonBeregningsperiode =
+        fun fra(
+            beregningsperiode: Beregningsperiode,
+            erForeldreloes: Boolean,
+        ): BarnepensjonBeregningsperiode =
             BarnepensjonBeregningsperiode(
                 datoFOM = beregningsperiode.datoFOM,
                 datoTOM = beregningsperiode.datoTOM,
@@ -60,6 +64,7 @@ data class BarnepensjonBeregningsperiode(
                 antallBarn = beregningsperiode.antallBarn,
                 avdoedeForeldre = beregningsperiode.avdoedeForeldre,
                 trygdetidForIdent = beregningsperiode.trygdetidForIdent,
+                harForeldreloessats = beregningsperiode.harForeldreloessats ?: erForeldreloes,
             )
     }
 }
@@ -73,7 +78,17 @@ data class OmstillingsstoenadBeregning(
     val trygdetid: TrygdetidMedBeregningsmetode,
     val oppphoersdato: LocalDate?,
     val opphoerNesteAar: Boolean,
+    val erYrkesskade: Boolean,
 ) : HarVedlegg
+
+data class OmstillingsstoenadBeregningRedigerbartUtfall(
+    val virkningsdato: LocalDate,
+    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
+    val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
+    val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
+    val oppphoersdato: LocalDate?,
+    val opphoerNesteAar: Boolean,
+) : BrevData
 
 data class OmstillingsstoenadBeregningsperiode(
     val datoFOM: LocalDate,
@@ -95,7 +110,7 @@ data class OmstillingsstoenadBeregningsperiode(
 )
 
 data class TrygdetidMedBeregningsmetode(
-    val navnAvdoed: String,
+    val navnAvdoed: String?,
     val trygdetidsperioder: List<Trygdetidsperiode>,
     val beregnetTrygdetidAar: Int,
     val prorataBroek: IntBroek?,
@@ -122,7 +137,8 @@ data class ForskjelligAvdoedPeriode(
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
-    val land: String,
+    val landkode: String,
+    val land: String?,
     val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
     val type: TrygdetidType,
 )
@@ -130,7 +146,8 @@ data class Trygdetidsperiode(
 fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,
     beregningsMetodeFraGrunnlag: BeregningsMetode,
-    navnAvdoed: String,
+    navnAvdoed: String?,
+    landKodeverk: List<LandDto>,
 ) = TrygdetidMedBeregningsmetode(
     navnAvdoed = navnAvdoed,
     trygdetidsperioder =
@@ -146,7 +163,8 @@ fun TrygdetidDto.fromDto(
             Trygdetidsperiode(
                 datoFOM = grunnlag.periodeFra,
                 datoTOM = grunnlag.periodeTil,
-                land = grunnlag.bosted,
+                landkode = grunnlag.bosted,
+                land = landKodeverk.hentLandFraLandkode(grunnlag.bosted),
                 opptjeningsperiode = grunnlag.beregnet,
                 type = TrygdetidType.valueOf(grunnlag.type),
             )
@@ -174,6 +192,10 @@ fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt = beregningsMetodeAnvendt,
     ident = this.ident,
 )
+
+private fun List<LandDto>.hentLandFraLandkode(landkode: String) = firstOrNull { it.isoLandkode == landkode }?.beskrivelse?.tekst
+
+fun TrygdetidDto.erYrkesskade() = beregnetTrygdetid?.resultat?.yrkesskade ?: false
 
 enum class FeilutbetalingType {
     FEILUTBETALING_UTEN_VARSEL,
@@ -205,12 +227,6 @@ class OverstyrtTrygdetidManglerAvdoed :
     UgyldigForespoerselException(
         code = "OVERSTYRT_TRYGDETID_MANGLER_AVDOED",
         detail = "Overstyrt trygdetid mangler avdød. Trygdetiden må overskrives med ny overstyrt trygdetid",
-    )
-
-class IngenStoetteForUkjentAvdoed :
-    UgyldigForespoerselException(
-        code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
-        detail = "Brevløsningen støtter ikke ukjent avdød",
     )
 
 class ManglerFrivilligSkattetrekk(

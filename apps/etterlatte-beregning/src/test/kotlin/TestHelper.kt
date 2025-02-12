@@ -20,6 +20,7 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -114,10 +115,12 @@ fun avkorting(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
+    aar: Int = 2024,
 ) = Avkorting(
     aarsoppgjoer =
         listOf(
             aarsoppgjoer(
+                aar = aar,
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 inntektsavkorting = inntektsavkorting,
                 avkortetYtelseAar = avkortetYtelseAar,
@@ -319,6 +322,7 @@ fun beregningsperiode(
     trygdetid = trygdetid,
     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
     regelVersjon = "1",
+    regelverk = Regelverk.fraDato(datoFOM.atDay(1)),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
 )
 
@@ -329,6 +333,7 @@ fun behandling(
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt: Virkningstidspunkt? = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
+    opphoerFraOgMed: YearMonth? = null,
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
@@ -344,7 +349,7 @@ fun behandling(
     revurderingInfo = null,
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
-    opphoerFraOgMed = null,
+    opphoerFraOgMed = opphoerFraOgMed,
     relatertBehandlingId = null,
     tidligereFamiliepleier = null,
 )

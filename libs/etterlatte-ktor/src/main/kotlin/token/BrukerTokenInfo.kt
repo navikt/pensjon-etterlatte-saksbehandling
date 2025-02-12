@@ -79,11 +79,14 @@ data class HardkodaSystembruker private constructor(
         val opprettGrunnlag = HardkodaSystembruker(Systembrukere.OPPRETT_GRUNNLAG) // skal bort på sikt
         val ryddeBeregning = HardkodaSystembruker(Systembrukere.BEREGNING)
         val omregning = HardkodaSystembruker(Systembrukere.OMREGNING)
+        val statistikk = HardkodaSystembruker(Systembrukere.STATISTIKK)
+        val tilgang = HardkodaSystembruker(Systembrukere.TILGANG)
     }
 
     enum class Systembrukere(
         val appName: String,
     ) {
+        TILGANG("tilgang"),
         OPPRETT_GRUNNLAG("opprettgrunnlag"),
         RIVER("river"),
         DOEDSHENDELSE("doedshendelse"),
@@ -91,6 +94,7 @@ data class HardkodaSystembruker private constructor(
         OPPGAVE("oppgave"),
         BEREGNING("beregning"),
         OMREGNING("omregning"),
+        STATISTIKK("statistikk"),
     }
 }
 

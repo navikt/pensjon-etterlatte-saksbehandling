@@ -38,7 +38,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
 
   return (
     <>
-      <Button variant="tertiary" onClick={aapneModal} icon={<ArchiveIcon />} size="small">
+      <Button variant="tertiary" onClick={aapneModal} icon={<ArchiveIcon aria-hidden />} size="small">
         Arkiver hendelse
       </Button>
 

@@ -75,7 +75,11 @@ class InnholdTilRedigerbartBrevHenter(
                 utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
                 revurderingsaarsak = generellBrevData.revurderingsaarsak,
                 behandlingId = behandlingId,
-                erForeldreloes = erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
+                erForeldreloes =
+                    erForeldreloes(
+                        generellBrevData.personerISak.soeker,
+                        generellBrevData.personerISak.avdoede,
+                    ),
                 loependeIPesys =
                     loependeIPesys(
                         generellBrevData.systemkilde,
@@ -104,7 +108,11 @@ class InnholdTilRedigerbartBrevHenter(
                             brevData = brevData,
                             avsender =
                                 adresseService.hentAvsender(
-                                    opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                    opprettAvsenderRequest(
+                                        bruker,
+                                        generellBrevData.forenkletVedtak,
+                                        generellBrevData.sak.enhet,
+                                    ),
                                     bruker,
                                 ),
                             soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
@@ -129,6 +137,7 @@ class InnholdTilRedigerbartBrevHenter(
                         generellBrevData.forenkletVedtak,
                         generellBrevData.sak.enhet,
                         generellBrevData.spraak,
+                        generellBrevData.prosesstype,
                     )
                 }
 
@@ -137,7 +146,12 @@ class InnholdTilRedigerbartBrevHenter(
                 sakType = generellBrevData.sak.sakType,
                 enhet = generellBrevData.sak.enhet,
                 personerISak = generellBrevData.personerISak,
-                innhold = BrevInnhold(brevKode.tittel, generellBrevData.spraak, innhold.await()),
+                innhold =
+                    BrevInnhold(
+                        brevKode.titlerPaaSpraak[generellBrevData.spraak] ?: brevKode.tittel,
+                        generellBrevData.spraak,
+                        innhold.await(),
+                    ),
                 innholdVedlegg = innholdVedlegg.await(),
                 brevkode = brevKode,
             )

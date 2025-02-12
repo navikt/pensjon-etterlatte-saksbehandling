@@ -6,11 +6,10 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -64,19 +63,19 @@ inline val PipelineContext<*, ApplicationCall>.sakId: SakId
 
 inline val PipelineContext<*, ApplicationCall>.oppgaveId: UUID
     get() =
-        requireNotNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+        krevIkkeNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "OppgaveId er ikke i path params"
         }
 
 inline val PipelineContext<*, ApplicationCall>.klageId: UUID
     get() =
-        requireNotNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+        krevIkkeNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "KlageId er ikke i path params"
         }
 
 inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
     get() =
-        requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
+        krevIkkeNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
             "Gosys oppgaveId er ikke i path params"
         }
 
@@ -101,7 +100,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
                 onSuccess(behandlingId)
             } else {
                 logger.info("Har ikke tilgang til behandling")
-                throw GenerellIkkeFunnetException()
+                throw IkkeTilgangTilBehandlingException()
             }
         }
 
@@ -131,7 +130,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
                 onSuccess(sakId)
             } else {
                 logger.info("Har ikke tilgang til sak")
-                throw GenerellIkkeFunnetException()
+                throw IkkeTilgangTilSakException()
             }
         }
 
@@ -242,23 +241,25 @@ fun ApplicationCall.dato(param: String) =
             .getOrElse { throw UgyldigDatoFormatException() }
     }
 
-suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
-    featureToggleService: FeatureToggleService,
-    toggle: FeatureToggle,
-    block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit,
-) {
-    if (featureToggleService.isEnabled(toggle, false)) {
-        block()
-    } else {
-        throw FeatureIkkeStoettetException()
-    }
-}
-
 class FeatureIkkeStoettetException :
     ForespoerselException(
         code = "NOT_IMPLEMENTED",
         status = HttpStatusCode.NotImplemented.value,
         detail = "Funksjonaliteten er ikke tilgjengelig enda.",
+    )
+
+class IkkeTilgangTilBehandlingException :
+    ForespoerselException(
+        code = "IKKE_TILGANG_TIL_BEHANDLING",
+        status = HttpStatusCode.Forbidden.value,
+        detail = "Bruker har ikke tilgang til behandling",
+    )
+
+class IkkeTilgangTilSakException :
+    ForespoerselException(
+        code = "IKKE_TILGANG_TIL_SAK",
+        status = HttpStatusCode.Forbidden.value,
+        detail = "Bruker har ikke tilgang til sak",
     )
 
 fun BrukerTokenInfo.lagGrunnlagsopplysning() =
@@ -267,5 +268,3 @@ fun BrukerTokenInfo.lagGrunnlagsopplysning() =
     } else {
         Grunnlagsopplysning.Gjenny.create(ident())
     }
-
-val routeLogger = LoggerFactory.getLogger("Route")

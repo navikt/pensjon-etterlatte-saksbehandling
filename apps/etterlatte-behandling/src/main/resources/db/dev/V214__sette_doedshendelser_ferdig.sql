@@ -1,0 +1,1 @@
+UPDATE doedshendelse set status = 'FERDIG' where status = 'NY';

@@ -8,13 +8,13 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -23,8 +23,6 @@ import java.util.UUID
 class AktivitetspliktUnntakDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
-
     fun upsertUnntak(
         unntak: LagreAktivitetspliktUnntak,
         sakId: SakId,
@@ -71,33 +69,7 @@ class AktivitetspliktUnntakDao(
         }
     }
 
-    fun oppdaterUnntak(
-        unntak: LagreAktivitetspliktUnntak,
-        kilde: Grunnlagsopplysning.Kilde,
-        behandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-                        UPDATE aktivitetsplikt_unntak
-                        SET  unntak = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ? 
-                        WHERE id = ? AND behandling_id = ?
-                    """.trimMargin(),
-                )
-            stmt.setString(1, unntak.unntak.name)
-            stmt.setDate(2, unntak.fom?.let { tom -> Date.valueOf(tom) })
-            stmt.setDate(3, unntak.tom?.let { tom -> Date.valueOf(tom) })
-            stmt.setString(4, kilde.toJson())
-            stmt.setString(5, unntak.beskrivelse)
-            stmt.setObject(6, requireNotNull(unntak.id))
-            stmt.setObject(7, behandlingId)
-
-            stmt.executeUpdate()
-        }
-    }
-
-    fun slettUnntak(
+    fun slettUnntakForBehandling(
         unntakId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
@@ -112,7 +84,10 @@ class AktivitetspliktUnntakDao(
             stmt.setObject(1, unntakId)
             stmt.setObject(2, behandlingId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Fant ingen unntak for behandlingId: $behandlingId unntakid: $unntakId"
+            }
         }
     }
 
@@ -133,7 +108,9 @@ class AktivitetspliktUnntakDao(
                 stmt.setObject(2, oppgaveId)
 
                 val endret = stmt.executeUpdate()
-                logger.info("Slettet $endret unntak for oppgaveId=$oppgaveId")
+                krev(endret == 1) {
+                    "Fant ingen unntak for oppgaveId: $oppgaveId unntakid: $unntakId"
+                }
             }
         }
     }
@@ -176,7 +153,7 @@ class AktivitetspliktUnntakDao(
                 if (behandlingId != null) {
                     hentUnntakForBehandling(UUID.fromString(behandlingId))
                 } else {
-                    requireNotNull(oppgaveId) {
+                    krevIkkeNull(oppgaveId) {
                         "Har en vurdering av aktivitet som ikke er knyttet til en oppgave eller en behandling"
                     }
                     hentUnntakForOppgave(UUID.fromString(oppgaveId))
@@ -308,12 +285,14 @@ data class LagreAktivitetspliktUnntak(
     val beskrivelse: String,
 )
 
-enum class AktivitetspliktUnntakType {
-    OMSORG_BARN_UNDER_ETT_AAR,
-    OMSORG_BARN_SYKDOM,
-    MANGLENDE_TILSYNSORDNING_SYKDOM,
-    SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE,
-    GRADERT_UFOERETRYGD,
-    MIDLERTIDIG_SYKDOM,
-    FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT,
+enum class AktivitetspliktUnntakType(
+    val lesbartNavn: String,
+) {
+    OMSORG_BARN_UNDER_ETT_AAR("Omsorg for barn under ett år"),
+    OMSORG_BARN_SYKDOM("Omsorg for barn som har sykdom, skade eller funksjonshemming"),
+    MANGLENDE_TILSYNSORDNING_SYKDOM("Manglende tilsynsordning ved sykdom"),
+    SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE("Bruker har sykdom, redusert arbeidsevne, AAP"),
+    GRADERT_UFOERETRYGD("Gradert uføretrygd"),
+    MIDLERTIDIG_SYKDOM("Midlertidig sykdom"),
+    FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT("Bruker er født i 1963 eller tidligere og har lav inntekt"),
 }

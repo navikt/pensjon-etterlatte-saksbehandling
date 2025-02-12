@@ -1,13 +1,13 @@
 package no.nav.etterlatte.libs.common
 
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 
 data class Enhetsnummer(
     @JsonValue val enhetNr: String,
 ) {
     init {
-        checkInternFeil(enhetNr.length == 4 && enhetNr.toIntOrNull() != null) {
+        krev(enhetNr.length == 4 && enhetNr.toIntOrNull() != null) {
             "Enhetsnummer må være et firesifret tall, men var $enhetNr"
         }
     }

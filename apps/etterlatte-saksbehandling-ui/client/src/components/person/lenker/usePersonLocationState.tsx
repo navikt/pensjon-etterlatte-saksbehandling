@@ -23,9 +23,9 @@ interface PersonLocationState {
  * Hack for å støtte åpning av personsiden i ny fane.
  * FNR lagres med en nøkkel (UUID) i localStorage og hentes opp igjen når [Person.tsx] lastes.
  **/
-export const usePersonLocationState = (key: string | null): PersonLocationState => {
+export const usePersonLocationState = (key: string | null): PersonLocationState | null => {
   const location = useLocation()
-  const [state, setState] = useState<PersonLocationState>(location.state || hentPersonLocationState(key))
+  const [state, setState] = useState<PersonLocationState | null>(location.state || hentPersonLocationState(key))
 
   useEffect(() => {
     if (key) localStorage.removeItem(key)

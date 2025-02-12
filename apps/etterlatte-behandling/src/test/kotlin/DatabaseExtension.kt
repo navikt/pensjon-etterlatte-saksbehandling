@@ -6,6 +6,7 @@ package no.nav.etterlatte
     TRUNCATE behandlinghendelse CASCADE;
     TRUNCATE grunnlagsendringshendelse CASCADE;
     TRUNCATE sak CASCADE;
+    TRUNCATE saksendring CASCADE;
     TRUNCATE oppgave CASCADE;
     TRUNCATE tilbakekrevingsperiode CASCADE;
     TRUNCATE tilbakekreving CASCADE;

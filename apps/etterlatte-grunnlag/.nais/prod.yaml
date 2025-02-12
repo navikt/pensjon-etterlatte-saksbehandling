@@ -36,6 +36,7 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics
@@ -98,7 +99,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-kafka
         - application: etterlatte-brev-api
         - application: etterlatte-beregning

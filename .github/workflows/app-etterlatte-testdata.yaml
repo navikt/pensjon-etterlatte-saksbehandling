@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - apps/etterlatte-testdata/**
+      - libs/etterlatte-omregning-model/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
       - "!**/test/**"
@@ -15,6 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-testdata/**
+      - libs/etterlatte-omregning-model/**
       - "!apps/etterlatte-testdata/.nais/*"
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml

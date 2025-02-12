@@ -2,14 +2,12 @@ rootProject.name = "pensjon-etterlatte-saksbehandling"
 include(
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",
-    "apps:etterlatte-gyldig-soeknad",
-    "apps:etterlatte-opplysninger-fra-soeknad",
     "apps:etterlatte-egne-ansatte-lytter",
     "apps:etterlatte-institusjonsopphold",
     "apps:etterlatte-testdata",
     "apps:etterlatte-testdata-behandler",
     "apps:etterlatte-utbetaling",
-    "apps:etterlatte-oppdater-behandling",
+    "apps:etterlatte-behandling-kafka",
     "apps:etterlatte-beregning",
     "apps:etterlatte-beregning-kafka",
     "apps:etterlatte-vedtaksvurdering",
@@ -53,4 +51,6 @@ include(
     "libs:etterlatte-vilkaarsvurdering-model",
     "libs:etterlatte-tilbakekreving-model",
     "libs:etterlatte-tidshendelser-model",
+    "libs:etterlatte-omregning-model",
+    "libs:etterlatte-inntektsjustering-model",
 )

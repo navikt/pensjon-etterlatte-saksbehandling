@@ -5,6 +5,11 @@ import io.mockk.clearAllMocks
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.HendelsePoller
+import no.nav.etterlatte.tidshendelser.hendelser.HendelsePublisher
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseStatus
+import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

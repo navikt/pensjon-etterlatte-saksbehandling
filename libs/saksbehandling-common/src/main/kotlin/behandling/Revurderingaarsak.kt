@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.GcpEnv
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.DevOgProd
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.IngenMiljoe
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.KunIDev
@@ -29,7 +30,10 @@ private sealed class KanBrukesIMiljoe {
     }
 }
 
-// Disse må ha en oversettelse i frontend Revurderingaarsak.ts
+/*
+    Disse må ha en oversettelse i frontend Revurderingaarsak.ts
+    Endring av enumnavnet her må også hensynta at det ligger lagret i vedtaksbasen og parses med objectmapper der til denne klassen.
+ */
 enum class Revurderingaarsak(
     private val gyldigFor: List<SakType>,
     private val miljoe: KanBrukesIMiljoe,
@@ -64,7 +68,7 @@ enum class Revurderingaarsak(
     UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    SLUTTBEHANDLING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
 
     FENGSELSOPPHOLD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     UT_AV_FENGSEL(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
@@ -106,14 +110,9 @@ enum class Revurderingaarsak(
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 
     fun erStoettaRevurdering(sakType: SakType): Boolean {
-        val erIkkeStoetta = listOf(NY_SOEKNAD, AARLIG_INNTEKTSJUSTERING)
+        val erIkkeStoetta = listOf(AARLIG_INNTEKTSJUSTERING)
         return kanBrukesIMiljo() && gyldigForSakType(sakType) && !erIkkeStoetta.contains(this)
     }
-}
 
-enum class GcpEnv(
-    val env: String,
-) {
-    PROD("prod-gcp"),
-    DEV("dev-gcp"),
+    fun kanLagreFritekstFeltForManuellRevurdering(): Boolean = this in listOf<Revurderingaarsak>(ANNEN, ANNEN_UTEN_BREV)
 }

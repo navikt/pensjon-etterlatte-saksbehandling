@@ -52,9 +52,9 @@ import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultat
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -77,6 +77,8 @@ internal class VilkaarsvurderingIntegrationTest(
     private lateinit var behandlingService: BehandlingService
     private lateinit var behandlingStatus: BehandlingStatusServiceImpl
     private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val saksbehandlerService: SaksbehandlerService = mockk()
+
     private val grunnlagVersjon = 12L
     private val grunnlagKlientMock =
         mockk<GrunnlagKlient> {
@@ -138,13 +140,13 @@ internal class VilkaarsvurderingIntegrationTest(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
                 generellBehandlingService = applicationContext.generellBehandlingService,
+                saksbehandlerService = saksbehandlerService,
+                aktivitetspliktService = applicationContext.aktivitetspliktService,
             )
         // Må bruke ConnectionAutoclosingImpl for å at den skal kaste exception hvis ikke den er wrappet med inTransaction
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryWrapperDatabase(
-                    VilkaarsvurderingRepository(ConnectionAutoclosingImpl(ds), DelvilkaarRepository()),
-                ),
+                VilkaarsvurderingDao(ConnectionAutoclosingImpl(ds), DelvilkaarDao()),
                 behandlingService,
                 grunnlagKlient,
                 behandlingStatus,

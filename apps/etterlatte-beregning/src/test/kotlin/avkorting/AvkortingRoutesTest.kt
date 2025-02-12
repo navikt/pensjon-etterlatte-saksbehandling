@@ -44,6 +44,7 @@ class AvkortingRoutesTest {
     private val avkortingService = mockk<AvkortingService>()
     private val avkortingTidligAlderspensjonService = mockk<AvkortingTidligAlderspensjonService>()
     private val aarligInntektsjusteringService = mockk<AarligInntektsjusteringService>()
+    private val mottattInntektsjusteringService = mockk<MottattInntektsjusteringService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -58,7 +59,7 @@ class AvkortingRoutesTest {
 
     @Test
     fun `skal returnere 204 naar avkorting ikke finnes`() {
-        coEvery { avkortingService.hentAvkorting(any(), any()) } returns null
+        coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(any(), any()) } returns null
 
         testApplication {
             val response =
@@ -186,6 +187,7 @@ class AvkortingRoutesTest {
                     behandlingKlient,
                     avkortingTidligAlderspensjonService,
                     aarligInntektsjusteringService,
+                    mottattInntektsjusteringService,
                 )
             }
             block(this)

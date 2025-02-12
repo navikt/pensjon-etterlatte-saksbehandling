@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
+import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -172,6 +173,25 @@ internal class BeregningRepositoryTest(
         assertNull(overstyrBeregningSlettet)
     }
 
+    @Test
+    fun `skal lagre og hente en beregningsperiode uten har_foreldreloessats satt`() {
+        val beregning =
+            beregning()
+                .copy(
+                    beregningsperioder =
+                        listOf(
+                            beregningsperiode()
+                                .copy(harForeldreloessats = null),
+                        ),
+                )
+
+        beregningRepository.lagreEllerOppdaterBeregning(beregning)
+
+        val beregningHentet = beregningRepository.hent(beregning.behandlingId)
+
+        assertTrue(beregningHentet!!.beregningsperioder.all { it.harForeldreloessats == null })
+    }
+
     private fun beregning(
         behandlingId: UUID = randomUUID(),
         datoFOM: YearMonth = YearMonth.of(2021, 2),
@@ -207,6 +227,7 @@ internal class BeregningRepositoryTest(
                     regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                     kunEnJuridiskForelder = true,
+                    harForeldreloessats = true,
                 ),
             ),
         overstyrBeregning = overstyrBeregning,

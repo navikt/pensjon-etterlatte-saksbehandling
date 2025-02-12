@@ -100,7 +100,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
           </BodyLong>
           <br />
           <div className="flex">
-            <Button size="small" variant="danger" onClick={() => setIsOpen(true)} icon={<XMarkIcon />}>
+            <Button size="small" variant="danger" onClick={() => setIsOpen(true)} icon={<XMarkIcon aria-hidden />}>
               Annuller behandling
             </Button>
           </div>

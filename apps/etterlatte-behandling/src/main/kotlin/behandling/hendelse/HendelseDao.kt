@@ -33,10 +33,11 @@ class HendelseDao(
         saksbehandler: String,
         kommentar: String? = null,
         valgtBegrunnelse: String? = null,
+        overstyrtInntruffet: Tidspunkt? = null,
     ) = lagreHendelse(
         UlagretHendelse(
             hendelse = "BEHANDLING:AVBRUTT",
-            inntruffet = Tidspunkt.now(),
+            inntruffet = overstyrtInntruffet ?: Tidspunkt.now(),
             vedtakId = null,
             behandlingId = behandling.id,
             sakId = behandling.sak.id,
@@ -271,7 +272,7 @@ class HendelseDao(
 
                 stmt.executeUpdate()
 
-                logger.info("lagret hendelse: $hendelse")
+                logger.info("lagret hendelse for sak: ${hendelse.sakId} behandlingid: ${hendelse.behandlingId}")
             }
         }
 }

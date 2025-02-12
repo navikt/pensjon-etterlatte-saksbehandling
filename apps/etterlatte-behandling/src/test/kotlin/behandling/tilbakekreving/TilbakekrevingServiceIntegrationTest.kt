@@ -42,7 +42,9 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
 import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
@@ -52,7 +54,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.toUUID30
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -66,7 +70,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random
 
@@ -241,7 +244,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal avbryte tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns 1L
+        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
@@ -291,7 +294,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     fun `skal oppdatere kravgrunnlag og perioder i tilbakekrevingsbehandling`() {
         val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
 
-        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns 1L
+        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
         coEvery { tilbakekrevingKlient.hentKravgrunnlag(any(), any(), any()) } returns
             kravgrunnlag(sak).copy(kontrollFelt = Kontrollfelt("ny_verdi"))
@@ -316,16 +319,17 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         // Nye perioder skal ha resatt verdiene som skal vurderes
         with(tilbakekrevingMedNyePerioder.tilbakekreving) {
             perioder.size shouldBe tilbakekreving.tilbakekreving.perioder.size
-            perioder.forEach {
-                with(it.ytelse) {
-                    bruttoTilbakekreving shouldBe null
-                    skatt shouldBe null
-                    resultat shouldBe null
-                    rentetillegg shouldBe null
-                    skyld shouldBe null
-                    tilbakekrevingsprosent shouldBe null
-                    beregnetFeilutbetaling shouldBe null
-                    nettoTilbakekreving shouldBe null
+            perioder.forEach { perioder ->
+                perioder.tilbakekrevingsbeloep.filter { it.klasseType == KlasseType.YTEL.name }.forEach {
+                    with(it) {
+                        skatt shouldBe null
+                        resultat shouldBe null
+                        rentetillegg shouldBe null
+                        skyld shouldBe null
+                        tilbakekrevingsprosent shouldBe null
+                        beregnetFeilutbetaling shouldBe null
+                        nettoTilbakekreving shouldBe null
+                    }
                 }
             }
         }
@@ -341,7 +345,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal fatte vedtak for tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns 1L
+        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
@@ -397,7 +401,6 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal fatte og attestere vedtak for tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns tilbakekrevingsvedtak(saksbehandler, enhet)
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
         coEvery { brevApiKlient.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
         coEvery { tilbakekrevingKlient.sendTilbakekrevingsvedtak(any(), any()) } just runs
@@ -406,6 +409,9 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns
+            tilbakekrevingsvedtak(saksbehandler, tilbakekreving.id, enhet)
 
         // Tildeler oppgaven til saksbehandler
         inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident) }
@@ -452,8 +458,15 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             valgtBegrunnelse shouldBe null
         }
 
-        rapid.publiserteMeldinger.size shouldBe 3
-        rapid.publiserteMeldinger.last().let { melding ->
+        rapid.publiserteMeldinger.size shouldBe 4
+        rapid.publiserteMeldinger[2].let { melding ->
+            objectMapper.readTree(melding.verdi).let {
+                it[EVENT_NAME_KEY].textValue() shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()
+                it[SKAL_SENDE_BREV].booleanValue() shouldBe true
+                it["vedtak"] shouldNotBe null
+            }
+        }
+        rapid.publiserteMeldinger[3].let { melding ->
             objectMapper.readTree(melding.verdi).let {
                 it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.ATTESTERT.lagEventnameForType()
                 it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
@@ -465,7 +478,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal fatte og underkjenne vedtak for tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.underkjennVedtakTilbakekreving(any(), any()) } returns 1L
+        coEvery { vedtakKlient.underkjennVedtakTilbakekreving(any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
@@ -530,31 +543,46 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     private fun tilbakekrevingsvedtak(
         saksbehandler: BrukerTokenInfo,
+        behandlingId: UUID,
         enhet: Enhetsnummer,
-    ): TilbakekrevingVedtakLagretDto =
-        TilbakekrevingVedtakLagretDto(
-            id = 1L,
-            fattetAv = saksbehandler.ident(),
-            enhet = enhet,
-            dato = LocalDate.now(),
-        )
+    ): VedtakDto =
+        mockk(relaxed = true) {
+            every { id } returns 1
+            every { this@mockk.behandlingId } returns behandlingId
+            every { vedtakFattet } returns
+                VedtakFattet(
+                    ansvarligSaksbehandler = saksbehandler.ident(),
+                    ansvarligEnhet = enhet,
+                    tidspunkt = Tidspunkt.now(),
+                )
+        }
+
+    private fun vedtak(): VedtakDto =
+        mockk {
+            every { id } returns 1
+        }
 
     private fun tilbakekrevingPerioder(tilbakekreving: TilbakekrevingBehandling) = listOf(oppdatertPeriode(tilbakekreving))
 
     private fun oppdatertPeriode(tilbakekreving: TilbakekrevingBehandling): TilbakekrevingPeriode =
         tilbakekreving.tilbakekreving.perioder.first().let {
             it.copy(
-                ytelse =
-                    it.ytelse.copy(
-                        beregnetFeilutbetaling = 100,
-                        bruttoTilbakekreving = 100,
-                        nettoTilbakekreving = 100,
-                        skatt = 10,
-                        skyld = TilbakekrevingSkyld.BRUKER,
-                        resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
-                        tilbakekrevingsprosent = 100,
-                        rentetillegg = 10,
-                    ),
+                tilbakekrevingsbeloep =
+                    it.tilbakekrevingsbeloep
+                        .filter { beloep ->
+                            beloep.klasseType == KlasseType.YTEL.name
+                        }.map { beloep ->
+                            beloep.copy(
+                                beregnetFeilutbetaling = 100,
+                                bruttoTilbakekreving = 100,
+                                nettoTilbakekreving = 100,
+                                skatt = 10,
+                                skyld = TilbakekrevingSkyld.BRUKER,
+                                resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
+                                tilbakekrevingsprosent = 100,
+                                rentetillegg = 10,
+                            )
+                        },
             )
         }
 

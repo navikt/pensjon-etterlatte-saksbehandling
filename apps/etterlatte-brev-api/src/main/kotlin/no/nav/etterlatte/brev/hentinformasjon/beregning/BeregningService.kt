@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
@@ -65,7 +66,9 @@ class BeregningService(
 
         // ved manuelt overstyrt beregning har vi ikke grunnlag
         return beregningsGrunnlag?.beregningsMetode?.beregningsMetode
-            ?: requireNotNull(it.beregningsMetode)
+            ?: krevIkkeNull(it.beregningsMetode) {
+                "Beregningsmetode mangler"
+            }
     }
 
     suspend fun finnUtbetalingsinfoNullable(
@@ -91,9 +94,13 @@ class BeregningService(
                     trygdetidForIdent = it.trygdetidForIdent,
                     prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
-                    beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
+                    beregningsMetodeAnvendt =
+                        krevIkkeNull(it.beregningsMetode) {
+                            "Beregningsmetode mangler"
+                        },
                     beregningsMetodeFraGrunnlag = finnBeregningsmetodeIGrunnlag(beregningsGrunnlag, it),
                     avdoedeForeldre = it.avdoedeForeldre,
+                    harForeldreloessats = it.harForeldreloessats,
                 )
             }
 
@@ -101,6 +108,7 @@ class BeregningService(
         val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else 1
 
         return Utbetalingsinfo(
+            beregning.overstyrBeregning != null,
             antallBarn,
             Kroner(beregningsperioder.hentUtbetaltBeloep()),
             virkningstidspunkt.atDay(1),
@@ -116,7 +124,7 @@ class BeregningService(
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkortingsinfo =
-        checkNotNull(
+        krevIkkeNull(
             finnAvkortingsinfoNullable(
                 behandlingId,
                 sakType,
@@ -177,7 +185,8 @@ class BeregningService(
         return Avkortingsinfo(
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
-            beregningOgAvkorting.endringIUtbetalingVedVirk,
+            endringIUtbetalingVedVirk = beregningOgAvkorting.endringIUtbetalingVedVirk,
+            erInnvilgelsesaar = beregningOgAvkorting.erInnvilgelsesaar,
         )
     }
 }

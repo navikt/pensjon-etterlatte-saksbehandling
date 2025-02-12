@@ -2,6 +2,8 @@ package no.nav.etterlatte.trygdetid.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -14,6 +16,7 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientImpl
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -25,7 +28,14 @@ class ApplicationContext {
             password = properties.dbPassword,
         )
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
+    private val avtaleRepository = AvtaleRepository(dataSource)
+
     val behandlingKlient = BehandlingKlient(config, httpClient())
+    val vedtaksvurderingKlient = VedtaksvurderingKlientImpl(config, httpClient())
+    val avtaleService = AvtaleService(avtaleRepository)
+
+    val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
+
     val trygdetidService =
         TrygdetidServiceImpl(
             TrygdetidRepository(dataSource),
@@ -33,7 +43,14 @@ class ApplicationContext {
             grunnlagKlient = grunnlagKlient,
             beregnTrygdetidService = TrygdetidBeregningService,
             pesysKlient = PesysKlientImpl(config, httpClient()),
+            avtaleService = avtaleService,
+            vedtaksvurderingKlient = vedtaksvurderingKlient,
         )
-    private val avtaleRepository = AvtaleRepository(dataSource)
-    val avtaleService = AvtaleService(avtaleRepository)
 }
+
+private fun featureToggleProperties(config: Config) =
+    FeatureToggleProperties(
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+    )

@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -32,6 +33,7 @@ import no.nav.etterlatte.oppgave.OppgaveKanIkkeEndres
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.sak.SakService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -62,9 +64,13 @@ class AktivitetspliktOppgaveServiceTest {
             enhet = Enheter.defaultEnhet.enhetNr,
         )
 
-    @BeforeEach
-    fun setupMocks() {
+    @AfterEach
+    fun afterEach() {
         clearAllMocks()
+    }
+
+    @BeforeEach
+    fun beforeEach() {
         every { sakService.finnSak(sak.id) } returns sak
     }
 
@@ -78,8 +84,16 @@ class AktivitetspliktOppgaveServiceTest {
             )
 
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
-        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns AktivitetspliktVurdering(emptyList(), emptyList())
-        every { aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgave.id) } returns null
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns
+            AktivitetspliktVurdering(
+                emptyList(),
+                emptyList(),
+            )
+        every { aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgave.id) } returns
+            AktivitetspliktVurdering(
+                emptyList(),
+                emptyList(),
+            )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgave.id) } returns null
 
         service.hentVurderingForOppgave(oppgave.id)
@@ -97,7 +111,11 @@ class AktivitetspliktOppgaveServiceTest {
             ).copy(status = Status.AVBRUTT)
 
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
-        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns AktivitetspliktVurdering(emptyList(), emptyList())
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns
+            AktivitetspliktVurdering(
+                emptyList(),
+                emptyList(),
+            )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgave.id) } returns null
         service.hentVurderingForOppgave(oppgave.id)
 
@@ -163,7 +181,15 @@ class AktivitetspliktOppgaveServiceTest {
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
 
-        val skalIkkeSendebrev = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, false, kilde = kilde)
+        val skalIkkeSendebrev =
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                null,
+                false,
+                kilde = kilde,
+                spraak = Spraak.NB,
+            )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
         assertThrows<BrevFeil> {
             service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
@@ -180,6 +206,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
                 every { sakId } returns sakIdForOppgave
+                every { id } returns oppgaveId
                 every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
@@ -193,10 +220,15 @@ class AktivitetspliktOppgaveServiceTest {
                 redusertEtterInntekt = true,
                 utbetaling = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalsendeBrev
 
-        every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns AktivitetspliktVurdering(emptyList(), emptyList())
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns
+            AktivitetspliktVurdering(
+                emptyList(),
+                emptyList(),
+            )
         assertThrows<ManglerAktivitetsgrad> {
             service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         }
@@ -211,15 +243,29 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
             }
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
 
         val skalIkkeSendebrev =
-            AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, redusertEtterInntekt = true, kilde = kilde)
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                null,
+                true,
+                redusertEtterInntekt = true,
+                kilde = kilde,
+                spraak = Spraak.NB,
+            )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
-        assertThrows<ManglerBrevdata> { service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler) }
+        assertThrows<ManglerBrevdata> {
+            service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
+                oppgaveId,
+                simpleSaksbehandler,
+            )
+        }
         verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
         verify(exactly = 0) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
     }
@@ -234,9 +280,23 @@ class AktivitetspliktOppgaveServiceTest {
                 every { sakId } returns sakIdForOppgave
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
-        val skalIkkeSendebrev = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, utbetaling = true, kilde = kilde)
+        val skalIkkeSendebrev =
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                null,
+                true,
+                utbetaling = true,
+                kilde = kilde,
+                spraak = Spraak.NB,
+            )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
-        assertThrows<ManglerBrevdata> { service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler) }
+        assertThrows<ManglerBrevdata> {
+            service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
+                oppgaveId,
+                simpleSaksbehandler,
+            )
+        }
     }
 
     @Test
@@ -246,12 +306,14 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
             }
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
 
-        val brevIdfinnes = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, 2L, true, kilde = kilde)
+        val brevIdfinnes =
+            AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, 2L, true, kilde = kilde, spraak = Spraak.NB)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns brevIdfinnes
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
@@ -265,6 +327,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
@@ -288,7 +351,6 @@ class AktivitetspliktOppgaveServiceTest {
             mockk {
                 every { aktivitet } returns listOf(aksgrad)
             }
-        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, any()) } returns 1
 
         val skalSendeBrev =
             AktivitetspliktInformasjonBrevdata(
@@ -299,12 +361,16 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
+        val brevId = 1L
         coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
             mockk {
-                every { id } returns 1L
+                every { id } returns brevId
             }
+        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, brevId) } just Runs
+
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
         verify(exactly = 1) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
@@ -317,6 +383,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
@@ -340,7 +407,7 @@ class AktivitetspliktOppgaveServiceTest {
             mockk {
                 every { aktivitet } returns listOf(aksgrad)
             }
-        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, any()) }
 
         val skalSendeBrev =
             AktivitetspliktInformasjonBrevdata(
@@ -351,6 +418,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
         coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
@@ -371,6 +439,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = sak.id
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { status } returns Status.AVBRUTT
             }
@@ -386,10 +455,15 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
-        every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } throws OppgaveKanIkkeEndres(oppgaveId, Status.AVBRUTT)
+        every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } throws
+            OppgaveKanIkkeEndres(
+                oppgaveId,
+                Status.AVBRUTT,
+            )
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
-        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.DISTRIBUERT)
 
         assertThrows<FeilIOppgave> {
@@ -405,6 +479,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = sak.id
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { status } returns Status.UNDER_BEHANDLING
             }
@@ -420,14 +495,21 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } just Runs
-        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.DISTRIBUERT)
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns
+            AktivitetspliktVurdering(
+                emptyList(),
+                emptyList(),
+            )
+        every { aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(any(), any()) } just Runs
         service.ferdigstillBrevOgOppgave(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) }
-        coVerify(exactly = 1) { brevApiKlient.ferdigstillBrev(any(), any()) }
+        coVerify(exactly = 1) { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) }
     }
 
     @Test
@@ -437,6 +519,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = sak.id
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
             }
 
@@ -452,10 +535,11 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } just Runs
-        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.JOURNALFOERT)
         assertThrows<BrevBleIkkeFerdig> {
             service.ferdigstillBrevOgOppgave(oppgaveId, simpleSaksbehandler)
@@ -484,6 +568,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
         assertThrows<OppgaveErAvsluttet> {
@@ -513,8 +598,9 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
-        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } just Runs
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
@@ -546,8 +632,9 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
-        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
@@ -579,8 +666,9 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
-        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(true)
 

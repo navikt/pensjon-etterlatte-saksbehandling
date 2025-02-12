@@ -9,7 +9,7 @@ import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
@@ -482,7 +483,7 @@ class KlageServiceImpl(
 
         sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "attestere vedtak")
 
-        checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
+        krevIkkeNull(klage.utfall as? KlageUtfallMedData.Avvist) {
             "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
         }
 
@@ -608,10 +609,7 @@ class KlageServiceImpl(
             klage = klage,
             ekstradataInnstilling =
                 EkstradataInnstilling(
-                    // TODO EY-3627:
-                    //  Hvordan håndtere flere mottakere her? Kun bruke [MottakerType.HOVED]?
-                    //  Skal det i det hele tatt være mulig å ha flere mottakere på en innstilling?
-                    mottakerInnstilling = brevMottakerTilKlageMottaker(ferdigstillResultat.oversendelsesbrev.mottakere.single()),
+                    mottakerInnstilling = mapMottakerInnstilling(klage.innkommendeDokument?.innsender, ferdigstillResultat),
                     // TODO: Håndter verge
                     vergeEllerFullmektig = null,
                     journalpostInnstillingsbrev = ferdigstillResultat.notatTilKa.journalpostId,
@@ -621,6 +619,28 @@ class KlageServiceImpl(
                     // TODO: hent ut vedtaksbrev for vedtaket
                     journalpostVedtak = null,
                 ),
+        )
+    }
+
+    private fun mapMottakerInnstilling(
+        innsender: String?,
+        resultat: FerdigstillResultat,
+    ): KlageMottaker {
+        val mottakere = resultat.oversendelsesbrev.mottakere
+
+        val brevMottaker =
+            if (mottakere.size > 1) {
+                mottakere.find { it.foedselsnummer?.value == innsender }
+                    ?: mottakere.single { it.type == MottakerType.HOVED }
+            } else {
+                mottakere.singleOrNull()
+                    ?: throw InternfeilException("Mangler mottaker på klageinnstilling")
+            }
+
+        return KlageMottaker(
+            navn = brevMottaker.navn,
+            foedselsnummer = brevMottaker.foedselsnummer?.value?.let { Mottakerident(it) },
+            orgnummer = brevMottaker.orgnummer,
         )
     }
 
@@ -729,13 +749,6 @@ class KlageServiceImpl(
             else -> true
         }
 }
-
-fun brevMottakerTilKlageMottaker(brevMottaker: Mottaker): KlageMottaker =
-    KlageMottaker(
-        navn = brevMottaker.navn,
-        foedselsnummer = brevMottaker.foedselsnummer?.value?.let { Mottakerident(it) },
-        orgnummer = brevMottaker.orgnummer,
-    )
 
 class OmgjoeringMaaGjeldeEtVedtakException(
     klage: Klage,

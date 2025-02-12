@@ -14,7 +14,9 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.GrunnlagKlientTest
 import no.nav.etterlatte.PdltjenesterKlientTest
+import no.nav.etterlatte.SkjermingKlientTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -33,8 +35,9 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
+import no.nav.etterlatte.persongalleri
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -46,11 +49,20 @@ import java.util.UUID
 class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val norg2Klient = mockk<Norg2Klient>()
     private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
+    private val skjermingHttpKlient = spyk<SkjermingKlientTest>()
+    private val grunnlagKlient = spyk<GrunnlagKlientTest>() // test versjon så vi får data for andre random ting som er brukt
+    private val soeker = no.nav.etterlatte.soeker // Obs denne må matche med grunnlag sitt persongalleri
+    private val persongalleri = persongalleri()
 
     @BeforeEach
     fun start() =
-        startServer(norg2Klient = norg2Klient, pdlTjenesterKlient = pdltjenesterKlient)
-            .also { resetDatabase() }
+        startServer(
+            norg2Klient = norg2Klient,
+            pdlTjenesterKlient = pdltjenesterKlient,
+            skjermingKlient = skjermingHttpKlient,
+            grunnlagklient = grunnlagKlient,
+        ).also { resetDatabase() }
+            .also { coEvery { grunnlagKlient.hentPersongalleri(any()) } returns persongalleri }
 
     @AfterEach
     fun afterEach() {
@@ -59,8 +71,8 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne sette på skjerming og få satt ny enhet`() {
-        val fnr = SOEKER_FOEDSELSNUMMER.value
-
+        val fnr = soeker
+        coEvery { skjermingHttpKlient.personErSkjermet(any()) } returns false
         testApplication {
             val client =
                 runServerWithModule(mockOAuth2Server) {
@@ -80,6 +92,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 )
             } returns GeografiskTilknytning(kommune = "0301")
 
+            coEvery { skjermingHttpKlient.personErSkjermet(fnr) } returns false
             val sak: Sak =
                 client
                     .post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -94,6 +107,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             Assertions.assertNotNull(sak.id)
             Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
+            coEvery { skjermingHttpKlient.personErSkjermet(fnr) } returns true
             client
                 .post("egenansatt") {
                     addAuthToken(this@EgenAnsattRouteTest.systemBruker)
@@ -125,6 +139,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             // Denne skal alltid settes hvis noen blir skjermet hvis de ikke er adressebeskyttet(se test under)
             Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, saketterSkjerming.enhet)
 
+            coEvery { skjermingHttpKlient.personErSkjermet(fnr) } returns false
             val steinkjer = ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
             coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(steinkjer)
             client
@@ -161,7 +176,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal ikke sette skjerming hvis adressebeskyttet, og da beholde 2103 som enhet`() {
-        val fnr = SOEKER_FOEDSELSNUMMER.value
+        val fnr = soeker
 
         testApplication {
             val client =
@@ -176,6 +191,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             coEvery {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
             } returns AdressebeskyttelseGradering.UGRADERT
+
             coEvery {
                 pdltjenesterKlient.hentGeografiskTilknytning(
                     fnr,
@@ -205,7 +221,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sak.id,
-                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(fnr, INNSENDER_FOEDSELSNUMMER.value, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -214,6 +230,9 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         UUID.fromString(it.body())
                     }
 
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@EgenAnsattRouteTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -221,7 +240,6 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )

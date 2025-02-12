@@ -43,7 +43,7 @@ class PesysKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/sak/sammendragWonderful",
+                        url = "$resourceUrl/sak/sammendrag/v2",
                         additionalHeaders = mapOf("fnr" to fnr),
                     ),
                 brukerTokenInfo = bruker,
@@ -57,9 +57,9 @@ class PesysKlientImpl(
 data class SakSammendragResponse(
     val sakType: String,
     val sakStatus: Status,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     val fomDato: LocalDate?,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     val tomDate: LocalDate?,
 ) {
     companion object {

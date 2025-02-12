@@ -76,6 +76,10 @@ spec:
         flags:
           - name: max_connections
             value: "100"
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write'
   env:
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
@@ -95,6 +99,10 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-trygdetid
+    - name: INNTEKTSKOMPONENT_URL
+      value: https://team-inntekt-proxy.prod-fss-pub.nais.io/proxy/inntektskomponenten
+    - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
+      value: api://prod-fss.team-inntekt.inntektskomponenten/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

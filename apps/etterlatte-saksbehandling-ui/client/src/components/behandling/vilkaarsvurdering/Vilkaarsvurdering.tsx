@@ -24,6 +24,10 @@ import {
 import { isFailure, isInitial, isPending, mapFailure } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { ClickEvent, trackClick } from '~utils/amplitude'
+import { Tilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
+import { KopierVilkaarAvdoed } from '~components/behandling/vilkaarsvurdering/KopierVilkaarAvdoed'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -37,6 +41,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
+  const kopierVilkaarAvdoedEnabled = useFeaturetoggle(FeatureToggle.kopier_vilkaar_avdoed)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)
@@ -79,6 +84,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   const resetVilkaarsvurdering = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
+
+    trackClick(ClickEvent.SLETT_VILKAARSVURDERING)
     slettGammelVilkaarsvurdering(behandlingId, () => {
       dispatch(updateVilkaarsvurdering(undefined))
       createVilkaarsvurdering(behandlingId, false)
@@ -125,6 +132,14 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             </AlertWrapper>
           )}
 
+          <Box paddingInline="16" paddingBlock="16 4">
+            {kopierVilkaarAvdoedEnabled &&
+              behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+              vilkaarsvurdering.resultat == null && (
+                <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
+              )}
+          </Box>
+
           {vilkaarsvurdering.vilkaar.map((value, index) => (
             <ManueltVilkaar
               key={index}
@@ -134,6 +149,25 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
             />
           ))}
+          {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+            <Box paddingInline="16">
+              <Tilbakemelding
+                spoersmaal="Hvor fornøyd er du med informasjonen fra bruker i søknaden?"
+                clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER_FOERSTEGANGSBEHANDLING}
+                behandlingId={behandlingId}
+              />
+            </Box>
+          )}
+
+          {behandling.behandlingType === IBehandlingsType.REVURDERING && (
+            <Box paddingInline="16">
+              <Tilbakemelding
+                spoersmaal="Hvor fornøyd er du med informasjonen som er meldt inn fra bruker?"
+                clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER_REVURDERING}
+                behandlingId={behandling.id}
+              />
+            </Box>
+          )}
 
           <Resultat
             setRedigerTotalvurdering={setRedigerTotalvurdering}

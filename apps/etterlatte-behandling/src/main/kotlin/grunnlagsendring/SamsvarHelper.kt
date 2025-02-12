@@ -12,6 +12,7 @@ import no.nav.etterlatte.common.klienter.hentUtland
 import no.nav.etterlatte.common.klienter.hentVergemaal
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -81,7 +82,10 @@ internal fun finnSamsvarForHendelse(
         }
 
         GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR -> {
-            SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar(false) // TODO("Må finne ut av denne")
+            samsvarFolkeregisterIdent(
+                identPdl = pdlData.foedselsnummer.verdi,
+                identGrunnlag = grunnlag?.soeker?.hentFoedselsnummer()?.verdi,
+            )
         }
 
         GrunnlagsendringsType.BOSTED -> {
@@ -99,6 +103,15 @@ internal fun finnSamsvarForHendelse(
         }
     }
 }
+
+fun samsvarFolkeregisterIdent(
+    identPdl: Folkeregisteridentifikator?,
+    identGrunnlag: Folkeregisteridentifikator?,
+) = SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar(
+    fraPdl = identPdl,
+    fraGrunnlag = identGrunnlag,
+    samsvar = identPdl == identGrunnlag,
+)
 
 fun samsvarDoedsdatoer(
     doedsdatoPdl: LocalDate?,

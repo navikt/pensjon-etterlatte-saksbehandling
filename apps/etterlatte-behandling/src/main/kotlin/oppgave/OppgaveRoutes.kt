@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -32,18 +33,20 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
-
-class ManglerReferanseException(
-    msg: String,
-) : UgyldigForespoerselException(
-        code = "MÅ_HA_REFERANSE",
-        detail = msg,
-    )
+import java.util.UUID
 
 inline val PipelineContext<*, ApplicationCall>.referanse: String
     get() =
-        call.parameters["referanse"] ?: throw ManglerReferanseException(
-            "Mangler referanse i requestem",
+        call.parameters["referanse"] ?: throw UgyldigForespoerselException(
+            code = "REFERANSE_MANGLER",
+            detail = "Mangler referanse i forespørselen",
+        )
+
+inline val PipelineContext<*, ApplicationCall>.gruppeId: String
+    get() =
+        call.parameters["gruppeId"] ?: throw UgyldigForespoerselException(
+            code = "GRUPPEID_MANGLER",
+            detail = "Mangler gruppeId i forespørselen",
         )
 
 const val VISALLE = "VISALLE"
@@ -92,6 +95,19 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        get("/gruppe/{gruppeId}") {
+            kunSaksbehandler {
+                val type = OppgaveType.valueOf(call.request.queryParameters["type"]!!)
+
+                val oppgaver =
+                    inTransaction {
+                        service.hentOppgaverForGruppeId(gruppeId, type)
+                    }
+
+                call.respond(oppgaver)
+            }
+        }
+
         get("/referanse/{referanse}/underbehandling") {
             kunSaksbehandler {
                 val oppgave =
@@ -131,6 +147,21 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     call.respond(HttpStatusCode.OK)
                 }
             }
+
+            post("/tildel") {
+                kunSaksbehandler {
+                    val request = call.receive<TildelingBulkRequest>()
+
+                    inTransaction {
+                        request.oppgaver
+                            .forEach { oppgaveId ->
+                                service.tildelSaksbehandler(oppgaveId, request.saksbehandler)
+                            }
+                    }
+
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
         }
 
         route("/sak/{$SAKID_CALL_PARAMETER}") {
@@ -140,7 +171,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 }
             }
 
-            // TODO: Standardisere opprettelse av oppgave
             post("/opprett") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val nyOppgaveDto = call.receive<NyOppgaveDto>()
@@ -153,7 +183,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                                 kilde = nyOppgaveDto.oppgaveKilde,
                                 type = nyOppgaveDto.oppgaveType,
                                 merknad = nyOppgaveDto.merknad,
-                                frist = null,
+                                frist = nyOppgaveDto.frist,
                                 saksbehandler = nyOppgaveDto.saksbehandler,
                             )
                         }
@@ -223,6 +253,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     call.respond(HttpStatusCode.OK)
                 }
             }
+
             put("frist") {
                 kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
@@ -270,6 +301,16 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        get("/referanse/{referanse}") {
+            kunSystembruker {
+                call.respond(
+                    inTransaction {
+                        service.hentOppgaverForReferanse(referanse)
+                    },
+                )
+            }
+        }
+
         put("ventefrist-gaar-ut") {
             val request = call.receive<VentefristGaarUtRequest>()
             val oppgaver =
@@ -289,6 +330,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
     }
 }
 
-internal data class GosysOppgaveversjon(
-    val versjon: Long,
+internal data class TildelingBulkRequest(
+    val saksbehandler: String,
+    val oppgaver: List<UUID>,
 )

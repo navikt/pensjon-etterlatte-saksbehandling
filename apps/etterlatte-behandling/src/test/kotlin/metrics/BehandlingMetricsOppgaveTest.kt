@@ -51,7 +51,7 @@ internal class BehandlingMetricsOppgaveTest(
         nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
 
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
-        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)))
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveMetrikkerDao = OppgaveMetrikkerDao(ds)
@@ -148,6 +148,7 @@ internal class BehandlingMetricsOppgaveTest(
         sakId = sak.id,
         kilde = OppgaveKilde.BEHANDLING,
         referanse = "referanse",
+        gruppeId = null,
         merknad = "merknad",
         opprettet = Tidspunkt.now(),
         sakType = sak.sakType,

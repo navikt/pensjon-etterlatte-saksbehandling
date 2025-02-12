@@ -62,6 +62,7 @@ sealed class Behandling {
     abstract val virkningstidspunkt: Virkningstidspunkt?
     abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
+    abstract val soeknadMottattDato: LocalDateTime?
     abstract val kilde: Vedtaksloesning
     abstract val sendeBrev: Boolean
     abstract val opphoerFraOgMed: YearMonth?
@@ -80,7 +81,12 @@ sealed class Behandling {
     fun mottattDato(): LocalDateTime? =
         when (this) {
             is Foerstegangsbehandling -> this.soeknadMottattDato
-            else -> this.behandlingOpprettet
+            else -> {
+                when (revurderingsaarsak()) {
+                    Revurderingaarsak.INNTEKTSENDRING -> this.soeknadMottattDato
+                    else -> this.behandlingOpprettet
+                }
+            }
         }
 
     fun gyldighetsproeving(): GyldighetsResultat? =
@@ -127,7 +133,7 @@ sealed class Behandling {
                 "Denne behandlingstypen støtter ikke oppdatering av videreført opphør.",
         )
 
-    open fun oppdaterTidligereFamiliepleier(tidligereFamililiepleier: TidligereFamiliepleier): Behandling =
+    open fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere tidligere famililiepleier på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av tidligere famililiepleier.",
@@ -250,6 +256,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         relatertBehandlingId = relatertBehandlingId,
         tidligereFamiliepleier = tidligereFamiliepleier,
         erSluttbehandling = erSluttbehandling(),
+        mottattDato = mottattDato(),
     )
 
 fun Behandling.toBehandlingSammendrag() =

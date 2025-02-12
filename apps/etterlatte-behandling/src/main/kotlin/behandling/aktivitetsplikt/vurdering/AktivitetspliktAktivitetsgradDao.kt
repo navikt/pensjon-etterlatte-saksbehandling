@@ -8,7 +8,8 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
@@ -26,14 +27,14 @@ class AktivitetspliktAktivitetsgradDao(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun upsertAktivitetsgradForOppgave(
+    fun upsertAktivitetsgradForOppgaveEllerBehandling(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
-        checkInternFeil(oppgaveId != null || behandlingId != null) {
+        krev(oppgaveId != null || behandlingId != null) {
             "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave. $sakId"
         }
 
@@ -67,7 +68,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setString(11, aktivitetsgrad.skjoennsmessigVurdering?.name)
             stmt.setBoolean(12, aktivitetsgrad.vurdertFra12Mnd)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Endret eller satt ikke inn vurdering for sakid: $sakId oppgaveId: $oppgaveId behandlingId: $behandlingId"
+            }
         }
     }
 
@@ -102,7 +106,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(8, aktivitetsgrad.id)
             stmt.setObject(9, behandlingId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Oppdaterte ikke aktivitetsgrad for behandlingId: $behandlingId aktivitetsgradid: ${aktivitetsgrad.id}"
+            }
         }
     }
 
@@ -146,7 +153,7 @@ class AktivitetspliktAktivitetsgradDao(
                 if (behandlingId != null) {
                     hentAktivitetsgradForBehandling(UUID.fromString(behandlingId))
                 } else {
-                    requireNotNull(oppgaveId) {
+                    krevIkkeNull(oppgaveId) {
                         "Har en vurdering av aktivitet som ikke er knyttet til en oppgave eller en behandling"
                     }
                     hentAktivitetsgradForOppgave(UUID.fromString(oppgaveId))
@@ -228,7 +235,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, behandlingId)
 
-            stmt.executeUpdate()
+            val slettet = stmt.executeUpdate()
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetsgrad for behandlingid: $behandlingId aktivitetId: $aktivitetId")
+            }
         }
     }
 
@@ -247,7 +257,9 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, oppgaveId)
             val slettet = stmt.executeUpdate()
-            logger.info("Slettet $slettet aktivitetsgrader for oppgave $oppgaveId")
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetsgrad for oppgaveId: $oppgaveId aktivitetId: $aktivitetId")
+            }
         }
     }
 

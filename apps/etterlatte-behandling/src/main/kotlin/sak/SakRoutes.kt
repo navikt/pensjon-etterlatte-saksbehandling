@@ -19,12 +19,15 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -39,12 +42,16 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
+import java.time.format.DateTimeParseException
+import java.util.UUID
 
 const val KJOERING = "kjoering"
 const val ANTALL = "antall"
+const val PLEIEFORHOLDET_OPPHOERTE_PARAMETER = "opphoerte"
 
 internal fun Route.sakSystemRoutes(
-    tilgangService: TilgangService,
+    tilgangService: TilgangServiceSjekker,
     sakService: SakService,
     behandlingService: BehandlingService,
     requestLogger: BehandlingRequestLogger,
@@ -77,6 +84,28 @@ internal fun Route.sakSystemRoutes(
                         },
                     ),
                 )
+            }
+        }
+
+        get("pleieforholdet-opphoerte/{${PLEIEFORHOLDET_OPPHOERTE_PARAMETER}}") {
+            kunSystembruker {
+                val maanedOpphoerte =
+                    try {
+                        call.parameters[PLEIEFORHOLDET_OPPHOERTE_PARAMETER]?.let {
+                            YearMonth.parse(it)
+                        } ?: throw UgyldigForespoerselException(
+                            "MANGLER_PARAMETER_MAANED_OPPHOERT",
+                            "Fikk ikke med nødvendig parameter for når pleieforholdet opphørte",
+                        )
+                    } catch (e: DateTimeParseException) {
+                        throw UgyldigForespoerselException(
+                            "FEIL_FORMAT_MAANED_OPPHOERT",
+                            "Kunne ikke parse ut YearMonth fra angitt parameter " +
+                                "${call.parameters[PLEIEFORHOLDET_OPPHOERTE_PARAMETER]}",
+                        )
+                    }
+                val opphoerte = inTransaction { sakService.hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte) }
+                call.respond(opphoerte)
             }
         }
 
@@ -140,7 +169,7 @@ internal fun Route.sakSystemRoutes(
     post("personer/saker/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType =
-                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
+                enumValueOf(krevIkkeNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
             val message = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(fnr = fnr.value, type) }
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/saker")
             call.respond(message)
@@ -150,7 +179,7 @@ internal fun Route.sakSystemRoutes(
     post("personer/getsak/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType =
-                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
+                enumValueOf(krevIkkeNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
 
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/getsak/{type}")
 
@@ -176,7 +205,7 @@ class SakIkkeFunnetException(
     )
 
 internal fun Route.sakWebRoutes(
-    tilgangService: TilgangService,
+    tilgangService: TilgangServiceSjekker,
     sakService: SakService,
     behandlingService: BehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
@@ -208,17 +237,81 @@ internal fun Route.sakWebRoutes(
                 )
             }
 
-            post("/endre_enhet") {
-                kunSaksbehandlerMedSkrivetilgang { navIdent ->
-                    val enhetrequest = call.receive<EnhetRequest>()
-                    try {
-                        if (enhetrequest.enhet !in Enheter.entries.map { it.enhetNr }) {
-                            throw UgyldigForespoerselException(
-                                code = "ENHET IKKE GYLDIG",
-                                detail = "enhet ${enhetrequest.enhet} er ikke i listen over gyldige enheter",
-                            )
+            get("/behandlinger/sisteIverksatte") {
+                logger.info("Henter siste iverksatte behandling for $sakId")
+
+                val sisteIverksatteBehandling =
+                    inTransaction {
+                        behandlingService
+                            .hentSisteIverksatte(sakId)
+                            ?.let { SisteIverksatteBehandling(it.id) }
+                    } ?: throw GenerellIkkeFunnetException()
+
+                call.respond(sisteIverksatteBehandling)
+            }
+
+            get("/endringer") {
+                kunSaksbehandler {
+                    logger.info("Henter endringer for sak ${sakId.sakId}")
+
+                    val saksendringer =
+                        inTransaction {
+                            sakService.hentSaksendringer(sakId)
                         }
 
+                    call.respond(saksendringer)
+                }
+            }
+
+            post("/oppdater-ident") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    val request = call.receive<OppdaterIdentRequest>()
+
+                    if (request.hendelseId == null && !request.utenHendelse) {
+                        throw InternfeilException("HendelseID mangler – kan ikke oppdatere ident på sak $sakId")
+                    }
+
+                    val oppdatertSak =
+                        inTransaction {
+                            val sak =
+                                sakService.finnSak(sakId)
+                                    ?: throw SakIkkeFunnetException("Fant ikke sak med id=$sakId")
+
+                            logger.info("Oppdaterer sak ${sak.id} og tilhørende oppgaver med nyeste ident fra PDL")
+
+                            val oppdatertSak = sakService.oppdaterIdentForSak(sak, brukerTokenInfo)
+                            oppgaveService.oppdaterIdentForOppgaver(oppdatertSak)
+
+                            behandlingService.hentAapneBehandlingerForSak(sakId).forEach {
+                                behandlingService.avbrytBehandling(
+                                    behandlingId = it.behandlingId,
+                                    saksbehandler = brukerTokenInfo,
+                                    aarsak = AarsakTilAvbrytelse.ENDRET_FOLKEREGISTERIDENT,
+                                    kommentar =
+                                        "Avbrytes pga. overføring av sak fra fnr. ${sak.ident} " +
+                                            "til ny ident ${oppdatertSak.ident}",
+                                )
+                            }
+
+                            if (request.hendelseId != null) {
+                                grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
+                                    hendelseId = request.hendelseId,
+                                    kommentar = "Sak er oppdatert med ny ident på bruker (fra=${sak.ident}, til=${oppdatertSak.ident})",
+                                    saksbehandler = saksbehandler,
+                                )
+                            }
+
+                            oppdatertSak
+                        }
+
+                    call.respond(oppdatertSak)
+                }
+            }
+
+            post("/endre-enhet") {
+                kunSaksbehandlerMedSkrivetilgang { navIdent ->
+                    val enhetrequest = call.receive<EnhetRequest>().validate()
+                    try {
                         inTransaction { sakService.finnSak(sakId) }
                             ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
@@ -229,7 +322,7 @@ internal fun Route.sakWebRoutes(
                             )
 
                         inTransaction {
-                            sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
+                            sakService.oppdaterEnhetForSak(sakMedEnhet, enhetrequest.kommentar)
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                         }
 
@@ -292,7 +385,7 @@ internal fun Route.sakWebRoutes(
                     val opprettHvisIkkeFinnes = call.request.queryParameters["opprettHvisIkkeFinnes"].toBoolean()
 
                     val type: SakType =
-                        requireNotNull(call.parameters["type"]) {
+                        krevIkkeNull(call.parameters["type"]) {
                             "Mangler påkrevd parameter {type} for å hente sak på bruker"
                         }.let { enumValueOf(it) }
 
@@ -324,10 +417,14 @@ internal fun Route.sakWebRoutes(
             post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
                     val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
-                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
-                        hendelse = arkivertHendelse,
-                        saksbehandler,
-                    )
+
+                    inTransaction {
+                        grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
+                            hendelseId = arkivertHendelse.id,
+                            kommentar = arkivertHendelse.kommentar,
+                            saksbehandler = saksbehandler,
+                        )
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -337,6 +434,22 @@ internal fun Route.sakWebRoutes(
 
 data class EnhetRequest(
     val enhet: Enhetsnummer,
+    val kommentar: String?,
+) {
+    fun validate(): EnhetRequest {
+        if (enhet !in Enheter.entries.map { it.enhetNr }) {
+            throw UgyldigForespoerselException(
+                code = "ENHET IKKE GYLDIG",
+                detail = "Enhet $enhet er ikke i listen over gyldige enheter",
+            )
+        }
+        return this
+    }
+}
+
+data class OppdaterIdentRequest(
+    val hendelseId: UUID?,
+    val utenHendelse: Boolean = false,
 )
 
 data class SakerDto(

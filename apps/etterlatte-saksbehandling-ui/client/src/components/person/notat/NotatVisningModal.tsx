@@ -14,7 +14,7 @@ export const NotatVisningModal = ({ notat }: { notat: Notat }) => {
 
   return (
     <>
-      <Button variant="primary" onClick={open} size="small" icon={<EyeIcon />}>
+      <Button variant="primary" onClick={open} size="small" icon={<EyeIcon aria-hidden />}>
         Vis
       </Button>
 

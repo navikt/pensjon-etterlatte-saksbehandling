@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class AutomatiskBehandlingService(
-    val service: VedtakBehandlingService,
-    val behandlingKlient: BehandlingKlient,
+    private val service: VedtakBehandlingService,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,7 +45,7 @@ class AutomatiskBehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
         logger.info("Håndterer behandling $behandlingId")
-        val vedtak = service.hentVedtakForBehandling(behandlingId, brukerTokenInfo)
+        val vedtak = service.hentVedtakForBehandling(behandlingId)
         if (vedtak != null) {
             logger.warn(
                 "Skal opprette og fatte vedtak, men har allerede et vedtak for behandlingen" +
@@ -87,8 +87,8 @@ class AutomatiskBehandlingService(
             behandlingKlient
                 .hentOppgaverForSak(sakId, brukerTokenInfo)
                 .filter { it.referanse == behandlingId.toString() }
-                .filter { it.status == Status.ATTESTERING }
-                .first()
+                .first { it.status == Status.ATTESTERING }
+
         behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
         return vedtakOgRapid
     }

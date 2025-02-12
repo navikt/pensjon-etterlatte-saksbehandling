@@ -6,7 +6,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.River
 
 const val EVENT_NAME_KEY = "@event_name"
-const val BEHOV_NAME_KEY = "@behov"
 const val CORRELATION_ID_KEY = "@correlation_id"
 const val TEKNISK_TID_KEY = "teknisk_tid"
 const val FEILENDE_STEG = "feilende_steg"

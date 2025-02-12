@@ -29,6 +29,8 @@ class DollyFeature(
         get() = "Opprett søknad automatisk via Dolly"
     override val path: String
         get() = "dolly"
+    override val kunEtterlatte: Boolean
+        get() = true
 
     override val routes: Route.() -> Unit
         get() = {
@@ -119,7 +121,8 @@ class DollyFeature(
                             )
                         }
 
-                    val noekkel = dollyService.sendSoeknad(request, brukerTokenInfo.ident(), Behandlingssteg.BEHANDLING_OPPRETTA)
+                    val noekkel =
+                        dollyService.sendSoeknad(request, brukerTokenInfo.ident(), Behandlingssteg.BEHANDLING_OPPRETTA)
 
                     call.respond(SoeknadResponse(200, noekkel).toJson())
                 } catch (e: Exception) {
@@ -141,6 +144,7 @@ data class NySoeknadRequest(
     val avdoed: String,
     val gjenlevende: String,
     val barn: List<String> = emptyList(),
+    val soeker: String? = null,
 )
 
 data class SoeknadResponse(

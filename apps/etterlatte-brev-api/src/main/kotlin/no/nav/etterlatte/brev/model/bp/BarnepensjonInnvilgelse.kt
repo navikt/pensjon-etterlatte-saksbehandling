@@ -6,18 +6,15 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
-import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
-import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.ManglerFrivilligSkattetrekk
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -25,7 +22,6 @@ import java.time.LocalDate
 data class BarnepensjonInnvilgelse(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
-    val etterbetaling: BarnepensjonEtterbetaling?,
     val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
@@ -34,6 +30,7 @@ data class BarnepensjonInnvilgelse(
     val harUtbetaling: Boolean,
     val erMigrertYrkesskade: Boolean,
     val erSluttbehandling: Boolean,
+    val erEtterbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -50,36 +47,31 @@ data class BarnepensjonInnvilgelse(
             erGjenoppretting: Boolean,
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
-        ): BarnepensjonInnvilgelse {
-            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
-            val frivilligSkattetrekk =
-                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
-                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
-
-            return BarnepensjonInnvilgelse(
+            landKodeverk: List<LandDto>,
+        ): BarnepensjonInnvilgelse =
+            BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
-                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, trygdetid, erForeldreloes = false, landKodeverk),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 erGjenoppretting = erGjenoppretting,
                 erMigrertYrkesskade = erMigrertYrkesskade,
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                frivilligSkattetrekk = frivilligSkattetrekk,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
+                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
                 erSluttbehandling = erSluttbehandling,
+                erEtterbetaling = etterbetaling != null,
             )
-        }
     }
 }
 
 data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
-    val avdoed: Avdoed,
+    val avdoed: Avdoed?,
     val senereAvdoed: Avdoed?,
     val sisteBeregningsperiodeDatoFom: LocalDate,
     val sisteBeregningsperiodeBeloep: Kroner,
@@ -87,6 +79,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val harFlereUtbetalingsperioder: Boolean,
     val erGjenoppretting: Boolean,
     val harUtbetaling: Boolean,
+    val erSluttbehandling: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -94,32 +87,25 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
             etterbetaling: EtterbetalingDTO?,
             avdoede: List<Avdoed>,
             systemkilde: Vedtaksloesning,
+            erSluttbehandling: Boolean,
         ): BarnepensjonInnvilgelseRedigerbartUtfall {
-            val beregningsperioder =
-                utbetalingsinfo.beregningsperioder.map {
-                    BarnepensjonBeregningsperiode.fra(it)
-                }
-
             val foersteAvdoed =
                 avdoede.minByOrNull { it.doedsdato }
-                    ?: throw UgyldigForespoerselException(
-                        code = "AVDOED_MED_DOEDSDATO_MANGLER",
-                        detail = "Ingen avdød med dødsdato",
-                    )
-            val senereAvdoed = avdoede.find { it.fnr != foersteAvdoed.fnr }
+
+            val senereAvdoed = foersteAvdoed?.let { avdoede.find { it.fnr != foersteAvdoed.fnr } }
 
             return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
                 avdoed = foersteAvdoed,
                 senereAvdoed = senereAvdoed,
                 sisteBeregningsperiodeDatoFom =
-                    beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
+                    utbetalingsinfo.beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
                         ?: throw UgyldigForespoerselException(
                             code = "INGEN_BEREGNINGSPERIODE_MED_FOM",
                             detail = "Ingen beregningsperiode med dato FOM",
                         ),
                 sisteBeregningsperiodeBeloep =
-                    beregningsperioder.maxByOrNull { it.datoFOM }?.utbetaltBeloep
+                    utbetalingsinfo.beregningsperioder.maxByOrNull { it.datoFOM }?.utbetaltBeloep
                         ?: throw UgyldigForespoerselException(
                             code = "INTET_UTBETALT_BELOEP",
                             detail = "Intet utbetalt beløp i siste beregningsperiode",
@@ -127,7 +113,8 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                erSluttbehandling = erSluttbehandling,
             )
         }
     }

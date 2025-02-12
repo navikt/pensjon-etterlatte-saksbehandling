@@ -27,6 +27,8 @@ on:
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-omregning-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/rapidsandrivers-extras/**
@@ -45,6 +47,8 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
+      - libs/etterlatte-omregning-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**

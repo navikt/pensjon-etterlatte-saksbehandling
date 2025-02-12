@@ -121,7 +121,7 @@ internal class BeregningRoutesTest {
     }
 
     @Test
-    fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling`() {
+    fun `skal returnere forbidden naar saksbehandler ikke har tilgang til behandling`() {
         val beregning = beregning()
 
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
@@ -137,7 +137,7 @@ internal class BeregningRoutesTest {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
-                    it.status shouldBe HttpStatusCode.NotFound
+                    it.status shouldBe HttpStatusCode.Forbidden
                 }
         }
     }

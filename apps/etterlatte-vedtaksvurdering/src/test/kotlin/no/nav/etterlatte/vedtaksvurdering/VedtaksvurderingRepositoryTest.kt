@@ -10,7 +10,9 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -89,6 +91,72 @@ internal class VedtaksvurderingRepositoryTest(
                 it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
                 it.vilkaarsvurdering shouldBe objectMapper.createObjectNode()
                 it.beregning shouldBe objectMapper.createObjectNode()
+                it.avkorting shouldBe avkorting
+                it.utbetalingsperioder.first().let { utbetalingsperiode ->
+                    utbetalingsperiode.id shouldNotBe null
+                    utbetalingsperiode.periode shouldBe Periode(YearMonth.of(2023, Month.JANUARY), null)
+                    utbetalingsperiode.beloep shouldBe BigDecimal.valueOf(100L)
+                    utbetalingsperiode.type shouldBe UtbetalingsperiodeType.UTBETALING
+                }
+            }
+        }
+    }
+
+    private fun lagAvkorting(ytelseEtterAvkorting: Int = 1000) =
+        AvkortingDto(
+            avkortingGrunnlag = listOf(),
+            avkortetYtelse =
+                listOf(
+                    AvkortetYtelseDto(
+                        fom = YearMonth.of(2024, Month.JANUARY),
+                        tom = YearMonth.of(2024, Month.APRIL),
+                        ytelseFoerAvkorting = 1700,
+                        ytelseEtterAvkorting = ytelseEtterAvkorting,
+                        avkortingsbeloep = 500,
+                        restanse = 0,
+                        sanksjon = null,
+                    ),
+                    AvkortetYtelseDto(
+                        fom = YearMonth.of(2024, Month.MAY),
+                        tom = YearMonth.of(2024, Month.JUNE),
+                        ytelseFoerAvkorting = 2500,
+                        ytelseEtterAvkorting = ytelseEtterAvkorting * 2,
+                        avkortingsbeloep = 500,
+                        restanse = 0,
+                        sanksjon = null,
+                    ),
+                ),
+        )
+
+    @Test
+    fun `skal opprette vedtak og kunne deserialisere innholdet`() {
+        val avkorting =
+            lagAvkorting().toObjectNode()
+
+        val nyttVedtak =
+            opprettVedtak(
+                avkorting = avkorting,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+            )
+
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        with(vedtak) {
+            vedtak shouldNotBe null
+            id shouldNotBe null
+            status shouldBe VedtakStatus.OPPRETTET
+            soeker shouldBe SOEKER_FOEDSELSNUMMER
+            sakId shouldBe sakId1
+            sakType shouldBe SakType.BARNEPENSJON
+            behandlingId shouldNotBe null
+            type shouldBe VedtakType.INNVILGELSE
+            innhold should beInstanceOf<VedtakInnhold.Behandling>()
+            (innhold as VedtakInnhold.Behandling).let {
+                it.behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+                it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
+                it.vilkaarsvurdering shouldBe objectMapper.createObjectNode()
+                it.beregning shouldBe objectMapper.createObjectNode()
+                it.revurderingAarsak shouldBe Revurderingaarsak.REGULERING
                 it.avkorting shouldBe avkorting
                 it.utbetalingsperioder.first().let { utbetalingsperiode ->
                     utbetalingsperiode.id shouldNotBe null
@@ -396,5 +464,24 @@ internal class VedtaksvurderingRepositoryTest(
         results.forEach {
             it.soeker shouldBe soeker2
         }
+    }
+
+    @Test
+    fun `skal hente vedtak for fnr selv om ikke saktype er spesifisert`() {
+        val soeker1 = Folkeregisteridentifikator.of(FNR_1)
+
+        val vedtak =
+            opprettVedtak(
+                sakId = SakId(10),
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.IVERKSATT,
+            )
+        repository.opprettVedtak(vedtak)
+        repository.iverksattVedtak(vedtak.behandlingId)
+
+        val results = repository.hentFerdigstilteVedtak(soeker1)
+
+        results.size shouldBe 1
     }
 }

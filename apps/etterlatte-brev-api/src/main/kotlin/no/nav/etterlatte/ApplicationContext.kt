@@ -61,6 +61,7 @@ import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
+import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
@@ -68,6 +69,7 @@ import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
@@ -97,6 +99,7 @@ internal class ApplicationContext {
     val grunnlagKlient = GrunnlagKlient(config, httpClient())
     val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     val beregningKlient = BeregningKlient(config, httpClient())
+    val pdltjenesterKlient = PdlTjenesterKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val oppgaveKlient = OppgaveKlient(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
@@ -108,7 +111,7 @@ internal class ApplicationContext {
 
     val beregningService = BeregningService(beregningKlient)
     val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
-    val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient)
+    val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient, pdltjenesterKlient)
 
     val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
     val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
@@ -180,10 +183,10 @@ internal class ApplicationContext {
             behandlingService,
         )
     val brevDataMapperFerdigstillVarsel =
-        BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, vilkaarsvurderingService)
+        BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService)
 
     val varselbrevService =
-        VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)
+        VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel, grunnlagKlient)
 
     val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
@@ -237,7 +240,11 @@ internal class ApplicationContext {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env.append(AZURE_APP_OUTBOUND_SCOPE) { requireNotNull(it.get(scope)) }
+                            env.append(AZURE_APP_OUTBOUND_SCOPE) { variabler ->
+                                krevIkkeNull(variabler[scope]) {
+                                    "Mangler outbound scope"
+                                }
+                            }
                     }
                 }
                 it.install(HttpTimeout)
@@ -252,6 +259,8 @@ enum class BrevKey : EnvEnum {
     CLAMAV_ENDPOINT_URL,
     REGOPPSLAG_SCOPE,
     REGOPPSLAG_URL,
+    ETTERLATTE_PDLTJENESTER_URL,
+    ETTERLATTE_PDLTJENESTER_CLIENT_ID,
     SAF_BASE_URL,
     SAF_SCOPE,
     ;

@@ -3,18 +3,23 @@ import { Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { VelgSaksbehandler } from '~components/oppgavebenk/gosys/VelgSaksbehandler'
 import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
-import React, { useState } from 'react'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { GosysBrukerWrapper } from '~components/oppgavebenk/gosys/GosysBrukerWrapper'
 import { GosysTemaTag } from '~shared/tags/GosysTemaTag'
+import { OppdatertOppgaveversjonResponseDto } from '~shared/api/gosys'
+import { OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 export const GosysOppgaveRow = (props: {
   oppgave: GosysOppgave
   saksbehandlereIEnhet: Array<Saksbehandler>
   skjulBruker?: boolean
+  oppdaterOppgaveTildeling: (
+    oppgaveId: number,
+    versjonDto: OppdatertOppgaveversjonResponseDto,
+    saksbehandler?: OppgaveSaksbehandler
+  ) => void
 }) => {
-  const [oppgave, setOppgave] = useState(props.oppgave)
-
+  const oppgave = props.oppgave
   return (
     <Table.Row>
       <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
@@ -35,7 +40,9 @@ export const GosysOppgaveRow = (props: {
         <VelgSaksbehandler
           saksbehandlereIEnhet={props.saksbehandlereIEnhet}
           oppgave={oppgave}
-          oppdaterTildeling={(saksbehandler) => setOppgave({ ...oppgave, saksbehandler })}
+          oppdaterTildeling={(oppgaveVersjonResponse, saksbehandler) =>
+            props.oppdaterOppgaveTildeling(oppgave.id, oppgaveVersjonResponse, saksbehandler)
+          }
         />
       </Table.DataCell>
       <Table.DataCell>

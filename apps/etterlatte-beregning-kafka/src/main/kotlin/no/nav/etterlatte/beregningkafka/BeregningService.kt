@@ -13,7 +13,8 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import java.util.UUID
 
 class BeregningService(
@@ -84,9 +85,17 @@ class BeregningService(
             }
         }
 
+    fun omregnMottattInntektsjustering(request: MottattInntektsjusteringAvkortigRequest): HttpResponse =
+        runBlocking {
+            beregningApp.post("$url/api/beregning/avkorting/mottatt-inntektsjustering") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+        }
+
     suspend fun hentGrunnbeloep(): Grunnbeloep =
         beregningApp
             .get("$url/api/beregning/grunnbeloep")
-            .also { checkInternFeil(it.status.isSuccess()) { "Kunne ikke hente grunnbeloep" } }
+            .also { krev(it.status.isSuccess()) { "Kunne ikke hente grunnbeloep" } }
             .body<Grunnbeloep>()
 }

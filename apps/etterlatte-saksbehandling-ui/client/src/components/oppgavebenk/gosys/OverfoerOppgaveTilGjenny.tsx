@@ -12,6 +12,7 @@ import { formaterSakstype } from '~utils/formatering/formatering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GOSYS_TEMA_FILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,
@@ -31,6 +32,8 @@ export const OverfoerOppgaveTilGjenny = ({
 
   const konverterTilGjennyoppgave = () => {
     if (!oppgave.bruker?.ident) throw Error('Kan ikke opprette sak i Gjenny uten fødselsnummer')
+
+    trackClick(ClickEvent.FLYTT_GOSYS_OPPGAVE)
 
     hentSak({ fnr: oppgave.bruker.ident, type: sakType!!, opprettHvisIkkeFinnes: skalOppretteSak }, (sak) => {
       if (!sak) return

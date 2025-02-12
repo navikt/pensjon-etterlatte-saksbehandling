@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.EtterbetalingResultat
 import no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
@@ -33,7 +34,7 @@ interface SamordningsKlient {
      */
     suspend fun samordneVedtak(
         vedtak: Vedtak,
-        etterbetaling: Boolean,
+        etterbetaling: EtterbetalingResultat,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
@@ -61,7 +62,7 @@ class SamordningsKlientImpl(
 
     override suspend fun samordneVedtak(
         vedtak: Vedtak,
-        etterbetaling: Boolean,
+        etterbetaling: EtterbetalingResultat,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         try {
@@ -88,7 +89,7 @@ class SamordningsKlientImpl(
         try {
             val response =
                 httpClient.get("$resourceUrl/api/vedtak") {
-                    header("pid", vedtak.soeker.value)
+                    header("pid", vedtak.soeker.value) // TODO: må endres til body når samhandlingsløsningen støtter dette
                     parameter("fagomrade", "EYO")
                     // parameter("sakId", "${vedtak.sakId}")  // FIXME retting i SAM ble prodsatt 29.05.2024. 6 ukers svarfrist...
                     if (!alleVedtak) {
@@ -142,7 +143,7 @@ class SamordningsKlientImpl(
     }
 }
 
-internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRequest {
+internal fun Vedtak.tilSamordneRequest(etterbetaling: EtterbetalingResultat): SamordneVedtakRequest {
     val innhold =
         when (this.innhold) {
             is VedtakInnhold.Behandling -> this.innhold
@@ -164,7 +165,8 @@ internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRe
                 ?.atEndOfMonth(),
         fagomrade = "EYO",
         ytelseType = "OMS",
-        etterbetaling = etterbetaling,
+        etterbetaling = etterbetaling.erEtterbetaling,
+        utvidetFrist = etterbetaling.harUtvidetFrist,
     )
 }
 
@@ -177,6 +179,7 @@ internal data class SamordneVedtakRequest(
     val fagomrade: String,
     val ytelseType: String,
     val etterbetaling: Boolean,
+    val utvidetFrist: Boolean,
 )
 
 private class SamordneVedtakRespons(

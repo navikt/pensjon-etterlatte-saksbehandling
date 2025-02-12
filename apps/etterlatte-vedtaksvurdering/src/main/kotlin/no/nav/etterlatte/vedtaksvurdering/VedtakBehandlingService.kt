@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -50,7 +52,6 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
-    private val rapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -59,7 +60,8 @@ class VedtakBehandlingService(
         dato: LocalDate,
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
-        val alleVedtakForSak = repository.hentVedtakForSak(sakId).filter { it.vedtakFattet != null && it.attestasjon != null }
+        val alleVedtakForSak =
+            repository.hentVedtakForSak(sakId).filter { it.vedtakFattet != null && it.attestasjon != null }
         return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
     }
 
@@ -100,7 +102,11 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) =
+            hentDataForVedtak(
+                behandlingId,
+                brukerTokenInfo,
+            )
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
@@ -279,7 +285,7 @@ class VedtakBehandlingService(
         )
     }
 
-    suspend fun tilSamordningVedtak(
+    fun tilSamordningVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
@@ -294,7 +300,10 @@ class VedtakBehandlingService(
                     .tilSamordningVedtak(behandlingId, tx = tx)
                     .also {
                         runBlocking {
-                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                            val tilSamordning = behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                            if (!tilSamordning) {
+                                throw VedtakTilSamordningException(behandlingId)
+                            }
                         }
                     }
             }
@@ -322,12 +331,12 @@ class VedtakBehandlingService(
             return false
         }
 
+        val grunnbeloep = beregningKlient.hentGrunnbeloep(brukerTokenInfo)
+        val etterbetaling = vedtak.erVedtakMedEtterbetaling(repository, grunnbeloep)
+
         return samordningsKlient
-            .samordneVedtak(
-                vedtak = vedtak,
-                etterbetaling = vedtak.erVedtakMedEtterbetaling(repository),
-                brukerTokenInfo = brukerTokenInfo,
-            ).also {
+            .samordneVedtak(vedtak, etterbetaling, brukerTokenInfo)
+            .also {
                 logger.info("Samordning: skal vente? $it [vedtak=${vedtak.id}, behandlingId=$behandlingId]")
             }
     }
@@ -347,7 +356,11 @@ class VedtakBehandlingService(
                             .samordnetVedtak(behandlingId, tx = tx)
                             .also {
                                 runBlocking {
-                                    behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                    val samordnetVedtak =
+                                        behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                    if (!samordnetVedtak) {
+                                        throw VedtakSamordnetException(behandlingId)
+                                    }
                                 }
                             }
                     }
@@ -362,12 +375,14 @@ class VedtakBehandlingService(
                     ),
                 )
             }
+
             VedtakStatus.IVERKSATT -> {
                 logger.warn(
                     "Behandlet svar på samording for vedtak ${vedtak.id}, " +
                         "men vedtaket er allerede iverksatt [behandling=$behandlingId. Skipper",
                 )
             }
+
             else -> {
                 verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
             }
@@ -407,20 +422,11 @@ class VedtakBehandlingService(
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-        sakId: SakId,
     ) {
         repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
 
         try {
-            val vedtak: Vedtak? = repository.hentVedtakTilSamordning(sakId)
-            if (vedtak?.status == VedtakStatus.TIL_SAMORDNING && skalSamordnesManuelt(vedtak.behandlingId)) {
-                logger.warn("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
-                samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
-                    rapidService.sendToRapid(samordnetVedtak)
-                }
-            } else {
-                samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
-            }
+            samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
             throw InternfeilException("Klarte ikke å oppdatere samordningsmelding", e)
@@ -440,7 +446,10 @@ class VedtakBehandlingService(
                 val iverksattVedtakLocal =
                     repository.iverksattVedtak(behandlingId, tx = tx).also {
                         runBlocking {
-                            behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
+                            val iverksattBehandling = behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
+                            if (!iverksattBehandling) {
+                                throw BehandlingIverksettelseException(behandlingId)
+                            }
                         }
                     }
                 iverksattVedtakLocal
@@ -457,32 +466,8 @@ class VedtakBehandlingService(
         )
     }
 
-    // MANUELL SAMORDNING: Dette er for å få saker som er TIL_SAMORDNING videre til SAMORDNET i det tilfelle
-    // overstyring ikke fungerer pga SAM returnerer ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
-    private fun skalSamordnesManuelt(behandlingId: UUID): Boolean {
-        val behandlingerSomErStuck =
-            listOf(
-                "6e960200-ac0a-4341-8e00-cf4300588d65", // iverksatt
-                "e893f467-4870-4d5c-a37a-9b63059206e3", // iverksatt
-                "b3cd19f6-4801-46b7-b711-b0270c754165", // iverksatt
-                "32728cab-773e-4506-9df7-de721434ea06", // sak 16490
-                "71224dbc-c2bd-4bb6-83f6-3616c74b67d1", // sak 16794
-                "9451ea21-6fa5-40ef-8921-8357810bbdc7", // sak 16946
-                "6aea67f4-d361-4ebb-823e-1a4013f7d03e", // sak 17444
-                "aa0e9fc0-168a-4722-8f76-e8cc56c8771c", // sak 17780
-                "d134905f-e6ac-4a5e-b0df-86267c55a72d", // sak 18100
-                // "989d4930-5752-4b07-84e9-d747f912708c", // sak 18106
-                "b66404a7-1d28-400d-b70b-a29abec13472", // sak 18360
-                "03a17bf9-28f6-4630-99c8-b3828162e26f", // sak 18504
-                "ef84c8c4-c37d-4273-9531-9783a85790ab", // sak 18967
-                "6f9e8895-f725-4323-b1f2-da094bad1118", // sak 19069
-                "989d4930-5752-4b07-84e9-d747f912708c", // sak 18106
-            )
-        return behandlingerSomErStuck.find { it == behandlingId.toString() } != null
-    }
-
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
-        requireNotNull(repository.hentVedtak(behandlingId)) {
+        krevIkkeNull(repository.hentVedtak(behandlingId)) {
             "Vedtak for behandling $behandlingId finnes ikke"
         }
 
@@ -540,7 +525,7 @@ class VedtakBehandlingService(
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingAarsak = behandling.revurderingsaarsak,
-                        revurderingInfo = behandling.revurderingInfo,
+                        revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
@@ -570,10 +555,10 @@ class VedtakBehandlingService(
                             opprettUtbetalingsperioder(
                                 vedtakType = vedtakType,
                                 beregningOgAvkorting = beregningOgAvkorting,
-                                behandling.sakType,
+                                sakType = behandling.sakType,
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
-                        revurderingInfo = behandling.revurderingInfo,
+                        revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
@@ -589,13 +574,9 @@ class VedtakBehandlingService(
         VedtakType.AVSLAG -> behandling.opphoerFraOgMed
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
-                // TODO Det burde være en løsning for å kunne fjerne et opphør uten en revurdering med samme virk som opphøret?
-                null
+                throw VirkningstidspunktOgOpphoerFomPaaSammeDatoException()
             } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
-                throw UgyldigForespoerselException(
-                    code = "VIRKNINGSTIDSPUNKT_ETTER_OPPHOER",
-                    detail = "Virkningstidspunkt kan ikke være senere enn opphør fra og med",
-                )
+                throw VirkningstidspunktEtterOpphoerException()
             } else {
                 behandling.opphoerFraOgMed
             }
@@ -641,7 +622,7 @@ class VedtakBehandlingService(
                     when (sakType) {
                         SakType.BARNEPENSJON -> {
                             val beregningsperioder =
-                                requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                krevIkkeNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
                                     "Mangler beregning"
                                 }
                             beregningsperioder.map {
@@ -653,7 +634,7 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.utbetaltBeloep.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
-                                    regelverk = it.regelverk,
+                                    regelverk = it.regelverk ?: Regelverk.fraDato(it.datoFOM.atDay(1)),
                                 )
                             }
                         }
@@ -697,15 +678,7 @@ class VedtakBehandlingService(
                         periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
-                        regelverk =
-                            if (perioderMedUtbetaling.any { it.regelverk != null }) {
-                                // Regelverk er satt på periodene - for at det skal bli konsistent mot utbetaling
-                                Regelverk.fraDato(
-                                    opphoerFraOgMed.atDay(1),
-                                )
-                            } else {
-                                null
-                            },
+                        regelverk = Regelverk.fraDato(opphoerFraOgMed.atDay(1)),
                     ),
                 )
             } else {
@@ -718,7 +691,7 @@ class VedtakBehandlingService(
     private fun hentRegelverkFraBeregningForPeriode(
         beregningsperioder: List<Beregningsperiode>,
         fom: YearMonth,
-    ): Regelverk? {
+    ): Regelverk {
         val samsvarendeBeregningsperiode =
             beregningsperioder
                 .sortedBy { it.datoFOM }
@@ -726,6 +699,7 @@ class VedtakBehandlingService(
                 ?: throw InternfeilException("Fant ingen beregningsperioder som samsvarte med avkortingsperiode $fom")
 
         return samsvarendeBeregningsperiode.regelverk
+            ?: Regelverk.fraDato(samsvarendeBeregningsperiode.datoFOM.atDay(1))
     }
 
     private suspend fun hentDataForVedtak(
@@ -741,7 +715,15 @@ class VedtakBehandlingService(
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
-                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak, trygdetider)
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
+                            VedtakData(
+                                behandling,
+                                vilkaarsvurdering,
+                                null,
+                                sak,
+                                trygdetider,
+                            )
+
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregningOgAvkorting =
                                 beregningKlient.hentBeregningOgAvkorting(
@@ -759,7 +741,7 @@ class VedtakBehandlingService(
         }
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
-        requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
+        krevIkkeNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
@@ -772,10 +754,7 @@ class VedtakBehandlingService(
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 
-    fun hentVedtakForBehandling(
-        behandlingId: UUID,
-        info: BrukerTokenInfo,
-    ): Vedtak? = repository.hentVedtak(behandlingId)
+    fun hentVedtakForBehandling(behandlingId: UUID): Vedtak? = repository.hentVedtak(behandlingId)
 }
 
 class VedtakTilstandException(
@@ -787,9 +766,33 @@ class BehandlingstilstandException(
     vedtak: Vedtak,
 ) : IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
+class BehandlingIverksettelseException(
+    behandlingId: UUID,
+) : InternfeilException("Iverksettelse av behandling $behandlingId feilet")
+
+class VedtakTilSamordningException(
+    behandlingId: UUID,
+) : InternfeilException("Sette vedtak til 'til samordning' for behandling $behandlingId feilet")
+
+class VedtakSamordnetException(
+    behandlingId: UUID,
+) : InternfeilException("Sette vedtak til 'samordnet' for behandling $behandlingId feilet")
+
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(
         code = "VEDTAKSVURDERING_MANGLER_AVKORTET_YTELSE",
         detail =
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
+    )
+
+class VirkningstidspunktEtterOpphoerException :
+    UgyldigForespoerselException(
+        code = "VIRKNINGSTIDSPUNKT_ETTER_OPPHOER",
+        detail = "Virkningstidspunkt kan ikke være senere enn opphør fra og med",
+    )
+
+class VirkningstidspunktOgOpphoerFomPaaSammeDatoException :
+    UgyldigForespoerselException(
+        code = "VIRKNINGSTIDSPUNKT_OG_OPPHOER_FRA_OG_MED_PAA_SAMME_DATO",
+        detail = "Virkningstidspunkt og opphør fra og med kan ikke være på samme dato",
     )

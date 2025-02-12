@@ -1,6 +1,6 @@
 package no.nav.etterlatte.ytelseMedGrunnlag
 
-import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -18,7 +18,7 @@ import java.util.UUID
  */
 class BeregningOgAvkortingBrevService(
     private val beregningRepository: BeregningRepository,
-    private val avkortingRepository: AvkortingRepository,
+    private val avkortingService: AvkortingService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val behandlingKlient: BehandlingKlient,
 ) {
@@ -26,7 +26,7 @@ class BeregningOgAvkortingBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto? {
-        val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
+        val avkortingUtenLoependeYtelse = avkortingService.hentAvkorting(behandlingId) ?: return null
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val avkorting = avkortingUtenLoependeYtelse.toDto(behandling.virkningstidspunkt().dato)
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
@@ -67,22 +67,24 @@ class BeregningOgAvkortingBrevService(
 
         return BeregningOgAvkortingDto(
             perioder = avkortinger,
+            erInnvilgelsesaar = avkortingUtenLoependeYtelse.aarsoppgjoer.minBy { it.aar }.aar == behandling.virkningstidspunkt().dato.year,
             endringIUtbetalingVedVirk =
                 when (behandling.behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> false
                     else -> {
-                        val forrigeBehandlingId =
-                            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
-                        val forrigeAvkorting = avkortingRepository.hentAvkorting(forrigeBehandlingId)
+                        val forrigeAvkorting =
+                            avkortingService.hentAvkortingForrigeBehandling(
+                                behandling,
+                                brukerTokenInfo,
+                                behandling.virkningstidspunkt().dato,
+                            )
                         val sisteBeloep =
                             forrigeAvkorting
-                                ?.toDto()
-                                ?.avkortetYtelse
-                                ?.last()
-                                ?.ytelseEtterAvkorting
-                        sisteBeloep?.let {
-                            it != avkorting.avkortetYtelse.last().ytelseEtterAvkorting
-                        } ?: false
+                                .toDto()
+                                .avkortetYtelse
+                                .last()
+                                .ytelseEtterAvkorting
+                        sisteBeloep != avkorting.avkortetYtelse.last().ytelseEtterAvkorting
                     }
                 },
         )

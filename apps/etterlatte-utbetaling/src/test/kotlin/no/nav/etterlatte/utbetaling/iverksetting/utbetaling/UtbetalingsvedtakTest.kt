@@ -26,7 +26,8 @@ internal class UtbetalingsvedtakTest {
                   "id": 72,
                   "periode": {
                     "fom": "2022-09",
-                    "tom": null
+                    "tom": null,
+                    "regelverk": "REGELVERK_TOM_DES_2023"
                   },
                   "beloep": 9290.0,
                   "type": "UTBETALING"
@@ -66,7 +67,8 @@ internal class UtbetalingsvedtakTest {
                   "id": 72,
                   "periode": {
                     "fom": "2022-09",
-                    "tom": null
+                    "tom": null,
+                    "regelverk": "REGELVERK_TOM_DES_2023"
                   },
                   "beloep": 9290.0,
                   "type": "UTBETALING"

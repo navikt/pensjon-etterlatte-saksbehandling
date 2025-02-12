@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
@@ -37,6 +38,8 @@ import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
+import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
+import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
@@ -86,11 +89,13 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.config.JobbKeys.JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
 import no.nav.etterlatte.config.JobbKeys.JOBB_METRIKKER_OPENING_HOURS
 import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.TempGrunnlagKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -100,6 +105,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
+import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
@@ -140,15 +146,14 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.SakendringerDao
-import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
@@ -247,7 +252,6 @@ internal class ApplicationContext(
             properties = featureToggleProperties(config),
             brukerIdent = { finnBrukerIdent() },
         ),
-    val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
@@ -257,6 +261,7 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
+    val tempGrunnlagKlient: TempGrunnlagKlient = TempGrunnlagKlient(config, httpClient()),
     val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
@@ -274,6 +279,8 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
+    val skjermingKlient: SkjermingKlient = SkjermingKlientImpl(skjermingHttpClient(config), env.requireEnvValue(SKJERMING_URL)),
+    val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -297,7 +304,7 @@ internal class ApplicationContext(
     val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
     val sakLesDao = SakLesDao(autoClosingDatabase)
-    val sakendringerDao = SakendringerDao(autoClosingDatabase) { sakLesDao.hentSak(it) }
+    val sakendringerDao = SakendringerDao(autoClosingDatabase)
     val sakSkrivDao = SakSkrivDao(sakendringerDao)
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
@@ -316,13 +323,9 @@ internal class ApplicationContext(
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
-    val vilkaarsvurderingDao = VilkaarsvurderingRepository(autoClosingDatabase, DelvilkaarRepository())
-
-    val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
-        VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
+    val vilkaarsvurderingDao = VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao())
 
     // Klient
-    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
     val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
@@ -433,6 +436,7 @@ internal class ApplicationContext(
             statistikkKafkaProducer = behandlingsHendelser,
             oppgaveService = oppgaveService,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
+            featureToggleService = featureToggleService,
         )
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
@@ -443,9 +447,10 @@ internal class ApplicationContext(
         OmregningService(
             behandlingService = behandlingService,
             omregningDao = omregningDao,
+            oppgaveService = oppgaveService,
         )
 
-    val tilgangService = TilgangServiceImpl(sakTilgangDao)
+    val tilgangService = TilgangServiceSjekkerImpl(sakTilgangDao)
 
     val externalServices: List<Pingable> =
         listOf(
@@ -458,18 +463,30 @@ internal class ApplicationContext(
             tilbakekrevingKlient,
         )
     val selfTestService = SelfTestService(externalServices)
-    val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
+
     val sakService =
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
-            enhetService,
+            brukerService,
             grunnlagsService,
             krrKlient,
             pdlTjenesterKlient,
+            featureToggleService,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
+
+    val inntektsjusteringSelvbetjeningService =
+        InntektsjusteringSelvbetjeningService(
+            oppgaveService = oppgaveService,
+            behandlingService = behandlingService,
+            vedtakKlient = vedtakKlient,
+            rapid = rapid,
+            featureToggleService = featureToggleService,
+            beregningKlient = beregningsKlient,
+        )
 
     val aarligInntektsjusteringJobbService =
         AarligInntektsjusteringJobbService(
@@ -487,6 +504,14 @@ internal class ApplicationContext(
         )
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
+    val oppdaterTilgangService =
+        OppdaterTilgangService(
+            sakService = sakService,
+            skjermingKlient = skjermingKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
+            brukerService = brukerService,
+            oppgaveService = oppgaveService,
+        )
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -495,9 +520,9 @@ internal class ApplicationContext(
             pdltjenesterKlient = pdlTjenesterKlient,
             grunnlagKlient = grunnlagKlientImpl,
             sakService = sakService,
-            brukerService = enhetService,
             doedshendelseService = doedshendelseService,
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
+            tilgangsService = oppdaterTilgangService,
         )
 
     private val doedshendelseReminderJob =
@@ -523,6 +548,9 @@ internal class ApplicationContext(
             krrKlient = krrKlient,
         )
 
+    val saksbehandlerService: SaksbehandlerService =
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
             behandlingDao,
@@ -531,6 +559,8 @@ internal class ApplicationContext(
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
+            aktivitetspliktService,
+            saksbehandlerService,
         )
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
@@ -551,8 +581,16 @@ internal class ApplicationContext(
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
-    val saksbehandlerService: SaksbehandlerService =
-        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+
+    val aktivitetspliktOppgaveUnntakUtloeperJobService =
+        AktivitetspliktOppgaveUnntakUtloeperJobService(
+            aktivitetspliktDao,
+            aktivitetspliktService,
+            oppgaveService,
+            vedtakKlient,
+            featureToggleService,
+        )
+
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,
@@ -564,12 +602,13 @@ internal class ApplicationContext(
 
     val vilkaarsvurderingService =
         VilkaarsvurderingService(
-            vilkaarsvurderingRepositoryWrapper,
+            vilkaarsvurderingDao,
             behandlingService,
             grunnlagKlientImpl,
             behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
+
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
@@ -584,6 +623,7 @@ internal class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,
+            tilgangsService = oppdaterTilgangService,
         )
 
     val migreringService =
@@ -612,12 +652,21 @@ internal class ApplicationContext(
         )
     }
 
+    val aktivitetspliktOppgaveUnntakUtloeperJob: AktivitetspliktOppgaveUnntakUtloeperJob by lazy {
+        AktivitetspliktOppgaveUnntakUtloeperJob(
+            aktivitetspliktOppgaveUnntakUtloeperJobService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
+        )
+    }
+
     val doedsmeldingerJob: DoedsmeldingJob by lazy {
         DoedsmeldingJob(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(20, ChronoUnit.MINUTES),
+            if (isProd()) Duration.of(3, ChronoUnit.MINUTES).toMillis() else Duration.of(20, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(2, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

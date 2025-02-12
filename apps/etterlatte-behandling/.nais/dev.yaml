@@ -152,7 +152,7 @@ spec:
     - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-migrering/.default
     - name: PEN_URL
-      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi
+      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/api
     - name: PEN_CLIENT_ID
       value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa
     - name: KRR_ENDPOINT_URL
@@ -176,7 +176,6 @@ spec:
         - application: etterlatte-migrering
         - application: etterlatte-beregning
         - application: etterlatte-tilbakekreving
-        - application: etterlatte-vilkaarsvurdering
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
         - application: digdir-krr-proxy
@@ -200,13 +199,10 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
-        - application: etterlatte-gyldig-soeknad
-        - application: etterlatte-oppdater-behandling
+        - application: etterlatte-behandling-kafka
         - application: etterlatte-hendelser-joark
         - application: etterlatte-statistikk
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold

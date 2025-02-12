@@ -3,6 +3,7 @@ import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregni
 import { InstitusjonsoppholdIBeregning, OverstyrBeregningsperiode, OverstyrtAarsakKey } from '~shared/types/Beregning'
 import { addMonths, lastDayOfMonth } from 'date-fns'
 import { formaterTilISOString } from '~utils/formatering/dato'
+import { SakType } from '~shared/types/sak'
 
 export const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -31,6 +32,7 @@ export const initialOverstyrBeregningsgrunnlagPeriode = (
     tom: undefined,
     data: {
       utbetaltBeloep: '',
+      foreldreloessats: behandling.sakType == SakType.BARNEPENSJON ? false : undefined,
       trygdetid: '',
       trygdetidForIdent: '',
       prorataBroekNevner: '',

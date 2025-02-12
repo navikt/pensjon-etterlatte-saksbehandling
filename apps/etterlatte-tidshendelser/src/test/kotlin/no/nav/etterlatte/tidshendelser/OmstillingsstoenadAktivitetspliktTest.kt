@@ -6,8 +6,13 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
+import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
+import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
+import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,6 +32,7 @@ class OmstillingsstoenadAktivitetspliktTest {
 
         every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns emptyList()
         every { behandlingKlient.hentSaker(emptyList()) } returns emptyMap()
+        every { behandlingKlient.hentSakerForPleieforholdetOpphoerte(any()) } returns emptyList()
 
         omstillingsstoenadService.execute(jobb)
 
@@ -49,6 +55,7 @@ class OmstillingsstoenadAktivitetspliktTest {
                 }.associateBy { it.id }
 
         every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns sakIder
+        every { behandlingKlient.hentSakerForPleieforholdetOpphoerte(any()) } returns emptyList()
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
         every {

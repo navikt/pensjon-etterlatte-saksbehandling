@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -58,7 +59,13 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -208,6 +215,7 @@ fun mockSaksbehandler(
             }
         every { name() } returns ident
         every { enheter() } returns enheter
+        every { brukerTokenInfo } returns mockk(relaxed = true)
     }
 
 fun opprettBehandling(
@@ -217,7 +225,6 @@ fun opprettBehandling(
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     virkningstidspunkt: Virkningstidspunkt? = null,
     revurderingAarsak: Revurderingaarsak? = null,
-    fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     opphoerFraOgMed: YearMonth? = null,
@@ -228,7 +235,6 @@ fun opprettBehandling(
     soeknadMottattDato = soeknadMottattDato,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsAarsak = revurderingAarsak,
-    fritekstAarsak = fritekstAarsak,
     prosesstype = prosesstype,
     kilde = kilde,
     sendeBrev = true,
@@ -243,7 +249,7 @@ fun foerstegangsbehandling(
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
-    persongalleri: Persongalleri = persongalleri(),
+    persongalleri: Persongalleri = defaultPersongalleriGydligeFnr,
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     utlandstilknytning: Utlandstilknytning? = null,
@@ -278,10 +284,11 @@ fun foerstegangsbehandling(
 fun revurdering(
     id: UUID = UUID.randomUUID(),
     sakId: SakId,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-    persongalleri: Persongalleri = persongalleri(),
+    persongalleri: Persongalleri = defaultPersongalleriGydligeFnr,
     revurderingAarsak: Revurderingaarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(id),
     virkningstidspunkt: Virkningstidspunkt? = null,
@@ -294,12 +301,13 @@ fun revurdering(
     begrunnelse: String? = null,
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
+    tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) = Revurdering.opprett(
     id = id,
     sak =
         Sak(
             ident = persongalleri.soeker,
-            sakType = SakType.BARNEPENSJON,
+            sakType = sakType,
             id = sakId,
             enhet = enhet,
         ),
@@ -318,14 +326,25 @@ fun revurdering(
     relatertBehandlingId = relatertBehandlingId,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
+    tidligereFamiliepleier = tidligereFamiliepleier,
 )
 
+val soeker = "11057523044"
+val defaultPersongalleriGydligeFnr =
+    Persongalleri(
+        soeker,
+        INNSENDER_FOEDSELSNUMMER.value,
+        listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
+        listOf(AVDOED_FOEDSELSNUMMER.value),
+        listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+    )
+
 fun persongalleri(
-    soeker: String = "Soeker",
-    innsender: String = "Innsender",
-    soesken: List<String> = listOf("Soester", "Bror"),
-    avdoed: List<String> = listOf("Avdoed"),
-    gjenlevende: List<String> = listOf("Gjenlevende"),
+    soeker: String = no.nav.etterlatte.soeker,
+    innsender: String = INNSENDER_FOEDSELSNUMMER.value,
+    soesken: List<String> = listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
+    avdoed: List<String> = listOf(AVDOED_FOEDSELSNUMMER.value),
+    gjenlevende: List<String> = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
 ) = Persongalleri(
     soeker = soeker,
     innsender = innsender,
@@ -400,7 +419,7 @@ fun grunnlagsOpplysningMedPersonopplysning(personopplysning: Person) =
         kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1"),
         opplysningType = Opplysningstype.DOEDSDATO,
         meta = ObjectMapper().createObjectNode(),
-        opplysning = personopplysning,
+        opplysning = personopplysning.toJsonNode(),
         attestering = null,
         fnr = null,
         periode = null,

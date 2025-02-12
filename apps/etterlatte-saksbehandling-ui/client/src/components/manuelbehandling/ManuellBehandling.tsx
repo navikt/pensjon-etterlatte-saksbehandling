@@ -1,13 +1,10 @@
-import { Alert, Button, Checkbox, Heading, ReadMore, Select, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Checkbox, Heading, ReadMore, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
-import {
-  InputRow,
-  NyBehandlingSkjema,
-} from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { NyBehandlingSkjema } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
@@ -19,7 +16,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { formaterDatoStrengTilLocaleDateTime } from '~utils/formatering/dato'
 import { formaterSpraak, mapRHFArrayToStringArray } from '~utils/formatering/formatering'
-import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
+import { ENHETER } from '~shared/types/Enhet'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
@@ -29,7 +26,7 @@ import Spinner from '~shared/Spinner'
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
   pesysId: number | undefined
-  enhet: EnhetFilterKeys
+  enhet: string
   foreldreloes: boolean
   ufoere: boolean
   overstyrTrygdetid: boolean
@@ -67,6 +64,7 @@ export default function ManuellBehandling() {
         soesken: [],
         avdoed: [],
       },
+      enhet: '',
     },
   })
 
@@ -85,7 +83,7 @@ export default function ManuellBehandling() {
         mottattDato: formaterDatoStrengTilLocaleDateTime(data.mottattDato),
         kilde: data.kilde,
         pesysId: data.pesysId,
-        enhet: data.enhet === 'VELGENHET' ? undefined : filtrerEnhet(data.enhet),
+        enhet: data.enhet === '' ? undefined : data.enhet,
         foreldreloes: data.foreldreloes,
         ufoere: data.ufoere,
       },
@@ -125,7 +123,7 @@ export default function ManuellBehandling() {
           <option value="GJENNY">Nei</option>
         </Select>
 
-        <InputRow>
+        <Box width="20rem">
           <TextField
             {...register('pesysId', {
               required: {
@@ -139,12 +137,15 @@ export default function ManuellBehandling() {
             pattern="[0-9]{11}"
             maxLength={11}
           />
-        </InputRow>
+        </Box>
 
         <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">
-          {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
-            <option key={status} value={status}>
-              {statusbeskrivelse}
+          <option key="" value="">
+            Velg enhet
+          </option>
+          {Object.entries(ENHETER).map(([id, navn]) => (
+            <option key={id} value={id}>
+              {navn}
             </option>
           ))}
         </Select>

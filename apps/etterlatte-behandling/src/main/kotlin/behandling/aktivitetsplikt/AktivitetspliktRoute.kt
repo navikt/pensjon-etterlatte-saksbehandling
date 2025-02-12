@@ -12,17 +12,14 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradOgUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
-import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -37,11 +34,19 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 const val AKTIVITET_ID_CALL_PARAMETER = "id"
+const val HENDELSE_ID_CALL_PARAMETER = "hendelseId"
 inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
     get() =
         call.parameters[AKTIVITET_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
             "MANGLER_AKTIVITET_ID",
             "Aktivitet id er ikke i path params",
+        )
+
+inline val PipelineContext<*, ApplicationCall>.hendelseId: UUID
+    get() =
+        call.parameters[HENDELSE_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
+            "MANGLER_HENDELSE_ID",
+            "Hendelse id er ikke i path params",
         )
 
 const val AKTIVITETSGRAD_ID_CALL_PARAMETER = "aktivitetsgradId"
@@ -67,37 +72,15 @@ internal fun Route.aktivitetspliktRoutes(
     val logger = LoggerFactory.getLogger("AktivitetspliktRoute")
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
+        /*
+            Denne ligger her for å hente ut data som ble vurdert på gammel flyt
+         */
         get {
             val result = inTransaction { aktivitetspliktService.hentAktivitetspliktOppfolging(behandlingId) }
             call.respond(result ?: HttpStatusCode.NoContent)
         }
 
-        post {
-            kunSkrivetilgang {
-                val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
-
-                try {
-                    val result =
-                        inTransaction {
-                            aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                                behandlingId,
-                                oppfolging,
-                                brukerTokenInfo.ident(),
-                            )
-                        }
-                    call.respond(result)
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
-                }
-            }
-        }
-
         route("/aktivitet") {
-            get {
-                logger.info("Henter aktiviteter for behandlingId=$behandlingId")
-                call.respond(inTransaction { aktivitetspliktService.hentAktiviteter(behandlingId) })
-            }
-
             post {
                 kunSkrivetilgang {
                     logger.info("Oppretter eller oppdaterer aktivitet for behandlingId=$behandlingId")
@@ -132,20 +115,6 @@ internal fun Route.aktivitetspliktRoutes(
 
     route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt") {
         route("aktivitet") {
-            get {
-                kunSaksbehandler {
-                    logger.info("Henter aktiviteter for sak $sakId")
-                    val dto =
-                        inTransaction {
-                            runBlocking {
-                                aktivitetspliktService.hentAktiviteter(
-                                    sakId = sakId,
-                                )
-                            }
-                        }
-                    call.respond(dto)
-                }
-            }
             post {
                 kunSkrivetilgang {
                     logger.info("Oppretter eller oppdaterer aktivitet for sakId=$sakId")
@@ -172,6 +141,67 @@ internal fun Route.aktivitetspliktRoutes(
                             }
 
                         call.respond(aktiviteter)
+                    }
+                }
+            }
+        }
+
+        route("/aktivitet-og-hendelser") {
+            get {
+                val behandlingId =
+                    call.parameters[BEHANDLINGID_CALL_PARAMETER]?.let {
+                        UUID.fromString(it)
+                    }
+                logger.info("Henter aktiviteter og hendelser for sak=$sakId")
+                call.respond(inTransaction { aktivitetspliktService.hentAktiviteterHendelser(sakId = sakId, behandlingId = behandlingId) })
+            }
+        }
+
+        route("hendelse") {
+            get {
+                kunSaksbehandler {
+                    val behandlingId =
+                        call.parameters[BEHANDLINGID_CALL_PARAMETER]?.let {
+                            UUID.fromString(it)
+                        }
+                    logger.info("Henter hendelser for sak $sakId")
+                    val dto =
+                        inTransaction {
+                            runBlocking {
+                                aktivitetspliktService.hentHendelser(
+                                    sakId = sakId,
+                                    behandlingId = behandlingId,
+                                )
+                            }
+                        }
+                    call.respond(dto)
+                }
+            }
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter eller oppdaterer hendelser for sakId=$sakId")
+                    val hendelse = call.receive<LagreAktivitetspliktHendelse>()
+                    val hendelser =
+                        inTransaction {
+                            aktivitetspliktService.upsertHendelse(hendelse, brukerTokenInfo, sakId = sakId)
+                            aktivitetspliktService.hentHendelser(sakId = sakId)
+                        }
+                    call.respond(hendelser)
+                }
+            }
+
+            route("/{$HENDELSE_ID_CALL_PARAMETER}") {
+                delete {
+                    kunSkrivetilgang {
+                        logger.info("Sletter hendelse $hendelseId for sakId $sakId")
+
+                        val hendelser =
+                            inTransaction {
+                                aktivitetspliktService.slettHendelse(hendelseId, brukerTokenInfo, sakId = sakId)
+                                aktivitetspliktService.hentHendelser(sakId = sakId)
+                            }
+
+                        call.respond(hendelser)
                     }
                 }
             }
@@ -216,8 +246,8 @@ internal fun Route.aktivitetspliktRoutes(
         route("revurdering") {
             post {
                 kunSystembruker {
-                    logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
                     val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
+                    logger.info("Sjekker om sak $sakId trenger en ny revurdering aktivitetsplikt ${request.jobbType.name}")
                     val opprettet =
                         inTransaction {
                             aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
@@ -229,6 +259,7 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
+
         route("oppgave-oppfoelging") {
             post {
                 kunSystembruker {
@@ -278,25 +309,13 @@ internal fun Route.aktivitetspliktRoutes(
             val oppgave = inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
             call.respond(oppgave)
         }
+        post("ferdigstill-oppgave") {
+            val oppgave = inTransaction { aktivitetspliktOppgaveService.ferdigstillOppgaveUtenBrev(oppgaveId, brukerTokenInfo) }
+            call.respond(oppgave)
+        }
     }
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
-        get {
-            logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
-            val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForOppgaveGammel(oppgaveId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, oppgaveId)
-            call.respond(vurdering)
-        }
-
-        get("/ny") {
-            logger.info("Henter ny aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
-            val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, oppgaveId)
-            call.respond(vurdering)
-        }
-
         route("/aktivitetsgrad") {
             post {
                 kunSkrivetilgang {
@@ -329,6 +348,23 @@ internal fun Route.aktivitetspliktRoutes(
                         }
                     call.respond(vurdering)
                 }
+            }
+        }
+
+        post("/aktivitetsgrad-og-unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og oppgaveId=$oppgaveId")
+                val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
+                val oppgave =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivtetsgradOgUnntakForOppgave(
+                            aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
+                            oppgaveId = oppgaveId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(oppgave)
             }
         }
 
@@ -372,48 +408,91 @@ internal fun Route.aktivitetspliktRoutes(
         get {
             logger.info("Henter aktivitetsplikt vurdering for behandlingId=$behandlingId")
             val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForBehandlingGammel(behandlingId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, behandlingId)
+                inTransaction { aktivitetspliktService.hentVurderingForBehandlingNy(behandlingId) }
             call.respond(vurdering)
         }
 
-        get("/ny") {
-            logger.info("Henter ny aktivitetsplikt vurdering for behandlingId=$behandlingId")
-            val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForBehandling(behandlingId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, behandlingId)
-            call.respond(vurdering)
+        post("/aktivitetsgrad-unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og behandlingId=$behandlingId")
+                val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
+                val vurderingForBehandling =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivitetsgradOgUnntakForBehandling(
+                            aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
+                            behandlingId = behandlingId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(vurderingForBehandling)
+            }
         }
 
         post("/aktivitetsgrad") {
             kunSkrivetilgang {
-                logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
-                val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
-                inTransaction {
-                    aktivitetspliktService.upsertAktivitetsgradForBehandling(
-                        aktivitetsgrad = aktivitetsgrad,
-                        behandlingId = behandlingId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
-                }
-                call.respond(HttpStatusCode.Created)
+                logger.info("Redigerer aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
+                val aktivitetsgradOgUnntak = call.receive<LagreAktivitetspliktAktivitetsgrad>()
+                val vurderingForBehandling =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivitetsgradForBehandling(
+                            aktivitetsgrad = aktivitetsgradOgUnntak,
+                            behandlingId = behandlingId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(vurderingForBehandling)
             }
         }
 
-        post("/unntak") {
+        delete("/aktivitetsgrad/{$AKTIVITETSGRAD_ID_CALL_PARAMETER}") {
             kunSkrivetilgang {
-                logger.info("Oppretter unntak for sakId=$sakId og behandlingId=$behandlingId")
-                val unntak = call.receive<LagreAktivitetspliktUnntak>()
-                inTransaction {
-                    aktivitetspliktService.upsertUnntakForBehandling(
-                        unntak = unntak,
-                        behandlingId = behandlingId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
+                logger.info("Sletter aktivitetsgrad med id=$aktivitetsgradId for behandlingId=$behandlingId i sak=$sakId")
+                val vurdering =
+                    inTransaction {
+                        aktivitetspliktService.slettAktivitetsgradForBehandling(
+                            behandlingId = behandlingId,
+                            aktivitetsgradId = aktivitetsgradId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(vurdering)
+            }
+        }
+
+        route("/unntak") {
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter unntak for sakId=$sakId og behandlingId=$behandlingId")
+                    val unntak = call.receive<LagreAktivitetspliktUnntak>()
+                    val aktivitetspliktVurdering =
+                        inTransaction {
+                            aktivitetspliktService.upsertUnntakForBehandling(
+                                unntak = unntak,
+                                behandlingId = behandlingId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(aktivitetspliktVurdering)
                 }
-                call.respond(HttpStatusCode.Created)
+            }
+            delete("{$UNNTAK_ID_CALL_PARAMETER}") {
+                kunSkrivetilgang {
+                    logger.info("Sletter unntak med id=$unntakId for sakId=$sakId og behandlingId=$behandlingId")
+                    val vurdering =
+                        inTransaction {
+                            aktivitetspliktService.slettUnntakForBehandling(
+                                behandlingId = behandlingId,
+                                sakId = sakId,
+                                unntakId = unntakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(vurdering)
+                }
             }
         }
     }
@@ -422,8 +501,3 @@ internal fun Route.aktivitetspliktRoutes(
 data class BrevIdDto(
     val brevId: BrevID? = null,
 )
-
-class VurderingIkkeFunnetException(
-    sakId: SakId,
-    referanse: UUID,
-) : IkkeFunnetException("VURDERING_IKKE_FUNNET", "Fant ikke vurdering i sak=$sakId med referanse=$referanse")

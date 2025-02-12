@@ -12,13 +12,19 @@ export interface Familieforhold {
 export const hentLevendeSoeskenFraAvdoedeForSoeker = (avdoede: Personopplysning[], soekerFnr?: string) => {
   const alleAvdoedesBarn = avdoede.flatMap((avdoed) => avdoed.opplysning.avdoedesBarn ?? [])
   const levendeSoesken = alleAvdoedesBarn.filter((barn) => barn.foedselsnummer !== soekerFnr && !barn.doedsdato)
-  return levendeSoesken
+  const unikeSoesken = levendeSoesken.filter(
+    (b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer)
+  )
+  return unikeSoesken
 }
 
 export const hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag = (avdoede: Personopplysning[], soekerFnr: string) => {
   const alleAvdoedesBarn = avdoede.flatMap((a) => a.opplysning.avdoedesBarn ?? [])
   const soeskenliste = alleAvdoedesBarn.filter((person) => person.foedselsnummer !== soekerFnr)
-  return soeskenliste.filter((soesken) => soesken.doedsdato === null)
+  const unikeSoesken = soeskenliste.filter(
+    (b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer)
+  )
+  return unikeSoesken.filter((soesken) => soesken.doedsdato === null)
 }
 
 export interface IFamilieRelasjon {
@@ -74,10 +80,14 @@ export interface Utland {
     tilflyttingsland?: string
     dato?: string
   }[]
-  innflyttingTilNorge?: {
-    fraflyttingsland?: string
-    dato?: string
-  }[]
+  innflyttingTilNorge?: InnflyttingDTO[]
+}
+
+export interface InnflyttingDTO {
+  fraflyttingsland?: string
+  dato?: string
+  gyldighetsdato?: string
+  ajourholdsdato?: string
 }
 
 export interface Statsborgerskap {

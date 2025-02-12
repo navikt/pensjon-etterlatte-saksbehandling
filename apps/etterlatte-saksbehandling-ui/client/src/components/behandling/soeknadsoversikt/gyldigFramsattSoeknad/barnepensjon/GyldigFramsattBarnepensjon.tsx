@@ -4,10 +4,6 @@ import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
-import {
-  finnVurdering,
-  GyldigFramsattVurdering,
-} from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { useEffect } from 'react'
@@ -18,6 +14,10 @@ import { Familieforhold } from '~shared/types/Person'
 import { isSuccess } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { HStack } from '@navikt/ds-react'
+import {
+  finnVurdering,
+  GyldigFramsattVurdering,
+} from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/GyldigFramsattVurdering'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
@@ -30,9 +30,6 @@ export const GyldigFramsattBarnepensjon = ({
   gyldigFramsatt: IGyldighetResultat | undefined
   gyldigFremsattTilStatusIcon: StatusIconProps
 }) => {
-  if (gyldigFramsatt == null) {
-    return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>
-  }
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -43,6 +40,7 @@ export const GyldigFramsattBarnepensjon = ({
   useEffect(() => {
     getPersonGalleriSoeknad({ behandlingId: behandling.id })
   }, [behandling.sakId, behandling.id])
+
   const manuellVurdering = finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING)?.basertPaaOpplysninger
   const harKildePesys = manuellVurdering?.kilde?.ident == 'PESYS'
 
@@ -75,7 +73,8 @@ export const GyldigFramsattBarnepensjon = ({
               <Foreldreansvar
                 harKildePesys={harKildePesys}
                 soekerGrunnlag={familieforhold?.soeker}
-                persongalleriGrunnlag={personGalleriSoeknad.data}
+                innsender={personGalleriSoeknad.data.opplysning.innsender}
+                avdoed={personGalleriSoeknad.data.opplysning.avdoed}
                 gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
               />
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />

@@ -69,6 +69,8 @@ spec:
               orgno: "940380014"
             - name: Elverum kommunale pensjonskasse
               orgno: "940360293"
+            - name: DRAMMEN KOMMUNALE PENSJONSKASSE
+              orgno: "980650383"
             - name: Maritim pensjonskasse
               orgno: "940415683"
             - name: Garantikassen for fiskere
@@ -112,60 +114,60 @@ spec:
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-pen-q1
           namespace: pensjon-q1
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-pen-q2
           namespace: pensjon-q2
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-pen-q5
           namespace: pensjon-q5
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
           namespace: pensjonselvbetjening
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: alderspensjon-endringssoknad-backend-q2
           namespace: pensjonselvbetjening
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: pensjonskalkulator-backend
           namespace: pensjonskalkulator
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: azure-token-generator
           namespace: aura
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: tokenx-token-generator
           namespace: aura
           cluster: dev-gcp

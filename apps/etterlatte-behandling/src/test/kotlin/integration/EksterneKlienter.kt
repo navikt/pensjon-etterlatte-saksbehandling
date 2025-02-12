@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -22,6 +23,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
@@ -32,6 +34,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
+import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
@@ -45,7 +48,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -56,12 +59,12 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -71,7 +74,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
@@ -80,7 +82,6 @@ import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -93,14 +94,21 @@ import java.time.YearMonth
 import java.util.UUID
 
 class GrunnlagKlientTest : GrunnlagKlient {
+    override suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = false
+
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<Person> {
+    ): Grunnlagsopplysning<JsonNode> {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
     }
+
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri = defaultPersongalleriGydligeFnr
 
     override suspend fun hentPersongalleri(
         behandlingId: UUID,
@@ -111,30 +119,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
             kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
             meta = emptyMap<String, String>().toObjectNode(),
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning =
-                Persongalleri(
-                    "soeker",
-                    "innsender",
-                    listOf("soesken"),
-                    listOf("avdoed"),
-                    listOf("gjenlevende"),
-                ),
-        )
-
-    override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? =
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-            meta = emptyMap<String, String>().toObjectNode(),
-            opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning =
-                Persongalleri(
-                    "soeker",
-                    "innsender",
-                    listOf("soesken"),
-                    listOf("avdoed"),
-                    listOf("gjenlevende"),
-                ),
+            opplysning = defaultPersongalleriGydligeFnr,
         )
 
     override suspend fun hentGrunnlagForSak(
@@ -157,7 +142,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -165,7 +150,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -173,7 +158,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -181,7 +166,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -189,7 +174,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -239,12 +224,12 @@ class BeregningKlientTest :
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
 
-    override suspend fun aarligInntektsjusteringSjekk(
+    override suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
         aar: Int,
         sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AarligInntektsjusteringAvkortingSjekkResponse = mockk()
+    ): InntektsjusteringAvkortingInfoResponse = mockk()
 
     override suspend fun harTilgangTilSak(
         sakId: SakId,
@@ -258,30 +243,42 @@ class VedtakKlientTest : VedtakKlient {
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): TilbakekrevingVedtakLagretDto =
-        TilbakekrevingVedtakLagretDto(
-            id = 123L,
-            fattetAv = "saksbehandler",
-            enhet = Enheter.defaultEnhet.enhetNr,
-            dato = LocalDate.now(),
-        )
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+            every { vedtakFattet } returns
+                mockk {
+                    every { ansvarligSaksbehandler } returns "saksbehandler"
+                    every { ansvarligEnhet } returns Enheter.defaultEnhet.enhetNr
+                    every { tidspunkt } returns Tidspunkt.now()
+                }
+        }
 
     override suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun lagreVedtakKlage(
         klage: Klage,
@@ -367,7 +364,16 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun oppdaterSpesifiktBrev(
+        sakId: SakId,
+        brevId: BrevID,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun ferdigstillJournalFoerOgDistribuerBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevStatusResponse {
@@ -476,6 +482,19 @@ class BrevApiKlientTest : BrevApiKlient {
             brevtype = Brevtype.MANUELT,
             brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
+}
+
+class SkjermingKlientTest : SkjermingKlient {
+    override suspend fun personErSkjermet(fnr: String): Boolean = false
+
+    override val serviceName: String
+        get() = "Navansatt"
+    override val beskrivelse: String
+        get() = "Henter navn for saksbehandlerident"
+    override val endpoint: String
+        get() = "endpoint"
+
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
@@ -603,6 +622,7 @@ class AxsysKlientTest : AxsysKlient {
 class KodeverkKlientTest : KodeverkKlient {
     override suspend fun hent(
         kodeverkNavn: KodeverkNavn,
+        ekskluderUgyldige: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): KodeverkResponse {
         val betydning =
@@ -644,9 +664,10 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         TODO("Not yet implemented")
     }
 
+    // Greit å holde denne i sync ellers mocke til om man vil teste relaterte identer. Hvis ikke vil man ikke finne saker på identer man tester på.
     override suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe =
         PdlFolkeregisterIdentListe(
-            listOf(PdlIdentifikator.FolkeregisterIdent(SOEKER_FOEDSELSNUMMER)),
+            listOf(PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(ident))),
         )
 
     override suspend fun hentAdressebeskyttelseForPerson(

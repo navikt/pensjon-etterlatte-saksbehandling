@@ -12,8 +12,11 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
@@ -30,7 +33,6 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.route.withUuidParam
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -46,7 +48,7 @@ private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
     get() =
         try {
             this.call.uuid(TRYGDETIDID_CALL_PARAMETER)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw UgyldigForespoerselException(
                 "MANGLER_TRYGDETID_ID",
                 "Kunne ikke lese ut parameteret trygdetidId",
@@ -55,21 +57,21 @@ private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 
+enum class TrygdetidToggles(
+    val value: String,
+) : FeatureToggle {
+    TRYGDETID_FRA_PESYS("trygdetid-fra-pesys"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 fun Route.trygdetid(
     trygdetidService: TrygdetidService,
     behandlingKlient: BehandlingKlient,
+    featureToggleService: FeatureToggleService,
 ) {
     route("/api/trygdetid_v2") {
-        post("/pesys") {
-            withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
-                call.respond(
-                    trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-                        fnr = fnr.value,
-                        brukerTokenInfo = brukerTokenInfo,
-                    ),
-                )
-            }
-        }
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
                 withBehandlingId(behandlingKlient) {
@@ -86,12 +88,48 @@ fun Route.trygdetid(
             post {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
-                    trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
+                    val overskriv = call.request.queryParameters["overskriv"]?.toBoolean() ?: false
+
+                    trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo, overskriv)
                     call.respond(
                         trygdetidService
                             .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                             .map { it.toDto() },
                     )
+                }
+            }
+
+            route("pesys") {
+                post {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")
+
+                        trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
+                        call.respond(
+                            trygdetidService
+                                .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                                .map { it.toDto() },
+                        )
+                    }
+                }
+                get("/sjekk-pesys-trygdetidsgrunnlag") {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        if (featureToggleService.isEnabled(
+                                TrygdetidToggles.TRYGDETID_FRA_PESYS,
+                                defaultValue = false,
+                            )
+                        ) {
+                            logger.info("Sjekker om avdød for behandling $behandlingId har trygdetidsgrunnlag i Pesys for AP og Uføre")
+                            val harTrygdetidsgrunnlagIPesys =
+                                trygdetidService.harTrygdetidsgrunnlagIPesysForApOgUfoere(
+                                    behandlingId,
+                                    brukerTokenInfo,
+                                )
+                            call.respond(harTrygdetidsgrunnlagIPesys)
+                        } else {
+                            call.respond(HttpStatusCode.Forbidden)
+                        }
+                    }
                 }
             }
 
@@ -216,6 +254,26 @@ fun Route.trygdetid(
                         }
                     }
                 }
+
+                delete("/grunnlag/slett-pesys") {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
+                        trygdetidService.slettPesysTrygdetidGrunnlagForTrygdetid(
+                            behandlingId,
+                            trygdetidId,
+                            brukerTokenInfo,
+                        )
+                        call.respond(
+                            trygdetidService
+                                .hentTrygdetidIBehandlingMedId(
+                                    behandlingId,
+                                    trygdetidId,
+                                    brukerTokenInfo,
+                                )!!
+                                .toDto(),
+                        )
+                    }
+                }
             }
 
             post("/oppdater-status") {
@@ -243,10 +301,6 @@ fun Route.trygdetid(
             post("/kopier-grunnlag/{kildeBehandlingId}") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
-                        logger.info(
-                            "Kopierer trygdetidsgrunnlag fra behandling $behandlingId " +
-                                "til behandling $kildeBehandlingId",
-                        )
                         call.respond(
                             trygdetidService.kopierTrygdetidsgrunnlag(
                                 behandlingId = behandlingId,
@@ -325,38 +379,6 @@ fun Route.trygdetid(
                             )
                         }
                     }
-
-                    post("/uten_fremtidig") {
-                        withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                            logger.info("Beregn trygdetid uten fremtidig trygdetid for behandling $behandlingId")
-
-                            val trygdetid =
-                                trygdetidService.hentTrygdetidIBehandlingMedId(
-                                    behandlingId,
-                                    trygdetidId,
-                                    brukerTokenInfo,
-                                )
-
-                            if (trygdetid != null) {
-                                trygdetidService.reberegnUtenFremtidigTrygdetid(
-                                    behandlingId,
-                                    trygdetidId,
-                                    brukerTokenInfo,
-                                )
-                                call.respond(
-                                    trygdetidService
-                                        .hentTrygdetidIBehandlingMedId(
-                                            behandlingId,
-                                            trygdetidId,
-                                            brukerTokenInfo,
-                                        )!!
-                                        .toDto(),
-                                )
-                            } else {
-                                call.respond(HttpStatusCode.NoContent)
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -372,7 +394,7 @@ fun Trygdetid.toDto(): TrygdetidDto =
         opplysninger = this.opplysninger.toDto(),
         overstyrtNorskPoengaar = this.overstyrtNorskPoengaar,
         ident = this.ident,
-        opplysningerDifferanse = requireNotNull(opplysningerDifferanse),
+        opplysningerDifferanse = krevIkkeNull(opplysningerDifferanse) { "Differanseopplysninger mangler" },
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =
@@ -424,8 +446,20 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto =
                         tidspunkt = kilde.tidspunkt.toString(),
                         ident = kilde.type,
                     )
+                is Grunnlagsopplysning.Ufoeretrygd ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
+                is Grunnlagsopplysning.Alderspensjon ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
 
-                else -> throw UnsupportedOperationException("Kilde for trygdetid maa vaere saksbehandler eller pesys")
+                else -> throw UnsupportedOperationException(
+                    "Kilde for trygdetid maa vaere saksbehandler, Ufoeretrygd, Alderspensjon eller pesys, var $kilde",
+                )
             },
         begrunnelse = begrunnelse,
         poengInnAar = poengInnAar,

@@ -1,4 +1,3 @@
-import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
 import { Box, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -20,6 +19,7 @@ import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAv
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
+import { OpprettOppfoelgingsoppgaveModal } from '~components/person/sakOgBehandling/OpprettOppfoelgingsoppgaveModal'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -47,9 +47,9 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
           <HStack gap="4" wrap={false}>
-            <SakHeaderWrapper>
+            <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
-            </SakHeaderWrapper>
+            </Box>
             <VStack gap="8">
               <VStack gap="4">
                 <Box paddingBlock="8 0">
@@ -66,8 +66,15 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 {mapResult(oppgaverResult, {
                   pending: <Spinner label="Henter oppgaver for sak..." />,
                   error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                  success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                  success: (oppgaver) => (
+                    <ForenkletOppgaverTable
+                      oppgaver={oppgaver}
+                      oppgaveValg={oppgaveValg}
+                      refreshOppgaver={() => oppgaverFetch(sak.id)}
+                    />
+                  ),
                 })}
+                <OpprettOppfoelgingsoppgaveModal sak={sak} vedOpprettelse={() => oppgaverFetch(sak.id)} />
               </VStack>
 
               <VStack gap="4">
@@ -119,14 +126,3 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
     </>
   )
 }
-
-export const HeadingWrapper = styled.div`
-  display: inline-flex;
-  margin-top: 3em;
-`
-
-const SakHeaderWrapper = styled.div`
-  padding: var(--a-spacing-8);
-  border-right: 1px solid var(--a-surface-active);
-  min-width: 25rem;
-`

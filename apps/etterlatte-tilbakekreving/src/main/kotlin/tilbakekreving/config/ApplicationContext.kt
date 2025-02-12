@@ -1,6 +1,5 @@
 package no.nav.etterlatte.tilbakekreving.config
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -41,7 +40,6 @@ class ApplicationContext(
                     azureAppJwk = properties.azureAppJwk,
                     azureAppWellKnownUrl = properties.azureAppWellKnownUrl,
                     azureAppScope = properties.behandlingScope,
-                    ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
                 ),
         )
 

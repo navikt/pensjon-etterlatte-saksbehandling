@@ -1,4 +1,5 @@
 import { SakType } from '~shared/types/sak'
+import { InnloggetSaksbehandler } from '~shared/types/saksbehandler'
 
 export interface OppgaveDTO {
   id: string
@@ -8,6 +9,7 @@ export interface OppgaveDTO {
   type: Oppgavetype
   kilde: OppgaveKilde
   referanse: string | null
+  gruppeId: string | null
   merknad?: string
   opprettet: string
   sakType: SakType
@@ -43,6 +45,7 @@ export interface NyOppgaveDto {
   oppgaveKilde?: OppgaveKilde
   oppgaveType: Oppgavetype
   merknad?: string
+  frist?: string
   referanse?: string
   saksbehandler?: string
 }
@@ -63,9 +66,11 @@ export enum OppgaveKilde {
   DOEDSHENDELSE = 'DOEDSHENDELSE',
   BEHANDLING = 'BEHANDLING',
   EKSTERN = 'EKSTERN',
+  EESSI = 'EESSI',
   GENERELL_BEHANDLING = 'GENERELL_BEHANDLING',
   TILBAKEKREVING = 'TILBAKEKREVING',
   SAKSBEHANDLER = 'SAKSBEHANDLER',
+  BRUKERDIALOG_SELVBETJENING = 'BRUKERDIALOG_SELVBETJENING',
 }
 
 export enum Oppgavetype {
@@ -86,8 +91,10 @@ export enum Oppgavetype {
   AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK = 'AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK',
   GENERELL_OPPGAVE = 'GENERELL_OPPGAVE',
   AARLIG_INNTEKTSJUSTERING = 'AARLIG_INNTEKTSJUSTERING',
-  MOTTATT_INNTEKTSJUSTERING = 'MOTTATT_INNTEKTSJUSTERING',
+  INNTEKTSOPPLYSNING = 'INNTEKTSOPPLYSNING',
   MANUELL_UTSENDING_BREV = 'MANUELL_UTSENDING_BREV',
+  OPPFOELGING = 'OPPFOELGING',
+  MELDT_INN_ENDRING = 'MELDT_INN_ENDRING',
 }
 
 export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [
@@ -97,6 +104,13 @@ export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [
   Oppgavestatus.UNDERKJENT,
   Oppgavestatus.PAA_VENT,
 ]
+
+export const erOppgaveTildeltInnloggetSaksbehandler = (
+  oppgave: OppgaveDTO,
+  innloggetSaksbehandler: InnloggetSaksbehandler
+): boolean => {
+  return oppgave.saksbehandler?.ident === innloggetSaksbehandler.ident
+}
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => {
   return oppgavestatuserForRedigerbarOppgave.includes(status)

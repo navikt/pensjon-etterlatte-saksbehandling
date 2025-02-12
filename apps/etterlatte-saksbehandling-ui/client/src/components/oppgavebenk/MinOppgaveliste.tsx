@@ -110,7 +110,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     <VStack gap="6">
       <FilterRad
         hentAlleOppgaver={hentMinOppgavelisteOppgaver}
-        hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentMinOppgavelisteOppgaver(oppgavestatusFilter)}
         filter={filter}
         setFilter={setFilter}
         saksbehandlereIEnhet={saksbehandlereIEnhet}

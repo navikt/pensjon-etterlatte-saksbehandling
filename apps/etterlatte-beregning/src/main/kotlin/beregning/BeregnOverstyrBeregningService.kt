@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -20,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -53,9 +55,15 @@ class BeregnOverstyrBeregningService(
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
-            requireNotNull(
-                beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id),
+            krevIkkeNull(
+                beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id, brukerTokenInfo),
             ) { "Behandling ${behandling.id} mangler overstyr beregningsgrunnlag" }
+
+        beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+            behandling.id,
+            virkningstidspunkt,
+            brukerTokenInfo,
+        )
 
         val beregningsType =
             when (behandling.sakType) {
@@ -147,6 +155,7 @@ class BeregnOverstyrBeregningService(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 0,
                                 trygdetid = 0,
+                                foreldreloessats = null,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
@@ -202,7 +211,7 @@ class BeregnOverstyrBeregningService(
                             )
 
                             val grunnbeloep =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
+                                krevIkkeNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
                                     "Anvendt grunnbeløp ikke funnet for perioden"
                                 }
 
@@ -226,6 +235,7 @@ class BeregnOverstyrBeregningService(
                                 utbetaltBeloep =
                                     periodisertResultat.resultat.verdi.utbetaltBeloep
                                         .toInt(),
+                                harForeldreloessats = periodisertResultat.resultat.verdi.foreldreloessats,
                                 institusjonsopphold = null,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
@@ -245,6 +255,7 @@ class BeregnOverstyrBeregningService(
                                         .takeIf { broek != null }
                                         ?.toInt(),
                                 broek = broek,
+                                regelverk = Regelverk.fraDato(periodisertResultat.periode.fraDato),
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
                                 kilde =

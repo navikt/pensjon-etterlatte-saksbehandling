@@ -7,11 +7,12 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
-import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { velgDoedsdato } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { AktivitetspliktVurdering12MndOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering12MndOversikt'
+import { AktivitetspliktVurderingOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingOversikt'
+import { AktivitetspliktOppgaveVurderingType } from '~shared/types/Aktivitetsplikt'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -23,7 +24,7 @@ export function VurderAktivitet() {
 
   return (
     <>
-      <AktivitetspliktVurdering12MndOversikt />
+      <AktivitetspliktVurderingOversikt />
       <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
         <VStack gap="4">
           {mapResult(familieOpplysningerResult, {
@@ -52,7 +53,10 @@ function NesteKnapp() {
   const gaaTilNeste = () => {
     setFeilmeldingAktiviteter('')
     if (aktiviteter?.length) {
-      if (vurderingType === 'TOLV_MAANEDER' && aktiviteter.every((aktivitet) => !aktivitet.vurdertFra12Mnd)) {
+      if (
+        vurderingType === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&
+        aktiviteter.every((aktivitet) => !aktivitet.vurdertFra12Mnd)
+      ) {
         setFeilmeldingAktiviteter('Du må gjøre en ny vurdering fra 12 måneder for å gå videre')
       } else {
         navigate(`../${AktivitetspliktSteg.BREVVALG}`)

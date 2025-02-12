@@ -159,7 +159,7 @@ spec:
     - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-migrering/.default
     - name: PEN_URL
-      value: https://pensjon-pen.prod-fss-pub.nais.io/pen/springapi
+      value: https://pensjon-pen.prod-fss-pub.nais.io/api
     - name: PEN_CLIENT_ID
       value: 53eaf67f-d7b2-46e9-8ffe-3da7cf0ac955
     - name: KRR_ENDPOINT_URL
@@ -177,7 +177,6 @@ spec:
       rules:
         - application: kodeverk-api
           namespace: team-rocket
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-api
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
@@ -205,14 +204,12 @@ spec:
         - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-gyldig-soeknad
-        - application: etterlatte-oppdater-behandling
+        - application: etterlatte-behandling-kafka
         - application: etterlatte-hendelser-joark
+        - application: etterlatte-hendelser-ufoere
         - application: etterlatte-statistikk
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-tidshendelser
-        - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold

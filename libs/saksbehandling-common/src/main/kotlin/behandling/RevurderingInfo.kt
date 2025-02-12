@@ -69,7 +69,7 @@ sealed class RevurderingInfo {
         val klageId: UUID,
     ) : RevurderingInfo()
 
-    @JsonTypeName("SLUTTBEHANDLING_UTLAND")
+    @JsonTypeName("SLUTTBEHANDLING")
     data class SluttbehandlingUtland(
         val landMedDokumenter: List<LandMedDokumenter>,
     ) : RevurderingInfo()

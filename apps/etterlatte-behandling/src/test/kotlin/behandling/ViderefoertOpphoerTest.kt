@@ -82,7 +82,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `lagrer viderefoert opphoer`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -110,7 +110,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `inaktiverer opphør`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -149,7 +149,6 @@ class ViderefoertOpphoerTest(
         (inaktivert.kilde as Grunnlagsopplysning.Saksbehandler).ident shouldBe "Slettersen"
         inaktivert.dato shouldBe viderefoertOpphoer.dato
         inaktivert.vilkaar shouldBe viderefoertOpphoer.vilkaar
-        inaktivert.kravdato shouldBe viderefoertOpphoer.kravdato
         inaktivert.skalViderefoere shouldBe viderefoertOpphoer.skalViderefoere
         inaktivert.begrunnelse shouldBe viderefoertOpphoer.begrunnelse
     }
@@ -157,7 +156,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `lagrer aktiv og inaktive opphoer paa samme behandling`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -221,7 +220,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `feiler ved oppretting hvis det skal viderefoeres og vilkaar mangler`() {
         val sak =
-            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -259,7 +258,6 @@ class ViderefoertOpphoerTest(
             begrunnelse = "for testformål",
             vilkaar = vilkaar,
             kilde = saksbehandlerKilde,
-            kravdato = null,
         )
 
     private fun hentAlleViderefoertOpphoer(behandlingId: UUID): List<ViderefoertOpphoer> =
@@ -280,7 +278,6 @@ class ViderefoertOpphoerTest(
                         dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
-                        kravdato = getDate("kravdato")?.toLocalDate(),
                         behandlingId = behandlingId,
                         vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
                         aktiv = getBoolean("aktiv"),

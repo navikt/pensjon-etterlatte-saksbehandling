@@ -1,6 +1,8 @@
 package no.nav.etterlatte.kodeverk
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import no.nav.etterlatte.libs.common.kodeverk.BeskrivelseDto
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.concurrent.TimeUnit
@@ -20,21 +22,21 @@ class KodeverkService(
             .expireAfterWrite(1, TimeUnit.DAYS)
             .build<CacheKey, KodeverkResponse>()
 
-    suspend fun hentAlleLand(brukerTokenInfo: BrukerTokenInfo): List<Land> {
+    suspend fun hentAlleLand(brukerTokenInfo: BrukerTokenInfo): List<LandDto> {
         val landkoder =
             cache.getIfPresent(CacheKey.LANDKODER)
                 ?: klient
-                    .hent(KodeverkNavn.LANDKODER, brukerTokenInfo)
+                    .hent(KodeverkNavn.LANDKODER, false, brukerTokenInfo)
                     .also { cache.put(CacheKey.LANDKODER, it) }
 
         return mapLandkoder(landkoder)
     }
 
-    suspend fun hentAlleLandISO2(brukerTokenInfo: BrukerTokenInfo): List<Land> {
+    suspend fun hentAlleLandISO2(brukerTokenInfo: BrukerTokenInfo): List<LandDto> {
         val landkoder =
             cache.getIfPresent(CacheKey.LANDKODER_ISO2)
                 ?: klient
-                    .hent(KodeverkNavn.LANDKODERISO2, brukerTokenInfo)
+                    .hent(KodeverkNavn.LANDKODERISO2, false, brukerTokenInfo)
                     .also { cache.put(CacheKey.LANDKODER_ISO2, it) }
 
         return mapLandkoder(landkoder)
@@ -44,7 +46,7 @@ class KodeverkService(
         val arkivtemaer =
             cacheArkivtemaer.getIfPresent(CacheKey.ARKIVTEMAER)
                 ?: klient
-                    .hent(KodeverkNavn.ARKIVTEMAER, brukerTokenInfo)
+                    .hent(KodeverkNavn.ARKIVTEMAER, true, brukerTokenInfo)
                     .also { cacheArkivtemaer.put(CacheKey.ARKIVTEMAER, it) }
 
         return arkivtemaer.betydninger.map { (tema, betydninger) ->
@@ -58,7 +60,7 @@ class KodeverkService(
         }
     }
 
-    private fun mapLandkoder(response: KodeverkResponse): List<Land> =
+    private fun mapLandkoder(response: KodeverkResponse): List<LandDto> =
         response
             .betydninger
             .filter { (isoLandkode) -> isoLandkode.matches(Regex("[A-Z]+")) }
@@ -73,14 +75,15 @@ class KodeverkService(
                 }
             }.mapNotNull { betydningMedIsoKode ->
                 betydningMedIsoKode.beskrivelser["nb"]?.let { beskrivelse ->
-                    Land(
+                    LandDto(
                         isoLandkode = betydningMedIsoKode.isolandkode,
                         gyldigFra = betydningMedIsoKode.gyldigFra,
                         gyldigTil = betydningMedIsoKode.gyldigTil,
                         beskrivelse =
                             LandNormalisert
                                 .hentBeskrivelse(betydningMedIsoKode.isolandkode)
-                                ?.let { Beskrivelse(term = beskrivelse.term, tekst = it) } ?: beskrivelse,
+                                ?.let { BeskrivelseDto(term = beskrivelse.term, tekst = it) }
+                                ?: beskrivelse.let { BeskrivelseDto(it.term, it.tekst) },
                     )
                 }
             }
@@ -91,10 +94,3 @@ private enum class CacheKey {
     LANDKODER_ISO2,
     ARKIVTEMAER,
 }
-
-data class Land(
-    val isoLandkode: String,
-    val gyldigFra: String,
-    val gyldigTil: String,
-    val beskrivelse: Beskrivelse,
-)

@@ -3,24 +3,26 @@ package no.nav.etterlatte.samordning.vedtak
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
+import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.ktor.runServerWithConfig
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.APP
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Issuer
@@ -41,27 +43,24 @@ class SamordningVedtakRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val samordningVedtakService = mockk<SamordningVedtakService>()
     private lateinit var config: Config
-    private lateinit var applicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
     }
 
+    // TODO: alle tester her skal oppdateres med fnr i body 1.mars 2025
     @Nested
     inner class MaskinportenApi {
         @BeforeEach
         fun before() {
             config = config(mockOAuth2Server.config.httpServer.port(), Issuer.MASKINPORTEN.issuerName)
-            applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
         fun `skal gi 401 når token mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -75,9 +74,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 401 med token hvor scope mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -92,9 +89,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 400 dersom tpnr-header mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -119,9 +114,7 @@ class SamordningVedtakRouteTest {
                 opprettSamordningVedtakDto()
 
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -156,9 +149,7 @@ class SamordningVedtakRouteTest {
                 listOf(opprettSamordningVedtakDto())
 
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak") {
                         parameter("fomDato", virkFom)
@@ -198,20 +189,17 @@ class SamordningVedtakRouteTest {
     @Nested
     inner class PensjonApi {
         private val virkFom = LocalDate.now()
-        private val fnr = "01448203510"
+        private val fnr = "06076941937"
 
         @BeforeEach
         fun before() {
             config = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
-            applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
         fun `skal gi 401 når token mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -226,9 +214,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 401 med token hvor rolle mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -253,15 +239,13 @@ class SamordningVedtakRouteTest {
                 listOf(opprettSamordningVedtakDto())
 
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         parameter("fomDato", virkFom)
                         header("fnr", fnr)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken("les-oms-vedtak")}")
+                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken("les-oms-samordning-vedtak")}")
                     }
 
                 response.status shouldBe HttpStatusCode.OK
@@ -293,14 +277,135 @@ class SamordningVedtakRouteTest {
         }
     }
 
-    private fun Application.samordningVedtakApi() {
-        restModule(routeLogger) {
+    @Nested
+    inner class SamordningApi {
+        private val virkFom = LocalDate.now()
+        private val fnr = "06237240748"
+
+        @BeforeEach
+        fun before() {
+            config = config(mockOAuth2Server.config.httpServer.port(), Issuer.TOKENX.issuerName)
+        }
+
+        @Test
+        fun `Skal gi bad request hvis appnavn er etterlatte-samordning-vedtak`() {
+            coEvery {
+                samordningVedtakService.hentVedtaksliste(
+                    fomDato = virkFom,
+                    fnr = Folkeregisteridentifikator.of(fnr),
+                    context = PensjonContext,
+                )
+            } returns
+                listOf(opprettSamordningVedtakDto())
+
+            testApplication {
+                val client = samordningVedtakApi("etterlatte-samordning-vedtak")
+                val response =
+                    client.post("/api/pensjon/vedtak") {
+                        parameter("fomDato", virkFom)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(HttpHeaders.Authorization, "Bearer ${tokenxtoken(fnr)}")
+                        setBody(FoedselsnummerDTO(fnr))
+                    }
+
+                response.status shouldBe HttpStatusCode.BadRequest
+                coVerify(exactly = 0) {
+                    samordningVedtakService.hentVedtaksliste(
+                        fomDato = virkFom,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        context = PensjonContext,
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun `skal gi 400 BAD request, med gyldig token selvbetjening tokenx hvis fnr mangler i body`() {
+            coEvery {
+                samordningVedtakService.hentVedtaksliste(
+                    fomDato = virkFom,
+                    fnr = Folkeregisteridentifikator.of(fnr),
+                    context = PensjonContext,
+                )
+            } returns
+                listOf(opprettSamordningVedtakDto())
+
+            testApplication {
+                val client = samordningVedtakApi("etterlatte-api")
+                val response =
+                    client.post("/api/pensjon/vedtak") {
+                        parameter("fomDato", virkFom)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(HttpHeaders.Authorization, "Bearer ${tokenxtoken(fnr)}")
+                    }
+
+                response.status shouldBe HttpStatusCode.BadRequest
+                coVerify(exactly = 0) {
+                    samordningVedtakService.hentVedtaksliste(
+                        fomDato = virkFom,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        context = PensjonContext,
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun `skal gi 200 med gyldig token selvbetjening tokenx og fnr i body`() {
+            coEvery {
+                samordningVedtakService.hentVedtaksliste(
+                    fomDato = virkFom,
+                    fnr = Folkeregisteridentifikator.of(fnr),
+                    context = PensjonContext,
+                )
+            } returns
+                listOf(opprettSamordningVedtakDto())
+
+            testApplication {
+                val client = samordningVedtakApi("etterlatte-api")
+                val response =
+                    client.post("/api/pensjon/vedtak") {
+                        parameter("fomDato", virkFom)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(HttpHeaders.Authorization, "Bearer ${tokenxtoken(fnr)}")
+                        setBody(FoedselsnummerDTO(fnr))
+                    }
+
+                response.status shouldBe HttpStatusCode.OK
+                coVerify {
+                    samordningVedtakService.hentVedtaksliste(
+                        fomDato = virkFom,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        context = PensjonContext,
+                    )
+                }
+            }
+        }
+
+        private fun tokenxtoken(fnr: String): String {
+            val claimSet =
+                tokenMedClaims(
+                    mapOf(
+                        Claims.sub to fnr,
+                    ),
+                )
+
+            return mockOAuth2Server
+                .issueToken(
+                    issuerId = Issuer.TOKENX.issuerName,
+                    claims = claimSet.allClaims,
+                ).serialize()
+        }
+    }
+
+    private fun ApplicationTestBuilder.samordningVedtakApi(appname: String? = null): HttpClient =
+        runServerWithConfig(applicationConfig = config) {
             samordningVedtakRoute(
                 samordningVedtakService = samordningVedtakService,
                 config = config,
+                appname = appname ?: "etterlatte-samordning-vedtak",
             )
         }
-    }
 
     @AfterEach
     fun afterEach() {

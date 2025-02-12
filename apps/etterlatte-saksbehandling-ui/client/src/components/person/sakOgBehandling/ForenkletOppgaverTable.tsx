@@ -7,7 +7,6 @@ import {
   Oppgavetype,
 } from '~shared/types/oppgave'
 import { Alert, Box, HStack, Table } from '@navikt/ds-react'
-import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
@@ -21,13 +20,16 @@ import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import { formaterDato } from '~utils/formatering/dato'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
+import { OppgaveFrist } from '~components/oppgavebenk/frist/OppgaveFrist'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,
   oppgaveValg,
+  refreshOppgaver,
 }: {
   oppgaver: OppgaveDTO[]
   oppgaveValg: OppgaveValg
+  refreshOppgaver: () => void
 }): ReactNode => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -85,7 +87,7 @@ export const ForenkletOppgaverTable = ({
           <Table.Row key={oppgave.id}>
             <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
             <Table.DataCell>
-              <FristWrapper dato={oppgave.frist} />
+              <OppgaveFrist oppgave={oppgave} oppdaterFrist={refreshOppgaver} />
             </Table.DataCell>
             <Table.DataCell>
               <HStack align="center">

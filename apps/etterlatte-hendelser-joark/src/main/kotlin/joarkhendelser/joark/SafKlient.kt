@@ -32,7 +32,7 @@ class SafKlient(
         if (res.status.isSuccess()) {
             try {
                 return res.body<JournalpostResponse>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 throw ResponseException(res, "Ukjent feil oppsto ved deserialisering av journalpost. id: $id")
             }
         } else {

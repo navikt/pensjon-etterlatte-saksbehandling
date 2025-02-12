@@ -1,5 +1,5 @@
 import { FloppydiskIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import { BodyShort, Box, Button, Heading, HStack, Radio, Textarea, TextField } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Checkbox, Heading, HStack, ReadMore, Textarea, VStack } from '@navikt/ds-react'
 import {
   AnnenForelder,
   AnnenForelderVurdering,
@@ -8,12 +8,11 @@ import {
 } from '~shared/types/grunnlag'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { isPending } from '~shared/api/apiUtils'
 import { redigerAnnenForelder, slettAnnenForelder } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { formaterDato } from '~utils/formatering/dato'
+import { BP_BEREGNING_AV_BARNEPENSJON } from '~components/behandling/virkningstidspunkt/utils'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
 type Props = {
   behandlingId: string
@@ -27,11 +26,10 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
 
   const {
     register,
-    watch,
     reset,
     handleSubmit,
     formState: { errors },
-    control,
+    watch,
   } = useForm<AnnenForelder>({
     defaultValues: personopplysninger?.annenForelder ?? { vurdering: null },
   })
@@ -48,7 +46,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
         annenForelder: annenForelder,
       },
       () => {
-        setTimeout(() => window.location.reload(), 2000)
+        setTimeout(() => window.location.reload(), 1000)
       }
     )
   }
@@ -59,10 +57,9 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
         behandlingId: behandlingId,
       },
       () => {
-        setTimeout(() => window.location.reload(), 2000)
+        setTimeout(() => window.location.reload(), 1000)
       }
     )
-    setRedigerModus(false)
   }
 
   const tekstAnnenForelderVurdering = (vurdering: AnnenForelderVurdering | null) => {
@@ -98,22 +95,6 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
                   <BodyShort>{personopplysninger.annenForelder?.begrunnelse}</BodyShort>
                 </Box>
               )}
-              {personopplysninger.annenForelder.navn && (
-                <Box paddingBlock="0 4">
-                  <Heading size="xsmall" level="4">
-                    Navn
-                  </Heading>
-                  <BodyShort>{personopplysninger.annenForelder?.navn}</BodyShort>
-                </Box>
-              )}
-              {personopplysninger.annenForelder.foedselsdato && (
-                <Box paddingBlock="0 4">
-                  <Heading size="xsmall" level="4">
-                    Fødselsdato
-                  </Heading>
-                  <BodyShort>{formaterDato(personopplysninger.annenForelder?.foedselsdato)}</BodyShort>
-                </Box>
-              )}
             </>
           )}
           {personopplysninger.annenForelder && (
@@ -145,45 +126,32 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
       )}
       {redigerModus && (
         <form onSubmit={handleSubmit(onLagreAnnenForelder)}>
-          <ControlledRadioGruppe
-            name="vurdering"
-            control={control}
-            errorVedTomInput="Du må velge et svar"
-            legend=""
-            hideLegend={true}
-            radios={Object.entries(teksterAnnenForelderVurdering).map(([verdi, tekst]) => {
-              return (
-                <Radio
-                  key={verdi}
-                  value={verdi}
-                  description={
-                    verdi === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
-                      ? 'Huk av hvis det ikke er registrert en annen juridisk forelder enn avdød. Dette gir sats som foreldreløs.'
-                      : ''
-                  }
-                >
-                  {tekst}
-                </Radio>
-              )
-            })}
-          />
-          <Heading size="xsmall" level="4" spacing>
-            {tekstAnnenForelderVurdering(watch().vurdering)}
-          </Heading>
-
-          {watch().vurdering === AnnenForelderVurdering.FORELDER_UTEN_IDENT_I_PDL && (
-            <>
-              <TextField {...register('navn', { shouldUnregister: true })} label="Navn" />
-              <ControlledDatoVelger name="foedselsdato" label="Fødselsdato" control={control} shouldUnregister={true} />
-            </>
-          )}
-          <Textarea
-            {...register('begrunnelse', {
-              required: { value: true, message: 'Må fylles ut' },
-            })}
-            label="Begrunnelse"
-            error={errors.begrunnelse?.message}
-          />
+          <VStack gap="2">
+            <Box>
+              <Checkbox
+                value={AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER}
+                {...register('vurdering')}
+                readOnly={!!watch('vurdering')}
+                required={true}
+              >
+                {tekstAnnenForelderVurdering(AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER)}
+              </Checkbox>
+              <ReadMore header="Når skal du bruke Kun én registrert juridisk forelder?">
+                Kryss av her hvis det er fastsatt kun én juridisk forelder (f.eks. assistert befruktning) og hen er død.
+                Det gis da barnepensjon som foreldreløs. Dokumentasjon må foreligge. Ikke kryss av her hvis en eller
+                begge foreldrene er ukjent (f.eks. at det ikke kan dokumenteres hvem som er mor eller far, og om hen er
+                død).
+                <HjemmelLenke {...BP_BEREGNING_AV_BARNEPENSJON} />
+              </ReadMore>
+            </Box>
+            <Textarea
+              {...register('begrunnelse', {
+                required: { value: true, message: 'Må fylles ut' },
+              })}
+              label="Begrunnelse"
+              error={errors.begrunnelse?.message}
+            />
+          </VStack>
           <HStack gap="4" paddingBlock="2 0">
             <Button size="small" icon={<FloppydiskIcon aria-hidden />} loading={isPending(redigerStatus)}>
               Lagre

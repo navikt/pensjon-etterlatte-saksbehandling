@@ -11,12 +11,13 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
+import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
@@ -28,20 +29,37 @@ fun Route.avkorting(
     behandlingKlient: BehandlingKlient,
     tidligAlderspensjonService: AvkortingTidligAlderspensjonService,
     aarligInntektsjusteringService: AarligInntektsjusteringService,
+    mottattInntektsjusteringService: MottattInntektsjusteringService,
 ) {
     val logger = LoggerFactory.getLogger("AvkortingRoute")
 
     route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
+        /*
+        Tiltenkt frontend. Henting vil utføre endringer på avkorting og behandling
+        (beregning av avkorting, behandlingsstatus, etc).
+         */
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
-                when (val avkorting = avkortingService.hentAvkorting(it, brukerTokenInfo)) {
+                when (val avkorting = avkortingService.hentOpprettEllerReberegnAvkorting(it, brukerTokenInfo)) {
                     null -> call.response.status(HttpStatusCode.NoContent)
                     else -> call.respond(avkorting)
                 }
             }
         }
 
+        get("skalHaInntektNesteAar") {
+            withBehandlingId(behandlingKlient) {
+                val behandling = behandlingKlient.hentBehandling(it, brukerTokenInfo)
+                val skalHaInntektNesteAar = avkortingService.skalHaInntektInnevaerendeOgNesteAar(behandling)
+                call.respond(AvkortingSkalHaInntektNesteAarDTO(skalHaInntektNesteAar))
+            }
+        }
+
+        /*
+        Brukes når behandling er ferdig med avkorting slik at det kan hentes uten at det gjøres nye beregninger og
+        endringer på behandlingstatus.
+         */
         get("ferdig") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
@@ -91,11 +109,12 @@ fun Route.avkorting(
 
     route("/api/beregning/avkorting") {
         post("aarlig-inntektsjustering-sjekk") {
-            val request = call.receive<AarligInntektsjusteringAvkortingSjekkRequest>()
+            val request = call.receive<InntektsjusteringAvkortingInfoRequest>()
             logger.info("Henter har inntekt for ${request.aar} for sakId=${request.sakId}")
             val respons = aarligInntektsjusteringService.hentSjekkAarligInntektsjustering(request)
             call.respond(respons)
         }
+
         post("aarlig-inntektsjustering") {
             val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
             logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
@@ -108,8 +127,20 @@ fun Route.avkorting(
                 )
             call.respond(respons.toDto())
         }
+
+        post("mottatt-inntektsjustering") {
+            val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
+            logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
+            val respons =
+                mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
+            call.respond(respons.toDto())
+        }
     }
 }
+
+data class AvkortingSkalHaInntektNesteAarDTO(
+    val skalHaInntektNesteAar: Boolean,
+)
 
 fun AvkortingGrunnlag.toDto() =
     AvkortingGrunnlagDto(

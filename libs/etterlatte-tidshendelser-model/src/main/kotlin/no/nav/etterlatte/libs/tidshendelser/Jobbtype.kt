@@ -21,22 +21,27 @@ enum class JobbType(
         SakType.OMSTILLINGSSTOENAD,
     ),
     OMS_DOED_4MND(
-        "Omstillingsstønad varselbrev om aktivitetsplikt 4 mnd etter dødsdato",
+        "Infobrev om aktivitetsplikt ved 6 måneder",
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),
     OMS_DOED_6MND(
-        "Omstillingsstønad vurdering av aktivitetsplikt 6 mnd etter dødsdato",
+        "Vurdering av aktivitetsplikt ved 6 måneder",
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),
     OMS_DOED_10MND(
-        "Infobrev om aktivitetsplikt 10 mnd etter dødsdato",
+        "Infobrev om aktivitetsplikt ved 12 måneder",
+        JobbKategori.OMS_DOEDSDATO,
+        SakType.OMSTILLINGSSTOENAD,
+    ),
+    OMS_DOED_12MND(
+        "Vurdering av aktivitetsplikt ved 12 måneder",
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),
     OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(
-        "Omstillingsstønad informasjon om aktivitetsplikt ved 6 mnd etter dødsdato - varig unntak",
+        "Infobrev etter 6 måneder - varig unntak",
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),

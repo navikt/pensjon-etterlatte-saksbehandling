@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 
 /*
 Breva våre er teknisk sett to brev som er satt sammen - den redigerbare delen, og delen som ligg fast.
@@ -19,6 +20,7 @@ enum class Brevkoder(
     val ferdigstilling: EtterlatteBrevKode,
     val tittel: String,
     val brevtype: Brevtype,
+    val titlerPaaSpraak: Map<Spraak, String> = emptyMap(),
 ) {
     OMREGNING(
         EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
@@ -81,7 +83,7 @@ enum class Brevkoder(
         Brevtype.INFORMASJON,
     ),
     BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT(
-        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT,
+        EtterlatteBrevKode.BARNEPENSJON_18_20_VED_REFORMSTIDSPUNKT,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om barnepensjon",
         Brevtype.INFORMASJON,
@@ -149,21 +151,46 @@ enum class Brevkoder(
         "Vedtak om avvist klage",
         Brevtype.VEDTAK,
     ),
-
+    KLAGE_SAKSBEHANDLINGSTID(
+        EtterlatteBrevKode.KLAGE_SAKSBEHANDLINGS_INFO,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+        "Klage – orientering om saksbehandlingstid",
+        Brevtype.INFORMASJON,
+        titlerPaaSpraak =
+            mapOf(
+                Spraak.NB to "Klage – orientering om saksbehandlingstid",
+                Spraak.NN to "Klage – orientering om saksbehandlingstid",
+                Spraak.EN to "Appeals - Information about processing time",
+            ),
+    ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
+        EtterlatteBrevKode.AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
         Brevtype.INFORMASJON,
+        titlerPaaSpraak =
+            mapOf(
+                Spraak.NB to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.NN to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.EN to "Information about the activity requirement for adjustment allowance",
+            ),
     ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
+        EtterlatteBrevKode.AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
         Brevtype.INFORMASJON,
+        titlerPaaSpraak =
+            mapOf(
+                Spraak.NB to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.NN to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.EN to "Information about the activity requirement for adjustment allowance",
+            ),
     ),
+
+    // Denne brukes kun til varig unntak som har egen manuel flyt
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
+        EtterlatteBrevKode.AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om omstillingsstønaden din",
         Brevtype.INFORMASJON,
@@ -175,7 +202,7 @@ enum class Brevkoder(
         Brevtype.INFORMASJON,
     ),
     OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNHENTING_AV_OPPLYSNINGER,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Du må sende oss flere opplysninger",
         Brevtype.INFORMASJON,
@@ -187,7 +214,7 @@ enum class Brevkoder(
         Brevtype.INFORMASJON,
     ),
     BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
-        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+        EtterlatteBrevKode.BARNEPENSJON_INNHENTING_AV_OPPLYSNINGER,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Du må sende oss flere opplysninger",
         Brevtype.INFORMASJON,
@@ -215,7 +242,7 @@ enum class Brevkoder(
     ;
 
     init {
-        checkInternFeil(redigering != ferdigstilling) {
+        krev(redigering != ferdigstilling) {
             "Bruk forskjellige maler for redigering og ferdigstilling. $redigering og $ferdigstilling er like"
         }
     }

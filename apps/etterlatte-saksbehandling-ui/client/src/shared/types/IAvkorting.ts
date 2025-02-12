@@ -6,6 +6,10 @@ export interface IAvkorting {
   tidligereAvkortetYtelse: IAvkortetYtelse[]
 }
 
+export interface IAvkortingSkalHaInntektNesteAar {
+  skalHaInntektNesteAar: boolean
+}
+
 export interface IAvkortingGrunnlagFrontend {
   aar: number
   fraVirk: IAvkortingGrunnlag | null
@@ -42,21 +46,29 @@ export interface IAvkortingGrunnlagLagre {
 
 export interface IOverstyrtInnvilgaMaaneder {
   antall: number
-  aarsak: OverstyrtInnvilaMaanederAarsak
+  aarsak: OverstyrtInnvilgaMaanederAarsak | SystemOverstyrtInnvilgaMaanederAarsak
   begrunnelse: string
 }
 
-export enum OverstyrtInnvilaMaanederAarsak {
+export enum OverstyrtInnvilgaMaanederAarsak {
   TAR_UT_PENSJON_TIDLIG = 'TAR_UT_PENSJON_TIDLIG',
   ANNEN = 'ANNEN',
 }
 
-export function hentLesbarTekstForInnvilgaMaanederType(type: OverstyrtInnvilaMaanederAarsak) {
+export enum SystemOverstyrtInnvilgaMaanederAarsak {
+  BLIR_67 = 'BLIR_67',
+}
+
+export function hentLesbarTekstForInnvilgaMaanederType(
+  type: OverstyrtInnvilgaMaanederAarsak | SystemOverstyrtInnvilgaMaanederAarsak
+) {
   switch (type) {
-    case OverstyrtInnvilaMaanederAarsak.TAR_UT_PENSJON_TIDLIG:
+    case OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG:
       return 'Tar ut pensjon tidlig'
-    case OverstyrtInnvilaMaanederAarsak.ANNEN:
+    case OverstyrtInnvilgaMaanederAarsak.ANNEN:
       return 'Annen'
+    case SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67:
+      return 'Blir 67'
   }
 }
 

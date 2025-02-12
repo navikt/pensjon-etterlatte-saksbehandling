@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -29,6 +30,9 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DokumentManglerDatoException(
@@ -201,7 +205,16 @@ class GenerellBehandlingService(
                 attestant = Attestant(saksbehandler.ident, Tidspunkt.now()),
             ),
         )
+
         opprettHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
+        oppgaveService.opprettOppgave(
+            generellbehandlingId.toString(),
+            hentetBehandling.sakId,
+            OppgaveKilde.GENERELL_BEHANDLING,
+            OppgaveType.GENERELL_OPPGAVE,
+            "Sluttbehandling - VO utland",
+            Tidspunkt.ofNorskTidssone(LocalDate.now().plus(3, ChronoUnit.MONTHS), LocalTime.NOON),
+        )
     }
 
     private fun verifiserRiktigSaksbehandler(
@@ -392,7 +405,8 @@ class GenerellBehandlingService(
                 ) ?: throw FantIkkeAvdoedException(
                     "Fant ikke avdød for sak: $sakId behandlingid: ${forstegangsbehandlingMedKravpakke.id}",
                 )
-            return KravPakkeMedAvdoed(kravpakke, avdoed.opplysning)
+
+            return KravPakkeMedAvdoed(kravpakke, objectMapper.readValue(avdoed.opplysning.toJson(), Person::class.java))
         } else {
             throw RuntimeException("Kravpakken for sak $sakId har ikke blitt attestert, status: ${kravpakke.status}")
         }

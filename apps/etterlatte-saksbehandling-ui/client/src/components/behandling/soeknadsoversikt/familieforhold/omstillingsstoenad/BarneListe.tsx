@@ -14,7 +14,7 @@ export const BarneListe = ({ familieforhold }: { familieforhold: Familieforhold 
   return (
     <VStack gap="4">
       <HStack gap="2">
-        <ChildEyesIcon fontSize={IconSize.DEFAULT} />
+        <ChildEyesIcon fontSize={IconSize.DEFAULT} aria-hidden />
         <Heading size="small" level="3">
           Barn
         </Heading>

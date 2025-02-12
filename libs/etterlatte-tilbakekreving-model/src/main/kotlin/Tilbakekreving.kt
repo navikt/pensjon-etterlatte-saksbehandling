@@ -70,9 +70,19 @@ enum class TilbakekrevingBeloepBeholdSvar {
 
 data class TilbakekrevingPeriode(
     val maaned: YearMonth,
-    val ytelse: Tilbakekrevingsbelop,
-    val feilkonto: Tilbakekrevingsbelop,
+    val tilbakekrevingsbeloep: List<Tilbakekrevingsbelop>,
 )
+
+fun List<Tilbakekrevingsbelop>.kunYtelse() = filter { it.klasseType == KlasseType.YTEL.name }
+
+val tilbakekrevingsbeloepComparator =
+    compareBy<Tilbakekrevingsbelop> {
+        when (it.klasseType) {
+            KlasseType.FEIL.name -> 0
+            KlasseType.YTEL.name -> 1
+            else -> 2
+        }
+    }
 
 data class Tilbakekrevingsbelop(
     val id: UUID,
@@ -89,82 +99,32 @@ data class Tilbakekrevingsbelop(
     val resultat: TilbakekrevingResultat?,
     val tilbakekrevingsprosent: Int?,
     val rentetillegg: Int?,
-) {
-    companion object {
-        fun ytelse(grunnlagsbeloep: Grunnlagsbeloep) =
-            Tilbakekrevingsbelop(
-                id = UUID.randomUUID(),
-                klasseKode = grunnlagsbeloep.klasseKode.value,
-                klasseType = grunnlagsbeloep.klasseType.name,
-                bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
-                nyBruttoUtbetaling = grunnlagsbeloep.nyBruttoUtbetaling.toInt(),
-                skatteprosent = grunnlagsbeloep.skatteProsent,
-                beregnetFeilutbetaling = null,
-                bruttoTilbakekreving = null,
-                nettoTilbakekreving = null,
-                skatt = null,
-                skyld = grunnlagsbeloep.skyld?.let { TilbakekrevingSkyld.valueOf(it) },
-                resultat = grunnlagsbeloep.resultat?.let { TilbakekrevingResultat.valueOf(it) },
-                tilbakekrevingsprosent = null,
-                rentetillegg = null,
-            )
-
-        fun feilkonto(grunnlagsbeloep: Grunnlagsbeloep) =
-            Tilbakekrevingsbelop(
-                id = UUID.randomUUID(),
-                klasseKode = grunnlagsbeloep.klasseKode.value,
-                klasseType = grunnlagsbeloep.klasseType.name,
-                bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
-                nyBruttoUtbetaling = grunnlagsbeloep.nyBruttoUtbetaling.toInt(),
-                skatteprosent = grunnlagsbeloep.skatteProsent,
-                beregnetFeilutbetaling = null,
-                bruttoTilbakekreving = grunnlagsbeloep.bruttoTilbakekreving.toInt(),
-                nettoTilbakekreving = null,
-                skatt = null,
-                skyld = null,
-                resultat = null,
-                tilbakekrevingsprosent = null,
-                rentetillegg = null,
-            )
-    }
-
-    fun toYtelseVedtak() =
-        TilbakekrevingsbelopYtelseVedtak(
-            klasseKode = klasseKode,
-            bruttoUtbetaling = bruttoUtbetaling,
-            nyBruttoUtbetaling = nyBruttoUtbetaling,
-            skatteprosent = skatteprosent,
-            beregnetFeilutbetaling = requireNotNull(beregnetFeilutbetaling),
-            bruttoTilbakekreving = requireNotNull(bruttoTilbakekreving),
-            nettoTilbakekreving = requireNotNull(nettoTilbakekreving),
-            skatt = requireNotNull(skatt),
-            skyld = requireNotNull(skyld),
-            resultat = requireNotNull(resultat),
-            tilbakekrevingsprosent = requireNotNull(tilbakekrevingsprosent),
-            rentetillegg = requireNotNull(rentetillegg),
-        )
-
-    fun toFeilkontoVedtak() =
-        TilbakekrevingsbelopFeilkontoVedtak(
-            klasseKode = klasseKode,
-            bruttoUtbetaling = bruttoUtbetaling,
-            nyBruttoUtbetaling = nyBruttoUtbetaling,
-            bruttoTilbakekreving = requireNotNull(bruttoTilbakekreving),
-        )
-}
+)
 
 fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> =
     map { periode ->
-        val ytelse =
-            requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }) { "Fant ingen ytelse" }
-
-        val feilkonto =
-            requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.FEIL }) { "Fant ikke feilkonto" }
-
         TilbakekrevingPeriode(
             maaned = periode.periode.fraOgMed,
-            ytelse = Tilbakekrevingsbelop.ytelse(ytelse),
-            feilkonto = Tilbakekrevingsbelop.feilkonto(feilkonto),
+            tilbakekrevingsbeloep =
+                periode.grunnlagsbeloep
+                    .map {
+                        Tilbakekrevingsbelop(
+                            id = UUID.randomUUID(),
+                            klasseKode = it.klasseKode.value,
+                            klasseType = it.klasseType.name,
+                            bruttoUtbetaling = it.bruttoUtbetaling.toInt(),
+                            nyBruttoUtbetaling = it.nyBruttoUtbetaling.toInt(),
+                            skatteprosent = it.skatteProsent,
+                            bruttoTilbakekreving = it.bruttoTilbakekreving.toInt(),
+                            beregnetFeilutbetaling = null,
+                            nettoTilbakekreving = null,
+                            skatt = null,
+                            skyld = null,
+                            resultat = null,
+                            tilbakekrevingsprosent = null,
+                            rentetillegg = null,
+                        )
+                    }.sortedWith(tilbakekrevingsbeloepComparator),
         )
     }
 
@@ -222,39 +182,11 @@ data class TilbakekrevingVedtak(
     val hjemmel: TilbakekrevingHjemmel,
     val kravgrunnlagId: String,
     val kontrollfelt: String,
-    val perioder: List<TilbakekrevingPeriodeVedtak>,
+    val perioder: List<TilbakekrevingPeriode>,
 )
 
 data class FattetVedtak(
     val saksbehandler: String,
     val enhet: Enhetsnummer,
     val dato: LocalDate,
-)
-
-data class TilbakekrevingPeriodeVedtak(
-    val maaned: YearMonth,
-    val ytelse: TilbakekrevingsbelopYtelseVedtak,
-    val feilkonto: TilbakekrevingsbelopFeilkontoVedtak,
-)
-
-data class TilbakekrevingsbelopYtelseVedtak(
-    val klasseKode: String,
-    val bruttoUtbetaling: Int,
-    val nyBruttoUtbetaling: Int,
-    val skatteprosent: BigDecimal,
-    val beregnetFeilutbetaling: Int,
-    val bruttoTilbakekreving: Int,
-    val nettoTilbakekreving: Int,
-    val skatt: Int,
-    val skyld: TilbakekrevingSkyld,
-    val resultat: TilbakekrevingResultat,
-    val tilbakekrevingsprosent: Int,
-    val rentetillegg: Int,
-)
-
-data class TilbakekrevingsbelopFeilkontoVedtak(
-    val klasseKode: String,
-    val bruttoUtbetaling: Int,
-    val nyBruttoUtbetaling: Int,
-    val bruttoTilbakekreving: Int,
 )

@@ -29,14 +29,15 @@ data class ManuellRevurdering(
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utlandstilknytning: Utlandstilknytning?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
+    override val soeknadMottattDato: LocalDateTime?,
     override val revurderingsaarsak: Revurderingaarsak,
     override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
-    override val opphoerFraOgMed: YearMonth? = null,
-    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
+    override val opphoerFraOgMed: YearMonth?,
+    override val tidligereFamiliepleier: TidligereFamiliepleier?,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -46,6 +47,7 @@ data class ManuellRevurdering(
         kommerBarnetTilgode = kommerBarnetTilgode,
         virkningstidspunkt = virkningstidspunkt,
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+        soeknadMottattDato = soeknadMottattDato,
         revurderingsaarsak = revurderingsaarsak,
         revurderingInfo = revurderingInfo,
         prosesstype = Prosesstype.MANUELL,
@@ -79,6 +81,11 @@ data class ManuellRevurdering(
     override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
+        }
+
+    override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
 
     override fun tilOpprettet() = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
@@ -144,6 +151,7 @@ data class ManuellRevurdering(
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
+                BehandlingStatus.TRYGDETID_OPPDATERT,
             ),
             BehandlingStatus.FATTET_VEDTAK,
         ) {

@@ -6,9 +6,10 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { opprettGenerellOppgave } from '~shared/api/oppgaver'
 import { GenerellOppgaveDto, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 interface GenerellOppgaveForm extends Omit<GenerellOppgaveDto, 'sakIds'> {
   sakIds: string
@@ -17,7 +18,7 @@ interface GenerellOppgaveForm extends Omit<GenerellOppgaveDto, 'sakIds'> {
 export default function GenerellOppgave() {
   useSidetittel('Opprett generell oppgave')
   const [opprettGenerellOppgaveResult, opprettGenerelOppgaveRequest] = useApiCall(opprettGenerellOppgave)
-  const skalViseSide = useFeatureEnabledMedDefault('opprette-generell-oppgave', false)
+  const skalViseSide = useFeaturetoggle(FeatureToggle.opprette_generell_oppgave)
 
   const {
     register,
@@ -40,6 +41,8 @@ export default function GenerellOppgave() {
   }, [opprettGenerellOppgaveResult, reset])
 
   const opprett = (data: GenerellOppgaveForm) => {
+    trackClick(ClickEvent.OPPRETT_GENERELL_OPPGAVE)
+
     opprettGenerelOppgaveRequest({
       sakIds: data.sakIds
         .split(',')

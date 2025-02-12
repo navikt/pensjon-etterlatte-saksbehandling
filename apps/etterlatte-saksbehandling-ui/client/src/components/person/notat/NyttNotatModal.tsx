@@ -4,6 +4,7 @@ import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Notat, NotatMal, opprettNotatForSak } from '~shared/api/notat'
 import { isPending } from '~shared/api/apiUtils'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 /**
  * Modal blir lagt tilbake når andre maler er på plass.
@@ -13,6 +14,8 @@ export const NyttNotatModal = ({ sakId, leggTilNotat }: { sakId: number; leggTil
   const [opprettNotatStatus, opprettNotat] = useApiCall(opprettNotatForSak)
 
   const opprettNyttNotat = () => {
+    trackClick(ClickEvent.OPPRETT_NYTT_NOTAT)
+
     opprettNotat({ sakId, mal: NotatMal.TOM_MAL }, (notat) => {
       leggTilNotat(notat)
     })
@@ -22,7 +25,7 @@ export const NyttNotatModal = ({ sakId, leggTilNotat }: { sakId: number; leggTil
     <Box>
       <Button
         variant="primary"
-        icon={<DocPencilIcon />}
+        icon={<DocPencilIcon aria-hidden />}
         iconPosition="right"
         onClick={opprettNyttNotat}
         loading={isPending(opprettNotatStatus)}

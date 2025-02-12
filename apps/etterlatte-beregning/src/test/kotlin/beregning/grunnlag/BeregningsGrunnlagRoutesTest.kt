@@ -36,13 +36,14 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -52,6 +53,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -164,8 +166,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 tidligereFamiliepleier = null,
             )
         coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
-        } returns SisteIverksatteBehandling(idForrigeIverksatt)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(idForrigeIverksatt, VedtakType.INNVILGELSE))
         every { repository.finnBeregningsGrunnlag(idRevurdering) } returns null
         every { repository.finnBeregningsGrunnlag(idForrigeIverksatt) } returns
             BeregningsGrunnlag(
@@ -196,7 +198,7 @@ internal class BeregningsGrunnlagRoutesTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
         }
         verify(exactly = 1) {
             repository.lagreBeregningsGrunnlag(any())
@@ -238,7 +240,7 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
-    fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling`() {
+    fun `skal returnere forbidden naar saksbehandler ikke har tilgang til behandling`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
@@ -251,13 +253,13 @@ internal class BeregningsGrunnlagRoutesTest {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
-                    it.status shouldBe HttpStatusCode.NotFound
+                    it.status shouldBe HttpStatusCode.Forbidden
                 }
         }
     }
 
     @Test
-    fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling ved opprettelse`() {
+    fun `skal returnere forbidden naar saksbehandler ikke har tilgang til behandling ved opprettelse`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
@@ -277,7 +279,7 @@ internal class BeregningsGrunnlagRoutesTest {
                         ),
                     )
                 }.let {
-                    it.status shouldBe HttpStatusCode.NotFound
+                    it.status shouldBe HttpStatusCode.Forbidden
                 }
         }
     }
@@ -562,6 +564,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(12L),
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
+                    foreldreloessats = false,
                     trygdetid = 10L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -581,6 +584,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(6L),
                     datoTOM = null,
                     utbetaltBeloep = 456L,
+                    foreldreloessats = false,
                     trygdetid = 20L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = 10,
@@ -673,6 +677,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(12L),
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
+                    foreldreloessats = false,
                     trygdetid = 10L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -692,6 +697,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(6L),
                     datoTOM = null,
                     utbetaltBeloep = 456L,
+                    foreldreloessats = false,
                     trygdetid = 20L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -725,6 +731,7 @@ internal class BeregningsGrunnlagRoutesTest {
                                         data =
                                             OverstyrBeregningGrunnlagData(
                                                 utbetaltBeloep = 123L,
+                                                foreldreloessats = false,
                                                 trygdetid = 10L,
                                                 trygdetidForIdent = null,
                                                 prorataBroekTeller = null,
@@ -739,6 +746,7 @@ internal class BeregningsGrunnlagRoutesTest {
                                         data =
                                             OverstyrBeregningGrunnlagData(
                                                 utbetaltBeloep = 456L,
+                                                foreldreloessats = false,
                                                 trygdetid = 20L,
                                                 trygdetidForIdent = null,
                                                 prorataBroekTeller = null,
@@ -799,6 +807,11 @@ internal class BeregningsGrunnlagRoutesTest {
                 }
         }
     }
+
+    private fun mockVedtak(
+        behandlingId: UUID,
+        type: VedtakType,
+    ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
 
     private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 

@@ -36,7 +36,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
     <>
       {dokumenter.length > 1 ? (
         <Dropdown>
-          <Button icon={<ChevronDownIcon />} size="small" as={Dropdown.Toggle}>
+          <Button icon={<ChevronDownIcon aria-hidden />} size="small" as={Dropdown.Toggle}>
             Vis
           </Button>
           <DropdownMenu>
@@ -66,7 +66,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
         </Dropdown>
       ) : dokumenter[0].dokumentvarianter[0]?.saksbehandlerHarTilgang ? (
         <Button
-          icon={<EyeIcon />}
+          icon={<EyeIcon aria-hidden />}
           size="small"
           onClick={() => open(dokumenter[0].dokumentInfoId)}
           disabled={!dokumenter[0].dokumentvarianter[0]?.saksbehandlerHarTilgang}

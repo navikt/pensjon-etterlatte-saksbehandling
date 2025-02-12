@@ -76,6 +76,11 @@ data class PdlPersonNavnFoedselResponse(
     override val errors: List<PdlResponseError>? = null,
 ) : PdlDataErrorResponse<PdlPersonNavnFoedselResponseData>
 
+data class PdlFoedselsdatoResponse(
+    override val data: PdlFoedselsdatoResponseData? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlFoedselsdatoResponseData>
+
 data class PdlPersonResponseBolk(
     override val data: PdlPersonResponseBulkData? = null,
     override val errors: List<PdlResponseError>? = null,
@@ -141,6 +146,10 @@ data class PdlPersonNavnFoedselResponseData(
     val hentPerson: PdlHentPersonNavnFoedselsdato? = null,
 )
 
+data class PdlFoedselsdatoResponseData(
+    val hentPerson: PdlHentFoedselsdato? = null,
+)
+
 data class PdlPersonResponseBulkData(
     val hentPersonBolk: List<PdlHentPersonBolkResult>? = null,
 )
@@ -161,6 +170,10 @@ data class PdlHentPersonNavnFoedselsdato(
     val foedselsdato: List<PdlFoedselsdato>,
     val doedsfall: List<PdlDoedsfall>,
     val vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?,
+)
+
+data class PdlHentFoedselsdato(
+    val foedselsdato: List<PdlFoedselsdato>,
 )
 
 data class PdlHentPerson(
@@ -236,6 +249,7 @@ data class PdlFoedested(
 
 data class PdlFolkeregistermetadata(
     val gyldighetstidspunkt: LocalDateTime? = null,
+    val ajourholdstidspunkt: LocalDateTime? = null,
     val opphoerstidspunkt: LocalDateTime? = null,
 )
 
@@ -305,6 +319,7 @@ data class PdlUtflyttingFraNorge(
 )
 
 data class PdlBostedsadresse(
+    val angittFlyttedato: LocalDate? = null,
     val coAdressenavn: String?,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,

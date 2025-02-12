@@ -5,7 +5,6 @@ import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import {
   BP_FORELDRELOES_BESKRIVELSE,
   BP_FORELDRELOES_HJEMLER,
@@ -43,6 +42,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { RevurderingKravpakke } from '~components/behandling/revurderingsoversikt/RevurderingKravpakke'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
+import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -68,7 +68,7 @@ const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderinga
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
     case Revurderingaarsak.INSTITUSJONSOPPHOLD:
       return [OMS_INST_HJEMLER_VIRK, OMS_INST_VIRK_BESKRIVELSE]
-    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
+    case Revurderingaarsak.SLUTTBEHANDLING:
       return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     default:
       return [FELLES_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
@@ -84,7 +84,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
     case Revurderingaarsak.INSTITUSJONSOPPHOLD:
     case Revurderingaarsak.FENGSELSOPPHOLD: //TODO: kanskje Revurderingaarsak.UT_AV_FENGSEL: men ikke i bruk nå..
       return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
-    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
+    case Revurderingaarsak.SLUTTBEHANDLING:
       return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     case Revurderingaarsak.FORELDRELOES:
       return [BP_FORELDRELOES_HJEMLER, BP_FORELDRELOES_BESKRIVELSE]
@@ -111,12 +111,10 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading spacing size="large" level="1">
-            Revurdering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="12 4">
+        <Heading spacing size="large" level="1">
+          Revurdering
+        </Heading>
         {[Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(revurderingsaarsak) ? (
           <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
         ) : (
@@ -138,7 +136,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             <BodyShort>{behandling.begrunnelse}</BodyShort>
           </>
         )}
-        {behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND && (
+        {behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING && (
           <SluttbehandlingUtland
             sakId={behandling.sakId}
             revurderingId={behandling.id}
@@ -168,7 +166,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         >
           {{ info: <GrunnlagForVirkningstidspunkt /> }}
         </Virkningstidspunkt>
-
+        {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
+          <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
+        )}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">

@@ -5,6 +5,6 @@ export const skalViseTrygdeavtale = (behandling: IDetaljertBehandling): boolean 
   return (
     behandling.boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale ||
     (behandling.behandlingType === IBehandlingsType.REVURDERING &&
-      behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND)
+      behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING)
   )
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
@@ -12,21 +13,24 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.SAMORDNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TIL_SAMORDNING
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
@@ -34,14 +38,16 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import no.nav.etterlatte.trygdetid.klienter.Trygdetidsgrunnlag
 import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlient
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import java.util.UUID
@@ -61,6 +67,17 @@ interface TrygdetidService {
     suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        overskriv: Boolean = false,
+    ): List<Trygdetid>
+
+    suspend fun harTrygdetidsgrunnlagIPesysForApOgUfoere(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
+    suspend fun leggInnTrygdetidsgrunnlagFraPesys(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
 
     suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
@@ -74,6 +91,12 @@ interface TrygdetidService {
         behandlingId: UUID,
         trygdetidId: UUID,
         trygdetidGrunnlagId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
+    suspend fun slettPesysTrygdetidGrunnlagForTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
 
@@ -119,53 +142,17 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
-    suspend fun reberegnUtenFremtidigTrygdetid(
-        behandlingId: UUID,
-        trygdetidId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
     suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
-    )
-
-    suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-        fnr: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): TrygdetidsperioderPesys
+    ): Trygdetid
 
     suspend fun finnBehandlingMedTrygdetidForSammeAvdoede(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): UUID?
 }
-
-data class TrygdetidsperioderPesys(
-    val ufoeretrygd: TrygdetidsPeriodeListe?,
-    val alderspensjon: TrygdetidsPeriodeListe?,
-)
-
-fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder() =
-    TrygdetidsperioderPesys(
-        ufoeretrygd =
-            TrygdetidsPeriodeListe(
-                trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
-                    it.tilTrygdetidsPeriode()
-                },
-            ),
-        alderspensjon =
-            TrygdetidsPeriodeListe(
-                trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
-                    it.tilTrygdetidsPeriode()
-                },
-            ),
-    )
-
-data class TrygdetidsPeriodeListe(
-    val trygdetidsGrunnlagListe: List<TrygdetidPeriodePesys>?,
-)
 
 data class TrygdetidPeriodePesys(
     val isoCode: String, // ISO 3166-1 alpha-3 code:
@@ -174,21 +161,27 @@ data class TrygdetidPeriodePesys(
     val poengInnAar: Boolean?,
     val poengUtAar: Boolean?,
     val prorata: Boolean?,
-    val kilde: Grunnlagsopplysning.Kilde,
+    val kilde: Grunnlagsopplysning.PesysYtelseKilde, // GrunnlagKildeCode i Pesys
 )
 
-fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
+private fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(kilde: Grunnlagsopplysning.PesysYtelseKilde): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
-        fra = toNorskLocalDate(fomDato.toInstant()),
-        til = toNorskLocalDate(fomDato.toInstant()),
+        fra = fomDato,
+        til = tomDato,
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
-        kilde = Grunnlagsopplysning.Pesys(Tidspunkt.now()),
+        kilde = kilde,
     )
 
-fun toNorskLocalDate(instant: Instant): LocalDate = LocalDate.ofInstant(instant, norskTidssone)
+private fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
+    TrygdetidPeriode(
+        fra = fra,
+        til = til,
+    )
+
+private const val AUTOMATISK_FREMTIDIG_BEGRUNNELSE = "Automatisk beregnet fremtidig trygdetid"
 
 class TrygdetidServiceImpl(
     private val trygdetidRepository: TrygdetidRepository,
@@ -196,17 +189,14 @@ class TrygdetidServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
     private val pesysKlient: PesysKlient,
+    private val avtaleService: AvtaleService,
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
     }
-
-    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-        fnr: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo).tilTrygdetidsperioder()
 
     override suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,
@@ -229,12 +219,23 @@ class TrygdetidServiceImpl(
     override suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        overskriv: Boolean,
     ) = kanOppdatereTrygdetid(
         behandlingId,
         brukerTokenInfo,
     ) {
         val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
-        val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+        val eksisterendeTrygdetider =
+            trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).let { trygdetider ->
+                if (overskriv) {
+                    trygdetider
+                        .forEach { trygdetid -> trygdetidRepository.slettTrygdetid(trygdetid.id) }
+                    emptyList()
+                } else {
+                    trygdetider
+                }
+            }
+
         if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
             throw TrygdetidAlleredeOpprettetException()
         }
@@ -243,21 +244,29 @@ class TrygdetidServiceImpl(
 
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                if (avdoede.isEmpty()) {
-                    logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
-                    throw GrunnlagManglerAvdoede()
+                val ukjentAvdoed = avdoede.isEmpty()
+                val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+                if (ukjentAvdoed || tidligereFamiliepleier) {
+                    logger.info(
+                        "Oppretter overstyrt trygdetid for behandling $behandlingId " +
+                            "(ukjentAvdoed=$ukjentAvdoed, tidligereFamiliepleier=$tidligereFamiliepleier)",
+                    )
+                    listOf(opprettOverstyrtBeregnetTrygdetid(behandlingId, true, brukerTokenInfo))
+                } else {
+                    logger.info("Oppretter trygdetid for behandling $behandlingId")
+                    opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 }
-                logger.info("Oppretter trygdetid for behandling $behandlingId")
-                opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
             }
 
             BehandlingType.REVURDERING -> {
-                val forrigeBehandling =
-                    behandlingKlient.hentSisteIverksatteBehandling(
-                        behandling.sak,
-                        brukerTokenInfo,
-                    )
-                val forrigeTrygdetider = hentTrygdetiderIBehandling(forrigeBehandling.id, brukerTokenInfo)
+                val sisteIverksatteBehandling =
+                    vedtaksvurderingKlient
+                        .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                        .sortedByDescending { it.datoFattet }
+                        .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
+
+                val forrigeTrygdetider = hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
                 if (forrigeTrygdetider.isEmpty()) {
                     opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 } else {
@@ -292,7 +301,7 @@ class TrygdetidServiceImpl(
     ) = avdoede
         .map { avdoed ->
             val fnr =
-                requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                     "Kunne ikke hente identifikator for avdød til trygdetid i " +
                         "behandlingen med id=${behandling.id}"
                 }
@@ -309,6 +318,7 @@ class TrygdetidServiceImpl(
                     ident = avdoedMedFnr.first,
                     yrkesskade = false,
                 )
+
             val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
             val oppdatertTrygdetid =
@@ -318,6 +328,134 @@ class TrygdetidServiceImpl(
         }.also {
             logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
         }
+
+    override suspend fun harTrygdetidsgrunnlagIPesysForApOgUfoere(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        val perioderIPesys =
+            avdoede
+                .map { avdoed ->
+                    val fnr =
+                        krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                                "behandlingen med id=$behandlingId"
+                        }
+
+                    Pair(fnr, avdoed)
+                }.map { avdoedMedFnr ->
+                    val doedsdato = avdoedMedFnr.second.hentDoedsdato()?.verdi ?: throw InternfeilException("Avdød mangler dødsdato")
+                    val trygdetidForUfoereOgAlderspensjon =
+                        pesysKlient.hentTrygdetidsgrunnlag(
+                            Pair(avdoedMedFnr.first, doedsdato),
+                            brukerTokenInfo,
+                        )
+                    trygdetidForUfoereOgAlderspensjon
+                }.map {
+                    mapTrygdetidsgrunnlagFraPesys(it)
+                }
+        return perioderIPesys.flatten().isNotEmpty()
+    }
+
+    override suspend fun leggInnTrygdetidsgrunnlagFraPesys(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Trygdetid> {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        if (!behandling.status.kanEndres()) {
+            throw UgyldigForespoerselException(
+                code = "UGYLDIG_TILSTAND_TRYGDETID",
+                detail = "Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand",
+            )
+        }
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        when (behandling.behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                val ukjentAvdoed = avdoede.isEmpty()
+                val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+                if (ukjentAvdoed || tidligereFamiliepleier) {
+                    throw InternfeilException("Støtter ikke pesys henting for ukjent avdød eller tidligere Familiepleier")
+                }
+            }
+            else -> throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
+        }
+
+        return avdoede
+            .map { avdoed ->
+                val fnr =
+                    krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=$behandlingId"
+                    }
+
+                Pair(fnr, avdoed)
+            }.map { avdoedMedFnr ->
+                val hentTrygdetid =
+                    trygdetidRepository.hentTrygdetid(behandlingId)
+                        ?: throw InternfeilException("Trygdetid er ikke opprettet")
+                val doedsdato = avdoedMedFnr.second.hentDoedsdato()?.verdi ?: throw InternfeilException("Avdød mangler dødsdato")
+
+                val trygdetidForUfoereOgAlderspensjon =
+                    pesysKlient.hentTrygdetidsgrunnlag(
+                        Pair(avdoedMedFnr.first, doedsdato),
+                        brukerTokenInfo,
+                    )
+
+                val hentetTrygdetidMedPesysTrygdetid =
+                    populerTrygdetidsGrunnlagFraPesys(hentTrygdetid, trygdetidForUfoereOgAlderspensjon)
+                trygdetidRepository.oppdaterTrygdetid(hentetTrygdetidMedPesysTrygdetid)
+                val oppdatertTrygdetid =
+                    opprettFremtidigTrygdetidForAvdoed(hentetTrygdetidMedPesysTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
+
+                oppdatertTrygdetid ?: hentetTrygdetidMedPesysTrygdetid
+            }
+    }
+
+    private fun populerTrygdetidsGrunnlagFraPesys(
+        trygdetid: Trygdetid,
+        pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
+    ): Trygdetid = trygdetid.copy(trygdetidGrunnlag = mapTrygdetidsgrunnlagFraPesys(pesysTrygdetidsgrunnlag))
+
+    private fun mapTrygdetidsgrunnlagFraPesys(
+        pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
+    ): List<TrygdetidGrunnlag> {
+        val mappedAlderspensjonTrygdetidsgrunnlag =
+            pesysTrygdetidsgrunnlag.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
+                mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Alderspensjon.create())
+            } ?: emptyList()
+
+        val mappedUfoereTrygdetidsgrunnlag =
+            pesysTrygdetidsgrunnlag.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
+                mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Ufoeretrygd.create())
+            } ?: emptyList()
+        if (mappedAlderspensjonTrygdetidsgrunnlag.isNotEmpty() && mappedUfoereTrygdetidsgrunnlag.isNotEmpty()) {
+            logger.error(
+                "Vi fikk trygdetidsgrunnlag for både alderspensjon og uføretrygd, vi må sjekke om dette gir mening eller om det blir feil.",
+            )
+        }
+        return mappedAlderspensjonTrygdetidsgrunnlag + mappedUfoereTrygdetidsgrunnlag
+    }
+
+    private fun mapPesysTrygdetidsgrunnlag(
+        tt: Trygdetidsgrunnlag,
+        kilde: Grunnlagsopplysning.PesysYtelseKilde,
+    ): TrygdetidGrunnlag {
+        val trygdetidsperiode = tt.tilTrygdetidsPeriode(kilde)
+        return TrygdetidGrunnlag(
+            id = UUID.randomUUID(),
+            type = TrygdetidType.FAKTISK,
+            bosted = tt.land ?: "Ukjent",
+            periode = trygdetidsperiode.fraPesystilVanlig(),
+            kilde = trygdetidsperiode.kilde,
+            beregnetTrygdetid = null,
+            poengUtAar = trygdetidsperiode.poengUtAar == true,
+            poengInnAar = trygdetidsperiode.poengInnAar == true,
+            prorata = trygdetidsperiode.prorata == true,
+            begrunnelse = null,
+        )
+    }
 
     private suspend fun opprettFremtidigTrygdetidForAvdoed(
         trygdetid: Trygdetid,
@@ -337,7 +475,7 @@ class TrygdetidServiceImpl(
                         Grunnlagsopplysning.automatiskSaksbehandler.ident,
                         Tidspunkt.now(),
                     ),
-                begrunnelse = "Automatisk beregnet fremtidig trygdetid",
+                begrunnelse = AUTOMATISK_FREMTIDIG_BEGRUNNELSE,
                 poengInnAar = false,
                 poengUtAar = false,
                 prorata = false,
@@ -372,10 +510,17 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            // Hvis vi oppdaterer en trygdetid som har automatisk begrunnelse, fjern automatisk begrunnelse
+            val trygdetidGrunnlagForOppdatering =
+                when (trygdetidGrunnlag.begrunnelse) {
+                    AUTOMATISK_FREMTIDIG_BEGRUNNELSE -> trygdetidGrunnlag.copy(begrunnelse = null)
+                    else -> trygdetidGrunnlag
+                }
+
             lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
                 behandlingId,
                 trygdetidId,
-                trygdetidGrunnlag,
+                trygdetidGrunnlagForOppdatering,
                 brukerTokenInfo,
             )
         }
@@ -429,6 +574,30 @@ class TrygdetidServiceImpl(
             oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
         }
 
+    override suspend fun slettPesysTrygdetidGrunnlagForTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid =
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            val trygdetid =
+                trygdetidRepository
+                    .hentTrygdetidMedId(behandlingId, trygdetidId)
+                    ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
+
+            val altUnntattPesysKildeGrunnlag =
+                trygdetid.copy(
+                    trygdetidGrunnlag =
+                        trygdetid.trygdetidGrunnlag.filter {
+                            when (it.kilde) {
+                                is Grunnlagsopplysning.PesysYtelseKilde -> false
+                                else -> true
+                            }
+                        },
+                )
+            oppdaterBeregnetTrygdetid(behandlingId, altUnntattPesysKildeGrunnlag, brukerTokenInfo)
+        }
+
     override suspend fun kopierSisteTrygdetidberegninger(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
@@ -438,10 +607,30 @@ class TrygdetidServiceImpl(
 
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
 
+        kopierAvtale(behandlingId, forrigeBehandlingId)
+
         val forrigeTrygdetid = hentTrygdetiderIBehandling(forrigeBehandlingId, brukerTokenInfo)
         val eksisterendeTrygdetider = hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
 
         return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid, eksisterendeTrygdetider)
+    }
+
+    private fun kopierAvtale(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+    ) {
+        val avtale =
+            avtaleService
+                .hentAvtaleForBehandling(forrigeBehandlingId)
+                ?.copy(id = UUID.randomUUID(), behandlingId)
+
+        if (avtale == null) {
+            logger.info("Fant ingen avtale på forrigeBehandling – hopper over kopiering av avtale")
+        } else {
+            logger.info("Kopierer avtale fra forrigeBehandling=$forrigeBehandlingId til nyBehandling=$behandlingId")
+
+            avtaleService.opprettAvtale(avtale)
+        }
     }
 
     private fun kopierSisteTrygdetidberegninger(
@@ -542,7 +731,7 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Trygdetid {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         // Merk: vi kan ikke bruke den vanlige sjekken på kanOppdatereTrygdetid, siden dette kallet skjer typisk
@@ -602,13 +791,13 @@ class TrygdetidServiceImpl(
 
         val ident =
             if (tidligereFamiliepleier) {
-                requireNotNull(behandling.soeker) {
+                krevIkkeNull(behandling.soeker) {
                     "Kunne ikke hente identifikator for soeker til trygdetid i " +
                         "behandlingen med id=$behandlingId"
                 }
             } else {
                 avdoed?.let {
-                    requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
+                    krevIkkeNull(it.hentFoedselsnummer()?.verdi?.value) {
                         "Kunne ikke hente identifikator for avdød til trygdetid i " +
                             "behandlingen med id=$behandlingId"
                     }
@@ -642,8 +831,7 @@ class TrygdetidServiceImpl(
                     ),
                 yrkesskade = false,
             )
-        val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-        trygdetidRepository.oppdaterTrygdetid(opprettet)
+        return trygdetidRepository.opprettTrygdetid(trygdetid)
     }
 
     override suspend fun setYrkesskade(
@@ -694,7 +882,7 @@ class TrygdetidServiceImpl(
             throw IngenTrygdetidFunnetForAvdoede()
         }
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
+        logger.info("Oppdaterer opplysningsgrunnlag for trygdetider (behandlingId=$behandlingId)")
 
         val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
         return trygdetidList
@@ -736,39 +924,6 @@ class TrygdetidServiceImpl(
                 behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
             } else {
                 false
-            }
-        }
-
-    override suspend fun reberegnUtenFremtidigTrygdetid(
-        behandlingId: UUID,
-        trygdetidId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid =
-        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
-            val gjeldendeTrygdetid: Trygdetid =
-                trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
-
-            val trygdetidUtenFremtidigGrunnlag =
-                gjeldendeTrygdetid.copy(
-                    trygdetidGrunnlag = gjeldendeTrygdetid.trygdetidGrunnlag.filter { it.type != TrygdetidType.FREMTIDIG },
-                )
-
-            val datoer = hentDatoerForBehandling(gjeldendeTrygdetid)
-
-            val nyBeregnetTrygdetid =
-                beregnTrygdetidService.beregnTrygdetid(
-                    trygdetidGrunnlag = trygdetidUtenFremtidigGrunnlag.trygdetidGrunnlag,
-                    foedselsDato = datoer.foedselsDato,
-                    doedsDato = datoer.doedsDato,
-                    norskPoengaar = trygdetidUtenFremtidigGrunnlag.overstyrtNorskPoengaar,
-                    yrkesskade = trygdetidUtenFremtidigGrunnlag.yrkesskade,
-                )
-
-            when (nyBeregnetTrygdetid) {
-                null -> trygdetidUtenFremtidigGrunnlag.nullstillBeregnetTrygdetid()
-                else -> trygdetidUtenFremtidigGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
-            }.also { nyTrygdetid ->
-                trygdetidRepository.oppdaterTrygdetid(nyTrygdetid)
             }
         }
 
@@ -870,6 +1025,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
         val datoer = hentDatoerForBehandling(trygdetid)
+        val nordiskKonvensjon = avtaleService.hentAvtaleForBehandling(behandlingId)?.nordiskTrygdeAvtale == JaNei.JA
 
         val nyBeregnetTrygdetid =
             beregnTrygdetidService.beregnTrygdetid(
@@ -878,8 +1034,8 @@ class TrygdetidServiceImpl(
                 datoer.doedsDato,
                 trygdetid.overstyrtNorskPoengaar,
                 trygdetid.yrkesskade,
+                nordiskKonvensjon,
             )
-
         return when (nyBeregnetTrygdetid) {
             null -> trygdetid.nullstillBeregnetTrygdetid()
             else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
@@ -895,11 +1051,20 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<TrygdetidDto> =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            logger.info("Kopierer trygdetidsgrunnlag for behandling $behandlingId fra behandling $kildeBehandlingId")
             val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
             val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
-            checkInternFeil(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
-                "Trygdetidene gjelder forskjellige avdøde"
+            krev(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
+                sikkerlogger().error(
+                    """
+                    Trygdetidene gjelder forskjellige avdøde ved kopiering av trygdetidsgrunnlag 
+                    fra $kildeBehandlingId til $behandlingId
+                    Mål: ${trygdetiderKilde.joinToString { it.ident }}
+                    Kilde: ${trygdetiderMaal.joinToString { it.ident }}
+                    """,
+                )
+                "Trygdetidene gjelder forskjellige avdøde. Se sikkerlogg for detaljer."
             }
 
             // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?
@@ -918,6 +1083,9 @@ class TrygdetidServiceImpl(
                         brukerTokenInfo,
                     )
                 }
+
+            kopierAvtale(behandlingId, kildeBehandlingId)
+
             hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                 .map { it.toDto() }
         }
@@ -963,6 +1131,7 @@ class TrygdetidServiceImpl(
                 listOf(
                     IVERKSATT,
                     BEREGNET,
+                    AVKORTET,
                     FATTET_VEDTAK,
                     ATTESTERT,
                     TIL_SAMORDNING,
@@ -975,12 +1144,6 @@ class ManglerForrigeTrygdetidMaaReguleresManuelt :
     UgyldigForespoerselException(
         "MANGLER_TRYGDETID_FOR_REGULERING",
         "Forrige behandling mangler trygdetid, og kan dermed ikke reguleres manuelt",
-    )
-
-class GrunnlagManglerAvdoede :
-    UgyldigForespoerselException(
-        code = "GRUNNLAG_MANGLER_AVDOEDE",
-        detail = "Ingen avdød(e) funnet i grunnlag. Kan ikke opprette trygdetid.",
     )
 
 class TrygdetidAlleredeOpprettetException :

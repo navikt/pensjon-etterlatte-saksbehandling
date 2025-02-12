@@ -25,7 +25,7 @@ export const AvdoedesBarn = ({ sakType, avdoede }: { sakType: SakType; avdoede?:
   }
 
   return (
-    <Personopplysning heading={opprettHeading()} icon={<ChildEyesIcon />}>
+    <Personopplysning heading={opprettHeading()} icon={<ChildEyesIcon aria-hidden />}>
       <Table>
         <Table.Header>
           <Table.Row>

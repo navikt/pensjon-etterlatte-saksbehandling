@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Result
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 
 data class Resource(
@@ -13,8 +14,11 @@ data class Resource(
     val url: String,
     val additionalHeaders: Map<String, String>? = null,
     val response: Any? = null,
+    val status: HttpStatusCode? = null,
 ) {
     fun addResponse(response: Any?): Resource = this.copy(response = response)
+
+    fun addStatusCode(statusCode: HttpStatusCode): Resource = this.copy(status = statusCode)
 }
 
 data class ThrowableErrorMessage(

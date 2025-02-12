@@ -67,6 +67,8 @@ sealed class SamsvarMellomKildeOgGrunnlag {
 
     @JsonTypeName("FOLKEREGISTERIDENTIFIKATOR")
     data class Folkeregisteridentifikatorsamsvar(
+        val fraPdl: Folkeregisteridentifikator?,
+        val fraGrunnlag: Folkeregisteridentifikator?,
         override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 

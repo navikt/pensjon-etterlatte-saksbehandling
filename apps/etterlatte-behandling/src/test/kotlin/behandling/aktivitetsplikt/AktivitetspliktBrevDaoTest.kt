@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -21,7 +21,7 @@ class AktivitetspliktBrevDaoTest(
     ds: DataSource,
 ) {
     private val dao = AktivitetspliktBrevDao(ConnectionAutoclosingTest(ds))
-    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
+    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)))
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
 
     @Test
@@ -37,6 +37,7 @@ class AktivitetspliktBrevDaoTest(
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                spraak = Spraak.NB,
             )
 
         dao.lagreBrevdata(brevdata)
@@ -64,6 +65,7 @@ class AktivitetspliktBrevDaoTest(
                 utbetaling = false,
                 redusertEtterInntekt = false,
                 kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                spraak = Spraak.NB,
             )
 
         dao.lagreBrevdata(brevdata)
@@ -87,6 +89,7 @@ class AktivitetspliktBrevDaoTest(
                 oppgaveId = oppgave.id,
                 skalSendeBrev = false,
                 kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                spraak = Spraak.NB,
             )
 
         dao.lagreBrevdata(brevdata)
@@ -108,6 +111,7 @@ class AktivitetspliktBrevDaoTest(
                 utbetaling = false,
                 redusertEtterInntekt = false,
                 kilde = Grunnlagsopplysning.Saksbehandler.create(sbIdent),
+                spraak = Spraak.NB,
             )
 
         dao.lagreBrevdata(brevdata)

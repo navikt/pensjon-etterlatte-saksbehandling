@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -20,7 +20,7 @@ import javax.sql.DataSource
 class AvkortingRepository(
     private val dataSource: DataSource,
 ) {
-    fun harSakInntektForAar(harInntektForAarDto: AarligInntektsjusteringAvkortingSjekkRequest): Boolean =
+    fun harSakInntektForAar(harInntektForAarDto: InntektsjusteringAvkortingInfoRequest): Boolean =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
                 queryOf(
@@ -501,4 +501,23 @@ class AvkortingRepository(
             sanksjonId = uuid("sanksjon_id"),
             sanksjonType = enumValueOf(string("sanksjon_type")),
         )
+
+    fun hentAlleAarsoppgjoer(sakId: SakId): List<Aarsoppgjoer> =
+        dataSource.transaction { tx ->
+            queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar ASC",
+                sakId.sakId,
+            ).let { query ->
+                tx.run(
+                    query
+                        .map { row ->
+                            Aarsoppgjoer(
+                                id = row.uuid("id"),
+                                aar = row.int("aar"),
+                                fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                            )
+                        }.asList,
+                )
+            }
+        }
 }

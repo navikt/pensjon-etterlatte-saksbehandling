@@ -26,7 +26,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkUgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -65,7 +65,6 @@ class BrevService(
                 brevData = req.brevParametereAutomatisk.brevDataMapping(),
             )
         val brevId = brev.id
-
         try {
             pdfGenerator.ferdigstillOgGenererPDF(
                 brevId,
@@ -95,7 +94,8 @@ class BrevService(
                 "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
                 e,
             )
-            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+
+            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker, req.brevKode)
             return BrevDistribusjonResponse(brevId, false)
         }
     }
@@ -105,6 +105,7 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ): BrevStatusResponse {
         val brevId = req.brevId
+
         val hentBrev = db.hentBrev(brevId)
         try {
             val brevStatus = hentBrev.status
@@ -168,6 +169,53 @@ class BrevService(
                 brevData = brevData,
                 spraak = spraak,
             ).first
+
+    suspend fun oppdaterManueltBrev(
+        sakId: SakId,
+        brevId: BrevID,
+        bruker: BrukerTokenInfo,
+        parametre: BrevParametre,
+    ): Brev {
+        val brev = db.hentBrev(brevId)
+        if (!brev.kanEndres()) {
+            throw UgyldigForespoerselException(
+                "BREV_KAN_IKKE_ENDRES",
+                "Innholdet i brev med id=$brevId kan ikke oppdateres, siden brevet har status ${brev.status}",
+            )
+        }
+        if (brev.sakId != sakId) {
+            throw UgyldigForespoerselException(
+                "SAK_ID_STEMMER_IKKE",
+                "SakId angitt ($sakId) stemmer ikke med sakId'en til brevet med id=$brevId",
+            )
+        }
+        val spraak = parametre.spraak
+
+        // Oppdater språket hvis nødvendig, _før_ vi henter data basert på språket til brevet
+        if (brev.spraak != spraak) {
+            db.oppdaterSpraak(brevId, spraak, bruker)
+            val tittel = parametre.brevkode.titlerPaaSpraak[spraak]
+            if (tittel != null) {
+                db.oppdaterTittel(brevId, tittel, bruker)
+            }
+        }
+        val innhold =
+            brevoppretter.hentNyttInnhold(
+                sakId = sakId,
+                brevId = brevId,
+                behandlingId = null,
+                bruker = bruker,
+                brevDataMapping = { parametre.brevDataMapping() },
+                brevKodeMapping = { parametre.brevkode },
+            )
+        if (innhold.hoveddel != null) {
+            db.oppdaterPayload(brevId, innhold.hoveddel, bruker)
+        }
+        if (innhold.vedlegg != null) {
+            db.oppdaterPayloadVedlegg(brevId, innhold.vedlegg, bruker)
+        }
+        return db.hentBrev(brevId)
+    }
 
     data class BrevPayload(
         val hoveddel: Slate?,
@@ -331,7 +379,6 @@ class BrevService(
         val brev = sjekkOmBrevKanEndres(id)
 
         if (brev.mottakere.size !in 1..2) {
-            logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
             throw UgyldigAntallMottakere()
         } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottakere.toJson()}")
@@ -356,7 +403,8 @@ class BrevService(
         logger.info("Sjekker om brev med id=$id kan slettes")
 
         val brev = sjekkOmBrevKanEndres(id)
-        checkUgyldigForespoerselException(value = brev.behandlingId == null, code = "BREV_KAN_IKKE_SLETTES") {
+
+        sjekk(brev.behandlingId == null) {
             "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
         }
 
@@ -426,9 +474,10 @@ class BrevService(
 
 class BrevKanIkkeEndres(
     brev: Brev,
+    msg: String? = "",
 ) : UgyldigForespoerselException(
         code = "BREV_KAN_IKKE_ENDRES",
-        detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()}",
+        detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()}, $msg",
         meta =
             mapOf(
                 "brevId" to brev.id,

@@ -4,6 +4,11 @@ import no.nav.etterlatte.libs.common.person.FolkeregisteridentifikatorValidator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import java.time.LocalDate
 
+/*
+    innsender: Denne brukes til å indikere system eller saksbehandler ident(manuelt opprettet behandling) i tillegg til faktisk innsender(innbygger)
+ */
+
+// TODO: gjøre om alle strings her til Folkeregister identifikator
 data class Persongalleri(
     val soeker: String,
     val innsender: String? = null,
@@ -27,6 +32,14 @@ data class Persongalleri(
             soesken.all { validateFnrSimple(it) } &&
             avdoed.all { validateFnrSimple(it) } &&
             gjenlevende.all { validateFnrSimple(it) }
+
+    fun hentAlleIdentifikatorer(): List<String> {
+        val idents = mutableListOf<String?>(soeker, innsender)
+        idents.addAll(soesken)
+        idents.addAll(avdoed)
+        idents.addAll(gjenlevende)
+        return idents.toList().mapNotNull { it }
+    }
 }
 
 fun validateFnrSimple(fnr: String?): Boolean {

@@ -10,16 +10,40 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+interface DollyInterface {
+    fun hentTestGruppeId(
+        brukerId: String,
+        accessToken: String,
+    ): Long?
+
+    fun hentFamilier(
+        gruppeId: Long,
+        accessToken: String,
+    ): List<ForenkletFamilieModell>
+
+    fun opprettBestilling(
+        bestilling: String,
+        gruppeId: Long,
+        accessToken: String,
+    ): BestillingStatus
+
+    fun sendSoeknad(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ): String
+}
+
 class DollyService(
     private val dollyClient: DollyClient,
     private val testnavClient: TestnavClient,
-) {
+) : DollyInterface {
     private val logger: Logger = LoggerFactory.getLogger(DollyService::class.java)
 
     /**
      * Returnerer ID-en på testgruppen dersom den eksisterer. Hvis ikke må gruppen opprettes manuelt.
      */
-    fun hentTestGruppeId(
+    override fun hentTestGruppeId(
         brukerId: String,
         accessToken: String,
     ): Long? =
@@ -38,7 +62,7 @@ class DollyService(
     /**
      * Oppretter en ny bestilling i gruppen som er spesifisert.
      */
-    fun opprettBestilling(
+    override fun opprettBestilling(
         bestilling: String,
         gruppeId: Long,
         accessToken: String,
@@ -57,7 +81,7 @@ class DollyService(
     /**
      * Hent testfamilier som kan benyttes for å sende inn søknad.
      */
-    fun hentFamilier(
+    override fun hentFamilier(
         gruppeId: Long,
         accessToken: String,
     ): List<ForenkletFamilieModell> =
@@ -91,7 +115,7 @@ class DollyService(
             }
         }
 
-    fun sendSoeknad(
+    override fun sendSoeknad(
         request: NySoeknadRequest,
         navIdent: String?,
         behandlingssteg: Behandlingssteg,
@@ -106,6 +130,7 @@ class DollyService(
                         gjenlevendeFnr = request.gjenlevende,
                         avdoedFnr = request.avdoed,
                         barn = request.barn,
+                        soeker = request.soeker,
                         behandlingssteg = behandlingssteg,
                     ).toJson(),
                 mapOf("NavIdent" to (navIdent!!.toByteArray())),
@@ -138,4 +163,46 @@ class DollyService(
                 hensikt = "Test av etterlatte-saksbehandling",
             )
     }
+}
+
+class DollyMock : DollyInterface {
+    override fun hentTestGruppeId(
+        brukerId: String,
+        accessToken: String,
+    ): Long = 0
+
+    override fun hentFamilier(
+        gruppeId: Long,
+        accessToken: String,
+    ): List<ForenkletFamilieModell> =
+        listOf(
+            ForenkletFamilieModell(
+                ibruk = true,
+                avdoed = "123",
+                gjenlevende = "321",
+                barn = listOf("044", "555"),
+            ),
+            ForenkletFamilieModell(
+                ibruk = true,
+                avdoed = "678",
+                gjenlevende = "777",
+                barn = listOf("888", "999"),
+            ),
+        )
+
+    override fun opprettBestilling(
+        bestilling: String,
+        gruppeId: Long,
+        accessToken: String,
+    ): BestillingStatus =
+        BestillingStatus(
+            123L,
+            false,
+        )
+
+    override fun sendSoeknad(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ): String = "123"
 }

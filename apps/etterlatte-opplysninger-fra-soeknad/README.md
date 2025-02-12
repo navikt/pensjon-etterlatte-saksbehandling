@@ -1,1 +1,0 @@
-# etterlatte-opplysninger-fra-soeknad

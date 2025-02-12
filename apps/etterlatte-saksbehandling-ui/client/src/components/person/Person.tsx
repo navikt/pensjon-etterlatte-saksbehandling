@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Tabs } from '@navikt/ds-react'
+import { Link, Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import {
@@ -27,9 +27,8 @@ import { Personopplysninger } from '~components/person/personopplysninger/Person
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
-import { Aktivitet } from '~components/person/aktivitet/Aktivitet'
+import { AktivitetspliktSakoversikt } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -46,11 +45,10 @@ export const Person = () => {
   useSidetittel('Personoversikt')
 
   const [search, setSearch] = useSearchParams()
-  const { fnr } = usePersonLocationState(search.get('key'))
+  const fnr = usePersonLocationState(search.get('key'))?.fnr
 
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
-  const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
@@ -65,7 +63,16 @@ export const Person = () => {
     }
   }, [fnr])
 
-  if (!fnrHarGyldigFormat(fnr)) {
+  if (!fnr) {
+    return (
+      <ApiErrorAlert>
+        Fant ikke fødselsnummer. Dette kan komme av at URL-en ble kopiert fra en annen fane eller nettleser, eller har
+        blitt endret manuelt.
+        <br />
+        <Link href="/">Gå til forsiden</Link>
+      </ApiErrorAlert>
+    )
+  } else if (!fnrHarGyldigFormat(fnr)) {
     return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 
@@ -89,7 +96,7 @@ export const Person = () => {
           )}
           <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
           <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
-          {skalViseNotater && <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />}
+          <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />
           {isOmstillingsstoenad(sakResult) && (
             <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
           )}
@@ -110,16 +117,14 @@ export const Person = () => {
         <Tabs.Panel value={PersonOversiktFane.BREV}>
           <BrevOversikt sakResult={sakResult} />
         </Tabs.Panel>
-        {skalViseNotater && (
-          <Tabs.Panel value={PersonOversiktFane.NOTATER}>
-            <NotatOversikt sakResult={sakResult} />
-          </Tabs.Panel>
-        )}
+        <Tabs.Panel value={PersonOversiktFane.NOTATER}>
+          <NotatOversikt sakResult={sakResult} />
+        </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
           <SamordningSak fnr={fnr} sakResult={sakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
-          <Aktivitet fnr={fnr} sakResult={sakResult} />
+          <AktivitetspliktSakoversikt fnr={fnr} sakResult={sakResult} />
         </Tabs.Panel>
       </Tabs>
     </>

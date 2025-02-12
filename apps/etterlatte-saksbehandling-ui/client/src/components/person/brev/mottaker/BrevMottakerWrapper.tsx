@@ -1,6 +1,6 @@
 import { IBrev } from '~shared/types/Brev'
 import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
-import { Button, HStack, VStack } from '@navikt/ds-react'
+import { Alert, Button, HStack, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettMottaker } from '~shared/api/brev'
@@ -26,6 +26,8 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
 
   return (
     <VStack gap="4">
+      {!mottakere.length && <Alert variant="error">Brevet har ingen mottaker!</Alert>}
+
       {mottakere.map((mottaker) => (
         <BrevMottakerPanel
           key={mottaker.id}
@@ -45,7 +47,7 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
             variant="secondary"
             onClick={opprettNyMottaker}
             loading={isPending(opprettMottakerResult)}
-            icon={<PlusIcon />}
+            icon={<PlusIcon aria-hidden />}
           >
             Legg til mottaker
           </Button>

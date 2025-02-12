@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import java.time.LocalDate
 
 data class BarnepensjonOpphoer(
@@ -28,7 +29,10 @@ data class BarnepensjonOpphoer(
             brevutfall: BrevutfallDto,
             virkningsdato: LocalDate?,
         ): BarnepensjonOpphoer {
-            val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+            val feilutbetaling =
+                krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                    "Feilutbetaling mangler i brevutfall"
+                }
 
             return BarnepensjonOpphoer(
                 innhold = innhold.innhold(),
@@ -40,7 +44,7 @@ data class BarnepensjonOpphoer(
                     ),
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                virkningsdato = requireNotNull(virkningsdato),
+                virkningsdato = krevIkkeNull(virkningsdato) { "Virkningsdato mangler" },
                 feilutbetaling = feilutbetaling,
             )
         }
@@ -53,7 +57,10 @@ data class BarnepensjonOpphoerRedigerbarUtfall(
     companion object {
         fun fra(brevutfall: BrevutfallDto): BarnepensjonOpphoerRedigerbarUtfall =
             BarnepensjonOpphoerRedigerbarUtfall(
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                feilutbetaling =
+                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                        "Feilutbetaling mangler i brevutfall"
+                    },
             )
     }
 }

@@ -44,8 +44,10 @@ spec:
     scopes:
       exposes:
         - name: "vedtaksinformasjon.read"
+          delegationSource: "altinn"
           enabled: true
           product: "etterlatteytelser"
+          separator: "/"
           allowedIntegrations:
             - maskinporten
           atMaxAge: 60
@@ -66,6 +68,8 @@ spec:
               orgno: "940380014"
             - name: Elverum kommunale pensjonskasse
               orgno: "940360293"
+            - name: DRAMMEN KOMMUNALE PENSJONSKASSE
+              orgno: "980650383"
             - name: Maritim pensjonskasse
               orgno: "940415683"
             - name: Garantikassen for fiskere
@@ -102,6 +106,12 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: innsendt-soeknad
+          namespace: etterlatte
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-sak
         - application: selvbetjening-backend
           namespace: etterlatte
           cluster: prod-gcp
@@ -111,39 +121,42 @@ spec:
         - application: arbeid-og-inntekt
           namespace: team-inntekt
           cluster: prod-fss
-          permissions:
-            roles:
-              - les-oms-sak-for-person
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss
           permissions:
             roles:
+              - les-oms-samordning-vedtak
               - les-oms-vedtak
+              - les-bp-samordning-vedtak
               - les-bp-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp
           permissions:
             roles:
+              - les-oms-samordning-vedtak
               - les-oms-vedtak
         - application: alderspensjon-endringssoknad-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp
           permissions:
             roles:
+              - les-oms-samordning-vedtak
               - les-oms-vedtak
         - application: pensjonskalkulator-backend
           namespace: pensjonskalkulator
           cluster: prod-gcp
           permissions:
             roles:
+              - les-oms-samordning-vedtak
               - les-oms-vedtak
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
           cluster: prod-gcp
           permissions:
             roles:
+              - les-oms-samordning-vedtak
               - les-oms-vedtak
         - application: eessi-pensjon-journalforing
           namespace: eessipensjon
@@ -152,6 +165,21 @@ spec:
             roles:
               - les-oms-sak
               - les-bp-sak
+        - application: eessi-pensjon-prefill
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: eessi-pensjon-journalforing
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+              - opprett-jfr-oppgave
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

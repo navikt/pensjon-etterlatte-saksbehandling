@@ -28,6 +28,7 @@ data class AutomatiskRevurdering(
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utlandstilknytning: Utlandstilknytning?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
+    override val soeknadMottattDato: LocalDateTime?,
     override val revurderingsaarsak: Revurderingaarsak,
     override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
@@ -45,6 +46,7 @@ data class AutomatiskRevurdering(
         kommerBarnetTilgode = kommerBarnetTilgode,
         virkningstidspunkt = virkningstidspunkt,
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+        soeknadMottattDato = soeknadMottattDato,
         revurderingsaarsak = revurderingsaarsak,
         revurderingInfo = revurderingInfo,
         prosesstype = Prosesstype.AUTOMATISK,
@@ -62,6 +64,11 @@ data class AutomatiskRevurdering(
     override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
+        }
+
+    override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
 
     override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)

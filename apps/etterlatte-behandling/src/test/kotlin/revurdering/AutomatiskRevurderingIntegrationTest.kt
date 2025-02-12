@@ -14,6 +14,7 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.gyldighetsresultatVurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
@@ -21,7 +22,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -33,7 +33,6 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.module
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.virkningstidspunktVurdering
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
@@ -45,11 +44,12 @@ import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
+    val testUser = mockSaksbehandler("User")
+
     @BeforeAll
     fun start() {
         startServer()
-
-        nyKontekstMedBrukerOgDatabase(mockSaksbehandler("User"), applicationContext.dataSource)
+        nyKontekstMedBrukerOgDatabase(testUser, applicationContext.dataSource)
     }
 
     @AfterAll
@@ -66,12 +66,12 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingFactory
                     .opprettBehandling(
                         sak.id,
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
-                        prosessType = Prosesstype.MANUELL,
                         request = applicationContext.behandlingFactory.hentDataForOpprettBehandling(sak.id),
-                    )?.behandling
+                        testUser.brukerTokenInfo,
+                    ).behandling
             Pair(sak, behandling as Foerstegangsbehandling)
         }
 

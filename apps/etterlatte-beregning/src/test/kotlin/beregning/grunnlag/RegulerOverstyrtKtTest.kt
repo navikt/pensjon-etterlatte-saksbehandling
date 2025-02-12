@@ -21,6 +21,7 @@ class RegulerOverstyrtKtTest {
                 datoFOM = LocalDate.of(2022, 5, 1),
                 datoTOM = null,
                 utbetaltBeloep = 5679,
+                foreldreloessats = false,
                 trygdetid = 40,
                 trygdetidForIdent = "",
                 prorataBroekTeller = null,

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import java.time.YearMonth
 import java.util.UUID
 
@@ -43,6 +44,7 @@ data class Beregningsperiode(
     val regelverk: Regelverk? = null,
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
+    val harForeldreloessats: Boolean? = null,
 )
 
 data class OverstyrBeregningDTO(
@@ -63,7 +65,7 @@ data class AvkortingGrunnlagFrontend(
 )
 
 data class AvkortingDto(
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>, // TODO kan "flyttes" inn i avkortetYteleDto?
+    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
 )
 
@@ -117,6 +119,7 @@ data class AvkortetYtelseDto(
 
 data class BeregningOgAvkortingDto(
     val perioder: List<BeregningOgAvkortingPeriodeDto>,
+    val erInnvilgelsesaar: Boolean,
     // Hvis nytt beløp fra siste åpne periode er ulik den siste åpne perioden til forrige behandling
     val endringIUtbetalingVedVirk: Boolean,
 )
@@ -147,13 +150,13 @@ enum class OverstyrtBeregningKategori {
     UKJENT_KATEGORI, // for å kunne håndtere tidligere overstyringer som ikke har kategori
 }
 
-data class AarligInntektsjusteringAvkortingSjekkRequest(
+data class InntektsjusteringAvkortingInfoRequest(
     val sakId: SakId,
     val aar: Int,
     val sisteBehandling: UUID,
 )
 
-data class AarligInntektsjusteringAvkortingSjekkResponse(
+data class InntektsjusteringAvkortingInfoResponse(
     val sakId: SakId,
     val aar: Int,
     val harInntektForAar: Boolean,
@@ -164,4 +167,10 @@ data class AarligInntektsjusteringAvkortingRequest(
     val aar: Int,
     val forrigeBehandling: UUID,
     val nyBehandling: UUID,
+)
+
+data class MottattInntektsjusteringAvkortigRequest(
+    val behandlingId: UUID,
+    val virkningstidspunkt: YearMonth,
+    val mottattInntektsjustering: MottattInntektsjustering,
 )

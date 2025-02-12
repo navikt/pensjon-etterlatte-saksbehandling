@@ -1,21 +1,21 @@
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { useDispatch } from 'react-redux'
-import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
+import { setAktivitetspliktOppgave } from '~store/reducers/AktivitetsplikReducer'
 import { Alert, BodyShort, Button, Heading, Modal, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapFailure, mapSuccess } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ferdigstillOppgaveUtenBrevAktivitetsplikt } from '~shared/api/aktivitetsplikt'
 
 export function FerdigstillAktivitetspliktOppgaveModal() {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
   const [open, setOpen] = useState(false)
-  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
+  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgaveUtenBrevAktivitetsplikt)
 
   const dispatch = useDispatch()
   const ferdigstill = () => {
-    apiFerdigstillOppgave(oppgave.id, (oppgave) => {
+    apiFerdigstillOppgave({ oppgaveId: oppgave.id }, (oppgave) => {
       dispatch(setAktivitetspliktOppgave(oppgave))
     })
   }

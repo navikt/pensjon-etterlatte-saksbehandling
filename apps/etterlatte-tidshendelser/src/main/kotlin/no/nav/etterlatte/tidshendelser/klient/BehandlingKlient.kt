@@ -3,6 +3,7 @@ package no.nav.etterlatte.tidshendelser.klient
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -11,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import java.time.YearMonth
 
 class BehandlingKlient(
     private val behandlingHttpClient: HttpClient,
@@ -37,6 +39,13 @@ class BehandlingKlient(
                 }.body<SakerDto>()
         }.saker
     }
+
+    fun hentSakerForPleieforholdetOpphoerte(doedsfallsmaaned: YearMonth): List<SakId> =
+        runBlocking {
+            behandlingHttpClient
+                .get("$behandlingUrl/saker/pleieforholdet-opphoerte/$doedsfallsmaaned")
+                .body()
+        }
 }
 
 data class SakerDto(

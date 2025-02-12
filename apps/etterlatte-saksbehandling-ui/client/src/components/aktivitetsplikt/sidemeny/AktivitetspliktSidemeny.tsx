@@ -1,4 +1,4 @@
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { formaterOppgaveStatus } from '~utils/formatering/formatering'

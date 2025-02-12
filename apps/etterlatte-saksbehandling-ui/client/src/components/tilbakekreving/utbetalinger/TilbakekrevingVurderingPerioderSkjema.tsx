@@ -1,6 +1,9 @@
 import {
+  klasseTypeYtelse,
+  leggPaaOrginalIndex,
   teksterTilbakekrevingResultat,
   teksterTilbakekrevingSkyld,
+  tekstKlasseKode,
   TilbakekrevingBehandling,
   TilbakekrevingPeriode,
   TilbakekrevingResultat,
@@ -20,6 +23,7 @@ import { FixedAlert } from '~shared/alerts/FixedAlert'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { formaterMaanedDato } from '~utils/formatering/dato'
+import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -98,7 +102,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
           <div>
             <Button
               variant="secondary"
-              icon={<ArrowsCirclepathIcon />}
+              icon={<ArrowsCirclepathIcon aria-hidden />}
               iconPosition="right"
               loading={isPending(oppdaterKravgrunnlagStatus)}
               size="small"
@@ -118,6 +122,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell style={{ minWidth: '6em' }}>Måned</Table.HeaderCell>
+                <Table.HeaderCell>Klasse</Table.HeaderCell>
                 <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
                 <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
                 <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
@@ -132,117 +137,167 @@ export function TilbakekrevingVurderingPerioderSkjema({
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {watch().values.map((periode, index) => {
-                const beloeper = periode.ytelse
-                return (
-                  <Table.Row key={'beloeperRad' + index} style={{ alignItems: 'start' }}>
-                    <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
-                    <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
-                    <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
-                    <Table.DataCell key="beregnetFeilutbetaling">
-                      <TextField
-                        {...register(`values.${index}.ytelse.beregnetFeilutbetaling`, {
-                          pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
-                          maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
-                        })}
-                        label=""
-                        error={errors.values && errors.values[index]?.ytelse?.beregnetFeilutbetaling?.message}
-                        inputMode="numeric"
-                        hideLabel={true}
+              {watch().values.map((periode, indexPeriode) => {
+                return periode.tilbakekrevingsbeloep.map(leggPaaOrginalIndex).map((beloep) => {
+                  const indexBeloep = beloep.originalIndex
+                  if (klasseTypeYtelse(beloep)) {
+                    return (
+                      <Table.Row key={`beloepRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
+                        <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
+                        <Table.DataCell key="klasseKode">
+                          {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
+                        </Table.DataCell>
+                        <Table.DataCell key="bruttoUtbetaling">{beloep.bruttoUtbetaling} kr</Table.DataCell>
+                        <Table.DataCell key="nyBruttoUtbetaling">{beloep.nyBruttoUtbetaling} kr</Table.DataCell>
+                        <Table.DataCell key="beregnetFeilutbetaling">
+                          <TextField
+                            {...register(
+                              `values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.beregnetFeilutbetaling`,
+                              {
+                                pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                                maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                              }
+                            )}
+                            label=""
+                            error={
+                              errors.values &&
+                              errors.values?.[indexPeriode]?.tilbakekrevingsbeloep?.[indexBeloep]
+                                ?.beregnetFeilutbetaling?.message
+                            }
+                            inputMode="numeric"
+                            hideLabel={true}
+                          />
+                        </Table.DataCell>
+                        <Table.DataCell key="skatteprosent">{beloep.skatteprosent} %</Table.DataCell>
+                        <Table.DataCell key="bruttoTilbakekreving">
+                          <TextField
+                            {...register(
+                              `values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.bruttoTilbakekreving`,
+                              {
+                                pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                                maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                              }
+                            )}
+                            label=""
+                            error={
+                              errors.values &&
+                              errors.values?.[indexPeriode]?.tilbakekrevingsbeloep?.[indexBeloep]?.bruttoTilbakekreving
+                                ?.message
+                            }
+                            inputMode="numeric"
+                            hideLabel={true}
+                          />
+                        </Table.DataCell>
+                        <Table.DataCell key="nettoTilbakekreving">
+                          <TextField
+                            {...register(
+                              `values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.nettoTilbakekreving`,
+                              {
+                                pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                                maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                              }
+                            )}
+                            label=""
+                            error={
+                              errors.values &&
+                              errors.values?.[indexPeriode]?.tilbakekrevingsbeloep?.[indexBeloep]?.nettoTilbakekreving
+                                ?.message
+                            }
+                            hideLabel={true}
+                          />
+                        </Table.DataCell>
+                        <Table.DataCell key="skatt">
+                          <TextField
+                            {...register(`values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.skatt`, {
+                              pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                              maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                            })}
+                            label=""
+                            error={
+                              errors.values &&
+                              errors.values?.[indexPeriode]?.tilbakekrevingsbeloep?.[indexBeloep]?.skatt?.message
+                            }
+                            hideLabel={true}
+                          />
+                        </Table.DataCell>
+                        <Table.DataCell key="skyld">
+                          <Select
+                            {...register(`values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.skyld`, {
+                              setValueAs: (value) => (!!value ? value : null),
+                            })}
+                            label="Skyld"
+                            hideLabel={true}
+                          >
+                            <option value="">Velg..</option>
+                            {Object.values(TilbakekrevingSkyld).map((skyld) => (
+                              <option key={skyld} value={skyld}>
+                                {teksterTilbakekrevingSkyld[skyld]}
+                              </option>
+                            ))}
+                          </Select>
+                        </Table.DataCell>
+                        <Table.DataCell key="resultat">
+                          <Select
+                            {...register(`values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.resultat`, {
+                              setValueAs: (value) => (!!value ? value : null),
+                            })}
+                            label="Resultat"
+                            hideLabel={true}
+                          >
+                            <option value="">Velg..</option>
+                            {Object.values(TilbakekrevingResultat).map((resultat) => (
+                              <option key={resultat} value={resultat}>
+                                {teksterTilbakekrevingResultat[resultat]}
+                              </option>
+                            ))}
+                          </Select>
+                        </Table.DataCell>
+                        <Table.DataCell key="tilbakekrevingsprosent">
+                          <TextField
+                            {...register(
+                              `values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.tilbakekrevingsprosent`,
+                              {
+                                pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                                min: { value: 0, message: 'Må være større enn 0' },
+                                max: { value: 100, message: 'Kan ikke være større enn 100' },
+                              }
+                            )}
+                            label=""
+                            error={
+                              errors.values &&
+                              errors.values?.[indexPeriode]?.tilbakekrevingsbeloep?.[indexBeloep]
+                                ?.tilbakekrevingsprosent?.message
+                            }
+                            hideLabel={true}
+                          />
+                        </Table.DataCell>
+                        <Table.DataCell key="rentetillegg">
+                          <TextField
+                            {...register(`values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.rentetillegg`, {
+                              pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                              maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                            })}
+                            label=""
+                            error={
+                              errors.values &&
+                              errors.values?.[indexPeriode]?.tilbakekrevingsbeloep?.[indexBeloep]?.rentetillegg?.message
+                            }
+                            hideLabel={true}
+                          />
+                        </Table.DataCell>
+                      </Table.Row>
+                    )
+                  } else {
+                    // Kun visning av andre klassetyper enn YTEL - Disse har ikke vurderingsfelter
+                    return (
+                      <TilbakekrevingVurderingPerioderRadAndreKlassetyper
+                        key={`beloepRad-${indexPeriode}-${indexBeloep}`}
+                        periode={periode}
+                        beloep={beloep}
                       />
-                    </Table.DataCell>
-                    <Table.DataCell key="skatteprosent">{beloeper.skatteprosent} %</Table.DataCell>
-                    <Table.DataCell key="bruttoTilbakekreving">
-                      <TextField
-                        {...register(`values.${index}.ytelse.bruttoTilbakekreving`, {
-                          pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
-                          maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
-                        })}
-                        label=""
-                        error={errors.values && errors.values[index]?.ytelse?.bruttoTilbakekreving?.message}
-                        inputMode="numeric"
-                        hideLabel={true}
-                      />
-                    </Table.DataCell>
-                    <Table.DataCell key="nettoTilbakekreving">
-                      <TextField
-                        {...register(`values.${index}.ytelse.nettoTilbakekreving`, {
-                          pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
-                          maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
-                        })}
-                        label=""
-                        error={errors.values && errors.values[index]?.ytelse?.nettoTilbakekreving?.message}
-                        hideLabel={true}
-                      />
-                    </Table.DataCell>
-                    <Table.DataCell key="skatt">
-                      <TextField
-                        {...register(`values.${index}.ytelse.skatt`, {
-                          pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
-                          maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
-                        })}
-                        label=""
-                        error={errors.values && errors.values[index]?.ytelse?.skatt?.message}
-                        hideLabel={true}
-                      />
-                    </Table.DataCell>
-                    <Table.DataCell key="skyld">
-                      <Select
-                        {...register(`values.${index}.ytelse.skyld`, {
-                          setValueAs: (value) => (!!value ? value : null),
-                        })}
-                        label="Skyld"
-                        hideLabel={true}
-                      >
-                        <option value="">Velg..</option>
-                        {Object.values(TilbakekrevingSkyld).map((skyld) => (
-                          <option key={skyld} value={skyld}>
-                            {teksterTilbakekrevingSkyld[skyld]}
-                          </option>
-                        ))}
-                      </Select>
-                    </Table.DataCell>
-                    <Table.DataCell key="resultat">
-                      <Select
-                        {...register(`values.${index}.ytelse.resultat`, {
-                          setValueAs: (value) => (!!value ? value : null),
-                        })}
-                        label="Resultat"
-                        hideLabel={true}
-                      >
-                        <option value="">Velg..</option>
-                        {Object.values(TilbakekrevingResultat).map((resultat) => (
-                          <option key={resultat} value={resultat}>
-                            {teksterTilbakekrevingResultat[resultat]}
-                          </option>
-                        ))}
-                      </Select>
-                    </Table.DataCell>
-                    <Table.DataCell key="tilbakekrevingsprosent">
-                      <TextField
-                        {...register(`values.${index}.ytelse.tilbakekrevingsprosent`, {
-                          pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
-                          min: { value: 0, message: 'Må være større enn 0' },
-                          max: { value: 100, message: 'Kan ikke være større enn 100' },
-                        })}
-                        label=""
-                        error={errors.values && errors.values[index]?.ytelse?.tilbakekrevingsprosent?.message}
-                        hideLabel={true}
-                      />
-                    </Table.DataCell>
-                    <Table.DataCell key="rentetillegg">
-                      <TextField
-                        {...register(`values.${index}.ytelse.rentetillegg`, {
-                          pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
-                          maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
-                        })}
-                        label=""
-                        error={errors.values && errors.values[index]?.ytelse?.rentetillegg?.message}
-                        hideLabel={true}
-                      />
-                    </Table.DataCell>
-                  </Table.Row>
-                )
+                    )
+                  }
+                })
               })}
             </Table.Body>
           </Table>

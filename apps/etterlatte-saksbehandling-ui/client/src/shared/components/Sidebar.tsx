@@ -10,7 +10,11 @@ export const Sidebar = ({ children }: { children: ReactNode }) => {
     <CollapsibleSidebar $collapsed={collapsed}>
       <SidebarTools>
         <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed(!collapsed)}>
-          {collapsed ? <ChevronLeftDoubleIcon /> : <ChevronRightDoubleIcon />}
+          {collapsed ? (
+            <ChevronLeftDoubleIcon aria-label="Åpne sidemeny" />
+          ) : (
+            <ChevronRightDoubleIcon aria-label="Lukk sidemeny" />
+          )}
         </Button>
       </SidebarTools>
 

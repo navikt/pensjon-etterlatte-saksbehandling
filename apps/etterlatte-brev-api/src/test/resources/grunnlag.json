@@ -119,10 +119,7 @@
         "utenlandskBankNavn": null,
         "utenlandskBankAdresse": null,
         "iban": null,
-        "swift": null,
-        "oenskerSkattetrekk": null,
-        "oensketSkattetrekk": null,
-        "beskrivelse": null
+        "swift": null
       },
       "attestering": null
     },

@@ -36,7 +36,7 @@ class TilbakekrevingDaoTest(
 
     @BeforeAll
     fun setup() {
-        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
 
         nyKontekstMedBrukerOgDatabase(mockk<User>().also { every { it.name() } returns this::class.java.simpleName }, dataSource)
@@ -73,7 +73,13 @@ class TilbakekrevingDaoTest(
                         perioder =
                             lagret.tilbakekreving.perioder.map {
                                 it.copy(
-                                    ytelse = it.ytelse.copy(beregnetFeilutbetaling = 123),
+                                    tilbakekrevingsbeloep =
+                                        it.tilbakekrevingsbeloep
+                                            .map { beloep ->
+                                                beloep.copy(
+                                                    beregnetFeilutbetaling = 123,
+                                                )
+                                            },
                                 )
                             },
                     ),

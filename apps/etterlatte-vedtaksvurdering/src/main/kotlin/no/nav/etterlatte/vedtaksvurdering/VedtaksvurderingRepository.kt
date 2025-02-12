@@ -12,7 +12,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -48,33 +49,6 @@ class VedtaksvurderingRepository(
     override fun <T> inTransaction(block: VedtaksvurderingRepository.(TransactionalSession) -> T): T =
         datasource.transaction(true) {
             this.block(it)
-        }
-
-    fun hentVedtakTilSamordning(
-        sakId: SakId,
-        tx: TransactionalSession? = null,
-    ): Vedtak? =
-        tx.session {
-            hent(
-                queryString = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
-                tilbakekreving, klage 
-            FROM vedtak 
-            WHERE sakid = :sakId
-            AND vedtakstatus = :vedtakStatus
-            ORDER BY datoattestert DESC
-            LIMIT 1
-            """,
-                params =
-                    mapOf(
-                        "sakId" to sakId.sakId,
-                        "vedtakStatus" to VedtakStatus.TIL_SAMORDNING.name,
-                    ),
-            ) {
-                it.toVedtak(emptyList())
-            }
         }
 
     fun opprettVedtak(
@@ -124,7 +98,11 @@ class VedtaksvurderingRepository(
                     if (opprettVedtak.innhold is VedtakInnhold.Behandling) {
                         opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
                         opprettVedtak.innhold.avkorting?.let {
-                            opprettAvkortetYtelsePerioder(vedtakId, deserialize<AvkortingDto>(it.toString()).avkortetYtelse, this)
+                            opprettAvkortetYtelsePerioder(
+                                vedtakId,
+                                deserialize<AvkortingDto>(it.toString()).avkortetYtelse,
+                                this,
+                            )
                         }
                     }
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
@@ -148,10 +126,12 @@ class VedtaksvurderingRepository(
                             "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
                             "opphoer_fom" to oppdatertVedtak.innhold.opphoerFraOgMed?.atDay(1),
                         )
+
                     is VedtakInnhold.Tilbakekreving ->
                         mapOf(
                             "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving.toJson(),
                         )
+
                     is VedtakInnhold.Klage ->
                         mapOf(
                             "klage" to oppdatertVedtak.innhold.klage.toJson(),
@@ -180,7 +160,11 @@ class VedtaksvurderingRepository(
                 opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.innhold.utbetalingsperioder, this)
                 slettAvkortetYtelsePerioder(oppdatertVedtak.id, this)
                 oppdatertVedtak.innhold.avkorting?.let {
-                    opprettAvkortetYtelsePerioder(oppdatertVedtak.id, deserialize<AvkortingDto>(it.toString()).avkortetYtelse, this)
+                    opprettAvkortetYtelsePerioder(
+                        oppdatertVedtak.id,
+                        deserialize<AvkortingDto>(it.toString()).avkortetYtelse,
+                        this,
+                    )
                 }
             }
             return@session hentVedtak(oppdatertVedtak.behandlingId, this)
@@ -224,7 +208,7 @@ class VedtaksvurderingRepository(
                             ?.let(Date::valueOf),
                     "type" to it.type.name,
                     "beloep" to it.beloep,
-                    "regelverk" to it.regelverk?.name,
+                    "regelverk" to it.regelverk.name,
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }
@@ -309,7 +293,7 @@ class VedtaksvurderingRepository(
     private fun hentVedtakNonNull(
         behandlingId: UUID,
         tx: TransactionalSession? = null,
-    ): Vedtak = requireNotNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
+    ): Vedtak = krevIkkeNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
 
     fun hentVedtakForSak(
         sakId: SakId,
@@ -335,7 +319,7 @@ class VedtaksvurderingRepository(
 
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
-        sakType: SakType,
+        sakType: SakType? = null,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
@@ -344,8 +328,8 @@ class VedtaksvurderingRepository(
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
             FROM vedtak  
             WHERE fnr = :fnr 
-            AND saktype = :saktype   
             AND vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
+            ${if (sakType == null) "" else "AND saktype = :saktype"}
             """
         return tx.session {
             hentListe(
@@ -353,7 +337,7 @@ class VedtaksvurderingRepository(
                 params = {
                     mapOf(
                         "fnr" to fnr.value,
-                        "saktype" to sakType.name,
+                        "saktype" to sakType?.name,
                     )
                 },
             ) {
@@ -407,7 +391,7 @@ class VedtaksvurderingRepository(
                         "behandlingId" to behandlingId,
                     ),
                 loggtekst = "Fatter vedtak for behandling $behandlingId",
-            ).also { checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter fatting behandlingid: $behandlingId" } }
+            ).also { krev(it == 1) { "Vedtak ble ikke oppdatert etter fatting behandlingid: $behandlingId" } }
                 .let { hentVedtakNonNull(behandlingId, this) }
         }
 
@@ -433,7 +417,7 @@ class VedtaksvurderingRepository(
                     ),
                 loggtekst = "Attesterer vedtak $behandlingId",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter attestering behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter attestering behandlingid: $behandlingId" }
             }
 
             opprett(
@@ -465,7 +449,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
                 loggtekst = "Underkjenner vedtak for behandling $behandlingId",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter underkjenning behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter underkjenning behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -480,7 +464,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer til_samordning vedtak",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter satt til samordning behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter satt til samordning behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -495,7 +479,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer samordnet vedtak",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter samordnet behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter samordnet behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -510,7 +494,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer iverksatt vedtak",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -581,7 +565,7 @@ class VedtaksvurderingRepository(
                 ),
             beloep = bigDecimalOrNull("beloep"),
             type = UtbetalingsperiodeType.valueOf(string("type")),
-            regelverk = stringOrNull("regelverk")?.let { Regelverk.valueOf(it) },
+            regelverk = string("regelverk").let { Regelverk.valueOf(it) },
         )
 
     private fun Row.toAvkortetYtelsePeriode() =
@@ -617,7 +601,7 @@ class VedtaksvurderingRepository(
                     ),
                 loggtekst = "Returnerer vedtak $behandlingId",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert returnert/tilbakestilt behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert returnert/tilbakestilt behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }

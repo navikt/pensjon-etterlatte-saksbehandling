@@ -67,7 +67,7 @@ export default function SEDLandMedDokumenter({
                   {redigerbar && (
                     <Button
                       variant="tertiary"
-                      icon={<TrashIcon />}
+                      icon={<TrashIcon aria-hidden />}
                       onClick={() => fjernLand()}
                       style={{ float: 'right' }}
                     >

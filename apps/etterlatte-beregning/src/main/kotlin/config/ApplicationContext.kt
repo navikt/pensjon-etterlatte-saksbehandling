@@ -3,9 +3,13 @@ package no.nav.etterlatte.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.avkorting.AarligInntektsjusteringService
+import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.AvkortingTidligAlderspensjonService
+import no.nav.etterlatte.avkorting.MottattInntektsjusteringService
+import no.nav.etterlatte.avkorting.inntektskomponent.InntektskomponentKlient
+import no.nav.etterlatte.avkorting.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
@@ -27,6 +31,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.sanksjon.SanksjonRepository
 import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
@@ -54,6 +59,19 @@ class ApplicationContext {
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
+
+    val inntektskomponentKlient =
+        InntektskomponentKlient(
+            httpClient =
+                httpClientClientCredentials(
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                    azureAppScope = config.getString("inntektskomponenten.scope"),
+                ),
+            url = config.getString("inntektskomponenten.url"),
+        )
+    val inntektskomponentService = InntektskomponentService(inntektskomponentKlient)
 
     val sanksjonService =
         SanksjonService(
@@ -105,6 +123,9 @@ class ApplicationContext {
             sanksjonService = sanksjonService,
         )
     val avkortingRepository = AvkortingRepository(dataSource)
+
+    val avkortingReparerAarsoppgjoeret = AvkortingReparerAarsoppgjoeret(avkortingRepository)
+
     val avkortingService =
         AvkortingService(
             behandlingKlient = behandlingKlient,
@@ -112,7 +133,8 @@ class ApplicationContext {
             beregningService = beregningService,
             sanksjonService = sanksjonService,
             grunnlagKlient = grunnlagKlient,
-            featureToggleService = featureToggleService,
+            vedtakKlient = vedtaksvurderingKlient,
+            avkortingReparerAarsoppgjoeret = avkortingReparerAarsoppgjoeret,
         )
     val avkortingTidligAlderspensjonService =
         AvkortingTidligAlderspensjonService(
@@ -125,10 +147,11 @@ class ApplicationContext {
             avkortingRepository = avkortingRepository,
             sanksjonService = sanksjonService,
         )
+    val mottattInntektsjusteringService = MottattInntektsjusteringService(avkortingService)
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(
             beregningRepository = beregningRepository,
-            avkortingRepository = avkortingRepository,
+            avkortingService = avkortingService,
             beregningsGrunnlagService = beregningsGrunnlagService,
             behandlingKlient = behandlingKlient,
         )

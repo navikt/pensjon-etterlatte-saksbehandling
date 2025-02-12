@@ -18,7 +18,8 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
@@ -39,8 +40,8 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.SakendringerDao
-import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.sak.TilgangServiceSjekker
+import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions
@@ -57,26 +58,40 @@ import javax.sql.DataSource
 internal class TilgangServiceTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var tilgangService: TilgangService
+    private lateinit var tilgangService: TilgangServiceSjekker
     private lateinit var sakService: SakService
     private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
+    private lateinit var sakendringerDao: SakendringerDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var klageDao: KlageDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
     private val brukerService = mockk<BrukerService>()
-    private val skjermingKlient = mockk<SkjermingKlient>()
+    private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
+    private val featureToggle = mockk<FeatureToggleService>()
 
     @BeforeAll
     fun beforeAll() {
-        tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+        tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
 
-        sakService = SakServiceImpl(sakRepo, sakLesDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
+        sakService =
+            SakServiceImpl(
+                sakRepo,
+                sakLesDao,
+                sakendringerDao,
+                skjermingKlient,
+                brukerService,
+                grunnlagservice,
+                krrKlient,
+                pdlTjenesterKlient,
+                featureToggle,
+            )
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
@@ -137,7 +152,10 @@ internal class TilgangServiceTest(
 
         val saksbehandlerUtenStrengtFortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(ident = "annenIdent", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(
+                    ident = "annenIdent",
+                    claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim),
+                ),
                 mapOf(),
             )
         val harTilgangStrengtFortroligBehandling =
@@ -145,7 +163,8 @@ internal class TilgangServiceTest(
                 klage.id.toString(),
                 saksbehandlerMedStrengtfortrolig,
             )
-        val harTilgangStrengtFortroligKlage = tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerMedStrengtfortrolig)
+        val harTilgangStrengtFortroligKlage =
+            tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerMedStrengtfortrolig)
 
         Assertions.assertTrue(harTilgangStrengtFortroligKlage)
         Assertions.assertTrue(harTilgangStrengtFortroligBehandling)
@@ -155,7 +174,8 @@ internal class TilgangServiceTest(
                 klage.id.toString(),
                 saksbehandlerUtenStrengtFortrolig,
             )
-        val harTilgangIkkeFortroligKlage = tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerUtenStrengtFortrolig)
+        val harTilgangIkkeFortroligKlage =
+            tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerUtenStrengtFortrolig)
 
         Assertions.assertFalse(harTilgangIkkeFortroligBehandling)
         Assertions.assertFalse(harTilgangIkkeFortroligKlage)
@@ -185,7 +205,10 @@ internal class TilgangServiceTest(
 
         val saksbehandlerUtenStrengtFortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(ident = "annenIdent", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(
+                    ident = "annenIdent",
+                    claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim),
+                ),
                 mapOf(),
             )
         val harTilgangStrengtFortroligBehandling =

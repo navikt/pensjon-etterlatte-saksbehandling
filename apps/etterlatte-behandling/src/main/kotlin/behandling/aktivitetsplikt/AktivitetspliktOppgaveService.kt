@@ -15,10 +15,12 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -32,6 +34,16 @@ import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
+
+enum class AktivitetspliktOppgaveToggles(
+    private val key: String,
+) : FeatureToggle {
+    UNNTAK_UTEN_FRIST("aktivitetsplikt-oppgave-unntak-ingen-frist"),
+    UNNTAK_MED_FRIST("aktivitetsplikt-oppgave-unntak-med-frist"),
+    ;
+
+    override fun key(): String = key
+}
 
 class AktivitetspliktOppgaveService(
     private val aktivitetspliktService: AktivitetspliktService,
@@ -84,11 +96,7 @@ class AktivitetspliktOppgaveService(
             vurderingType = vurderingType,
             oppgave = oppgave,
             sak = sak,
-            vurdering =
-                vurderinger ?: AktivitetspliktVurdering(
-                    emptyList(),
-                    emptyList(),
-                ),
+            vurdering = vurderinger,
         )
     }
 
@@ -97,28 +105,109 @@ class AktivitetspliktOppgaveService(
         data: AktivitetspliktInformasjonBrevdataRequest,
     ): AktivitetspliktInformasjonBrevdata {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        /*
+        Hvis oppgaven er ferdigstilt fra forrige vurdering må vi på en måte få lagt den
+        inn i brevdataen her.
+        Holder det å sjekke på oppgavetype + brev for sak av den typen?
+        Tidligere hadde man ingen referanse til denne.
+         */
         if (oppgave.status.erAvsluttet()) {
             throw OppgaveErAvsluttet("Oppgave er avsluttet, id $oppgaveId. Kan ikke fjerne brevid")
-        } else {
-            val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-            val saksbehandler =
-                Kontekst.get().brukerTokenInfo
-                    ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
-            val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
-            aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
-            val hentBrevId = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
-            if (!data.skalSendeBrev && hentBrevId?.brevId != null) {
+        }
+
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+        val saksbehandler =
+            Kontekst.get().brukerTokenInfo
+                ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
+
+        val eksisterendeData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
+
+        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
+        val oppdatertData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+
+        // Hvis brev allerede er opprettet kan det hende vi må endre / slette det
+        if (oppdatertData?.brevId != null) {
+            // Hvis brevet ikke er relevant skal det slettes
+            if (!data.skalSendeBrev) {
                 aktivitetspliktBrevDao.fjernBrevId(oppgaveId, kilde)
                 runBlocking {
                     brevApiKlient.slettBrev(
-                        brevId = hentBrevId.brevId,
+                        brevId = oppdatertData.brevId,
                         sakId = sak.id,
                         brukerTokenInfo = saksbehandler,
                     )
                 }
+                // Hvis brevdata er endret må vi oppdatere brevet
+            } else if (!oppdatertData.harLikeUtfall(eksisterendeData)) {
+                val brevParametre = mapOgValiderBrevParametre(oppgave, oppdatertData)
+                runBlocking {
+                    brevApiKlient.oppdaterSpesifiktBrev(
+                        sakId = sak.id,
+                        brevParametre = brevParametre,
+                        brukerTokenInfo = saksbehandler,
+                        brevId = oppdatertData.brevId,
+                    )
+                }
             }
-            return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
         }
+        return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
+    }
+
+    private fun mapOgValiderBrevParametre(
+        oppgave: OppgaveIntern,
+        brevdata: AktivitetspliktInformasjonBrevdata,
+    ): BrevParametre {
+        val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgave.id)
+
+        val sisteAktivtetsgrad =
+            vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
+                ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: ${oppgave.id}")
+
+        sjekkOmHarNyVurdering(oppgave, vurderingForOppgave.aktivitet)
+
+        if (brevdata.manglerUtfylling()) {
+            throw UgyldigForespoerselException(
+                "MANGLER_UTFYLLING",
+                "Data for brev mangler utfylling, og må redigeres og lagres på nytt for å opprette brevet.",
+            )
+        }
+
+        val nasjonalEllerUtland =
+            behandlingService.hentUtlandstilknytningForSak(oppgave.sakId)
+                ?: throw ManglerUtlandstilknytning("Mangler utlandstilknytning for sakid ${oppgave.sakId} oppgaveid: ${oppgave.id}")
+
+        val aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad)
+        val utbetaling =
+            krevIkkeNull(brevdata.utbetaling) { "Mangler utbetaling for utbetaling for oppgave ${oppgave.id}" }
+        val redusertEtterInntekt =
+            krevIkkeNull(brevdata.redusertEtterInntekt) { "Mangler redusert-inntekt for oppgave ${oppgave.id}" }
+        val spraak = krevIkkeNull(brevdata.spraak) { "Mangler spraak for oppgave ${oppgave.id}" }
+        val nasjonalEllerUtlandMapped = mapNasjonalEllerUtland(nasjonalEllerUtland.type)
+
+        val brevparametere =
+            when (oppgave.type) {
+                OppgaveType.AKTIVITETSPLIKT ->
+                    BrevParametre.AktivitetspliktInformasjon4Mnd(
+                        aktivitetsgrad = aktivitetsgrad,
+                        utbetaling = utbetaling,
+                        redusertEtterInntekt = redusertEtterInntekt,
+                        nasjonalEllerUtland = nasjonalEllerUtlandMapped,
+                        spraak = spraak,
+                    )
+
+                OppgaveType.AKTIVITETSPLIKT_12MND ->
+                    BrevParametre.AktivitetspliktInformasjon10Mnd(
+                        aktivitetsgrad = aktivitetsgrad,
+                        utbetaling = utbetaling,
+                        redusertEtterInntekt = redusertEtterInntekt,
+                        nasjonalEllerUtland = nasjonalEllerUtlandMapped,
+                        spraak = spraak,
+                    )
+
+                else -> throw FeilOppgavetype("Prøver å lage aktivitetsplikt med oppgavetype: ${oppgave.type} id: ${oppgave.id}")
+            }
+        return brevparametere
     }
 
     private fun mapAktivitetsgradstypeTilAktivtetsgrad(aktivitetsgrad: AktivitetspliktAktivitetsgradType): Aktivitetsgrad =
@@ -167,29 +256,12 @@ class AktivitetspliktOppgaveService(
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
-            val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId)
-
-            val sisteAktivtetsgrad =
-                vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
-                    ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: $oppgaveId")
-
-            sjekkOmHarNyVurdering(oppgave, vurderingForOppgave.aktivitet)
-
-            val nasjonalEllerUtland =
-                behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-            val brevParametreAktivitetsplikt10mnd =
-                BrevParametre.AktivitetspliktInformasjon10Mnd(
-                    aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
-                    utbetaling = brevData.utbetaling!!,
-                    redusertEtterInntekt = brevData.redusertEtterInntekt!!,
-                    nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
-                    spraak = Spraak.NB,
-                )
+            val brevparametereAktivitetspliktVurdering = mapOgValiderBrevParametre(oppgave, brevData)
             val opprettetBrev =
                 runBlocking {
                     brevApiKlient.opprettSpesifiktBrev(
                         oppgave.sakId,
-                        brevParametreAktivitetsplikt10mnd,
+                        brevparametereAktivitetspliktVurdering,
                         brukerTokenInfo = brukerTokenInfo,
                     )
                 }
@@ -220,12 +292,32 @@ class AktivitetspliktOppgaveService(
         }
     }
 
+    fun ferdigstillOppgaveUtenBrev(
+        oppgaveId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OppgaveIntern {
+        val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
+        if (brevData.skalSendeBrev) {
+            throw UgyldigForespoerselException(
+                "FEIL_I_BREVDATA",
+                "Kan ikke ferdigstille oppgave for aktivitetsplikt uten å sende brev hvis det er valgt at brev skal sendes.",
+            )
+        }
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+
+        val unntakIOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId).unntak
+        aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIOppgave, sak.id)
+        return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+    }
+
     fun ferdigstillBrevOgOppgave(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern {
         val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        logger.info("Ferdigstiller brev aktivitetsplikt for oppgaveid $oppgaveId")
         try {
             oppgaveService.sjekkOmKanFerdigstilleOppgave(oppgave, brukerTokenInfo)
         } catch (e: Exception) {
@@ -241,11 +333,14 @@ class AktivitetspliktOppgaveService(
                 enhetsnummer = sak.enhet,
                 avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = brukerTokenInfo.ident()),
             )
-        val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
+        val brevrespons: BrevStatusResponse =
+            runBlocking { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(req, brukerTokenInfo) }
         if (brevrespons.status.erDistribuert()) {
-            oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
-            return oppgaveService.hentOppgave(oppgaveId)
+            val unntakIOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId).unntak
+            aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIOppgave, sak.id)
+            return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {
+            logger.warn("Brev ble ikke distribuert, ferdigstiller ikke oppgave $oppgaveId for aktivitetsplikt")
             throw BrevBleIkkeFerdig(brevrespons.status)
         }
     }
@@ -287,6 +382,20 @@ class BrevFeil(
         detail = msg,
     )
 
+class FeilOppgavetype(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "FEIL_OPPGAVETYPE",
+        detail = msg,
+    )
+
+class ManglerUtlandstilknytning(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_UTLANDSTILKNTTNING",
+        detail = msg,
+    )
+
 class ManglerBrevdata(
     msg: String,
 ) : UgyldigForespoerselException(
@@ -305,6 +414,8 @@ data class AktivitetspliktInformasjonBrevdataRequest(
     val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
+    val spraak: Spraak? = null,
+    val begrunnelse: String? = null,
 ) {
     fun toDaoObjektBrevutfall(
         oppgaveId: UUID,
@@ -318,6 +429,8 @@ data class AktivitetspliktInformasjonBrevdataRequest(
             utbetaling = this.utbetaling,
             redusertEtterInntekt = this.redusertEtterInntekt,
             skalSendeBrev = this.skalSendeBrev,
+            spraak = this.spraak,
+            begrunnelse = this.begrunnelse,
         )
 }
 
@@ -328,8 +441,18 @@ data class AktivitetspliktInformasjonBrevdata(
     val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
+    val begrunnelse: String? = null,
+    val spraak: Spraak?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-)
+) {
+    fun manglerUtfylling(): Boolean = skalSendeBrev && listOf(utbetaling, spraak, redusertEtterInntekt, spraak).any { it == null }
+
+    fun harLikeUtfall(annen: AktivitetspliktInformasjonBrevdata?): Boolean =
+        this.skalSendeBrev == annen?.skalSendeBrev &&
+            this.utbetaling == annen.utbetaling &&
+            this.redusertEtterInntekt == annen.redusertEtterInntekt &&
+            this.spraak == annen.spraak
+}
 
 data class AktivitetspliktOppgaveVurdering(
     val vurderingType: VurderingType,

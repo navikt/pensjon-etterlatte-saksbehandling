@@ -172,6 +172,7 @@ query(
             }
         }
         bostedsadresse(historikk: $bostedsadresseHistorikk) @include(if: $bostedsadresse) {
+            angittFlyttedato
             coAdressenavn
             vegadresse {...vegadresseDetails}
             utenlandskAdresse {...utenlandskAdresseDetails}

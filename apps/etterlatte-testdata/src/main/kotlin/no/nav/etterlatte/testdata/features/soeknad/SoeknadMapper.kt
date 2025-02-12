@@ -1,5 +1,6 @@
 package no.nav.etterlatte.testdata.features.soeknad
 
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ArbeidOgUtdanningOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeOMS
@@ -41,44 +42,49 @@ object SoeknadMapper {
         avdoedFnr: String,
         barn: List<String> = emptyList(),
         behandlingssteg: Behandlingssteg,
+        soeker: String? = null,
     ): JsonMessage =
         when (type) {
-            SoeknadType.OMSTILLINGSSTOENAD ->
+            SoeknadType.OMSTILLINGSSTOENAD -> {
+                val soekerFnr = soeker ?: gjenlevendeFnr
                 JsonMessage.newMessage(
                     mutableMapOf(
                         SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
-                        "@skjema_info" to
+                        SoeknadInnsendt.skjemaInfoKey to
                             opprettOmstillingsstoenadSoeknad(
-                                soekerFnr = gjenlevendeFnr,
+                                soekerFnr = soekerFnr,
                                 avdoedFnr = avdoedFnr,
                                 barn = barn,
                             ).toObjectNode(),
-                        "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-                        "@template" to "soeknad",
-                        "@fnr_soeker" to gjenlevendeFnr,
-                        "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        SoeknadInnsendt.lagretSoeknadIdKey to "TEST-${UUID.randomUUID()}",
+                        SoeknadInnsendt.templateKey to "soeknad",
+                        SoeknadInnsendt.fnrSoekerKey to soekerFnr,
+                        SoeknadInnsendt.hendelseGyldigTilKey to OffsetDateTime.now().plusMinutes(60L),
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
+            }
 
-            SoeknadType.BARNEPENSJON ->
+            SoeknadType.BARNEPENSJON -> {
+                val soekerFnr = soeker ?: barn.first()
                 JsonMessage.newMessage(
                     mutableMapOf(
                         SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
-                        "@skjema_info" to
+                        SoeknadInnsendt.skjemaInfoKey to
                             opprettBarnepensjonSoeknad(
                                 gjenlevendeFnr = gjenlevendeFnr,
                                 avdoedFnr = avdoedFnr,
-                                barnFnr = barn.first(),
-                                soesken = barn.drop(1),
+                                barnFnr = soekerFnr,
+                                soesken = barn.filter { it != soeker },
                             ).toObjectNode(),
-                        "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-                        "@template" to "soeknad",
-                        "@fnr_soeker" to barn.first(),
-                        "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        SoeknadInnsendt.lagretSoeknadIdKey to "TEST-${UUID.randomUUID()}",
+                        SoeknadInnsendt.templateKey to "soeknad",
+                        SoeknadInnsendt.fnrSoekerKey to barn.first(),
+                        SoeknadInnsendt.hendelseGyldigTilKey to OffsetDateTime.now().plusMinutes(60L),
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
+            }
 
             else -> {
                 throw Exception("Ukjent soknad type: '$type'")

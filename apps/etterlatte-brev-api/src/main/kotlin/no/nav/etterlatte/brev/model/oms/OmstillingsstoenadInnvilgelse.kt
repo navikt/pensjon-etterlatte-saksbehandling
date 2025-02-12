@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
@@ -12,13 +11,14 @@ import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
-import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
+import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -48,41 +48,12 @@ data class OmstillingsstoenadInnvilgelse(
             avdoede: List<Avdoed>,
             utlandstilknytning: UtlandstilknytningType?,
             behandling: DetaljertBehandling,
+            landKodeverk: List<LandDto>,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
-                avkortingsinfo.beregningsperioder.map {
-                    OmstillingsstoenadBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        inntekt = it.inntekt,
-                        oppgittInntekt = it.oppgittInntekt,
-                        fratrekkInnAar = it.fratrekkInnAar,
-                        innvilgaMaaneder = it.innvilgaMaaneder,
-                        grunnbeloep = it.grunnbeloep,
-                        ytelseFoerAvkorting = it.ytelseFoerAvkorting,
-                        restanse = it.restanse,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        trygdetid = it.trygdetid,
-                        beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
-                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
-                        sanksjon = it.sanksjon != null,
-                        institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
-                        erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
-                    )
-                }
+                avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
             val erTidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true
-
-            val sisteBeregningsperiode =
-                beregningsperioder
-                    .filter {
-                        it.datoFOM.year == beregningsperioder.first().datoFOM.year
-                    }.maxBy { it.datoFOM }
-            val sisteBeregningsperiodeNesteAar =
-                beregningsperioder
-                    .filter {
-                        it.datoFOM.year == beregningsperioder.first().datoFOM.year + 1
-                    }.maxByOrNull { it.datoFOM }
 
             val omsRettUtenTidsbegrensning =
                 vilkaarsVurdering.vilkaar.single {
@@ -92,6 +63,7 @@ data class OmstillingsstoenadInnvilgelse(
                         )
                 }
 
+            val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
             val avdoed =
                 if (erTidligereFamiliepleier) {
                     null
@@ -106,25 +78,6 @@ data class OmstillingsstoenadInnvilgelse(
                     avdoede.single().doedsdato
                 }
 
-            // Hvis antall innvilga måneder er overstyrt under beregning skal "forventa" opphørsdato vises selv uten opphørFom
-            val forventaOpphoersDato =
-                when (behandling.opphoerFraOgMed) {
-                    null -> {
-                        if (sisteBeregningsperiode.erOverstyrtInnvilgaMaaneder) {
-                            val foersteFom = beregningsperioder.first().datoFOM
-                            foersteFom.plusMonths(sisteBeregningsperiode.innvilgaMaaneder.toLong())
-                        } else if (sisteBeregningsperiodeNesteAar != null && sisteBeregningsperiodeNesteAar.erOverstyrtInnvilgaMaaneder) {
-                            LocalDate
-                                .of(sisteBeregningsperiodeNesteAar.datoFOM.year, 1, 1)
-                                .plusMonths(sisteBeregningsperiodeNesteAar.innvilgaMaaneder.toLong())
-                        } else {
-                            null
-                        }
-                    }
-
-                    else -> behandling.opphoerFraOgMed?.atDay(1)
-                }
-
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
                 avdoed = avdoed,
@@ -133,24 +86,24 @@ data class OmstillingsstoenadInnvilgelse(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = sisteBeregningsperiodeNesteAar,
+                        sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode,
+                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
                         trygdetid =
                             trygdetid.fromDto(
-                                beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed =
-                                    avdoed?.navn
-                                        ?: "",
-                                // TODO: navnAvdoed brukes ikke i oms så burde ikke være påkrevd
+                                beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                navnAvdoed = null,
+                                landKodeverk = landKodeverk,
                             ),
-                        oppphoersdato = forventaOpphoersDato,
-                        opphoerNesteAar = forventaOpphoersDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                        opphoerNesteAar =
+                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        erYrkesskade = trygdetid.erYrkesskade(),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
-                    doedsdatoEllerOpphoertPleieforhold
-                        .plusMonths(4)
-                        .isAfter(avkortingsinfo.virkningsdato),
+                    innvilgetMindreEnnFireMndEtterDoedsfall(
+                        doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
+                    ),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
@@ -161,6 +114,11 @@ data class OmstillingsstoenadInnvilgelse(
                 tidligereFamiliepleier = erTidligereFamiliepleier,
             )
         }
+
+        fun innvilgetMindreEnnFireMndEtterDoedsfall(
+            innvilgelsesDato: LocalDate = LocalDate.now(),
+            doedsdatoEllerOpphoertPleieforhold: LocalDate,
+        ): Boolean = innvilgelsesDato.isBefore(doedsdatoEllerOpphoertPleieforhold.plusMonths(4))
     }
 }
 

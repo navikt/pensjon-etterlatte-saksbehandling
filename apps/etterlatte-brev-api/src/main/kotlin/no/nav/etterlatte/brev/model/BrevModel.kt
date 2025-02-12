@@ -4,7 +4,6 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -15,6 +14,7 @@ import java.util.UUID
 fun mottakerFraAdresse(
     fnr: Folkeregisteridentifikator,
     regoppslag: RegoppslagResponseDTO,
+    type: MottakerType,
 ) = Mottaker(
     id = UUID.randomUUID(),
     navn = regoppslag.navn,
@@ -31,11 +31,12 @@ fun mottakerFraAdresse(
             land = regoppslag.adresse.land,
         ),
     tvingSentralPrint = false,
+    type = type,
 )
 
 fun tomMottaker(
     fnr: Folkeregisteridentifikator? = null,
-    type: MottakerType = MottakerType.HOVED,
+    type: MottakerType,
 ) = Mottaker(
     id = UUID.randomUUID(),
     navn = "N/A",
@@ -62,7 +63,7 @@ fun opprettBrevFra(
     soekerFnr = opprettNyttBrev.soekerFnr,
     status = opprettNyttBrev.status,
     statusEndret = opprettNyttBrev.opprettet,
-    mottakere = listOf(opprettNyttBrev.mottaker),
+    mottakere = opprettNyttBrev.mottakere,
     opprettet = opprettNyttBrev.opprettet,
     brevtype = opprettNyttBrev.brevtype,
     brevkoder = opprettNyttBrev.brevkoder,
@@ -96,7 +97,7 @@ data class OpprettNyttBrev(
     val behandlingId: UUID?,
     val soekerFnr: String,
     val prosessType: BrevProsessType,
-    val mottaker: Mottaker,
+    val mottakere: List<Mottaker>,
     val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
@@ -109,7 +110,4 @@ data class OpprettNyttBrev(
 data class EtterbetalingDTO(
     val datoFom: LocalDate,
     val datoTom: LocalDate,
-    val inneholderKrav: Boolean?,
-    val frivilligSkattetrekk: Boolean?,
-    val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
 )

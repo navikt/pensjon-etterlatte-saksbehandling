@@ -9,6 +9,7 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ISak } from '~shared/types/sak'
 import { round } from 'lodash'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 /**
  * Husk å endre [proxy_body_size] i nais-filene hvis du skal øke maks filstørrelse.
@@ -69,6 +70,8 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
       })
     )
 
+    trackClick(ClickEvent.LAST_OPP_BREV)
+
     lastOppBrev({ sakId: sak.id, formData }, (brev) => {
       navigate(`/person/sak/${brev.sakId}/brev/${brev.id}`)
     })
@@ -82,7 +85,12 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
 
   return (
     <>
-      <Button variant="secondary" icon={<UploadIcon />} iconPosition="right" onClick={() => setIsOpen(true)}>
+      <Button
+        variant="secondary"
+        icon={<UploadIcon aria-hidden />}
+        iconPosition="right"
+        onClick={() => setIsOpen(true)}
+      >
         Last opp fil
       </Button>
 
@@ -103,7 +111,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
                   <br />
                   {/* */}
                   <Link href="/tom-brevmal.docx" target="_blank">
-                    Last ned mal <DownloadIcon />
+                    Last ned mal <DownloadIcon aria-hidden />
                   </Link>
                 </Alert>
                 <br />
@@ -124,7 +132,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
                     variant="secondary"
                     onClick={tilbakestill}
                     disabled={isPending(lastOppStatus)}
-                    icon={<FileResetIcon />}
+                    icon={<FileResetIcon aria-hidden />}
                   >
                     Tilbakestill
                   </Button>

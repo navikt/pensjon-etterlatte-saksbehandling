@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.etterlatte.brev.model.KlageSaksbehandlingstidData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
@@ -14,6 +15,7 @@ import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnhentingAvOpplysninger
+import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -49,6 +51,7 @@ sealed class BrevParametre {
             AktivitetspliktInformasjon10mndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
     }
 
+    // Denne brukes kun til varig unntak som har egen manuel flyt
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND")
     data class AktivitetspliktInformasjon6Mnd(
         override val spraak: Spraak,
@@ -142,6 +145,25 @@ sealed class BrevParametre {
             BarnepensjonInnhentingAvOpplysninger(
                 erOver18aar = erOver18aar,
                 borIUtlandet = borIUtlandet,
+            )
+    }
+
+    @JsonTypeName("KLAGE_SAKSBEHANDLINGSTID")
+    data class KlageSaksbehandlingstid(
+        override val spraak: Spraak,
+        val sakType: SakType,
+        val borIUtlandet: Boolean,
+        val datoMottatKlage: LocalDate,
+        val datoForVedtak: LocalDate,
+    ) : BrevParametre() {
+        override val brevkode: Brevkoder = Brevkoder.KLAGE_SAKSBEHANDLINGSTID
+
+        override fun brevDataMapping(): BrevDataRedigerbar =
+            KlageSaksbehandlingstidData(
+                datoMottatKlage = datoMottatKlage,
+                datoForVedtak = datoForVedtak,
+                borIUtlandet = borIUtlandet,
+                sakType = sakType,
             )
     }
 

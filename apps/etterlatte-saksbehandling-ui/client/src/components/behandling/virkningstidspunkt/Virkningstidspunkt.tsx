@@ -1,4 +1,5 @@
 import {
+  Alert,
   BodyShort,
   ConfirmationPanel,
   ErrorMessage,
@@ -26,6 +27,7 @@ import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthP
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapFailure } from '~shared/api/apiUtils'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export interface Hjemmel {
   lenke: string
@@ -44,6 +46,8 @@ const Virkningstidspunkt = (props: {
 
   const dispatch = useAppDispatch()
   const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
+  const avdoede = usePersonopplysninger()?.avdoede
+  const tidligVirkningstidspunktTillatt = useFeaturetoggle(FeatureToggle.tillate_tidlig_virkningstidspunkt)
 
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
@@ -55,6 +59,7 @@ const Virkningstidspunkt = (props: {
   const [overstyr, setOverstyr] = useState(false)
 
   const [errorTekst, setErrorTekst] = useState<string>('')
+
   function getSoeknadMottattDato() {
     return erBosattUtland
       ? subYears(new Date(), 20)
@@ -67,7 +72,6 @@ const Virkningstidspunkt = (props: {
   }
 
   function foersteDoedsdato(): Date | undefined {
-    const avdoede = usePersonopplysninger()?.avdoede
     const mappetAvdoede = avdoede?.map((it) => it.opplysning.doedsdato!!)
 
     if (mappetAvdoede && mappetAvdoede.length > 0) {
@@ -79,8 +83,12 @@ const Virkningstidspunkt = (props: {
     }
   }
 
+  const minimumVirkningstidspunkt = tidligVirkningstidspunktTillatt
+    ? subYears(new Date(), 3)
+    : hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType)
+
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType),
+    fromDate: minimumVirkningstidspunkt,
     toDate: addMonths(new Date(), 4),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',
@@ -196,6 +204,10 @@ const Virkningstidspunkt = (props: {
                 Hva er virkningstidspunkt for behandlingen?
               </Heading>
 
+              {!foersteDoedsdato() && (
+                <Alert variant="warning">Det er anbefalt å registrere dødsdato før du setter virkningstidspunkt.</Alert>
+              )}
+
               {erBosattUtland && (
                 <DatoVelger
                   label={
@@ -229,7 +241,8 @@ const Virkningstidspunkt = (props: {
                 fastsettVirkStatus,
                 (error) =>
                   behandling.behandlingType === IBehandlingsType.REVURDERING &&
-                  error.code === 'VIRK_FOER_FOERSTE_IVERKSATT_VIRK' && (
+                  error.code &&
+                  ['VIRK_FOER_FOERSTE_IVERKSATT_VIRK', 'VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER'].includes(error.code) && (
                     <ConfirmationPanel
                       label="Ja, jeg er sikker"
                       checked={overstyr}

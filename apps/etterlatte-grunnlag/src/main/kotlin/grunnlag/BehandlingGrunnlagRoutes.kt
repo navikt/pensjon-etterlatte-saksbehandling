@@ -69,6 +69,13 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
 
+        post("/laas") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                grunnlagService.laasVersjonForBehandling(behandlingId)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         post("/laas-til-behandling/{behandlingIdLaasesTil}") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())

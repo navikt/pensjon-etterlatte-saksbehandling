@@ -44,7 +44,7 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
     <>
       <Button
         variant="danger"
-        icon={<ArrowUndoIcon />}
+        icon={<ArrowUndoIcon aria-hidden />}
         onClick={() => setIsOpen(true)}
         title="Marker som utgår"
         size="small"

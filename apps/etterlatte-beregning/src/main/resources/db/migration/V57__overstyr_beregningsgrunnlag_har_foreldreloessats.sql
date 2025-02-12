@@ -1,0 +1,1 @@
+ALTER TABLE overstyr_beregningsgrunnlag ADD COLUMN har_foreldreloessats BOOLEAN;

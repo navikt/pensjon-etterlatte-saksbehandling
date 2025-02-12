@@ -96,21 +96,27 @@ export function BrevMottakerPanel({
     <Box padding="4" borderWidth="1" borderRadius="small">
       {mapResult(soeker, {
         initial: kanRedigeres && mottaker.type === MottakerType.HOVED && (
-          <Alert variant="info" size="small" inline>
-            Sjekk om bruker har verge
-          </Alert>
+          <Box marginBlock="0 2">
+            <Alert variant="info" size="small">
+              Sjekk om bruker har verge
+            </Alert>
+          </Box>
         ),
         pending: <Spinner label="Henter eventuelle verger" margin="0" />,
-        error: (error) => (
-          <ApiErrorAlert>
-            {error.detail || 'Feil oppsto ved henting av eventuelle verger. Prøv igjen senere'}
-          </ApiErrorAlert>
+        error: () => (
+          <Box marginBlock="0 2">
+            <Alert variant="info" size="small">
+              Sjekk om brevet skal sendes til verge. Registrer eventuelt riktig adresse.
+            </Alert>
+          </Box>
         ),
         success: (soekeren) =>
           (soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt || []).length > 0 && (
-            <Alert variant="info" size="small" inline>
-              Brevet skal sendes til verge. Registrer riktig adresse.
-            </Alert>
+            <Box marginBlock="0 2">
+              <Alert variant="info" size="small">
+                Brevet skal sendes til verge. Registrer riktig adresse.
+              </Alert>
+            </Box>
           ),
       })}
 
@@ -182,7 +188,7 @@ export function BrevMottakerPanel({
         <HStack justify="center" marginBlock="4 0">
           <Button
             variant="secondary"
-            icon={<PersonCheckmarkIcon />}
+            icon={<PersonCheckmarkIcon aria-hidden />}
             size="small"
             onClick={() =>
               apiSettHovedmottaker({ brevId, sakId, mottakerId: mottaker.id }, () => window.location.reload())
@@ -212,7 +218,7 @@ const MottakerInnholdKompakt = ({ mottaker }: { mottaker: Mottaker }) => {
         )}
         <br />
         {foedselsnummer && foedselsnummer.value}
-        {orgnummer && orgnummer}
+        {!!orgnummer && orgnummer}
       </BodyShort>
 
       <BodyShort as="div">

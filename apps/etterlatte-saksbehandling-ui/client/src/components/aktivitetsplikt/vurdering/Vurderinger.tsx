@@ -1,14 +1,14 @@
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import React from 'react'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 
-import { AktivitetsgradIOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/AktivitetsgradIOppgave'
+import { AktivitetsgradOgUnntakIOppgave } from '~components/aktivitetsplikt/vurdering/AktivitetsgradOgUnntakIOppgave'
 import { LeggTilNyVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/LeggTilNyVurdering'
-import { UnntakIOppgave } from '~components/aktivitetsplikt/vurdering/unntak/UnntakIOppgave'
+import { InformasjonUnntakOppfoelging } from '~components/aktivitetsplikt/vurdering/InformasjonUnntakOppfoelging'
 
 export function Vurderinger(props: { doedsdato: Date }) {
-  const { oppgave } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
   const { doedsdato } = props
   const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
@@ -19,10 +19,14 @@ export function Vurderinger(props: { doedsdato: Date }) {
           <Heading size="medium">Vurdering av aktivitetsplikt</Heading>
           <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
         </VStack>
-        <AktivitetsgradIOppgave doedsdato={doedsdato} />
-        <UnntakIOppgave />
+        <AktivitetsgradOgUnntakIOppgave />
 
-        {oppgaveErRedigerbar && <LeggTilNyVurdering doedsdato={doedsdato} />}
+        {oppgaveErRedigerbar && (
+          <>
+            <InformasjonUnntakOppfoelging vurdering={vurdering} />
+            <LeggTilNyVurdering doedsdato={doedsdato} />
+          </>
+        )}
       </VStack>
     </Box>
   )

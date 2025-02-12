@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -13,9 +14,11 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
@@ -49,6 +52,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class StatistikkService(
@@ -195,7 +199,7 @@ class StatistikkService(
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
             type = vedtakInnhold.behandling.type.name,
             status = hendelse.name,
-            resultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling)?.name,
+            resultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling.status)?.name,
             resultatBegrunnelse = null,
             behandlingMetode =
                 hentBehandlingMetode(
@@ -228,32 +232,6 @@ class StatistikkService(
             pesysId = statistikkBehandling.pesysId,
             relatertTil = statistikkBehandling.relatertBehandlingId,
         )
-    }
-
-    private fun behandlingResultatFraVedtak(
-        vedtak: VedtakDto,
-        vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
-        statistikkBehandling: StatistikkBehandling,
-    ): BehandlingResultat? {
-        if (statistikkBehandling.status == BehandlingStatus.AVBRUTT) {
-            return BehandlingResultat.AVBRUTT
-        }
-        if (vedtakKafkaHendelseType !in
-            listOf(
-                VedtakKafkaHendelseHendelseType.ATTESTERT,
-                VedtakKafkaHendelseHendelseType.IVERKSATT,
-            )
-        ) {
-            return null
-        }
-        return when (
-            (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
-                it.type == UtbetalingsperiodeType.OPPHOER
-            }
-        ) {
-            true -> BehandlingResultat.OPPHOER
-            false -> BehandlingResultat.INNVILGELSE
-        }
     }
 
     private fun hentStatistikkBehandling(behandlingId: UUID) =
@@ -372,8 +350,8 @@ class StatistikkService(
 
     private fun mapTilbakekrevingResultat(tilbakekreving: Tilbakekreving): TilbakekrevingResultat? =
         TilbakekrevingResultat.hoyesteGradAvTilbakekreving(
-            tilbakekreving.perioder.mapNotNull {
-                it.ytelse.resultat
+            tilbakekreving.perioder.flatMap { periode ->
+                periode.tilbakekrevingsbeloep.mapNotNull { beloep -> beloep.resultat }
             },
         )
 
@@ -404,6 +382,7 @@ class StatistikkService(
                     statistikkKlage.klage.formkrav
                         ?.saksbehandler
                         ?.ident
+
                 else -> utfall.saksbehandler.ident
             },
         aktorId = statistikkKlage.klage.sak.ident,
@@ -532,7 +511,57 @@ class StatistikkService(
         statistikkBehandling: StatistikkBehandling,
         hendelse: BehandlingHendelseType,
         tekniskTid: LocalDateTime,
-    ): SakRad? = sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    ): SakRad? {
+        if (hendelse == BehandlingHendelseType.OPPRETTET) {
+            // Dette kan potensielt være en behandling som blir rullet tilbake. Vi vil gjøre ekstra verifisering på
+            // at behandlingen finnes
+            try {
+                runBlocking { retry(3) { behandlingKlient.hentStatistikkBehandling(statistikkBehandling.id) } }
+            } catch (e: Exception) {
+                logger.error(
+                    "Kunne ikke hente behandling med id ${statistikkBehandling.id} fra behandling. " +
+                        "Hvis opprettelse av behandlingen ble rullet tilbake og behandlingen med id=" +
+                        "${statistikkBehandling.id} ikke finnes i behandlingsbasen lengre, må det også legges inn " +
+                        "en avbrytelsesmelding til statistikk. ",
+                )
+            }
+        }
+        return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    }
+
+    fun registrerEndretEnhetForReferanse(
+        referanse: UUID,
+        nyEnhet: Enhetsnummer,
+        tekniskTid: LocalDateTime,
+    ): SakRad? {
+        val sisteRadForReferanse = sakRepository.hentSisteRad(referanse)
+        if (sisteRadForReferanse == null) {
+            logger.warn("Fikk melding om behandling statistikk ikke kjenner til, med referanse $referanse")
+            return null
+        }
+
+        return if (sisteRadForReferanse.ansvarligEnhet == nyEnhet) {
+            logger.info(
+                "Behandlingen med referanse $referanse har allerede enhet $nyEnhet på siste registrering. " +
+                    "Oppdaterer ikke statistikken.",
+            )
+            null
+        } else {
+            val tekniskTidForOppdatertEnhet =
+                if (sisteRadForReferanse.tekniskTid >= tekniskTid.toTidspunkt()) {
+                    sisteRadForReferanse.tekniskTid.plus(1, ChronoUnit.SECONDS)
+                } else {
+                    tekniskTid.toTidspunkt()
+                }
+            val nyRad =
+                sisteRadForReferanse.copy(
+                    ansvarligEnhet = nyEnhet,
+                    status = BehandlingHendelseType.ENDRET_ENHET.name,
+                    tekniskTid = tekniskTidForOppdatertEnhet,
+                )
+            return sakRepository.lagreRad(nyRad)
+        }
+    }
 
     fun registrerStatistikkBehandlingPaaVentHendelse(
         behandlingId: UUID,
@@ -586,6 +615,43 @@ class StatistikkService(
             raderMedFeil,
             raderRegistrert,
         )
+    }
+}
+
+internal fun behandlingResultatFraVedtak(
+    vedtak: VedtakDto,
+    vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
+    behandligStatus: BehandlingStatus,
+): BehandlingResultat? {
+    if (behandligStatus == BehandlingStatus.AVBRUTT) {
+        return BehandlingResultat.AVBRUTT
+    }
+    if (vedtakKafkaHendelseType !in
+        listOf(
+            VedtakKafkaHendelseHendelseType.ATTESTERT,
+            VedtakKafkaHendelseHendelseType.IVERKSATT,
+        )
+    ) {
+        return null
+    }
+    return when (vedtak.type) {
+        VedtakType.INNVILGELSE -> BehandlingResultat.INNVILGELSE
+        VedtakType.OPPHOER -> BehandlingResultat.OPPHOER
+        VedtakType.AVSLAG -> BehandlingResultat.AVSLAG
+        VedtakType.ENDRING -> {
+            when (
+                (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
+                    it.type == UtbetalingsperiodeType.OPPHOER
+                }
+            ) {
+                true -> BehandlingResultat.OPPHOER
+                false -> BehandlingResultat.ENDRING
+            }
+        }
+
+        VedtakType.TILBAKEKREVING,
+        VedtakType.AVVIST_KLAGE,
+        -> throw InternfeilException("Skal ikke mappe vedtak")
     }
 }
 

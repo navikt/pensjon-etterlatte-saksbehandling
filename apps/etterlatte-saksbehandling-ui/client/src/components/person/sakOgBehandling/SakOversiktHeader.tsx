@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
-import { Alert, BodyShort, Heading, HStack, Loader, ReadMore, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack, Loader, ReadMore, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
 import { EndreEnhet } from '~components/person/sakOgBehandling/EndreEnhet'
@@ -13,10 +13,14 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
 import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
-import styled from 'styled-components'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
 import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettSaksgrunnlag'
+import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
+import { usePerson } from '~shared/statusbar/usePerson'
+import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
+import { ENHETER } from '~shared/types/Enhet'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -28,6 +32,7 @@ interface Props {
 
 export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const person = usePerson()
 
   const [navkontorResult, hentNavkontor] = useApiCall(hentNavkontorForPerson)
   const [yrkesskadefordelResult, hentYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
@@ -59,7 +64,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         <SakStatus sakId={sak.id} />
       </VStack>
 
-      <HStack gap="4" wrap={false}>
+      <HStack gap="4" wrap={false} align="center">
         <LocationPinIcon aria-hidden width="1.75rem" height="1.75rem" />
         <BodyShort>
           Navkontor:{' '}
@@ -70,59 +75,47 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
           })}
         </BodyShort>
       </HStack>
-
-      <HStack gap="4" wrap={false}>
+      <HStack gap="4" wrap={false} align="center">
         <Buildings3Icon aria-hidden width="1.75rem" height="1.75rem" />
-        <BodyShort>Denne saken tilhører enhet {sak.enhet}</BodyShort>
+        <BodyShort>Enhet: {ENHETER[sak.enhet] ?? sak.enhet}</BodyShort>
+        {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
+          <EndreEnhet sakId={sak.id} gjeldendeEnhet={sak.enhet} />
+        )}
       </HStack>
-      {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && <EndreEnhet sakId={sak.id} />}
-      {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
-        <ReadMore header="Ønsker du å bytte enhet?">
-          <ol>
-            <li>
-              Skriv i kommentarfeltet i sjekklisten inne i behandlingen hvilken enhet saken overføres til og hvorfor.
-            </li>
-            <li>Deretter går du til saksoversikten og klikker på knappen ovenfor for å endre enhet.</li>
-            <li>Overfør til riktig behandlende enhet.</li>
-          </ol>
-        </ReadMore>
-      )}
+
+      <ReadMore header="Historikk" onClick={() => trackClick(ClickEvent.VIS_SAKSHISTORIKK)}>
+        <Sakshistorikk sakId={sak.id} />
+      </ReadMore>
 
       {mapResult(flyktningResult, {
         success: (data) =>
           !!data?.erFlyktning && (
             <>
-              <HorisontaltSkille />
-              <div>
+              <Box paddingBlock="3" borderWidth="1 0 0 0" borderColor="border-subtle">
                 <Alert variant="info" size="small" inline>
                   Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
                   {formaterDato(data.virkningstidspunkt)}
                 </Alert>
-              </div>
+              </Box>
             </>
           ),
       })}
-
       {mapResult(yrkesskadefordelResult, {
         success: (data) =>
           data.migrertYrkesskadefordel && (
             <>
-              <HorisontaltSkille />
-              <div>
+              <Box paddingBlock="3" borderWidth="1 0 0 0" borderColor="border-subtle">
                 <Alert variant="info" size="small" inline>
                   Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
                 </Alert>
-              </div>
+              </Box>
             </>
           ),
       })}
 
       {!behandlinger.length && <OpprettSaksgrunnlag sak={sak} />}
+
+      {!!person && person.foedselsnummer !== sak.ident && <OppdaterIdentModal sak={sak} hendelse={null} />}
     </VStack>
   )
 }
-
-const HorisontaltSkille = styled.hr`
-  border-color: var(--a-surface-active);
-  width: 100%;
-`

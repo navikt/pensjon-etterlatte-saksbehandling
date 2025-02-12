@@ -15,6 +15,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { flyttTilGjenny, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
 import { GosysOppgave } from '~shared/types/Gosys'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const OppgaveFraJournalpostModal = ({
   isOpen,
@@ -56,6 +57,8 @@ export const OppgaveFraJournalpostModal = ({
 
   const opprettJournalfoeringsoppgave = () => {
     if (isSuccess(sakStatus)) {
+      trackClick(ClickEvent.OPPRETT_JOURNALFOERINGSOPPGAVE)
+
       apiOpprettOppgave(
         {
           sakId: sakStatus.data.sak.id,
@@ -76,6 +79,8 @@ export const OppgaveFraJournalpostModal = ({
 
   const konverterTilGjennyoppgave = (oppgave: GosysOppgave) => {
     if (isSuccess(sakStatus)) {
+      trackClick(ClickEvent.FLYTT_GOSYS_OPPGAVE)
+
       flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sakStatus.data.sak.id }, (oppgave) => {
         navigate(`/oppgave/${oppgave.id}`)
       })
@@ -84,7 +89,7 @@ export const OppgaveFraJournalpostModal = ({
 
   return (
     <>
-      <Button variant="secondary" size="small" icon={<PencilIcon />} onClick={() => setIsOpen(true)} title="Rediger" />
+      <Button variant="secondary" size="small" icon={<PencilIcon title="Rediger" />} onClick={() => setIsOpen(true)} />
 
       <Modal
         open={isOpen}
@@ -115,7 +120,7 @@ export const OppgaveFraJournalpostModal = ({
                       href={`${configContext['gosysUrl']}/personoversikt/fnr=${oppgaver[0].bruker?.ident}`}
                       target="_blank"
                     >
-                      Åpne i Gosys <ExternalLinkIcon />
+                      Åpne i Gosys <ExternalLinkIcon aria-hidden />
                     </Link>
                   </Alert>
 
@@ -170,7 +175,7 @@ export const OppgaveFraJournalpostModal = ({
                   {journalpost.journalpostId}. Du må ferdigstille den eksisterende oppgaven før du kan opprette en ny.
                   <br />
                   <Link href="/" target="_blank">
-                    Gå til oppgavelisten <ExternalLinkIcon />
+                    Gå til oppgavelisten <ExternalLinkIcon aria-hidden />
                   </Link>
                 </Alert>
               ),

@@ -4,19 +4,19 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
+import no.nav.etterlatte.libs.common.tilbakekreving.tilbakekrevingsbeloepComparator
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
@@ -139,17 +139,16 @@ class TilbakekrevingDao(
                 )
             statement.setObject(1, tilbakekrevingId)
             val allePerioderOgTyper = statement.executeQuery().toList { toTilbakekrevingsperiode() }
-            val ytelseperioder = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.YTEL.name }
-            val feilkonto = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.FEIL.name }
-            return ytelseperioder.map { (maaned, ytelse) ->
-                TilbakekrevingPeriode(
-                    maaned = maaned,
-                    ytelse = ytelse,
-                    feilkonto =
-                        feilkonto.find { it.first == maaned }?.second
-                            ?: throw TilbakekrevingHarMangelException("Mangler feilkonto for tilbakekrevingsperiode"),
-                )
-            }
+            return allePerioderOgTyper
+                .groupBy({ it.first }, { it.second })
+                .mapValues { (_, value) -> value }
+                .map { (maaned, perioder) ->
+                    TilbakekrevingPeriode(
+                        maaned = maaned,
+                        tilbakekrevingsbeloep =
+                            perioder.sortedWith(tilbakekrevingsbeloepComparator),
+                    )
+                }
         }
 
     fun lagreTilbakekreving(tilbakekrevingBehandling: TilbakekrevingBehandling): TilbakekrevingBehandling =
@@ -199,7 +198,7 @@ class TilbakekrevingDao(
         }
         statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
         statement.executeUpdate().also {
-            checkInternFeil(it == 1) {
+            krev(it == 1) {
                 "Kunne ikke lagre tilbaekreving behandling for sakid ${tilbakekrevingBehandling.sak.id}"
             }
         }
@@ -218,7 +217,7 @@ class TilbakekrevingDao(
             )
         statement.setObject(1, tilbakekrevingId)
         statement.executeUpdate().also {
-            checkInternFeil(it > 0) {
+            krev(it > 0) {
                 "Kunne ikke deleteTilbakekrevingsperioder behandling for id $tilbakekrevingId"
             }
         }
@@ -264,29 +263,30 @@ class TilbakekrevingDao(
 
         fun addArgumentsAndBatch(
             maaned: YearMonth,
-            beloeper: Tilbakekrevingsbelop,
+            beloep: Tilbakekrevingsbelop,
         ) {
-            statement.setObject(1, beloeper.id)
+            statement.setObject(1, beloep.id)
             statement.setString(2, maaned.toString())
-            statement.setString(3, beloeper.klasseKode)
-            statement.setString(4, beloeper.klasseType)
-            statement.setInt(5, beloeper.bruttoUtbetaling)
-            statement.setInt(6, beloeper.nyBruttoUtbetaling)
-            statement.setBigDecimal(7, beloeper.skatteprosent)
-            statement.setInt(8, beloeper.beregnetFeilutbetaling)
-            statement.setInt(9, beloeper.bruttoTilbakekreving)
-            statement.setInt(10, beloeper.nettoTilbakekreving)
-            statement.setInt(11, beloeper.skatt)
-            statement.setString(12, beloeper.skyld?.name)
-            statement.setString(13, beloeper.resultat?.name)
-            statement.setInt(14, beloeper.tilbakekrevingsprosent)
-            statement.setInt(15, beloeper.rentetillegg)
+            statement.setString(3, beloep.klasseKode)
+            statement.setString(4, beloep.klasseType)
+            statement.setInt(5, beloep.bruttoUtbetaling)
+            statement.setInt(6, beloep.nyBruttoUtbetaling)
+            statement.setBigDecimal(7, beloep.skatteprosent)
+            statement.setInt(8, beloep.beregnetFeilutbetaling)
+            statement.setInt(9, beloep.bruttoTilbakekreving)
+            statement.setInt(10, beloep.nettoTilbakekreving)
+            statement.setInt(11, beloep.skatt)
+            statement.setString(12, beloep.skyld?.name)
+            statement.setString(13, beloep.resultat?.name)
+            statement.setInt(14, beloep.tilbakekrevingsprosent)
+            statement.setInt(15, beloep.rentetillegg)
             statement.setObject(16, tilbakekrevingBehandling.id)
             statement.addBatch()
         }
-        tilbakekrevingBehandling.tilbakekreving.perioder.forEach {
-            addArgumentsAndBatch(it.maaned, it.ytelse)
-            addArgumentsAndBatch(it.maaned, it.feilkonto)
+        tilbakekrevingBehandling.tilbakekreving.perioder.forEach { periode ->
+            periode.tilbakekrevingsbeloep.forEach { belop ->
+                addArgumentsAndBatch(periode.maaned, belop)
+            }
         }
         statement.executeBatch()
     }

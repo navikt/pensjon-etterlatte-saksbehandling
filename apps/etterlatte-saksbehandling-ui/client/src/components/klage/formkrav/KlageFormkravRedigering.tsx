@@ -1,4 +1,16 @@
-import { Box, Button, ErrorMessage, Heading, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Box,
+  Button,
+  ErrorMessage,
+  Heading,
+  HStack,
+  Radio,
+  ReadMore,
+  Select,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -151,7 +163,7 @@ export function KlageFormkravRedigering() {
         </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnFormkrav)}>
-        <Box paddingBlock="8" paddingInline="16 8">
+        <Box paddingBlock="8" paddingInline="16 8" maxWidth="42.5rem">
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
@@ -194,11 +206,50 @@ export function KlageFormkravRedigering() {
               name="vedtaketKlagenGjelderId"
               control={control}
             />
+            <Heading level="2" size="medium">
+              Klagefrist
+            </Heading>
+            <ControlledRadioGruppe
+              name="erKlagenFramsattInnenFrist"
+              control={control}
+              legend="Er klagefristen overholdt?"
+              description={
+                <ReadMore header="Hjelp til å vurdere kravet">
+                  Etter folketrygdloven § 21-12 femte ledd er klagefristen seks uker. Etter forvaltningsloven § 29
+                  begynner klagefristen å løpe fra det tidspunkt underretning om vedtaket er kommet frem til parten.
+                  <br />
+                  Hvis klagefristen ikke er overholdt, må det vurderes om klagen likevel kan behandles jamfør
+                  forvaltningsloven § 31.
+                </ReadMore>
+              }
+              errorVedTomInput="Du må sette om klagen er framsatt innenfor klagefristen"
+              radios={
+                <>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </>
+              }
+            />
 
+            <Heading level="2" size="medium">
+              Formkrav
+            </Heading>
+            <BodyShort textColor="subtle">
+              Etter forvaltningsloven § 32 må klagen oppfylle visse formkrav. Inneholder klagen feil eller mangler, skal
+              det settes en kort frist for rettelse eller utfylling.
+            </BodyShort>
             <ControlledRadioGruppe
               name="erKlagerPartISaken"
               control={control}
-              legend="Er klager part i saken?"
+              legend="Er klagen fremsatt av parten eller annen med rettslig klageinteresse?"
+              description={
+                <ReadMore header="Hjelp til å vurdere kravet">
+                  Etter forvaltningsloven § 28 er det bare part i saken eller annen med rettslig klageinteresse som kan
+                  klage på vedtaket. Den som uten å være part i saken har en nær tilknytning til saken, kan ha rettslig
+                  klageinteresse. Både parten og andre med rettslig klageinteresse kan etter forvaltningsloven § 12 la
+                  seg representere av advokat eller annen fullmektig.
+                </ReadMore>
+              }
               errorVedTomInput="Du må sette om klager er part i saken"
               radios={
                 <>
@@ -212,6 +263,13 @@ export function KlageFormkravRedigering() {
               name="erKlagenSignert"
               control={control}
               legend="Er klagen signert?"
+              description={
+                <ReadMore header="Hjelp til å vurdere kravet">
+                  En klage skal være underskrevet av klageren eller hans fullmektig eller ha en kvalifisert elektronisk
+                  signatur. Dette følger av forvaltningsloven § 32, lov om elektroniske tilleggstjenester § 1 og
+                  eIDAS-forordningen artikkel 25 nr. 2.
+                </ReadMore>
+              }
               errorVedTomInput="Du må sette om klagen er signert"
               radios={
                 <>
@@ -225,21 +283,8 @@ export function KlageFormkravRedigering() {
               name="gjelderKlagenNoeKonkretIVedtaket"
               control={control}
               legend="Klages det på konkrete elementer i vedtaket?"
+              description="Etter forvaltningsloven § 32 skal klageren vise til vedtaket det klages over og hvilke endringer som ønskes. Klagen bør grunngis av klageren."
               errorVedTomInput="Du må sette om det klages på elementer i vedtaket"
-              radios={
-                <>
-                  <Radio value={JaNei.JA}>Ja</Radio>
-                  <Radio value={JaNei.NEI}>Nei</Radio>
-                </>
-              }
-            />
-
-            <ControlledRadioGruppe
-              name="erKlagenFramsattInnenFrist"
-              control={control}
-              legend="Er klagen framsatt innenfor klagefristen?"
-              description="Vurder også ytre klagefrist jf forv.loven § 31"
-              errorVedTomInput="Du må sette om klagen er framsatt innenfor klagefristen"
               radios={
                 <>
                   <Radio value={JaNei.JA}>Ja</Radio>

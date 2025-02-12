@@ -12,25 +12,29 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -48,11 +52,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.persongalleri
-import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.soeker
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -68,27 +72,23 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
+    val user = mockSaksbehandler("test")
+    private val norg2Klient = mockk<Norg2Klient>()
+
     @BeforeAll
     fun start() {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        val saksbehandlerMedRoller =
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleStrengtFortrolig() } returns false
-                every { harRolleEgenAnsatt() } returns false
-                every { harRolleAttestant() } returns true
-            }
-        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-        every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        val standardEnhet = ArbeidsFordelingEnhet(Enheter.defaultEnhet.navn, Enheter.defaultEnhet.enhetNr)
 
-        startServer()
+        coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(standardEnhet)
+
+        startServer(norg2Klient = norg2Klient)
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
     @AfterAll
     fun shutdown() = afterAll()
 
-    val fnr: String = "123"
+    val fnr: String = soeker
 
     private fun opprettSakMedFoerstegangsbehandling(
         fnr: String,
@@ -98,18 +98,30 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             inTransaction {
                 applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
+
+        val sakmedenhet = inTransaction { applicationContext.sakLesDao.hentSak(sak.id) }
+        println(sakmedenhet)
+        /* Sakenhet fra brukerService blir child^2 #2123 aner ikke hvordan det skjer da den er mocka til noe annet men aldri brukes
+        Men det fungerer i egenansattroutetest?
+        jævlig rart men prøvd med
+                    coEvery {
+                norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
+            } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
+         */
+
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =
             inTransaction {
                 factory
                     .opprettBehandling(
                         sak.id,
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
+                        user.brukerTokenInfo,
                     )
-            }?.also { it.sendMeldingForHendelse() }?.behandling
+            }.also { it.sendMeldingForHendelse() }.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }
@@ -156,11 +168,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         verify {
             oppgaveService.opprettOppgave(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+                referanse = revurdering.id.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.REVURDERING,
+                merknad = revurdering.revurderingsaarsak?.lesbar(),
+                gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -169,7 +182,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
-            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }
@@ -242,11 +255,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                revurdering.id,
-                BehandlingStatus.IVERKSATT,
-                LocalDateTime.now(),
-            )
+            iverksett(revurdering, "saksbehandler")
         }
 
         assertThrows<BehandlingKanIkkeEndres> {
@@ -263,15 +272,16 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
             verify {
-                hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
+                hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET)
                 oppgaveService.hentOppgaverForSak(sak.id)
                 oppgaveService.hentOppgave(any())
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                    merknad = revurdering.revurderingsaarsak?.lesbar(),
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
@@ -317,6 +327,14 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
                 behandlingInfoService = mockk(),
+                tilgangsService =
+                    OppdaterTilgangService(
+                        applicationContext.sakService,
+                        applicationContext.skjermingKlient,
+                        applicationContext.pdlTjenesterKlient,
+                        applicationContext.brukerService,
+                        applicationContext.oppgaveService,
+                    ),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -385,42 +403,38 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
             verify {
                 oppgaveService.hentOppgaverForSak(sak.id)
+                oppgaveService.avbrytAapneOppgaverMedReferanse(behandling!!.id.toString())
                 oppgaveService.hentOppgave(any())
-                hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
+                hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET)
                 oppgaveService.opprettOppgave(
-                    behandling!!.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.FOERSTEGANGSBEHANDLING,
-                    "2 søsken",
-                    null,
-                    null,
-                )
-                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                    behandling!!.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    "2 søsken",
+                    referanse = behandling.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                    merknad = "2 søsken",
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                    merknad = revurdering.revurderingsaarsak?.lesbar(),
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                    merknad = revurdering.revurderingsaarsak?.lesbar(),
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any())
-                hendelser.sendMeldingForHendelseStatisitkk(
+                hendelser.sendMeldingForHendelseStatistikk(
                     behandling.toStatistikkBehandling(
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                     ),
                     BehandlingHendelseType.OPPRETTET,
                 )
@@ -430,7 +444,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `kan opprette ny revurdering med aarsak = SLUTTBEHANDLING_UTLAND og lagre i db`() {
+    fun `kan opprette ny revurdering med aarsak = SLUTTBEHANDLING og lagre i db`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
@@ -471,7 +485,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     grunnlagService,
                 ).opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    aarsak = Revurderingaarsak.SLUTTBEHANDLING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = simpleSaksbehandler(),
@@ -484,11 +498,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         verify {
             oppgaveService.opprettOppgave(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+                referanse = revurdering.id.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.REVURDERING,
+                merknad = revurdering.revurderingsaarsak?.lesbar(),
+                gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -496,7 +511,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
-            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }
@@ -535,11 +550,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
             ferdigstillOppgaver(behandling, saksbehandler)
         }
         val revurderingen =
@@ -563,7 +574,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             inTransaction {
                 manuellRevurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    aarsak = Revurderingaarsak.SLUTTBEHANDLING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = simpleSaksbehandler(),
@@ -608,7 +619,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.hentRevurderingsinfoForSakMedAarsak(
                     sak.id,
-                    Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    Revurderingaarsak.SLUTTBEHANDLING,
                 )
             }
         assertEquals(1, sluttbehandlingermedinfo.size)
@@ -739,11 +750,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                nonNullBehandling.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            applicationContext.behandlingDao.lagreStatus(nonNullBehandling.copy(status = BehandlingStatus.IVERKSATT))
             ferdigstillOppgaver(behandling, saksbehandler)
         }
 
@@ -872,6 +879,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                                 every { it.id } returns UUID.randomUUID()
                                 every { it.utlandstilknytning } returns null
                                 every { it.boddEllerArbeidetUtlandet } returns null
+                                every { it.revurderingsaarsak() } returns Revurderingaarsak.REVURDERE_ETTER_OPPHOER
                             }
                     },
                 grunnlagService = mockk<GrunnlagService>().also { coEvery { it.hentPersongalleri(any()) } returns mockk() },
@@ -901,21 +909,22 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
-                any(),
-                opphoerFraOgMed = null,
             )
         }
     }
 
-    private fun iverksett(behandling: Behandling) {
-        applicationContext.behandlingDao.lagreStatus(
-            behandling.id,
-            BehandlingStatus.IVERKSATT,
-            Tidspunkt.now().toLocalDatetimeUTC(),
-        )
-        ferdigstillOppgaver(behandling)
+    private fun iverksett(
+        behandling: Behandling,
+        saksbehandlerId: String = "sbh",
+    ) {
+        val iverksatt =
+            when (behandling) {
+                is Foerstegangsbehandling -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+                is ManuellRevurdering -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+                is AutomatiskRevurdering -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+            }
+        applicationContext.behandlingDao.lagreStatus(iverksatt)
+        ferdigstillOppgaver(behandling, saksbehandlerId)
     }
 
     private fun ferdigstillOppgaver(
@@ -980,5 +989,13 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
+            tilgangsService =
+                OppdaterTilgangService(
+                    applicationContext.sakService,
+                    applicationContext.skjermingKlient,
+                    applicationContext.pdlTjenesterKlient,
+                    applicationContext.brukerService,
+                    applicationContext.oppgaveService,
+                ),
         )
 }

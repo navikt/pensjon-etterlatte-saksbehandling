@@ -5,11 +5,11 @@ import React, { useEffect } from 'react'
 import { isSuccess, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { OppgaveVurderingRoute } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { AktivitetspliktOppgaveVurderingRoutes } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { Link } from '@navikt/ds-react'
 import { hentAktivitetspliktOppgaveVurdering } from '~shared/api/aktivitetsplikt'
 import { useDispatch } from 'react-redux'
-import { setStartdata, useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
+import { setStartdata, useAktivitetspliktOppgaveVurderingState } from '~store/reducers/AktivitetsplikReducer'
 
 export function VurderAktivitetspliktOppgave() {
   useSidetittel('Vurder aktivitetsplikt')
@@ -41,7 +41,7 @@ export function VurderAktivitetspliktOppgave() {
     ),
     pending: <Spinner visible label="Henter oppgave for vurdering" />,
     success: (oppgave) => {
-      return <>{dataErSatt && <OppgaveVurderingRoute vurderingOgOppgave={oppgave} />}</>
+      return <>{dataErSatt && <AktivitetspliktOppgaveVurderingRoutes vurderingOgOppgave={oppgave} />}</>
     },
     error: (e) => (
       <ApiErrorAlert>{e.detail || 'Kunne ikke hente oppgave for vurderingen av aktivitetsplikt'}</ApiErrorAlert>

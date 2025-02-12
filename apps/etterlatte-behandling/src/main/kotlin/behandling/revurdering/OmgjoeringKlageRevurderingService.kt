@@ -64,12 +64,12 @@ class OmgjoeringKlageRevurderingService(
             behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
 
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(behandlingSomOmgjoeres.id) }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
         return revurderingService
             .opprettRevurdering(
                 sakId = sakId,
                 persongalleri = persongalleri,
-                forrigeBehandling = behandlingSomOmgjoeresId,
+                forrigeBehandling = behandlingSomOmgjoeres,
                 mottattDato =
                     klagenViOmgjoerPaaGrunnAv.innkommendeDokument
                         ?.mottattDato
@@ -79,10 +79,7 @@ class OmgjoeringKlageRevurderingService(
                 kilde = Vedtaksloesning.GJENNY,
                 revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
-                utlandstilknytning = behandlingSomOmgjoeres.utlandstilknytning,
-                boddEllerArbeidetUtlandet = behandlingSomOmgjoeres.boddEllerArbeidetUtlandet,
                 begrunnelse = "Omgjøring på grunn av klage",
-                fritekstAarsak = omgjoeringsoppgave.merknad,
                 saksbehandlerIdent = saksbehandler.ident,
                 relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id.toString(),
             ).oppdater()

@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
@@ -60,9 +62,10 @@ fun Route.vedtaksvurderingRoute(
 
         post("/sak/{$SAKID_CALL_PARAMETER}/samordning/melding") {
             withSakId(behandlingKlient) { sakId ->
-                val oppdatering = requireNotNull(call.receive<OppdaterSamordningsmelding>())
+                val oppdatering = call.receive<OppdaterSamordningsmelding>()
+
                 logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
-                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo, sakId).run {
+                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo).run {
                     rapidService.sendGenerellHendelse(
                         VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET,
                         mapOf(
@@ -249,9 +252,18 @@ fun Route.vedtaksvurderingRoute(
     }
 
     route("/vedtak") {
+        post("fnr") {
+            val request = call.receive<Folkeregisteridentifikator>()
+            val vedtak = vedtakService.hentVedtak(request).map { it.toDto() }
+            call.respond(vedtak)
+        }
+
         route("/samordnet") {
             post("/{vedtakId}") {
-                val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+                val vedtakId =
+                    krevIkkeNull(call.parameters["vedtakId"]?.toLong()) {
+                        "VedtakId mangler"
+                    }
 
                 val vedtak =
                     vedtakService.hentVedtak(vedtakId)
@@ -270,16 +282,14 @@ fun Route.vedtaksvurderingRoute(
 
 fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamordningService) {
     route("/api/samordning/vedtak") {
-        get {
+        post {
             val sakstype =
                 call.parameters["sakstype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "sakstype ikke angitt")
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, "sakstype ikke angitt")
             val fomDato =
                 call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
-            val fnr =
-                call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
+            val fnr = call.receive<FoedselsnummerDTO>().foedselsnummer.let { Folkeregisteridentifikator.of(it) }
 
             val vedtaksliste =
                 vedtakSamordningService.hentVedtaksliste(
@@ -291,7 +301,10 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
         }
 
         get("/{vedtakId}") {
-            val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+            val vedtakId =
+                krevIkkeNull(call.parameters["vedtakId"]?.toLong()) {
+                    "VedtakId mangler"
+                }
 
             val vedtak =
                 vedtakSamordningService.hentVedtak(vedtakId)
@@ -311,27 +324,27 @@ fun Route.tilbakekrevingvedtakRoute(
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingVedtakDto>()
                 logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.opprettEllerOppdaterVedtak(dto))
+                call.respond(service.opprettEllerOppdaterVedtak(dto).toDto())
             }
         }
         post("/fatt-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.fattVedtak(dto, brukerTokenInfo))
+                call.respond(service.fattVedtak(dto, brukerTokenInfo).toDto())
             }
         }
         post("/attester-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.attesterVedtak(dto, brukerTokenInfo))
+                call.respond(service.attesterVedtak(dto, brukerTokenInfo).toDto())
             }
         }
         post("/underkjenn-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
-                call.respond(service.underkjennVedtak(behandlingId))
+                call.respond(service.underkjennVedtak(behandlingId).toDto())
             }
         }
     }

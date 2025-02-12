@@ -17,19 +17,25 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
     <CheckboxGroup
       legend="Skyldtes dødsfallet en godkjent yrkesskade/sykdom"
       description={
-        redigerbar &&
-        'Kryss av her hvis dødsfallet skyldtes en godkjent yrkesskade/sykdom. Dette gir automatisk 40 års trygdetid'
+        redigerbar && (
+          <>
+            Kryss av her hvis dødsfallet skyldtes en godkjent yrkesskade/sykdom. Dette gir automatisk 40 års trygdetid.
+            <br />
+            Velg Nasjonal beregning under beregningsgrunnlag og &#34;Trygdetid i beregning&#34; for å støtte riktig
+            brevutfall for yrkesskade.
+          </>
+        )
       }
       readOnly={!redigerbar}
+      value={[yrkesskade]}
     >
       <Checkbox
-        checked={yrkesskade}
         onChange={() => {
           const oppdatertYrkesskade = !(yrkesskade ?? false)
-
           setYrkesskade(oppdatertYrkesskade)
           oppdaterYrkesskade(oppdatertYrkesskade)
         }}
+        value={true}
       >
         Godkjent yrkesskade/sykdom
       </Checkbox>

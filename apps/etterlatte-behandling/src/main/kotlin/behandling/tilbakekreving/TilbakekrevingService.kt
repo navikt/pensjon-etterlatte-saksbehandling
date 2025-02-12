@@ -8,23 +8,25 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
@@ -74,6 +76,8 @@ class TilbakekrevingService(
                     TilbakekrevingBehandling.ny(kravgrunnlag, sak),
                 )
 
+            varsleOmUkjenteKlasseTyper(kravgrunnlag, tilbakekreving.id)
+
             val oppgaveFraBehandlingMedFeilutbetaling =
                 oppgaveService
                     .hentOppgaverForSak(sak.id)
@@ -99,7 +103,7 @@ class TilbakekrevingService(
                 )
             }
 
-            tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.OPPRETTET)
+            lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.OPPRETTET)
 
             tilbakekrevinghendelser.sendTilbakekreving(
                 statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -152,7 +156,7 @@ class TilbakekrevingService(
 
             oppgaveService.avbrytAapneOppgaverMedReferanse(tilbakekreving.id.toString(), merknad)
 
-            tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
+            lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
 
             tilbakekrevinghendelser.sendTilbakekreving(
                 statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -296,12 +300,38 @@ class TilbakekrevingService(
                             oppdatertKravgrunnlag,
                         ).copy(status = TilbakekrevingStatus.UNDER_ARBEID)
 
+                varsleOmUkjenteKlasseTyper(oppdatertKravgrunnlag, tilbakekrevingId)
+
                 tilbakekrevingDao.lagreTilbakekrevingMedNyePerioder(oppdatertTilbakekreving)
             } else {
                 logger.info("Kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId er ikke endret - beholder vurderinger")
                 tilbakekreving
             }
         }
+
+    /**
+     * Vi har ikke fått noen tydelig avklaring på hvordan vi skal forholde oss til andre klassetyper enn YTEL og FEIL inntil
+     * videre. Logger derfor ut en feil for å varsle dersom det dukker opp noen nye.
+     */
+    private fun varsleOmUkjenteKlasseTyper(
+        oppdatertKravgrunnlag: Kravgrunnlag,
+        tilbakekrevingId: UUID,
+    ) {
+        val kjenteKlasseTyper = listOf(KlasseType.YTEL, KlasseType.FEIL)
+        oppdatertKravgrunnlag.perioder.forEach { periode ->
+            periode.grunnlagsbeloep.forEach { grunnlagsbeloep ->
+                if (grunnlagsbeloep.klasseType !in (kjenteKlasseTyper)) {
+                    logger.error(
+                        "Fikk en klasseType som ikke var forventet (${grunnlagsbeloep.klasseType}) i tilbakekreving " +
+                            "$tilbakekrevingId. I utgangspunktet vil ikke dette påvirke saksbehandlingen sånn " +
+                            "det er satt opp nå siden dette bare sendes uendret til vedtak tilsvarende klassetypen FEIL, " +
+                            "men følg opp saken for å se at dette blir riktig også i dette tilfellet. Oppdater i så fall " +
+                            "kjenteKlasseTyper for å unngå å logge dette på nytt.",
+                    )
+                }
+            }
+        }
+    }
 
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,
@@ -326,7 +356,7 @@ class TilbakekrevingService(
             }
         }
 
-        val vedtakId =
+        val vedtak =
             runBlocking {
                 vedtakKlient.fattVedtakTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
@@ -340,7 +370,7 @@ class TilbakekrevingService(
                 tilbakekreving.copy(status = TilbakekrevingStatus.FATTET_VEDTAK),
             )
 
-        tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.FATTET_VEDTAK, vedtakId, saksbehandler)
+        lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.FATTET_VEDTAK, vedtak.id, saksbehandler)
 
         tilbakekrevinghendelser.sendTilbakekreving(
             statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -364,11 +394,12 @@ class TilbakekrevingService(
         inTransaction {
             logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            val sendeBrev = tilbakekreving.sendeBrev
 
             sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
             sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
-            if (tilbakekreving.sendeBrev) {
+            if (sendeBrev) {
                 logger.info("Ferdigstiller vedtaksbrev for tilbakekreving=$tilbakekrevingId")
                 runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, tilbakekreving.sak.id, saksbehandler) }
             } else {
@@ -389,7 +420,15 @@ class TilbakekrevingService(
                     tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT),
                 )
 
-            tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.ATTESTERT, vedtak.id, saksbehandler, kommentar)
+            runBlocking {
+                logger.info("Sender vedtak til tilbakekrevingskomponenten for tilbakekreving=$tilbakekrevingId")
+                tilbakekrevingKlient.sendTilbakekrevingsvedtak(
+                    saksbehandler,
+                    tilbakekrevingVedtak(tilbakekreving, vedtak),
+                )
+            }
+
+            lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.ATTESTERT, vedtak.id, saksbehandler, kommentar)
 
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 referanse = tilbakekreving.id.toString(),
@@ -397,17 +436,14 @@ class TilbakekrevingService(
                 saksbehandler = saksbehandler,
             )
 
+            if (sendeBrev) {
+                tilbakekrevinghendelser.sendVedtakForJournalfoeringOgDistribusjonAvBrev(tilbakekrevingId, vedtak)
+            }
+
             tilbakekrevinghendelser.sendTilbakekreving(
                 statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
                 type = TilbakekrevingHendelseType.ATTESTERT,
             )
-
-            runBlocking {
-                tilbakekrevingKlient.sendTilbakekrevingsvedtak(
-                    saksbehandler,
-                    tilbakekrevingVedtak(tilbakekreving, vedtak),
-                )
-            }
 
             oppdatertTilbakekreving
         }
@@ -425,7 +461,7 @@ class TilbakekrevingService(
             sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
             sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
-            val vedtakId =
+            val vedtak =
                 runBlocking {
                     vedtakKlient.underkjennVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
@@ -436,9 +472,9 @@ class TilbakekrevingService(
             val oppdatertTilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.UNDERKJENT))
 
-            tilbakekrevingHendelse(
+            lagreTilbakekrevingHendelse(
                 tilbakekreving = tilbakekreving,
-                vedtakId = vedtakId,
+                vedtakId = vedtak.id,
                 saksbehandler = saksbehandler,
                 hendelseType = TilbakekrevingHendelseType.UNDERKJENT,
                 kommentar = kommentar,
@@ -459,7 +495,7 @@ class TilbakekrevingService(
             oppdatertTilbakekreving
         }
 
-    private fun tilbakekrevingHendelse(
+    private fun lagreTilbakekrevingHendelse(
         tilbakekreving: TilbakekrevingBehandling,
         hendelseType: TilbakekrevingHendelseType,
         vedtakId: Long? = null,
@@ -485,37 +521,42 @@ class TilbakekrevingService(
 
     private fun tilbakekrevingVedtak(
         tilbakekreving: TilbakekrevingBehandling,
-        vedtak: TilbakekrevingVedtakLagretDto,
+        vedtak: VedtakDto,
     ) = TilbakekrevingVedtak(
         sakId = tilbakekreving.sak.id,
         vedtakId = tilbakekreving.tilbakekreving.kravgrunnlag.vedtakId.value,
         fattetVedtak =
-            FattetVedtak(
-                saksbehandler = vedtak.fattetAv,
-                enhet = vedtak.enhet,
-                dato = vedtak.dato,
+            sjekkIkkeNull(vedtak.vedtakFattet) { "Vedtak ${vedtak.id} i tilbakekreving ${tilbakekreving.id} er ikke fattet" }.let {
+                FattetVedtak(
+                    saksbehandler = it.ansvarligSaksbehandler,
+                    enhet = it.ansvarligEnhet,
+                    dato = it.tidspunkt.toLocalDate(),
+                )
+            },
+        aarsak =
+            krevIkkeNull(tilbakekreving.tilbakekreving.vurdering?.aarsak) {
+                "Årsak for tilbakekreving mangler"
+            },
+        hjemmel =
+            hjemmelFraVurdering(
+                krevIkkeNull(tilbakekreving.tilbakekreving.vurdering) {
+                    "Kan ikke opprette hjemmel uten vurdering"
+                },
             ),
-        aarsak = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.aarsak),
-        hjemmel = hjemmelFraVurdering(requireNotNull(tilbakekreving.tilbakekreving.vurdering)),
         kravgrunnlagId =
             tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value
                 .toString(),
         kontrollfelt = tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value,
-        perioder =
-            tilbakekreving.tilbakekreving.perioder.map {
-                TilbakekrevingPeriodeVedtak(
-                    maaned = it.maaned,
-                    ytelse = it.ytelse.toYtelseVedtak(),
-                    feilkonto = it.feilkonto.toFeilkontoVedtak(),
-                )
-            },
+        perioder = tilbakekreving.tilbakekreving.perioder,
     )
 
     private fun hjemmelFraVurdering(vurdering: TilbakekrevingVurdering): TilbakekrevingHjemmel =
         if (vurdering.vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT) {
             TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
         } else {
-            requireNotNull(vurdering.rettsligGrunnlag)
+            krevIkkeNull(vurdering.rettsligGrunnlag) {
+                "Rettslig grunnlag mangler"
+            }
         }
 
     private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling): StatistikkTilbakekrevingDto {
@@ -577,12 +618,14 @@ class TilbakekrevingService(
     ) {
         val oppgaveUnderBehandling =
             oppgaveService.hentOppgaveUnderBehandling(tilbakekrevingId.toString())
-                ?: throw TilbakekrevingFeilTilstandException(
+                ?: throw TilbakekrevingFeilTilstandUgyldig(
+                    code = "OPPGAVE_IKKE_UNDER_BEHANDLING",
                     "Oppgaven tilknyttet tilbakekreving $tilbakekrevingId er ikke under behandling",
                 )
 
         if (oppgaveUnderBehandling.saksbehandler?.ident != saksbehandler.ident()) {
-            throw TilbakekrevingFeilTilstandException(
+            throw TilbakekrevingFeilTilstandUgyldig(
+                code = "SAKSBEHANDLER_IKKE_TILDELT_OPPGAVE",
                 "Saksbehandler ${saksbehandler.ident()} er ikke tilknyttet oppgave ${oppgaveUnderBehandling.id}",
             )
         }

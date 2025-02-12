@@ -8,5 +8,5 @@ data class Opplysningsbehov(
     val sakId: SakId,
     val sakType: SakType,
     val persongalleri: Persongalleri,
-    val kilde: Grunnlagsopplysning.Kilde? = null,
+    val kilde: Grunnlagsopplysning.Kilde,
 )

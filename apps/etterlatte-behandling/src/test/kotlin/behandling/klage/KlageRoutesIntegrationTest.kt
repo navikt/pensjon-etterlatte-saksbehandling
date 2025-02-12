@@ -24,7 +24,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
-import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -42,12 +41,7 @@ import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -103,65 +97,6 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
 
         val forventetParsetDatoVintertid = LocalDate.of(2024, Month.FEBRUARY, 3)
         assertEquals(forventetParsetDatoVintertid, innkommendeKlageVintertid.parseMottattDato())
-    }
-
-    @Test
-    fun `opprettelse av klage gaar bra og henting gir 404 etter at saken blir skjermet`() {
-        withTestApplication { client ->
-            val sak: Sak = opprettSak(client)
-            val klage: Klage = opprettKlage(sak, client)
-
-            val hentetKlage: Klage = hentKlage(client, klage.id)
-            assertEquals(klage, hentetKlage)
-
-            // setter skjerming for saken
-            client.postAndAssertOk(
-                "/egenansatt",
-                systemBruker,
-                EgenAnsattSkjermet(fnr = sak.ident, inntruffet = Tidspunkt.now(), skjermet = true),
-            )
-
-            // henter med saksbehandler som mangler tilgang
-            client.get("/api/klage/${klage.id}", tokenSaksbehandler) {
-                assertEquals(HttpStatusCode.NotFound, it.status)
-            }
-            // henter med saksbehandler som har tilgang
-            val hentetMedTilgang: Klage =
-                client.getAndAssertOk("/api/klage/${klage.id}", tokenSaksbehandlerMedEgenAnsattTilgang).body()
-            assertEquals(klage.id, hentetMedTilgang.id)
-        }
-    }
-
-    @Test
-    fun `opprettelse av klage gaar bra og henting gjoer tilgangskontroll naar saken faar adressebeskyttelse`() {
-        withTestApplication { client ->
-            val sak: Sak = opprettSak(client)
-            val klage: Klage = opprettKlage(sak, client)
-            assertEquals(klage, hentKlage(client, klage.id))
-            // Setter strengt fortrolig på saken klagen hører til
-            client.postAndAssertOk(
-                "/grunnlagsendringshendelse/adressebeskyttelse",
-                systemBruker,
-                Adressebeskyttelse(
-                    hendelseId = "1",
-                    endringstype = Endringstype.OPPRETTET,
-                    fnr = sak.ident,
-                    adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                ),
-            )
-
-            client.get("/api/klage/${klage.id}", tokenSaksbehandler) {
-                assertEquals(HttpStatusCode.NotFound, it.status)
-            }
-            val hentetMedTilgang =
-                client
-                    .getAndAssertOk("/api/klage/${klage.id}", tokenSaksbehandlerMedStrengtFortrolig)
-                    .body<Klage>()
-            assertEquals(
-                klage.copy(sak = klage.sak.copy(enhet = Enheter.STRENGT_FORTROLIG.enhetNr)),
-                hentetMedTilgang,
-            )
-        }
     }
 
     @Test

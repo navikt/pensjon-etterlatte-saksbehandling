@@ -7,12 +7,14 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
-import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -21,6 +23,8 @@ import java.util.UUID
 class AktivitetspliktDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun finnSenesteAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -52,28 +56,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun lagre(
-        behandlingId: UUID,
-        nyOppfolging: OpprettAktivitetspliktOppfolging,
-        navIdent: String,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-            |INSERT INTO aktivitetsplikt_oppfolging(behandling_id, aktivitet, opprettet_av) 
-            |VALUES (?, ?, ?)
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, behandlingId)
-            stmt.setString(2, nyOppfolging.aktivitet)
-            stmt.setString(3, navIdent)
-
-            stmt.executeUpdate()
-        }
-    }
-
-    fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitet> =
+    fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitetPeriode> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -90,7 +73,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitet> =
+    fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitetPeriode> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -107,7 +90,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun opprettAktivitet(
+    fun opprettAktivitetForBehandling(
         behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
@@ -160,7 +143,7 @@ class AktivitetspliktDao(
         }
     }
 
-    fun oppdaterAktivitet(
+    fun oppdaterAktivitetForBehandling(
         behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
@@ -179,10 +162,14 @@ class AktivitetspliktDao(
             stmt.setDate(3, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(4, kilde.toJson())
             stmt.setString(5, aktivitet.beskrivelse)
-            stmt.setObject(6, requireNotNull(aktivitet.id))
+            stmt.setObject(6, krevIkkeNull(aktivitet.id) { "Aktivitet id mangler" })
             stmt.setObject(7, behandlingId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Kunne ikke endre aktivitet for behandlingId: $behandlingId id: ${aktivitet.id}"
+            }
+            endret
         }
     }
 
@@ -205,14 +192,17 @@ class AktivitetspliktDao(
             stmt.setDate(3, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(4, kilde.toJson())
             stmt.setString(5, aktivitet.beskrivelse)
-            stmt.setObject(6, requireNotNull(aktivitet.id))
+            stmt.setObject(6, krevIkkeNull(aktivitet.id) { "Aktivitet id mangler" })
             stmt.setSakId(7, sakId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Kunne ikke endre aktivitet for sakId: $sakId id: ${aktivitet.id}"
+            }
         }
     }
 
-    fun slettAktivitet(
+    fun slettAktivitetForBehandling(
         aktivitetId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
@@ -227,7 +217,10 @@ class AktivitetspliktDao(
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, behandlingId)
 
-            stmt.executeUpdate()
+            val slettet = stmt.executeUpdate()
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetId: $aktivitetId for behandlingId: $behandlingId")
+            }
         }
     }
 
@@ -246,7 +239,10 @@ class AktivitetspliktDao(
             stmt.setObject(1, aktivitetId)
             stmt.setSakId(2, sakId)
 
-            stmt.executeUpdate()
+            val slettet = stmt.executeUpdate()
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetId: $aktivitetId for sakId: $sakId")
+            }
         }
     }
 
@@ -269,8 +265,123 @@ class AktivitetspliktDao(
         }
     }
 
+    fun hentHendelserForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitetHendelse> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, dato, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_hendelse
+                        WHERE behandling_id = ?
+                        """.trimMargin(),
+                    )
+                stmt.setObject(1, behandlingId)
+
+                stmt.executeQuery().toList { toHendelse() }
+            }
+        }
+
+    fun hentHendelserForSak(sakId: SakId): List<AktivitetspliktAktivitetHendelse> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, dato, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_hendelse
+                        WHERE sak_id = ?
+                        """.trimMargin(),
+                    )
+                stmt.setSakId(1, sakId)
+
+                stmt.executeQuery().toList { toHendelse() }
+            }
+        }
+
+    fun upsertHendelse(
+        behandlingId: UUID?,
+        hendelse: LagreAktivitetspliktHendelse,
+        kilde: Grunnlagsopplysning.Kilde,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        INSERT INTO aktivitetsplikt_hendelse(id, sak_id, behandling_id, dato, opprettet, endret, beskrivelse) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT (id) DO UPDATE SET
+                        dato = excluded.dato,
+                        endret = excluded.endret,
+                        beskrivelse = excluded.beskrivelse
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, hendelse.id ?: UUID.randomUUID())
+            stmt.setSakId(2, hendelse.sakId)
+            stmt.setObject(3, behandlingId)
+            stmt.setDate(4, Date.valueOf(hendelse.dato))
+            stmt.setString(5, kilde.toJson())
+            stmt.setString(6, kilde.toJson())
+            stmt.setString(7, hendelse.beskrivelse)
+
+            stmt.executeUpdate()
+        }
+    }
+
+    fun slettHendelse(hendelseId: UUID) =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        DELETE FROM aktivitetsplikt_hendelse
+                        WHERE id = ?
+                        """.trimMargin(),
+                    )
+                stmt.setObject(1, hendelseId)
+
+                stmt.executeUpdate()
+            }
+        }
+
+    fun kopierHendelser(
+        forrigeBehandlingId: UUID,
+        nyBehandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        INSERT INTO aktivitetsplikt_hendelse (id, sak_id, behandling_id, dato, opprettet, endret, beskrivelse)
+                        (SELECT gen_random_uuid(), sak_id, ?, dato, opprettet, endret, beskrivelse FROM aktivitetsplikt_hendelse WHERE behandling_id = ?)
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, nyBehandlingId)
+            stmt.setObject(2, forrigeBehandlingId)
+
+            stmt.executeUpdate()
+        }
+    }
+
+    fun finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper(tom: LocalDate) =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT DISTINCT sak_id 
+                        FROM aktivitetsplikt_unntak 
+                        WHERE tom IS NOT NULL
+                            AND tom <= ?
+                        """.trimMargin(),
+                    )
+                stmt.setDate(1, Date.valueOf(tom))
+                stmt.executeQuery().toList { SakId(getLong("sak_id")) }
+            }
+        }
+
     private fun ResultSet.toAktivitet() =
-        AktivitetspliktAktivitet(
+        AktivitetspliktAktivitetPeriode(
             id = getUUID("id"),
             sakId = SakId(getLong("sak_id")),
             type = AktivitetspliktAktivitetType.valueOf(getString("aktivitet_type")),
@@ -280,9 +391,35 @@ class AktivitetspliktDao(
             endret = objectMapper.readValue(getString("endret")),
             beskrivelse = getString("beskrivelse"),
         )
+
+    private fun ResultSet.toHendelse() =
+        AktivitetspliktAktivitetHendelse(
+            id = getUUID("id"),
+            sakId = SakId(getLong("sak_id")),
+            behandlingId = getString("behandling_id")?.let { UUID.fromString(it) },
+            dato = getDate("dato").toLocalDate(),
+            opprettet = objectMapper.readValue(getString("opprettet")),
+            endret = objectMapper.readValue(getString("endret")),
+            beskrivelse = getString("beskrivelse"),
+        )
 }
 
 data class AktivitetspliktAktivitet(
+    val hendelser: List<AktivitetspliktAktivitetHendelse>,
+    val perioder: List<AktivitetspliktAktivitetPeriode>,
+)
+
+data class AktivitetspliktAktivitetHendelse(
+    val id: UUID,
+    val sakId: SakId,
+    val behandlingId: UUID?,
+    val dato: LocalDate,
+    val opprettet: Grunnlagsopplysning.Kilde,
+    val endret: Grunnlagsopplysning.Kilde?,
+    val beskrivelse: String,
+)
+
+data class AktivitetspliktAktivitetPeriode(
     val id: UUID,
     val sakId: SakId,
     val type: AktivitetspliktAktivitetType,
@@ -315,6 +452,13 @@ data class LagreAktivitetspliktAktivitet(
     val type: AktivitetspliktAktivitetType,
     val fom: LocalDate,
     val tom: LocalDate? = null,
+    val beskrivelse: String,
+)
+
+data class LagreAktivitetspliktHendelse(
+    val id: UUID? = null,
+    val sakId: SakId,
+    val dato: LocalDate,
     val beskrivelse: String,
 )
 

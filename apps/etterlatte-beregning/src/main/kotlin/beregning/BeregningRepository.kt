@@ -11,7 +11,8 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
@@ -101,8 +102,8 @@ class BeregningRepository(
         if (overstyrBeregning.status == OverstyrBeregningStatus.IKKE_AKTIV) {
             return null
         }
-        return checkNotNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
-            "Vi opprettet en overstyrt beregning på sakId=${overstyrBeregning.sakId} akkurat nå men den finnes ikke >:("
+        return krevIkkeNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
+            "Vi opprettet en overstyrt beregning på sakId=${overstyrBeregning.sakId} akkurat nå men den finnes ikke"
         }
     }
 
@@ -149,6 +150,7 @@ class BeregningRepository(
             "regelverk" to beregningsperiode.regelverk?.name,
             "kilde" to beregningsperiode.kilde?.toJson(),
             "kunEnJuridiskForelder" to beregningsperiode.kunEnJuridiskForelder,
+            "harForeldreloessats" to beregningsperiode.harForeldreloessats,
         )
 }
 
@@ -214,25 +216,31 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
             regelverk = stringOrNull(BeregningsperiodeDatabaseColumns.Regelverk.navn)?.let { Regelverk.valueOf(it) },
             kilde = stringOrNull(BeregningsperiodeDatabaseColumns.Kilde.navn)?.let { objectMapper.readValue(it) },
             kunEnJuridiskForelder = boolean(BeregningsperiodeDatabaseColumns.KunEnJuridiskForelder.navn),
+            harForeldreloessats =
+                if (anyOrNull(BeregningsperiodeDatabaseColumns.HarForeldreloessats.navn) != null) {
+                    boolean(BeregningsperiodeDatabaseColumns.HarForeldreloessats.navn)
+                } else {
+                    null
+                },
         )
     }
 
 private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregning {
     val base =
         beregningsperioder.first().apply {
-            checkInternFeil(beregningsperioder.all { it.beregningId == beregningId }) {
+            krev(beregningsperioder.all { it.beregningId == beregningId }) {
                 "Beregningen inneholder forskjellige beregningsIder $beregningId for beregning $beregningId"
             }
-            checkInternFeil(beregningsperioder.all { it.behandlingId == behandlingId }) {
+            krev(beregningsperioder.all { it.behandlingId == behandlingId }) {
                 "Beregningen inneholder forskjellige behandlingIder $behandlingId for beregning $beregningId"
             }
-            checkInternFeil(beregningsperioder.all { it.type == type }) {
+            krev(beregningsperioder.all { it.type == type }) {
                 "Beregningen inneholder forskjellige typer $type for beregning $beregningId"
             }
-            checkInternFeil(beregningsperioder.all { it.beregnetDato == beregnetDato }) {
+            krev(beregningsperioder.all { it.beregnetDato == beregnetDato }) {
                 "Beregningen inneholder forskjellige beregnetDatoer $beregnetDato for beregning $beregningId"
             }
-            checkInternFeil(beregningsperioder.all { it.grunnlagMetadata == grunnlagMetadata }) {
+            krev(beregningsperioder.all { it.grunnlagMetadata == grunnlagMetadata }) {
                 "Beregningen inneholder forskjellige grunnlagMetadata $grunnlagMetadata for beregning $beregningId"
             }
         }
@@ -266,6 +274,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                     regelverk = it.regelverk,
                     kilde = it.kilde,
                     kunEnJuridiskForelder = it.kunEnJuridiskForelder,
+                    harForeldreloessats = it.harForeldreloessats,
                 )
             },
         overstyrBeregning = null,
@@ -302,6 +311,7 @@ private enum class BeregningsperiodeDatabaseColumns(
     Kilde("kilde"),
     Institusjonsopphold("institusjonsopphold"),
     KunEnJuridiskForelder("kun_en_juridisk_forelder"),
+    HarForeldreloessats("har_foreldreloessats"),
 }
 
 private object Queries {
@@ -339,14 +349,16 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.Regelverk.navn},
             ${BeregningsperiodeDatabaseColumns.Kilde.navn},
             ${BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn},
-            ${BeregningsperiodeDatabaseColumns.KunEnJuridiskForelder.navn}
+            ${BeregningsperiodeDatabaseColumns.KunEnJuridiskForelder.navn},
+            ${BeregningsperiodeDatabaseColumns.HarForeldreloessats.navn}
             )
         VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
             :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :trygdetidForIdent::TEXT,
             :beregningsMetode::TEXT, :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT,
             :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :avdoedeForeldre::JSONB, :regelResultat::JSONB, 
-            :regelVersjon::TEXT, :regelverk::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB, :kunEnJuridiskForelder) 
+            :regelVersjon::TEXT, :regelverk::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB, :kunEnJuridiskForelder,
+            :harForeldreloessats) 
     """
 
     val slettBeregningperioder = """
@@ -412,4 +424,5 @@ private data class BeregningsperiodeDAO(
     val regelverk: Regelverk? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
     val kunEnJuridiskForelder: Boolean = false,
+    val harForeldreloessats: Boolean? = null,
 )

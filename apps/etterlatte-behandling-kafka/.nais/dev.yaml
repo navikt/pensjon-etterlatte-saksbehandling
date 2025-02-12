@@ -1,0 +1,69 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-behandling-kafka
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: "{{image}}"
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  secureLogs:
+    enabled: true
+  kafka:
+    pool: nav-dev
+  azure:
+    application:
+      enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 384Mi
+  replicas:
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: KAFKA_RESET_POLICY
+      value: latest
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: DOKARKIV_URL
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: PDFGEN_URL
+      value: http://ey-pdfgen/api/v1/genpdf
+  envFrom:
+    - secret: my-application-unleash-api-token
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: ey-pdfgen
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: dokarkiv-q2.dev-fss-pub.nais.io
+    inbound:
+      rules:
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
+          namespace: aura
+          cluster: dev-gcp

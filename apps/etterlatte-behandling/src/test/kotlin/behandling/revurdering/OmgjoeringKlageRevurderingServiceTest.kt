@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -29,13 +30,11 @@ import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,9 +49,10 @@ import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
+    val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
+
     @BeforeAll
     fun start() {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         val saksbehandlerMedRoller =
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleStrengtFortrolig() } returns false
@@ -86,12 +86,13 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
                 factory
                     .opprettBehandling(
                         sak.id,
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
+                        user.brukerTokenInfo,
                     )
-            }?.also { it.sendMeldingForHendelse() }?.behandling
+            }.also { it.sendMeldingForHendelse() }.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }
@@ -121,11 +122,8 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             )
         }
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            val iverksatt = behandling!!.copy(status = BehandlingStatus.IVERKSATT)
+            applicationContext.behandlingDao.lagreStatus(iverksatt)
         }
         val klage =
             inTransaction {
@@ -262,5 +260,13 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
+            tilgangsService =
+                OppdaterTilgangService(
+                    applicationContext.sakService,
+                    applicationContext.skjermingKlient,
+                    applicationContext.pdlTjenesterKlient,
+                    applicationContext.brukerService,
+                    applicationContext.oppgaveService,
+                ),
         )
 }

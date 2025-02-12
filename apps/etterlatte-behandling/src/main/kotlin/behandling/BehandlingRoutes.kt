@@ -35,9 +35,9 @@ import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -52,7 +52,6 @@ import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -96,6 +95,15 @@ internal fun Route.behandlingRoutes(
             val detaljertBehandlingDTO =
                 behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingId, brukerTokenInfo)
             call.respond(detaljertBehandlingDTO)
+        }
+
+        get("status") {
+            val status =
+                inTransaction {
+                    behandlingService.hentBehandling(behandlingId)?.status
+                        ?: throw InternfeilException("Fant ikke behandling id=$behandlingId")
+                }
+            call.respond(status)
         }
 
         post("/gyldigfremsatt") {
@@ -253,7 +261,6 @@ internal fun Route.behandlingRoutes(
                             begrunnelse = body.begrunnelse,
                             vilkaar = body.vilkaarType,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
-                            kravdato = body.kravdato,
                             aktiv = true,
                         )
 
@@ -414,14 +421,6 @@ internal fun Route.behandlingRoutes(
                     )
                 }
             }
-
-            post("/gyldigfremsatt") {
-                kunSkrivetilgang {
-                    val body = call.receive<GyldighetsResultat>()
-                    gyldighetsproevingService.lagreGyldighetsproeving(behandlingId, body)
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
         }
 
         route("/opprettbehandling") {
@@ -441,6 +440,7 @@ internal fun Route.behandlingRoutes(
                                 behandlingsBehov.mottattDato,
                                 Vedtaksloesning.GJENNY,
                                 request = request,
+                                brukerTokenInfo = brukerTokenInfo,
                             )
                         }
                     behandlingOgOppgave.sendMeldingForHendelse()
@@ -455,7 +455,6 @@ data class ViderefoertOpphoerRequest(
     @JsonProperty("dato") private val _dato: String?,
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
-    val kravdato: LocalDate? = null,
     val vilkaarType: VilkaarType?,
 ) {
     val dato: YearMonth? = _dato?.tilYearMonth()
@@ -468,6 +467,5 @@ data class ViderefoertOpphoer(
     val vilkaar: VilkaarType?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
-    val kravdato: LocalDate?,
     val aktiv: Boolean = true,
 )

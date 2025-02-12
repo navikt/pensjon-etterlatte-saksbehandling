@@ -5,14 +5,18 @@ import { opphevFeilregistrertSakstilknytning } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost: Journalpost }) => {
   const [opphevFeilregistreringStatus, apiOpphevFeilregistrering] = useApiCall(opphevFeilregistrertSakstilknytning)
 
-  const opphevFeilregistrering = () =>
+  const opphevFeilregistrering = () => {
+    trackClick(ClickEvent.OPPHEV_FEILREGISTRERING_JOURNALPOST)
+
     apiOpphevFeilregistrering(journalpost.journalpostId, () => {
       setTimeout(() => window.location.reload(), 2000)
     })
+  }
 
   if (isSuccess(opphevFeilregistreringStatus)) {
     return (

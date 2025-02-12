@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -15,45 +16,20 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import java.sql.Date
 import java.sql.ResultSet
 import java.time.YearMonth
 
 class SakLesDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    private val mapTilSak: ResultSet.() -> Sak = {
-        Sak(
-            sakType = enumValueOf(getString("sakType")),
-            ident = getString("fnr"),
-            id = SakId(getLong("id")),
-            enhet = Enhetsnummer(getString("enhet")),
-        )
-    }
-
-    fun finnSakerMedGraderingOgSkjerming(sakIder: List<SakId>): List<SakMedGradering> =
-        connectionAutoclosing.hentConnection { connection ->
-            with(connection) {
-                val statement =
-                    prepareStatement(
-                        "SELECT id, adressebeskyttelse from sak where id = any(?)",
-                    )
-                statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
-                statement.executeQuery().toList {
-                    SakMedGradering(
-                        id = SakId(getLong(1)),
-                        adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    )
-                }
-            }
-        }
-
     fun hentSaker(
         kjoering: String,
         antall: Int,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
         sakType: SakType? = null,
-        loependeFom: YearMonth? = null,
+        rekjoereManuellUtenOppgave: Boolean = false,
     ): List<Sak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -69,11 +45,18 @@ class SakLesDao(
                         AND k.status!='${KjoeringStatus.KLAR_TIL_REGULERING.name}'
                     )
                     OR EXISTS(
-                        -- nyeste kjøring har feila
+                        -- nyeste kjøring har feila eller har satt til manuell uten oppgave (hvis bryter er på)
                         SELECT 1 FROM omregningskjoering k
                             WHERE k.sak_id=s.id 
                             AND k.kjoering='$kjoering' 
-                            AND k.status = '${KjoeringStatus.FEILA.name}'
+                            AND k.status in ${
+                            rekjoereManuellUtenOppgave.let {
+                                when (it) {
+                                    true -> "('${KjoeringStatus.FEILA.name}', '${KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE.name}')"
+                                    false -> "('${KjoeringStatus.FEILA.name}')"
+                                }
+                            }
+                        }
                             AND k.tidspunkt >= (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering)
                     )
                     )
@@ -187,4 +170,33 @@ class SakLesDao(
                     .toList(mapTilSak)
             }
         }
+
+    fun finnSakerMedPleieforholdOpphoerer(maanedOpphoerte: YearMonth): List<SakId> =
+        connectionAutoclosing.hentConnection { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT DISTINCT ON (sak_id) sak_id, tidligere_familiepleier ->> 'opphoertPleieforhold' FROM behandling 
+                    WHERE tidligere_familiepleier ->> 'opphoertPleieforhold' IS NOT NULL 
+                    AND status = ?
+                    AND TO_DATE(tidligere_familiepleier ->> 'opphoertPleieforhold', 'YYYY-MM-DD') BETWEEN ? AND ?
+                    ORDER BY sak_id, behandling_opprettet DESC;
+                    """.trimIndent(),
+                )
+            statement.setString(1, BehandlingStatus.IVERKSATT.name)
+            statement.setDate(2, Date.valueOf(maanedOpphoerte.atDay(1)))
+            statement.setDate(3, Date.valueOf(maanedOpphoerte.atEndOfMonth()))
+            statement.executeQuery().toList {
+                SakId(getLong("sak_id"))
+            }
+        }
+}
+
+internal val mapTilSak: ResultSet.() -> Sak = {
+    Sak(
+        sakType = enumValueOf(getString("sakType")),
+        ident = getString("fnr"),
+        id = SakId(getLong("id")),
+        enhet = Enhetsnummer(getString("enhet")),
+    )
 }

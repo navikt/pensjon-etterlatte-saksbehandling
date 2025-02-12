@@ -53,7 +53,7 @@ class AutomatiskRevurderingService(
 
         gyldigForAutomatiskRevurdering(request, loepende, forrigeBehandling, systembruker)
 
-        val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
+        val persongalleri = grunnlagService.hentPersongalleri(request.sakId)
 
         val revurderingOgOppfoelging =
             inTransaction {
@@ -65,6 +65,7 @@ class AutomatiskRevurderingService(
                     kilde = Vedtaksloesning.GJENNY,
                     persongalleri = persongalleri,
                     frist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
+                    mottattDato = request.mottattDato?.toString(),
                 )
             }
 
@@ -139,28 +140,24 @@ class AutomatiskRevurderingService(
         sakId: SakId,
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,
-        virkningstidspunkt: LocalDate? = null,
+        virkningstidspunkt: LocalDate,
         kilde: Vedtaksloesning,
         persongalleri: Persongalleri,
-        mottattDato: String? = null,
-        begrunnelse: String? = null,
         frist: Tidspunkt? = null,
+        mottattDato: String? = null,
     ) = forrigeBehandling.let {
         revurderingService.opprettRevurdering(
             sakId = sakId,
             persongalleri = persongalleri,
-            forrigeBehandling = forrigeBehandling.id,
+            forrigeBehandling = forrigeBehandling,
             mottattDato = mottattDato,
             prosessType = Prosesstype.AUTOMATISK,
             kilde = kilde,
             revurderingAarsak = revurderingAarsak,
-            virkningstidspunkt = virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
-            utlandstilknytning = forrigeBehandling.utlandstilknytning,
-            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-            begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
+            virkningstidspunkt = virkningstidspunkt.tilVirkningstidspunkt("Opprettet automatisk"),
+            begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
             frist = frist,
-            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
         )
     }
 }

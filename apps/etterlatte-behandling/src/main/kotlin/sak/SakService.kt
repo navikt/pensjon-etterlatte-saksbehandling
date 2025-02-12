@@ -11,6 +11,8 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -27,11 +29,13 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -79,12 +83,22 @@ interface SakService {
 
     fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
 
-    fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering>
+    fun oppdaterEnhetForSak(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    )
 
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int
+    )
+
+    fun sjekkSkjerming(
+        fnr: String,
+        sakId: SakId,
+        type: SakType,
+        overstyrendeEnhet: Enhetsnummer?,
+    )
 
     fun hentEnkeltSakForPerson(fnr: String): Sak
 
@@ -98,6 +112,20 @@ interface SakService {
         sakId: SakId,
         bruker: Systembruker,
     ): SakMedGraderingOgSkjermet
+
+    fun oppdaterIdentForSak(
+        sak: Sak,
+        bruker: BrukerTokenInfo,
+    ): Sak
+
+    fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
+
+    fun settEnhetOmAdressebeskyttet(
+        sak: Sak,
+        gradering: AdressebeskyttelseGradering,
+    )
+
+    fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset>
 }
 
 class ManglerTilgangTilEnhet(
@@ -110,11 +138,13 @@ class ManglerTilgangTilEnhet(
 class SakServiceImpl(
     private val dao: SakSkrivDao,
     private val lesDao: SakLesDao,
+    private val endringerDao: SakendringerDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
     private val grunnlagService: GrunnlagService,
     private val krrKlient: KrrKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
+    private val featureToggle: FeatureToggleService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -149,8 +179,17 @@ class SakServiceImpl(
         loependeFom: YearMonth?,
     ): List<SakId> =
         lesDao
-            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType, loependeFom)
-            .also { logger.info("Henta ${it.size} saker før filtrering") }
+            .hentSaker(
+                kjoering,
+                antall,
+                spesifikkeSaker,
+                ekskluderteSaker,
+                sakType,
+                featureToggle.isEnabled(
+                    ReguleringFeatureToggle.OMREGING_REKJOERE_MANUELL_UTEN_OPPGAVE,
+                    false,
+                ),
+            ).also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }
             .map(Sak::id)
@@ -164,8 +203,10 @@ class SakServiceImpl(
         } else if (it.size == 1) {
             it.single()
         } else {
+            sikkerLogg.error("Fant ${it.size} saker av type $sakType på person: ${it.joinToString()}}")
+
             throw InternfeilException(
-                "Personen har flere saker (${it.joinToString()} av type $sakType. " +
+                "Personen har ${it.size} saker av type $sakType. " +
                     "Dette må meldes i Porten for manuell kontroll og opprydding.",
             )
         }
@@ -216,18 +257,86 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident), HardkodaSystembruker.opprettGrunnlag) }
-        val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
-        val spraak = hentSpraak(sak.ident)
-        val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
+        leggTilGrunnlag(sak)
+
+        return sak
+    }
+
+    private fun leggTilGrunnlag(sak: Sak) {
         runBlocking {
+            val harGrunnlag = grunnlagService.grunnlagFinnes(sak.id, HardkodaSystembruker.opprettGrunnlag)
+
+            if (harGrunnlag) {
+                logger.info("Finnes allerede grunnlag på sak=${sak.id}")
+                return@runBlocking
+            }
+            logger.info("Fant ingen grunnlag på sak=${sak.id} - oppretter grunnlag")
+
+            val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
+            val spraak = hentSpraak(sak.ident)
+            val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
+
+            grunnlagService.leggInnNyttGrunnlagSak(
+                sak,
+                Persongalleri(sak.ident),
+                HardkodaSystembruker.opprettGrunnlag,
+            )
+
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = sak.id,
                 opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
                 HardkodaSystembruker.opprettGrunnlag,
             )
+            logger.info("Grunnlag opprettet på sak=${sak.id}")
         }
-        return sak
+    }
+
+    override fun oppdaterIdentForSak(
+        sak: Sak,
+        bruker: BrukerTokenInfo,
+    ): Sak {
+        val identListe = runBlocking { pdltjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident) }
+
+        val alleIdenter = identListe.identifikatorer.map { it.folkeregisterident.value }
+        if (sak.ident !in alleIdenter) {
+            sikkerLogg.error("Ident ${sak.ident} fra sak ${sak.id} matcher ingen av identene fra PDL: $alleIdenter")
+            throw InternfeilException(
+                "Ident i sak ${sak.id} stemmer ikke overens med identer vi fikk fra PDL",
+            )
+        }
+
+        val gjeldendeIdent =
+            identListe.identifikatorer.singleOrNull { !it.historisk }?.folkeregisterident
+                ?: throw InternfeilException("Sak ${sak.id} har flere eller ingen gyldige identer samtidig. Kan ikke oppdatere ident.")
+
+        dao.oppdaterIdent(sak.id, gjeldendeIdent)
+
+        runBlocking {
+            val oppdatertPersongalleri =
+                grunnlagService
+                    .hentPersongalleri(sak.id)
+                    .copy(soeker = gjeldendeIdent.value)
+
+            grunnlagService.leggInnNyttGrunnlagSak(sak, oppdatertPersongalleri, bruker)
+        }
+
+        logger.info("Oppdaterte sak ${sak.id} med bruker sin nyeste ident. Se sikkerlogg for detailjer")
+        sikkerLogg.info(
+            "Oppdaterte sak ${sak.id}: Endret ident fra ${sak.ident} til ${gjeldendeIdent.value}. " +
+                "Alle identer fra PDL: ${identListe.identifikatorer.joinToString()}",
+        )
+
+        return lesDao.hentSak(sak.id)
+            ?: throw InternfeilException("Kunne ikke hente ut sak ${sak.id} som nettopp ble endret")
+    }
+
+    override fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId> {
+        logger.info("Henter saker der dato pleieforholdet opphørte var $maanedOpphoerte")
+        return lesDao
+            .finnSakerMedPleieforholdOpphoerer(maanedOpphoerte)
+            .also {
+                logger.info("Fant ${it.size} saker der pleieforholdet opphørte i $maanedOpphoerte")
+            }
     }
 
     private fun hentSpraak(fnr: String): Spraak {
@@ -256,11 +365,14 @@ class SakServiceImpl(
     ): Sak {
         var sak = finnSakForPerson(fnr, type)
         if (sak == null) {
+            logger.info("Fant ingen sak av type=$type på person ${fnr.maskerFnr()} - oppretter ny sak")
+
             val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
             sak = dao.opprettSak(fnr, type, enhet)
         }
 
-        sjekkSkjerming(fnr = fnr, sakId = sak.id)
+        sjekkSkjerming(fnr = fnr, sakId = sak.id, type = type, overstyrendeEnhet = overstyrendeEnhet)
+
         val hentetGradering =
             runBlocking {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -271,12 +383,12 @@ class SakServiceImpl(
                 )
             }
         oppdaterAdressebeskyttelse(sak.id, hentetGradering)
-        settEnhetOmAdresebeskyttet(sak, hentetGradering)
+        settEnhetOmAdressebeskyttet(sak, hentetGradering)
         sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
     }
 
-    private fun settEnhetOmAdresebeskyttet(
+    override fun settEnhetOmAdressebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     ) {
@@ -300,6 +412,25 @@ class SakServiceImpl(
             AdressebeskyttelseGradering.FORTROLIG -> return
             AdressebeskyttelseGradering.UGRADERT -> return
         }
+    }
+
+    override fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset> {
+        val saksendringer = endringerDao.hentEndringerForSak(sakId)
+
+        // Inntil vi har gått opp om det er greit å vise adressebeskyttelse og skjerming, så ønsker vi ikke å eksponere
+        // dette. Verken som egne endringstyper eller som en del av andre endringstyper.
+        val saksendringerUtenSensitiveEndringer =
+            saksendringer
+                .filter {
+                    it.endringstype in
+                        listOf(
+                            Endringstype.OPPRETT_SAK,
+                            Endringstype.ENDRE_ENHET,
+                            Endringstype.ENDRE_IDENT,
+                        )
+                }.map(Saksendring::toSaksendringBegrenset)
+
+        return saksendringerUtenSensitiveEndringer
     }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
@@ -381,21 +512,35 @@ class SakServiceImpl(
     override fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
+    ) = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
-    private fun sjekkSkjerming(
+    override fun sjekkSkjerming(
         fnr: String,
         sakId: SakId,
+        type: SakType,
+        overstyrendeEnhet: Enhetsnummer?,
     ) {
         val erSkjermet =
             runBlocking {
                 skjermingKlient.personErSkjermet(fnr)
             }
         if (erSkjermet) {
+            logger.info("Oppdater egen ansatt for sak $sakId")
             dao.oppdaterEnheterPaaSaker(
                 listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
             )
+        } else {
+            val sakMedSkjerming = lesDao.hentSak(sakId)!!
+            if (sakMedSkjerming.enhet == Enheter.EGNE_ANSATTE.enhetNr) {
+                val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
+                if (enhet == Enheter.EGNE_ANSATTE.enhetNr) {
+                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr)))
+                } else {
+                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, enhet)))
+                }
+            }
         }
+
         dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
     }
 
@@ -403,7 +548,12 @@ class SakServiceImpl(
         dao.oppdaterEnheterPaaSaker(saker)
     }
 
-    override fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering> = lesDao.finnSakerMedGraderingOgSkjerming(sakIder)
+    override fun oppdaterEnhetForSak(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    ) {
+        dao.oppdaterEnheterPaaSaker(listOf(sak), kommentar)
+    }
 
     override fun finnSak(
         ident: String,
@@ -438,4 +588,13 @@ class SakServiceImpl(
         enheterSomSkalFiltreres: List<Enhetsnummer>,
         saker: List<Sak>,
     ): List<Sak> = saker.filter { it.enhet !in enheterSomSkalFiltreres }
+}
+
+enum class ReguleringFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    OMREGING_REKJOERE_MANUELL_UTEN_OPPGAVE("aarlig-inntektsjustering-la-manuell-behandling"),
+    ;
+
+    override fun key() = key
 }

@@ -23,7 +23,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
   const [ferdigstillStatus, apiFerdigstillBrev] = useApiCall(ferdigstillBrev)
   const [journalfoerStatus, apiJournalfoerBrev] = useApiCall(journalfoerBrev)
   const [distribuerStatus, apiDistribuerBrev] = useApiCall(distribuerBrev)
-
+  //TODO: ferdigstill, journalfoer og distribuer burde gjøres i samme kall
   const ferdigstill = () => {
     setFeilmeldingBekreft(undefined)
     if (erAktivitetspliktVarsel && !bekreftetInfobrev) {

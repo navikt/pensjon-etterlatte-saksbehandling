@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.ktor.client.plugins.ResponseException
 import io.mockk.Called
@@ -11,6 +12,7 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
@@ -30,9 +32,11 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -44,9 +48,11 @@ import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -70,29 +76,36 @@ internal class SakServiceTest {
     private val norg2Klient = mockk<Norg2Klient>()
     private val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     private val saksbehandlerService = mockk<SaksbehandlerService>()
-    private val skjermingKlient = mockk<SkjermingKlient>()
+    private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val sakSkrivDao = mockk<SakSkrivDao>()
     private val sakLesDao = mockk<SakLesDao>()
+    private val sakendringerDao = mockk<SakendringerDao>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val service: SakService =
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagservice,
             krrKlient,
             pdlTjenesterKlient,
+            featureToggleService,
         )
 
     @BeforeEach
     fun before() {
         clearAllMocks()
-
-        coEvery { grunnlagservice.leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
-        coEvery { grunnlagservice.leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
+        /*
+         Asserter her på at vi må bruke systembruker siden vi ikke nødvendigvis har tilgang med saksbehandlertoken da alt skjer i en transaction
+         Gjelder ikke for oppdaterIdentForSak()
+         */
+        coEvery { grunnlagservice.leggInnNyttGrunnlagSak(any(), any(), any(Systembruker::class)) } just runs
+        coEvery { grunnlagservice.leggTilNyeOpplysningerBareSak(any(), any(), any(Systembruker::class)) } just runs
 
         coEvery { krrKlient.hentDigitalKontaktinformasjon(any()) } returns
             DigitalKontaktinformasjon(
@@ -389,19 +402,22 @@ internal class SakServiceTest {
     fun `finnEllerOpprettSak lagre enhet hvis enhet er funnet`() {
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
-        every {
-            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        } returns
+        val sak1 =
             Sak(
                 id = sakId1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
+        every { sakLesDao.hentSak(sakId1) } returns sak1
+        every {
+            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        } returns
+            sak1
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
-
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
+        coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
                 ArbeidsFordelingRequest(
@@ -417,12 +433,7 @@ internal class SakServiceTest {
         val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe
-            Sak(
-                ident = KONTANT_FOT.value,
-                sakType = SakType.BARNEPENSJON,
-                id = sakId1,
-                enhet = Enheter.PORSGRUNN.enhetNr,
-            )
+            sak1
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
         verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
@@ -451,24 +462,27 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
-    // TODO: skriv om til at pdltjenester returnerer  strengt fortrolgi for denne
     @Test
-    fun `finnEllerOpprettSak lagre enhet og setter gradering`() {
+    fun `finnEllerOpprettSak lagrer enhet og setter gradering`() {
         systemBrukerKontekst()
 
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
+        coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
-        every {
-            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        } returns
+        val sak1 =
             Sak(
                 id = sakId1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
+        every {
+            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        } returns
+            sak1
+        every { sakLesDao.hentSak(sakId1) } returns sak1
 
         coEvery {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -487,7 +501,7 @@ internal class SakServiceTest {
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(any(), any()) } just runs
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
 
         val sak =
@@ -497,12 +511,7 @@ internal class SakServiceTest {
             )
 
         sak shouldBe
-            Sak(
-                ident = KONTANT_FOT.value,
-                sakType = SakType.BARNEPENSJON,
-                id = sakId1,
-                enhet = Enheter.PORSGRUNN.enhetNr,
-            )
+            sak1
 
         verify(exactly = 1) {
             service.oppdaterAdressebeskyttelse(
@@ -554,8 +563,9 @@ internal class SakServiceTest {
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
+        coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
 
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
@@ -764,7 +774,13 @@ internal class SakServiceTest {
             val ident1 = LITE_BARN.value
             val ident2 = KONTANT_FOT.value
 
-            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(ident1, ident2)
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(LITE_BARN, true),
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT, false),
+                    ),
+                )
             every { sakLesDao.finnSaker(ident1, sakType) } returns listOf(dummySak(ident1, sakType))
             every { sakLesDao.finnSaker(ident2, sakType) } returns emptyList()
 
@@ -785,7 +801,14 @@ internal class SakServiceTest {
             val ident1 = LITE_BARN.value
             val ident2 = KONTANT_FOT.value
 
-            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(ident1, ident2)
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(LITE_BARN, true),
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT, false),
+                    ),
+                )
+
             every { sakLesDao.finnSaker(ident1, sakType) } returns listOf(dummySak(ident1, sakType))
             every { sakLesDao.finnSaker(ident2, sakType) } returns listOf(dummySak(ident2, sakType))
 
@@ -803,6 +826,95 @@ internal class SakServiceTest {
         }
     }
 
+    @Nested
+    inner class TestOppdaterIdentForSak {
+        @Test
+        fun `Sak ident ikke funnet i PDL`() {
+            val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
+
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    emptyList(),
+                )
+
+            assertThrows<InternfeilException> {
+                service.oppdaterIdentForSak(sak, simpleSaksbehandler())
+            }
+
+            coVerify(exactly = 1) {
+                pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
+            }
+
+            verify {
+                sakLesDao wasNot Called
+                sakSkrivDao wasNot Called
+            }
+        }
+
+        @Test
+        fun `Bruker har flere gyldige identer i PDL`() {
+            val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
+
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT),
+                        PdlIdentifikator.FolkeregisterIdent(JOVIAL_LAMA),
+                    ),
+                )
+
+            assertThrows<InternfeilException> {
+                service.oppdaterIdentForSak(sak, simpleSaksbehandler())
+            }
+
+            coVerify(exactly = 1) {
+                pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
+            }
+
+            verify {
+                sakLesDao wasNot Called
+                sakSkrivDao wasNot Called
+            }
+        }
+
+        @Test
+        fun `Bruker har historisk ident`() {
+            val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
+
+            val persongalleri = Persongalleri("soeker", "innsender", listOf("soesken"), listOf("avdoed"))
+
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT, true),
+                        PdlIdentifikator.FolkeregisterIdent(JOVIAL_LAMA, false),
+                    ),
+                )
+            justRun { sakSkrivDao.oppdaterIdent(any(), any()) }
+            every { sakLesDao.hentSak(any()) } returns sak.copy(ident = JOVIAL_LAMA.value)
+            coEvery { grunnlagservice.hentPersongalleri(any<SakId>()) } returns persongalleri
+
+            val oppdatertSak = service.oppdaterIdentForSak(sak, simpleSaksbehandler())
+
+            oppdatertSak.id shouldBe sak.id
+            oppdatertSak.enhet shouldBe sak.enhet
+            oppdatertSak.sakType shouldBe sak.sakType
+
+            oppdatertSak.ident shouldNotBe sak.ident
+            oppdatertSak.ident shouldBe JOVIAL_LAMA.value
+
+            coVerify(exactly = 1) {
+                pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
+                grunnlagservice.leggInnNyttGrunnlagSak(sak, persongalleri.copy(soeker = oppdatertSak.ident), any())
+            }
+
+            verify(exactly = 1) {
+                sakSkrivDao.oppdaterIdent(sak.id, JOVIAL_LAMA)
+                sakLesDao.hentSak(sak.id)
+            }
+        }
+    }
+
     private fun dummySak(
         ident: String,
         sakType: SakType,
@@ -814,13 +926,13 @@ internal class SakServiceTest {
         enhet = enhet.enhetNr,
     )
 
-    private fun dummyPdlResponse(vararg identer: String) =
+    private fun dummyPdlResponse(ident: String) =
         PdlFolkeregisterIdentListe(
-            identer.mapIndexed { index, ident ->
-                PdlIdentifikator.FolkeregisterIdent(
-                    folkeregisterident = Folkeregisteridentifikator.of(ident),
-                    historisk = (identer.size > 1 && index == 1), // første i listen vil bli historisk hvis flere enn 1
-                )
-            },
+            identifikatorer =
+                listOf(
+                    PdlIdentifikator.FolkeregisterIdent(
+                        folkeregisterident = Folkeregisteridentifikator.of(ident),
+                    ),
+                ),
         )
 }

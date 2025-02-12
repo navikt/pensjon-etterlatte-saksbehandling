@@ -99,7 +99,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         behandlingId,
                     ),
                 )
-            coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
+            coEvery { vedtakService.hentVedtakForBehandling(any()) } returns null
             coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
                 listOf(lagOppgave(behandlingId, Status.ATTESTERING))
             coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
@@ -143,7 +143,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
             assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
             coVerify(atMost = 1) {
-                vedtakService.hentVedtakForBehandling(any(), any())
+                vedtakService.hentVedtakForBehandling(any())
             }
             coVerify(exactly = 1) {
                 vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -166,7 +166,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             testApplication {
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
-                coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
+                coEvery { vedtakService.hentVedtakForBehandling(any()) } returns null
                 coEvery { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } returns
                     opprettetVedtak
                 coEvery { vedtakService.fattVedtak(behandlingId, any(), any()) } returns
@@ -224,7 +224,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
                 assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
                 coVerify(exactly = 1) {
-                    vedtakService.hentVedtakForBehandling(behandlingId, any())
+                    vedtakService.hentVedtakForBehandling(behandlingId)
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                     behandlingKlient.hentOppgaverForSak(sakId1, any())
                     vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
@@ -242,7 +242,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             testApplication {
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
-                coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
+                coEvery { vedtakService.hentVedtakForBehandling(any()) } returns null
                 coEvery { runBlocking { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } } returns
                     opprettetVedtak
                 coEvery { runBlocking { vedtakService.fattVedtak(behandlingId, any(), any()) } } returns
@@ -279,7 +279,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
                 coVerify(atMost = 1) {
-                    vedtakService.hentVedtakForBehandling(any(), any())
+                    vedtakService.hentVedtakForBehandling(any())
                 }
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -361,6 +361,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         type = OppgaveType.FOERSTEGANGSBEHANDLING,
         saksbehandler = null,
         referanse = referanse.toString(),
+        gruppeId = null,
         merknad = null,
         sakType = SakType.BARNEPENSJON,
         fnr = null,

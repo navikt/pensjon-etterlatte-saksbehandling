@@ -1,6 +1,7 @@
 package no.nav.etterlatte.oppgave
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -9,6 +10,8 @@ import io.mockk.verify
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.JOVIAL_LAMA
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.azureAdAttestantClaim
@@ -20,15 +23,18 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -52,6 +58,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
@@ -60,7 +67,7 @@ internal class OppgaveServiceTest(
 ) {
     private val sakLesDao: SakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
     private val sakSkrivDao =
-        SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk(relaxed = true)
     private val hendelseDao = mockk<HendelseDao>()
@@ -223,7 +230,8 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
+        val saksbehandlerto =
+            mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
@@ -256,7 +264,8 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
+        val saksbehandlerto =
+            mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
@@ -287,7 +296,8 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
+        val saksbehandlerto =
+            mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
@@ -708,6 +718,36 @@ internal class OppgaveServiceTest(
     }
 
     @Test
+    fun `Underkjenne behandling skal ikke endre saksbehandler hvis forrige er EY`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveService.opprettOppgave(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val systembruker = systembruker(mapOf(Claims.azp_name to "EY"))
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, systembruker.ident)
+        oppgaveService.tilAttestering(
+            referanse,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val saksbehandler = simpleSaksbehandler()
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler.ident)
+        val underkjentOppgave = oppgaveService.tilUnderkjent(referanse, OppgaveType.FOERSTEGANGSBEHANDLING, null)
+
+        assertEquals(Status.UNDERKJENT, underkjentOppgave.status)
+        assertEquals(saksbehandler.ident, underkjentOppgave.saksbehandler?.ident)
+        assertEquals("EY", underkjentOppgave.forrigeSaksbehandlerIdent)
+    }
+
+    @Test
     fun `Kan ikke lukke oppgave hvis man ikke eier oppgaven under behandling`() {
         val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
@@ -1095,28 +1135,6 @@ internal class OppgaveServiceTest(
     }
 
     @Test
-    fun `skal lukke nye ikke ferdige eller feilregistrerte oppgaver hvis ny søknad kommer inn`() {
-        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val behandlingsref = UUID.randomUUID().toString()
-        val oppgaveSomSkalBliAvbrutt =
-            oppgaveService.opprettOppgave(
-                behandlingsref,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
-            )
-        oppgaveService.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
-
-        oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingsref, opprettetSak.id)
-
-        val alleOppgaver = oppgaveDao.hentOppgaverForReferanse(behandlingsref)
-        assertEquals(2, alleOppgaver.size)
-        val avbruttOppgave = oppgaveDao.hentOppgave(oppgaveSomSkalBliAvbrutt.id)!!
-        assertEquals(avbruttOppgave.status, Status.AVBRUTT)
-    }
-
-    @Test
     fun `Skal filtrere bort oppgaver med annen enhet`() {
         nyKontekstMedBrukerOgDatabaseContext(saksbehandler, DatabaseContextTest(dataSource))
 
@@ -1371,4 +1389,75 @@ internal class OppgaveServiceTest(
         oppdatertOppgave.status shouldBe Status.FERDIGSTILT
         forrigeStatus shouldBe Status.UNDER_BEHANDLING
     }
+
+    @Test
+    fun `Oppdater ident på oppgaver tilknyttet sak`() {
+        val opprinneligIdent = KONTANT_FOT
+
+        val sak =
+            sakSkrivDao.opprettSak(
+                fnr = opprinneligIdent.value,
+                type = SakType.OMSTILLINGSSTOENAD,
+                enhet = Enheter.defaultEnhet.enhetNr,
+            )
+        val sakId = sak.id
+
+        // 5 oppgaver skal få ny ident
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.NY)
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.UNDER_BEHANDLING)
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.UNDERKJENT)
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.PAA_VENT)
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.ATTESTERING)
+
+        // 3 avsluttede oppgaver skal beholde gammel ident for historikk
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.FEILREGISTRERT)
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.FERDIGSTILT)
+        opprettOppgave(sakId = sakId, type = OppgaveType.VURDER_KONSEKVENS, status = Status.AVBRUTT)
+
+        val nyIdent = JOVIAL_LAMA
+        sakSkrivDao.oppdaterIdent(sakId, nyIdent)
+
+        val oppdatertSak = sakLesDao.hentSak(sakId)!!
+        oppdatertSak.ident shouldBe nyIdent.value
+        opprinneligIdent shouldNotBe nyIdent
+
+        oppgaveService.oppdaterIdentForOppgaver(oppdatertSak)
+
+        val oppgaver = oppgaveService.hentOppgaverForSak(sakId)
+
+        oppgaver.size shouldBe 8
+
+        oppgaver.forEach {
+            if (it.erAvsluttet()) {
+                it.fnr shouldBe opprinneligIdent.value
+            } else {
+                it.fnr shouldBe nyIdent.value
+            }
+        }
+    }
+
+    private fun opprettOppgave(
+        referanse: String = UUID.randomUUID().toString(),
+        sakId: SakId = SakId(Random.nextLong()),
+        kilde: OppgaveKilde? = null,
+        type: OppgaveType,
+        merknad: String? = "en tilfeldig merknad",
+        frist: Tidspunkt? = null,
+        saksbehandler: String? = null,
+        status: Status? = null,
+    ): OppgaveIntern =
+        oppgaveService
+            .opprettOppgave(
+                referanse = referanse,
+                sakId = sakId,
+                kilde = kilde,
+                type = type,
+                merknad = merknad,
+                frist = frist,
+                saksbehandler = saksbehandler,
+            ).also {
+                if (status != null) {
+                    oppgaveService.oppdaterStatusOgMerknad(it.id, "ny merknad", status)
+                }
+            }
 }

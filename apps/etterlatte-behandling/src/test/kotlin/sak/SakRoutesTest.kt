@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -16,6 +17,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
@@ -25,16 +27,20 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -45,6 +51,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.UUID
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakRoutesTest {
@@ -52,7 +59,7 @@ internal class SakRoutesTest {
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxUnitFun = true)
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>(relaxUnitFun = true)
-    private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
+    private val tilgangService = mockk<TilgangServiceSjekker>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>(relaxUnitFun = true)
     private val requestLogger = mockk<BehandlingRequestLogger>()
     private val hendelseDao = mockk<HendelseDao>()
@@ -96,6 +103,7 @@ internal class SakRoutesTest {
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
                     referanse = "hmm",
+                    gruppeId = null,
                     merknad = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.BARNEPENSJON,
@@ -111,6 +119,7 @@ internal class SakRoutesTest {
                     type = OppgaveType.KLAGE,
                     saksbehandler = null,
                     referanse = "hmm",
+                    gruppeId = null,
                     merknad = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.BARNEPENSJON,
@@ -126,6 +135,7 @@ internal class SakRoutesTest {
                     type = OppgaveType.KLAGE,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
                     referanse = "hmm",
+                    gruppeId = null,
                     merknad = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.BARNEPENSJON,
@@ -133,16 +143,20 @@ internal class SakRoutesTest {
                     frist = null,
                 ),
             )
+
+        val sakMedEnhet = SakMedEnhet(SakId(1), Enheter.PORSGRUNN.enhetNr)
+        val kommentar = "Lorem ipsum"
+
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/endre_enhet") {
+                client.post("/api/sak/${sakMedEnhet.id.sakId}/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
+                    setBody(EnhetRequest(enhet = sakMedEnhet.enhet, kommentar = kommentar))
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
-            verify(exactly = 1) { sakService.oppdaterEnhetForSaker(any()) }
+            verify(exactly = 1) { sakService.oppdaterEnhetForSak(sakMedEnhet, kommentar) }
         }
     }
 
@@ -157,10 +171,10 @@ internal class SakRoutesTest {
 
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/endre_enhet") {
+                client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enhetsnummer("4805")))
+                    setBody(EnhetRequest(enhet = Enhetsnummer("4805"), kommentar = "Lorem ipsum"))
                 }
             assertEquals(400, response.status.value)
             verify(exactly = 0) { sakService.finnSak(any()) }
@@ -178,10 +192,10 @@ internal class SakRoutesTest {
         every { sakService.finnSak(any()) } returns null
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/endre_enhet") {
+                client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr, kommentar = "Lorem ipsum"))
                 }
             assertEquals(400, response.status.value)
         }
@@ -214,8 +228,94 @@ internal class SakRoutesTest {
         }
     }
 
+    @Test
+    fun `Oppdater ident på sak`() {
+        val nyIdent = KONTANT_FOT
+        val sakId = SakId(Random.nextLong())
+        val hendelseId = UUID.randomUUID()
+        val sak =
+            Sak(
+                "ident",
+                SakType.OMSTILLINGSSTOENAD,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
+
+        every { sakService.finnSak(any()) } returns sak
+        every { sakService.oppdaterIdentForSak(any(), any()) } returns sak.copy(ident = nyIdent.value)
+        val behandlingOgSak = BehandlingOgSak(UUID.randomUUID(), sakId)
+        every { behandlingService.hentAapneBehandlingerForSak(sakId) } returns listOf(behandlingOgSak)
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/$sakId/oppdater-ident") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(OppdaterIdentRequest(hendelseId))
+                }
+            assertEquals(200, response.status.value)
+        }
+
+        verify(exactly = 1) {
+            sakService.finnSak(sakId)
+            sakService.oppdaterIdentForSak(sak, any())
+            behandlingService.hentAapneBehandlingerForSak(sakId)
+            behandlingService.avbrytBehandling(
+                behandlingOgSak.behandlingId,
+                any(),
+                AarsakTilAvbrytelse.ENDRET_FOLKEREGISTERIDENT,
+                any(),
+            )
+            grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelseId, any(), any())
+        }
+    }
+
+    @Test
+    fun `Oppdater ident på sak - uten hendelse`() {
+        val nyIdent = KONTANT_FOT
+        val sakId = SakId(Random.nextLong())
+        val sak =
+            Sak(
+                "ident",
+                SakType.OMSTILLINGSSTOENAD,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
+
+        every { sakService.finnSak(any()) } returns sak
+        every { sakService.oppdaterIdentForSak(any(), any()) } returns sak.copy(ident = nyIdent.value)
+        val behandlingOgSak = BehandlingOgSak(UUID.randomUUID(), sakId)
+        every { behandlingService.hentAapneBehandlingerForSak(sakId) } returns listOf(behandlingOgSak)
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/$sakId/oppdater-ident") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(OppdaterIdentRequest(null, utenHendelse = true))
+                }
+            assertEquals(200, response.status.value)
+        }
+
+        verify(exactly = 1) {
+            sakService.finnSak(sakId)
+            sakService.oppdaterIdentForSak(sak, any())
+            behandlingService.hentAapneBehandlingerForSak(sakId)
+            behandlingService.avbrytBehandling(
+                behandlingOgSak.behandlingId,
+                any(),
+                AarsakTilAvbrytelse.ENDRET_FOLKEREGISTERIDENT,
+                any(),
+            )
+        }
+        verify {
+            grunnlagsendringshendelseService wasNot Called
+        }
+    }
+
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
+        val user =
+            mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
         every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
 

@@ -22,11 +22,6 @@ export const vurderVilkaar = async (args: {
 }): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.post(`/vilkaarsvurdering/${args.behandlingId}`, { ...args.request })
 
-export const slettVurdering = async (args: {
-  behandlingId: string
-  type: string
-}): Promise<ApiResponse<IVilkaarsvurdering>> => apiClient.delete(`/vilkaarsvurdering/${args.behandlingId}/${args.type}`)
-
 export const slettTotalVurdering = async (behandlingId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.delete(`/vilkaarsvurdering/resultat/${behandlingId}`)
 
@@ -51,6 +46,19 @@ export const hentMigrertYrkesskadeFordel = async (
 export const hentVilkaartyper = async (behandlingId: string): Promise<ApiResponse<Vilkaartyper>> =>
   apiClient.get(`/vilkaarsvurdering/${behandlingId}/typer`)
 
+export const hentKandidatForKopieringAvVilkaar = async (behandlingId: string): Promise<ApiResponse<string | null>> => {
+  return apiClient.get(`/vilkaarsvurdering/${behandlingId}/behandling-med-vilkaarsvurdering-for-avdoede`)
+}
+
+export const kopierVilkaarFraAnnenBehandling = async (args: {
+  behandlingId: string
+  kildeBehandlingId: string
+}): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.post<IVilkaarsvurdering>(
+    `/vilkaarsvurdering/${args.behandlingId}/kopier-vilkaar/${args.kildeBehandlingId}`,
+    {}
+  )
+
 export interface StatusOppdatert {
   statusOppdatert: boolean
 }
@@ -65,6 +73,7 @@ export interface IVilkaarsvurdering {
 
 export interface Vilkaar {
   id: string
+  kopiertFraVilkaarId: string | null
   hovedvilkaar: Delvilkaar
   unntaksvilkaar: Delvilkaar[]
   vurdering?: VurdertResultat | null

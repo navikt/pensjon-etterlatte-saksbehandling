@@ -48,7 +48,7 @@ export const EessiPensjonLenke = ({ sakId, behandlingId, sakType }: Props) => {
 
   return mapSuccess(persongalleriStatus, (persongalleri) => (
     <Link href={opprettUrl(persongalleri.opplysning)} target="_blank">
-      <EarthIcon />
+      <EarthIcon aria-label="Se saken hos eessi pensjon" />
     </Link>
   ))
 }

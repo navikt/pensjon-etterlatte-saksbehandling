@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -111,7 +112,7 @@ fun Route.dokumentRoute(
 
 private inline val PipelineContext<*, ApplicationCall>.journalpostId: String
     get() =
-        requireNotNull(call.parameters["journalpostId"]) {
+        krevIkkeNull(call.parameters["journalpostId"]) {
             "JournalpostID mangler i requesten"
         }
 

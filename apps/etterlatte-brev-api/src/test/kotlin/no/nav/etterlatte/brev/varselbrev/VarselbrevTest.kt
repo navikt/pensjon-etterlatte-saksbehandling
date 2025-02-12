@@ -19,11 +19,11 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.systembruker
@@ -64,22 +64,23 @@ class VarselbrevTest(
     fun start() {
         val adresseService =
             mockk<AdresseService>().also {
-                coEvery { it.hentMottakerAdresse(any(), any()) } returns
-                    Mottaker(
-                        id = UUID.fromString("d762e98d-514d-4bb5-a6b5-a3fbf4d65887"),
-                        navn = "Navn Navnesen",
-                        foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
-                        orgnummer = null,
-                        adresse =
-                            Adresse(
-                                adresseType = AdresseType.VEGADRESSE.name,
-                                adresselinje1 = "Adresse1",
-                                landkode = "NO",
-                                land = "Norge",
-                            ),
+                coEvery { it.hentMottakere(any(), any(), any()) } returns
+                    listOf(
+                        Mottaker(
+                            id = UUID.fromString("d762e98d-514d-4bb5-a6b5-a3fbf4d65887"),
+                            navn = "Navn Navnesen",
+                            foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                            orgnummer = null,
+                            adresse =
+                                Adresse(
+                                    adresseType = AdresseType.VEGADRESSE.name,
+                                    adresselinje1 = "Adresse1",
+                                    landkode = "NO",
+                                    land = "Norge",
+                                ),
+                        ),
                     )
 
-                tomMottaker(SOEKER_FOEDSELSNUMMER)
                 coEvery { it.hentAvsender(any(), any()) } returns
                     Avsender(
                         kontor = "",
@@ -108,6 +109,7 @@ class VarselbrevTest(
                         every { it.revurderingsaarsak } returns null
                         every { it.systemkilde } returns Vedtaksloesning.GJENNY
                         every { it.behandlingId } returns null
+                        every { it.prosesstype } returns null
                     }
             }
         val brevbaker =
@@ -132,6 +134,7 @@ class VarselbrevTest(
                         any(),
                         any(),
                         any(),
+                        any(),
                     )
                 } returns listOf()
             }
@@ -140,6 +143,7 @@ class VarselbrevTest(
                 coEvery { it.hentSak(sak.id, any()) } returns sak
                 coEvery { it.hentBehandling(any(), any()) } returns
                     mockk<DetaljertBehandling> {
+                        every { id } returns UUID.randomUUID()
                         every { utlandstilknytning } returns
                             Utlandstilknytning(
                                 UtlandstilknytningType.NASJONAL,
@@ -148,6 +152,11 @@ class VarselbrevTest(
                             )
                         every { revurderingsaarsak } returns Revurderingaarsak.AKTIVITETSPLIKT
                     }
+            }
+
+        val grunnlagKlient =
+            mockk<GrunnlagKlient>().also {
+                coEvery { it.hentGrunnlag(any(), any()) } returns mockk()
             }
 
         val innholdTilRedigerbartBrevHenter =
@@ -160,7 +169,7 @@ class VarselbrevTest(
                 innholdTilRedigerbartBrevHenter,
             )
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk())
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk(), grunnlagKlient)
     }
 
     @Test

@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevMedTittelData
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
@@ -11,11 +12,11 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
-import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarsel
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.YearMonth
 import java.util.UUID
@@ -23,6 +24,7 @@ import java.util.UUID
 class BrevDataMapperFerdigstillVarsel(
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,
+    private val behandlingService: BehandlingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
@@ -50,7 +52,7 @@ class BrevDataMapperFerdigstillVarsel(
 
     private suspend fun hentBrevDataFerdigstillingBarnepensjon(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            val behandlingId = requireNotNull(request.behandlingId)
+            val behandlingId = krevIkkeNull(request.behandlingId) { "BehandlingId mangler" }
             val beregning =
                 if (hentUtfall(request) == VilkaarsvurderingUtfall.IKKE_OPPFYLT) {
                     null
@@ -75,6 +77,8 @@ class BrevDataMapperFerdigstillVarsel(
         coroutineScope {
             val grunnbeloep = async { beregningService.hentGrunnbeloep(request.bruker) }
             val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, request.bruker) }
+            val landKodeverk = async { behandlingService.hentLand(request.bruker) }
+
             val utbetalingsinfo =
                 async {
                     beregningService.finnUtbetalingsinfo(
@@ -90,9 +94,9 @@ class BrevDataMapperFerdigstillVarsel(
                 avdoede = request.avdoede,
                 utbetalingsinfo = utbetalingsinfo.await(),
                 grunnbeloep = grunnbeloep.await(),
-                beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo.await()),
-                trygdetid = requireNotNull(trygdetid.await()),
+                trygdetid = krevIkkeNull(trygdetid.await()) { "Fant ingen trygdetid for behandling $behandlingId" },
                 erForeldreloes = request.erForeldreloes,
+                landKodeverk = landKodeverk.await(),
             )
         }
 }

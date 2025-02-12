@@ -23,11 +23,9 @@ import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -90,7 +88,7 @@ internal class BehandlingInfoRoutesTest {
         val dto = brevutfallOgEtterbetalingDto(behandlingId)
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { behandlingInfoDao.lagreBrevutfall(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.lagreBrevutfall(any()) } returns brevutfallDto(behandlingId)
         every { behandlingInfoDao.lagreEtterbetaling(any()) } returns etterbetaling(behandlingId)
         every { behandlingsstatusService.settBeregnet(any(), any(), any()) } returns Unit
 
@@ -115,9 +113,6 @@ internal class BehandlingInfoRoutesTest {
 
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoTom shouldBe dto.etterbetaling?.datoTom
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.kilde shouldNotBe null
         }
     }
@@ -128,7 +123,7 @@ internal class BehandlingInfoRoutesTest {
         val dto = brevutfallOgEtterbetalingDto(behandlingId)
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { behandlingInfoDao.hentBrevutfall(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.hentBrevutfall(any()) } returns brevutfallDto(behandlingId)
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
 
         testApplication {
@@ -173,9 +168,6 @@ internal class BehandlingInfoRoutesTest {
 
             etterbetaling.datoFom shouldBe dto.etterbetaling?.datoFom
             etterbetaling.datoTom shouldBe dto.etterbetaling?.datoTom
-            etterbetaling.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
-            etterbetaling.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
-            etterbetaling.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
         }
     }
 
@@ -197,8 +189,8 @@ internal class BehandlingInfoRoutesTest {
                 )
         }
 
-    private fun brevutfall(behandlingId: UUID) =
-        Brevutfall(
+    private fun brevutfallDto(behandlingId: UUID) =
+        BrevutfallDto(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
@@ -211,10 +203,7 @@ internal class BehandlingInfoRoutesTest {
             behandlingId = behandlingId,
             fom = YearMonth.of(2023, 1),
             tom = YearMonth.of(2023, 2),
-            inneholderKrav = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
-            frivilligSkattetrekk = true,
-            etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
         )
 
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
@@ -234,9 +223,6 @@ internal class BehandlingInfoRoutesTest {
                     behandlingId = behandlingId,
                     datoFom = LocalDate.of(2023, 1, 1),
                     datoTom = LocalDate.of(2023, 2, 28),
-                    inneholderKrav = true,
-                    frivilligSkattetrekk = true,
-                    etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
                     kilde = null,
                 ),
         )

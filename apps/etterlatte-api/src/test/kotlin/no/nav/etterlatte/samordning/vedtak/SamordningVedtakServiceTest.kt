@@ -40,7 +40,7 @@ const val FNR = "10518209200"
 const val TPNR_SPK = "3010"
 
 class SamordningVedtakServiceTest {
-    private val vedtakKlient = mockk<VedtaksvurderingKlient>()
+    private val vedtakKlient = mockk<VedtaksvurderingSamordningKlient>()
     private val tpKlient = mockk<TjenestepensjonKlient>()
     private val samordningVedtakService = SamordningVedtakService(vedtakKlient, tpKlient)
 

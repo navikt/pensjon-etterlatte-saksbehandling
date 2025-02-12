@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgave
 
+import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -46,6 +47,70 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
 
     @AfterAll
     fun shutdown() = afterAll()
+
+    @Test
+    fun `Kan hente oppgaver fra referanse`() {
+        testApplication {
+            val client =
+                runServerWithModule(mockOAuth2Server) {
+                    module(applicationContext)
+                }
+            val fnr = AVDOED_FOEDSELSNUMMER.value
+
+            val sak: Sak =
+                client
+                    .post("/personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                    }.apply {
+                        assertEquals(HttpStatusCode.OK, status)
+                    }.body()
+
+            val referanse = UUID.randomUUID().toString()
+
+            // ingen oppgave finnes, klarer å deserialisere, støtter systembruker
+            client
+                .get("oppgaver/referanse/$referanse") {
+                    addAuthToken(this@OppgaveRoutesTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    val ingenOppgave: List<OppgaveIntern> = it.body()
+                    ingenOppgave.size shouldBe 0
+                }
+
+            val oppgave =
+                client
+                    .post("oppgaver/sak/${sak.id}/opprett") {
+                        val dto =
+                            NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", referanse)
+
+                        addAuthToken(this@OppgaveRoutesTest.systemBruker)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(dto)
+                    }.let {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                        val lestOppgave: OppgaveIntern = it.body()
+                        assertEquals(fnr, lestOppgave.fnr)
+                        assertEquals(referanse, lestOppgave.referanse)
+                        assertEquals(OppgaveType.JOURNALFOERING, lestOppgave.type)
+                        lestOppgave
+                    }
+
+            // Støtter deserialisering av liste og godtar saksbehandler(obs prefikset api)
+            client
+                .get("api/oppgaver/referanse/${oppgave.referanse}") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    val oppgaveMedReferanse: List<OppgaveIntern> = it.body()
+                    oppgaveMedReferanse.size shouldBe 1
+                    oppgaveMedReferanse.first().referanse shouldBe oppgave.referanse
+                }
+        }
+    }
 
     @Test
     fun verdikjedetest() {

@@ -22,9 +22,8 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -38,6 +37,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
@@ -93,14 +93,14 @@ class AarligInntektsjusteringJobbServiceTest {
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {
-            beregningKlient.aarligInntektsjusteringSjekk(
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 any(),
                 any(),
                 any(),
                 any(),
             )
         } returns
-            AarligInntektsjusteringAvkortingSjekkResponse(
+            InntektsjusteringAvkortingInfoResponse(
                 SakId(123L),
                 aar = 2025,
                 harInntektForAar = false,
@@ -151,11 +151,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
             )
         } returns
             mockk {
@@ -185,7 +180,7 @@ class AarligInntektsjusteringJobbServiceTest {
 
         val exception =
             assertThrows<UgyldigForespoerselException> {
-                service.opprettManuellInntektsjustering(sakId, oppgaveId, mockk())
+                service.opprettRevurderingForAarligInntektsjustering(sakId, oppgaveId, mockk())
             }
         exception.code shouldBe "KAN_IKKE_OPPRETTE_REVURDERING_PGA_AAPNE_BEHANDLINGER"
     }
@@ -200,7 +195,7 @@ class AarligInntektsjusteringJobbServiceTest {
 
         coEvery { oppgaveService.ferdigstillOppgave(oppgaveId, any()) } returns mockk()
         coEvery { oppgaveService.hentOppgave(oppgaveId) } returns oppgave
-        val revurdering = service.opprettManuellInntektsjustering(sakId, oppgaveId, mockk())
+        val revurdering = service.opprettRevurderingForAarligInntektsjustering(sakId, oppgaveId, mockk())
         verify {
             revurderingService.opprettRevurdering(
                 sakId = sakId,
@@ -211,16 +206,11 @@ class AarligInntektsjusteringJobbServiceTest {
                 kilde = any(),
                 revurderingAarsak = any(),
                 virkningstidspunkt = any(),
-                utlandstilknytning = any(),
-                boddEllerArbeidetUtlandet = any(),
                 begrunnelse = any(),
-                fritekstAarsak = any(),
                 saksbehandlerIdent = any(),
                 relatertBehandlingId = any(),
                 frist = any(),
                 paaGrunnAvOppgave = any(),
-                opphoerFraOgMed = any(),
-                tidligereFamiliepleier = any(),
             )
 
             oppgaveService.ferdigstillOppgave(oppgaveId, any())
@@ -239,7 +229,7 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         verify {
@@ -280,7 +270,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         verify {
@@ -307,14 +297,14 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         coEvery {
-            beregningKlient.aarligInntektsjusteringSjekk(
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 any(),
                 any(),
                 any(),
                 any(),
             )
         } returns
-            AarligInntektsjusteringAvkortingSjekkResponse(
+            InntektsjusteringAvkortingInfoResponse(
                 SakId(123L),
                 aar = 2025,
                 harInntektForAar = true,
@@ -324,7 +314,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         verify {
@@ -360,7 +350,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         // TODO verifer opprettelse rev
@@ -394,7 +384,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         // TODO verifer opprettelse rev
@@ -422,14 +412,14 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         coEvery {
-            beregningKlient.aarligInntektsjusteringSjekk(
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 any(),
                 any(),
                 any(),
                 any(),
             )
         } returns
-            AarligInntektsjusteringAvkortingSjekkResponse(
+            InntektsjusteringAvkortingInfoResponse(
                 SakId(123L),
                 aar = 2025,
                 harInntektForAar = false,
@@ -439,7 +429,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         verify {
@@ -471,7 +461,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         verify {
@@ -508,7 +498,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         verify {
@@ -539,7 +529,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         verify {
@@ -579,7 +569,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         // TODO verifer opprettelse rev
@@ -643,7 +633,7 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
         }
 
         // TODO verifer opprettelse rev
@@ -659,11 +649,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 },
             )
         }
-    }
-
-    @Test
-    fun `et eller annet feilhaandtering`() {
-        // TODO
     }
 
     companion object {

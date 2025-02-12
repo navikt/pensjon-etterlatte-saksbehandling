@@ -114,6 +114,8 @@ data class Utland(
 data class InnflyttingTilNorge(
     val fraflyttingsland: String?,
     val dato: LocalDate?,
+    val gyldighetsdato: LocalDate?,
+    val ajourholdsdato: LocalDate?,
 )
 
 data class UtflyttingFraNorge(
@@ -230,14 +232,6 @@ data class ForelderVerge(
     override fun navn(): String = navn
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class BrevMottaker(
-    val navn: String?,
-    val foedselsnummer: MottakerFoedselsnummer?,
-    val adresse: MottakerAdresse?,
-    val adresseTypeIKilde: String? = null,
-)
-
 /**
  * Denne pakker inn fødselsnummer i {value: "<fnr>"}, fordi det skal matche responsen fra brev-api...
  */
@@ -253,18 +247,6 @@ data class MottakerFoedselsnummer(
     override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class MottakerAdresse(
-    val adresseType: String,
-    val adresselinje1: String? = null,
-    val adresselinje2: String? = null,
-    val adresselinje3: String? = null,
-    val postnummer: String? = null,
-    val poststed: String? = null,
-    val landkode: String,
-    val land: String,
-)
-
 enum class AdressebeskyttelseGradering {
     STRENGT_FORTROLIG_UTLAND,
     STRENGT_FORTROLIG,
@@ -272,7 +254,7 @@ enum class AdressebeskyttelseGradering {
     UGRADERT,
     ;
 
-    fun erGradert(): Boolean = this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG
+    fun harAdressebeskyttelse(): Boolean = this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG
 }
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT

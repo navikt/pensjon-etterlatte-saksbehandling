@@ -69,8 +69,7 @@ export const EndreSak = ({
                 <Button
                   variant="tertiary-neutral"
                   size="small"
-                  icon={<XMarkIcon />}
-                  title="Fjern kobling til saken"
+                  icon={<XMarkIcon title="Fjern kobling til saken" />}
                   style={{ float: 'right' }}
                   onClick={() => kobleTilSak(undefined)}
                 />
@@ -88,7 +87,7 @@ export const EndreSak = ({
                 <Button
                   variant="secondary-neutral"
                   size="small"
-                  icon={<TabsAddIcon />}
+                  icon={<TabsAddIcon aria-hidden />}
                   iconPosition="right"
                   title="Koble til saken"
                   onClick={konverterOgKobleTilSak}

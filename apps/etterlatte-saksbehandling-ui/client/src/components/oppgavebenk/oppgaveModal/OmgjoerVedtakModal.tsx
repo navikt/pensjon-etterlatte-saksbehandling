@@ -57,6 +57,7 @@ enum OmgjoerHandling {
 
 export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
   const [open, setOpen] = useState(false)
+  const [disabledOpprett, setDisabledOpprett] = useState(false)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettOmgjoeringKlage)
   const [opprettOmgjoeringFoerstegangsbehandlingStatus, opprettOmgjoeringFoerstegangsbehandlingApi] = useApiCall(
     opprettOmgjoeringFoerstegangsbehandling
@@ -69,6 +70,7 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
     if (oppgave.referanse) {
       fetchKlage(oppgave.referanse)
     }
+    setDisabledOpprett(false)
   }, [oppgave.referanse])
 
   const klage = mapSuccess(klageResult, (hentetKlage) => hentetKlage)
@@ -96,7 +98,7 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
         },
       })
     } else {
-      // TODO: exception?
+      setDisabledOpprett(true)
     }
   }
 
@@ -135,9 +137,12 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
                     Vedtaket om {formaterVedtakType(vedtak.vedtakType!!)} attestert{' '}
                     {formaterKanskjeStringDato(vedtak.datoAttestert)} skal omgjøres.
                   </BodyShort>
-                  {!finnOmgjoeringsHandlingForKlage(klage) && (
-                    <Alert variant="warning">Det er ikke støttet å omgjøre vedtak som ikke er behandlinger enda.</Alert>
-                  )}
+                  {!finnOmgjoeringsHandlingForKlage(klage) ||
+                    (disabledOpprett && (
+                      <Alert variant="warning">
+                        Det er ikke støttet å omgjøre vedtak som ikke er behandlinger enda.
+                      </Alert>
+                    ))}
                 </>
               )
             }
@@ -186,7 +191,8 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
             disabled={
               isSuccess(opprettRevurderingStatus) ||
               isSuccess(opprettOmgjoeringFoerstegangsbehandlingStatus) ||
-              isPendingOrInitial(klageResult)
+              isPendingOrInitial(klageResult) ||
+              disabledOpprett
             }
           >
             Opprett revurdering

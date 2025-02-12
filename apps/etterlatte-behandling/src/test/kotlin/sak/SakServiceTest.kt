@@ -79,6 +79,7 @@ internal class SakServiceTest {
     private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val sakSkrivDao = mockk<SakSkrivDao>()
     private val sakLesDao = mockk<SakLesDao>()
+    private val sakendringerDao = mockk<SakendringerDao>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -87,6 +88,7 @@ internal class SakServiceTest {
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagservice,

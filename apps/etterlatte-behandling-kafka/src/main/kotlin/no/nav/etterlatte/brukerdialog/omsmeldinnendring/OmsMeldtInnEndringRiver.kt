@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsMeldtInnEndring
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -21,8 +22,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class OmsMeldtInnEndringRiver(
@@ -47,7 +46,7 @@ internal class OmsMeldtInnEndringRiver(
         try {
             val sak =
                 runBlocking {
-                    behandlingKlient.finnEllerOpprettSak(endringer.fnr, SakType.OMSTILLINGSSTOENAD)
+                    behandlingKlient.finnEllerOpprettSak(endringer.fnr.value, SakType.OMSTILLINGSSTOENAD)
                 }
 
             val journalpostResponse =
@@ -122,19 +121,4 @@ enum class OmsMeldtInnEndringHendelsetype(
     ;
 
     override fun lagEventnameForType(): String = this.eventname
-}
-
-//  TODO i lib
-data class OmsMeldtInnEndring(
-    val id: UUID = UUID.randomUUID(),
-    val fnr: String,
-    val endring: OmsEndring,
-    val beskrivelse: String,
-    val tidspunkt: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS),
-)
-
-enum class OmsEndring {
-    INNTEKT,
-    AKTIVITET_OG_INNTEKT,
-    ANNET,
 }

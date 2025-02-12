@@ -6,6 +6,10 @@ export enum LogEvents {
 }
 
 export enum ClickEvent {
+  // Sak
+  VIS_SAKSHISTORIKK = 'vis sakshistorikk',
+  MANUELT_ENDRET_ENHET = 'manuelt endret enhet',
+
   //Aktivitetsplikt
   SJEKKER_SISTE_BEREGNING = 'sjekker siste beregning',
 

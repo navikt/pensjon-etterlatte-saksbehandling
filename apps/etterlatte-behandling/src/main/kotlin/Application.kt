@@ -228,6 +228,17 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
     tempGrunnlagRoutes(applicationContext.tempGrunnlagKlient)
+
+/*
+    TODO 👇
+
+    route("/grunnlag") {
+        behandlingGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
+        personRoute(applicationContext.tempGrunnlagServiceProxy, applicationContext.tilgangService)
+        sakGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
+        aldersovergangRoutes(applicationContext.tempAldersovergangServiceProxy)
+    }
+*/
 }
 
 private fun Route.settOppTilganger(

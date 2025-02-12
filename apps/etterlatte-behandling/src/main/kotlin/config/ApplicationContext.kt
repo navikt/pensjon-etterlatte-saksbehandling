@@ -100,6 +100,8 @@ import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.TempGrunnlagKlient
+import no.nav.etterlatte.grunnlag.TempGrunnlagServiceProxy
+import no.nav.etterlatte.grunnlag.aldersovergang.TempAldersovergangServiceProxy
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -265,7 +267,15 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
+    // TODO: Fjerne denne etter tabeller er opprettet i behandling
     val tempGrunnlagKlient: TempGrunnlagKlient = TempGrunnlagKlient(config, httpClient()),
+    // TODO: Ta disse i bruk
+    val tempGrunnlagServiceProxy: TempGrunnlagServiceProxy = TempGrunnlagServiceProxy(config, httpClient()),
+    val tempAldersovergangServiceProxy: TempAldersovergangServiceProxy =
+        TempAldersovergangServiceProxy(
+            config,
+            httpClient(),
+        ),
     val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
@@ -477,6 +487,7 @@ internal class ApplicationContext(
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagsService,

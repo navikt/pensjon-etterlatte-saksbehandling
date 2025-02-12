@@ -14,6 +14,7 @@ import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.OpprettJournalpostR
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
+import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsMeldtInnEndring
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId

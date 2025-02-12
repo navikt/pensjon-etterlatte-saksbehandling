@@ -301,6 +301,16 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        get("/referanse/{referanse}") {
+            kunSystembruker {
+                call.respond(
+                    inTransaction {
+                        service.hentOppgaverForReferanse(referanse)
+                    },
+                )
+            }
+        }
+
         put("ventefrist-gaar-ut") {
             val request = call.receive<VentefristGaarUtRequest>()
             val oppgaver =

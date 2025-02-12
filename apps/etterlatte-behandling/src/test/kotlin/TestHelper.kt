@@ -257,6 +257,7 @@ fun foerstegangsbehandling(
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
+    relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
 ) = Foerstegangsbehandling(
     id = id,
@@ -279,6 +280,7 @@ fun foerstegangsbehandling(
     kilde = kilde,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
+    relatertBehandlingId = relatertBehandlingId,
 )
 
 fun revurdering(

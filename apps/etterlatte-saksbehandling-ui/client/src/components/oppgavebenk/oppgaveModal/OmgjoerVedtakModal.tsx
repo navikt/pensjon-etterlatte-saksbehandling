@@ -72,11 +72,13 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
     if (oppgave.referanse) {
       fetchKlage(oppgave.referanse)
     }
+  }, [oppgave.referanse])
 
+  useEffect(() => {
     if (klage) {
       setDisabledOpprett(finnOmgjoeringsHandlingForKlage(klage) == OmgjoerHandling.IKKE_STOETTET)
     }
-  }, [oppgave.referanse])
+  }, [klage])
 
   function opprett() {
     if (!klage) {

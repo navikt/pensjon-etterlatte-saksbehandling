@@ -83,6 +83,10 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
+import no.nav.etterlatte.brev.BrevKlient
+import no.nav.etterlatte.brev.BrevKlientImpl
+import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
@@ -277,6 +281,7 @@ internal class ApplicationContext(
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val brevKlient: BrevKlient = BrevKlientImpl(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
         TilbakekrevingKlientImpl(
@@ -581,6 +586,16 @@ internal class ApplicationContext(
 
     val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
 
+    val tilbakekrevingBrevService =
+        TilbakekrevingBrevService(
+            sakService,
+            brevKlient,
+            vedtakKlient,
+            grunnlagKlientImpl,
+        )
+    val brevService =
+        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
+
     val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
@@ -590,6 +605,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
             brevApiKlient = brevApiKlient,
+            brevService = brevService,
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekrevingHendelserService,
         )

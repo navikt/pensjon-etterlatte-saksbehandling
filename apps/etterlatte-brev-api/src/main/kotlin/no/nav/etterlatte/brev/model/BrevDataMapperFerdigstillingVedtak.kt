@@ -34,12 +34,12 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjusteringVedta
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
-import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTO
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -192,14 +192,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                     )
 
-                TILBAKEKREVING ->
-                    TilbakekrevingBrevDTO.fra(
-                        innholdMedVedlegg.innhold(),
-                        tilbakekreving,
-                        sakType,
-                        utlandstilknytningType,
-                        soekerNavn,
-                    )
+                TILBAKEKREVING -> throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
 
                 AVVIST_KLAGE ->
                     AvvistKlageFerdigData.fra(

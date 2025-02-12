@@ -65,6 +65,7 @@ import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevServiceNy
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.EnvEnum
@@ -186,7 +187,14 @@ internal class ApplicationContext {
         BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService)
 
     val varselbrevService =
-        VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel, grunnlagKlient)
+        VarselbrevService(
+            db,
+            brevoppretter,
+            behandlingService,
+            pdfGenerator,
+            brevDataMapperFerdigstillVarsel,
+            grunnlagKlient,
+        )
 
     val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
@@ -225,6 +233,13 @@ internal class ApplicationContext {
     val notatService = NotatService(notatRepository, pdfGeneratorKlient, dokarkivService, grunnlagService)
 
     val tilgangssjekker = Tilgangssjekker(config, httpClient())
+
+    val tilbakekrevingBrevService =
+        VedtaksbrevServiceNy(
+            brevbakerService,
+            adresseService,
+            db,
+        )
 
     private fun httpClient(
         scope: EnvEnum? = null,

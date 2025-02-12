@@ -46,7 +46,8 @@ data class TilbakekrevingBrevDTO(
                 doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
                 varsel = tilbakekreving.vurdering?.forhaandsvarsel ?: throw TilbakeKrevingManglerVarsel(),
                 datoVarselEllerVedtak =
-                    tilbakekreving.vurdering?.forhaandsvarselDato ?: throw TilbakeKrevingManglerForhaandsvarselDatoException(),
+                    tilbakekreving.vurdering?.forhaandsvarselDato
+                        ?: throw TilbakeKrevingManglerForhaandsvarselDatoException(),
                 datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
                 tilbakekreving =
                     TilbakekrevingData(
@@ -80,8 +81,10 @@ data class TilbakekrevingBrevDTO(
                     maaned = periode.maaned.atDay(1),
                     beloeper =
                         periode.let { beloeper ->
-                            val beregnetFeilutbetaling = beloepMedKunYtelse.sumOf { beloep -> beloep.beregnetFeilutbetaling ?: 0 }
-                            val bruttoTilbakekreving = beloepMedKunYtelse.sumOf { beloep -> beloep.bruttoTilbakekreving ?: 0 }
+                            val beregnetFeilutbetaling =
+                                beloepMedKunYtelse.sumOf { beloep -> beloep.beregnetFeilutbetaling ?: 0 }
+                            val bruttoTilbakekreving =
+                                beloepMedKunYtelse.sumOf { beloep -> beloep.bruttoTilbakekreving ?: 0 }
                             val skatt = beloepMedKunYtelse.sumOf { beloep -> beloep.skatt ?: 0 }
                             val netto = beloepMedKunYtelse.sumOf { beloep -> beloep.nettoTilbakekreving ?: 0 }
                             val renteTillegg = beloepMedKunYtelse.sumOf { beloep -> beloep.rentetillegg ?: 0 }
@@ -97,8 +100,9 @@ data class TilbakekrevingBrevDTO(
                         },
                     resultat =
                         beloepMedKunYtelse
-                            .map { it.resultat ?: throw TilbakekrevingManglerResultatException("Alle perioder må ha resultat") }
-                            .let {
+                            .map {
+                                it.resultat ?: throw TilbakekrevingManglerResultatException("Alle perioder må ha resultat")
+                            }.let {
                                 TilbakekrevingResultat.hoyesteGradAvTilbakekreving(it)
                             } ?: throw TilbakekrevingManglerResultatException("Fant ingen resultat"),
                 )

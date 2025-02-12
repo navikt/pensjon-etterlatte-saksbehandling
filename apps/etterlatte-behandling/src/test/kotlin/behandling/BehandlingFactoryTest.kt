@@ -46,6 +46,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
@@ -718,6 +719,83 @@ internal class BehandlingFactoryTest {
     }
 
     @Test
+    fun `skal lage ny førstegangsbehandling, oppgave og sende statisitkkmelding hvis omgjøring etter klage`() {
+        val omgjoeringsOppgaveId = UUID.randomUUID()
+
+        val sak = sak()
+        val saksbehandler = simpleSaksbehandler()
+        val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+        val revurdering =
+            revurdering(
+                sak = sak,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                status = BehandlingStatus.AVBRUTT,
+            )
+
+        val oppgaveInternMock =
+            OppgaveIntern(
+                id = omgjoeringsOppgaveId,
+                status = Status.PAA_VENT,
+                enhet = Enheter.defaultEnhet.enhetNr,
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                saksbehandler = OppgaveSaksbehandler(saksbehandler.ident),
+                forrigeSaksbehandlerIdent = null,
+                referanse = "",
+                gruppeId = null,
+                merknad = null,
+                opprettet = Tidspunkt.now(),
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                fnr = null,
+                frist = null,
+            )
+
+        every { sakServiceMock.finnSak(sak.id) } returns sak
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                avslaattFoerstegangsbehandling,
+                revurdering,
+            )
+        every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
+        every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
+
+        val opprettBehandlingSlot = slot<OpprettBehandling>()
+        every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
+        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } just runs
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns oppgaveInternMock
+        every { oppgaveService.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveInternMock)
+        every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any()) } just runs
+        every { oppgaveService.ferdigstillOppgave(any(), any()) } returns oppgaveInternMock
+
+        val opprettetBehandling =
+            behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false, omgjoeringsOppgaveId))
+        opprettetBehandling.sak.id shouldBe sak.id
+        opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+        opprettBehandlingSlot.captured.sakId shouldBe sak.id
+        opprettBehandlingSlot.captured.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+
+        verify {
+            sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.hentBehandlingerForSak(sak.id)
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring på grunn av klage")
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
+            behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
+            oppgaveService.ferdigstillOppgave(omgjoeringsOppgaveId, saksbehandler)
+        }
+        coVerify {
+            grunnlagService.hentPersongalleri(sak.id)
+            grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class))
+        }
+    }
+
+    @Test
     fun `skal lage ny førstegangsbehandling, oppgave og sende statisitkkmelding hvis omgjøring er lov`() {
         val sak = sak()
         val saksbehandler = simpleSaksbehandler()
@@ -780,7 +858,7 @@ internal class BehandlingFactoryTest {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring av førstegangsbehandling")
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
             behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
@@ -856,7 +934,7 @@ internal class BehandlingFactoryTest {
         } returns Unit
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } returns Unit
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring av førstegangsbehandling")
         } returns mockOppgave
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())

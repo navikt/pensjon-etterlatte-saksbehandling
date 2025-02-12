@@ -40,6 +40,7 @@ class AdresseService(
         with(personerISak) {
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
 
+            // TODO: hvis BP og barn under 18 år så bør vi sjekke gjenlevende
             val soekerAdresse =
                 if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() > 18) {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.HOVED)
@@ -47,6 +48,13 @@ class AdresseService(
                     null
                 } else {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.KOPI)
+                }
+            // Søker er gjenlevende hvis OMS
+            val gjenlevendeAdresse =
+                if (sakType == SakType.BARNEPENSJON && gjenlevende.isNotEmpty()) {
+                    hentMottakerAdresse(sakType, gjenlevende.first(), MottakerType.KOPI)
+                } else {
+                    null
                 }
 
             val vergeMottakerType =
@@ -79,7 +87,7 @@ class AdresseService(
                         }
                 }
 
-            listOfNotNull(soekerAdresse, vergeAdresse)
+            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)
         }
 
     suspend fun hentAvsender(

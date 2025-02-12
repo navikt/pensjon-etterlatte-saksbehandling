@@ -8,6 +8,7 @@ data class PersonerISak(
     val soeker: Soeker,
     val avdoede: List<Avdoed>,
     val verge: Verge?,
+    val gjenlevende: List<String> = emptyList(),
 ) {
     fun soekerOgEventuellVerge(): SoekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge)
 }

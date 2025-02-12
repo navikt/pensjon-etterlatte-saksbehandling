@@ -135,7 +135,7 @@ class DoedshendelseKontrollpunktService(
                 sikkerLogg.error("Det finnes flere saker på bruker med ident=$beroertFnr: ${saker.joinToString()} ")
 
                 val sakMedBehandlinger = behandlingService.hentSakMedBehandlinger(saker)
-                sikkerLogg.error("Bruker sak ${sakMedBehandlinger.sak.id} for dødshendelsen")
+                logger.info("Bruker sak ${sakMedBehandlinger.sak.id} for dødshendelsen")
 
                 with(sakMedBehandlinger.sak) {
                     Sak(

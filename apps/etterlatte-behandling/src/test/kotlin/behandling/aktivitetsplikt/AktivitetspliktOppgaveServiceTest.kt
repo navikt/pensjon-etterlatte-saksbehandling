@@ -20,6 +20,8 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -491,6 +493,12 @@ class AktivitetspliktOppgaveServiceTest {
                 every { id } returns brevId
             }
         every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, brevId) } just Runs
+        every { behandlingService.hentUtlandstilknytningForSak(sakIdForOppgave) } returns
+            Utlandstilknytning(
+                type = UtlandstilknytningType.NASJONAL,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                begrunnelse = "Beskrivelse",
+            )
 
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }

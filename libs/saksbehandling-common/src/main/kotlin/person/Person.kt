@@ -214,8 +214,8 @@ data class GeografiskTilknytning(
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = Vergemaal::class, name = "Vergemaal"),
-    JsonSubTypes.Type(value = Vergemaal::class, name = "UkjentVergemaal"),
-    JsonSubTypes.Type(value = Vergemaal::class, name = "ForelderVerge"),
+    JsonSubTypes.Type(value = UkjentVergemaal::class, name = "UkjentVergemaal"),
+    JsonSubTypes.Type(value = ForelderVerge::class, name = "ForelderVerge"),
 )
 interface Verge {
     fun navn(): String?

@@ -109,6 +109,12 @@ fun Route.brevRoute(
                 }
             }
 
+            post("tilbakestill") {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    service.tilbakestillMottakere(brevId, brukerTokenInfo)
+                }
+            }
+
             put("{mottakerId}/hoved") {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val mottakerId =

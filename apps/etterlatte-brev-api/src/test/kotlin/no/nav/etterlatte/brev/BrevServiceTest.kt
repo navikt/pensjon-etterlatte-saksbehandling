@@ -69,6 +69,8 @@ internal class BrevServiceTest {
             mockk(),
             mockk(),
             mockk(),
+            mockk(),
+            mockk(),
         )
     private val bruker = simpleSaksbehandler("Z123456")
 

@@ -116,7 +116,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     val sakId =
         try {
             call.parameters[SAKID_CALL_PARAMETER]?.tilSakId()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw UgyldigForespoerselException("SAKID_IKKE_TALL", "Kunne ikke lese ut sakId-parameter")
         }
     if (sakId == null) {

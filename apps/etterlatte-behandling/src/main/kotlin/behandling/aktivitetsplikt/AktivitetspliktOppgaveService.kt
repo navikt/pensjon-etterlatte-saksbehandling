@@ -86,23 +86,50 @@ class AktivitetspliktOppgaveService(
             throw HarVarigUnntak("Har varig unntak i sak. sakid=$sakId")
         }
 
+        if (request.type == VurderingType.SEKS_MAANEDER) {
+            val ferdigstilt12mndOppgave =
+                oppgaveService
+                    .hentOppgaverForSakAvType(
+                        sakId,
+                        listOf(OppgaveType.AKTIVITETSPLIKT_12MND),
+                    ).filter { it.status != no.nav.etterlatte.libs.common.oppgave.Status.AVBRUTT }
+            if (ferdigstilt12mndOppgave.isNotEmpty()) {
+                throw Har12MndVurderingFerdigstilt(
+                    "Kan ikke opprette 6 mnd vurdering, finnes en ferdigstilt eller under arbeids oppgave for 12 mnd vurdering",
+                )
+            }
+        }
+        if (request.type == VurderingType.TOLV_MAANEDER) {
+            val oppfoelging6mnd =
+                oppgaveService.hentOppgaverForSakAvType(
+                    sakId,
+                    listOf(OppgaveType.AKTIVITETSPLIKT),
+                )
+            if (oppfoelging6mnd.any { it.erUnderBehandling() }) {
+                throw KanIkkeopprette12mndOppaveOm6MndErUnderbehandling("Kan ikke opprette 12 mnd mens en 6 mnd er under behandling. ")
+            }
+            val ferdigstilt6mndOppgave = oppfoelging6mnd.filter { it.erFerdigstilt() }
+            if (ferdigstilt6mndOppgave.isEmpty()) {
+                throw MaaHa6mndVurderingForAaOpprette12mnd("Kan ikke opprette 12 mnd vurdering, uten en ferdigstilt 6 mnd vurdering")
+            }
+        }
+
         val oppgaveType =
             when (request.type) {
                 VurderingType.SEKS_MAANEDER -> OppgaveType.AKTIVITETSPLIKT
                 VurderingType.TOLV_MAANEDER -> OppgaveType.AKTIVITETSPLIKT_12MND
             }
-        val oppgaverForSak = oppgaveService.hentOppgaverForSakAvType(sakId, listOf(oppgaveType))
 
+        val oppgaverForSak = oppgaveService.hentOppgaverForSakAvType(sakId, listOf(oppgaveType))
         val harOppfoelgingsOppgaveUnderbehandling =
             oppgaverForSak.filter {
                 it.erUnderBehandling() ||
                     it.status == no.nav.etterlatte.libs.common.oppgave.Status.AVBRUTT
             }
-        // TODO: må sjekke om avbrutt gir mening, kan ikke huske at vi satt noen til det i flyten :O
 
         if (harOppfoelgingsOppgaveUnderbehandling.isNotEmpty()) {
             throw HarOppfoelgingsOppgaveUnderbehandling(
-                "Det finnes allerede en oppgave som ikke er ferdigbehandlet for denne saken. Sakid=$sakId",
+                "Det finnes allerede en tilsvarende oppgave som ikke er ferdigbehandlet for denne saken. Sakid=$sakId",
             )
         }
 
@@ -437,6 +464,27 @@ class HarVarigUnntak(
     msg: String,
 ) : UgyldigForespoerselException(
         code = "HAR_VARIG_UNNTAK",
+        detail = msg,
+    )
+
+class MaaHa6mndVurderingForAaOpprette12mnd(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "12_MND_VURDERING_KREVER_6_MND_VURDERING_FOR_AA_OPPRETTE",
+        detail = msg,
+    )
+
+class KanIkkeopprette12mndOppaveOm6MndErUnderbehandling(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "12_MND_VURDERING_KREVER_6_MND_FERDIGBEHANDLET",
+        detail = msg,
+    )
+
+class Har12MndVurderingFerdigstilt(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "HAR_12MND_VURDERING_KAN_IKKE_OPPRETTE_6_MND",
         detail = msg,
     )
 

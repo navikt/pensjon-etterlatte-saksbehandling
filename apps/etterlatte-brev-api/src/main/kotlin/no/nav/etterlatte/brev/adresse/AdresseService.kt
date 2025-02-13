@@ -54,9 +54,7 @@ class AdresseService(
                     hentMottakerAdresse(
                         sakType,
                         gjenlevende.first(),
-                        if (soekerFoedselsdato == null ||
-                            soekerFoedselsdato.hentAlder() > 18
-                        ) {
+                        if (soekerAdresse?.type == MottakerType.HOVED) {
                             MottakerType.KOPI
                         } else {
                             MottakerType.HOVED

@@ -48,7 +48,7 @@ class AdresseService(
                 } else {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.KOPI)
                 }
-            // Søker er gjenlevende hvis OMS
+            // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
             val gjenlevendeAdresse =
                 if (sakType == SakType.BARNEPENSJON && gjenlevende.isNotEmpty()) {
                     hentMottakerAdresse(

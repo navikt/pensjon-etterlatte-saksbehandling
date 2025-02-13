@@ -315,6 +315,9 @@ class BrevService(
         if (nyeMottakere.isEmpty()) {
             throw KanIkkeTilbakestilleUtenNyeMottakere()
         }
+        if (nyeMottakere.size > 2) {
+            throw MaksAntallMottakere()
+        }
         if (!nyeMottakere.any { it.type == MottakerType.HOVED }) {
             throw KanIkkeSletteHovedmottaker()
         }

@@ -259,6 +259,11 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
+        get("oppgaver-sak") {
+            logger.info("Henter oppfølgingsoppgaver for $sakId")
+            val oppfoelgingsoppgaver = aktivitetspliktOppgaveService.hentOppfoelgingsoppgaver(sakId)
+            call.respond(oppfoelgingsoppgaver)
+        }
 
         route("oppgave-oppfoelging") {
             post {
@@ -271,11 +276,6 @@ internal fun Route.aktivitetspliktRoutes(
                         }
                     call.respond(opprettet)
                 }
-            }
-            get {
-                logger.info("Henter oppfølgingsoppgaver for $sakId")
-                val oppfoelgingsoppgaver = aktivitetspliktOppgaveService.hentOppfoelgingsoppgaver(sakId)
-                call.respond(oppfoelgingsoppgaver)
             }
         }
         route("varigUnntak") {

@@ -49,7 +49,8 @@ enum class AktivitetspliktOppgaveToggles(
     override fun key(): String = key
 }
 
-data class OppfoelgingsOppgavFerdigstilt(
+data class OppfoelgingsOppgave(
+    val kanOpprette: Boolean,
     val erFerdigstilt: Boolean,
     val oppgaveType: OppgaveType,
 )
@@ -64,14 +65,14 @@ class AktivitetspliktOppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun hentOppfoelgingsoppgaver(sakId: SakId): List<OppfoelgingsOppgavFerdigstilt> {
+    fun hentOppfoelgingsoppgaver(sakId: SakId): List<OppfoelgingsOppgave> {
         val oppgaverForSak =
             oppgaveService.hentOppgaverForSakAvType(
                 sakId,
                 listOf(OppgaveType.AKTIVITETSPLIKT, OppgaveType.AKTIVITETSPLIKT_12MND),
             )
 
-        return oppgaverForSak.map { OppfoelgingsOppgavFerdigstilt(it.erFerdigstilt(), it.type) }
+        return oppgaverForSak.map { OppfoelgingsOppgave(!it.erUnderBehandling(), it.erFerdigstilt(), it.type) }
     }
 
     fun opprettOppfoelgingsoppgave(request: OpprettOppfoelgingsoppgave): UUID {

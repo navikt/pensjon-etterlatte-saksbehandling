@@ -261,7 +261,7 @@ internal fun Route.aktivitetspliktRoutes(
         }
         get("oppgaver-sak") {
             logger.info("Henter oppfølgingsoppgaver for $sakId")
-            val oppfoelgingsoppgaver = aktivitetspliktOppgaveService.hentOppfoelgingsoppgaver(sakId)
+            val oppfoelgingsoppgaver = inTransaction { aktivitetspliktOppgaveService.hentOppfoelgingsoppgaver(sakId) }
             call.respond(oppfoelgingsoppgaver)
         }
 

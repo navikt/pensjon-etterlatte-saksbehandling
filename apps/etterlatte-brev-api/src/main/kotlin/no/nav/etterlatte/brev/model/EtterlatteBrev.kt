@@ -154,8 +154,8 @@ fun TrygdetidDto.fromDto(
         when (beregningsMetodeAnvendt) {
             BeregningsMetode.NASJONAL -> trygdetidGrunnlag.filter { it.bosted == "NOR" }
             BeregningsMetode.PRORATA -> {
-                // Kun ta med de som er avtaleland
-                trygdetidGrunnlag.filter { it.prorata }
+                // Kun ta med de som er avtaleland (Norge er alltid avtaleland)
+                trygdetidGrunnlag.filter { it.prorata || it.bosted == "NOR" }
             }
 
             else -> throw IllegalArgumentException("$beregningsMetodeAnvendt er ikke en gyldig beregningsmetode")

@@ -2,20 +2,26 @@ package no.nav.etterlatte.behandling.jobs
 
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.Timer
 import java.util.UUID
+import javax.sql.DataSource
 
 /**
  * Det ble opprettet aktivitetspliktrevurderinger for 12-månederskravet for feil måneder i starten av februar.
@@ -28,9 +34,18 @@ class AvbryterFeilopprettedeRevurderingJob(
     private val behandlingService: BehandlingService,
     private val avbrytRevurderingerDao: AvbrytRevurderingerDao,
     private val isLeader: () -> Boolean,
+    dataSource: DataSource,
+    val sakTilgangDao: SakTilgangDao,
 ) : TimerJob {
     private val jobbNavn = this::class.java.simpleName
     private val logger = LoggerFactory.getLogger(AvbryterFeilopprettedeRevurderingJob::class.java)
+    private var jobContext: Context =
+        Context(
+            Self(AvbrytRevurderinger::class.java.simpleName),
+            DatabaseContext(dataSource),
+            sakTilgangDao,
+            HardkodaSystembruker.aktivitetsplikt,
+        )
 
     override fun schedule(): Timer =
         fixedRateCancellableTimer(
@@ -39,7 +54,7 @@ class AvbryterFeilopprettedeRevurderingJob(
             period = Duration.of(3, ChronoUnit.HOURS).toMillis(),
             loggerInfo = LoggerInfo(logger = logger, sikkerLogg = null, loggTilSikkerLogg = false),
         ) {
-            AvbrytRevurderinger(behandlingService, avbrytRevurderingerDao, isLeader).run()
+            AvbrytRevurderinger(behandlingService, avbrytRevurderingerDao, isLeader).run(jobContext)
         }
 }
 
@@ -50,8 +65,9 @@ class AvbrytRevurderinger(
 ) {
     private val logger = LoggerFactory.getLogger(AvbrytRevurderinger::class.java)
 
-    fun run() {
+    fun run(context: Context) {
         if (isLeader()) {
+            Kontekst.set(context)
             logger.info("pod er leader, kjører jobb for å avbryte revurderinger")
             newSingleThreadContext("AvbrytRevurderingerJob").use { ctx ->
                 Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })

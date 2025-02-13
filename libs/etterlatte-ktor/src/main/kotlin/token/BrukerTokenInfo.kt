@@ -74,6 +74,7 @@ data class HardkodaSystembruker private constructor(
          */
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
+        val aktivitetsplikt = HardkodaSystembruker(Systembrukere.AKTIVITETSPLIKT)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
         val oppgave = HardkodaSystembruker(Systembrukere.OPPGAVE)
         val opprettGrunnlag = HardkodaSystembruker(Systembrukere.OPPRETT_GRUNNLAG) // skal bort på sikt
@@ -90,6 +91,7 @@ data class HardkodaSystembruker private constructor(
         OPPRETT_GRUNNLAG("opprettgrunnlag"),
         RIVER("river"),
         DOEDSHENDELSE("doedshendelse"),
+        AKTIVITETSPLIKT("aktivitetsplikt"),
         TESTDATA("testdata"),
         OPPGAVE("oppgave"),
         BEREGNING("beregning"),

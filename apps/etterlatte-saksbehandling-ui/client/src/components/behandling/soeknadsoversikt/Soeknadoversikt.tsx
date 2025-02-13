@@ -26,8 +26,7 @@ import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/vide
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import SluttBehandlingOmgjoering from '~components/behandling/soeknadsoversikt/SluttbehandlingOmgjoering'
 
-export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandling } = props
+export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -37,7 +36,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const personopplysninger = usePersonopplysninger()
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
-  const erForeldreloes = (personopplysninger?.avdoede || []).length >= 2
+  const erForeldreloes = !!personopplysninger?.avdoede?.length && personopplysninger?.avdoede.length >= 2
 
   return (
     <>

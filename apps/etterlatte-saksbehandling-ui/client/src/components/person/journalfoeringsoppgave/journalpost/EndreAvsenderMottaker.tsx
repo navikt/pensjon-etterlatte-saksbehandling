@@ -25,7 +25,7 @@ export const EndreAvsenderMottaker = ({
   const [rediger, setRediger] = useState(false)
 
   const lagreEndring = (avsenderMottaker: AvsenderMottaker) => {
-    oppdaterAvsenderMottaker(avsenderMottaker)
+    oppdaterAvsenderMottaker({ ...avsenderMottaker, idType: BrukerIdType.FNR })
     setRediger(false)
   }
 

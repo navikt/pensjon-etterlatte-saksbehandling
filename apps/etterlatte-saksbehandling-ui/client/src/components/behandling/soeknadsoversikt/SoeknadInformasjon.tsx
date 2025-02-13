@@ -17,12 +17,14 @@ export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehan
     }
 
     // Innsender er verge
-    if (
-      personopplysninger?.innsender?.opplysning.foedselsnummer ===
-      personopplysninger?.soeker?.opplysning.vergemaalEllerFremtidsfullmakt?.[0].vergeEllerFullmektig
-        .motpartsPersonident
-    ) {
-      return '(verge)'
+    if (!!personopplysninger?.soeker?.opplysning.vergemaalEllerFremtidsfullmakt?.length) {
+      if (
+        personopplysninger?.innsender?.opplysning.foedselsnummer ===
+        personopplysninger?.soeker?.opplysning.vergemaalEllerFremtidsfullmakt?.[0].vergeEllerFullmektig
+          .motpartsPersonident
+      ) {
+        return '(verge)'
+      }
     }
 
     return ''

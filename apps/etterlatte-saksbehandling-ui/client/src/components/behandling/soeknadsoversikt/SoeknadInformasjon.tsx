@@ -6,9 +6,25 @@ import { formaterDatoMedFallback } from '~utils/formatering/dato'
 export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const personopplysninger = usePersonopplysninger()
 
-  //TODO ta høyde for verge? :))))))
-  const erInnsenderGjenlevende =
-    personopplysninger?.innsender?.opplysning.foedselsnummer === personopplysninger?.soeker?.opplysning.foedselsnummer
+  const visOmInnsenderErGjenlevendeEllerVerge = (): string => {
+    // Innsender er gjenlevende
+    if (
+      personopplysninger?.innsender?.opplysning.foedselsnummer === personopplysninger?.soeker?.opplysning.foedselsnummer
+    ) {
+      return '(gjenlevende)'
+    }
+
+    // Innsender er verge
+    if (
+      personopplysninger?.innsender?.opplysning.foedselsnummer ===
+      personopplysninger?.soeker?.opplysning.vergemaalEllerFremtidsfullmakt?.[0].vergeEllerFullmektig
+        .motpartsPersonident
+    ) {
+      return '(verge)'
+    }
+
+    return ''
+  }
 
   return (
     <Table size="small">
@@ -26,7 +42,7 @@ export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehan
           <Table.DataCell>
             {!!personopplysninger?.innsender ? (
               <VStack>
-                <BodyShort>{`${personopplysninger.innsender.opplysning.fornavn} ${personopplysninger.innsender.opplysning.etternavn} ${erInnsenderGjenlevende && '(gjenlevende)'}`}</BodyShort>
+                <BodyShort>{`${personopplysninger.innsender.opplysning.fornavn} ${personopplysninger.innsender.opplysning.etternavn} ${visOmInnsenderErGjenlevendeEllerVerge()}`}</BodyShort>
                 <Detail>{`${personopplysninger.innsender.kilde.type.toUpperCase()} ${formaterDatoMedFallback(personopplysninger.innsender.kilde.tidspunkt)}`}</Detail>
               </VStack>
             ) : (

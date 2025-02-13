@@ -69,6 +69,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -90,6 +91,7 @@ import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
+import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
@@ -719,6 +721,38 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     ): AdressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT
 
     override suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId? = PdlIdentifikator.AktoerId("0123456789")
+
+    override suspend fun hentPerson(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): Person {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentOpplysningsperson(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): PersonDTO {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentHistoriskForeldreansvar(
+        fnr: Folkeregisteridentifikator,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): HistorikkForeldreansvar {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentPersongalleri(
+        foedselsnummer: String,
+        sakType: SakType,
+        innsender: String?,
+    ): Persongalleri? {
+        TODO("Not yet implemented")
+    }
 
     override val serviceName: String
         get() = "Pdl tjenester"

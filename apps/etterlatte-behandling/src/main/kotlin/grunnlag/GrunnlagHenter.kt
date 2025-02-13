@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class GrunnlagHenter(
-    private val pdltjenesterKlient: PdlTjenesterKlientImpl,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

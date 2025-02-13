@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -19,9 +20,12 @@ import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
+import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
@@ -32,6 +36,8 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
+import no.nav.etterlatte.pdl.HistorikkForeldreansvar
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -61,6 +67,31 @@ interface PdlTjenesterKlient : Pingable {
     suspend fun hentAdressebeskyttelseForPerson(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering
 
     suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId?
+
+    suspend fun hentPerson(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): Person
+
+    // Duplikat hentPdlModellForSaktype?
+    suspend fun hentOpplysningsperson(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): PersonDTO
+
+    suspend fun hentHistoriskForeldreansvar(
+        fnr: Folkeregisteridentifikator,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): HistorikkForeldreansvar
+
+    suspend fun hentPersongalleri(
+        foedselsnummer: String,
+        sakType: SakType,
+        innsender: String?,
+    ): Persongalleri?
 }
 
 class PdlTjenesterKlientImpl(
@@ -198,6 +229,83 @@ class PdlTjenesterKlientImpl(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }.body<PdlIdentifikator.AktoerId?>()
+    }
+
+    override suspend fun hentPerson(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): Person {
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(sakType))
+
+        return client
+            .post("$url/person") {
+                contentType(ContentType.Application.Json)
+                setBody(personRequest)
+            }.body<Person>()
+    }
+
+    override suspend fun hentPersongalleri(
+        foedselsnummer: String,
+        sakType: SakType,
+        innsender: String?,
+    ): Persongalleri? =
+        try {
+            val persongalleriRequest =
+                HentPersongalleriRequest(
+                    mottakerAvYtelsen = Folkeregisteridentifikator.of(foedselsnummer),
+                    saktype = sakType,
+                    innsender =
+                        innsender
+                            ?.takeIf { Folkeregisteridentifikator.isValid(it) }
+                            ?.let { Folkeregisteridentifikator.of(it) },
+                )
+
+            client
+                .post("$url/galleri") {
+                    contentType(ContentType.Application.Json)
+                    setBody(persongalleriRequest)
+                }.body<Persongalleri>()
+        } catch (e: Exception) {
+            logger.warn(
+                "Kunne ikke hente persongalleriet fra PDL, på grunn av feil. " +
+                    "Metadata om request er i sikkerlogg",
+                e,
+            )
+            sikkerLogg.warn(
+                "Kunne ikke hente persongalleriet fra PDL for soeker=$foedselsnummer i saktype " +
+                    "$sakType, på grunn av feil.",
+                e,
+            )
+            null
+        }
+
+    override suspend fun hentOpplysningsperson(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): PersonDTO {
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(sakType))
+
+        return client
+            .post("$url/person/v2") {
+                contentType(ContentType.Application.Json)
+                setBody(personRequest)
+            }.body<PersonDTO>()
+    }
+
+    override suspend fun hentHistoriskForeldreansvar(
+        fnr: Folkeregisteridentifikator,
+        rolle: PersonRolle,
+        sakType: SakType,
+    ): HistorikkForeldreansvar {
+        val personRequest = HentPersonHistorikkForeldreAnsvarRequest(fnr, rolle, sakType)
+
+        return client
+            .post("$url/foreldreansvar") {
+                contentType(ContentType.Application.Json)
+                setBody(personRequest)
+            }.body<HistorikkForeldreansvar>()
     }
 }
 

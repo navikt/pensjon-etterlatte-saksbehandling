@@ -2,7 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -115,7 +115,7 @@ interface GrunnlagService {
 }
 
 class GrunnlagServiceImpl(
-    private val pdltjenesterKlient: PdlTjenesterKlientImpl,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
     private val opplysningDao: IOpplysningDao,
     private val grunnlagHenter: GrunnlagHenter,
 ) : GrunnlagService {

@@ -2,11 +2,10 @@ package no.nav.etterlatte.grunnlag
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
-import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -16,7 +15,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Test
 
-class GrunnlagHenterTest {
+internal class GrunnlagHenterTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlientImpl>()
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)
 
@@ -32,13 +31,13 @@ class GrunnlagHenterTest {
                 grunnlagTestData.gjenlevende,
             ) + grunnlagTestData.avdoede
         listOf.forEach { person ->
-            every { pdltjenesterKlient.hentOpplysningsperson(person.foedselsnummer.value, any(), sakType) } returns
+            coEvery { pdltjenesterKlient.hentOpplysningsperson(person.foedselsnummer.value, any(), sakType) } returns
                 mockPerson().copy(foedselsnummer = OpplysningDTO(person.foedselsnummer, null))
-            every { pdltjenesterKlient.hentPerson(person.foedselsnummer.value, any(), sakType) } returns
+            coEvery { pdltjenesterKlient.hentPerson(person.foedselsnummer.value, any(), sakType) } returns
                 person
         }
         val soekerFnr = grunnlagTestData.soeker.foedselsnummer
-        every { pdltjenesterKlient.hentOpplysningsperson(soekerFnr.value, any(), sakType) } returns
+        coEvery { pdltjenesterKlient.hentOpplysningsperson(soekerFnr.value, any(), sakType) } returns
             mockPerson().copy(
                 foedselsnummer = OpplysningDTO(soekerFnr, null),
             )

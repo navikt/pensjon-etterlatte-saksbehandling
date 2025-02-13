@@ -27,6 +27,7 @@ query(
         }
         avsenderMottaker {
             id
+            type
             navn
             erLikBruker
         }

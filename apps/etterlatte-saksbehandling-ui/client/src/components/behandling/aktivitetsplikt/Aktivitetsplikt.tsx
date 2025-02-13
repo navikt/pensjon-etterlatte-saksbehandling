@@ -125,7 +125,8 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           <Box maxWidth="42.5rem">
             <Alert variant="info">
               Det har gått mer enn 4 måneder siden dødsfallet, det har derfor ikke blitt opprettet oppgave om
-              aktivtetsplikt ved 6 måneder. Vurder om du må manuelt sende informasjonsbrev og følg opp svar fra bruker.
+              aktivitetsplikt ved 6 måneder. Vurder aktiviteten til bruker før du sender informasjonsbrev om aktivitet,
+              setter oppgaven på vent eller avslutter oppgaven.
             </Alert>
           </Box>
         )}

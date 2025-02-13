@@ -727,6 +727,8 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             avbrytRevurderingerDao = AvbrytRevurderingerDao(connectionAutoclosing = autoClosingDatabase),
             isLeader = { leaderElectionKlient.isLeader() },
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

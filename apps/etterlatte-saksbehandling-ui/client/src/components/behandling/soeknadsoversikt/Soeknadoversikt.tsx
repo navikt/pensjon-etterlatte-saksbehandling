@@ -15,15 +15,8 @@ import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversi
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
 import {
-  BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
-  BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
-  BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
-  BP_FOERSTEGANGSBEHANDLING_HJEMLER,
-  BP_FORELDRELOES_PAA_GAMMELT_REGELVERK_BEHANDLES_I_PESYS_BESKRIVELSE,
-  OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
-  OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
-  OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
-  OMS_FOERSTEGANGSBEHANDLING_HJEMLER,
+  beskrivelseVirkningstidspunkt,
+  hjemlerVirkningstidspunkt,
 } from '~components/behandling/virkningstidspunkt/utils'
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -33,8 +26,7 @@ import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/vide
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import SluttBehandlingOmgjoering from '~components/behandling/soeknadsoversikt/SluttbehandlingOmgjoering'
 
-export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandling } = props
+export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -44,38 +36,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const personopplysninger = usePersonopplysninger()
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
-  const erForeldreloes = (personopplysninger?.avdoede || []).length >= 2
-
-  const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
-    switch (sakType) {
-      case SakType.BARNEPENSJON:
-        return erBosattUtland ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : BP_FOERSTEGANGSBEHANDLING_HJEMLER
-      case SakType.OMSTILLINGSSTOENAD:
-        return erBosattUtland ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : OMS_FOERSTEGANGSBEHANDLING_HJEMLER
-    }
-  }
-
-  const beskrivelseVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean, erForeldreloes: boolean) => {
-    switch (sakType) {
-      case SakType.BARNEPENSJON:
-        return bpBeskrivelseVirkningstidspunkt(erBosattUtland, erForeldreloes)
-      case SakType.OMSTILLINGSSTOENAD:
-        return omsBeskrivelseVirkningstidspunkt(erBosattUtland)
-    }
-  }
-
-  function bpBeskrivelseVirkningstidspunkt(erBosattUtland: boolean, erForeldreloes: boolean) {
-    const standard = erBosattUtland
-      ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
-      : BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-    return erForeldreloes ? standard + BP_FORELDRELOES_PAA_GAMMELT_REGELVERK_BEHANDLES_I_PESYS_BESKRIVELSE : standard
-  }
-
-  function omsBeskrivelseVirkningstidspunkt(erBosattUtland: boolean) {
-    return erBosattUtland
-      ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
-      : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-  }
+  const erForeldreloes = !!personopplysninger?.avdoede?.length && personopplysninger?.avdoede.length >= 2
 
   return (
     <>
@@ -131,7 +92,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               hjemler={hjemlerVirkningstidspunkt(behandling.sakType, erBosattUtland)}
               beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland, erForeldreloes)}
             >
-              {{ info: <GrunnlagForVirkningstidspunkt /> }}
+              <GrunnlagForVirkningstidspunkt />
             </Virkningstidspunkt>
             <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />

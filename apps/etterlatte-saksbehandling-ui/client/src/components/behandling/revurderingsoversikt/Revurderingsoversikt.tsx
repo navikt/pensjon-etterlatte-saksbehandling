@@ -2,7 +2,7 @@ import { BodyShort, Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
-import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
+import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
@@ -18,6 +18,7 @@ import {
   FELLES_REVURDERING_HJEMLER,
   FELLES_SLUTTBEHANDLING_BESKRIVELSE,
   FELLES_SLUTTBEHANDLING_HJEMLER,
+  Hjemmel,
   OMS_ALDERSOVERGANG_BESKRIVELSE,
   OMS_ALDERSOVERGANG_HJEMLER,
   OMS_INNTEKTSENDRING_BESKRIVELSE,
@@ -164,7 +165,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           hjemler={hjemler}
           beskrivelse={beskrivelse}
         >
-          {{ info: <GrunnlagForVirkningstidspunkt /> }}
+          <GrunnlagForVirkningstidspunkt />
         </Virkningstidspunkt>
         {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
           <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />

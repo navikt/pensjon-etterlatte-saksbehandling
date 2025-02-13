@@ -94,13 +94,14 @@ export const AktivitetspliktSakoversikt = ({
           ),
           success: (oppgaver) => (
             <>
-              {kanOppretteOppgaveAvType(oppgaver, Oppgavetype.AKTIVITETSPLIKT) && (
-                <>
-                  <Button>Opprett 6 månderers oppfølgingsoppgave</Button>
-                </>
-              )}
+              {!oppfoelging12mndErFerdigstilt(oppgaver) &&
+                kanOppretteOppgaveAvType(oppgaver, Oppgavetype.AKTIVITETSPLIKT) && (
+                  <>
+                    <Button>Opprett 6 månderers oppfølgingsoppgave</Button>
+                  </>
+                )}
               {kanOppretteOppgaveAvType(oppgaver, Oppgavetype.AKTIVITETSPLIKT_12MND) &&
-                har6MndVurdering(oppgaver, Oppgavetype.AKTIVITETSPLIKT_12MND) && (
+                har6MndVurdering(oppgaver, Oppgavetype.AKTIVITETSPLIKT) && (
                   <>
                     <Button>Opprett 12 månderers oppfølgingsoppgave</Button>
                   </>
@@ -108,10 +109,13 @@ export const AktivitetspliktSakoversikt = ({
             </>
           ),
         })}
-        <Button>Opprett 6 månderers oppfølgingsoppgave</Button>
       </Box>
     </Box>
   )
+}
+
+function oppfoelging12mndErFerdigstilt(oppgaver: AktivitetspliktOppfoelgingsOppgave[]): boolean {
+  return oppgaver.filter((o) => o.oppgaveType == Oppgavetype.AKTIVITETSPLIKT_12MND).some((o) => o.erFerdigstilt)
 }
 
 function har6MndVurdering(

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brukerdialog.soeknad.client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -40,7 +41,6 @@ class FeiletVedOpprettBehandling(
 )
 class BehandlingClient(
     private val sakOgBehandlingApp: HttpClient,
-    private val behandlingAppForventSukess: HttpClient,
     private val url: String,
 ) {
     fun opprettBehandling(
@@ -52,6 +52,7 @@ class BehandlingClient(
             val response =
                 sakOgBehandlingApp
                     .post("$url/behandlinger/opprettbehandling") {
+                        expectSuccess = false
                         contentType(ContentType.Application.Json)
                         setBody(BehandlingsBehov(sakId, persongalleri, mottattDato.toString()))
                     }
@@ -63,7 +64,7 @@ class BehandlingClient(
 
     fun behandleInntektsjustering(request: MottattInntektsjustering) {
         runBlocking {
-            behandlingAppForventSukess
+            sakOgBehandlingApp
                 .post("$url/inntektsjustering/behandle") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
@@ -76,7 +77,7 @@ class BehandlingClient(
         saktype: SakType,
     ): Sak =
         runBlocking {
-            behandlingAppForventSukess
+            sakOgBehandlingApp
                 .post("$url/personer/saker/$saktype") {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))
@@ -85,7 +86,7 @@ class BehandlingClient(
 
     fun hentSakMedBehandlinger(sakId: SakId): SakMedBehandlinger =
         runBlocking {
-            behandlingAppForventSukess.get("$url/saker/${sakId.sakId}/behandlinger").body()
+            sakOgBehandlingApp.get("$url/saker/${sakId.sakId}/behandlinger").body()
         }
 
     fun opprettOppgave(
@@ -93,7 +94,7 @@ class BehandlingClient(
         oppgave: NyOppgaveDto,
     ): UUID =
         runBlocking {
-            behandlingAppForventSukess
+            sakOgBehandlingApp
                 .post("$url/oppgaver/sak/${sakId.sakId}/opprett") {
                     contentType(ContentType.Application.Json)
                     setBody(oppgave)
@@ -103,7 +104,7 @@ class BehandlingClient(
 
     fun finnOppgaverForReferanse(referanse: String): List<OppgaveIntern> =
         runBlocking {
-            behandlingAppForventSukess
+            sakOgBehandlingApp
                 .get("$url/oppgaver/referanse/$referanse") {
                     contentType(ContentType.Application.Json)
                 }.body()

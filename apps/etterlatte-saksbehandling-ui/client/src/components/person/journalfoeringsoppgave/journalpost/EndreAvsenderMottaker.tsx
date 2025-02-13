@@ -3,7 +3,7 @@ import { Alert, BodyShort, Box, Button, Heading, HStack, Label, TextField, VStac
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
-import { fnrHarGyldigFormat } from '~utils/fnr'
+import { fnrErGyldig, fnrHarGyldigFormat } from '~utils/fnr'
 import { useForm } from 'react-hook-form'
 import { PersonSoekModal } from '~components/person/journalfoeringsoppgave/journalpost/modal/PersonSoekModal'
 
@@ -25,7 +25,10 @@ export const EndreAvsenderMottaker = ({
   const [rediger, setRediger] = useState(false)
 
   const lagreEndring = (avsenderMottaker: AvsenderMottaker) => {
-    oppdaterAvsenderMottaker({ ...avsenderMottaker, idType: BrukerIdType.FNR })
+    oppdaterAvsenderMottaker({
+      ...avsenderMottaker,
+      idType: fnrErGyldig(avsenderMottaker.id) ? BrukerIdType.FNR : avsenderMottaker.idType,
+    })
     setRediger(false)
   }
 

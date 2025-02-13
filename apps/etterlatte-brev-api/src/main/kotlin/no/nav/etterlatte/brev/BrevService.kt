@@ -262,7 +262,10 @@ class BrevService(
             .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
     }
 
-    fun opprettMottaker(brevId: BrevID): Mottaker {
+    fun opprettMottaker(
+        brevId: BrevID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Mottaker {
         val brev = sjekkOmBrevKanEndres(brevId)
 
         if (brev.mottakere.size > 1) {
@@ -274,7 +277,7 @@ class BrevService(
         logger.info("Oppretter ny mottaker på brev=$brevId")
 
         db
-            .opprettMottaker(brevId, nyMottaker)
+            .opprettMottaker(brevId, nyMottaker, brukerTokenInfo)
             .also { logger.info("Ny mottaker opprettet på brev id=$brevId") }
 
         return nyMottaker
@@ -319,7 +322,7 @@ class BrevService(
             throw KanIkkeSletteHovedmottaker()
         }
         mottakere.forEach { mottaker ->
-            db.oppdaterMottaker(brev.id, mottaker, bruker)
+            db.opprettMottaker(brev.id, mottaker, bruker)
         }
 
         return db.hentBrev(brevId).mottakere

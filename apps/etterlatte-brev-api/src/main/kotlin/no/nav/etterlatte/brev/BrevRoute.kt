@@ -94,7 +94,7 @@ fun Route.brevRoute(
         route("mottaker") {
             post {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
-                    val mottaker = service.opprettMottaker(brevId)
+                    val mottaker = service.opprettMottaker(brevId, brukerTokenInfo)
 
                     call.respond(mottaker)
                 }

@@ -170,8 +170,10 @@ class BrevRepository(
     fun opprettMottaker(
         id: BrevID,
         mottaker: Mottaker,
+        bruker: BrukerTokenInfo,
     ) = using(sessionOf(ds)) {
         it.opprettMottaker(id, mottaker)
+        it.lagreHendelse(id, Status.OPPRETTET, mottaker.toJson(), bruker)
     }
 
     fun oppdaterMottaker(

@@ -43,6 +43,9 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -216,6 +219,92 @@ internal class BehandlingServiceImplTest {
             { assertEquals(1, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
             { assertEquals(1, behandlinger.filterIsInstance<Revurdering>().size) },
         )
+    }
+
+    @Test
+    fun `avbrytBehangling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for revurdering `() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
+        val relatertBehandlingsId = UUID.randomUUID()
+        val revurderingbehandling =
+            revurdering(
+                sakId = sakId1,
+                relatertBehandlingId = relatertBehandlingsId.toString(),
+                revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+            )
+
+        val oppgaveKlage = mockOppgaveIntern(relatertBehandlingsId)
+
+        every { behandlingDaoMock.hentBehandling(revurderingbehandling.id) } returns revurderingbehandling
+        every { behandlingDaoMock.avbrytBehandling(revurderingbehandling.id, any(), any()) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
+        every {
+            behandlingHendelser.sendMeldingForHendelseStatistikk(
+                any(),
+                BehandlingHendelseType.AVBRUTT,
+            )
+        } returns Unit
+
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
+        every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
+        every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
+
+        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
+
+        behandlingService.avbrytBehandling(revurderingbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
+
+        verify {
+            oppgaveServiceMock.opprettOppgave(
+                referanse = relatertBehandlingsId.toString(),
+                sakId = sakId1,
+                kilde = any(),
+                type = any(),
+                merknad = any(),
+                frist = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `avbrytBehangling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for førstegangsbehandling `() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
+        val relatertBehandlingsId = UUID.randomUUID()
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1, relatertBehandlingId = relatertBehandlingsId.toString())
+
+        val oppgaveKlage = mockOppgaveIntern(relatertBehandlingsId)
+
+        every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+        every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id, any(), any()) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
+        every {
+            behandlingHendelser.sendMeldingForHendelseStatistikk(
+                any(),
+                BehandlingHendelseType.AVBRUTT,
+            )
+        } returns Unit
+
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
+        every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
+        every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
+        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
+
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
+
+        verify {
+            oppgaveServiceMock.opprettOppgave(
+                referanse = relatertBehandlingsId.toString(),
+                sakId = sakId1,
+                kilde = any(),
+                type = any(),
+                merknad = any(),
+                frist = any(),
+            )
+        }
     }
 
     @Test
@@ -1125,6 +1214,19 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger // TODO fjern?
         every { behandlingDaoMock.hentInnvilgaFoerstegangsbehandling(behandling.sak.id) } returns foerstegangsbehandling
+    }
+
+    private fun mockOppgaveIntern(relatertBehandlingsId: UUID): OppgaveIntern {
+        val oppgaveKlage = mockk<OppgaveIntern>()
+        every { oppgaveKlage.type } returns OppgaveType.KLAGE
+        every { oppgaveKlage.id } returns relatertBehandlingsId
+        every { oppgaveKlage.referanse } returns relatertBehandlingsId.toString()
+        every { oppgaveKlage.merknad } returns ""
+        every { oppgaveKlage.frist } returns mockk<Tidspunkt>()
+        every { oppgaveKlage.sakId } returns sakId1
+        every { oppgaveKlage.kilde } returns mockk<OppgaveKilde>()
+
+        return oppgaveKlage
     }
 
     private fun mockPersongalleri() =

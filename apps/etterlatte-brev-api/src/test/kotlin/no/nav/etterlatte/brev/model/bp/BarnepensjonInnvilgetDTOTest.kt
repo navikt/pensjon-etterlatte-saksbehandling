@@ -122,6 +122,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                 erMigrertYrkesskade = false,
                 erSluttbehandling = false,
                 landKodeverk = landKodeverk(),
+                klage = null,
             )
 
         Assertions.assertEquals(

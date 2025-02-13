@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -27,7 +26,6 @@ class ApplicationBuilder {
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
             azureAppScope = config.getString("brevapi.azure.scope"),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         ).config {
             install(HttpTimeout)
         }
@@ -39,7 +37,6 @@ class ApplicationBuilder {
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
             azureAppScope = config.getString("grunnlag.azure.scope"),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
     private val brevapiKlient = BrevapiKlient(config, brevhttpKlient)

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregningkafka
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.BEREGNING_AZURE_SCOPE
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -18,7 +17,6 @@ class AppBuilder(
             azureAppJwk = props.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = props.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = props.requireEnvValue(BEREGNING_AZURE_SCOPE),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
 

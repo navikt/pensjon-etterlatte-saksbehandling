@@ -18,9 +18,13 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevParametre
+import no.nav.etterlatte.brev.BrevPayload
+import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -59,6 +63,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -81,7 +86,6 @@ import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -317,6 +321,11 @@ class VedtakKlientTest : VedtakKlient {
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO = LoependeYtelseDTO(true, false, LocalDate.now())
+
+    override suspend fun hentVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto? = null
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {
@@ -642,6 +651,41 @@ class KodeverkKlientTest : KodeverkKlient {
     }
 }
 
+class BrevKlientTest : BrevKlient {
+    override suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): BrevPayload {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): Pdf {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): Brev {
+        TODO("Not yet implemented")
+    }
+}
+
 class PdltjenesterKlientTest : PdlTjenesterKlient {
     override fun hentPdlModellForSaktype(
         foedselsnummer: String,
@@ -664,9 +708,10 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         TODO("Not yet implemented")
     }
 
+    // Greit å holde denne i sync ellers mocke til om man vil teste relaterte identer. Hvis ikke vil man ikke finne saker på identer man tester på.
     override suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe =
         PdlFolkeregisterIdentListe(
-            listOf(PdlIdentifikator.FolkeregisterIdent(SOEKER_FOEDSELSNUMMER)),
+            listOf(PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(ident))),
         )
 
     override suspend fun hentAdressebeskyttelseForPerson(

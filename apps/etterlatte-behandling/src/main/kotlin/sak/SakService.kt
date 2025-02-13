@@ -76,19 +76,20 @@ interface SakService {
 
     fun finnFlyktningForSak(id: SakId): Flyktning?
 
-    fun markerSakerMedSkjerming(
-        sakIder: List<SakId>,
+    fun oppdaterSkjerming(
+        sakId: SakId,
         skjermet: Boolean,
     )
 
-    fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
-
-    fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering>
+    fun oppdaterEnhet(
+        sak: SakMedEnhet,
+        kommentar: String? = null,
+    )
 
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int
+    )
 
     fun sjekkSkjerming(
         fnr: String,
@@ -117,10 +118,12 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
-    fun settEnhetOmAdresseebeskyttet(
+    fun settEnhetOmAdressebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     )
+
+    fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset>
 }
 
 class ManglerTilgangTilEnhet(
@@ -133,6 +136,7 @@ class ManglerTilgangTilEnhet(
 class SakServiceImpl(
     private val dao: SakSkrivDao,
     private val lesDao: SakLesDao,
+    private val endringerDao: SakendringerDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
     private val grunnlagService: GrunnlagService,
@@ -237,11 +241,11 @@ class SakServiceImpl(
                 .flatMap { lesDao.finnSaker(it.folkeregisterident.value, sakType) }
         }
 
-    override fun markerSakerMedSkjerming(
-        sakIder: List<SakId>,
+    override fun oppdaterSkjerming(
+        sakId: SakId,
         skjermet: Boolean,
     ) {
-        dao.markerSakerMedSkjerming(sakIder, skjermet)
+        dao.oppdaterSkjerming(sakId, skjermet)
     }
 
     override fun finnEllerOpprettSakMedGrunnlag(
@@ -377,35 +381,50 @@ class SakServiceImpl(
                 )
             }
         oppdaterAdressebeskyttelse(sak.id, hentetGradering)
-        settEnhetOmAdresseebeskyttet(sak, hentetGradering)
+        settEnhetOmAdressebeskyttet(sak, hentetGradering)
         sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
     }
 
-    override fun settEnhetOmAdresseebeskyttet(
+    override fun settEnhetOmAdressebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     ) {
         when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
-                    )
+                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr))
                 }
             }
 
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
-                    )
+                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr))
                 }
             }
 
             AdressebeskyttelseGradering.FORTROLIG -> return
             AdressebeskyttelseGradering.UGRADERT -> return
         }
+    }
+
+    override fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset> {
+        val saksendringer = endringerDao.hentEndringerForSak(sakId)
+
+        // Inntil vi har gått opp om det er greit å vise adressebeskyttelse og skjerming, så ønsker vi ikke å eksponere
+        // dette. Verken som egne endringstyper eller som en del av andre endringstyper.
+        val saksendringerUtenSensitiveEndringer =
+            saksendringer
+                .filter {
+                    it.endringstype in
+                        listOf(
+                            Endringstype.OPPRETT_SAK,
+                            Endringstype.ENDRE_ENHET,
+                            Endringstype.ENDRE_IDENT,
+                        )
+                }.map(Saksendring::toSaksendringBegrenset)
+
+        return saksendringerUtenSensitiveEndringer
     }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
@@ -487,7 +506,7 @@ class SakServiceImpl(
     override fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
+    ) = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     override fun sjekkSkjerming(
         fnr: String,
@@ -501,29 +520,30 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             logger.info("Oppdater egen ansatt for sak $sakId")
-            dao.oppdaterEnheterPaaSaker(
-                listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
+            dao.oppdaterEnhet(
+                SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr),
             )
         } else {
             val sakMedSkjerming = lesDao.hentSak(sakId)!!
             if (sakMedSkjerming.enhet == Enheter.EGNE_ANSATTE.enhetNr) {
                 val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
                 if (enhet == Enheter.EGNE_ANSATTE.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr)))
+                    dao.oppdaterEnhet(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr))
                 } else {
-                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, enhet)))
+                    dao.oppdaterEnhet(SakMedEnhet(sakId, enhet))
                 }
             }
         }
 
-        dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
+        dao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
     }
 
-    override fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>) {
-        dao.oppdaterEnheterPaaSaker(saker)
+    override fun oppdaterEnhet(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    ) {
+        dao.oppdaterEnhet(sak, kommentar)
     }
-
-    override fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering> = lesDao.finnSakerMedGraderingOgSkjerming(sakIder)
 
     override fun finnSak(
         ident: String,

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.hendelserpdl.config
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.hendelserpdl.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
@@ -25,7 +24,6 @@ class ApplicationContext(
                     azureAppJwk = env.requireEnvValue(AzureEnums.AZURE_APP_JWK),
                     azureAppWellKnownUrl = env.requireEnvValue(AzureEnums.AZURE_APP_WELL_KNOWN_URL),
                     azureAppScope = env.requireEnvValue(PDL_AZURE_SCOPE),
-                    ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
                 ),
             url = "http://etterlatte-pdltjenester",
         ),

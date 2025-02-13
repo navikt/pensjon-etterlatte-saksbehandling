@@ -43,7 +43,7 @@ internal class BehandlingMetricsTest(
 
     @BeforeAll
     fun beforeAll() {
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = mockk(),

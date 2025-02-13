@@ -2,11 +2,12 @@ import { Heading, HStack, VStack } from '@navikt/ds-react'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
-import { HjemmelLenke, HjemmelLenkeProps } from '~components/behandling/felles/HjemmelLenke'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+import { Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
 
 interface LovtekstMedLenkeProps {
   tittel: string
-  hjemler: HjemmelLenkeProps[]
+  hjemler: Hjemmel[]
   children: ReactNode
   status: StatusIconProps | null
 }

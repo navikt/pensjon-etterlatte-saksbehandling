@@ -1,12 +1,8 @@
 import { Link } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
 
-export interface HjemmelLenkeProps {
-  tittel: string
-  lenke: string
-}
-
-export const HjemmelLenke = (props: HjemmelLenkeProps) => {
+export const HjemmelLenke = (props: Hjemmel) => {
   return (
     <Link href={props.lenke} target="_blank" rel="noopener noreferrer">
       {props.tittel}

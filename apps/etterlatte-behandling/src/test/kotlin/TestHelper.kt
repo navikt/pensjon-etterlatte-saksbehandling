@@ -257,6 +257,7 @@ fun foerstegangsbehandling(
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
+    relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
 ) = Foerstegangsbehandling(
     id = id,
@@ -279,11 +280,13 @@ fun foerstegangsbehandling(
     kilde = kilde,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
+    relatertBehandlingId = relatertBehandlingId,
 )
 
 fun revurdering(
     id: UUID = UUID.randomUUID(),
     sakId: SakId,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -306,7 +309,7 @@ fun revurdering(
     sak =
         Sak(
             ident = persongalleri.soeker,
-            sakType = SakType.BARNEPENSJON,
+            sakType = sakType,
             id = sakId,
             enhet = enhet,
         ),

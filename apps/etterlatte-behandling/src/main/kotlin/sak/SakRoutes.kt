@@ -250,6 +250,19 @@ internal fun Route.sakWebRoutes(
                 call.respond(sisteIverksatteBehandling)
             }
 
+            get("/endringer") {
+                kunSaksbehandler {
+                    logger.info("Henter endringer for sak ${sakId.sakId}")
+
+                    val saksendringer =
+                        inTransaction {
+                            sakService.hentSaksendringer(sakId)
+                        }
+
+                    call.respond(saksendringer)
+                }
+            }
+
             post("/oppdater-ident") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     val request = call.receive<OppdaterIdentRequest>()
@@ -297,15 +310,8 @@ internal fun Route.sakWebRoutes(
 
             post("/endre-enhet") {
                 kunSaksbehandlerMedSkrivetilgang { navIdent ->
-                    val enhetrequest = call.receive<EnhetRequest>()
+                    val enhetrequest = call.receive<EnhetRequest>().validate()
                     try {
-                        if (enhetrequest.enhet !in Enheter.entries.map { it.enhetNr }) {
-                            throw UgyldigForespoerselException(
-                                code = "ENHET IKKE GYLDIG",
-                                detail = "enhet ${enhetrequest.enhet} er ikke i listen over gyldige enheter",
-                            )
-                        }
-
                         inTransaction { sakService.finnSak(sakId) }
                             ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
@@ -316,7 +322,7 @@ internal fun Route.sakWebRoutes(
                             )
 
                         inTransaction {
-                            sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
+                            sakService.oppdaterEnhet(sakMedEnhet, enhetrequest.kommentar)
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                         }
 
@@ -428,7 +434,18 @@ internal fun Route.sakWebRoutes(
 
 data class EnhetRequest(
     val enhet: Enhetsnummer,
-)
+    val kommentar: String?,
+) {
+    fun validate(): EnhetRequest {
+        if (enhet !in Enheter.entries.map { it.enhetNr }) {
+            throw UgyldigForespoerselException(
+                code = "ENHET IKKE GYLDIG",
+                detail = "Enhet $enhet er ikke i listen over gyldige enheter",
+            )
+        }
+        return this
+    }
+}
 
 data class OppdaterIdentRequest(
     val hendelseId: UUID?,

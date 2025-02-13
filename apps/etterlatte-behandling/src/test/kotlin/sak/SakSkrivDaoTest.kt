@@ -1,25 +1,31 @@
 package no.nav.etterlatte.sak
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAnyOf
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.date.shouldBeBetween
 import io.kotest.matchers.date.shouldBeToday
 import io.kotest.matchers.date.shouldNotBeToday
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.KONTANT_FOT
-import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -27,14 +33,22 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.opprettBehandling
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -43,6 +57,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 import kotlin.random.Random
 
@@ -50,11 +65,12 @@ import kotlin.random.Random
 internal class SakSkrivDaoTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakSkrivDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
     private lateinit var tilgangService: TilgangServiceSjekker
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
+    private lateinit var sakendringerDao: SakendringerDao
 
     companion object {
         @RegisterExtension
@@ -65,7 +81,8 @@ internal class SakSkrivDaoTest(
     fun beforeAll() {
         val connectionAutoclosing = ConnectionAutoclosingTest(dataSource)
         sakLesDao = SakLesDao(connectionAutoclosing)
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(sakendringerDao)
         tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
@@ -74,7 +91,11 @@ internal class SakSkrivDaoTest(
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
                 ConnectionAutoclosingTest(dataSource),
             )
-        Kontekst.set(null)
+        nyKontekstMedBruker(
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { name() } returns "Børre"
+            },
+        )
     }
 
     @AfterEach
@@ -85,7 +106,7 @@ internal class SakSkrivDaoTest(
     @Test
     fun `klarer å sette opprett for saker der de har det på behandlingen`() {
         val fnrMedBehandling = "1231234"
-        val opprettSak = sakRepo.opprettSak(fnrMedBehandling, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val opprettSak = sakSkrivDao.opprettSak(fnrMedBehandling, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         val fnrUtenbehandling = "123124124"
         val opprettBehandling =
             opprettBehandling(
@@ -156,23 +177,23 @@ internal class SakSkrivDaoTest(
 
     @Test
     fun `kan opprette sak`() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val opprettSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, opprettSak.enhet)
     }
 
     @Test
     fun `Returnerer null dersom flyktning ikke finnes`() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val opprettSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         Assertions.assertEquals(sakLesDao.finnFlyktningForSak(opprettSak.id), null)
     }
 
     @Test
     fun `hentSakerMedIder henter kun de sakene med innsendt id`() {
-        val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak1 = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak3 = sakSkrivDao.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         val alleSaker = listOf(sak1, sak2, sak3)
 
         val alleIder = alleSaker.map { it.id }
@@ -190,22 +211,14 @@ internal class SakSkrivDaoTest(
     @Test
     fun `Skal kunne oppdatere enhet`() {
         val fnr = "fnr"
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak = sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         val funnetSaker = sakLesDao.finnSaker(fnr)
         Assertions.assertEquals(1, funnetSaker.size)
         Assertions.assertEquals(sak.id, funnetSaker[0].id)
-        sakRepo.opprettSak(fnr, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).also {
-            Assertions.assertNotNull(it)
-        }
-        val funnetSakermed2saker = sakLesDao.finnSaker(fnr)
-        Assertions.assertEquals(2, funnetSakermed2saker.size)
 
-        val sakerMedNyEnhet =
-            funnetSakermed2saker.map {
-                SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
-            }
+        val sakerMedNyEnhet = SakMedEnhet(sak.id, Enheter.EGNE_ANSATTE.enhetNr)
 
-        sakRepo.oppdaterEnheterPaaSaker(sakerMedNyEnhet)
+        sakSkrivDao.oppdaterEnhet(sakerMedNyEnhet)
 
         val sakerMedEgenAnsattEnhet = sakLesDao.finnSaker(fnr)
         sakerMedEgenAnsattEnhet.forEach {
@@ -213,13 +226,22 @@ internal class SakSkrivDaoTest(
         }
     }
 
+    @Test
+    fun `Skal kunne markere sak med skjerming`() {
+        val sak1 = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        sakSkrivDao.oppdaterSkjerming(sak1.id, true)
+
+        hentKomplettSak(sak1.id)?.erSkjermet shouldBe true
+    }
+
     @Nested
     inner class HentAlleSaker {
         @Test
         fun `Skal hente angitte saker`() {
-            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakSkrivDao.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
             listOf(sak1, sak2, sak3).forEach {
                 behandlingRepo.opprettBehandling(
@@ -238,10 +260,10 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal utelate ekskluderte saker`() {
-            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakSkrivDao.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakSkrivDao.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
             listOf(sak1, sak2, sak3, sak4).forEach {
                 behandlingRepo.opprettBehandling(
@@ -261,9 +283,9 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal kun returnere spesifikke saker som ikke er ekskludert`() {
-            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakSkrivDao.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
             listOf(sak1, sak2, sak3).forEach {
                 behandlingRepo.opprettBehandling(
@@ -288,9 +310,9 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
-            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakSkrivDao.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
             listOf(sak1, sak2, sak3).forEach {
                 behandlingRepo.opprettBehandling(
@@ -308,7 +330,7 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Hvis kjoering er starta, skal vi ikke hente ut`() {
-            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val sakid = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     sakId = sakid,
@@ -325,7 +347,7 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Hvis kjoering er starta, og saa feila det, skal vi hente ut`() {
-            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val sakid = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     sakId = sakid,
@@ -343,7 +365,7 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Hvis kjoering er starta, og saa ferdigstilt, skal vi ikke hente ut`() {
-            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val sakid = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     sakId = sakid,
@@ -361,7 +383,7 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Hvis kjoering er starta, og saa feila, og saa ferdigstilt, skal vi ikke hente ut`() {
-            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val sakid = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     sakId = sakid,
@@ -381,7 +403,7 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Hvis kjoering er ferdigstilt, skal vi ikke hente ut`() {
-            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val sakid = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     sakId = sakid,
@@ -398,10 +420,10 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal hente saker for gitt sakstype hvis sakstype er angitt`() {
-            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak4 = sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakSkrivDao.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakSkrivDao.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
             listOf(sak1, sak2, sak3, sak4).forEach {
                 behandlingRepo.opprettBehandling(
                     opprettBehandling(
@@ -425,11 +447,11 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `skal ikke hente saker som ikke har behandlinger`() {
-            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakSkrivDao.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakSkrivDao.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
             val sakerMedBehandlinger = listOf(sak1, sak2)
             sakerMedBehandlinger.forEach {
@@ -447,13 +469,13 @@ internal class SakSkrivDaoTest(
     }
 
     @Test
-    fun `oppdater ident på sak`() {
+    fun `oppdater ident på sak med lagring av endring`() {
         val opprinneligIdent = Random.nextLong().toString()
-        val sak = sakRepo.opprettSak(opprinneligIdent, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak = sakSkrivDao.opprettSak(opprinneligIdent, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         val nyIdent = KONTANT_FOT
 
-        sakRepo.oppdaterIdent(sak.id, nyIdent)
+        sakSkrivDao.oppdaterIdent(sak.id, nyIdent)
 
         val oppdatertSak = sakLesDao.hentSak(sak.id)!!
 
@@ -470,9 +492,8 @@ internal class SakSkrivDaoTest(
                     .prepareStatement(
                         """
                         SELECT foer, etter
-                        FROM endringer
-                        WHERE tabell = 'sak'
-                        AND foer ->> 'id' = '${sak.id}' 
+                        FROM saksendring
+                        WHERE foer ->> 'id' = '${sak.id}'
                         """.trimIndent(),
                     ).executeQuery()
                     .toList {
@@ -480,9 +501,9 @@ internal class SakSkrivDaoTest(
                     }
             }
 
-        endringer.size shouldBe 1
-
         endringer.single().let { (foer, etter) ->
+            foer.id shouldBe sak.id
+
             foer.id shouldBe etter.id
             foer.enhet shouldBe etter.enhet
             foer.sakType shouldBe etter.sakType
@@ -494,8 +515,8 @@ internal class SakSkrivDaoTest(
 
     @Test
     fun `skal hente saker med dato pleieforholdet opphoerte`() {
-        val sak1 = sakRepo.opprettSak("ident1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
-        val sak2 = sakRepo.opprettSak("ident2", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val sak1 = sakSkrivDao.opprettSak("ident1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val sak2 = sakSkrivDao.opprettSak("ident2", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
         val pleieForholdEnStart = LocalDate.of(2021, Month.AUGUST, 7)
         val pleieForholdEnSlutt = LocalDate.of(2024, Month.AUGUST, 9)
         val pleieForholdToStart = LocalDate.of(2022, Month.SEPTEMBER, 1)
@@ -548,4 +569,142 @@ internal class SakSkrivDaoTest(
         sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdEnStart)) shouldBe emptyList()
         sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdToStart)) shouldBe emptyList()
     }
+
+    @Test
+    fun `skal opprette sak med lagring av endring`() {
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+
+        val endringForSak = sakendringerDao.hentEndringerForSak(sak.id).single()
+
+        with(endringForSak) {
+            foer shouldBe null
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
+            endringstype shouldBe Endringstype.OPPRETT_SAK
+            identtype shouldBe Identtype.SAKSBEHANDLER
+            ident shouldBe "Børre"
+            assertTrue(tidspunkt.isAfter(Tidspunkt.now().minus(2, ChronoUnit.SECONDS)))
+            assertTrue(tidspunkt.isBefore(Tidspunkt.now()))
+        }
+    }
+
+    @Test
+    fun `skal oppdatere adressebeskyttelse med lagring av endring`() {
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val komplettSakFoer = hentKomplettSak(sak.id)!!
+
+        sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.FORTROLIG)
+
+        val endringForOppdatering =
+            sakendringerDao
+                .hentEndringerForSak(sak.id)
+                .single { it.foer != null }
+
+        with(endringForOppdatering) {
+            foer?.id shouldBe sak.id
+            etter.id shouldBe sak.id
+            foer!! shouldBeEqual komplettSakFoer
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
+            foer?.adressebeskyttelse shouldBe null
+            etter.adressebeskyttelse shouldBe AdressebeskyttelseGradering.FORTROLIG
+        }
+    }
+
+    @Test
+    fun `skal oppdatere skjerming med lagring av endring`() {
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val komplettSakFoer = hentKomplettSak(sak.id)!!
+
+        sakSkrivDao.oppdaterSkjerming(sak.id, true)
+
+        val endringForOppdatering =
+            sakendringerDao
+                .hentEndringerForSak(sak.id)
+                .single { it.foer != null }
+
+        with(endringForOppdatering) {
+            foer?.id shouldBe sak.id
+            etter.id shouldBe sak.id
+            foer!! shouldBeEqual komplettSakFoer
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
+            foer?.erSkjermet shouldBe null
+            etter.erSkjermet shouldBe true
+        }
+    }
+
+    @Test
+    fun `skal oppdatere ident med lagring av endring`() {
+        val sak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val komplettSakFoer = hentKomplettSak(sak.id)!!
+
+        sakSkrivDao.oppdaterIdent(sak.id, SOEKER2_FOEDSELSNUMMER)
+
+        val endringForOppdatering =
+            sakendringerDao
+                .hentEndringerForSak(sak.id)
+                .single { it.foer != null }
+
+        with(endringForOppdatering) {
+            foer?.id shouldBe sak.id
+            etter.id shouldBe sak.id
+            foer!! shouldBeEqual komplettSakFoer
+            etter shouldBeEqual hentKomplettSak(sak.id)!!
+            foer?.ident shouldBe SOEKER_FOEDSELSNUMMER.value
+            etter.ident shouldBe SOEKER2_FOEDSELSNUMMER.value
+        }
+    }
+
+    @Test
+    fun `skal oppdatere enhet sak med lagring av endring`() {
+        val sak1 = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakSkrivDao.opprettSak(SOEKER2_FOEDSELSNUMMER.value, SakType.OMSTILLINGSSTOENAD, Enheter.NORDLAND_BODOE.enhetNr)
+        sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak1.id, Enheter.AALESUND.enhetNr))
+        sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak2.id, Enheter.KLAGE_VEST.enhetNr))
+
+        val endringForSak1 =
+            sakendringerDao
+                .hentEndringerForSak(sak1.id)
+                .single { it.foer != null }
+        with(endringForSak1) {
+            foer?.enhet shouldBe Enheter.PORSGRUNN.enhetNr
+            etter.enhet shouldBe Enheter.AALESUND.enhetNr
+            etter shouldBeEqual hentKomplettSak(sak1.id)!!
+        }
+        val endringForSak2 =
+            sakendringerDao
+                .hentEndringerForSak(sak2.id)
+                .single { it.foer != null }
+        with(endringForSak2) {
+            foer?.enhet shouldBe Enheter.NORDLAND_BODOE.enhetNr
+            etter.enhet shouldBe Enheter.KLAGE_VEST.enhetNr
+            etter shouldBeEqual hentKomplettSak(sak2.id)!!
+        }
+    }
+
+    private fun hentKomplettSak(sakId: SakId): KomplettSak? =
+        ConnectionAutoclosingTest(dataSource).hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("SELECT * FROM sak WHERE id = ?")
+                statement.setLong(1, sakId.sakId)
+                statement
+                    .executeQuery()
+                    .singleOrNull {
+                        KomplettSak(
+                            id = SakId(getLong("id")),
+                            ident = getString("fnr"),
+                            sakType = enumValueOf(getString("sakType")),
+                            adressebeskyttelse =
+                                getString("adressebeskyttelse")
+                                    ?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
+                            erSkjermet = if (getObject("erskjermet") != null) getBoolean("erskjermet") else null,
+                            enhet = Enhetsnummer(getString("enhet")),
+                            flyktning =
+                                getString("flyktning")?.let {
+                                    no.nav.etterlatte.behandling.objectMapper
+                                        .readValue(it)
+                                },
+                            opprettet = getTidspunktOrNull("opprettet"),
+                        )
+                    }
+            }
+        }
 }

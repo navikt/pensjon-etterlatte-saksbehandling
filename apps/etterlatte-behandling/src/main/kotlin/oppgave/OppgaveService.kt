@@ -703,6 +703,7 @@ class OppgaveService(
                         OppgaveType.AARLIG_INNTEKTSJUSTERING,
                         OppgaveType.INNTEKTSOPPLYSNING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
+                        OppgaveType.MELDT_INN_ENDRING,
                         OppgaveType.OPPFOELGING,
                         -> {
                             logger.info(

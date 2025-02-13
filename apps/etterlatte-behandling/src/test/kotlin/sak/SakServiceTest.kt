@@ -79,6 +79,7 @@ internal class SakServiceTest {
     private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val sakSkrivDao = mockk<SakSkrivDao>()
     private val sakLesDao = mockk<SakLesDao>()
+    private val sakendringerDao = mockk<SakendringerDao>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -87,6 +88,7 @@ internal class SakServiceTest {
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagservice,
@@ -413,8 +415,8 @@ internal class SakServiceTest {
         } returns
             sak1
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
-        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakSkrivDao.oppdaterSkjerming(any(), any()) } just runs
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
         coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
@@ -435,7 +437,7 @@ internal class SakServiceTest {
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
         verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
-        verify(exactly = 1) { sakSkrivDao.markerSakerMedSkjerming(any(), any()) }
+        verify(exactly = 1) { sakSkrivDao.oppdaterSkjerming(any(), any()) }
         verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {
@@ -468,7 +470,7 @@ internal class SakServiceTest {
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
-        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
+        every { sakSkrivDao.oppdaterSkjerming(any(), any()) } just runs
         val sak1 =
             Sak(
                 id = sakId1,
@@ -499,8 +501,8 @@ internal class SakServiceTest {
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
-        every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(any(), any()) } just runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just runs
 
         val sak =
             service.finnEllerOpprettSakMedGrunnlag(
@@ -518,7 +520,7 @@ internal class SakServiceTest {
             )
         }
         verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
-        verify(exactly = 1) { sakSkrivDao.markerSakerMedSkjerming(any(), any()) }
+        verify(exactly = 1) { sakSkrivDao.oppdaterSkjerming(any(), any()) }
         verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
@@ -541,7 +543,7 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-        verify(exactly = 1) { sakSkrivDao.oppdaterEnheterPaaSaker(any()) }
+        verify(exactly = 1) { sakSkrivDao.oppdaterEnhet(any()) }
     }
 
     @Test
@@ -560,9 +562,9 @@ internal class SakServiceTest {
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
-        every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
-        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just runs
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
+        every { sakSkrivDao.oppdaterSkjerming(any(), any()) } just runs
         coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
 
         every {
@@ -588,7 +590,7 @@ internal class SakServiceTest {
             )
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
-        verify(exactly = 1) { sakSkrivDao.markerSakerMedSkjerming(any(), any()) }
+        verify(exactly = 1) { sakSkrivDao.oppdaterSkjerming(any(), any()) }
         verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
@@ -611,7 +613,7 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         }
-        verify(exactly = 1) { sakSkrivDao.oppdaterEnheterPaaSaker(any()) }
+        verify(exactly = 1) { sakSkrivDao.oppdaterEnhet(any()) }
         verify(exactly = 1) { sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 

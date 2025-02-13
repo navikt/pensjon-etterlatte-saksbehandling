@@ -95,12 +95,10 @@ class BehandlingFactory(
                     throw UgyldigEnhetException()
                 }
                 inTransaction {
-                    sakService.oppdaterEnhetForSaker(
-                        listOf(
-                            SakMedEnhet(
-                                enhet = it,
-                                id = sak.id,
-                            ),
+                    sakService.oppdaterEnhet(
+                        SakMedEnhet(
+                            enhet = it,
+                            id = sak.id,
                         ),
                     )
                 }
@@ -246,7 +244,13 @@ class BehandlingFactory(
                     merknad =
                         when (kilde) {
                             Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else -> opprettMerknad(request.sak, persongalleri, behandling.id, brukerTokenInfo)
+                            else ->
+                                opprettMerknad(
+                                    request.sak,
+                                    persongalleri,
+                                    behandling.id,
+                                    HardkodaSystembruker.opprettGrunnlag,
+                                )
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                 )
@@ -293,6 +297,24 @@ class BehandlingFactory(
                     throw AvslagOmgjoering.HarAapenBehandling()
                 }
 
+                val omgjoeringsOppgaver = oppgaveService.hentOppgaverForSak(sakId, OppgaveType.OMGJOERING)
+                val klageId =
+                    if (omgjoeringRequest.omgjoeringsOppgaveId != null) {
+                        val omgjoeringsOppgave =
+                            omgjoeringsOppgaver.find {
+                                it.erUnderBehandling() &&
+                                    it.id == omgjoeringRequest.omgjoeringsOppgaveId &&
+                                    it.saksbehandler?.ident == saksbehandler.ident
+                            }
+                        if (omgjoeringsOppgave == null) {
+                            throw AvslagOmgjoering.HarIkkeOmgjoeringsoppgaveUnderBehandling()
+                        }
+                        omgjoeringsOppgave.referanse
+                    } else {
+                        if (omgjoeringsOppgaver.any { !it.erAvsluttet() }) throw AvslagOmgjoering.AapenOmgjoeringISak()
+                        null
+                    }
+
                 val sisteAvslaatteBehandling =
                     behandlingerISak
                         .filter { it.status == BehandlingStatus.AVSLAG }
@@ -300,6 +322,7 @@ class BehandlingFactory(
 
                 val foerstegangsbehandlingViOmgjoerer =
                     foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
+
                 val nyFoerstegangsbehandling =
                     opprettFoerstegangsbehandling(
                         behandlingerUnderBehandling = emptyList(),
@@ -307,6 +330,7 @@ class BehandlingFactory(
                         mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
                         kilde = Vedtaksloesning.GJENNY,
                         prosessType = Prosesstype.MANUELL,
+                        relatertBehandlingsId = klageId,
                     )
 
                 if (omgjoeringRequest.erSluttbehandlingUtland) {
@@ -326,12 +350,24 @@ class BehandlingFactory(
                     behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, nyGyldighetsproeving)
                 }
 
+                if (omgjoeringRequest.omgjoeringsOppgaveId != null) {
+                    oppgaveService.ferdigstillOppgave(omgjoeringRequest.omgjoeringsOppgaveId, saksbehandler)
+                }
+
+                val merknad =
+                    if (omgjoeringRequest.omgjoeringsOppgaveId ==
+                        null
+                    ) {
+                        "Omgjøring av førstegangsbehandling"
+                    } else {
+                        "Omgjøring på grunn av klage"
+                    }
                 val oppgave =
                     opprettOppgaveForFoerstegangsbehandling(
                         referanse = nyFoerstegangsbehandling.id.toString(),
                         sakId = nyFoerstegangsbehandling.sak.id,
                         oppgaveKilde = OppgaveKilde.BEHANDLING,
-                        merknad = "Omgjøring av førstegangsbehandling",
+                        merknad = merknad,
                         gruppeId = null,
                     )
                 oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
@@ -476,6 +512,7 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
+        relatertBehandlingsId: String? = null,
     ): Behandling {
         if (behandlingerUnderBehandling.isNotEmpty()) {
             throw InternfeilException(
@@ -492,6 +529,7 @@ class BehandlingFactory(
             kilde = kilde,
             prosesstype = prosessType,
             sendeBrev = true,
+            relatertBehandlingId = relatertBehandlingsId,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
@@ -551,6 +589,18 @@ sealed class AvslagOmgjoering {
         UgyldigForespoerselException(
             "HAR_AAPEN_BEHANDLING",
             "For å omgjøre en førstegangsbehandling må alle andre behandlinger i saken være lukket.",
+        )
+
+    class HarIkkeOmgjoeringsoppgaveUnderBehandling :
+        UgyldigForespoerselException(
+            "HAR_IKKE_OMGJOERINGS_OPPGAVE_UNDER_BEHANDLING",
+            "Du har ikke omgjøringsoppgaven for avslaget tilordnet deg, plukk oppgaven og prøv igjen",
+        )
+
+    class AapenOmgjoeringISak :
+        UgyldigForespoerselException(
+            "AAPEN_OMGJOERING_I_SAK",
+            "Det ligger en åpen omgjøringsoppgave i saken, omgjøring av førstegangsbehandling skal gjøres fra omgjøringsoppgaven",
         )
 }
 

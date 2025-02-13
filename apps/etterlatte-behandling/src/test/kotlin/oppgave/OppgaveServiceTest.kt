@@ -67,7 +67,7 @@ internal class OppgaveServiceTest(
 ) {
     private val sakLesDao: SakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
     private val sakSkrivDao =
-        SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk(relaxed = true)
     private val hendelseDao = mockk<HendelseDao>()

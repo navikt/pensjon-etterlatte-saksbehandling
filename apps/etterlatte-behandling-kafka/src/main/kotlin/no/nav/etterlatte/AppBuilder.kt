@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
@@ -10,13 +9,14 @@ import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.brukerdialog.inntektsjustering.JournalfoerInntektsjusteringService
-import no.nav.etterlatte.brukerdialog.omsendring.JournalfoerOmsMeldtInnEndringService
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.JournalfoerOmsMeldtInnEndringService
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
@@ -31,9 +31,13 @@ class AppBuilder(
 ) {
     val behandlingService: BehandlingService by lazy {
         BehandlingServiceImpl(
-            behandlingApp,
+            behandlingAppExpectSuccess,
             "http://etterlatte-behandling",
         )
+    }
+
+    val grunnlagKlient: GrunnlagKlient by lazy {
+        GrunnlagKlient(behandlingAppExpectSuccess, "http://etterlatte-behandling")
     }
 
     val tidshendelserService: TidshendelseService by lazy {
@@ -44,7 +48,7 @@ class AppBuilder(
 
     // TODO: Slå sammen med "behandlingService" over
     val behandlingKlient: BehandlingClient by lazy {
-        BehandlingClient(httpClient(BEHANDLING_AZURE_SCOPE), "http://etterlatte-behandling")
+        BehandlingClient(behandlingAppExpectSuccess, "http://etterlatte-behandling")
     }
 
     val journalfoerSoeknadService: JournalfoerSoeknadService by lazy {
@@ -77,13 +81,12 @@ class AppBuilder(
         )
     }
 
-    private val behandlingApp: HttpClient by lazy {
+    private val behandlingAppExpectSuccess: HttpClient by lazy {
         httpClientClientCredentials(
             azureAppClientId = props.requireEnvValue(AZURE_APP_CLIENT_ID),
             azureAppJwk = props.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = props.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = props.requireEnvValue(BEHANDLING_AZURE_SCOPE),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
 
@@ -96,7 +99,6 @@ class AppBuilder(
             azureAppJwk = props.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = props.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = props.requireEnvValue(scope),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
 }
 

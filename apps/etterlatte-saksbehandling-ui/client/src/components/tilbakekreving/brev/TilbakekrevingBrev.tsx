@@ -33,9 +33,16 @@ export function TilbakekrevingBrev({
       if (statusCode === 200) {
         setVedtaksbrev(brev)
       } else if (statusCode === 204) {
-        opprettNyttVedtaksbrev({ behandlingId: behandling.id, sakId: behandling.sak.id }, (nyttBrev) => {
-          setVedtaksbrev(nyttBrev)
-        })
+        opprettNyttVedtaksbrev(
+          {
+            behandlingId: behandling.id,
+            sakId: behandling.sak.id,
+            tilbakekrevingBrev: true,
+          },
+          (nyttBrev) => {
+            setVedtaksbrev(nyttBrev)
+          }
+        )
       }
     })
   }, [behandling, tilbakestilt])
@@ -70,7 +77,7 @@ export function TilbakekrevingBrev({
 
               {vedtaksbrev && (
                 <>
-                  <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                  <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} tilbakekrevingBrev={true} />
 
                   <BrevMottakerWrapper brev={vedtaksbrev} kanRedigeres={redigerbar} />
                 </>
@@ -84,6 +91,7 @@ export function TilbakekrevingBrev({
             brev={vedtaksbrev}
             kanRedigeres={redigerbar}
             tilbakestillingsaction={() => setTilbakestilt(true)}
+            tilbakekrevingBrev={true}
           />
         )}
       </BrevContent>

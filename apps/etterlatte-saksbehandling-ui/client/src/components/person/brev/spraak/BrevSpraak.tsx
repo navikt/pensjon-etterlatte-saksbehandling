@@ -7,9 +7,10 @@ import { formaterSpraak } from '~utils/formatering/formatering'
 interface Props {
   brev: IBrev
   kanRedigeres: boolean
+  tilbakekrevingBrev?: boolean // TODO
 }
 
-export default function BrevSpraak({ brev, kanRedigeres }: Props) {
+export default function BrevSpraak({ brev, kanRedigeres, tilbakekrevingBrev = false }: Props) {
   const [nyttSpraak, setNyttSpraak] = useState(brev.spraak)
 
   return (
@@ -26,6 +27,7 @@ export default function BrevSpraak({ brev, kanRedigeres }: Props) {
             sakId={brev.sakId}
             behandlingId={brev.behandlingId}
             brevtype={brev.brevtype}
+            tilbakekrevingBrev={tilbakekrevingBrev}
           />
         )}
       </HStack>

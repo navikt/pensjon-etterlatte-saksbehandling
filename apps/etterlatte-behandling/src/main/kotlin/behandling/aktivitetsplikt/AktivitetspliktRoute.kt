@@ -309,6 +309,10 @@ internal fun Route.aktivitetspliktRoutes(
             val oppgave = inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
             call.respond(oppgave)
         }
+        post("ferdigstill-oppgave") {
+            val oppgave = inTransaction { aktivitetspliktOppgaveService.ferdigstillOppgaveUtenBrev(oppgaveId, brukerTokenInfo) }
+            call.respond(oppgave)
+        }
     }
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {

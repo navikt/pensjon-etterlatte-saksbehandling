@@ -45,6 +45,7 @@ export interface NyOppgaveDto {
   oppgaveKilde?: OppgaveKilde
   oppgaveType: Oppgavetype
   merknad?: string
+  frist?: string
   referanse?: string
   saksbehandler?: string
 }
@@ -69,6 +70,7 @@ export enum OppgaveKilde {
   GENERELL_BEHANDLING = 'GENERELL_BEHANDLING',
   TILBAKEKREVING = 'TILBAKEKREVING',
   SAKSBEHANDLER = 'SAKSBEHANDLER',
+  BRUKERDIALOG_SELVBETJENING = 'BRUKERDIALOG_SELVBETJENING',
 }
 
 export enum Oppgavetype {
@@ -92,6 +94,7 @@ export enum Oppgavetype {
   INNTEKTSOPPLYSNING = 'INNTEKTSOPPLYSNING',
   MANUELL_UTSENDING_BREV = 'MANUELL_UTSENDING_BREV',
   OPPFOELGING = 'OPPFOELGING',
+  MELDT_INN_ENDRING = 'MELDT_INN_ENDRING',
 }
 
 export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [

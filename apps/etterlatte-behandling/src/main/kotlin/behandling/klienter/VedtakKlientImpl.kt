@@ -4,8 +4,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -73,6 +77,11 @@ interface VedtakKlient {
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO
+
+    suspend fun hentVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto?
 }
 
 class VedtakKlientException(
@@ -351,6 +360,38 @@ class VedtakKlientImpl(
                 "Kunne ikke sjekk om sak $sakId har løpende ytelse på dato $dato",
                 e,
             )
+        }
+    }
+
+    override suspend fun hentVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto? {
+        try {
+            logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.NotFound) {
+                logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
+                return null
+            } else {
+                logger.error("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
+
+                throw ForespoerselException(
+                    status = re.response.status.value,
+                    code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
+                    detail = "Ukjent feil oppsto ved henting av vedtak for behandling",
+                    meta = mapOf("behandlingId" to behandlingId),
+                )
+            }
         }
     }
 }

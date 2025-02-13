@@ -8,11 +8,13 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
+import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.ApplicationContext
@@ -47,6 +49,7 @@ abstract class BehandlingIntegrationTest {
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
         brevApiKlient: BrevApiKlient? = null,
+        brevKlient: BrevKlient? = null,
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
@@ -94,6 +97,7 @@ abstract class BehandlingIntegrationTest {
                             "vedtak.resource.url" to "http://localhost",
                             "krr.url" to "http://localhost",
                             "azure.app.well.known.url" to "wellKnownUrl",
+                            "brev-api.resource.url" to "http://localhost",
                         ),
                     ),
                 rapid = testProdusent ?: TestProdusent(),
@@ -103,10 +107,14 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientImpl = grunnlagklient ?: GrunnlagKlientTest(),
+                tempGrunnlagKlient = mockk(relaxed = true),
+                tempAldersovergangServiceProxy = mockk(relaxed = true),
+                tempGrunnlagServiceProxy = mockk(relaxed = true),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
+                brevKlient = brevKlient ?: BrevKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingKlient = tilbakekrevingKlient ?: TilbakekrevingKlientTest(),
                 migreringHttpClient = migreringHttpClientTest(),

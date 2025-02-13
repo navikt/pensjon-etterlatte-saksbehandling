@@ -23,7 +23,6 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -33,16 +32,13 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
+import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -65,6 +61,7 @@ internal class EgenAnsattServiceTest(
 ) {
     private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
+    private lateinit var sakendringerDao: SakendringerDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
     private lateinit var sakService: SakService
@@ -75,15 +72,7 @@ internal class EgenAnsattServiceTest(
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
-    private val soeker = "11057523044"
-    private val persongalleri =
-        Persongalleri(
-            soeker,
-            INNSENDER_FOEDSELSNUMMER.value,
-            listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
-            listOf(AVDOED_FOEDSELSNUMMER.value),
-            listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
-        )
+    private val persongalleri = persongalleri()
 
     @BeforeAll
     fun beforeAll() {
@@ -113,7 +102,8 @@ internal class EgenAnsattServiceTest(
         grunnlagKlient = mockk()
         oppdaterTilgangService = mockk()
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
         oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))
         val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
@@ -122,6 +112,7 @@ internal class EgenAnsattServiceTest(
                 SakServiceImpl(
                     sakRepo,
                     sakLesDao,
+                    sakendringerDao,
                     skjermingKlient,
                     brukerService,
                     grunnlagservice,
@@ -195,6 +186,6 @@ internal class EgenAnsattServiceTest(
         egenAnsattService.haandterSkjerming(egenAnsattSkjermet)
 
         verify(exactly = 1) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }
-        verify(exactly = 0) { sakService.markerSakerMedSkjerming(any(), any()) }
+        verify(exactly = 0) { sakService.oppdaterSkjerming(any(), any()) }
     }
 }

@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.hentGjenlevende
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -137,6 +138,7 @@ class OversendelseBrevServiceImpl(
                 soeker = grunnlag.mapSoeker(null),
                 avdoede = grunnlag.mapAvdoede(),
                 verge = verge,
+                gjenlevende = grunnlag.hentGjenlevende(),
             )
         return Pair(grunnlag.mapSpraak(), personerISak)
     }

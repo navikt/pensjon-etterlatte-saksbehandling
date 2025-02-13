@@ -59,6 +59,17 @@ fun Grunnlag.mapSoeker(aldersgruppe: Aldersgruppe?): Soeker =
         )
     }
 
+fun Grunnlag.hentGjenlevende(): List<String> {
+    with(this.sak) {
+        val opplysning = hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)
+        val persongalleri =
+            krevIkkeNull(opplysning?.verdi) {
+                "Sak (id=${metadata.sakId}) mangler opplysningstype PERSONGALLERI_V1"
+            }
+        return persongalleri.gjenlevende
+    }
+}
+
 fun Grunnlag.mapInnsender(): Innsender? =
     with(this.sak) {
         val opplysning = hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)

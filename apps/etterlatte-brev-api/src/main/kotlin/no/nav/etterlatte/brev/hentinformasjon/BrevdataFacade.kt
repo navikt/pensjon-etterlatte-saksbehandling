@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.hentGjenlevende
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -62,6 +63,7 @@ class BrevdataFacade(
                     soeker = grunnlag.mapSoeker(brevutfallDto?.aldersgruppe),
                     avdoede = grunnlag.mapAvdoede(),
                     verge = verge,
+                    gjenlevende = grunnlag.hentGjenlevende(),
                 )
             val vedtak = vedtakDeferred?.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()

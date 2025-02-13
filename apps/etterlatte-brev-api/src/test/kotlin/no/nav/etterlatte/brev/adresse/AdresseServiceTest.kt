@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
@@ -104,6 +105,95 @@ internal class AdresseServiceTest {
         coVerify(exactly = 1) {
             norg2Mock.hentEnhet(sak.enhet)
             saksbehandlerKlient.hentSaksbehandlerNavn(zIdent, any())
+        }
+    }
+
+    @Test
+    fun `BP skal ha med gjenlevende på kopi om den er ulik innsender og søker hvis søker er over 18`() {
+        val sakType = SakType.BARNEPENSJON
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
+                soeker = Soeker("RETRO", null, "TELEFONKIOSK", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = null,
+                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.now().minusYears(19)
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+        mottakere.size shouldBe 3
+        mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == SOEKER_FOEDSELSNUMMER.value } shouldBe 1
+        mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == INNSENDER_FOEDSELSNUMMER.value } shouldBe 1
+        mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 1
+
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, INNSENDER_FOEDSELSNUMMER.value)
+            regoppslagMock.hentMottakerAdresse(sakType, SOEKER_FOEDSELSNUMMER.value)
+            regoppslagMock.hentMottakerAdresse(sakType, GJENLEVENDE_FOEDSELSNUMMER.value)
+        }
+    }
+
+    @Test
+    fun `BP skal ha med gjenlevende på HOVED om den er ulik innsender og søker hvis søker er under 18`() {
+        val sakType = SakType.BARNEPENSJON
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
+                soeker = Soeker("RETRO", null, "TELEFONKIOSK", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = null,
+                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        // Må være under 18 år
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(SOEKER_FOEDSELSNUMMER.value, any()) } returns LocalDate.now().minusYears(4)
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+        mottakere.size shouldBe 2
+        mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 1
+        mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == INNSENDER_FOEDSELSNUMMER.value } shouldBe 1
+
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, INNSENDER_FOEDSELSNUMMER.value)
+            regoppslagMock.hentMottakerAdresse(sakType, GJENLEVENDE_FOEDSELSNUMMER.value)
+        }
+    }
+
+    @Test
+    fun `BP innsender og gjenlevende er samme, skal velge innsender`() {
+        val sakType = SakType.BARNEPENSJON
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(GJENLEVENDE_FOEDSELSNUMMER.value)),
+                soeker = Soeker("RETRO", null, "TELEFONKIOSK", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = null,
+                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        // Må være under 18 år
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(SOEKER_FOEDSELSNUMMER.value, any()) } returns LocalDate.now().minusYears(4)
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+        mottakere.size shouldBe 1
+        mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 1
+
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, GJENLEVENDE_FOEDSELSNUMMER.value)
         }
     }
 

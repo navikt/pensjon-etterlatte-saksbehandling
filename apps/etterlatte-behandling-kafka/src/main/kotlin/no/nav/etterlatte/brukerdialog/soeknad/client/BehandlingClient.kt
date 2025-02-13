@@ -2,6 +2,7 @@ package no.nav.etterlatte.brukerdialog.soeknad.client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -51,6 +52,7 @@ class BehandlingClient(
             val response =
                 sakOgBehandlingApp
                     .post("$url/behandlinger/opprettbehandling") {
+                        expectSuccess = false
                         contentType(ContentType.Application.Json)
                         setBody(BehandlingsBehov(sakId, persongalleri, mottattDato.toString()))
                     }

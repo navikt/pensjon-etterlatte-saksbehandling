@@ -66,7 +66,7 @@ internal class OpprettBehandlingRiver(
 
                         throw e
                     } else {
-                        logger.error(
+                        logger.warn(
                             "Mottok søknad med id=$soeknadId, men det finnes allerede en åpen behandling på sak ${sak.id} " +
                                 "(behandlingId=${aapenBehandling.id}). Dette burde ikke skje og må kontrolleres manuelt.",
                         )

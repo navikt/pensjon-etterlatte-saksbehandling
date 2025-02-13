@@ -322,7 +322,7 @@ internal fun Route.sakWebRoutes(
                             )
 
                         inTransaction {
-                            sakService.oppdaterEnhetForSak(sakMedEnhet, enhetrequest.kommentar)
+                            sakService.oppdaterEnhet(sakMedEnhet, enhetrequest.kommentar)
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                         }
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
@@ -32,13 +31,13 @@ class AppBuilder(
 ) {
     val behandlingService: BehandlingService by lazy {
         BehandlingServiceImpl(
-            behandlingApp,
+            behandlingAppExpectSuccess,
             "http://etterlatte-behandling",
         )
     }
 
     val grunnlagKlient: GrunnlagKlient by lazy {
-        GrunnlagKlient(behandlingApp, "http://etterlatte-behandling")
+        GrunnlagKlient(behandlingAppExpectSuccess, "http://etterlatte-behandling")
     }
 
     val tidshendelserService: TidshendelseService by lazy {
@@ -49,7 +48,7 @@ class AppBuilder(
 
     // TODO: Slå sammen med "behandlingService" over
     val behandlingKlient: BehandlingClient by lazy {
-        BehandlingClient(httpClient(BEHANDLING_AZURE_SCOPE), "http://etterlatte-behandling")
+        BehandlingClient(behandlingAppExpectSuccess, "http://etterlatte-behandling")
     }
 
     val journalfoerSoeknadService: JournalfoerSoeknadService by lazy {
@@ -82,13 +81,12 @@ class AppBuilder(
         )
     }
 
-    private val behandlingApp: HttpClient by lazy {
+    private val behandlingAppExpectSuccess: HttpClient by lazy {
         httpClientClientCredentials(
             azureAppClientId = props.requireEnvValue(AZURE_APP_CLIENT_ID),
             azureAppJwk = props.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = props.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = props.requireEnvValue(BEHANDLING_AZURE_SCOPE),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
 
@@ -101,7 +99,6 @@ class AppBuilder(
             azureAppJwk = props.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = props.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = props.requireEnvValue(scope),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
 }
 

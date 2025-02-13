@@ -18,9 +18,13 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevParametre
+import no.nav.etterlatte.brev.BrevPayload
+import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -317,6 +321,11 @@ class VedtakKlientTest : VedtakKlient {
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO = LoependeYtelseDTO(true, false, LocalDate.now())
+
+    override suspend fun hentVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto? = null
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {
@@ -639,6 +648,41 @@ class KodeverkKlientTest : KodeverkKlient {
                 ),
             ),
         )
+    }
+}
+
+class BrevKlientTest : BrevKlient {
+    override suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): BrevPayload {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): Pdf {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevRequest: BrevRequest,
+    ): Brev {
+        TODO("Not yet implemented")
     }
 }
 

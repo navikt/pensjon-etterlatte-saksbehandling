@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsMeldtInnEndring
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -21,8 +22,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class OmsMeldtInnEndringRiver(
@@ -47,7 +46,7 @@ internal class OmsMeldtInnEndringRiver(
         try {
             val sak =
                 runBlocking {
-                    behandlingKlient.finnEllerOpprettSak(endringer.fnr, SakType.OMSTILLINGSSTOENAD)
+                    behandlingKlient.finnEllerOpprettSak(endringer.fnr.value, SakType.OMSTILLINGSSTOENAD)
                 }
 
             val journalpostResponse =
@@ -81,26 +80,27 @@ internal class OmsMeldtInnEndringRiver(
 
     private fun mottatMeldtInnEndringFullfoert(
         sakId: SakId,
-        meldtInnEndringId: UUID
+        meldtInnEndringId: UUID,
     ) {
         logger.info("Mottakk av meldt inn endring fullført, sender melding til selvbetjening sak=$sakId")
         val correlationId = getCorrelationId()
         val hendelsetype = OmsMeldtInnEndringHendelsetype.MOTTAK_FULLOERT.lagEventnameForType()
 
-        rapidsConnection.publish(
-            "mottak-meld-inn-endring-fullfoert-$sakId",
-            JsonMessage
-                .newMessage(
-                    hendelsetype,
-                    mapOf(
-                        CORRELATION_ID_KEY to correlationId,
-                        TEKNISK_TID_KEY to Tidspunkt.now(),
-                        "meldt_inn_endring_id" to meldtInnEndringId
-                    )
-                ).toJson()
-        ).also {
-            logger.info("Publiserte $hendelsetype for $sakId")
-        }
+        rapidsConnection
+            .publish(
+                "mottak-meld-inn-endring-fullfoert-$sakId",
+                JsonMessage
+                    .newMessage(
+                        hendelsetype,
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            "meldt_inn_endring_id" to meldtInnEndringId,
+                        ),
+                    ).toJson(),
+            ).also {
+                logger.info("Publiserte $hendelsetype for $sakId")
+            }
     }
 
     private fun JsonMessage.omsMeldtInnEndringer(): OmsMeldtInnEndring =
@@ -117,23 +117,8 @@ enum class OmsMeldtInnEndringHendelsetype(
     val eventname: String,
 ) : EventnameHendelseType {
     MOTTATT(HENDELSE_KEY),
-    MOTTAK_FULLOERT(MOTTAK_FULLFOERT_KEY)
+    MOTTAK_FULLOERT(MOTTAK_FULLFOERT_KEY),
     ;
 
     override fun lagEventnameForType(): String = this.eventname
-}
-
-//  TODO i lib
-data class OmsMeldtInnEndring(
-    val id: UUID = UUID.randomUUID(),
-    val fnr: String,
-    val endring: OmsEndring,
-    val beskrivelse: String,
-    val tidspunkt: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS),
-)
-
-enum class OmsEndring {
-    INNTEKT,
-    AKTIVITET_OG_INNTEKT,
-    ANNET,
 }

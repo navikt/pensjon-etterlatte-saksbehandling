@@ -1,16 +1,16 @@
 import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { isInitial, isPending, isPendingOrInitial, isSuccess, mapApiResult, mapSuccess } from '~shared/api/apiUtils'
-import { opprettOmgjoeringKlage } from '~shared/api/revurdering'
+import { isPending, isPendingOrInitial, isSuccess, mapApiResult, mapResult, mapSuccess } from '~shared/api/apiUtils'
+import { opprettOmgjoeringFoerstegangsbehandling, opprettOmgjoeringKlage } from '~shared/api/revurdering'
 import { hentKlage } from '~shared/api/klage'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Klage, Omgjoering, VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { formaterVedtakType } from '~utils/formatering/formatering'
 import { formaterKanskjeStringDato } from '~utils/formatering/dato'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
+import { VedtakType } from '~components/vedtak/typer'
 
 function hentOmgjoering(klage: Klage): Omgjoering | null {
   if (klage.kabalResultat === 'MEDHOLD') {
@@ -30,31 +30,43 @@ function hentVedtakKlagesPaa(klage: Klage): VedtaketKlagenGjelder | null {
   return klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?? null
 }
 
-function erBehandlingVedtakOmgjoering(klage: Klage): boolean {
+function finnOmgjoeringsHandlingForKlage(klage: Klage): OmgjoerHandling {
   const omgjoering = hentOmgjoering(klage)
   if (omgjoering === null) {
-    return false
+    return OmgjoerHandling.IKKE_STOETTET
   }
 
   const vedtakKlagesPaa = hentVedtakKlagesPaa(klage)
   switch (vedtakKlagesPaa?.vedtakType) {
-    case 'INNVILGELSE':
-    case 'ENDRING':
-    case 'OPPHOER':
-      return true
-    case 'AVSLAG':
-      return false
+    case VedtakType.INNVILGELSE:
+    case VedtakType.ENDRING:
+    case VedtakType.OPPHOER:
+      return OmgjoerHandling.REVURDERING
+    case VedtakType.AVSLAG:
+      return OmgjoerHandling.OMGJOERING_FOERSTEGANGSBEHANDLING
     default:
-      return false
+      return OmgjoerHandling.IKKE_STOETTET
   }
+}
+
+enum OmgjoerHandling {
+  REVURDERING = 'REVURDERING',
+  OMGJOERING_FOERSTEGANGSBEHANDLING = 'OMGJOERING_FOERSTEGANGSBEHANDLING',
+  IKKE_STOETTET = 'IKKE_STOETTET',
 }
 
 export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
   const [open, setOpen] = useState(false)
+  const [disabledOpprett, setDisabledOpprett] = useState(false)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettOmgjoeringKlage)
+  const [opprettOmgjoeringFoerstegangsbehandlingStatus, opprettOmgjoeringFoerstegangsbehandlingApi] = useApiCall(
+    opprettOmgjoeringFoerstegangsbehandling
+  )
   const [klageResult, fetchKlage] = useApiCall(hentKlage)
 
   if (!erOppgaveRedigerbar(oppgave?.status)) return null
+
+  const klage = mapSuccess(klageResult, (hentetKlage) => hentetKlage)
 
   useEffect(() => {
     if (oppgave.referanse) {
@@ -62,7 +74,11 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
     }
   }, [oppgave.referanse])
 
-  const klage = mapSuccess(klageResult, (hentetKlage) => hentetKlage)
+  useEffect(() => {
+    if (klage) {
+      setDisabledOpprett(finnOmgjoeringsHandlingForKlage(klage) == OmgjoerHandling.IKKE_STOETTET)
+    }
+  }, [klage])
 
   function opprett() {
     if (!klage) {
@@ -70,10 +86,21 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
       return
     }
 
-    if (erBehandlingVedtakOmgjoering(klage) && isInitial(opprettRevurderingStatus)) {
+    const handling = finnOmgjoeringsHandlingForKlage(klage)
+
+    if (handling === OmgjoerHandling.REVURDERING) {
       opprettRevurdering({
         oppgaveId: oppgave.id,
         sakId: oppgave.sakId,
+      })
+    } else if (handling === OmgjoerHandling.OMGJOERING_FOERSTEGANGSBEHANDLING) {
+      opprettOmgjoeringFoerstegangsbehandlingApi({
+        sakId: oppgave.sakId,
+        omgjoeringRequest: {
+          skalKopiere: true,
+          erSluttbehandlingUtland: false,
+          omgjoeringsOppgaveId: oppgave.id,
+        },
       })
     }
   }
@@ -113,40 +140,71 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
                     Vedtaket om {formaterVedtakType(vedtak.vedtakType!!)} attestert{' '}
                     {formaterKanskjeStringDato(vedtak.datoAttestert)} skal omgjøres.
                   </BodyShort>
-                  {!erBehandlingVedtakOmgjoering(klage) && (
-                    <Alert variant="warning">
-                      Det er ikke støttet å omgjøre vedtak som ikke er behandlinger enda.{' '}
-                    </Alert>
-                  )}
+                  {!finnOmgjoeringsHandlingForKlage(klage) ||
+                    (disabledOpprett && (
+                      <Alert variant="warning">
+                        Det er ikke støttet å omgjøre vedtak som ikke er behandlinger enda.
+                      </Alert>
+                    ))}
                 </>
               )
             }
           )}
-          {mapSuccess(opprettRevurderingStatus, (behandling) => (
-            <>
-              <BodyShort spacing>Revurdering for omgjøring av vedtak er opprettet. </BodyShort>
 
-              <Button variant="primary" as="a" href={`/behandling/${behandling.id}`}>
-                Åpne revurdering
-              </Button>
-            </>
-          ))}
-          {isFailureHandler({
-            apiResult: opprettRevurderingStatus,
-            errorMessage:
-              'Kunne ikke opprette revurdering for omgjøring. Prøv på nytt senere, og meld sak hvis problemet vedvarer',
+          {mapResult(opprettRevurderingStatus, {
+            success: (behandling) => (
+              <>
+                <BodyShort spacing>Revurdering for omgjøring av vedtak er opprettet. </BodyShort>
+
+                <Button variant="primary" as="a" href={`/behandling/${behandling.id}`}>
+                  Åpne revurdering
+                </Button>
+              </>
+            ),
+            error: (error) => (
+              <ApiErrorAlert>
+                Kunne ikke opprette revurdering for omgjøring. Prøv på nytt senere, og meld sak hvis problemet vedvarer:{' '}
+                {error.detail}
+              </ApiErrorAlert>
+            ),
+          })}
+
+          {mapResult(opprettOmgjoeringFoerstegangsbehandlingStatus, {
+            success: (behandling) => (
+              <>
+                <BodyShort spacing>Omgjøring av førstegangsbehandling er opprettet. </BodyShort>
+
+                <Button variant="primary" as="a" href={`/behandling/${behandling.id}`}>
+                  Åpne behandling
+                </Button>
+              </>
+            ),
+            error: (error) => (
+              <ApiErrorAlert>
+                Kunne ikke opprette omgjøring førstegangsbehandling på grunn av feil: {error.detail}
+              </ApiErrorAlert>
+            ),
           })}
         </Modal.Body>
         <Modal.Footer>
           <Button
             variant="primary"
             onClick={opprett}
-            loading={isPending(opprettRevurderingStatus)}
-            disabled={isSuccess(opprettRevurderingStatus) || isPendingOrInitial(klageResult)}
+            loading={isPending(opprettRevurderingStatus) || isPending(opprettOmgjoeringFoerstegangsbehandlingStatus)}
+            disabled={
+              isSuccess(opprettRevurderingStatus) ||
+              isSuccess(opprettOmgjoeringFoerstegangsbehandlingStatus) ||
+              isPendingOrInitial(klageResult) ||
+              disabledOpprett
+            }
           >
             Opprett revurdering
           </Button>
-          <Button variant="tertiary" onClick={() => setOpen(false)} disabled={isPending(opprettRevurderingStatus)}>
+          <Button
+            variant="tertiary"
+            onClick={() => setOpen(false)}
+            disabled={isPending(opprettRevurderingStatus) || isPending(opprettOmgjoeringFoerstegangsbehandlingStatus)}
+          >
             Avbryt
           </Button>
         </Modal.Footer>

@@ -186,6 +186,6 @@ internal class EgenAnsattServiceTest(
         egenAnsattService.haandterSkjerming(egenAnsattSkjermet)
 
         verify(exactly = 1) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }
-        verify(exactly = 0) { sakService.markerSakerMedSkjerming(any(), any()) }
+        verify(exactly = 0) { sakService.oppdaterSkjerming(any(), any()) }
     }
 }

@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -153,9 +154,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, behandlingId)
                     VedtakType.AVSLAG -> barnepensjonAvslag(avdoede, brukerTokenInfo, behandlingId)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
-                    VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
+
+                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevdata for $vedtakType skal ikke utledes her")
                 }
             }
 
@@ -194,9 +196,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, behandlingId)
                     VedtakType.AVSLAG -> omstillingsstoenadAvslag(brukerTokenInfo, behandlingId, avdoede)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
-                    VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
+
+                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevdata for $vedtakType skal ikke utledes her")
                 }
             }
         }

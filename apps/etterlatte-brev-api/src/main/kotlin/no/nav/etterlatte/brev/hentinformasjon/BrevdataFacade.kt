@@ -15,8 +15,10 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -45,7 +47,8 @@ class BrevdataFacade(
         coroutineScope {
             val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingService.hentVedtak(it, brukerTokenInfo) } }
-            val brevutfallDeferred = behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
+            val brevutfallDeferred =
+                behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
 
             val vedtakType = vedtakDeferred?.await()?.type
             val grunnlag = grunnlagService.hentGrunnlag(vedtakType, sakId, brukerTokenInfo, behandlingId)
@@ -85,19 +88,18 @@ class BrevdataFacade(
                 }
             val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
             val spraak = overstyrSpraak ?: grunnlag.mapSpraak()
-            val relatertKlageId =
-                when (behandling?.revurderingsaarsak) {
-                    Revurderingaarsak.OMGJOERING_ETTER_KLAGE -> {
-                        krevIkkeNull(behandling.relatertBehandlingId) {
-                            "Vi må få med den relaterte klagen til behanldingen hvis dette vedtaket er en omgjøring " +
-                                "etter klage, for å få riktig brev."
-                        }
-                    }
-                    else -> null
-                }
+            val relatertBehandlingId = behandling?.relatertBehandlingId
 
             val forenkletVedtak =
-                forenkletVedtak(vedtak, sak, saksbehandlerIdent, attestantIdent, brukerTokenInfo, relatertKlageId)
+                forenkletVedtak(
+                    vedtak,
+                    sak,
+                    saksbehandlerIdent,
+                    attestantIdent,
+                    brukerTokenInfo,
+                    relatertBehandlingId,
+                    behandling,
+                )
             val revurderingaarsak = behandling?.revurderingsaarsak
 
             GenerellBrevData(
@@ -119,7 +121,8 @@ class BrevdataFacade(
         saksbehandlerIdent: String,
         attestantIdent: String?,
         bruker: BrukerTokenInfo,
-        relatertKlageId: String?,
+        relatertBehandlingId: String?,
+        behandling: DetaljertBehandling?,
     ): ForenkletVedtak? =
         when (vedtak?.type) {
             VedtakType.INNVILGELSE,
@@ -138,17 +141,13 @@ class BrevdataFacade(
                         vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                         virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                         klage =
-                            if (vedtakInnhold.behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-                                val klageId = UUID.fromString(relatertKlageId)
-                                val klage = behandlingService.hentKlage(klageId, bruker)
+                            hentKlageForBehandling(relatertBehandlingId, behandling, bruker)?.also {
                                 logger.info(
-                                    "Hentet klage med id=$klageId fra behandling for revurdering " +
-                                        "omgjøring etter klage i sak ${sak.id}, og fikk klage med status=" +
-                                        "${klage.status} fra behandling",
+                                    "Hentet klage med id=$relatertBehandlingId fra behandling med id=${behandling?.id} " +
+                                        "for behandlingType=${behandling?.behandlingType} " +
+                                        "omgjøring etter klage i sak=${behandling?.sak?.sakId}, " +
+                                        "med klageStatus=${it.status}",
                                 )
-                                klage
-                            } else {
-                                null
                             },
                     )
                 }
@@ -182,6 +181,29 @@ class BrevdataFacade(
                             (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                         ),
                 )
+
             null -> null
+        }
+
+    suspend fun hentKlageForBehandling(
+        relatertBehandlingId: String?,
+        behandling: DetaljertBehandling?,
+        bruker: BrukerTokenInfo,
+    ): Klage? =
+        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING && relatertBehandlingId != null) {
+            try {
+                val klageId = UUID.fromString(relatertBehandlingId)
+                behandlingService.hentKlage(klageId, bruker)
+            } catch (e: Exception) {
+                logger.info(
+                    "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
+                )
+                null
+            }
+        } else if (behandling?.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+            val klageId = UUID.fromString(relatertBehandlingId)
+            behandlingService.hentKlage(klageId, bruker)
+        } else {
+            null
         }
 }

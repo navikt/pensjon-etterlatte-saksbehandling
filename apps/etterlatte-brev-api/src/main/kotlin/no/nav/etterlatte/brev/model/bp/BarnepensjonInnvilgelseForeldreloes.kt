@@ -13,12 +13,20 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+
+fun Klage.datoVedtakOmgjoering(): LocalDate? =
+    this.formkrav
+        ?.formkrav
+        ?.vedtaketKlagenGjelder
+        ?.datoAttestert
+        ?.toLocalDate()
 
 data class BarnepensjonInnvilgelseForeldreloes(
     override val innhold: List<Slate.Element>,
@@ -33,6 +41,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
     val erMigrertYrkesskade: Boolean,
     val erSluttbehandling: Boolean,
     val erEtterbetaling: Boolean,
+    val datoVedtakOmgjoering: LocalDate?,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -51,6 +60,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
             landKodeverk: List<LandDto>,
+            klage: Klage?,
         ): BarnepensjonInnvilgelseForeldreloes =
             BarnepensjonInnvilgelseForeldreloes(
                 innhold = innhold.innhold(),
@@ -77,6 +87,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                 vedtattIPesys = vedtattIPesys,
                 erSluttbehandling = erSluttbehandling,
                 erEtterbetaling = etterbetaling != null,
+                datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
             )
     }
 }

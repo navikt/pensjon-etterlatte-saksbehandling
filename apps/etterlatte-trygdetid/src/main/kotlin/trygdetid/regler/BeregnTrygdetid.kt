@@ -229,15 +229,12 @@ val summerFaktiskNorge =
         trygdetidPerioder,
         dagerPrMaaned,
         ->
+        val summert = trygdetidPerioder.summer(dagerPrMaaned).oppjustertMaaneder()
 
-        trygdetidPerioder.let { perioder ->
-            val summert = perioder.summer(dagerPrMaaned).oppjustertMaaneder()
-
-            FaktiskTrygdetid(
-                periode = Period.ofMonths(summert.toInt()).normalized(),
-                antallMaaneder = summert,
-            )
-        }
+        FaktiskTrygdetid(
+            periode = Period.ofMonths(summert.toInt()).normalized(),
+            antallMaaneder = summert,
+        )
     }
 
 /**

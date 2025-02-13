@@ -67,6 +67,6 @@ internal class BehandlingClientTest {
             ) {
                 install(ContentNegotiation) { jackson {} }
             }
-        return BehandlingClient(httpClient, "")
+        return BehandlingClient(httpClient, httpClient, "")
     }
 }

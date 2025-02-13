@@ -48,7 +48,7 @@ class AppBuilder(
 
     // TODO: Slå sammen med "behandlingService" over
     val behandlingKlient: BehandlingClient by lazy {
-        BehandlingClient(httpClient(BEHANDLING_AZURE_SCOPE), "http://etterlatte-behandling")
+        BehandlingClient(httpClient(BEHANDLING_AZURE_SCOPE), behandlingApp, "http://etterlatte-behandling")
     }
 
     val journalfoerSoeknadService: JournalfoerSoeknadService by lazy {

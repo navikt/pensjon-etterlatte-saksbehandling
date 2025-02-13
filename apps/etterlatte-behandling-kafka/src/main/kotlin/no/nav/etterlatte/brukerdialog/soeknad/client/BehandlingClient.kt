@@ -40,6 +40,7 @@ class FeiletVedOpprettBehandling(
 )
 class BehandlingClient(
     private val sakOgBehandlingApp: HttpClient,
+    private val behandlingAppForventSukess: HttpClient,
     private val url: String,
 ) {
     fun opprettBehandling(
@@ -62,7 +63,7 @@ class BehandlingClient(
 
     fun behandleInntektsjustering(request: MottattInntektsjustering) {
         runBlocking {
-            sakOgBehandlingApp
+            behandlingAppForventSukess
                 .post("$url/inntektsjustering/behandle") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
@@ -75,7 +76,7 @@ class BehandlingClient(
         saktype: SakType,
     ): Sak =
         runBlocking {
-            sakOgBehandlingApp
+            behandlingAppForventSukess
                 .post("$url/personer/saker/$saktype") {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))
@@ -84,7 +85,7 @@ class BehandlingClient(
 
     fun hentSakMedBehandlinger(sakId: SakId): SakMedBehandlinger =
         runBlocking {
-            sakOgBehandlingApp.get("$url/saker/${sakId.sakId}/behandlinger").body()
+            behandlingAppForventSukess.get("$url/saker/${sakId.sakId}/behandlinger").body()
         }
 
     fun opprettOppgave(
@@ -92,7 +93,7 @@ class BehandlingClient(
         oppgave: NyOppgaveDto,
     ): UUID =
         runBlocking {
-            sakOgBehandlingApp
+            behandlingAppForventSukess
                 .post("$url/oppgaver/sak/${sakId.sakId}/opprett") {
                     contentType(ContentType.Application.Json)
                     setBody(oppgave)
@@ -102,7 +103,7 @@ class BehandlingClient(
 
     fun finnOppgaverForReferanse(referanse: String): List<OppgaveIntern> =
         runBlocking {
-            sakOgBehandlingApp
+            behandlingAppForventSukess
                 .get("$url/oppgaver/referanse/$referanse") {
                     contentType(ContentType.Application.Json)
                 }.body()

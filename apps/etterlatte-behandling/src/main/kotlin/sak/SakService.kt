@@ -83,12 +83,15 @@ interface SakService {
 
     fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
 
-    fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering>
+    fun oppdaterEnhetForSak(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    )
 
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int
+    )
 
     fun sjekkSkjerming(
         fnr: String,
@@ -117,10 +120,12 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
-    fun settEnhetOmAdresseebeskyttet(
+    fun settEnhetOmAdressebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     )
+
+    fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset>
 }
 
 class ManglerTilgangTilEnhet(
@@ -133,6 +138,7 @@ class ManglerTilgangTilEnhet(
 class SakServiceImpl(
     private val dao: SakSkrivDao,
     private val lesDao: SakLesDao,
+    private val endringerDao: SakendringerDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
     private val grunnlagService: GrunnlagService,
@@ -377,12 +383,12 @@ class SakServiceImpl(
                 )
             }
         oppdaterAdressebeskyttelse(sak.id, hentetGradering)
-        settEnhetOmAdresseebeskyttet(sak, hentetGradering)
+        settEnhetOmAdressebeskyttet(sak, hentetGradering)
         sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
     }
 
-    override fun settEnhetOmAdresseebeskyttet(
+    override fun settEnhetOmAdressebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     ) {
@@ -406,6 +412,25 @@ class SakServiceImpl(
             AdressebeskyttelseGradering.FORTROLIG -> return
             AdressebeskyttelseGradering.UGRADERT -> return
         }
+    }
+
+    override fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset> {
+        val saksendringer = endringerDao.hentEndringerForSak(sakId)
+
+        // Inntil vi har gått opp om det er greit å vise adressebeskyttelse og skjerming, så ønsker vi ikke å eksponere
+        // dette. Verken som egne endringstyper eller som en del av andre endringstyper.
+        val saksendringerUtenSensitiveEndringer =
+            saksendringer
+                .filter {
+                    it.endringstype in
+                        listOf(
+                            Endringstype.OPPRETT_SAK,
+                            Endringstype.ENDRE_ENHET,
+                            Endringstype.ENDRE_IDENT,
+                        )
+                }.map(Saksendring::toSaksendringBegrenset)
+
+        return saksendringerUtenSensitiveEndringer
     }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
@@ -487,7 +512,7 @@ class SakServiceImpl(
     override fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
+    ) = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     override fun sjekkSkjerming(
         fnr: String,
@@ -523,7 +548,12 @@ class SakServiceImpl(
         dao.oppdaterEnheterPaaSaker(saker)
     }
 
-    override fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering> = lesDao.finnSakerMedGraderingOgSkjerming(sakIder)
+    override fun oppdaterEnhetForSak(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    ) {
+        dao.oppdaterEnheterPaaSaker(listOf(sak), kommentar)
+    }
 
     override fun finnSak(
         ident: String,

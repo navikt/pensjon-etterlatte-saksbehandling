@@ -30,6 +30,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -72,6 +73,7 @@ class AktivitetspliktServiceTest {
     private val oppgaveService: OppgaveService = mockk()
     private val statistikkProduer: BehandlingHendelserKafkaProducer = mockk()
     private val kopierService: AktivitetspliktKopierService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
     private val service =
         AktivitetspliktService(
             aktivitetspliktDao,
@@ -83,6 +85,7 @@ class AktivitetspliktServiceTest {
             statistikkProduer,
             kopierService,
             oppgaveService,
+            featureToggleService,
         )
     private val user =
         mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }

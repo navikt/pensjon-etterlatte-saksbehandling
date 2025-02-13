@@ -12,13 +12,13 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
@@ -29,6 +29,7 @@ import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
@@ -51,10 +52,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.soeker
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
-import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -70,28 +72,23 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
-    val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
+    val user = mockSaksbehandler("test")
+    private val norg2Klient = mockk<Norg2Klient>()
 
     @BeforeAll
     fun start() {
-        val saksbehandlerMedRoller =
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleStrengtFortrolig() } returns false
-                every { harRolleEgenAnsatt() } returns false
-                every { harRolleAttestant() } returns true
-            }
-        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-        every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        val standardEnhet = ArbeidsFordelingEnhet(Enheter.defaultEnhet.navn, Enheter.defaultEnhet.enhetNr)
 
-        startServer()
+        coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(standardEnhet)
+
+        startServer(norg2Klient = norg2Klient)
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
     @AfterAll
     fun shutdown() = afterAll()
 
-    val fnr: String = "123"
+    val fnr: String = soeker
 
     private fun opprettSakMedFoerstegangsbehandling(
         fnr: String,
@@ -101,6 +98,17 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             inTransaction {
                 applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
+
+        val sakmedenhet = inTransaction { applicationContext.sakLesDao.hentSak(sak.id) }
+        println(sakmedenhet)
+        /* Sakenhet fra brukerService blir child^2 #2123 aner ikke hvordan det skjer da den er mocka til noe annet men aldri brukes
+        Men det fungerer i egenansattroutetest?
+        jævlig rart men prøvd med
+                    coEvery {
+                norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
+            } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
+         */
+
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =
             inTransaction {
@@ -322,10 +330,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 tilgangsService =
                     OppdaterTilgangService(
                         applicationContext.sakService,
-                        mockk(relaxed = true),
-                        mockk(relaxed = true),
-                        mockk(relaxed = true),
-                        mockk(relaxed = true),
+                        applicationContext.skjermingKlient,
+                        applicationContext.pdlTjenesterKlient,
+                        applicationContext.brukerService,
+                        applicationContext.oppgaveService,
                     ),
             )
 
@@ -984,10 +992,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             tilgangsService =
                 OppdaterTilgangService(
                     applicationContext.sakService,
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
+                    applicationContext.skjermingKlient,
+                    applicationContext.pdlTjenesterKlient,
+                    applicationContext.brukerService,
+                    applicationContext.oppgaveService,
                 ),
         )
 }

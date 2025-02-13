@@ -73,8 +73,28 @@ export function VurderAktivitetspliktWrapper(props: {
       typeVurdering={typeVurdering}
       onAvbryt={onAvbryt}
       lagreStatus={lagreStatus}
+      vurderingKilde={VurderingKilde.OPPGAVE}
     />
   )
+}
+
+export enum VurderingKilde {
+  OPPGAVE = 'OPPGAVE',
+  FOERSTEGANGSBEHANDLING = 'FOERSTEGANGSBEHANDLING',
+  REVURDERING = 'REVURDERING',
+}
+
+function aktivitetsgradTekstFraKilde(
+  vurderingKilde: VurderingKilde,
+  vurderingType: AktivitetspliktOppgaveVurderingType
+) {
+  switch (vurderingKilde) {
+    case VurderingKilde.FOERSTEGANGSBEHANDLING:
+    case VurderingKilde.REVURDERING:
+      return 'Hva er aktivitetsgraden til bruker?'
+    case VurderingKilde.OPPGAVE:
+      return `Hva er aktivitetsgraden til bruker ${vurderingType === 'SEKS_MAANEDER' ? 'seks måneder' : 'tolv måneder'} etter dødsfall?`
+  }
 }
 
 export function VurderingAktivitetsgradOgUnntak(props: {
@@ -83,12 +103,16 @@ export function VurderingAktivitetsgradOgUnntak(props: {
   onSubmit: (data: NyVurderingAktivitetsgradOgUnntak) => void
   typeVurdering: AktivitetspliktOppgaveVurderingType
   lagreStatus: Result<IAktivitetspliktVurderingNyDto>
+  vurderingKilde: VurderingKilde
 }) {
-  const { onSubmit, onAvbryt, doedsdato, typeVurdering, lagreStatus } = props
+  const { onSubmit, onAvbryt, doedsdato, typeVurdering, lagreStatus, vurderingKilde } = props
 
-  const defaultFom = doedsdato
-    ? startOfMonth(addMonths(doedsdato, maanederForVurdering(typeVurdering)))
-    : startOfMonth(new Date())
+  const defaultFom =
+    vurderingKilde === VurderingKilde.OPPGAVE
+      ? doedsdato
+        ? startOfMonth(addMonths(doedsdato, maanederForVurdering(typeVurdering)))
+        : startOfMonth(new Date())
+      : new Date()
 
   const methods = useForm<NyVurderingAktivitetsgradOgUnntak>({
     defaultValues: {
@@ -114,7 +138,7 @@ export function VurderingAktivitetsgradOgUnntak(props: {
           <ControlledRadioGruppe
             control={control}
             name="vurderingAvAktivitet.aktivitetsgrad"
-            legend="Hva er aktivitetsgraden til bruker?"
+            legend={aktivitetsgradTekstFraKilde(vurderingKilde, typeVurdering)}
             errorVedTomInput="Du må velge en aktivitetsgrad"
             radios={
               <>
@@ -132,12 +156,20 @@ export function VurderingAktivitetsgradOgUnntak(props: {
               </>
             }
           />
+          {vurderingKilde === VurderingKilde.FOERSTEGANGSBEHANDLING && (
+            <Box maxWidth="42.5rem">
+              <Alert variant="info">
+                Vurder situasjonen som gjelder i dag, og om det er noen unntak. Denne vurderingen er for å dokumentere
+                senere oppfølging.
+              </Alert>
+            </Box>
+          )}
           <HStack gap="6">
             <ControlledDatoVelger
               name="vurderingAvAktivitet.fom"
               label="Fra og med"
               control={control}
-              description="Fra dato oppgitt"
+              description={`Fra ${vurderingKilde === VurderingKilde.OPPGAVE ? 'kravet inntreffer' : 'dato oppgitt'}`}
               errorVedTomInput="Du må velge fra og med dato"
             />
             <ControlledDatoVelger
@@ -199,7 +231,8 @@ export function VurderingAktivitetsgradOgUnntak(props: {
                 }
               />
             )}
-          {svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50 &&
+          {vurderingKilde === VurderingKilde.OPPGAVE &&
+            svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50 &&
             watch('harUnntak') !== JaNei.JA && (
               <Box maxWidth="50rem">
                 <Alert variant="info">

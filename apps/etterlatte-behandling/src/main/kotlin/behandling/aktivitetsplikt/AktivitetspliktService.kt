@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
@@ -41,7 +42,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -64,6 +64,7 @@ class AktivitetspliktService(
     private val statistikkKafkaProducer: BehandlingHendelserKafkaProducer,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
     private val oppgaveService: OppgaveService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -148,45 +149,45 @@ class AktivitetspliktService(
         }
 
     fun opprettOppfoelgingsoppgaveUnntak(
-        referanse: UUID,
         unntak: List<AktivitetspliktUnntak>,
-        sak: Sak,
+        sakId: SakId,
     ) {
+        if (!featureToggleService.isEnabled(AktivitetspliktOppgaveToggles.UNNTAK_UTEN_FRIST, false)) {
+            return
+        }
+
         try {
             // Hvis bruker har varig unntak er det ikke nødvendig å følge opp
             if (unntak.any { it.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT }) {
                 return
             }
 
-            val unntakUtenTilOgMed = unntak.filter { it.tom == null }
-            if (unntakUtenTilOgMed.isNotEmpty()) {
-                // Lag en oppfølgingsoppgave for å følge opp unntak uten frist
-                oppgaveService.opprettOppgave(
-                    referanse = referanse.toString(),
-                    sakId = sak.id,
-                    kilde = OppgaveKilde.SAKSBEHANDLER,
-                    type = OppgaveType.OPPFOELGING,
-                    merknad = "Unntak ${
-                        unntakUtenTilOgMed.joinToString(
-                            separator = ", ",
-                            prefix = "\"",
-                            postfix = "\"",
-                        ) { it.unntak.navn }
-                    } har ikke til og med dato.",
-                    frist =
-                        LocalDate
-                            .now()
-                            .plusMonths(2)
-                            .atStartOfDay()
-                            .toTidspunkt(),
-                    saksbehandler = null,
-                    gruppeId = null,
-                )
-            }
+            val unntakUtenTilOgMed =
+                unntak
+                    .filter { it.tom == null }
+                    .map {
+                        // Lag en oppfølgingsoppgave for å følge opp unntak uten frist
+                        oppgaveService.opprettOppgave(
+                            referanse = it.id.toString(),
+                            sakId = sakId,
+                            kilde = OppgaveKilde.SAKSBEHANDLER,
+                            type = OppgaveType.OPPFOELGING,
+                            merknad = "Unntak ${it.unntak.lesbartNavn} har ikke til og med dato.",
+                            frist =
+                                LocalDate
+                                    .now()
+                                    .plusMonths(2)
+                                    .atStartOfDay()
+                                    .toTidspunkt(),
+                            saksbehandler = null,
+                            gruppeId = null,
+                        )
+                    }
+            logger.info("opprettet ${unntakUtenTilOgMed.size} oppgaver for oppfølging av unntak i sak $sakId")
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke opprette oppfølgingsoppgave i ferdigstilling av aktivitetsplikt for " +
-                    "sak ${sak.id} referanse=$referanse. Stopper ikke ferdigstillingen av oppgave/behandling",
+                    "sak $sakId. Stopper ikke ferdigstillingen av oppgave/behandling",
                 e,
             )
         }

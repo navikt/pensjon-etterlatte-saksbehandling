@@ -17,7 +17,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
-import { subMonths, isBefore, isValid, parse } from 'date-fns'
+import { isBefore, isValid, parse, subMonths } from 'date-fns'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
@@ -104,16 +104,13 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             </BodyLong>
             <BodyLong spacing>
               Selv om de første seks månedene er fritatt, er det viktig å kartlegge situasjonen tidlig for å sikre
-              riktig oppfølging og forberede brukeren på kravene som følger
+              riktig oppfølging og forberede brukeren på kravene som følger.
             </BodyLong>
           </ReadMore>
         </TekstWrapper>
 
         {isValidDateOfDeath(avdoedesDoedsdato!!) && ( // https://jira.adeo.no/browse/EY-4939 todo denne valideringen burde skje et annet sted vel og si noe om den ikke er gyldig
           <>
-            <Heading spacing level="1" size="medium">
-              Gjenlevende sin tidslinje
-            </Heading>
             <AktivitetspliktTidslinje
               behandling={behandling}
               doedsdato={avdoedesDoedsdato!!}

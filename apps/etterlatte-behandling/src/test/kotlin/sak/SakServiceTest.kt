@@ -79,6 +79,7 @@ internal class SakServiceTest {
     private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val sakSkrivDao = mockk<SakSkrivDao>()
     private val sakLesDao = mockk<SakLesDao>()
+    private val sakendringerDao = mockk<SakendringerDao>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -87,6 +88,7 @@ internal class SakServiceTest {
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
+            sakendringerDao,
             skjermingKlient,
             brukerService,
             grunnlagservice,
@@ -414,7 +416,7 @@ internal class SakServiceTest {
             sak1
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
         coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
@@ -499,7 +501,7 @@ internal class SakServiceTest {
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(any(), any()) } just runs
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
 
         val sak =
@@ -561,7 +563,7 @@ internal class SakServiceTest {
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
         coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
 

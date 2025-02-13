@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype
@@ -29,7 +28,6 @@ import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.SIVILSTAND_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
 import no.nav.person.pdl.leesah.Personhendelse
-import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -144,12 +142,6 @@ class PersonHendelseFordeler(
         hendelse: Personhendelse,
         personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) {
-        val gradering = hendelse.adressebeskyttelse?.gradering
-        if (gradering == null || gradering == Gradering.UGRADERT) {
-            logger.info("Ignorerer person med tom eller ugradert gradering, krever ingen tiltak.")
-            return
-        }
-
         publiserPaaRapid(
             opplysningstype = ADRESSEBESKYTTELSE_V1,
             hendelse =
@@ -157,10 +149,6 @@ class PersonHendelseFordeler(
                     hendelseId = hendelse.hendelseId,
                     endringstype = hendelse.endringstype(),
                     fnr = personnummer.folkeregisterident.value,
-                    adressebeskyttelseGradering =
-                        gradering.let {
-                            AdressebeskyttelseGradering.valueOf(gradering.toString())
-                        },
                 ),
         )
     }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
@@ -40,13 +41,14 @@ class BrevKodeMapperVedtak {
                     VedtakType.AVSLAG -> Brevkoder.BP_AVSLAG
                     VedtakType.ENDRING -> Brevkoder.BP_REVURDERING
                     VedtakType.OPPHOER -> Brevkoder.BP_OPPHOER
-                    VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
                     null -> throw UgyldigForespoerselException(
                         code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
                         detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
                         meta = mapOf("request" to request),
                     )
+
+                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
                 }
             }
 
@@ -63,13 +65,14 @@ class BrevKodeMapperVedtak {
                     }
 
                     VedtakType.OPPHOER -> Brevkoder.OMS_OPPHOER
-                    VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
                     null -> throw UgyldigForespoerselException(
                         code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
                         detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
                         meta = mapOf("request" to request),
                     )
+
+                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
                 }
             }
         }

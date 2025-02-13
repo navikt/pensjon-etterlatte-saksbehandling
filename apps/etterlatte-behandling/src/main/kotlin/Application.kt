@@ -27,10 +27,12 @@ import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
+import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
+import no.nav.etterlatte.grunnlag.tempGrunnlagRoutes
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.inntektsjustering.aarligInntektsjusteringRoute
@@ -94,6 +96,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
+        context.aktivitetspliktOppgaveUnntakUtloeperJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -170,6 +173,9 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         behandlingFactory = applicationContext.behandlingFactory,
     )
+
+    brevRoute(service = applicationContext.brevService)
+
     aktivitetspliktRoutes(
         aktivitetspliktService = applicationContext.aktivitetspliktService,
         aktivitetspliktOppgaveService = applicationContext.aktivitetspliktOppgaveService,
@@ -221,6 +227,18 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     kodeverk(applicationContext.kodeverkService)
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
+    tempGrunnlagRoutes(applicationContext.tempGrunnlagKlient)
+
+/*
+    TODO 👇
+
+    route("/grunnlag") {
+        behandlingGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
+        personRoute(applicationContext.tempGrunnlagServiceProxy, applicationContext.tilgangService)
+        sakGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
+        aldersovergangRoutes(applicationContext.tempAldersovergangServiceProxy)
+    }
+*/
 }
 
 private fun Route.settOppTilganger(

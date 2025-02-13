@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.brevutsendelse
 
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
@@ -28,7 +27,7 @@ internal class BrevutsendelseDaoTest(
     @BeforeAll
     fun beforeAll() {
         brevutsendelseDao = BrevutsendelseDao(ConnectionAutoclosingTest(dataSource = dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
     }
 
     @AfterEach

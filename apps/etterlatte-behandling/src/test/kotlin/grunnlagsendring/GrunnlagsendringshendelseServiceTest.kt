@@ -4,13 +4,13 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -19,15 +19,12 @@ import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.BrukerService
-import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
@@ -50,15 +47,15 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -82,8 +79,8 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val sakService = mockk<SakService>()
     private val oppgaveService = mockk<OppgaveService>()
-    private val brukerService = mockk<BrukerService>()
     private val doedshendelseService = mockk<DoedshendelseService>()
+    private val oppdaterTilgangService = mockk<OppdaterTilgangService>()
     private val grunnlagsendringsHendelseFilter = mockk<GrunnlagsendringsHendelseFilter>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
@@ -109,13 +106,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                     pdlService,
                     grunnlagKlient,
                     sakService,
-                    brukerService,
                     doedshendelseService.apply {
                         every { opprettDoedshendelseForBeroertePersoner(any()) } returns Unit
                     },
                     grunnlagsendringsHendelseFilter.apply {
                         every { hendelseErRelevantForSak(any(), any()) } returns true
                     },
+                    oppdaterTilgangService,
                 ),
             )
     }
@@ -655,148 +652,37 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Skal kunne sette adressebeskyttelse strengt fortrolig og sette enhet`() {
-        val sakIder: Set<SakId> = setOf(sakId1, sakId2, sakId3, randomSakId(), randomSakId(), randomSakId())
-        val saker =
-            sakIder.map {
-                Sak(
-                    id = it,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                )
-            }
-        val fnr = "16508201382"
-        val adressebeskyttelse =
-            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-
-        coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
-        every { sakService.finnSaker(fnr) } returns saker
-        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
-        every {
-            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
-        every { sakService.oppdaterEnhetForSaker(any()) } just runs
-        saker.forEach {
-            every { sakService.finnSak(it.id) } returns it
-        }
-        runBlocking {
-            grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
-        }
-
-        coVerify(exactly = 1) { grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr) }
-
-        every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
-
-        sakIder.forEach {
-            verify(exactly = 1) {
-                sakService.oppdaterAdressebeskyttelse(
-                    it,
-                    adressebeskyttelse.adressebeskyttelseGradering,
-                )
-            }
-            verify(exactly = 1) {
-                oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
-            }
-        }
-    }
-
-    @Test
     fun `Skal ikke gjøre oppdateringer om sakidene ikke finnes`() {
-        val sakIder: Set<SakId> = setOf(randomSakId(), randomSakId())
-        val saker =
-            sakIder.map {
-                Sak(
-                    id = it,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                )
-            }
         val fnr = "16508201382"
         val adressebeskyttelse =
-            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
-        coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
-        every { sakService.finnSaker(fnr) } returns saker
-        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
-        every {
-            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
-        every { sakService.oppdaterEnhetForSaker(any()) } just runs
-        every { sakService.finnSak(any()) } returns null
+        coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns emptySet()
 
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }
 
         coVerify(exactly = 1) { grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr) }
-        verify(exactly = 2) { sakService.finnSak(any()) }
-
-        every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
-
-        verify(exactly = 0) {
-            sakService.oppdaterAdressebeskyttelse(
-                any(),
-                adressebeskyttelse.adressebeskyttelseGradering,
-            )
-        }
     }
 
     @Test
-    fun `Skal kunne sette fortrolig og sette enhet`() {
-        val sakIder: Set<SakId> =
-            setOf(
-                sakId1,
-                sakId2,
-                sakId3,
-                randomSakId(),
-                randomSakId(),
-                randomSakId(),
-            )
-        val saker =
-            sakIder.map {
-                Sak(
-                    id = it,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                )
-            }
-        val fnr = AVDOED2_FOEDSELSNUMMER.value
+    fun `Skal gjøre tilgangsoppdateringer om sakider fines for hendelse adressebeskyttelse`() {
+        val fnr = "16508201382"
         val adressebeskyttelse =
-            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.FORTROLIG)
+            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
-        coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
-        every { sakService.finnSaker(fnr) } returns saker
-        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
-        every {
-            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
-        every { sakService.oppdaterEnhetForSaker(any()) } just runs
-        saker.forEach {
-            every { sakService.finnSak(it.id) } returns it
-        }
+        val sakId = SakId(1L)
+        coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns setOf(sakId)
+        val persongalleri = persongalleri()
+        coEvery { grunnlagKlient.hentPersongalleri(sakId) } returns persongalleri
+        coEvery { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri) } just Runs
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }
 
         coVerify(exactly = 1) { grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr) }
-
-        sakIder.forEach {
-            verify(exactly = 1) {
-                sakService.oppdaterAdressebeskyttelse(
-                    it,
-                    adressebeskyttelse.adressebeskyttelseGradering,
-                )
-            }
-            verify(exactly = 1) {
-                oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
-            }
-        }
+        coVerify(exactly = 1) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri) }
     }
 
     @Test

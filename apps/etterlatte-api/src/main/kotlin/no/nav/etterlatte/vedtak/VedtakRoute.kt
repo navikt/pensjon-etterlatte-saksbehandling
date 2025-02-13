@@ -58,6 +58,6 @@ enum class VedtakType {
 
 data class VedtakUtbetaling(
     val fraOgMed: LocalDate,
-    val tilOgMed: LocalDate,
+    val tilOgMed: LocalDate?,
     val beloep: BigDecimal?,
 )

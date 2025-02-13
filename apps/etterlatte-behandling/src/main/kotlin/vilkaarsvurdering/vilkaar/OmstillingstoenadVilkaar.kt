@@ -12,7 +12,6 @@ object OmstillingstoenadVilkaar {
             doedsfall(),
             oevrigeVilkaar(),
             overlappendeYtelser(),
-            sivilstand(),
             yrkesskade(),
             avdoedesMedlemskap(),
             avdoedesMedlemskapEoes(),
@@ -21,6 +20,8 @@ object OmstillingstoenadVilkaar {
             rettTilStoenadUtenTidsbegrensning(),
             aktivitetsplikt(),
         )
+
+    fun loependevilkaar() = inngangsvilkaar() + sivilstand()
 
     private fun etterlatteLever() =
         Vilkaar(

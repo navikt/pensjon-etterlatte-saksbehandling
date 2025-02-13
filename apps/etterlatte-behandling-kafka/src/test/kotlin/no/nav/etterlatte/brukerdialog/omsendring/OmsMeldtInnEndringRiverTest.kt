@@ -8,6 +8,10 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.ArkiverOmsMeldtInnEndring
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.JournalfoerOmsMeldtInnEndringService
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringHendelseKeys
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringRiver
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.AvsenderMottaker
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.Bruker
@@ -20,8 +24,11 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsEndring
+import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsMeldtInnEndring
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
@@ -44,11 +51,11 @@ class OmsMeldtInnEndringRiverTest {
 
     @Test
     fun `Skal journalføre meldt inn endring for OMS og lage oppgave`() {
-        val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, SakId(321), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("15507143951", SakType.OMSTILLINGSSTOENAD, SakId(321), Enheter.PORSGRUNN.enhetNr)
         val endring =
             OmsMeldtInnEndring(
                 id = UUID.randomUUID(),
-                fnr = "123",
+                fnr = Foedselsnummer.of("15507143951"),
                 endring = OmsEndring.ANNET,
                 beskrivelse = "Endringer fra bruker..",
                 tidspunkt = Instant.parse("2024-08-01T05:06:07Z"),
@@ -78,7 +85,7 @@ class OmsMeldtInnEndringRiverTest {
         val pdfDataSlot = slot<PDFMal>()
 
         coVerify(exactly = 1) {
-            behandlingKlientMock.finnEllerOpprettSak("123", SakType.OMSTILLINGSSTOENAD)
+            behandlingKlientMock.finnEllerOpprettSak("15507143951", SakType.OMSTILLINGSSTOENAD)
 
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
             pdfgenKlient.genererPdf(capture(pdfDataSlot), "oms_meldt_inn_endring_v1")
@@ -86,9 +93,9 @@ class OmsMeldtInnEndringRiverTest {
             behandlingKlientMock.opprettOppgave(
                 sakId = SakId(321L),
                 withArg {
-                    it.oppgaveKilde shouldBe OppgaveKilde.HENDELSE
-                    it.oppgaveType shouldBe OppgaveType.GENERELL_OPPGAVE
-                    it.merknad shouldBe "" // TODO
+                    it.oppgaveKilde shouldBe OppgaveKilde.BRUKERDIALOG_SELVBETJENING
+                    it.oppgaveType shouldBe OppgaveType.MELDT_INN_ENDRING
+                    it.merknad shouldBe "Endring meldt inn fra selvbetjening skjema"
                 },
             )
         }

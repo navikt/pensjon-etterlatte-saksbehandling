@@ -99,4 +99,12 @@ class BehandlingClient(
                 }.body<OppgaveIntern>()
                 .id
         }
+
+    fun finnOppgaverForReferanse(referanse: String): List<OppgaveIntern> =
+        runBlocking {
+            sakOgBehandlingApp
+                .get("$url/oppgaver/referanse/$referanse") {
+                    contentType(ContentType.Application.Json)
+                }.body()
+        }
 }

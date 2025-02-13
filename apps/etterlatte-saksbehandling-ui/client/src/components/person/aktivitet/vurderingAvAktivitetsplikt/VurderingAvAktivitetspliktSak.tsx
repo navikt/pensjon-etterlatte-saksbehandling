@@ -1,8 +1,7 @@
 import React from 'react'
 import { IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Heading, VStack } from '@navikt/ds-react'
-import { AktivitetsgradSakTabell } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/AktivitetsgradSakTabell'
-import { UnntakPlainVisning } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/UnntakPlainVisning'
+import { AktivitetsgradOgUnntakSakTabell } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/AktivitetsgradOgUnntakSakTabell'
 
 export const VurderingAvAktivitetspliktSak = ({
   aktivitetspliktVurdering,
@@ -16,8 +15,10 @@ export const VurderingAvAktivitetspliktSak = ({
         <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
       </VStack>
 
-      <AktivitetsgradSakTabell aktiviteter={aktivitetspliktVurdering.aktivitet} />
-      <UnntakPlainVisning unntaker={aktivitetspliktVurdering.unntak} />
+      <AktivitetsgradOgUnntakSakTabell
+        aktiviteter={aktivitetspliktVurdering.aktivitet}
+        unntak={aktivitetspliktVurdering.unntak}
+      />
     </VStack>
   )
 }

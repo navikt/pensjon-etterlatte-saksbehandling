@@ -24,3 +24,31 @@ export interface FoersteVirk {
   foersteIverksatteVirkISak: string
   sakId: number
 }
+
+export interface ISaksendring {
+  id: string
+  endringstype: Endringstype
+  foer: ISak
+  etter: ISak
+  ident: string
+  identtype: Identtype
+  kommentar: string
+  tidspunkt: string
+}
+
+export enum Identtype {
+  SAKSBEHANDLER = 'SAKSBEHANDLER',
+  GJENNY = 'GJENNY',
+}
+
+export enum Endringstype {
+  OPPRETT_SAK = 'OPPRETT_SAK',
+  ENDRE_IDENT = 'ENDRE_IDENT',
+  ENDRE_ENHET = 'ENDRE_ENHET',
+}
+
+export const tekstEndringstype: Record<Endringstype, string> = {
+  OPPRETT_SAK: 'Opprettet sak',
+  ENDRE_IDENT: 'Nytt identnummer',
+  ENDRE_ENHET: 'Bytte av enhet',
+}

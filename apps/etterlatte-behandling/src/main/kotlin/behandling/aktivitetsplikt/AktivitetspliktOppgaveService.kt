@@ -16,7 +16,6 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -40,6 +39,7 @@ enum class AktivitetspliktOppgaveToggles(
     private val key: String,
 ) : FeatureToggle {
     UNNTAK_UTEN_FRIST("aktivitetsplikt-oppgave-unntak-ingen-frist"),
+    UNNTAK_MED_FRIST("aktivitetsplikt-oppgave-unntak-med-frist"),
     ;
 
     override fun key(): String = key
@@ -52,7 +52,6 @@ class AktivitetspliktOppgaveService(
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao,
     private val brevApiKlient: BrevApiKlient,
     private val behandlingService: BehandlingService,
-    private val unleashFeatureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -293,6 +292,25 @@ class AktivitetspliktOppgaveService(
         }
     }
 
+    fun ferdigstillOppgaveUtenBrev(
+        oppgaveId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OppgaveIntern {
+        val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
+        if (brevData.skalSendeBrev) {
+            throw UgyldigForespoerselException(
+                "FEIL_I_BREVDATA",
+                "Kan ikke ferdigstille oppgave for aktivitetsplikt uten å sende brev hvis det er valgt at brev skal sendes.",
+            )
+        }
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+
+        val unntakIOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId).unntak
+        aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIOppgave, sak.id)
+        return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+    }
+
     fun ferdigstillBrevOgOppgave(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -318,10 +336,8 @@ class AktivitetspliktOppgaveService(
         val brevrespons: BrevStatusResponse =
             runBlocking { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(req, brukerTokenInfo) }
         if (brevrespons.status.erDistribuert()) {
-            if (unleashFeatureToggleService.isEnabled(AktivitetspliktOppgaveToggles.UNNTAK_UTEN_FRIST, false)) {
-                val unntakIOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId).unntak
-                aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(oppgaveId, unntakIOppgave, sak)
-            }
+            val unntakIOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId).unntak
+            aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIOppgave, sak.id)
             return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {
             logger.warn("Brev ble ikke distribuert, ferdigstiller ikke oppgave $oppgaveId for aktivitetsplikt")

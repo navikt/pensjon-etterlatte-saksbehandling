@@ -102,6 +102,7 @@ enum class OppgaveKilde {
     GJENOPPRETTING,
     SAKSBEHANDLER,
     BRUKERDIALOG,
+    BRUKERDIALOG_SELVBETJENING,
 }
 
 enum class OppgaveType {
@@ -126,6 +127,7 @@ enum class OppgaveType {
     AARLIG_INNTEKTSJUSTERING,
     MANUELL_UTSENDING_BREV,
     OPPFOELGING,
+    MELDT_INN_ENDRING,
     ;
 
     companion object {

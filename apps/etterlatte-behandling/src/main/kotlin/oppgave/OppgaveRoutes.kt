@@ -183,7 +183,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                                 kilde = nyOppgaveDto.oppgaveKilde,
                                 type = nyOppgaveDto.oppgaveType,
                                 merknad = nyOppgaveDto.merknad,
-                                frist = null,
+                                frist = nyOppgaveDto.frist,
                                 saksbehandler = nyOppgaveDto.saksbehandler,
                             )
                         }
@@ -298,6 +298,16 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 }
 
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        get("/referanse/{referanse}") {
+            kunSystembruker {
+                call.respond(
+                    inTransaction {
+                        service.hentOppgaverForReferanse(referanse)
+                    },
+                )
             }
         }
 

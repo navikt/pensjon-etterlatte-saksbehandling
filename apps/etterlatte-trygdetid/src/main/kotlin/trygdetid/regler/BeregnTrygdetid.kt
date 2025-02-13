@@ -77,12 +77,17 @@ val dagerPrMaanedTrygdetidGrunnlag =
         verdi = 30,
     )
 
-val opptjeningsDatoer: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Pair<LocalDate, LocalDate>> =
+data class Opptjeningsdatoer(
+    val foedselsDato: LocalDate,
+    val doedsDato: LocalDate,
+)
+
+val opptjeningsDatoer: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Opptjeningsdatoer> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Hent foedselsdato og doedsdato",
         finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { Pair(it.foedselsDato, it.doedsDato) },
+        finnFelt = { Opptjeningsdatoer(foedselsDato = it.foedselsDato, doedsDato = it.doedsDato) },
     )
 
 val antallPoengaarINorge: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Int?> =
@@ -209,10 +214,10 @@ val finnDatoerForOpptjeningstid =
             if (fremtidigFra != null) {
                 fremtidigFra.withDayOfMonth(1).minusDays(1)
             } else {
-                opptjeningsDatoer.second.withDayOfMonth(1).minusDays(1)
+                opptjeningsDatoer.doedsDato.withDayOfMonth(1).minusDays(1)
             }
         Pair(
-            opptjeningsDatoer.first.plusYears(16),
+            opptjeningsDatoer.foedselsDato.plusYears(16),
             opptjeningTil,
         )
     }

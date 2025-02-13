@@ -32,12 +32,45 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+data class PersonerISakOgSak(
+    val personerISak: PersonerISak,
+    val sak: Sak,
+)
+
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val grunnlagService: GrunnlagService,
     private val behandlingService: BehandlingService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(BrevdataFacade::class.java)
+
+    suspend fun hentPersonerISakforBrev(
+        sakId: SakId,
+        behandlingId: UUID?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): PersonerISakOgSak =
+        coroutineScope {
+            val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
+            val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingService.hentVedtak(it, brukerTokenInfo) } }
+            val vedtakType = vedtakDeferred?.await()?.type
+            val grunnlag = grunnlagService.hentGrunnlag(vedtakType, sakId, brukerTokenInfo, behandlingId)
+            val sak = sakDeferred.await()
+            val brevutfallDeferred = behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
+
+            val brevutfallDto = brevutfallDeferred?.await()
+            val verge = grunnlagService.hentVergeForSak(sak.sakType, brevutfallDto, grunnlag)
+            val personerISak =
+                PersonerISak(
+                    innsender = grunnlag.mapInnsender(),
+                    soeker = grunnlag.mapSoeker(brevutfallDto?.aldersgruppe),
+                    avdoede = grunnlag.mapAvdoede(),
+                    verge = verge,
+                )
+            PersonerISakOgSak(
+                personerISak = personerISak,
+                sak = sak,
+            )
+        }
 
     suspend fun hentGenerellBrevData(
         sakId: SakId,

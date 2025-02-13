@@ -69,6 +69,8 @@ internal class BrevServiceTest {
             mockk(),
             mockk(),
             mockk(),
+            mockk(),
+            mockk(),
         )
     private val bruker = simpleSaksbehandler("Z123456")
 
@@ -266,13 +268,13 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            val faktiskMottaker = brevService.opprettMottaker(brev.id)
+            val faktiskMottaker = brevService.opprettMottaker(brev.id, bruker)
 
             faktiskMottaker.type shouldBe MottakerType.KOPI
 
             verify {
                 db.hentBrev(brev.id)
-                db.opprettMottaker(brev.id, match { it.type == MottakerType.KOPI })
+                db.opprettMottaker(brev.id, match { it.type == MottakerType.KOPI }, bruker)
             }
         }
 
@@ -288,7 +290,7 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            assertThrows<MaksAntallMottakere> { brevService.opprettMottaker(brev.id) }
+            assertThrows<MaksAntallMottakere> { brevService.opprettMottaker(brev.id, bruker) }
 
             verify {
                 db.hentBrev(brev.id)
@@ -303,7 +305,7 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             assertThrows<BrevKanIkkeEndres> {
-                brevService.opprettMottaker(brev.id)
+                brevService.opprettMottaker(brev.id, bruker)
             }
 
             verify {

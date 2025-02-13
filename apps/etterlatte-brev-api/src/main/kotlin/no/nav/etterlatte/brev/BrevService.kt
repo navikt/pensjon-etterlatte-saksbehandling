@@ -311,17 +311,18 @@ class BrevService(
         val brev = sjekkOmBrevKanEndres(brevId)
         logger.info("Tilbakestiller mottakere for brev=$brevId")
         val personerISakOgSak = brevdataFacade.hentPersonerISakforBrev(brev.sakId, brev.behandlingId, bruker)
+        val nyeMottakere = adresseService.hentMottakere(personerISakOgSak.sak.sakType, personerISakOgSak.personerISak, bruker)
+        if (nyeMottakere.isEmpty()) {
+            throw KanIkkeTilbakestilleUtenNyeMottakere()
+        }
+        if (!nyeMottakere.any { it.type == MottakerType.HOVED }) {
+            throw KanIkkeSletteHovedmottaker()
+        }
+        // bare slett hvis testene går gjennom
         brev.mottakere.forEach { mottaker ->
             db.slettMottaker(brev.id, mottaker.id, bruker)
         }
-        val mottakere = adresseService.hentMottakere(personerISakOgSak.sak.sakType, personerISakOgSak.personerISak, bruker)
-        if (mottakere.isEmpty()) {
-            throw KanIkkeTilbakestilleUtenNyeMottakere()
-        }
-        if (!mottakere.any { it.type == MottakerType.HOVED }) {
-            throw KanIkkeSletteHovedmottaker()
-        }
-        mottakere.forEach { mottaker ->
+        nyeMottakere.forEach { mottaker ->
             db.opprettMottaker(brev.id, mottaker, bruker)
         }
 

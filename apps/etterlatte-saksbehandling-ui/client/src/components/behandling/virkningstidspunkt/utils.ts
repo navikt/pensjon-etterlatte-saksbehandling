@@ -1,6 +1,10 @@
 import { addMonths, isBefore, subYears } from 'date-fns'
-import { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { SakType } from '~shared/types/sak'
+
+export interface Hjemmel {
+  lenke: string
+  tittel: string
+}
 
 export function hentMinimumsVirkningstidspunkt(
   avdoedDoedsdato: Date | undefined,
@@ -21,6 +25,35 @@ export function hentMinimumsVirkningstidspunkt(
   } else {
     return minimumsVirkningstidspunkt
   }
+}
+
+export const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
+  switch (sakType) {
+    case SakType.BARNEPENSJON:
+      return erBosattUtland ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : BP_FOERSTEGANGSBEHANDLING_HJEMLER
+    case SakType.OMSTILLINGSSTOENAD:
+      return erBosattUtland ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : OMS_FOERSTEGANGSBEHANDLING_HJEMLER
+  }
+}
+
+export const beskrivelseVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean, erForeldreloes: boolean) => {
+  switch (sakType) {
+    case SakType.BARNEPENSJON:
+      return bpBeskrivelseVirkningstidspunkt(erBosattUtland, erForeldreloes)
+    case SakType.OMSTILLINGSSTOENAD:
+      return omsBeskrivelseVirkningstidspunkt(erBosattUtland)
+  }
+}
+
+const bpBeskrivelseVirkningstidspunkt = (erBosattUtland: boolean, erForeldreloes: boolean) => {
+  const standard = erBosattUtland
+    ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+    : BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+  return erForeldreloes ? standard + BP_FORELDRELOES_PAA_GAMMELT_REGELVERK_BEHANDLES_I_PESYS_BESKRIVELSE : standard
+}
+
+const omsBeskrivelseVirkningstidspunkt = (erBosattUtland: boolean) => {
+  return erBosattUtland ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
 }
 
 // FELLES

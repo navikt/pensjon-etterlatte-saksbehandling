@@ -126,7 +126,7 @@ class OpplysningDaoProxy(
                     Resource(clientId, "$url/finnNyesteGrunnlagForSak?sakId=$sakId&opplysningstype=$opplysningType"),
                     brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 ).mapBoth(
-                    success = { deserialize(it.response.toString()) },
+                    success = { res -> res.response?.let { deserialize(it.toString()) } },
                     failure = { throw it },
                 )
         }
@@ -141,10 +141,13 @@ class OpplysningDaoProxy(
         return runBlocking {
             downstreamResourceClient
                 .get(
-                    Resource(clientId, "$url/finnNyesteGrunnlagForBehandling?behandlingId=$behandlingId&opplysningstype=$opplysningType"),
+                    Resource(
+                        clientId,
+                        "$url/finnNyesteGrunnlagForBehandling?behandlingId=$behandlingId&opplysningstype=$opplysningType",
+                    ),
                     brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 ).mapBoth(
-                    success = { deserialize(it.response.toString()) },
+                    success = { res -> res.response?.let { deserialize(it.toString()) } },
                     failure = { throw it },
                 )
         }
@@ -186,7 +189,10 @@ class OpplysningDaoProxy(
                     ),
                     brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 ).mapBoth(
-                    success = { deserialize(it.response.toString()) },
+                    success = {
+                        logger.info("Versjon oppdatert for behandling=$behandlingId")
+                        1 // TODO: Returverdien brukes ikke og kan fjernes
+                    },
                     failure = { throw it },
                 )
         }
@@ -201,7 +207,10 @@ class OpplysningDaoProxy(
                     Resource(clientId, "$url/laasGrunnlagVersjonForBehandling?behandlingId=$behandlingId"),
                     brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 ).mapBoth(
-                    success = { deserialize(it.response.toString()) },
+                    success = {
+                        logger.info("Versjon låst for behandling=$behandlingId")
+                        1 // TODO: Returverdien brukes ikke og kan fjernes
+                    },
                     failure = { throw it },
                 )
         }
@@ -248,7 +257,7 @@ class OpplysningDaoProxy(
                     Resource(clientId, "$url/hentBehandlingVersjon?behandlingId=$behandlingId"),
                     brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 ).mapBoth(
-                    success = { deserialize(it.response.toString()) },
+                    success = { res -> res.response?.let { deserialize(it.toString()) } },
                     failure = { throw it },
                 )
         }

@@ -42,10 +42,8 @@ class NavAnsattKlientImpl(
 
                 retryOgPakkUt<SaksbehandlerInfo?> {
                     client.get("$url/navansatt/$ident").body()
-                }.also {
-                    if (it != null) {
-                        navneCache.put(ident, it)
-                    }
+                }?.also {
+                    navneCache.put(ident, it)
                 }
             }
         } catch (exception: Exception) {

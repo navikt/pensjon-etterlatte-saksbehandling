@@ -53,10 +53,8 @@ class AxsysKlientImpl(
                 .body<EnhetslisteResponse?>()
                 ?.enheter
                 ?.map { SaksbehandlerEnhet(it.enhetId, it.navn) }
-                .also {
-                    if (it != null) {
-                        enhetCache.put(ident, it)
-                    }
+                ?.also {
+                    enhetCache.put(ident, it)
                 } ?: emptyList()
         } catch (cause: Throwable) {
             val feilmelding = "Klarte ikke å hente enheter for ident $ident fra axsys."

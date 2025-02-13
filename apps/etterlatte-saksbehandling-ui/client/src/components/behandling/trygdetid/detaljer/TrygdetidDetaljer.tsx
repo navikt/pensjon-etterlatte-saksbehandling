@@ -42,6 +42,9 @@ export const formaterBeregnetTrygdetid = (periode?: string) => {
   if (!periode) {
     return ''
   }
+  if (periode === 'P0D') {
+    return `0 år 0 måneder`
+  }
 
   // Legger til 0 år eksplisitt dersom perioden er under ett år
   const periodeMedAntallAar = periode.includes('Y') ? periode : 'P0Y' + periode.slice(1)

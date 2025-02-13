@@ -67,7 +67,7 @@ class AdresseService(
                 }
 
             val vergeMottakerType =
-                if (soekerAdresse?.type == MottakerType.HOVED) {
+                if (soekerAdresse?.type == MottakerType.HOVED || gjenlevendeAdresse?.type == MottakerType.HOVED) {
                     MottakerType.KOPI
                 } else {
                     MottakerType.HOVED
@@ -96,7 +96,7 @@ class AdresseService(
                         }
                 }
 
-            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)
+            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse).distinctBy { it.foedselsnummer }
         }
 
     suspend fun hentAvsender(

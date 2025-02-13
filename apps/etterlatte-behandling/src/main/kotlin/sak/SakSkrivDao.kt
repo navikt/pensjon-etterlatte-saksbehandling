@@ -19,6 +19,29 @@ import no.nav.etterlatte.libs.ktor.route.logger
 class SakSkrivDao(
     private val sakendringerDao: SakendringerDao,
 ) {
+    fun opprettSak(
+        fnr: String,
+        type: SakType,
+        enhet: Enhetsnummer,
+    ): Sak =
+        sakendringerDao.opprettSak { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        "INSERT INTO sak(sakType, fnr, enhet, opprettet) VALUES(?, ?, ?, ?) RETURNING id, sakType, fnr, enhet",
+                    )
+                statement.setString(1, type.name)
+                statement.setString(2, fnr)
+                statement.setString(3, enhet.enhetNr)
+                statement.setTidspunkt(4, Tidspunkt.now())
+                krevIkkeNull(
+                    statement
+                        .executeQuery()
+                        .singleOrNull(mapTilSak),
+                ) { "Kunne ikke opprette sak for fnr: ${fnr.maskerFnr()}" }
+            }
+        }
+
     fun oppdaterAdresseBeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
@@ -37,29 +60,6 @@ class SakSkrivDao(
             }
         }
     }
-
-    fun opprettSak(
-        fnr: String,
-        type: SakType,
-        enhet: Enhetsnummer,
-    ): Sak =
-        sakendringerDao.opprettSak(Endringstype.OPPRETT_SAK) { connection ->
-            with(connection) {
-                val statement =
-                    prepareStatement(
-                        "INSERT INTO sak(sakType, fnr, enhet, opprettet) VALUES(?, ?, ?, ?) RETURNING id, sakType, fnr, enhet",
-                    )
-                statement.setString(1, type.name)
-                statement.setString(2, fnr)
-                statement.setString(3, enhet.enhetNr)
-                statement.setTidspunkt(4, Tidspunkt.now())
-                krevIkkeNull(
-                    statement
-                        .executeQuery()
-                        .singleOrNull(mapTilSak),
-                ) { "Kunne ikke opprette sak for fnr: ${fnr.maskerFnr()}" }
-            }
-        }
 
     fun oppdaterIdent(
         sakId: SakId,
@@ -80,11 +80,11 @@ class SakSkrivDao(
         }
     }
 
-    fun oppdaterEnheterPaaSaker(
-        saker: List<SakMedEnhet>,
+    fun oppdaterEnhet(
+        sakMedEnhet: SakMedEnhet,
         kommentar: String? = null,
     ) {
-        sakendringerDao.oppdaterSaker(saker.map { it.id }, Endringstype.ENDRE_ENHET, kommentar) {
+        sakendringerDao.oppdaterSak(sakMedEnhet.id, Endringstype.ENDRE_ENHET, kommentar) {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -94,30 +94,29 @@ class SakSkrivDao(
                         where id = ?
                         """.trimIndent(),
                     )
-                saker.forEach { sak ->
-                    statement.setString(1, sak.enhet.enhetNr)
-                    statement.setSakId(2, sak.id)
-                    statement.executeUpdate()
-                }
+
+                statement.setString(1, sakMedEnhet.enhet.enhetNr)
+                statement.setSakId(2, sakMedEnhet.id)
+                statement.executeUpdate()
             }
         }
     }
 
-    fun markerSakerMedSkjerming(
-        sakIder: List<SakId>,
+    fun oppdaterSkjerming(
+        sakId: SakId,
         skjermet: Boolean,
-    ) = sakendringerDao.oppdaterSaker(sakIder, Endringstype.ENDRE_SKJERMING, null) {
+    ) = sakendringerDao.oppdaterSak(sakId, Endringstype.ENDRE_SKJERMING) {
         with(it) {
             val statement =
                 prepareStatement(
                     """
                     UPDATE sak 
                     set erSkjermet = ? 
-                    where id = any(?)
+                    where id = ?
                     """.trimIndent(),
                 )
             statement.setBoolean(1, skjermet)
-            statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
+            statement.setSakId(2, sakId)
             statement.executeUpdate()
         }
     }

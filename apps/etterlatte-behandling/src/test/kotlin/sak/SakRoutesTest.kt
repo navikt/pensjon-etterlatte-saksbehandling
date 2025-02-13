@@ -82,7 +82,7 @@ internal class SakRoutesTest {
     @Test
     fun `Returnerer ok ved endring av enhet med EnhetsRequest`() {
         coEvery {
-            sakService.oppdaterEnhetForSaker(any())
+            sakService.oppdaterEnhet(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         } just runs
         every { sakService.finnSak(any()) } returns
@@ -156,14 +156,14 @@ internal class SakRoutesTest {
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
-            verify(exactly = 1) { sakService.oppdaterEnhetForSak(sakMedEnhet, kommentar) }
+            verify(exactly = 1) { sakService.oppdaterEnhet(sakMedEnhet, kommentar) }
         }
     }
 
     @Test
     fun `Returnerer badrequest ved endring av enhet med ugyldig enhet`() {
         coEvery {
-            sakService.oppdaterEnhetForSaker(any())
+            sakService.oppdaterEnhet(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         } just runs
         every { sakService.finnSak(any()) } returns null
@@ -186,7 +186,7 @@ internal class SakRoutesTest {
     @Test
     fun `Returnerer bad request hvis sak ikke finnes ved endring av enhet`() {
         coEvery {
-            sakService.oppdaterEnhetForSaker(any())
+            sakService.oppdaterEnhet(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         } just runs
         every { sakService.finnSak(any()) } returns null

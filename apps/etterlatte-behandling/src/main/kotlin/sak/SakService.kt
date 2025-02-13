@@ -76,16 +76,14 @@ interface SakService {
 
     fun finnFlyktningForSak(id: SakId): Flyktning?
 
-    fun markerSakerMedSkjerming(
-        sakIder: List<SakId>,
+    fun oppdaterSkjerming(
+        sakId: SakId,
         skjermet: Boolean,
     )
 
-    fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
-
-    fun oppdaterEnhetForSak(
+    fun oppdaterEnhet(
         sak: SakMedEnhet,
-        kommentar: String?,
+        kommentar: String? = null,
     )
 
     fun oppdaterAdressebeskyttelse(
@@ -243,11 +241,11 @@ class SakServiceImpl(
                 .flatMap { lesDao.finnSaker(it.folkeregisterident.value, sakType) }
         }
 
-    override fun markerSakerMedSkjerming(
-        sakIder: List<SakId>,
+    override fun oppdaterSkjerming(
+        sakId: SakId,
         skjermet: Boolean,
     ) {
-        dao.markerSakerMedSkjerming(sakIder, skjermet)
+        dao.oppdaterSkjerming(sakId, skjermet)
     }
 
     override fun finnEllerOpprettSakMedGrunnlag(
@@ -395,17 +393,13 @@ class SakServiceImpl(
         when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
-                    )
+                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr))
                 }
             }
 
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
-                    )
+                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr))
                 }
             }
 
@@ -526,33 +520,29 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             logger.info("Oppdater egen ansatt for sak $sakId")
-            dao.oppdaterEnheterPaaSaker(
-                listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
+            dao.oppdaterEnhet(
+                SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr),
             )
         } else {
             val sakMedSkjerming = lesDao.hentSak(sakId)!!
             if (sakMedSkjerming.enhet == Enheter.EGNE_ANSATTE.enhetNr) {
                 val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
                 if (enhet == Enheter.EGNE_ANSATTE.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr)))
+                    dao.oppdaterEnhet(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr))
                 } else {
-                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, enhet)))
+                    dao.oppdaterEnhet(SakMedEnhet(sakId, enhet))
                 }
             }
         }
 
-        dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
+        dao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
     }
 
-    override fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>) {
-        dao.oppdaterEnheterPaaSaker(saker)
-    }
-
-    override fun oppdaterEnhetForSak(
+    override fun oppdaterEnhet(
         sak: SakMedEnhet,
         kommentar: String?,
     ) {
-        dao.oppdaterEnheterPaaSaker(listOf(sak), kommentar)
+        dao.oppdaterEnhet(sak, kommentar)
     }
 
     override fun finnSak(

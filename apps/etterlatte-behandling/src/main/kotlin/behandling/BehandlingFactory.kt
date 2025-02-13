@@ -95,12 +95,10 @@ class BehandlingFactory(
                     throw UgyldigEnhetException()
                 }
                 inTransaction {
-                    sakService.oppdaterEnhetForSaker(
-                        listOf(
-                            SakMedEnhet(
-                                enhet = it,
-                                id = sak.id,
-                            ),
+                    sakService.oppdaterEnhet(
+                        SakMedEnhet(
+                            enhet = it,
+                            id = sak.id,
                         ),
                     )
                 }

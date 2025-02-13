@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.jobs
 
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
@@ -9,6 +7,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
@@ -69,19 +68,14 @@ class AvbrytRevurderinger(
         if (isLeader()) {
             Kontekst.set(context)
             logger.info("pod er leader, kjører jobb for å avbryte revurderinger")
-            newSingleThreadContext("AvbrytRevurderingerJob").use { ctx ->
-                Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })
-                runBlocking(ctx) {
-                    avbrytRevurderinger()
-                }
-            }
+            avbrytRevurderinger()
         } else {
             logger.info("pod er ikke leader, kjører ikke jobb for å avbryte revurderinger")
         }
     }
 
     private fun avbrytRevurderinger() {
-        val behandlingerSomSkalAvbrytes = avbrytRevurderingerDao.hentAktuelleRevurderinger()
+        val behandlingerSomSkalAvbrytes = inTransaction { avbrytRevurderingerDao.hentAktuelleRevurderinger() }
         if (behandlingerSomSkalAvbrytes.isEmpty()) {
             logger.info("Ingen behandlinger å avbryte, kjører ikke jobb")
             return
@@ -90,17 +84,19 @@ class AvbrytRevurderinger(
         val antallAvbrutte =
             behandlingerSomSkalAvbrytes
                 .map {
-                    val behandling = behandlingService.hentBehandling(it) ?: return@map false
-                    if (!behandling.status.kanAvbrytes()) {
-                        return@map false
+                    inTransaction {
+                        val behandling = behandlingService.hentBehandling(it) ?: return@inTransaction false
+                        if (!behandling.status.kanAvbrytes()) {
+                            return@inTransaction false
+                        }
+                        behandlingService.avbrytBehandling(
+                            behandling.id,
+                            HardkodaSystembruker.oppgave,
+                            AarsakTilAvbrytelse.AVBRUTT_PAA_GRUNN_AV_FEIL,
+                            "Automatisk avbrutt på grunn av feil opprettet behandling",
+                        )
+                        true
                     }
-                    behandlingService.avbrytBehandling(
-                        behandling.id,
-                        HardkodaSystembruker.oppgave,
-                        AarsakTilAvbrytelse.AVBRUTT_PAA_GRUNN_AV_FEIL,
-                        "Automatisk avbrutt på grunn av feil opprettet behandling",
-                    )
-                    true
                 }.count { it }
         logger.info("Avbrøt $antallAvbrutte av ${behandlingerSomSkalAvbrytes.size} behandlinger.")
     }

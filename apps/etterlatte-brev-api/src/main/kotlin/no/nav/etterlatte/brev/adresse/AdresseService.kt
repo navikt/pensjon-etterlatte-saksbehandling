@@ -96,7 +96,7 @@ class AdresseService(
                         }
                 }
 
-            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse).distinctBy { it.foedselsnummer }
+            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)
         }
 
     suspend fun hentAvsender(

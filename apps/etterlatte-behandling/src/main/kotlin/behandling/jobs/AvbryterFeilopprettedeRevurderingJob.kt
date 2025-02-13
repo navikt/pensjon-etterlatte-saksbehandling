@@ -86,7 +86,7 @@ class AvbrytRevurderinger(
                     )
                     true
                 }.count { it }
-        logger.info("Avbrøt $antallAvbrutte av $behandlingerSomSkalAvbrytes behandlinger.")
+        logger.info("Avbrøt $antallAvbrutte av ${behandlingerSomSkalAvbrytes.size} behandlinger.")
     }
 }
 

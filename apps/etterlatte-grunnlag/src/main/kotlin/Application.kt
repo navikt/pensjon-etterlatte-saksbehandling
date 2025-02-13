@@ -63,6 +63,10 @@ class ApplicationBuilder {
             applicationConfig = config,
         ) {
             route("grunnlag") {
+                opplysningDaoRoutes(opplysningDao)
+                aldersovergangDaoRoutes(aldersovergangDao)
+
+                // TODO: Fjerne disse når apper er rutet via behandling -> grunnlag
                 sakGrunnlagRoute(grunnlagService, behandlingKlient)
                 behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
                 personRoute(grunnlagService, behandlingKlient)

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag.klienter
 
+import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -46,11 +47,17 @@ interface PdlTjenesterKlient {
     ): Persongalleri?
 }
 
+@Deprecated(
+    "Slå sammen med eksisterende PdlTjenesterKlient",
+    ReplaceWith("no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl"),
+)
 class PdlTjenesterKlientImpl(
     private val pdl: HttpClient,
-    private val url: String,
+    config: Config,
 ) : PdlTjenesterKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    private val url = config.getString("pdltjenester.url")
 
     override fun hentPerson(
         foedselsnummer: String,

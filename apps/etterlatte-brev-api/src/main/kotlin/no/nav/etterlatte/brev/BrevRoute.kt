@@ -111,7 +111,7 @@ fun Route.brevRoute(
 
             post("tilbakestill") {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
-                    service.tilbakestillMottakere(brevId, brukerTokenInfo)
+                    call.respond(service.tilbakestillMottakere(brevId, brukerTokenInfo))
                 }
             }
 

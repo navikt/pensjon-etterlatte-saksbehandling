@@ -140,7 +140,17 @@ data class FremtidigTrygdetid(
     val antallMaaneder: Long,
     val opptjeningstidIMaaneder: Long,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
-)
+) {
+    companion object {
+        val ZERO =
+            FremtidigTrygdetid(
+                periode = Period.ZERO,
+                antallMaaneder = 0,
+                opptjeningstidIMaaneder = 0,
+                mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+            )
+    }
+}
 
 data class OpplysningerDifferanse(
     val differanse: Boolean,

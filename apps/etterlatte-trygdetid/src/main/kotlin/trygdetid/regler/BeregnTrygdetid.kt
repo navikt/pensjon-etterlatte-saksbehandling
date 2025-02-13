@@ -175,8 +175,8 @@ val fremtidigTrygdetid =
         trygdetidPerioder,
         dagerPrMaaned,
         ->
-        trygdetidPerioder.firstOrNull { it.type == TrygdetidType.FREMTIDIG }?.let {
-            listOf(it).summer(dagerPrMaaned)
+        trygdetidPerioder.firstOrNull { it.type == TrygdetidType.FREMTIDIG }.let {
+            listOfNotNull(it).summer(dagerPrMaaned)
         }
     }
 
@@ -279,11 +279,9 @@ val summerFaktiskTeoretisk =
 
         val summert =
             beregningsPerioder
-                .takeIf { it.isNotEmpty() }
-                ?.summer(dagerPrMaaned)
-                ?.plusYears(norskPoengaar?.toLong() ?: 0)
-                ?.oppjustertMaaneder()
-                ?: 0
+                .summer(dagerPrMaaned)
+                .plusYears(norskPoengaar?.toLong() ?: 0)
+                .oppjustertMaaneder()
 
         FaktiskTrygdetid(
             periode = Period.ofMonths(summert.toInt()).normalized(),
@@ -333,7 +331,7 @@ val fremtidigTrygdetidForNasjonal =
         regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID", versjon = "1.1"),
     ) benytter nordiskEllerFireFemtedeler og fremtidigTrygdetid og opptjeningsTidIMnd med
         { nordiskEllerFireFemtedeler, fremtidig, opptjening ->
-            if (fremtidig != null) {
+            if (fremtidig != Period.ZERO) {
                 val fremtidigPeriode =
                     fremtidig.justertForOpptjeningstiden(opptjening, nordiskEllerFireFemtedeler)
 
@@ -344,7 +342,7 @@ val fremtidigTrygdetidForNasjonal =
                     mindreEnnFireFemtedelerAvOpptjeningstiden = nordiskEllerFireFemtedeler,
                 )
             } else {
-                null
+                FremtidigTrygdetid.ZERO
             }
         }
 
@@ -361,7 +359,7 @@ val fremtidigTrygdetidForTeoretisk =
         fremtidig,
         opptjening,
         ->
-        if (fremtidig != null) {
+        if (fremtidig != Period.ZERO) {
             val mindreEnnFireFemtedelerAvOpptjeningstiden = teoretisk.antallMaaneder * 5 < opptjening * 4
 
             val fremtidigPeriode =
@@ -374,7 +372,7 @@ val fremtidigTrygdetidForTeoretisk =
                 mindreEnnFireFemtedelerAvOpptjeningstiden = mindreEnnFireFemtedelerAvOpptjeningstiden,
             )
         } else {
-            null
+            FremtidigTrygdetid.ZERO
         }
     }
 
@@ -408,7 +406,11 @@ val beregnetFremtidigTrygdetid =
         teoretisk,
         norskPoengaar,
         ->
-        TrygdetidPar(nasjonal, teoretisk).takeIf { norskPoengaar == null }
+        if (norskPoengaar == null) {
+            TrygdetidPar(nasjonal, teoretisk)
+        } else {
+            TrygdetidPar(FremtidigTrygdetid.ZERO, FremtidigTrygdetid.ZERO)
+        }
     }
 
 /**
@@ -426,7 +428,7 @@ val avrundetTrygdetid =
             TrygdetidPar(
                 nasjonal =
                     minOf(
-                        faktisk.nasjonal.periode.plus(fremtidig?.nasjonal.verdiOrZero()).normalized().let {
+                        faktisk.nasjonal.periode.plus(fremtidig.nasjonal.periode).normalized().let {
                             if (it.months >= 6) {
                                 it.years + 1
                             } else {
@@ -437,7 +439,7 @@ val avrundetTrygdetid =
                     ),
                 teoretisk =
                     minOf(
-                        faktisk.teoretisk.periode.plus(fremtidig?.teoretisk.verdiOrZero()).normalized().let {
+                        faktisk.teoretisk.periode.plus(fremtidig.teoretisk.periode).normalized().let {
                             if (it.months >= 6) {
                                 it.years + 1
                             } else {
@@ -499,8 +501,8 @@ val beregnDetaljertBeregnetTrygdetid =
             DetaljertBeregnetTrygdetidResultat(
                 faktiskTrygdetidNorge = faktisk.nasjonal,
                 faktiskTrygdetidTeoretisk = faktisk.teoretisk,
-                fremtidigTrygdetidNorge = fremtidig?.nasjonal,
-                fremtidigTrygdetidTeoretisk = fremtidig?.teoretisk,
+                fremtidigTrygdetidNorge = fremtidig.nasjonal,
+                fremtidigTrygdetidTeoretisk = fremtidig.teoretisk,
                 samletTrygdetidNorge = avrundet.first.nasjonal,
                 samletTrygdetidTeoretisk = avrundet.first.teoretisk,
                 prorataBroek = avrundet.second,
@@ -533,8 +535,6 @@ val beregnDetaljertBeregnetTrygdetidMedYrkesskade =
 
 // Utility functions - burde vaert regler men må kalles fra flere steder.
 // Subsumsjonsverdi for regler som kalle disse skal fortsatt være korrekt.
-
-private fun FremtidigTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
 
 /**
  * Summer periodene fra alle trygdetid grunnlag i listen med riktig oppjustering av dager il slutt.

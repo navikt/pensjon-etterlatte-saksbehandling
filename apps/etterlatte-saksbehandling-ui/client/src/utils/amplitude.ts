@@ -30,6 +30,7 @@ export enum ClickEvent {
   OPPRETT_NYTT_BREV = 'opprett nytt brev',
   SLETT_BREV = 'slett brev',
   LAST_OPP_BREV = 'last opp brev',
+  TILBAKESTILL_MOTTAKERE_BREV = 'tilbakestiller mottakere for brev',
 
   // Notat
   OPPRETT_NYTT_NOTAT = 'opprett nytt notat',

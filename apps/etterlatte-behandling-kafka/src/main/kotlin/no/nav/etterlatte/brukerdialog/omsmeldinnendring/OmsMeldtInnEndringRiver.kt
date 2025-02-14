@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsEndring
 import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsMeldtInnEndring
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -62,12 +63,12 @@ internal class OmsMeldtInnEndringRiver(
                     NyOppgaveDto(
                         oppgaveKilde = OppgaveKilde.BRUKERDIALOG_SELVBETJENING,
                         oppgaveType = OppgaveType.MELDT_INN_ENDRING,
-                        merknad = "Endring meldt inn fra selvbetjening skjema",
+                        merknad = mapEndringTilLesbarString(omsEndring = endringer.endring),
                         referanse = journalpostResponse.journalpostId,
                         frist = null,
                     ),
             )
-
+            endringer.endring
             mottatMeldtInnEndringFullfoert(sak.id, endringer.id)
         } catch (e: Exception) {
             // Selvbetjening-backend vil fortsette å sende nye meldinger til dette ikke feiler
@@ -105,6 +106,13 @@ internal class OmsMeldtInnEndringRiver(
 
     private fun JsonMessage.omsMeldtInnEndringer(): OmsMeldtInnEndring =
         objectMapper.treeToValue<OmsMeldtInnEndring>(this[OmsMeldtInnEndringHendelseKeys.INNHOLD_KEY])
+
+    private fun mapEndringTilLesbarString(omsEndring: OmsEndring): String =
+        when (omsEndring) {
+            OmsEndring.INNTEKT -> "Inntekt"
+            OmsEndring.AKTIVITET_OG_INNTEKT -> "Aktivitet og inntekt"
+            OmsEndring.ANNET -> "Annet"
+        }
 }
 
 object OmsMeldtInnEndringHendelseKeys {

@@ -56,7 +56,7 @@ class OmsMeldtInnEndringRiverTest {
             OmsMeldtInnEndring(
                 id = UUID.randomUUID(),
                 fnr = Foedselsnummer.of("15507143951"),
-                endring = OmsEndring.ANNET,
+                endring = OmsEndring.AKTIVITET_OG_INNTEKT,
                 beskrivelse = "Endringer fra bruker..",
                 tidspunkt = Instant.parse("2024-08-01T05:06:07Z"),
             )
@@ -95,7 +95,7 @@ class OmsMeldtInnEndringRiverTest {
                 withArg {
                     it.oppgaveKilde shouldBe OppgaveKilde.BRUKERDIALOG_SELVBETJENING
                     it.oppgaveType shouldBe OppgaveType.MELDT_INN_ENDRING
-                    it.merknad shouldBe "Endring meldt inn fra selvbetjening skjema"
+                    it.merknad shouldBe "Aktivitet og inntekt"
                 },
             )
         }

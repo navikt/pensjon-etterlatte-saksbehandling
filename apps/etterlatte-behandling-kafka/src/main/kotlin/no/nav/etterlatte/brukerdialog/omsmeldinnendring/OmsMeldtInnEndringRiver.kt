@@ -68,7 +68,6 @@ internal class OmsMeldtInnEndringRiver(
                         frist = null,
                     ),
             )
-            endringer.endring
             mottatMeldtInnEndringFullfoert(sak.id, endringer.id)
         } catch (e: Exception) {
             // Selvbetjening-backend vil fortsette å sende nye meldinger til dette ikke feiler

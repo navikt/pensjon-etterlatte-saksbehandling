@@ -133,8 +133,6 @@ class SafKlient(
                 }
 
             if (res.status.isSuccess()) {
-                val test = res.body<JournalpostResponse>()
-                logger.info(test.toString())
                 res.body<JournalpostResponse>()
             } else {
                 throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")

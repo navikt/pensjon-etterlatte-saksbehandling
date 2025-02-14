@@ -48,7 +48,7 @@ export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehan
           <Table.DataCell>
             {!!personopplysninger?.innsender ? (
               <VStack>
-                <BodyShort>{`{formaterNavn(personopplysninger.innsender.opplysning)} ${visOmInnsenderErSoekerEllerVerge()}`}</BodyShort>
+                <BodyShort>{`${formaterNavn(personopplysninger.innsender.opplysning)} ${visOmInnsenderErSoekerEllerVerge()}`}</BodyShort>
                 <Detail>{`${personopplysninger.innsender.kilde.type.toUpperCase()} ${formaterDatoMedFallback(personopplysninger.innsender.kilde.tidspunkt)}`}</Detail>
               </VStack>
             ) : (

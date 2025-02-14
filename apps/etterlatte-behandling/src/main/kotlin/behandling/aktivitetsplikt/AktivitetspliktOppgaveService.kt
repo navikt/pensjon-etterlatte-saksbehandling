@@ -154,7 +154,7 @@ class AktivitetspliktOppgaveService(
                 frist =
                     LocalDate
                         .now()
-                        .plusMonths(2)
+                        .plusMonths(1)
                         .atStartOfDay()
                         .toTidspunkt(),
             )

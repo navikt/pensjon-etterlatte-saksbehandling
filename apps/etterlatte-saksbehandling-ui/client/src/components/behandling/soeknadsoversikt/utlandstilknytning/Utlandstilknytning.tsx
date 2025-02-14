@@ -1,5 +1,5 @@
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '../LovtekstMedLenke'
+import { SoeknadVurdering } from '../SoeknadVurdering'
 import { Informasjon, Vurdering } from '../styled'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
 
@@ -18,7 +18,7 @@ export const Utlandstilknytning = ({
   redigerbar: boolean
 }) => {
   return (
-    <LovtekstMedLenke tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
+    <SoeknadVurdering tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
       <Informasjon>
         Svar for om saken skal behandles som følge av utlandstilknytning basert på om avdøde har bodd/arbeidet i
         EØS/avtale-land eller ikke, og om gjenlevende bor i Norge eller utlandet. Om søker bor i utlandet er det en
@@ -32,6 +32,6 @@ export const Utlandstilknytning = ({
           behandlingId={behandling.id}
         />
       </Vurdering>
-    </LovtekstMedLenke>
+    </SoeknadVurdering>
   )
 }

@@ -19,7 +19,7 @@ import { Informasjon, Vurdering } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
-import { LovtekstMedLenke } from '../soeknadsoversikt/LovtekstMedLenke'
+import { SoeknadVurdering } from '../soeknadsoversikt/SoeknadVurdering'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt, Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
@@ -139,7 +139,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
 
   return (
     <>
-      <LovtekstMedLenke
+      <SoeknadVurdering
         tittel="Virkningstidspunkt"
         hjemler={hjemler}
         status={Boolean(behandling.virkningstidspunkt) ? 'success' : 'warning'}
@@ -250,7 +250,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
             </VStack>
           </VurderingsboksWrapper>
         </Vurdering>
-      </LovtekstMedLenke>
+      </SoeknadVurdering>
     </>
   )
 }

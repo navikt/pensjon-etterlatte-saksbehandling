@@ -1,5 +1,5 @@
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
+import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
@@ -47,7 +47,7 @@ export const GyldigFramsattBarnepensjon = ({
   return (
     <>
       {isSuccess(personGalleriSoeknad) && (
-        <LovtekstMedLenke
+        <SoeknadVurdering
           tittel="Vurdering - søknad gyldig fremsatt"
           hjemler={[
             {
@@ -87,7 +87,7 @@ export const GyldigFramsattBarnepensjon = ({
               redigerbar={redigerbar}
             />
           </Vurdering>
-        </LovtekstMedLenke>
+        </SoeknadVurdering>
       )}
     </>
   )

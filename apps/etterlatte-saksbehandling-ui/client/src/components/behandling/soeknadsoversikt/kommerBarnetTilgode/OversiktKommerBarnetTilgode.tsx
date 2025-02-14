@@ -3,7 +3,7 @@ import { Informasjon, Vurdering } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
-import { LovtekstMedLenke } from '../LovtekstMedLenke'
+import { SoeknadVurdering } from '../SoeknadVurdering'
 import { Info } from '../Info'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
@@ -58,7 +58,7 @@ export const OversiktKommerBarnetTilgode = ({
   const skalViseInnsenderAdresse = !innsenderErGjenlevende && innsenderHarForeldreAnsvar && innsenderAdresse
 
   return (
-    <LovtekstMedLenke
+    <SoeknadVurdering
       tittel="Vurdering - kommer pensjonen barnet til gode?"
       hjemler={[
         { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-1', tittel: 'Folketrygdloven § 18-1' },
@@ -108,6 +108,6 @@ export const OversiktKommerBarnetTilgode = ({
           behandlingId={behandlingId}
         />
       </Vurdering>
-    </LovtekstMedLenke>
+    </SoeknadVurdering>
   )
 }

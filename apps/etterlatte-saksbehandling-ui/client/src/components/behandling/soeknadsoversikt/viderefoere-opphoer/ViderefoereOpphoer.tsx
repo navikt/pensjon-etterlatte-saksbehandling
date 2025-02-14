@@ -1,5 +1,5 @@
 import { IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '../LovtekstMedLenke'
+import { SoeknadVurdering } from '../SoeknadVurdering'
 import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { BodyShort, Button } from '@navikt/ds-react'
@@ -18,7 +18,7 @@ export const ViderefoereOpphoer = ({
   const [vurdert, setVurdert] = useState(behandling.viderefoertOpphoer !== null)
 
   return (
-    <LovtekstMedLenke tittel="Opphør fra og med" hjemler={[]} status={statusIkon(behandling.viderefoertOpphoer)}>
+    <SoeknadVurdering tittel="Opphør fra og med" hjemler={[]} status={statusIkon(behandling.viderefoertOpphoer)}>
       <Informasjon>
         <BodyShort>
           Er opphørsdato tidligere enn dagens dato, eller skal saken opphøre i nær fremtid fordi vilkårene ikke lenger
@@ -46,6 +46,6 @@ export const ViderefoereOpphoer = ({
           </Button>
         )}
       </Vurdering>
-    </LovtekstMedLenke>
+    </SoeknadVurdering>
   )
 }

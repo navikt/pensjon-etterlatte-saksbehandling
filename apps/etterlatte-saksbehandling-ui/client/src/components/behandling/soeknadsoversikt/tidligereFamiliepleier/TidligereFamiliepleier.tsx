@@ -1,5 +1,5 @@
 import { IDetaljertBehandling, ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '../LovtekstMedLenke'
+import { SoeknadVurdering } from '../SoeknadVurdering'
 import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { BodyShort, Button, List, ReadMore, VStack } from '@navikt/ds-react'
@@ -22,7 +22,7 @@ export const TidligereFamiliepleier = ({
   const [vurdert, setVurdert] = useState<boolean>(!!behandling.tidligereFamiliepleier)
 
   return (
-    <LovtekstMedLenke
+    <SoeknadVurdering
       tittel="Tidligere familiepleier"
       hjemler={[
         {
@@ -73,6 +73,6 @@ export const TidligereFamiliepleier = ({
           </Button>
         )}
       </Vurdering>
-    </LovtekstMedLenke>
+    </SoeknadVurdering>
   )
 }

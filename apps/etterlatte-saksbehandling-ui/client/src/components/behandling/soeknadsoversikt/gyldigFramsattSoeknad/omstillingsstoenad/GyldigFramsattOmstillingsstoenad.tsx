@@ -1,5 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
+import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
@@ -30,7 +30,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
   const undertekst = formaterGrunnlagKilde(innsender?.kilde)
 
   return (
-    <LovtekstMedLenke
+    <SoeknadVurdering
       tittel="Vurdering - søknad gyldig fremsatt"
       hjemler={[
         {
@@ -62,6 +62,6 @@ export const GyldigFramsattOmstillingsstoenad = ({
           redigerbar={redigerbar}
         />
       </Vurdering>
-    </LovtekstMedLenke>
+    </SoeknadVurdering>
   )
 }

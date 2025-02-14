@@ -85,13 +85,19 @@ export enum BrukerIdType {
   ORGNR = 'ORGNR',
   AKTOERID = 'AKTOERID',
   FNR = 'FNR',
+}
+
+export enum AvsenderMottakerIdType {
+  ORGNR = 'ORGNR',
+  AKTOERID = 'AKTOERID',
+  FNR = 'FNR',
   UTL_ORG = 'UTL_ORG',
   HPRNR = 'HPRNR',
 }
 
 export interface AvsenderMottaker {
   id?: string
-  idType?: string
+  idType?: AvsenderMottakerIdType
   navn?: string
   land?: string
 }

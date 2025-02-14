@@ -19,10 +19,6 @@ const formaterType = (type: BrukerIdType) => {
       return 'Aktørid'
     case BrukerIdType.FNR:
       return 'Fødselsnummer'
-    case BrukerIdType.HPRNR:
-      return 'HPRNR'
-    case BrukerIdType.UTL_ORG:
-      return 'UTL_ORG'
   }
 }
 

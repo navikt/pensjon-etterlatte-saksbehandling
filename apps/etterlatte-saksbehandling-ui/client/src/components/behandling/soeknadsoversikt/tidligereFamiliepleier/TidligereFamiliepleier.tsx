@@ -1,6 +1,6 @@
 import { IDetaljertBehandling, ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
-import { Informasjon, Vurdering } from '../styled'
+import { Vurdering } from '../styled'
 import { useState } from 'react'
 import { BodyShort, Button, List, ReadMore, VStack } from '@navikt/ds-react'
 import { TidligereFamiliepleierVurdering } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleierVurdering'
@@ -32,33 +32,31 @@ export const TidligereFamiliepleier = ({
       ]}
       status={statusIkon(behandling.tidligereFamiliepleier)}
     >
-      <Informasjon>
-        <VStack gap="4">
-          <BodyShort>
-            Tidligere familiepleier kan innvilges når det har vært nødvendig med tilsyn og pleie av en nærstående i
-            minst fem år, og det ikke er mulig å forsørge seg selv etter at pleieforholdet er opphørt.
-          </BodyShort>
+      <VStack gap="4" marginBlock="3" marginInline="0" maxWidth="41rem">
+        <BodyShort>
+          Tidligere familiepleier kan innvilges når det har vært nødvendig med tilsyn og pleie av en nærstående i minst
+          fem år, og det ikke er mulig å forsørge seg selv etter at pleieforholdet er opphørt.
+        </BodyShort>
 
-          <ReadMore header="Les mer om hvilke vilkår som må oppfylles">
-            <List as="ul" title="For å ha rett til ytelsen må tidligere familiepleier">
-              <List.Item>være medlem i trygden og ha vært det i minst fem år</List.Item>
-              <List.Item>være ugift og ha vært ugift i minst fem år under pleieforholdet</List.Item>
-              <List.Item>
-                ha vært ute av stand til å forsørge seg selv med eget arbeid på grunn av pleieforholdet
-              </List.Item>
-              <List.Item>ikke hatt mulighet for å forsørge seg selv etter at pleieforholdet opphørte</List.Item>
-              <List.Item>ikke ha tilstrekkelige midler til livsopphold</List.Item>
-            </List>
-            <List as="ul" title="I tillegg er det et krav at">
-              <List.Item>pleieforholdet må ha vart i minst fem år</List.Item>
-              <List.Item>
-                den som er pleid må ha mottatt pensjon fra folketrygden eller vært medlem i trygden i minst fem år frem
-                til pleieforholdet opphørte
-              </List.Item>
-            </List>
-          </ReadMore>
-        </VStack>
-      </Informasjon>
+        <ReadMore header="Les mer om hvilke vilkår som må oppfylles">
+          <List as="ul" title="For å ha rett til ytelsen må tidligere familiepleier">
+            <List.Item>være medlem i trygden og ha vært det i minst fem år</List.Item>
+            <List.Item>være ugift og ha vært ugift i minst fem år under pleieforholdet</List.Item>
+            <List.Item>
+              ha vært ute av stand til å forsørge seg selv med eget arbeid på grunn av pleieforholdet
+            </List.Item>
+            <List.Item>ikke hatt mulighet for å forsørge seg selv etter at pleieforholdet opphørte</List.Item>
+            <List.Item>ikke ha tilstrekkelige midler til livsopphold</List.Item>
+          </List>
+          <List as="ul" title="I tillegg er det et krav at">
+            <List.Item>pleieforholdet må ha vart i minst fem år</List.Item>
+            <List.Item>
+              den som er pleid må ha mottatt pensjon fra folketrygden eller vært medlem i trygden i minst fem år frem
+              til pleieforholdet opphørte
+            </List.Item>
+          </List>
+        </ReadMore>
+      </VStack>
       <Vurdering>
         {vurdert && (
           <TidligereFamiliepleierVurdering

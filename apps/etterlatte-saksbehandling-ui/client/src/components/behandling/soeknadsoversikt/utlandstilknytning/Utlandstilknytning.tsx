@@ -1,7 +1,8 @@
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
-import { Informasjon, Vurdering } from '../styled'
+import { Vurdering } from '../styled'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
+import { Box } from '@navikt/ds-react'
 
 const statusIkon = (utlandstilknytning: IUtlandstilknytning | null) => {
   if (utlandstilknytning === null) {
@@ -19,12 +20,12 @@ export const Utlandstilknytning = ({
 }) => {
   return (
     <SoeknadVurdering tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
-      <Informasjon>
+      <Box marginBlock="3" marginInline="0" maxWidth="41rem">
         Svar for om saken skal behandles som følge av utlandstilknytning basert på om avdøde har bodd/arbeidet i
         EØS/avtale-land eller ikke, og om gjenlevende bor i Norge eller utlandet. Om søker bor i utlandet er det en
         bosatt utland-sak, om avdøde har bodd/arbeidet i EØS/avtale-land og gjenlevende bor i Norge er det en
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
-      </Informasjon>
+      </Box>
       <Vurdering>
         <UtlandstilknytningVurdering
           utlandstilknytning={behandling.utlandstilknytning}

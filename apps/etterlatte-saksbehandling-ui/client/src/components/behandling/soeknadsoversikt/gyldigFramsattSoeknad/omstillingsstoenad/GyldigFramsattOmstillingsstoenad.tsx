@@ -1,6 +1,6 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
-import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
+import { Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -8,7 +8,7 @@ import { StatusIconProps } from '~shared/icons/statusIcon'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { HStack } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/GyldigFramsattVurdering'
 
 export const GyldigFramsattOmstillingsstoenad = ({
@@ -45,11 +45,11 @@ export const GyldigFramsattOmstillingsstoenad = ({
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
-        <Informasjon>
+        <Box marginBlock="3" marginInline="0" maxWidth="41rem">
           Den som har rett til ytelsen må sette frem krav (verge hvis aktuelt). Om annet må fullmakt ligge i saken.
           Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet eller i det landet
           vedkommende sist var medlem.
-        </Informasjon>
+        </Box>
         <HStack gap="4">
           <Info tekst={navn} undertekst={undertekst} label="Innsender" />
           <Verger behandlingId={behandling.id} sakId={behandling.sakId} />

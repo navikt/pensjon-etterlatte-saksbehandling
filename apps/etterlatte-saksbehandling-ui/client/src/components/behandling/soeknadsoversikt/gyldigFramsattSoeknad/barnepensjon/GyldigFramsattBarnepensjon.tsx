@@ -1,6 +1,6 @@
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
-import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
+import { Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
@@ -13,7 +13,7 @@ import { Familieforhold } from '~shared/types/Person'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { HStack } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 import {
   finnVurdering,
   GyldigFramsattVurdering,
@@ -63,11 +63,11 @@ export const GyldigFramsattBarnepensjon = ({
           status={gyldigFremsattTilStatusIcon}
         >
           <div>
-            <Informasjon>
+            <Box marginBlock="3" marginInline="0" maxWidth="41rem">
               Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt
               ligge i saken. Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet
               eller i det landet vedkommende sist var medlem.
-            </Informasjon>
+            </Box>
             <HStack gap="4">
               <Innsender harKildePesys={harKildePesys} />
               <Foreldreansvar

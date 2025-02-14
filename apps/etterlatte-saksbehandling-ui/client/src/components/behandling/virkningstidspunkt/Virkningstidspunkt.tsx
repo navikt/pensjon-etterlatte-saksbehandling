@@ -1,6 +1,7 @@
 import {
   Alert,
   BodyShort,
+  Box,
   ConfirmationPanel,
   ErrorMessage,
   Heading,
@@ -15,7 +16,7 @@ import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/re
 import { formaterDato } from '~utils/formatering/dato'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Informasjon, Vurdering } from '../soeknadsoversikt/styled'
+import { Vurdering } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
@@ -145,7 +146,9 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
         status={Boolean(behandling.virkningstidspunkt) ? 'success' : 'warning'}
       >
         <VStack gap="2">
-          <Informasjon>{beskrivelse}</Informasjon>
+          <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+            {beskrivelse}
+          </Box>
           <HStack gap="4">{children}</HStack>
         </VStack>
 

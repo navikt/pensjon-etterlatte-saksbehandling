@@ -1,5 +1,5 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { Informasjon, Vurdering } from '../styled'
+import { Vurdering } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
@@ -7,7 +7,7 @@ import { SoeknadVurdering } from '../SoeknadVurdering'
 import { Info } from '../Info'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
-import { HStack } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 
 interface AdresseProps {
@@ -69,9 +69,9 @@ export const OversiktKommerBarnetTilgode = ({
       status={svarTilStatusIcon(kommerBarnetTilgode?.svar)}
     >
       <div>
-        <Informasjon>
+        <Box marginBlock="3" marginInline="0" maxWidth="41rem">
           Undersøk om boforholdet er avklart og det er sannsynlig at pensjonen kommer barnet til gode.
-        </Informasjon>
+        </Box>
 
         <HStack gap="4">
           {bostedsadresse && (

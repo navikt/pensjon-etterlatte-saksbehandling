@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.omregning.OmregningKlassifikasjonskodeJobService.Companion.kjoering
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -78,7 +77,7 @@ class AarligInntektsjusteringJobbService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun startAarligInntektsjusteringJobb(request: AarligInntektsjusteringRequest) {
-        logger.info("Starter årlig inntektsjusteringjobb $kjoering")
+        logger.info("Starter årlig inntektsjusteringjobb ${request.kjoering}")
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
         }

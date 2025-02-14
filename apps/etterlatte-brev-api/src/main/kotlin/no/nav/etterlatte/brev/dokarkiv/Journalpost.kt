@@ -176,6 +176,7 @@ enum class AvsenderMottakerIdType {
     HPRNR,
     UTL_ORG,
     UKJENT,
+    NULL,
 }
 
 class JournalpostKoder {

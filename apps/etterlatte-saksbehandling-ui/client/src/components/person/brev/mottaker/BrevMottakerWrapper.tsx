@@ -1,6 +1,6 @@
 import { IBrev } from '~shared/types/Brev'
 import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
-import { Alert, Button, HStack, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, HStack, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettMottaker, tilbakestillMottakere } from '~shared/api/brev'
@@ -62,6 +62,10 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
       )}
       {kanRedigeres && (
         <HStack justify="center">
+          <BodyShort>
+            Her kan du oppdatere mottakere, her bruker persongrunnlaget i saken til å generere mottakere. Hvis endringer
+            har forekommet i familieforholdet i behandlingen vil dette bli gjenspeilet hvis denne brukes.
+          </BodyShort>
           <Button
             variant="secondary"
             onClick={tilbakestillMottakereWrapper}

@@ -85,6 +85,8 @@ export enum BrukerIdType {
   ORGNR = 'ORGNR',
   AKTOERID = 'AKTOERID',
   FNR = 'FNR',
+  UTL_ORG = 'UTL_ORG',
+  HPRNR = 'HPRNR',
 }
 
 export interface AvsenderMottaker {

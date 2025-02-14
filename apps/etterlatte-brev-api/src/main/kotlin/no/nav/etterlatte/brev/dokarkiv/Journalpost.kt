@@ -166,6 +166,8 @@ enum class BrukerIdType {
     FNR,
     AKTOERID,
     ORGNR,
+    UTL_ORG,
+    HPRNR,
 }
 
 class JournalpostKoder {

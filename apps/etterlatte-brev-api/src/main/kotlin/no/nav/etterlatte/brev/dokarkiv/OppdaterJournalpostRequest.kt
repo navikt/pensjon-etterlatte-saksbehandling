@@ -33,7 +33,7 @@ data class OppdaterJournalpostRequest(
         val id: String?,
         @JsonProperty("idType")
         @JsonAlias("type")
-        val idType: String? = null,
+        val idType: BrukerIdType? = null,
         val navn: String? = null,
     )
 }

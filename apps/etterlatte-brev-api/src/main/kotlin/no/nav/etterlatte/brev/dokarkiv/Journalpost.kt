@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -162,13 +163,24 @@ enum class BrukerIdType {
     ORGNR,
 }
 
+/**
+ * SAF kan gi oss "NULL" og "UKJENT" som idType, men Dokarkiv støtter ikke at vi sender dette tilbake.
+ * Sikrer derfor at idType blir [null] i tilfeller hvor vi ikke anser det som en gyldig verdi.
+ **/
 enum class AvsenderMottakerIdType {
     FNR,
     ORGNR,
     HPRNR,
     UTL_ORG,
-    UKJENT,
-    NULL,
+    ;
+
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun fra(value: String?) =
+            AvsenderMottakerIdType.entries
+                .firstOrNull { it.name.equals(value, ignoreCase = true) }
+    }
 }
 
 class JournalpostKoder {

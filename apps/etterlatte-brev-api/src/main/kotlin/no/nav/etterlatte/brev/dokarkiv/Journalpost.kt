@@ -1,9 +1,10 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
-import org.slf4j.LoggerFactory
 
 interface OpprettJournalpost {
     val avsenderMottaker: AvsenderMottaker?
@@ -101,15 +102,18 @@ data class KnyttTilAnnenSakResponse(
     val nyJournalpostId: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class AvsenderMottaker(
     val id: String?,
-    val idType: String? = "FNR",
+    @JsonAlias("type")
+    val idType: AvsenderMottakerIdType? = AvsenderMottakerIdType.FNR,
     val navn: String? = null,
     val land: String? = null,
 )
 
 data class Bruker(
     val id: String,
+    @JsonAlias("type")
     val idType: BrukerIdType = BrukerIdType.FNR,
 )
 
@@ -118,8 +122,6 @@ data class JournalpostDokument(
     val brevkode: String = "XX.YY-ZZ",
     val dokumentvarianter: List<DokumentVariant>,
 )
-
-val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.Journalpost")
 
 data class JournalpostSak(
     val sakstype: Sakstype,
@@ -166,8 +168,14 @@ enum class BrukerIdType {
     FNR,
     AKTOERID,
     ORGNR,
-    UTL_ORG,
+}
+
+enum class AvsenderMottakerIdType {
+    FNR,
+    ORGNR,
     HPRNR,
+    UTL_ORG,
+    UKJENT,
 }
 
 class JournalpostKoder {

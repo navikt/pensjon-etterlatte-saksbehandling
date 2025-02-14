@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -82,16 +83,16 @@ class OppdatererTilgangServiceTest {
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
         every { sakService.finnSak(sakId) } returns sak
-        every { sakService.markerSakerMedSkjerming(any(), any()) } just Runs
-        every { sakService.oppdaterEnhetForSaker(any()) } just Runs
+        every { sakService.oppdaterSkjerming(any(), any()) } just Runs
+        every { sakService.oppdaterEnhet(any()) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
         every { sakService.oppdaterAdressebeskyttelse(any(), any()) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
-            sakService.markerSakerMedSkjerming(match { it.first().sakId == sak.id.sakId }, true)
-            sakService.oppdaterEnhetForSaker(match { it.first().id == sak.id })
+            sakService.oppdaterSkjerming(sakId, true)
+            sakService.oppdaterEnhet(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
         }
@@ -121,16 +122,16 @@ class OppdatererTilgangServiceTest {
                 Enheter.PORSGRUNN.enhetNr,
             )
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
-        every { sakService.oppdaterEnhetForSaker(any()) } just Runs
-        every { sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false) } just Runs
+        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakService.oppdaterSkjerming(match { it == sak.id }, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 0) {
             sakService.settEnhetOmAdressebeskyttet(any(), any())
-            sakService.markerSakerMedSkjerming(any(), any())
-            sakService.oppdaterEnhetForSaker(any())
+            sakService.oppdaterSkjerming(any(), any())
+            sakService.oppdaterEnhet(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         }
         verify(exactly = 1) {
@@ -162,8 +163,8 @@ class OppdatererTilgangServiceTest {
                 Enheter.EGNE_ANSATTE.enhetNr,
             )
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
-        every { sakService.oppdaterEnhetForSaker(any()) } just Runs
-        every { sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false) } just Runs
+        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakService.oppdaterSkjerming(sak.id, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
@@ -173,8 +174,8 @@ class OppdatererTilgangServiceTest {
         }
         verify(exactly = 1) {
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
-            sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false)
-            sakService.oppdaterEnhetForSaker(match { it.first().id == sak.id && it.first().enhet == enhet.enhetNr })
+            sakService.oppdaterSkjerming(sak.id, false)
+            sakService.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
     }
@@ -223,8 +224,8 @@ class OppdatererTilgangServiceTest {
                 graderingOgEnhet.second,
             )
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
-        every { sakService.oppdaterEnhetForSaker(any()) } just Runs
-        every { sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false) } just Runs
+        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakService.oppdaterSkjerming(sak.id, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
@@ -234,8 +235,8 @@ class OppdatererTilgangServiceTest {
         }
         verify(exactly = 1) {
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
-            sakService.markerSakerMedSkjerming(match { it.first() == sak.id }, false)
-            sakService.oppdaterEnhetForSaker(match { it.first().id == sak.id && it.first().enhet == enhet.enhetNr })
+            sakService.oppdaterSkjerming(sak.id, false)
+            sakService.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
     }
@@ -252,15 +253,15 @@ class OppdatererTilgangServiceTest {
                 enhet.navn,
                 enhet.enhetNr,
             )
-        every { sakService.oppdaterEnhetForSaker(any()) } just Runs
-        every { sakService.markerSakerMedSkjerming(any(), false) } just Runs
+        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakService.oppdaterSkjerming(any(), false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
 
         oppdaterTilgangService.fjernSkjermingFraSak(sak, soeker)
 
         verify(exactly = 1) {
-            sakService.oppdaterEnhetForSaker(match { it.first().id == sak.id && it.first().enhet == enhet.enhetNr })
-            sakService.markerSakerMedSkjerming(match { it.first().sakId == sak.id.sakId }, false)
+            sakService.oppdaterEnhet(SakMedEnhet(sakId, enhet.enhetNr))
+            sakService.oppdaterSkjerming(sakId, false)
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(
                 match {
                     it.first().id == sak.id &&

@@ -207,6 +207,8 @@ internal class ApplicationContext {
             brevdistribuerer,
             dokdistKanalKlient,
             oppgaveService,
+            brevdataFacade,
+            adresseService,
         )
 
     val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))

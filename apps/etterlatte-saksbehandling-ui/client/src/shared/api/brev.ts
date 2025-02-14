@@ -43,6 +43,12 @@ export const opprettVedtaksbrev = async (args: {
 export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>
   apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, {})
 
+export const tilbakestillMottakere = async (props: {
+  brevId: number
+  sakId: number
+}): Promise<ApiResponse<Mottaker[]>> =>
+  apiClient.post(`/brev/${props.brevId}/mottaker/tilbakestill?sakId=${props.sakId}`, {})
+
 export const oppdaterMottaker = async (props: {
   brevId: number
   sakId: number

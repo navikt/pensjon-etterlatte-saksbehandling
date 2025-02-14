@@ -89,6 +89,7 @@ class VedtaksbrevServiceNy(
                             soeker,
                             avdoede,
                             verge,
+                            emptyList(), // TODO her burde det slenges på hvis BP i requesten..
                         ),
                         bruker,
                     ),

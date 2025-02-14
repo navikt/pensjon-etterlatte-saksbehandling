@@ -1,11 +1,13 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.BestemDistribusjonskanalRequest
 import no.nav.etterlatte.brev.distribusjon.BestemDistribusjonskanalResponse
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DokDistKanalKlient
+import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
@@ -45,6 +47,8 @@ class BrevService(
     private val distribuerer: Brevdistribuerer,
     private val dokDistKanalKlient: DokDistKanalKlient,
     private val oppgaveService: OppgaveService,
+    private val brevdataFacade: BrevdataFacade,
+    private val adresseService: AdresseService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
@@ -258,7 +262,10 @@ class BrevService(
             .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
     }
 
-    fun opprettMottaker(brevId: BrevID): Mottaker {
+    fun opprettMottaker(
+        brevId: BrevID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Mottaker {
         val brev = sjekkOmBrevKanEndres(brevId)
 
         if (brev.mottakere.size > 1) {
@@ -270,7 +277,7 @@ class BrevService(
         logger.info("Oppretter ny mottaker på brev=$brevId")
 
         db
-            .opprettMottaker(brevId, nyMottaker)
+            .opprettMottaker(brevId, nyMottaker, brukerTokenInfo)
             .also { logger.info("Ny mottaker opprettet på brev id=$brevId") }
 
         return nyMottaker
@@ -295,6 +302,34 @@ class BrevService(
 
             logger.info("Mottaker (id=$mottakerId) slettet fra brev=$brevId")
         }
+    }
+
+    suspend fun tilbakestillMottakere(
+        brevId: BrevID,
+        bruker: BrukerTokenInfo,
+    ): List<Mottaker> {
+        val brev = sjekkOmBrevKanEndres(brevId)
+        logger.info("Tilbakestiller mottakere for brev=$brevId")
+        val personerISakOgSak = brevdataFacade.hentPersonerISakforBrev(brev.sakId, brev.behandlingId, bruker)
+        val nyeMottakere = adresseService.hentMottakere(personerISakOgSak.sak.sakType, personerISakOgSak.personerISak, bruker)
+        if (nyeMottakere.isEmpty()) {
+            throw KanIkkeTilbakestilleUtenNyeMottakere()
+        }
+        if (nyeMottakere.size > 2) {
+            throw MaksAntallMottakere()
+        }
+        if (!nyeMottakere.any { it.type == MottakerType.HOVED }) {
+            throw KanIkkeSletteHovedmottaker()
+        }
+        // bare slett hvis testene går gjennom
+        brev.mottakere.forEach { mottaker ->
+            db.slettMottaker(brev.id, mottaker.id, bruker)
+        }
+        nyeMottakere.forEach { mottaker ->
+            db.opprettMottaker(brev.id, mottaker, bruker)
+        }
+
+        return db.hentBrev(brevId).mottakere
     }
 
     fun oppdaterMottaker(
@@ -486,6 +521,12 @@ class BrevKanIkkeEndres(
     )
 
 class MaksAntallMottakere : UgyldigForespoerselException("MAKS_ANTALL_MOTTAKERE", "Maks 2 mottakere tillatt")
+
+class KanIkkeTilbakestilleUtenNyeMottakere :
+    UgyldigForespoerselException(
+        code = "KAN_IKKE_SLETTE_MOTTAKERE_UTEN_NY",
+        detail = "Kan ikke tilbakestille mottakere hvis det ikke er nye",
+    )
 
 class KanIkkeSletteHovedmottaker :
     UgyldigForespoerselException(

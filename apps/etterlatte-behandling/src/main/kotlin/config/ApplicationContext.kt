@@ -40,6 +40,8 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJobService
+import no.nav.etterlatte.behandling.jobs.AvbrytRevurderingerDao
+import no.nav.etterlatte.behandling.jobs.AvbryterFeilopprettedeRevurderingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
@@ -717,6 +719,16 @@ internal class ApplicationContext(
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
             openingHours = env.requireEnvValue(JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val avbryterFeilopprettedeRevurderingJob: AvbryterFeilopprettedeRevurderingJob by lazy {
+        AvbryterFeilopprettedeRevurderingJob(
+            behandlingService = behandlingService,
+            avbrytRevurderingerDao = AvbrytRevurderingerDao(connectionAutoclosing = autoClosingDatabase),
+            isLeader = { leaderElectionKlient.isLeader() },
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

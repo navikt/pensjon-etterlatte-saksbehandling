@@ -48,9 +48,28 @@ class AdresseService(
                 } else {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.KOPI)
                 }
+            // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
+            val gjenlevendeAdresse =
+                if (sakType == SakType.BARNEPENSJON &&
+                    gjenlevende.isNotEmpty() &&
+                    gjenlevende.first() != soeker.fnr.value &&
+                    gjenlevende.first() != innsender?.fnr?.value
+                ) {
+                    hentMottakerAdresse(
+                        sakType,
+                        gjenlevende.first(),
+                        if (soekerAdresse?.type == MottakerType.HOVED) {
+                            MottakerType.KOPI
+                        } else {
+                            MottakerType.HOVED
+                        },
+                    )
+                } else {
+                    null
+                }
 
             val vergeMottakerType =
-                if (soekerAdresse?.type == MottakerType.HOVED) {
+                if (soekerAdresse?.type == MottakerType.HOVED || gjenlevendeAdresse?.type == MottakerType.HOVED) {
                     MottakerType.KOPI
                 } else {
                     MottakerType.HOVED
@@ -79,7 +98,7 @@ class AdresseService(
                         }
                 }
 
-            listOfNotNull(soekerAdresse, vergeAdresse)
+            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)
         }
 
     suspend fun hentAvsender(

@@ -3,7 +3,7 @@ import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottaker
 import { Alert, Button, HStack, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { opprettMottaker } from '~shared/api/brev'
+import { opprettMottaker, tilbakestillMottakere } from '~shared/api/brev'
 import { isPending } from '~shared/api/apiUtils'
 import { PlusIcon } from '@navikt/aksel-icons'
 
@@ -11,6 +11,13 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
   const [mottakere, setMottakere] = useState(brev.mottakere)
 
   const [opprettMottakerResult, apiOpprettMottaker] = useApiCall(opprettMottaker)
+  const [tilbakestillMottakereResult, apiTilbakestillMottaker] = useApiCall(tilbakestillMottakere)
+
+  const tilbakestillMottakereWrapper = () => {
+    apiTilbakestillMottaker({ brevId: brev.id, sakId: brev.sakId }, (mottakereres) => {
+      setMottakere([...mottakereres])
+    })
+  }
 
   const opprettNyMottaker = () => {
     apiOpprettMottaker({ brevId: brev.id, sakId: brev.sakId }, (mottaker) => {
@@ -50,6 +57,18 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
             icon={<PlusIcon aria-hidden />}
           >
             Legg til mottaker
+          </Button>
+        </HStack>
+      )}
+      {kanRedigeres && (
+        <HStack justify="center">
+          <Button
+            variant="secondary"
+            onClick={tilbakestillMottakereWrapper}
+            loading={isPending(tilbakestillMottakereResult)}
+            icon={<PlusIcon aria-hidden />}
+          >
+            Tilbakestill mottakere
           </Button>
         </HStack>
       )}

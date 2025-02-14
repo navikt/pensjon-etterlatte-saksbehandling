@@ -106,4 +106,12 @@ class SafModelTest {
 
         safAvsenderMottaker.type shouldBe type
     }
+
+    @Test
+    fun `Deserialisering av avsendermottaker idtype som er NULL`() {
+        val safJson = """{"id":"id","type":"NULL","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
+        val safAvsenderMottaker = deserialize<SafAvsenderMottaker>(safJson)
+
+        safAvsenderMottaker.type shouldBe AvsenderMottakerIdType.NULL
+    }
 }

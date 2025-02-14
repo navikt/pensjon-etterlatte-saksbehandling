@@ -106,7 +106,7 @@ data class KnyttTilAnnenSakResponse(
 data class AvsenderMottaker(
     val id: String?,
     @JsonAlias("type")
-    val idType: AvsenderMottakerIdType? = AvsenderMottakerIdType.FNR,
+    val idType: AvsenderMottakerIdType?,
     val navn: String? = null,
     val land: String? = null,
 )
@@ -154,14 +154,6 @@ enum class JournalPostType(
     NOTAT("NOTAT"),
     INNGAAENDE("INNGAAENDE"),
     UTGAAENDE("UTGAAENDE"),
-}
-
-enum class DokumentKategori(
-    val type: String,
-) {
-    SOK("SOK"),
-    VB("VB"),
-    IB("IB"),
 }
 
 enum class BrukerIdType {

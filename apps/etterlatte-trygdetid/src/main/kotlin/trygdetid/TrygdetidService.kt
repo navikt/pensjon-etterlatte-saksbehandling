@@ -1068,7 +1068,6 @@ class TrygdetidServiceImpl(
                 "Trygdetidene gjelder forskjellige avdøde"
             }
 
-            // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?
             trygdetiderMaal
                 .forEach { trygdetidMaal ->
                     oppdaterBeregnetTrygdetid(

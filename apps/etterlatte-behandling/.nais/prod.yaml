@@ -202,6 +202,7 @@ spec:
       rules:
         - application: etterlatte-vilkaarsvurdering-kafka
         - application: etterlatte-egne-ansatte-lytter
+        - application: etterlatte-hendelser-egne-ansatte
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling-kafka

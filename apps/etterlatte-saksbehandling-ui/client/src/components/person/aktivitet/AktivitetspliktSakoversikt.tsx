@@ -110,7 +110,6 @@ export const AktivitetspliktSakoversikt = ({
   )
 }
 
-//Burde sikkert sjekke på om den er under behandling også, men backend stopper dette
 function oppfoelging12mndErFerdigstilt(oppgaver: AktivitetspliktOppfoelgingsOppgave[]): boolean {
   return oppgaver.filter((o) => o.oppgaveType == Oppgavetype.AKTIVITETSPLIKT_12MND).some((o) => o.erFerdigstilt)
 }

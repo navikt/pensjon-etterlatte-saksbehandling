@@ -168,6 +168,10 @@ enum class BrukerIdType {
     FNR,
     AKTOERID,
     ORGNR,
+    HPRNR,
+    UTL_ORG,
+    UKJENT,
+    NULL,
 }
 
 enum class AvsenderMottakerIdType {

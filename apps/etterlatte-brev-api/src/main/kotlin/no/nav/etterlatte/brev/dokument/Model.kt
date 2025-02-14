@@ -197,7 +197,7 @@ data class AvsenderMottaker(
     val id: String?,
     @JsonProperty("idType")
     @JsonAlias("type")
-    val type: String?,
+    val type: BrukerIdType?,
     val navn: String?,
     val land: String?,
     val erLikBruker: Boolean?,

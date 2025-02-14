@@ -97,7 +97,6 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
-        context.avbryterFeilopprettedeRevurderingJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")

@@ -1,4 +1,4 @@
-import { AvsenderMottaker, BrukerIdType } from '~shared/types/Journalpost'
+import { AvsenderMottaker, AvsenderMottakerIdType } from '~shared/types/Journalpost'
 import { Alert, BodyShort, Box, Button, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React, { useState } from 'react'
@@ -27,7 +27,7 @@ export const EndreAvsenderMottaker = ({
   const lagreEndring = (avsenderMottaker: AvsenderMottaker) => {
     oppdaterAvsenderMottaker({
       ...avsenderMottaker,
-      idType: fnrHarGyldigFormat(avsenderMottaker.id) ? BrukerIdType.FNR : avsenderMottaker.idType,
+      idType: fnrHarGyldigFormat(avsenderMottaker.id) ? AvsenderMottakerIdType.FNR : avsenderMottaker.idType,
     })
     setRediger(false)
   }
@@ -75,7 +75,7 @@ export const EndreAvsenderMottaker = ({
               <PersonSoekModal
                 velgPerson={({ id, navn }) => {
                   setValue('id', id, { shouldDirty: true, shouldValidate: true })
-                  setValue('idType', BrukerIdType.FNR)
+                  setValue('idType', AvsenderMottakerIdType.FNR)
                   setValue('navn', navn, { shouldDirty: true, shouldValidate: true })
                 }}
               />

@@ -1,8 +1,7 @@
 import { IBoddEllerArbeidetUtlandet, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
-import { Vurdering } from '../styled'
 import { BoddEllerArbeidetUtlandetVurdering } from './BoddEllerArbeidetUtlandetVurdering'
-import { BodyShort, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, VStack } from '@navikt/ds-react'
 
 const statusIkon = (boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null) => {
   if (boddEllerArbeidetUtlandet) {
@@ -39,9 +38,9 @@ export const BoddEllerArbeidetUtlandet = ({
           avtaleland det ikke er sendt krav til tidligere i annen sak til avdød. Se spørsmålstegn for mer informasjon.
         </BodyShort>
       </VStack>
-      <Vurdering>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         <BoddEllerArbeidetUtlandetVurdering redigerbar={redigerbar} behandlingId={behandling.id} />
-      </Vurdering>
+      </Box>
     </SoeknadVurdering>
   )
 }

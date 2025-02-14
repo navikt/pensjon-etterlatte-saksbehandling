@@ -1,8 +1,7 @@
 import { IDetaljertBehandling, ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
-import { Vurdering } from '../styled'
 import { useState } from 'react'
-import { BodyShort, Button, List, ReadMore, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, List, ReadMore, VStack } from '@navikt/ds-react'
 import { TidligereFamiliepleierVurdering } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleierVurdering'
 
 const statusIkon = (tidligereFamiliepleier: ITidligereFamiliepleier | null) => {
@@ -57,7 +56,7 @@ export const TidligereFamiliepleier = ({
           </List>
         </ReadMore>
       </VStack>
-      <Vurdering>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         {vurdert && (
           <TidligereFamiliepleierVurdering
             redigerbar={redigerbar}
@@ -70,7 +69,7 @@ export const TidligereFamiliepleier = ({
             Legg til vurdering
           </Button>
         )}
-      </Vurdering>
+      </Box>
     </SoeknadVurdering>
   )
 }

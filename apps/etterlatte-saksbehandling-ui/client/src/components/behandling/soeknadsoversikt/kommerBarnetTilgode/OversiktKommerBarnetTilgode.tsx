@@ -1,5 +1,4 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { Vurdering } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
@@ -101,13 +100,13 @@ export const OversiktKommerBarnetTilgode = ({
         </HStack>
       </div>
 
-      <Vurdering>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         <KommerBarnetTilGodeVurdering
           kommerBarnetTilgode={kommerBarnetTilgode}
           redigerbar={redigerbar}
           behandlingId={behandlingId}
         />
-      </Vurdering>
+      </Box>
     </SoeknadVurdering>
   )
 }

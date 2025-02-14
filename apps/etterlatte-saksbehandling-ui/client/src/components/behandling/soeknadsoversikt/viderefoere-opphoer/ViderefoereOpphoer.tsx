@@ -1,8 +1,7 @@
 import { IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
-import { Vurdering } from '../styled'
 import { useState } from 'react'
-import { BodyShort, Button, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, VStack } from '@navikt/ds-react'
 import { ViderefoereOpphoerVurdering } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerVurdering'
 
 const statusIkon = (viderefoertOpphoer: ViderefoertOpphoer | null) =>
@@ -30,7 +29,7 @@ export const ViderefoereOpphoer = ({
           blir behandlet av det automatiske opphøret.
         </BodyShort>
       </VStack>
-      <Vurdering>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         {vurdert && (
           <ViderefoereOpphoerVurdering
             virkningstidspunkt={behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null}
@@ -45,7 +44,7 @@ export const ViderefoereOpphoer = ({
             Legg til vurdering
           </Button>
         )}
-      </Vurdering>
+      </Box>
     </SoeknadVurdering>
   )
 }

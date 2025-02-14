@@ -1,6 +1,5 @@
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
-import { Vurdering } from '../styled'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
 import { Box } from '@navikt/ds-react'
 
@@ -26,13 +25,13 @@ export const Utlandstilknytning = ({
         bosatt utland-sak, om avdøde har bodd/arbeidet i EØS/avtale-land og gjenlevende bor i Norge er det en
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
       </Box>
-      <Vurdering>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         <UtlandstilknytningVurdering
           utlandstilknytning={behandling.utlandstilknytning}
           redigerbar={redigerbar}
           behandlingId={behandling.id}
         />
-      </Vurdering>
+      </Box>
     </SoeknadVurdering>
   )
 }

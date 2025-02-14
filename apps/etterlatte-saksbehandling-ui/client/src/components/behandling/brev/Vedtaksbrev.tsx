@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, Box, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
-import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/SendTilAttesteringModal'
 import {
@@ -36,6 +35,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
+import { formaterDato } from '~utils/formatering/dato'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -173,7 +173,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             <Heading spacing size="large" level="1">
               Vedtaksbrev
             </Heading>
-            {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
+
+            {soeknadMottattDato && <Label>Søknad mottatt: {formaterDato(soeknadMottattDato)}</Label>}
 
             <br />
             {behandling?.status === IBehandlingStatus.FATTET_VEDTAK && (

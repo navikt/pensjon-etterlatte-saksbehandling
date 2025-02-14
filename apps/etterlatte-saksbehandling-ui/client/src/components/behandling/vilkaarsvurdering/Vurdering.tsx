@@ -1,11 +1,10 @@
-import { BodyShort, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '~shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { formaterVurderingsResultat } from '~components/behandling/vilkaarsvurdering/utils'
-import { Vurdering as VurderingWrapper } from '~/components/behandling/soeknadsoversikt/styled'
 
 const MIN_KOMMENTAR_LENGDE = 1
 const INGEN_VILKAAR_OPPFYLT = 'ingen_vilkaar_oppfylt'
@@ -143,7 +142,7 @@ export const Vurdering = ({
   )
 
   return (
-    <VurderingWrapper>
+    <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
       <VurderingsboksWrapper
         tittel={overskrift()}
         subtittelKomponent={
@@ -250,7 +249,7 @@ export const Vurdering = ({
           />
         </>
       </VurderingsboksWrapper>
-    </VurderingWrapper>
+    </Box>
   )
 }
 

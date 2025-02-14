@@ -1,6 +1,5 @@
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
+import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
@@ -13,7 +12,7 @@ import { Familieforhold } from '~shared/types/Person'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { HStack } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 import {
   finnVurdering,
   GyldigFramsattVurdering,
@@ -47,7 +46,7 @@ export const GyldigFramsattBarnepensjon = ({
   return (
     <>
       {isSuccess(personGalleriSoeknad) && (
-        <LovtekstMedLenke
+        <SoeknadVurdering
           tittel="Vurdering - søknad gyldig fremsatt"
           hjemler={[
             {
@@ -63,11 +62,11 @@ export const GyldigFramsattBarnepensjon = ({
           status={gyldigFremsattTilStatusIcon}
         >
           <div>
-            <Informasjon>
+            <Box marginBlock="3" marginInline="0" maxWidth="41rem">
               Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt
               ligge i saken. Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet
               eller i det landet vedkommende sist var medlem.
-            </Informasjon>
+            </Box>
             <HStack gap="4">
               <Innsender harKildePesys={harKildePesys} />
               <Foreldreansvar
@@ -80,14 +79,14 @@ export const GyldigFramsattBarnepensjon = ({
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
             </HStack>
           </div>
-          <Vurdering>
+          <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
             <GyldigFramsattVurdering
               behandlingId={behandling.id}
               gyldigFramsatt={behandling.gyldighetsprøving}
               redigerbar={redigerbar}
             />
-          </Vurdering>
-        </LovtekstMedLenke>
+          </Box>
+        </SoeknadVurdering>
       )}
     </>
   )

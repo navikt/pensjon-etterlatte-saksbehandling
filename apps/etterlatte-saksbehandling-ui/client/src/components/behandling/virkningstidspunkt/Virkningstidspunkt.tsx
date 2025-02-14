@@ -1,6 +1,7 @@
 import {
   Alert,
   BodyShort,
+  Box,
   ConfirmationPanel,
   ErrorMessage,
   Heading,
@@ -15,11 +16,10 @@ import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/re
 import { formaterDato } from '~utils/formatering/dato'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Informasjon, Vurdering } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
-import { LovtekstMedLenke } from '../soeknadsoversikt/LovtekstMedLenke'
+import { SoeknadVurdering } from '../soeknadsoversikt/SoeknadVurdering'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt, Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
@@ -139,17 +139,19 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
 
   return (
     <>
-      <LovtekstMedLenke
+      <SoeknadVurdering
         tittel="Virkningstidspunkt"
         hjemler={hjemler}
         status={Boolean(behandling.virkningstidspunkt) ? 'success' : 'warning'}
       >
         <VStack gap="2">
-          <Informasjon>{beskrivelse}</Informasjon>
+          <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+            {beskrivelse}
+          </Box>
           <HStack gap="4">{children}</HStack>
         </VStack>
 
-        <Vurdering>
+        <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
           <VurderingsboksWrapper
             tittel="Hva er virkningstidspunkt for behandlingen?"
             subtittelKomponent={
@@ -249,8 +251,8 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
               )}
             </VStack>
           </VurderingsboksWrapper>
-        </Vurdering>
-      </LovtekstMedLenke>
+        </Box>
+      </SoeknadVurdering>
     </>
   )
 }

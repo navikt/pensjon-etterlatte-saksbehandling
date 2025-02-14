@@ -1,7 +1,7 @@
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '../LovtekstMedLenke'
-import { Informasjon, Vurdering } from '../styled'
+import { SoeknadVurdering } from '../SoeknadVurdering'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
+import { Box } from '@navikt/ds-react'
 
 const statusIkon = (utlandstilknytning: IUtlandstilknytning | null) => {
   if (utlandstilknytning === null) {
@@ -18,20 +18,20 @@ export const Utlandstilknytning = ({
   redigerbar: boolean
 }) => {
   return (
-    <LovtekstMedLenke tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
-      <Informasjon>
+    <SoeknadVurdering tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
+      <Box marginBlock="3" marginInline="0" maxWidth="41rem">
         Svar for om saken skal behandles som følge av utlandstilknytning basert på om avdøde har bodd/arbeidet i
         EØS/avtale-land eller ikke, og om gjenlevende bor i Norge eller utlandet. Om søker bor i utlandet er det en
         bosatt utland-sak, om avdøde har bodd/arbeidet i EØS/avtale-land og gjenlevende bor i Norge er det en
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
-      </Informasjon>
-      <Vurdering>
+      </Box>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         <UtlandstilknytningVurdering
           utlandstilknytning={behandling.utlandstilknytning}
           redigerbar={redigerbar}
           behandlingId={behandling.id}
         />
-      </Vurdering>
-    </LovtekstMedLenke>
+      </Box>
+    </SoeknadVurdering>
   )
 }

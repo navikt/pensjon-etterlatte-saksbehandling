@@ -151,7 +151,7 @@ class JournalfoerBrevService(
                             orgnummer != null -> AvsenderMottakerIdType.ORGNR
                             else -> {
                                 logger.warn("Kunne ikke utlede type på avsenderMottaker fra brev-mottaker")
-                                AvsenderMottakerIdType.UKJENT
+                                null
                             }
                         },
                     navn = navn,

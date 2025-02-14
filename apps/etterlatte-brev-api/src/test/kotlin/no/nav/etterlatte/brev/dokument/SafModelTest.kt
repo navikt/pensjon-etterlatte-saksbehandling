@@ -107,11 +107,18 @@ class SafModelTest {
         safAvsenderMottaker.type shouldBe type
     }
 
-    @Test
-    fun `Deserialisering av avsendermottaker idtype som er NULL`() {
-        val safJson = """{"id":"id","type":"NULL","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "UKJENT",
+            "NULL",
+            "TILFELDIG VERDI SOM IKKE VALIDERER",
+        ],
+    )
+    fun `Deserialisering av avsendermottaker idtype som er NULL eller UKJENT`(type: String) {
+        val safJson = """{"id":"id","type":"$type","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
         val safAvsenderMottaker = deserialize<SafAvsenderMottaker>(safJson)
 
-        safAvsenderMottaker.type shouldBe AvsenderMottakerIdType.NULL
+        safAvsenderMottaker.type shouldBe null
     }
 }

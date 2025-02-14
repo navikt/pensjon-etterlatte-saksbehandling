@@ -53,6 +53,15 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
+  const sorterRevurderingsaarsakerKronologisk = (revurderingsaarsaker: Revurderingaarsak[]): Revurderingaarsak[] => {
+    return revurderingsaarsaker.toSorted((first, last) => {
+      if (tekstRevurderingsaarsak[first].trim().toLowerCase() > tekstRevurderingsaarsak[last].trim().toLowerCase()) {
+        return 1
+      }
+      return -1
+    })
+  }
+
   const lukkModal = () => {
     setHandlingValgt(HandlingValgt.INGEN)
     setOpen(false)
@@ -108,7 +117,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                           <VStack gap="2">
                             <BodyShort>
                               Bruker har meldt inn en endring. Velg mellom å opprette en revurdering eller å avslutte
-                              oppgaven dersom den ikke skal behandles
+                              oppgaven dersom den ikke skal behandles.
                             </BodyShort>
                             <div>
                               <Button
@@ -118,7 +127,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                                 to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
                                 target="_blank"
                               >
-                                Vis (åpnes i ny fane)
+                                Åpne dokument (åpnes i ny fane)
                               </Button>
                             </div>
                           </VStack>
@@ -143,7 +152,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                                 error={errors.revurderingsaarsak?.message}
                               >
                                 <option value="">Velg årsak</option>
-                                {revurderingsaarsaker.map((aarsak, index) => (
+                                {sorterRevurderingsaarsakerKronologisk(revurderingsaarsaker).map((aarsak, index) => (
                                   <option key={index} value={aarsak}>
                                     {tekstRevurderingsaarsak[aarsak]}
                                   </option>

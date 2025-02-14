@@ -204,13 +204,13 @@ class BrevRepository(
                     ),
                 ).asUpdate,
             ).also {
-                krev(it == 1) { "Brev fikk ikke oppdatert mottaker id: $id" }
+                krev(it == 1) { "Brev id $id fikk ikke oppdatert mottaker id: $id" }
             }
 
         tx
             .lagreHendelse(id, Status.OPPDATERT, mottaker.toJson(), bruker)
             .also {
-                krev(it == 1) { "Brev fikk ikke oppdater hendelse for oppdatert mottaker id: $id" }
+                krev(it == 1) { "Brev id $id fikk ikke oppdater hendelse for oppdatert mottaker." }
             }
     }
 

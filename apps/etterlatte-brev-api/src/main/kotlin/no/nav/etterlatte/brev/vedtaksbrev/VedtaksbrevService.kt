@@ -146,7 +146,12 @@ class VedtaksbrevService(
         } else if (!brev.kanEndres()) {
             throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
         } else if (brev.mottakere.size !in 1..2) {
-            logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            if (brukerTokenInfo is Saksbehandler) {
+                logger.warn("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            } else {
+                logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            }
+
             throw UgyldigAntallMottakere()
         } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
             sikkerlogger.error("Ugyldig mottaker(e): ${brev.mottakere.toJson()}")

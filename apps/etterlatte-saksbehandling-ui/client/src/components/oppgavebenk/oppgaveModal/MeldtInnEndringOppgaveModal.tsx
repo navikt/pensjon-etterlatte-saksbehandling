@@ -53,7 +53,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
-  const sorterRevurderingsaarsakerKronologisk = (revurderingsaarsaker: Revurderingaarsak[]): Revurderingaarsak[] => {
+  const sorterRevurderingsaarsakerAlfabetisk = (revurderingsaarsaker: Revurderingaarsak[]): Revurderingaarsak[] => {
     return revurderingsaarsaker.toSorted((first, last) => {
       if (tekstRevurderingsaarsak[first].trim().toLowerCase() > tekstRevurderingsaarsak[last].trim().toLowerCase()) {
         return 1
@@ -152,7 +152,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
                                 error={errors.revurderingsaarsak?.message}
                               >
                                 <option value="">Velg årsak</option>
-                                {sorterRevurderingsaarsakerKronologisk(revurderingsaarsaker).map((aarsak, index) => (
+                                {sorterRevurderingsaarsakerAlfabetisk(revurderingsaarsaker).map((aarsak, index) => (
                                   <option key={index} value={aarsak}>
                                     {tekstRevurderingsaarsak[aarsak]}
                                   </option>

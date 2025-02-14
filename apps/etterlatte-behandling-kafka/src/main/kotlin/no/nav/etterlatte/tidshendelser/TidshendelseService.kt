@@ -109,7 +109,6 @@ class TidshendelseService(
                     "aktivitetspliktoppgave for sak: ${hendelse.sakId}",
             )
         }
-        // TODO: må kun opprette om den ikke finnes med gyldig status
         val response =
             behandlingService.opprettOppgaveOppfoelgingAktivitetsplikt(
                 sakId = hendelse.sakId,
@@ -132,7 +131,6 @@ class TidshendelseService(
     }
 
     private fun opprettRevurderingForAktivitetsplikt(hendelse: TidshendelsePacket): TidshendelseResult {
-        // TODO: denne må håndtere at det ikke finnes en tilsvarende oppgave med gyldig status
         val response =
             behandlingService.opprettRevurderingAktivitetsplikt(
                 sakId = hendelse.sakId,

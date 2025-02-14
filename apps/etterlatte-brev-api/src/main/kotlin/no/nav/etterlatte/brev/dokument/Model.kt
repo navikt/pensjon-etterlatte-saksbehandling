@@ -197,7 +197,9 @@ data class AvsenderMottaker(
     val navn: String?,
     val land: String?,
     val erLikBruker: Boolean?,
-)
+) {
+    val idType: String = "$type"
+}
 
 // https://confluence.adeo.no/display/BOA/Type%3A+Utsendingsinfo
 @JsonIgnoreProperties(ignoreUnknown = true)

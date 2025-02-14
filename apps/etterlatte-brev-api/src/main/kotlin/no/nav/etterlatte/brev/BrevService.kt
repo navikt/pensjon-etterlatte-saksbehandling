@@ -290,7 +290,7 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(brevId)
 
-        logger.info("Sletter mottaker (id=$mottakerId) fra brev=$brevId")
+        logger.info("Sletter mottaker fra brev=$brevId (id=$mottakerId)")
 
         val mottaker = brev.mottakere.find { it.id == mottakerId }
         if (mottaker?.type == MottakerType.HOVED) {
@@ -300,7 +300,7 @@ class BrevService(
         } else {
             db.slettMottaker(brevId, mottakerId, bruker)
 
-            logger.info("Mottaker (id=$mottakerId) slettet fra brev=$brevId")
+            logger.info("Slettetr fra brev=$brevId Mottaker (id=$mottakerId)")
         }
     }
 
@@ -344,7 +344,7 @@ class BrevService(
             throw InternfeilException("Kan ikke sette hoved-/kopimottaker på vanlig oppdatering av mottaker")
         }
 
-        logger.info("Oppdaterer mottaker (id=${mottaker.id}) på brev=$brevId")
+        logger.info("Oppdaterer mottaker for brev=$brevId (id=${mottaker.id})")
 
         return db
             .oppdaterMottaker(brevId, mottaker, bruker)

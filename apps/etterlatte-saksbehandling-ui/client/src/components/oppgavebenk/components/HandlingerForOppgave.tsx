@@ -40,6 +40,10 @@ export const HandlingerForOppgave = ({
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
 
+  const erISakOversikt = () => {
+    return window.location.href.includes('/person')
+  }
+
   const opprettInntektsjusteringRevurdering = () => {
     opprettManuellInntektsjustering(
       {
@@ -195,11 +199,27 @@ export const HandlingerForOppgave = ({
     case Oppgavetype.OPPFOELGING:
       return <OppfoelgingAvOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.MELDT_INN_ENDRING:
-      return (
-        erOppgaveRedigerbar(oppgave.status) && (
-          <MeldtInnEndringOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+      if (!erISakOversikt()) {
+        return (
+          <PersonButtonLink
+            size="small"
+            icon={<EyeIcon aria-hidden />}
+            fnr={fnr || '-'}
+            fane={PersonOversiktFane.SAKER}
+            queryParams={{ referanse: referanse || '-' }}
+            disabled={!fnr}
+          >
+            Se sak
+          </PersonButtonLink>
         )
-      )
+      } else {
+        return (
+          erOppgaveRedigerbar(oppgave.status) && (
+            <MeldtInnEndringOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+          )
+        )
+      }
+
     default:
       return null
   }

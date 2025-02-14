@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.EnumSource
 import no.nav.etterlatte.brev.dokarkiv.AvsenderMottaker as DokarkivAvsenderMottaker
 import no.nav.etterlatte.brev.dokument.AvsenderMottaker as SafAvsenderMottaker
 
@@ -95,5 +96,14 @@ class SafModelTest {
         safAvsenderMottaker.type shouldBe dokarkivAvsenderMottaker.idType
         safAvsenderMottaker.navn shouldBe dokarkivAvsenderMottaker.navn
         safAvsenderMottaker.land shouldBe dokarkivAvsenderMottaker.land
+    }
+
+    @ParameterizedTest
+    @EnumSource(AvsenderMottakerIdType::class)
+    fun `Deserialisering av avsendermottaker idtype`(type: AvsenderMottakerIdType) {
+        val safJson = """{"id":"id","type":"$type","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
+        val safAvsenderMottaker = deserialize<SafAvsenderMottaker>(safJson)
+
+        safAvsenderMottaker.type shouldBe type
     }
 }

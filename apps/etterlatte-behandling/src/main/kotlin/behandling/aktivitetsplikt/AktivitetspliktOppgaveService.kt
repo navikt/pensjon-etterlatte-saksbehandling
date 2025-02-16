@@ -129,7 +129,7 @@ class AktivitetspliktOppgaveService(
         sakId: SakId,
         oppgaveType: OppgaveType,
     ): Behandling {
-        val oppgaverForSak = oppgaveService.hentOppgaverForSakAvType(sakId, listOf(oppgaveType))
+        val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId, oppgaveType)
         val harOppfoelgingsOppgaveUnderbehandling =
             oppgaverForSak.filter {
                 it.erUnderBehandling() ||
@@ -149,9 +149,9 @@ class AktivitetspliktOppgaveService(
     private fun validerMnd6KanOpprette(sakId: SakId) {
         val ferdigstilt12mndOppgave =
             oppgaveService
-                .hentOppgaverForSakAvType(
+                .hentOppgaverForSak(
                     sakId,
-                    listOf(OppgaveType.AKTIVITETSPLIKT_12MND),
+                    OppgaveType.AKTIVITETSPLIKT_12MND,
                 ).filter { it.status != no.nav.etterlatte.libs.common.oppgave.Status.AVBRUTT }
         if (ferdigstilt12mndOppgave.isNotEmpty()) {
             throw Har12MndVurderingFerdigstilt(
@@ -162,9 +162,9 @@ class AktivitetspliktOppgaveService(
 
     private fun valider12MndKanOpprette(sakId: SakId) {
         val oppfoelging6mnd =
-            oppgaveService.hentOppgaverForSakAvType(
+            oppgaveService.hentOppgaverForSak(
                 sakId,
-                listOf(OppgaveType.AKTIVITETSPLIKT),
+                OppgaveType.AKTIVITETSPLIKT,
             )
         if (oppfoelging6mnd.any { it.erUnderBehandling() }) {
             throw KanIkkeopprette12mndOppaveOm6MndErUnderbehandling("Kan ikke opprette 12 mnd mens en 6 mnd er under behandling. ")

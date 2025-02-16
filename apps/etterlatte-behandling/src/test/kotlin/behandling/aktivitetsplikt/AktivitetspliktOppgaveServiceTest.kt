@@ -100,7 +100,7 @@ class AktivitetspliktOppgaveServiceTest {
     @Test
     fun `Kan ikke opprette oppfølgingsoppgave hvis samme oppgavetype allerede finnes under behandling`() {
         every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
-        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT)) } returns
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
             listOf(
                 mockk {
                     every { erUnderBehandling() } returns true
@@ -109,21 +109,21 @@ class AktivitetspliktOppgaveServiceTest {
                 },
             )
 
-        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT_12MND)) } returns emptyList()
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
         assertThrows<HarOppfoelgingsOppgaveUnderbehandling> {
             service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
         }
 
         verify(exactly = 1) {
             aktivitetspliktService.harVarigUnntak(sak.id)
-            oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT))
+            oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT)
         }
     }
 
     @Test
     fun `Kan ikke opprette oppfølgingsoppgave hvis det ikke finnes en iverksatt behandling`() {
         every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
-        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT)) } returns
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
             listOf(
                 mockk {
                     every { erUnderBehandling() } returns false
@@ -131,7 +131,7 @@ class AktivitetspliktOppgaveServiceTest {
                     every { type } returns OppgaveType.AKTIVITETSPLIKT
                 },
             )
-        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT_12MND)) } returns emptyList()
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
         every { behandlingService.hentSisteIverksatte(sak.id) } returns null
 
         assertThrows<ManglerIverksattBehandling> {
@@ -140,7 +140,7 @@ class AktivitetspliktOppgaveServiceTest {
 
         verify(exactly = 1) {
             aktivitetspliktService.harVarigUnntak(sak.id)
-            oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT))
+            oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT)
             behandlingService.hentSisteIverksatte(sak.id)
         }
     }
@@ -153,9 +153,9 @@ class AktivitetspliktOppgaveServiceTest {
         val vurderingType: VurderingType = VurderingType.SEKS_MAANEDER
         every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
         every {
-            oppgaveService.hentOppgaverForSakAvType(
+            oppgaveService.hentOppgaverForSak(
                 sak.id,
-                listOf(OppgaveType.AKTIVITETSPLIKT_12MND),
+                OppgaveType.AKTIVITETSPLIKT_12MND,
             )
         } returns
             listOf(
@@ -179,9 +179,9 @@ class AktivitetspliktOppgaveServiceTest {
         val vurderingType: VurderingType = VurderingType.TOLV_MAANEDER
         every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
         every {
-            oppgaveService.hentOppgaverForSakAvType(
+            oppgaveService.hentOppgaverForSak(
                 sak.id,
-                listOf(OppgaveType.AKTIVITETSPLIKT),
+                OppgaveType.AKTIVITETSPLIKT,
             )
         } returns
             listOf(
@@ -206,9 +206,9 @@ class AktivitetspliktOppgaveServiceTest {
         val vurderingType: VurderingType = VurderingType.TOLV_MAANEDER
         every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
         every {
-            oppgaveService.hentOppgaverForSakAvType(
+            oppgaveService.hentOppgaverForSak(
                 sak.id,
-                listOf(OppgaveType.AKTIVITETSPLIKT),
+                OppgaveType.AKTIVITETSPLIKT,
             )
         } returns
             listOf(
@@ -237,7 +237,7 @@ class AktivitetspliktOppgaveServiceTest {
                 VurderingType.TOLV_MAANEDER -> OppgaveType.AKTIVITETSPLIKT_12MND
             }
         every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
-        every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(oppgaveType)) } returns
+        every { oppgaveService.hentOppgaverForSak(sak.id, oppgaveType) } returns
             listOf(
                 mockk {
                     every { erUnderBehandling() } returns false
@@ -252,7 +252,7 @@ class AktivitetspliktOppgaveServiceTest {
                 every { id } returns sisteIverksatteBehandlingId
             }
         if (oppgaveType == OppgaveType.AKTIVITETSPLIKT_12MND) {
-            every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT)) } returns
+            every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
                         every { erFerdigstilt() } returns true
@@ -260,7 +260,7 @@ class AktivitetspliktOppgaveServiceTest {
                     },
                 )
         } else {
-            every { oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(OppgaveType.AKTIVITETSPLIKT_12MND)) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
         }
 
         val oppgaveId = UUID.randomUUID()
@@ -291,7 +291,7 @@ class AktivitetspliktOppgaveServiceTest {
                 frist = any(),
             )
             aktivitetspliktService.harVarigUnntak(sak.id)
-            oppgaveService.hentOppgaverForSakAvType(sak.id, listOf(oppgaveType))
+            oppgaveService.hentOppgaverForSak(sak.id, oppgaveType)
             behandlingService.hentSisteIverksatte(sak.id)
         }
     }

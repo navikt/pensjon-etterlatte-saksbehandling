@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
+import kotlin.collections.contains
 
 class BrevService(
     private val db: BrevRepository,
@@ -407,11 +408,22 @@ class BrevService(
             brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
+    // EY-4963
+    private fun sjekkOmErAktivitetsipliktsvurderingsBrev(brevkoder: Brevkoder?): Boolean =
+        listOf(
+            Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
+            Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
+        ).contains(brevkoder)
+
     suspend fun ferdigstill(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
         val brev = sjekkOmBrevKanEndres(id)
+
+        if (sjekkOmErAktivitetsipliktsvurderingsBrev(brev.brevkoder)) {
+            throw BrevKanIkkeEndres(brev, "brevkoden er feil, er ${brev.brevkoder}. Denne kan kun endres i aktivitetsplikts flyten")
+        }
 
         if (brev.mottakere.size !in 1..2) {
             throw UgyldigAntallMottakere()
@@ -437,9 +449,11 @@ class BrevService(
     ) {
         logger.info("Sjekker om brev med id=$id kan slettes")
         val brev = sjekkOmBrevKanSlettes(id)
-
         sjekk(brev.behandlingId == null) {
             "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+        }
+        if (sjekkOmErAktivitetsipliktsvurderingsBrev(brev.brevkoder)) {
+            throw BrevKanIkkeEndres(brev, "brevkoden er feil, er ${brev.brevkoder}. Denne kan kun endres i aktivitetsplikts flyten")
         }
 
         val result = db.settBrevSlettet(id, bruker)

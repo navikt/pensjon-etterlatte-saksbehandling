@@ -24,7 +24,13 @@ const mapAdresse = (mottaker: Mottaker) => {
   return `${adresselinje}, ${postlinje}`
 }
 
-const kanEndres = (brev: IBrev) => brev.status !== BrevStatus.DISTRIBUERT
+const kanEndres = (brev: IBrev) => brev.status !== BrevStatus.DISTRIBUERT && gyldigbrevkode(brev.brevkoder)
+
+export const gyldigbrevkode = (brevkoder: string): boolean =>
+  ![
+    'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD',
+    'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD',
+  ].includes(brevkoder)
 
 const handlingKnapp = (brev: IBrev) => {
   if (kanEndres(brev)) {

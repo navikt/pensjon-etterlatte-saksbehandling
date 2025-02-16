@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -22,10 +23,12 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -470,6 +473,64 @@ internal class BrevServiceTest {
     }
 
     @Nested
+    inner class FerdigstillingAvBrev {
+        @ParameterizedTest
+        @EnumSource(Status::class)
+        fun `Skal ikke kunne ferdigstille aktivitetspliktsbrev som medfører vurdering, uavhengig av status`(status: Status) {
+            val brev =
+                opprettBrev(
+                    status,
+                    BrevProsessType.REDIGERBAR,
+                ).copy(brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<BrevKanIkkeEndres> {
+                runBlocking { brevService.ferdigstill(brev.id, bruker) }
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Kan ferdigstille brev med en hovedmottaker`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+            val pdf = Pdf(bytes = ByteArray(1))
+            coEvery { pdfGenerator.genererPdf(brev.id, any(), any(), any(), any()) } returns pdf
+            runBlocking { brevService.ferdigstill(brev.id, bruker) }
+
+            verify {
+                db.hentBrev(brev.id)
+                db.lagrePdfOgFerdigstillBrev(brev.id, pdf, any())
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Kan ikke ferdigstille brev med mer enn 2 mottakere`(status: Status) {
+            val brev =
+                opprettBrev(status, BrevProsessType.REDIGERBAR)
+                    .copy(mottakere = listOf(opprettMottaker(), opprettMottaker(), opprettMottaker()))
+
+            every { db.hentBrev(any()) } returns brev
+            val pdf = Pdf(bytes = ByteArray(1))
+            coEvery { pdfGenerator.genererPdf(brev.id, any(), any(), any(), any()) } returns pdf
+            assertThrows<UgyldigAntallMottakere> {
+                runBlocking { brevService.ferdigstill(brev.id, bruker) }
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
+    @Nested
     inner class SlettingAvBrev {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT", "SLETTET"], mode = EnumSource.Mode.INCLUDE)
@@ -514,6 +575,26 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             assertThrows<Exception> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class)
+        fun `Skal ikke kunne slette aktivitetspliktsbrev som medfører vurdering, uavhengig av status`(status: Status) {
+            val brev =
+                opprettBrev(
+                    status,
+                    BrevProsessType.REDIGERBAR,
+                ).copy(brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<BrevKanIkkeEndres> {
                 brevService.slett(brev.id, bruker)
             }
 

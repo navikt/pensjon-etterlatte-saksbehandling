@@ -1,13 +1,12 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { Informasjon, Vurdering } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
-import { LovtekstMedLenke } from '../LovtekstMedLenke'
+import { SoeknadVurdering } from '../SoeknadVurdering'
 import { Info } from '../Info'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
-import { HStack } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 
 interface AdresseProps {
@@ -58,7 +57,7 @@ export const OversiktKommerBarnetTilgode = ({
   const skalViseInnsenderAdresse = !innsenderErGjenlevende && innsenderHarForeldreAnsvar && innsenderAdresse
 
   return (
-    <LovtekstMedLenke
+    <SoeknadVurdering
       tittel="Vurdering - kommer pensjonen barnet til gode?"
       hjemler={[
         { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-1', tittel: 'Folketrygdloven § 18-1' },
@@ -69,9 +68,9 @@ export const OversiktKommerBarnetTilgode = ({
       status={svarTilStatusIcon(kommerBarnetTilgode?.svar)}
     >
       <div>
-        <Informasjon>
+        <Box marginBlock="3" marginInline="0" maxWidth="41rem">
           Undersøk om boforholdet er avklart og det er sannsynlig at pensjonen kommer barnet til gode.
-        </Informasjon>
+        </Box>
 
         <HStack gap="4">
           {bostedsadresse && (
@@ -101,13 +100,13 @@ export const OversiktKommerBarnetTilgode = ({
         </HStack>
       </div>
 
-      <Vurdering>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         <KommerBarnetTilGodeVurdering
           kommerBarnetTilgode={kommerBarnetTilgode}
           redigerbar={redigerbar}
           behandlingId={behandlingId}
         />
-      </Vurdering>
-    </LovtekstMedLenke>
+      </Box>
+    </SoeknadVurdering>
   )
 }

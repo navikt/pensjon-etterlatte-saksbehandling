@@ -10,7 +10,6 @@ import no.nav.etterlatte.azureAdFortroligClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klage.KlageDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -20,6 +19,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
@@ -304,7 +304,7 @@ internal class TilgangServiceTest(
 
         Assertions.assertEquals(true, hartilgangtilvanligsak)
 
-        sakRepo.markerSakerMedSkjerming(listOf(sakId), true)
+        sakRepo.oppdaterSkjerming(sakId, true)
 
         val hartilgangSomStrengtFortroligMotEgenAnsattSak =
             tilgangService.harTilgangTilBehandling(

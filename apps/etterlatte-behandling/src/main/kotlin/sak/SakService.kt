@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerService
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
@@ -13,6 +12,8 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -23,10 +24,10 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -37,7 +38,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
@@ -76,16 +76,14 @@ interface SakService {
 
     fun finnFlyktningForSak(id: SakId): Flyktning?
 
-    fun markerSakerMedSkjerming(
-        sakIder: List<SakId>,
+    fun oppdaterSkjerming(
+        sakId: SakId,
         skjermet: Boolean,
     )
 
-    fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
-
-    fun oppdaterEnhetForSak(
+    fun oppdaterEnhet(
         sak: SakMedEnhet,
-        kommentar: String?,
+        kommentar: String? = null,
     )
 
     fun oppdaterAdressebeskyttelse(
@@ -214,7 +212,8 @@ class SakServiceImpl(
 
     override fun finnSakerOmsOgHvisAvdoed(ident: String): List<SakId> {
         val saker = finnSakerForPerson(ident, SakType.OMSTILLINGSSTOENAD).filterForEnheter()
-        val sakerOgRollerForPerson = runBlocking { grunnlagService.hentAlleSakerForPerson(ident) }
+        val sakerOgRollerForPerson =
+            runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(ident)) }
         val sakerOgRollerGruppert = sakerOgRollerForPerson.sakiderOgRoller.distinct()
         val avdoedSak = sakerOgRollerGruppert.filter { it.rolle == Saksrolle.AVDOED }
         val sakerForAvdoed = avdoedSak.map { it.sakId }
@@ -243,11 +242,11 @@ class SakServiceImpl(
                 .flatMap { lesDao.finnSaker(it.folkeregisterident.value, sakType) }
         }
 
-    override fun markerSakerMedSkjerming(
-        sakIder: List<SakId>,
+    override fun oppdaterSkjerming(
+        sakId: SakId,
         skjermet: Boolean,
     ) {
-        dao.markerSakerMedSkjerming(sakIder, skjermet)
+        dao.oppdaterSkjerming(sakId, skjermet)
     }
 
     override fun finnEllerOpprettSakMedGrunnlag(
@@ -264,7 +263,7 @@ class SakServiceImpl(
 
     private fun leggTilGrunnlag(sak: Sak) {
         runBlocking {
-            val harGrunnlag = grunnlagService.grunnlagFinnes(sak.id, HardkodaSystembruker.opprettGrunnlag)
+            val harGrunnlag = grunnlagService.grunnlagFinnesForSak(sak.id)
 
             if (harGrunnlag) {
                 logger.info("Finnes allerede grunnlag på sak=${sak.id}")
@@ -276,16 +275,14 @@ class SakServiceImpl(
             val spraak = hentSpraak(sak.ident)
             val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
 
-            grunnlagService.leggInnNyttGrunnlagSak(
-                sak,
-                Persongalleri(sak.ident),
-                HardkodaSystembruker.opprettGrunnlag,
+            grunnlagService.opprettEllerOppdaterGrunnlagForSak(
+                sak.id,
+                opplysningsbehov(sak, Persongalleri(sak.ident)),
             )
 
-            grunnlagService.leggTilNyeOpplysningerBareSak(
+            grunnlagService.lagreNyeSaksopplysningerBareSak(
                 sakId = sak.id,
-                opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
-                HardkodaSystembruker.opprettGrunnlag,
+                nyeOpplysninger = listOf(spraakOpplysning),
             )
             logger.info("Grunnlag opprettet på sak=${sak.id}")
         }
@@ -314,10 +311,10 @@ class SakServiceImpl(
         runBlocking {
             val oppdatertPersongalleri =
                 grunnlagService
-                    .hentPersongalleri(sak.id)
+                    .hentPersongalleri(sak.id)!!
                     .copy(soeker = gjeldendeIdent.value)
 
-            grunnlagService.leggInnNyttGrunnlagSak(sak, oppdatertPersongalleri, bruker)
+            grunnlagService.opprettEllerOppdaterGrunnlagForSak(sak.id, opplysningsbehov(sak, oppdatertPersongalleri))
         }
 
         logger.info("Oppdaterte sak ${sak.id} med bruker sin nyeste ident. Se sikkerlogg for detailjer")
@@ -395,17 +392,13 @@ class SakServiceImpl(
         when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
-                    )
+                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr))
                 }
             }
 
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
-                    )
+                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr))
                 }
             }
 
@@ -526,33 +519,29 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             logger.info("Oppdater egen ansatt for sak $sakId")
-            dao.oppdaterEnheterPaaSaker(
-                listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
+            dao.oppdaterEnhet(
+                SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr),
             )
         } else {
             val sakMedSkjerming = lesDao.hentSak(sakId)!!
             if (sakMedSkjerming.enhet == Enheter.EGNE_ANSATTE.enhetNr) {
                 val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
                 if (enhet == Enheter.EGNE_ANSATTE.enhetNr) {
-                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr)))
+                    dao.oppdaterEnhet(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr))
                 } else {
-                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, enhet)))
+                    dao.oppdaterEnhet(SakMedEnhet(sakId, enhet))
                 }
             }
         }
 
-        dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
+        dao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
     }
 
-    override fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>) {
-        dao.oppdaterEnheterPaaSaker(saker)
-    }
-
-    override fun oppdaterEnhetForSak(
+    override fun oppdaterEnhet(
         sak: SakMedEnhet,
         kommentar: String?,
     ) {
-        dao.oppdaterEnheterPaaSaker(listOf(sak), kommentar)
+        dao.oppdaterEnhet(sak, kommentar)
     }
 
     override fun finnSak(

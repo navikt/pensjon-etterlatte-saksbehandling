@@ -1,5 +1,5 @@
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { OppgaveDTO } from '~shared/types/oppgave'
+import { OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
 import { ISak } from '~shared/types/sak'
 import { IBrevAktivitetspliktDto } from '~shared/api/aktivitetsplikt'
 
@@ -98,6 +98,14 @@ export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, s
 export interface IAktivitetspliktVurderingNyDto {
   aktivitet: IAktivitetspliktAktivitetsgrad[]
   unntak: IAktivitetspliktUnntak[]
+}
+
+export type AktivitetspliktOppfoelgingsOppgaver = Oppgavetype.AKTIVITETSPLIKT | Oppgavetype.AKTIVITETSPLIKT_12MND
+
+export interface AktivitetspliktOppfoelgingsOppgave {
+  kanOpprette: boolean
+  erFerdigstilt: boolean
+  oppgaveType: AktivitetspliktOppfoelgingsOppgaver
 }
 
 export function harVurdering(vurdering: IAktivitetspliktVurderingNyDto): boolean {

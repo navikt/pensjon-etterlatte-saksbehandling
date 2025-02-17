@@ -15,51 +15,49 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.sakId
-import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
     route("sak/{$SAKID_CALL_PARAMETER}") {
         get {
             val opplysningsgrunnlag =
-                grunnlagService.hentOpplysningsgrunnlagForSak(sakId, brukerTokenInfo)
+                grunnlagService.hentOpplysningsgrunnlagForSak(sakId)
                     ?: throw GenerellIkkeFunnetException()
             call.respond(opplysningsgrunnlag)
         }
 
         get("/grunnlag-finnes") {
-            val grunnlagFinnes = grunnlagService.grunnlagFinnesForSak(sakId, brukerTokenInfo)
+            val grunnlagFinnes = grunnlagService.grunnlagFinnesForSak(sakId)
             call.respond(grunnlagFinnes)
         }
 
         get("/persongalleri") {
             val persongalleri =
-                grunnlagService.hentPersongalleri(sakId, brukerTokenInfo)
+                grunnlagService.hentPersongalleri(sakId)
                     ?: throw GenerellIkkeFunnetException()
 
             call.respond(persongalleri)
         }
-    }
 
-    post("opprett-grunnlag") {
-        val opplysningsbehov = call.receive<Opplysningsbehov>()
-        grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov, brukerTokenInfo)
-        call.respond(HttpStatusCode.OK)
-    }
+        post("opprett-grunnlag") {
+            val opplysningsbehov = call.receive<Opplysningsbehov>()
+            grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
+            call.respond(HttpStatusCode.OK)
+        }
 
-    post("/oppdater-grunnlag") {
-        val request = call.receive<OppdaterGrunnlagRequest>()
-        grunnlagService.oppdaterGrunnlagForSak(request, brukerTokenInfo)
-        call.respond(HttpStatusCode.OK)
-    }
+        post("/oppdater-grunnlag") {
+            val request = call.receive<OppdaterGrunnlagRequest>()
+            grunnlagService.oppdaterGrunnlagForSak(request)
+            call.respond(HttpStatusCode.OK)
+        }
 
-    post("/nye-opplysninger") {
-        val opplysningsbehov = call.receive<NyeSaksopplysninger>()
-        grunnlagService.lagreNyeSaksopplysningerBareSak(
-            opplysningsbehov.sakId,
-            opplysningsbehov.opplysninger,
-            brukerTokenInfo,
-        )
-        call.respond(HttpStatusCode.OK)
+        post("/nye-opplysninger") {
+            val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+            grunnlagService.lagreNyeSaksopplysningerBareSak(
+                opplysningsbehov.sakId,
+                opplysningsbehov.opplysninger,
+            )
+            call.respond(HttpStatusCode.OK)
+        }
     }
 }
 

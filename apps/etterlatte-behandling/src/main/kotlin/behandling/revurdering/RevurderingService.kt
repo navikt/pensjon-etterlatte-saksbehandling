@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.revurdering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
@@ -14,6 +13,8 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -34,7 +35,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -210,20 +210,17 @@ class RevurderingService(
                         }
                     runBlocking {
                         if (kanHenteNyttGrunnlag) {
-                            grunnlagService.leggInnNyttGrunnlag(
-                                it,
-                                persongalleri,
-                                // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll
-                                HardkodaSystembruker.opprettGrunnlag,
+                            grunnlagService.opprettGrunnlag(
+                                it.id,
+                                opplysningsbehov(it.sak, persongalleri),
                             )
                         } else {
-                            grunnlagService.laasTilGrunnlagIBehandling(
-                                it,
+                            grunnlagService.laasTilVersjonForBehandling(
+                                it.id,
                                 krevIkkeNull(forrigeBehandling.id) {
                                     "Har en automatisk behandling som ikke sender med behandlingId for sist iverksatt. " +
                                         "Da kan vi ikke legge inn riktig grunnlag. Automatisk behandling id=${it.id}"
                                 },
-                                HardkodaSystembruker.opprettGrunnlag,
                             )
                         }
                     }

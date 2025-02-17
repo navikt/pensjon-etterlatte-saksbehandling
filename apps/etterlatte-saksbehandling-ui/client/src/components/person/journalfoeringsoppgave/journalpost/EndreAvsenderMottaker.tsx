@@ -1,5 +1,5 @@
-import { AvsenderMottaker, BrukerIdType } from '~shared/types/Journalpost'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
+import { AvsenderMottaker, AvsenderMottakerIdType } from '~shared/types/Journalpost'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Label, Select, TextField, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
@@ -20,12 +20,16 @@ export const EndreAvsenderMottaker = ({
     handleSubmit,
     reset,
     setValue,
+    watch,
   } = useForm<AvsenderMottaker>({ defaultValues: avsenderMottaker })
 
   const [rediger, setRediger] = useState(false)
 
   const lagreEndring = (avsenderMottaker: AvsenderMottaker) => {
-    oppdaterAvsenderMottaker(avsenderMottaker)
+    oppdaterAvsenderMottaker({
+      ...avsenderMottaker,
+      idType: fnrHarGyldigFormat(avsenderMottaker.id) ? AvsenderMottakerIdType.FNR : avsenderMottaker.idType,
+    })
     setRediger(false)
   }
 
@@ -45,16 +49,33 @@ export const EndreAvsenderMottaker = ({
           <VStack gap="8">
             <VStack gap="4">
               <TextField
-                {...register('id', {
-                  pattern: {
-                    value: /^\d{11}$/,
-                    message: 'Fødselsnummer må bestå av 11 siffer',
-                  },
-                })}
-                label="Fødselsnummer"
+                {...register('id')}
+                label="ID"
+                description="Må være et fødselsnummer, organisasjonsnummer, HPRNR (Helsepersonellregisterets identifikator), eller en utenlandsk organisasjon"
                 error={errors?.id?.message}
                 htmlSize={40}
               />
+
+              {watch('idType') === AvsenderMottakerIdType.FNR && !fnrHarGyldigFormat(watch('id')) && (
+                <Alert variant="warning">
+                  ID-type er fødselsnummer, men ID-en ser ikke ut til å være et gyldig fødselsnummer. Er du sikker på at
+                  det er korrekt?
+                </Alert>
+              )}
+
+              <Select
+                {...register('idType', { required: { value: !!watch('id')?.length, message: 'Påkrevd' } })}
+                label="ID type"
+                error={errors?.idType?.message}
+              >
+                <option value="">Velg type ...</option>
+                <option value={AvsenderMottakerIdType.FNR}>Fødselsnummer</option>
+                <option value={AvsenderMottakerIdType.ORGNR}>Organisasjonsnummer</option>
+                <option value={AvsenderMottakerIdType.AKTOERID}>AktørID</option>
+                <option value={AvsenderMottakerIdType.UTL_ORG}>Utenlandsk organisasjon</option>
+                <option value={AvsenderMottakerIdType.HPRNR}>Helsepersonellregisterets identifikator</option>
+              </Select>
+
               <TextField
                 {...register('navn', {
                   required: {
@@ -72,7 +93,7 @@ export const EndreAvsenderMottaker = ({
               <PersonSoekModal
                 velgPerson={({ id, navn }) => {
                   setValue('id', id, { shouldDirty: true, shouldValidate: true })
-                  setValue('idType', BrukerIdType.FNR)
+                  setValue('idType', AvsenderMottakerIdType.FNR)
                   setValue('navn', navn, { shouldDirty: true, shouldValidate: true })
                 }}
               />

@@ -16,10 +16,10 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnn
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -59,7 +60,7 @@ class AktivitetspliktService(
     private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
     private val behandlingService: BehandlingService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val statistikkKafkaProducer: BehandlingHendelserKafkaProducer,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
@@ -73,14 +74,17 @@ class AktivitetspliktService(
 
     suspend fun hentAktivitetspliktDto(
         sakId: SakId,
-        bruker: BrukerTokenInfo,
         behandlingId: UUID?,
     ): AktivitetspliktDto {
         val faktiskBehandlingId =
             behandlingId ?: behandlingService.hentSisteIverksatte(sakId)?.id
                 ?: throw ManglerBehandlingIdEllerIverksattBehandlingException(sakId)
 
-        val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(faktiskBehandlingId, bruker)
+        val grunnlag =
+            krevIkkeNull(grunnlagService.hentOpplysningsgrunnlag(faktiskBehandlingId)) {
+                "Fant ikke opplysningsgrunnlag for behandlingId=$faktiskBehandlingId"
+            }
+
         val avdoedDoedsdato =
             grunnlag
                 .hentAvdoede()
@@ -204,7 +208,7 @@ class AktivitetspliktService(
         }
     }
 
-    private fun harVarigUnntak(sakId: SakId): Boolean {
+    fun harVarigUnntak(sakId: SakId): Boolean {
         val varigUnntak =
             hentVurderingForSak(sakId)
                 .unntak
@@ -654,7 +658,6 @@ class AktivitetspliktService(
 
     fun opprettRevurderingHvisKravIkkeOppfylt(
         request: OpprettRevurderingForAktivitetspliktDto,
-        bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
         val forrigeBehandling =
             krevIkkeNull(behandlingService.hentSisteIverksatte(request.sakId)) {
@@ -663,11 +666,7 @@ class AktivitetspliktService(
         val persongalleri =
             runBlocking {
                 krevIkkeNull(
-                    grunnlagKlient
-                        .hentPersongalleri(
-                            forrigeBehandling.id,
-                            bruker,
-                        )?.opplysning,
+                    grunnlagService.hentPersongalleri(forrigeBehandling.id),
                 ) {
                     "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
                 }
@@ -786,7 +785,7 @@ class AktivitetspliktService(
         behandlingId: UUID? = null,
     ) {
         try {
-            val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
+            val dto = hentAktivitetspliktDto(sakId, behandlingId)
             statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
         } catch (e: ManglerDoedsdatoUnderBehandlingException) {
             // Dette er ikke kritisk og vi vil bare logge en advarsel
@@ -850,25 +849,48 @@ class AktivitetspliktService(
     }
 
     fun opprettOppgaveHvisIkkeVarigUnntak(dto: OpprettOppgaveForAktivitetspliktDto): OpprettOppgaveForAktivitetspliktResponse {
-        if (harVarigUnntak(dto.sakId)) {
+        val sakId = dto.sakId
+        if (harVarigUnntak(sakId)) {
             return OpprettOppgaveForAktivitetspliktResponse(
                 opprettetOppgave = false,
             )
         }
-        logger.info("Sak ${dto.sakId} har ikke varig unntak, oppretter oppgave for aktivitetsplikt infobrev")
+        logger.info("Sakid $sakId har ikke varig unntak, oppretter oppgave for aktivitetsplikt infobrev")
         val oppgaveType =
             when (dto.jobbType) {
                 JobbType.OMS_DOED_4MND -> OppgaveType.AKTIVITETSPLIKT
                 JobbType.OMS_DOED_10MND -> OppgaveType.AKTIVITETSPLIKT_12MND
                 else -> throw UgyldigForespoerselException(
                     "FEIL_JOBBTYPE",
-                    "Kan ikke opprette en aktivitetspliktoppgave for jobbtype=${dto.jobbType} i sak ${dto.sakId}",
+                    "Kan ikke opprette en aktivitetspliktoppgave for jobbtype=${dto.jobbType} i sak $sakId",
                 )
             }
+
+        val kanOpprette =
+            when (oppgaveType) {
+                OppgaveType.AKTIVITETSPLIKT -> validerMnd6KanOpprette(sakId)
+                OppgaveType.AKTIVITETSPLIKT_12MND -> valider12MndKanOpprette(sakId)
+                else -> throw UgyldigForespoerselException("FEIL_OPPGAVETYPE", "Kan ikke håndtere oppgavetype $oppgaveType i sak $sakId")
+            }
+        if (!kanOpprette) {
+            logger.info("Oppretter ikke oppgavetype $oppgaveType i sak $sakId da kravet for 6/12 mnd ikke oppfylles.")
+            return OpprettOppgaveForAktivitetspliktResponse(
+                opprettetOppgave = false,
+            )
+        }
+        if (validerFinnesIkkeAllerede(sakId, oppgaveType)) {
+            logger.info(
+                "Oppretter ikke oppgavetype $oppgaveType i sak $sakId da den finnes allerede som under behandling eller som ferdigdstilt",
+            )
+            return OpprettOppgaveForAktivitetspliktResponse(
+                opprettetOppgave = false,
+            )
+        }
+
         val opprettetOppgave =
             oppgaveService.opprettOppgave(
                 referanse = dto.referanse ?: "",
-                sakId = dto.sakId,
+                sakId = sakId,
                 kilde = OppgaveKilde.HENDELSE,
                 type = oppgaveType,
                 merknad = dto.jobbType.beskrivelse,
@@ -878,6 +900,39 @@ class AktivitetspliktService(
             opprettetOppgave = true,
             oppgaveId = opprettetOppgave.id,
         )
+    }
+
+    private fun validerFinnesIkkeAllerede(
+        sakId: SakId,
+        oppgaveType: OppgaveType,
+    ): Boolean =
+        oppgaveService
+            .hentOppgaverForSak(
+                sakId,
+                oppgaveType,
+            ).any {
+                it.erUnderBehandling() ||
+                    it.erFerdigstilt()
+            }
+
+    private fun validerMnd6KanOpprette(sakId: SakId): Boolean =
+        oppgaveService
+            .hentOppgaverForSak(
+                sakId,
+                OppgaveType.AKTIVITETSPLIKT_12MND,
+            ).none { it.status != Status.AVBRUTT }
+
+    private fun valider12MndKanOpprette(sakId: SakId): Boolean {
+        val oppfoelging6mnd =
+            oppgaveService.hentOppgaverForSak(
+                sakId,
+                OppgaveType.AKTIVITETSPLIKT,
+            )
+        if (oppfoelging6mnd.any { it.erUnderBehandling() }) {
+            return false
+        }
+        val ferdigstilt6mndOppgave = oppfoelging6mnd.filter { it.erFerdigstilt() }
+        return ferdigstilt6mndOppgave.isNotEmpty()
     }
 }
 

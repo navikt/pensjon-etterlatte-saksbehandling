@@ -30,7 +30,7 @@ class GrunnlagKlient(
         logger.info("Lagrer nye personopplysninger på sak $sakId")
 
         runBlocking {
-            klient.post("$url/grunnlag/person/behandling/$behandlingId/nye-opplysninger") {
+            klient.post("$url/api/grunnlag/person/behandling/$behandlingId/nye-opplysninger") {
                 contentType(ContentType.Application.Json)
                 setBody(NyePersonopplysninger(sakId, fnr, nyeOpplysninger))
             }
@@ -45,7 +45,7 @@ class GrunnlagKlient(
         logger.info("Lagrer nye saksopplysninger på sak $sakId")
 
         runBlocking {
-            klient.post("$url/grunnlag/behandling/$behandlingId/nye-opplysninger") {
+            klient.post("$url/api/grunnlag/behandling/$behandlingId/nye-opplysninger") {
                 contentType(ContentType.Application.Json)
                 setBody(NyeSaksopplysninger(sakId, nyeOpplysninger))
             }
@@ -56,7 +56,7 @@ class GrunnlagKlient(
         logger.info("Låser grunnlagsversjon for behandling (id=$behandlingId)")
 
         runBlocking {
-            klient.post("$url/grunnlag/behandling/$behandlingId/laas") {
+            klient.post("$url/api/grunnlag/behandling/$behandlingId/laas") {
                 contentType(ContentType.Application.Json)
             }
         }

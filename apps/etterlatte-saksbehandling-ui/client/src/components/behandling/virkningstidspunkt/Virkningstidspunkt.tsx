@@ -1,6 +1,7 @@
 import {
   Alert,
   BodyShort,
+  Box,
   ConfirmationPanel,
   ErrorMessage,
   Heading,
@@ -10,40 +11,34 @@ import {
   useMonthpicker,
   VStack,
 } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterDato } from '~utils/formatering/dato'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Informasjon, Vurdering } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
-import { LovtekstMedLenke } from '../soeknadsoversikt/LovtekstMedLenke'
+import { SoeknadVurdering } from '../soeknadsoversikt/SoeknadVurdering'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
-import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
+import { hentMinimumsVirkningstidspunkt, Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapFailure } from '~shared/api/apiUtils'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
-export interface Hjemmel {
-  lenke: string
-  tittel: string
-}
-
-const Virkningstidspunkt = (props: {
+interface Props {
   behandling: IDetaljertBehandling
   redigerbar: boolean
-  hjemler: Hjemmel[]
-  beskrivelse: string
-  children?: { info: React.ReactNode }
   erBosattUtland: boolean
-}) => {
-  const { behandling, erBosattUtland } = props
+  hjemler: Array<Hjemmel>
+  beskrivelse: string
+  children?: ReactNode | Array<ReactNode>
+}
 
+const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, beskrivelse, children }: Props) => {
   const dispatch = useAppDispatch()
   const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
   const avdoede = usePersonopplysninger()?.avdoede
@@ -144,17 +139,19 @@ const Virkningstidspunkt = (props: {
 
   return (
     <>
-      <LovtekstMedLenke
+      <SoeknadVurdering
         tittel="Virkningstidspunkt"
-        hjemler={props.hjemler}
+        hjemler={hjemler}
         status={Boolean(behandling.virkningstidspunkt) ? 'success' : 'warning'}
       >
         <VStack gap="2">
-          <Informasjon>{props.beskrivelse}</Informasjon>
-          <HStack gap="4">{props.children?.info}</HStack>
+          <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+            {beskrivelse}
+          </Box>
+          <HStack gap="4">{children}</HStack>
         </VStack>
 
-        <Vurdering>
+        <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
           <VurderingsboksWrapper
             tittel="Hva er virkningstidspunkt for behandlingen?"
             subtittelKomponent={
@@ -192,7 +189,7 @@ const Virkningstidspunkt = (props: {
                   }
                 : undefined
             }
-            redigerbar={props.redigerbar}
+            redigerbar={redigerbar}
             lagreklikk={fastsett}
             avbrytklikk={reset}
             kommentar={behandling.virkningstidspunkt?.begrunnelse}
@@ -254,8 +251,8 @@ const Virkningstidspunkt = (props: {
               )}
             </VStack>
           </VurderingsboksWrapper>
-        </Vurdering>
-      </LovtekstMedLenke>
+        </Box>
+      </SoeknadVurdering>
     </>
   )
 }

@@ -94,7 +94,7 @@ fun Route.brevRoute(
         route("mottaker") {
             post {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
-                    val mottaker = service.opprettMottaker(brevId)
+                    val mottaker = service.opprettMottaker(brevId, brukerTokenInfo)
 
                     call.respond(mottaker)
                 }
@@ -106,6 +106,12 @@ fun Route.brevRoute(
                     service.oppdaterMottaker(brevId, body.mottaker, brukerTokenInfo)
 
                     call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("tilbakestill") {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    call.respond(service.tilbakestillMottakere(brevId, brukerTokenInfo))
                 }
             }
 

@@ -16,9 +16,9 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -49,7 +49,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -61,7 +60,6 @@ import no.nav.etterlatte.libs.common.sak.SakMedUtlandstilknytning
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
@@ -231,7 +229,6 @@ interface BehandlingService {
 
     suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
         overstyr: Boolean,
     ): Boolean
@@ -287,10 +284,9 @@ internal class BehandlingServiceImpl(
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
-    private val grunnlagKlient: GrunnlagKlient,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
-    private val grunnlagService: GrunnlagServiceImpl,
+    private val grunnlagService: GrunnlagService,
     private val beregningKlient: BeregningKlient,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -376,7 +372,19 @@ internal class BehandlingServiceImpl(
                 )
             }
 
-            if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+            val erBehandlingOmgjoeringEtterKlage =
+                when (behandling) {
+                    is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+
+                    is Foerstegangsbehandling ->
+                        behandling.relatertBehandlingId?.let { klageId ->
+                            oppgaveService
+                                .hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE)
+                                .any { it.id.toString() == klageId }
+                        } ?: false
+                }
+
+            if (erBehandlingOmgjoeringEtterKlage) {
                 val omgjoeringsoppgaveForKlage =
                     oppgaveService
                         .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
@@ -399,11 +407,10 @@ internal class BehandlingServiceImpl(
             grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
         }
 
-        val persongalleri =
-            runBlocking { grunnlagKlient.hentPersongalleri(behandlingId, saksbehandler) }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(behandlingId)!! }
 
         behandlingHendelser.sendMeldingForHendelseStatistikk(
-            behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
+            behandling.toStatistikkBehandling(persongalleri = persongalleri),
             BehandlingHendelseType.AVBRUTT,
         )
     }
@@ -414,9 +421,8 @@ internal class BehandlingServiceImpl(
     ): StatistikkBehandling? =
         inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient
-                    .hentPersongalleri(behandlingId, brukerTokenInfo)
-                    ?.opplysning
+                grunnlagService
+                    .hentPersongalleri(behandlingId)
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toStatistikkBehandling(persongalleri)
@@ -429,17 +435,14 @@ internal class BehandlingServiceImpl(
         hentBehandling(behandlingId)?.let {
             val persongalleri: Persongalleri =
                 runBlocking {
-                    grunnlagKlient
-                        .hentPersongalleri(behandlingId, brukerTokenInfo)
-                }?.opplysning
-                    ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
+                    grunnlagService.hentPersongalleri(behandlingId)
+                } ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toDetaljertBehandlingWithPersongalleri(persongalleri)
         }
 
     override suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
         overstyr: Boolean,
     ): Boolean {
@@ -458,7 +461,6 @@ internal class BehandlingServiceImpl(
                 erGyldigVirkningstidspunktFoerstegangsbehandling(
                     request,
                     behandling,
-                    brukerTokenInfo,
                 )
 
             else -> throw Exception("BehandlingType ${behandling.type} er ikke støttet")
@@ -488,7 +490,6 @@ internal class BehandlingServiceImpl(
     private suspend fun erGyldigVirkningstidspunktFoerstegangsbehandling(
         request: VirkningstidspunktRequest,
         behandling: Behandling,
-        brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         val virkningstidspunkt = request.dato
         if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
@@ -499,7 +500,7 @@ internal class BehandlingServiceImpl(
         }
 
         val foersteDoedsdato =
-            hentFoersteDoedsdato(behandling.id, brukerTokenInfo, behandling.sak.sakType)?.let { YearMonth.from(it) }
+            hentFoersteDoedsdato(behandling.id, behandling.sak.sakType)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         if (foersteDoedsdato == null) {
@@ -579,11 +580,10 @@ internal class BehandlingServiceImpl(
 
     private suspend fun hentFoersteDoedsdato(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): LocalDate? {
         val personopplysninger =
-            grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
+            grunnlagService.hentPersonopplysninger(behandlingId, sakType)
         return personopplysninger.avdoede
             .mapNotNull { it.opplysning.doedsdato }
             .minOrNull()
@@ -601,7 +601,6 @@ internal class BehandlingServiceImpl(
                         behandling.id,
                         behandling.sak.id,
                         behandling.sak.sakType,
-                        brukerTokenInfo,
                     )
                 }
                 behandlingDao.lagreStatus(behandling)
@@ -977,8 +976,9 @@ internal class BehandlingServiceImpl(
         transform: (Persongalleri) -> Persongalleri,
     ) {
         val forrigePersonGalleri =
-            grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
+            grunnlagService.hentPersongalleri(behandlingId)
                 ?: throw PersongalleriFinnesIkkeException()
+
         inTransaction {
             hentBehandlingOrThrow(behandlingId)
                 .tilOpprettet()
@@ -994,10 +994,10 @@ internal class BehandlingServiceImpl(
                             ),
                         )
                     runBlocking {
-                        grunnlagService.leggTilNyeOpplysninger(
+                        grunnlagService.lagreNyeSaksopplysninger(
+                            behandling.sak.id,
                             behandlingId,
-                            NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
-                            HardkodaSystembruker.opprettGrunnlag,
+                            nyeOpplysinger,
                         )
                     }
 
@@ -1006,7 +1006,6 @@ internal class BehandlingServiceImpl(
                             behandling.id,
                             behandling.sak.id,
                             behandling.sak.sakType,
-                            brukerTokenInfo,
                         )
                     }
                     behandlingDao.lagreStatus(behandling)

@@ -2,18 +2,18 @@ package no.nav.etterlatte.inntektsjustering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.omregning.OmregningKlassifikasjonskodeJobService.Companion.kjoering
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.Personopplysning
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.ALDERSOVERGANG_67
@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -68,6 +69,7 @@ class AarligInntektsjusteringJobbService(
     private val behandlingService: BehandlingService,
     private val revurderingService: RevurderingService,
     private val grunnlagService: GrunnlagService,
+    private val aldersovergangService: AldersovergangService,
     private val vedtakKlient: VedtakKlient,
     private val beregningKlient: BeregningKlient,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
@@ -78,7 +80,7 @@ class AarligInntektsjusteringJobbService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun startAarligInntektsjusteringJobb(request: AarligInntektsjusteringRequest) {
-        logger.info("Starter årlig inntektsjusteringjobb $kjoering")
+        logger.info("Starter årlig inntektsjusteringjobb ${request.kjoering}")
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
         }
@@ -184,11 +186,10 @@ class AarligInntektsjusteringJobbService(
 
         val aldersovergangMaaned =
             runBlocking {
-                grunnlagService.aldersovergangMaaned(
+                aldersovergangService.aldersovergangMaaned(
                     sakId,
                     SakType.OMSTILLINGSSTOENAD,
-                    HardkodaSystembruker.omregning,
-                )
+                )!!
             }
         if (aldersovergangMaaned.year == loependeFom.year) {
             nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, ALDERSOVERGANG_67)
@@ -330,7 +331,7 @@ class AarligInntektsjusteringJobbService(
             revurderingService
                 .opprettRevurdering(
                     sakId = sakId,
-                    persongalleri = persongalleri,
+                    persongalleri = krevIkkeNull(persongalleri) { "Persongalleri mangler for sak=$sakId" },
                     forrigeBehandling = forrigeBehandling,
                     mottattDato = null,
                     prosessType = Prosesstype.MANUELL,
@@ -420,7 +421,6 @@ class AarligInntektsjusteringJobbService(
                 .hentPersonopplysninger(
                     sisteBehandlingId,
                     sak.sakType,
-                    HardkodaSystembruker.omregning,
                 ).soeker ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
         }
 

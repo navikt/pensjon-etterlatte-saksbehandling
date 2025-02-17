@@ -38,7 +38,7 @@ class BrevutsendelseService(
 
             val sak = hentSak(brevutsendelse)
             val gyldigBrevMottakerResultat =
-                sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, brukerTokenInfo)
+                sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak)
 
             if (gyldigBrevMottakerResultat == GYLDIG_MOTTAKER) {
                 // TODO: lagre ned status på brev?

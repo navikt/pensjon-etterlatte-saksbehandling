@@ -3,8 +3,6 @@ package no.nav.etterlatte.funksjonsbrytere
 import io.getunleash.DefaultUnleash
 import io.getunleash.UnleashContext
 import io.getunleash.UnleashContextProvider
-import io.getunleash.strategy.GradualRolloutRandomStrategy
-import io.getunleash.strategy.GradualRolloutUserIdStrategy
 import io.getunleash.util.UnleashConfig
 import org.slf4j.LoggerFactory
 
@@ -38,8 +36,6 @@ class UnleashFeatureToggleService(
                 .unleashContextProvider(lagUnleashContextProvider(brukerIdent))
                 .apiKey(properties.apiKey)
                 .build(),
-            GradualRolloutRandomStrategy(),
-            GradualRolloutUserIdStrategy(),
         )
 
     private fun lagUnleashContextProvider(brukerIdentResolver: () -> String?) =

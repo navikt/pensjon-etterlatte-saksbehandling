@@ -11,17 +11,36 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.sql.DataSource
 
+interface IAldersovergangDao {
+    fun hentSoekereFoedtIEnGittMaaned(
+        maaned: YearMonth,
+        tx: TransactionalSession? = null,
+    ): List<String>
+
+    fun hentSakerHvorDoedsfallForekomIGittMaaned(
+        maaned: YearMonth,
+        tx: TransactionalSession? = null,
+    ): List<String>
+
+    fun hentFoedselsdato(
+        sakId: SakId,
+        opplysningType: Opplysningstype,
+        tx: TransactionalSession? = null,
+    ): LocalDate?
+}
+
 class AldersovergangDao(
     private val datasource: DataSource,
-) : Transactions<AldersovergangDao> {
+) : IAldersovergangDao,
+    Transactions<AldersovergangDao> {
     override fun <R> inTransaction(block: AldersovergangDao.(TransactionalSession) -> R): R =
         datasource.transaction {
             this.block(it)
         }
 
-    fun hentSoekereFoedtIEnGittMaaned(
+    override fun hentSoekereFoedtIEnGittMaaned(
         maaned: YearMonth,
-        tx: TransactionalSession? = null,
+        tx: TransactionalSession?,
     ): List<String> {
         val sql =
             """
@@ -53,9 +72,9 @@ class AldersovergangDao(
         }
     }
 
-    fun hentSakerHvorDoedsfallForekomIGittMaaned(
+    override fun hentSakerHvorDoedsfallForekomIGittMaaned(
         maaned: YearMonth,
-        tx: TransactionalSession? = null,
+        tx: TransactionalSession?,
     ): List<String> {
         val sql =
             """
@@ -92,10 +111,10 @@ class AldersovergangDao(
         }
     }
 
-    fun hentFoedselsdato(
+    override fun hentFoedselsdato(
         sakId: SakId,
         opplysningType: Opplysningstype,
-        tx: TransactionalSession? = null,
+        tx: TransactionalSession?,
     ): LocalDate? {
         val sql =
             """

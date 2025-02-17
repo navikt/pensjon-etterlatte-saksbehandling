@@ -58,6 +58,7 @@ import java.util.UUID
 data class OmgjoeringRequest(
     val skalKopiere: Boolean,
     val erSluttbehandlingUtland: Boolean,
+    val omgjoeringsOppgaveId: UUID? = null,
 )
 
 internal fun Route.behandlingRoutes(
@@ -183,7 +184,6 @@ internal fun Route.behandlingRoutes(
                         runBlocking {
                             behandlingService.erGyldigVirkningstidspunkt(
                                 behandlingId,
-                                brukerTokenInfo,
                                 body,
                                 overstyr,
                             )
@@ -440,7 +440,6 @@ internal fun Route.behandlingRoutes(
                                 behandlingsBehov.mottattDato,
                                 Vedtaksloesning.GJENNY,
                                 request = request,
-                                brukerTokenInfo = brukerTokenInfo,
                             )
                         }
                     behandlingOgOppgave.sendMeldingForHendelse()

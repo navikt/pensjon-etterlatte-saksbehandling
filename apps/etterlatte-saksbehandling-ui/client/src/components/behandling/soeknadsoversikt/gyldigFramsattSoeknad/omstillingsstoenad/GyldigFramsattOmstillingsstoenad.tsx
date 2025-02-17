@@ -1,6 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
+import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -8,7 +7,7 @@ import { StatusIconProps } from '~shared/icons/statusIcon'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { HStack } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/GyldigFramsattVurdering'
 
 export const GyldigFramsattOmstillingsstoenad = ({
@@ -30,7 +29,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
   const undertekst = formaterGrunnlagKilde(innsender?.kilde)
 
   return (
-    <LovtekstMedLenke
+    <SoeknadVurdering
       tittel="Vurdering - søknad gyldig fremsatt"
       hjemler={[
         {
@@ -45,23 +44,23 @@ export const GyldigFramsattOmstillingsstoenad = ({
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
-        <Informasjon>
+        <Box marginBlock="3" marginInline="0" maxWidth="41rem">
           Den som har rett til ytelsen må sette frem krav (verge hvis aktuelt). Om annet må fullmakt ligge i saken.
           Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet eller i det landet
           vedkommende sist var medlem.
-        </Informasjon>
+        </Box>
         <HStack gap="4">
           <Info tekst={navn} undertekst={undertekst} label="Innsender" />
           <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
         </HStack>
       </div>
-      <Vurdering>
+      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}
           redigerbar={redigerbar}
         />
-      </Vurdering>
-    </LovtekstMedLenke>
+      </Box>
+    </SoeknadVurdering>
   )
 }

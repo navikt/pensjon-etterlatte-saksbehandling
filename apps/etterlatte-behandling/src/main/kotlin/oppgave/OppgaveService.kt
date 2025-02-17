@@ -505,6 +505,11 @@ class OppgaveService(
 
     fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries)
 
+    fun hentOppgaverForSakAvType(
+        sakId: SakId,
+        typer: List<OppgaveType>,
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSakMedType(sakId, typer)
+
     fun hentOppgaverForSak(
         sakId: SakId,
         type: OppgaveType,

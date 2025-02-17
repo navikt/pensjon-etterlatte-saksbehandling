@@ -1,10 +1,10 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
@@ -27,7 +28,7 @@ import java.time.LocalTime
 class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
     private val behandlingService: BehandlingService,
-    private val grunnlagService: GrunnlagServiceImpl,
+    private val grunnlagService: GrunnlagService,
     private val vedtakKlient: VedtakKlient,
     private val beregningKlient: BeregningKlient,
 ) {
@@ -53,7 +54,10 @@ class AutomatiskRevurderingService(
 
         gyldigForAutomatiskRevurdering(request, loepende, forrigeBehandling, systembruker)
 
-        val persongalleri = grunnlagService.hentPersongalleri(request.sakId)
+        val persongalleri =
+            krevIkkeNull(grunnlagService.hentPersongalleri(request.sakId)) {
+                "Persongalleri mangler for sak=${request.sakId}"
+            }
 
         val revurderingOgOppfoelging =
             inTransaction {

@@ -115,10 +115,6 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-grunnlag
-    - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
@@ -141,7 +137,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-grunnlag
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester

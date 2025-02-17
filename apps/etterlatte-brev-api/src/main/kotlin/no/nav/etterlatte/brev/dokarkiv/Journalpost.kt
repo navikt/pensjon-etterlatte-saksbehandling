@@ -1,9 +1,11 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
-import org.slf4j.LoggerFactory
 
 interface OpprettJournalpost {
     val avsenderMottaker: AvsenderMottaker?
@@ -101,15 +103,18 @@ data class KnyttTilAnnenSakResponse(
     val nyJournalpostId: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class AvsenderMottaker(
     val id: String?,
-    val idType: String? = "FNR",
+    @JsonAlias("type")
+    val idType: AvsenderMottakerIdType?,
     val navn: String? = null,
     val land: String? = null,
 )
 
 data class Bruker(
     val id: String,
+    @JsonAlias("type")
     val idType: BrukerIdType = BrukerIdType.FNR,
 )
 
@@ -118,8 +123,6 @@ data class JournalpostDokument(
     val brevkode: String = "XX.YY-ZZ",
     val dokumentvarianter: List<DokumentVariant>,
 )
-
-val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.Journalpost")
 
 data class JournalpostSak(
     val sakstype: Sakstype,
@@ -154,18 +157,30 @@ enum class JournalPostType(
     UTGAAENDE("UTGAAENDE"),
 }
 
-enum class DokumentKategori(
-    val type: String,
-) {
-    SOK("SOK"),
-    VB("VB"),
-    IB("IB"),
-}
-
 enum class BrukerIdType {
     FNR,
     AKTOERID,
     ORGNR,
+}
+
+/**
+ * SAF kan gi oss "NULL" og "UKJENT" som idType, men Dokarkiv støtter ikke at vi sender dette tilbake.
+ * Sikrer derfor at idType blir [null] i tilfeller hvor vi ikke anser det som en gyldig verdi.
+ **/
+enum class AvsenderMottakerIdType {
+    FNR,
+    ORGNR,
+    HPRNR,
+    UTL_ORG,
+    ;
+
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun fra(value: String?) =
+            AvsenderMottakerIdType.entries
+                .firstOrNull { it.name.equals(value, ignoreCase = true) }
+    }
 }
 
 class JournalpostKoder {

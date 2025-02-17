@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
@@ -16,10 +17,10 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlag.GenerellKilde
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -40,13 +41,14 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
@@ -80,9 +82,8 @@ internal class BehandlingServiceImplTest {
     private val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
     private val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao>()
     private val hendelseDaoMock = mockk<HendelseDao>()
-    private val grunnlagKlientMock = mockk<GrunnlagKlient>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val oppgaveServiceMock = mockk<OppgaveService>()
-    private val grunnlagServiceMock = mockk<GrunnlagServiceImpl>()
 
     private val behandlingService =
         BehandlingServiceImpl(
@@ -90,10 +91,9 @@ internal class BehandlingServiceImplTest {
             behandlingHendelser = behandlingHendelser,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
             hendelseDao = hendelseDaoMock,
-            grunnlagKlient = grunnlagKlientMock,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveServiceMock,
-            grunnlagService = grunnlagServiceMock,
+            grunnlagService = grunnlagService,
             beregningKlient = mockk(),
         )
 
@@ -219,6 +219,92 @@ internal class BehandlingServiceImplTest {
     }
 
     @Test
+    fun `avbrytBehangling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for revurdering `() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
+        val relatertBehandlingsId = UUID.randomUUID()
+        val revurderingbehandling =
+            revurdering(
+                sakId = sakId1,
+                relatertBehandlingId = relatertBehandlingsId.toString(),
+                revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+            )
+
+        val oppgaveKlage = mockOppgaveIntern(relatertBehandlingsId)
+
+        every { behandlingDaoMock.hentBehandling(revurderingbehandling.id) } returns revurderingbehandling
+        every { behandlingDaoMock.avbrytBehandling(revurderingbehandling.id, any(), any()) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
+        every {
+            behandlingHendelser.sendMeldingForHendelseStatistikk(
+                any(),
+                BehandlingHendelseType.AVBRUTT,
+            )
+        } returns Unit
+
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
+        every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
+        every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
+
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+
+        behandlingService.avbrytBehandling(revurderingbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
+
+        verify {
+            oppgaveServiceMock.opprettOppgave(
+                referanse = relatertBehandlingsId.toString(),
+                sakId = sakId1,
+                kilde = any(),
+                type = any(),
+                merknad = any(),
+                frist = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `avbrytBehangling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for førstegangsbehandling `() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
+        val relatertBehandlingsId = UUID.randomUUID()
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1, relatertBehandlingId = relatertBehandlingsId.toString())
+
+        val oppgaveKlage = mockOppgaveIntern(relatertBehandlingsId)
+
+        every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+        every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id, any(), any()) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
+        every {
+            behandlingHendelser.sendMeldingForHendelseStatistikk(
+                any(),
+                BehandlingHendelseType.AVBRUTT,
+            )
+        } returns Unit
+
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
+        every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
+        every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
+
+        verify {
+            oppgaveServiceMock.opprettOppgave(
+                referanse = relatertBehandlingsId.toString(),
+                sakId = sakId1,
+                kilde = any(),
+                type = any(),
+                merknad = any(),
+                frist = any(),
+            )
+        }
+    }
+
+    @Test
     fun `avbrytBehandling sjekker om behandlingsstatusen er gyldig for avbrudd`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
@@ -242,7 +328,7 @@ internal class BehandlingServiceImplTest {
 
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
 
-        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         val saksbehandler = simpleSaksbehandler()
         assertThrows<BehandlingKanIkkeAvbrytesException> {
@@ -274,7 +360,7 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
-        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "test")
 
@@ -348,7 +434,7 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
-        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
 
@@ -378,7 +464,7 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
-        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
         verify(exactly = 1) {
@@ -773,7 +859,7 @@ internal class BehandlingServiceImplTest {
         val request = VirkningstidspunktRequest(virkningstidspunkt.toString(), begrunnelse, kravdato?.toLocalDate())
 
         return runBlocking {
-            behandlingService.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request, false)
+            behandlingService.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, request, false)
         }
     }
 
@@ -1004,9 +1090,9 @@ internal class BehandlingServiceImplTest {
         nyKontekstMedBruker(mockSaksbehandler())
         val behandling = foerstegangsbehandling(sakId = randomSakId(), id = UUID.randomUUID())
         every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
-        coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
-        coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs
-        coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any(), any()) } just runs
+        coEvery { grunnlagService.hentPersongalleri(behandling.id) } returns mockPersongalleri()
+        coEvery { grunnlagService.lagreNyeSaksopplysninger(any(), behandling.id, any()) } just runs
+        coEvery { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
         every { behandlingDaoMock.lagreStatus(any()) } just runs
         every { behandlingDaoMock.lagreStatus(any()) } just runs
 
@@ -1022,14 +1108,13 @@ internal class BehandlingServiceImplTest {
                 annenForelderInRequest,
             )
         }
-        val slot = slot<NyeSaksopplysninger>()
+        val slot = slot<List<Grunnlagsopplysning<JsonNode>>>()
         coVerify {
-            grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, capture(slot), any())
-            grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any(), TOKEN)
+            grunnlagService.lagreNyeSaksopplysninger(any(), behandling.id, capture(slot))
+            grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, any())
         }
-        assertEquals(behandling.sak.id, slot.captured.sakId)
 
-        val grunnlagsopplysning = slot.captured.opplysninger.single()
+        val grunnlagsopplysning = slot.captured.single()
         assertEquals(Opplysningstype.PERSONGALLERI_V1, grunnlagsopplysning.opplysningType)
 
         val persongalleri = objectMapper.readValue(grunnlagsopplysning.opplysning.toJson(), Persongalleri::class.java)
@@ -1103,7 +1188,7 @@ internal class BehandlingServiceImplTest {
             }
 
         coEvery {
-            grunnlagKlientMock.hentPersonopplysningerForBehandling(behandling.id, TOKEN, sakType)
+            grunnlagService.hentPersonopplysninger(behandling.id, sakType)
         } returns
             PersonopplysningerResponse(
                 avdoede =
@@ -1120,27 +1205,33 @@ internal class BehandlingServiceImplTest {
                 soeker = null,
                 annenForelder = null,
             )
-        coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
+        coEvery { grunnlagService.hentPersongalleri(behandling.id) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger // TODO fjern?
         every { behandlingDaoMock.hentInnvilgaFoerstegangsbehandling(behandling.sak.id) } returns foerstegangsbehandling
     }
 
+    private fun mockOppgaveIntern(relatertBehandlingsId: UUID): OppgaveIntern {
+        val oppgaveKlage = mockk<OppgaveIntern>()
+        every { oppgaveKlage.type } returns OppgaveType.KLAGE
+        every { oppgaveKlage.id } returns relatertBehandlingsId
+        every { oppgaveKlage.referanse } returns relatertBehandlingsId.toString()
+        every { oppgaveKlage.merknad } returns ""
+        every { oppgaveKlage.frist } returns mockk<Tidspunkt>()
+        every { oppgaveKlage.sakId } returns sakId1
+        every { oppgaveKlage.kilde } returns mockk<OppgaveKilde>()
+
+        return oppgaveKlage
+    }
+
     private fun mockPersongalleri() =
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-            meta = emptyMap<String, String>().toObjectNode(),
-            opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning =
-                Persongalleri(
-                    "soeker",
-                    "innsender",
-                    listOf("soesken"),
-                    listOf("avdoed"),
-                    listOf("gjenlevende"),
-                ),
+        Persongalleri(
+            "soeker",
+            "innsender",
+            listOf("soesken"),
+            listOf("avdoed"),
+            listOf("gjenlevende"),
         )
 
     companion object {

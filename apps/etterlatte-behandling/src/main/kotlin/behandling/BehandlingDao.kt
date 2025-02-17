@@ -209,6 +209,7 @@ class BehandlingDao(
                     .getString("tidligere_familiepleier")
                     ?.let { objectMapper.readValue(it) },
             erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling"),
+            relatertBehandlingId = rs.getString("relatert_behandling"),
         )
     }
 

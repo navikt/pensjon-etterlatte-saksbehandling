@@ -79,8 +79,6 @@ spec:
       value: http://etterlatte-behandling
     - name: VEDTAK_API_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: GRUNNLAG_API_URL
-      value: http://etterlatte-grunnlag
     - name: BEREGNING_API_URL
       value: http://etterlatte-beregning
     - name: TRYGDETID_API_URL
@@ -95,8 +93,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: VEDTAK_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
-    - name: GRUNNLAG_API_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: BEREGNING_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
     - name: TRYGDETID_API_SCOPE
@@ -132,7 +128,6 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-brev-api
-        - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-pdltjenester
         - application: etterlatte-vedtaksvurdering

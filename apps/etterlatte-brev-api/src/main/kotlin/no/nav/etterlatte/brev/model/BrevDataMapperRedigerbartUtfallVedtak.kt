@@ -170,6 +170,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             virkningstidspunkt!!,
                             sakType,
                             vedtakType,
+                            klage,
                         )
 
                     VedtakType.ENDRING -> {
@@ -308,6 +309,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         virkningstidspunkt: YearMonth,
         sakType: SakType,
         vedtakType: VedtakType,
+        klage: Klage?,
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
@@ -336,6 +338,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             krevIkkeNull(avkortingsinfo.await()) { "Avkortingsinfo mangler i brevutfall" },
             etterbetaling.await(),
             behandling.tidligereFamiliepleier?.svar ?: false,
+            klage,
         )
     }
 

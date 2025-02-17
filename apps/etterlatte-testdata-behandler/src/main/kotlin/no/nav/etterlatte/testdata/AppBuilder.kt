@@ -38,9 +38,9 @@ class AppBuilder {
             )
         val grunnlagService =
             GrunnlagService(
-                settOppHttpClient("grunnlag"),
-                "http://etterlatte-grunnlag",
-                config.getString("grunnlag.client.id"),
+                settOppHttpClient("behandling"),
+                "http://etterlatte-behandling",
+                config.getString("behandling.client.id"),
             )
         val behandlingService =
             BehandlingService(

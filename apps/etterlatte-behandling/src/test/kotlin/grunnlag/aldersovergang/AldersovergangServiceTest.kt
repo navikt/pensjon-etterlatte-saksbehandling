@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.insert
-import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -46,7 +45,7 @@ class AldersovergangServiceTest(
         lagSakMedSoekerFoedtPaaGittDato(LocalDate.of(2000, 6, 15), sakId)
         val resultat =
             runBlocking {
-                service.aldersovergangMaaned(sakId, SakType.OMSTILLINGSSTOENAD, simpleSaksbehandler())
+                service.aldersovergangMaaned(sakId, SakType.OMSTILLINGSSTOENAD)
             }
         resultat shouldBe YearMonth.of(2067, 7)
     }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.AvsenderMottaker
+import no.nav.etterlatte.brev.dokarkiv.AvsenderMottakerIdType
 import no.nav.etterlatte.brev.dokarkiv.Bruker
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
@@ -146,9 +147,12 @@ class JournalfoerBrevService(
                     id = foedselsnummer?.value ?: orgnummer,
                     idType =
                         when {
-                            foedselsnummer != null -> "FNR"
-                            orgnummer != null -> "ORGNR"
-                            else -> "UKJENT"
+                            foedselsnummer != null -> AvsenderMottakerIdType.FNR
+                            orgnummer != null -> AvsenderMottakerIdType.ORGNR
+                            else -> {
+                                logger.warn("Kunne ikke utlede type på avsenderMottaker fra brev-mottaker")
+                                null
+                            }
                         },
                     navn = navn,
                 )

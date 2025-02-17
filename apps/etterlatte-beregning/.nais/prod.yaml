@@ -81,16 +81,10 @@ spec:
           - name: pgaudit.log
             value: 'write'
   env:
-    - name: GRUNNLAG_AZURE_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag
-    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-grunnlag
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
@@ -108,7 +102,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid

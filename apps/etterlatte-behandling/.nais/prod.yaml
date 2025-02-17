@@ -216,5 +216,6 @@ spec:
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage
         - application: etterlatte-brev-api
+        - application: etterlatte-brev-kafka
         - application: etterlatte-utbetaling
         - application: etterlatte-api

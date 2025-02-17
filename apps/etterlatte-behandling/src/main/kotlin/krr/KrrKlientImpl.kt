@@ -50,7 +50,7 @@ class KrrKlientImpl(
             if (response.status.isSuccess()) {
                 response
                     .body<DigitalKontaktinformasjon?>()
-                    .also {
+                    ?.also {
                         logger.info("Hentet kontaktinformasjon fra KRR")
                         cache.put(fnr, it)
                     }

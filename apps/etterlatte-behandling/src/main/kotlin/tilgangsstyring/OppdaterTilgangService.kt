@@ -82,9 +82,9 @@ class OppdaterTilgangService(
              */
             if (hoyesteGradering == AdressebeskyttelseGradering.FORTROLIG) {
                 val enhet = hentEnhet(fnr = sak.ident, sak = sak)
-                val sakMedEnhet = listOf(SakMedEnhet(sakId, enhet))
-                sakService.oppdaterEnhetForSaker(sakMedEnhet)
-                oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                val sakMedEnhet = SakMedEnhet(sakId, enhet)
+                sakService.oppdaterEnhet(sakMedEnhet)
+                oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
             } else {
                 sakService.settEnhetOmAdressebeskyttet(sak, hoyesteGradering)
                 val enhet =
@@ -99,10 +99,10 @@ class OppdaterTilgangService(
             val egenAnsattSkjerming = alleIdenter.map { fnr -> sjekkOmIdentErSkjermet(fnr) }
             sakService.oppdaterAdressebeskyttelse(sakId, identerMedGradering.hentPrioritertGradering())
             if (egenAnsattSkjerming.any { it }) {
-                sakService.markerSakerMedSkjerming(listOf(sakId), true)
-                val sakMedEnhet = listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
-                sakService.oppdaterEnhetForSaker(sakMedEnhet)
-                oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                sakService.oppdaterSkjerming(sakId, true)
+                val sakMedEnhet = SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)
+                sakService.oppdaterEnhet(sakMedEnhet)
+                oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
             } else {
                 val tilgangSak = sakService.hentGraderingForSak(sakId, HardkodaSystembruker.tilgang)
                 /*
@@ -110,10 +110,10 @@ class OppdaterTilgangService(
                  */
                 if (tilgangSak.erSpesialSak()) {
                     val enhetsNummer = hentEnhet(fnr = sak.ident, sak = sak)
-                    val sakMedEnhet = listOf(SakMedEnhet(sakId, enhetsNummer))
-                    sakService.oppdaterEnhetForSaker(sakMedEnhet)
-                    sakService.markerSakerMedSkjerming(listOf(sakId), false)
-                    oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                    val sakMedEnhet = SakMedEnhet(sakId, enhetsNummer)
+                    sakService.oppdaterEnhet(sakMedEnhet)
+                    sakService.oppdaterSkjerming(sakId, false)
+                    oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                 }
             }
         }
@@ -125,8 +125,8 @@ class OppdaterTilgangService(
     ) {
         val enhet = hentEnhet(fnr = fnr, sak = sak)
         val sakerMedNyEnhet = SakMedEnhet(sak.id, enhet)
-        sakService.oppdaterEnhetForSaker(listOf(sakerMedNyEnhet))
-        sakService.markerSakerMedSkjerming(listOf(sak.id), false)
+        sakService.oppdaterEnhet(sakerMedNyEnhet)
+        sakService.oppdaterSkjerming(sak.id, false)
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakerMedNyEnhet))
     }
 

@@ -13,8 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
-import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -190,7 +189,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
 
-            val actual = runBlocking { grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!! }
+            val actual = runBlocking { grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!! }
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -247,7 +246,6 @@ internal class GrunnlagServiceTest {
                 grunnlagService.opprettEllerOppdaterGrunnlagForSak(
                     sakId,
                     opplysningsbehov,
-                    simpleSaksbehandler(),
                 )
             }
 
@@ -261,7 +259,7 @@ internal class GrunnlagServiceTest {
 
             val grunnlag =
                 runBlocking {
-                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId, simpleSaksbehandler())
+                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId)
                 }
             assertNotNull(grunnlag)
             if (grunnlag != null) {
@@ -290,7 +288,7 @@ internal class GrunnlagServiceTest {
 
             val actual =
                 runBlocking {
-                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())
+                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)
                 }!!
             val expected =
                 mapOf(
@@ -312,7 +310,7 @@ internal class GrunnlagServiceTest {
 
             val actual =
                 runBlocking {
-                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!!
+                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
                 }
             val expected =
                 mapOf(
@@ -333,7 +331,7 @@ internal class GrunnlagServiceTest {
 
             val actual =
                 runBlocking {
-                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!!
+                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
                 }
             val expected =
                 mapOf(
@@ -378,7 +376,7 @@ internal class GrunnlagServiceTest {
             val opplysning =
                 runBlocking {
                     grunnlagService
-                        .hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!!
+                        .hentOpplysningsgrunnlagForSak(sakId1)!!
                 }
 
             assertEquals(
@@ -392,7 +390,7 @@ internal class GrunnlagServiceTest {
             every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
             val opplysningsgrunnlag =
                 runBlocking {
-                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!!
+                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
                 }
 
             assertEquals(
@@ -443,7 +441,7 @@ internal class GrunnlagServiceTest {
 
         val actual =
             runBlocking {
-                grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!!
+                grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
             }
         val expected =
             Opplysning.Konstant(
@@ -503,7 +501,7 @@ internal class GrunnlagServiceTest {
 
         val opplysningsgrunnlag =
             runBlocking {
-                grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!!
+                grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
             }
 
         assertEquals(1, opplysningsgrunnlag.sak.size)
@@ -579,7 +577,7 @@ internal class GrunnlagServiceTest {
             /*
              * Barn 1 søker barnepensjon og har rolle søsken i annen sak
              */
-            val barn1 = runBlocking { grunnlagService.hentSakerOgRoller(barnepensjonSoeker1, simpleSaksbehandler()) }
+            val barn1 = runBlocking { grunnlagService.hentSakerOgRoller(barnepensjonSoeker1) }
             assertEquals(2, barn1.sakiderOgRoller.size)
             assertEquals(barnepensjonSoeker1.value, barn1.fnr)
 
@@ -592,7 +590,7 @@ internal class GrunnlagServiceTest {
             /*
              * Barn 2 søker barnepensjon og har rolle søsken i annen sak
              */
-            val barn2 = runBlocking { grunnlagService.hentSakerOgRoller(barnepensjonSoeker2, simpleSaksbehandler()) }
+            val barn2 = runBlocking { grunnlagService.hentSakerOgRoller(barnepensjonSoeker2) }
             assertEquals(2, barn2.sakiderOgRoller.size)
             assertEquals(barnepensjonSoeker2.value, barn2.fnr)
 
@@ -615,7 +613,7 @@ internal class GrunnlagServiceTest {
                     grunnlaghendelse3,
                 )
 
-            val gjenlevende = runBlocking { grunnlagService.hentSakerOgRoller(gjenlevendeFnr, simpleSaksbehandler()) }
+            val gjenlevende = runBlocking { grunnlagService.hentSakerOgRoller(gjenlevendeFnr) }
             assertEquals(3, gjenlevende.sakiderOgRoller.size)
             assertEquals(gjenlevendeFnr.value, gjenlevende.fnr)
 
@@ -638,7 +636,7 @@ internal class GrunnlagServiceTest {
                     grunnlaghendelse2,
                 )
 
-            val soesken = runBlocking { grunnlagService.hentSakerOgRoller(soeskenFnr, simpleSaksbehandler()) }
+            val soesken = runBlocking { grunnlagService.hentSakerOgRoller(soeskenFnr) }
             assertEquals(2, soesken.sakiderOgRoller.size)
             assertTrue(soesken.sakiderOgRoller.all { it.rolle == Saksrolle.SOESKEN })
 
@@ -695,7 +693,7 @@ internal class GrunnlagServiceTest {
                 )
 
             val opplysningsgrunnlag =
-                runBlocking { grunnlagService.hentOpplysningsgrunnlagForSak(sakId1, simpleSaksbehandler())!! }
+                runBlocking { grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!! }
 
             assertEquals(1, opplysningsgrunnlag.sak.size)
             assertEquals(1, opplysningsgrunnlag.familie.size)
@@ -766,7 +764,7 @@ internal class GrunnlagServiceTest {
             grunnlagHenter.hentGrunnlagsdata(any())
         } returns sampleFetchedGrunnlag(opplysningsperson)
 
-        runBlocking { grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType, simpleSaksbehandler()) }
+        runBlocking { grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType) }
 
         val slot = mutableListOf<Grunnlagsopplysning<JsonNode>>()
         verify {
@@ -943,7 +941,7 @@ internal class GrunnlagServiceTest {
                 )
 
             val resultat =
-                runBlocking { grunnlagService.hentPersonopplysninger(behandlingsid, SakType.BARNEPENSJON, simpleSaksbehandler()) }
+                runBlocking { grunnlagService.hentPersonopplysninger(behandlingsid, SakType.BARNEPENSJON) }
 
             resultat.innsender?.opplysning?.foedselsnummer shouldBe SOEKER_FOEDSELSNUMMER
             resultat.soeker?.opplysning?.foedselsnummer shouldBe SOEKER_FOEDSELSNUMMER
@@ -1021,7 +1019,7 @@ internal class GrunnlagServiceTest {
                     ),
                 )
             val resultat =
-                runBlocking { grunnlagService.hentPersonopplysninger(behandlingsid, SakType.BARNEPENSJON, simpleSaksbehandler()) }
+                runBlocking { grunnlagService.hentPersonopplysninger(behandlingsid, SakType.BARNEPENSJON) }
 
             resultat.innsender?.opplysning?.foedselsnummer shouldBe GJENLEVENDE_FOEDSELSNUMMER
             resultat.soeker?.opplysning?.foedselsnummer shouldBe GJENLEVENDE_FOEDSELSNUMMER

@@ -1,7 +1,10 @@
 package no.nav.etterlatte.brev.dokument
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.etterlatte.brev.dokarkiv.AvsenderMottakerIdType
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -193,7 +196,9 @@ data class Bruker(
 
 data class AvsenderMottaker(
     val id: String?,
-    val type: String?,
+    @JsonProperty("idType")
+    @JsonAlias("type")
+    val type: AvsenderMottakerIdType?,
     val navn: String?,
     val land: String?,
     val erLikBruker: Boolean?,

@@ -81,10 +81,6 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
-    - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag
-    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-grunnlag
     - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_URL
@@ -106,7 +102,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
-        - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

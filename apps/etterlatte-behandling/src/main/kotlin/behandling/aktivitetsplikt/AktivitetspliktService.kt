@@ -16,10 +16,10 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnn
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
@@ -59,7 +59,7 @@ class AktivitetspliktService(
     private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
     private val behandlingService: BehandlingService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val statistikkKafkaProducer: BehandlingHendelserKafkaProducer,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
@@ -73,14 +73,17 @@ class AktivitetspliktService(
 
     suspend fun hentAktivitetspliktDto(
         sakId: SakId,
-        bruker: BrukerTokenInfo,
         behandlingId: UUID?,
     ): AktivitetspliktDto {
         val faktiskBehandlingId =
             behandlingId ?: behandlingService.hentSisteIverksatte(sakId)?.id
                 ?: throw ManglerBehandlingIdEllerIverksattBehandlingException(sakId)
 
-        val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(faktiskBehandlingId, bruker)
+        val grunnlag =
+            krevIkkeNull(grunnlagService.hentOpplysningsgrunnlag(faktiskBehandlingId)) {
+                "Fant ikke opplysningsgrunnlag for behandlingId=$faktiskBehandlingId"
+            }
+
         val avdoedDoedsdato =
             grunnlag
                 .hentAvdoede()
@@ -654,7 +657,6 @@ class AktivitetspliktService(
 
     fun opprettRevurderingHvisKravIkkeOppfylt(
         request: OpprettRevurderingForAktivitetspliktDto,
-        bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
         val forrigeBehandling =
             krevIkkeNull(behandlingService.hentSisteIverksatte(request.sakId)) {
@@ -663,11 +665,7 @@ class AktivitetspliktService(
         val persongalleri =
             runBlocking {
                 krevIkkeNull(
-                    grunnlagKlient
-                        .hentPersongalleri(
-                            forrigeBehandling.id,
-                            bruker,
-                        )?.opplysning,
+                    grunnlagService.hentPersongalleri(forrigeBehandling.id),
                 ) {
                     "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
                 }
@@ -786,7 +784,7 @@ class AktivitetspliktService(
         behandlingId: UUID? = null,
     ) {
         try {
-            val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
+            val dto = hentAktivitetspliktDto(sakId, behandlingId)
             statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
         } catch (e: ManglerDoedsdatoUnderBehandlingException) {
             // Dette er ikke kritisk og vi vil bare logge en advarsel

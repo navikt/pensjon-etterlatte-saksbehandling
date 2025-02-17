@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.generellbehandling
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -98,7 +98,7 @@ class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val hendelseDao: HendelseDao,
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
 ) {
@@ -376,10 +376,7 @@ class GenerellBehandlingService(
     private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
         generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
 
-    suspend fun hentKravpakkeForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): KravPakkeMedAvdoed {
+    suspend fun hentKravpakkeForSak(sakId: SakId): KravPakkeMedAvdoed {
         val (kravpakke, forstegangsbehandlingMedKravpakke) =
             inTransaction {
                 val behandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
@@ -398,10 +395,9 @@ class GenerellBehandlingService(
             }
         if (kravpakke.status == GenerellBehandling.Status.ATTESTERT) {
             val avdoed =
-                grunnlagKlient.finnPersonOpplysning(
+                grunnlagService.hentGrunnlagAvType(
                     forstegangsbehandlingMedKravpakke.id,
                     Opplysningstype.AVDOED_PDL_V1,
-                    brukerTokenInfo,
                 ) ?: throw FantIkkeAvdoedException(
                     "Fant ikke avdød for sak: $sakId behandlingid: ${forstegangsbehandlingMedKravpakke.id}",
                 )

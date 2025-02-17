@@ -20,10 +20,10 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -83,7 +83,7 @@ internal class GenerellBehandlingServiceTest(
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnlagKlient = mockk<GrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
     private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
     private val saksbehandlerNavn = "Ola Nordmann"
@@ -184,10 +184,9 @@ internal class GenerellBehandlingServiceTest(
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
         coEvery {
-            grunnlagKlient.finnPersonOpplysning(
+            grunnlagKlient.hentGrunnlagAvType(
                 foerstegangsbehandling.id,
                 Opplysningstype.AVDOED_PDL_V1,
-                brukerTokenInfo,
             )
         } returns grunnlagsopplysningMedPersonopplysning
 
@@ -199,10 +198,10 @@ internal class GenerellBehandlingServiceTest(
                 ).copy(tilknyttetBehandling = foerstegangsbehandling.id, status = GenerellBehandling.Status.ATTESTERT)
         val opprettBehandlingGenerell = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
 
-        val kravpakkeMedArbeidetUtlandet = runBlocking { service.hentKravpakkeForSak(sak.id, brukerTokenInfo) }
+        val kravpakkeMedArbeidetUtlandet = runBlocking { service.hentKravpakkeForSak(sak.id) }
         assertEquals(opprettBehandlingGenerell.id, kravpakkeMedArbeidetUtlandet.kravpakke.id)
         assertEquals(foerstegangsbehandling.id, kravpakkeMedArbeidetUtlandet.kravpakke.tilknyttetBehandling)
-        coVerify { grunnlagKlient.finnPersonOpplysning(any(), any(), any()) }
+        coVerify { grunnlagKlient.hentGrunnlagAvType(any(), any()) }
         verify { behandlingService.hentBehandlingerForSak(any()) }
     }
 

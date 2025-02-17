@@ -14,12 +14,12 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.GrunnlagKlientTest
 import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SkjermingKlientTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlag.IOpplysningDao
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -50,7 +50,9 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val norg2Klient = mockk<Norg2Klient>()
     private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val skjermingHttpKlient = spyk<SkjermingKlientTest>()
-    private val grunnlagKlient = spyk<GrunnlagKlientTest>() // test versjon så vi får data for andre random ting som er brukt
+
+//    private val grunnlagKlient = spyk<GrunnlagKlientTest>() // test versjon så vi får data for andre random ting som er brukt
+    private val opplysningDaoMock = mockk<IOpplysningDao>()
     private val soeker = no.nav.etterlatte.soeker // Obs denne må matche med grunnlag sitt persongalleri
     private val persongalleri = persongalleri()
 
@@ -60,9 +62,9 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             norg2Klient = norg2Klient,
             pdlTjenesterKlient = pdltjenesterKlient,
             skjermingKlient = skjermingHttpKlient,
-            grunnlagklient = grunnlagKlient,
+//            opplysningDao = opplysningDaoMock,
         ).also { resetDatabase() }
-            .also { coEvery { grunnlagKlient.hentPersongalleri(any()) } returns persongalleri }
+//            .also { coEvery { opplysningDaoMock.hentAlleGrunnlagForSak(any()) } returns persongalleri }
 
     @AfterEach
     fun afterEach() {

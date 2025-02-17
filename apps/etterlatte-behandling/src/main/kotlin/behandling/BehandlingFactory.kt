@@ -12,6 +12,8 @@ import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -28,7 +30,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
@@ -46,7 +47,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
@@ -58,7 +58,7 @@ import java.util.UUID
 
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
-    private val grunnlagService: GrunnlagServiceImpl,
+    private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,
     private val sakService: SakService,
@@ -113,7 +113,6 @@ class BehandlingFactory(
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
                     request = hentDataForOpprettBehandling(sak.id),
-                    brukerTokenInfo = brukerTokenInfo,
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService
@@ -153,11 +152,7 @@ class BehandlingFactory(
             opplysninger.add(lagOpplysning(Opplysningstype.UFOERE, kilde, request.ufoere.toJsonNode()))
         }
 
-        grunnlagService.leggTilNyeOpplysninger(
-            behandling.id,
-            NyeSaksopplysninger(sak.id, opplysninger),
-            HardkodaSystembruker.opprettGrunnlag,
-        )
+        grunnlagService.lagreNyeSaksopplysninger(sak.id, behandling.id, opplysninger)
 
         if (request.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             coroutineScope {
@@ -178,7 +173,6 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         request: DataHentetForOpprettBehandling,
-        brukerTokenInfo: BrukerTokenInfo,
     ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
         val prosessType = Prosesstype.MANUELL
@@ -223,11 +217,9 @@ class BehandlingFactory(
                     prosessType,
                 )
             runBlocking {
-                grunnlagService.leggInnNyttGrunnlag(
-                    behandling,
-                    persongalleri,
-                    // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll,
-                    HardkodaSystembruker.opprettGrunnlag,
+                grunnlagService.opprettGrunnlag(
+                    behandling.id,
+                    opplysningsbehov(behandling.sak, persongalleri),
                 )
             }
 
@@ -249,7 +241,6 @@ class BehandlingFactory(
                                     request.sak,
                                     persongalleri,
                                     behandling.id,
-                                    HardkodaSystembruker.opprettGrunnlag,
                                 )
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
@@ -375,14 +366,12 @@ class BehandlingFactory(
                 OmgjoerBehandling(nyFoerstegangsbehandling, sisteAvslaatteBehandling, foerstegangsbehandlingViOmgjoerer)
             }
 
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId)!! }
 
         runBlocking {
-            grunnlagService.leggInnNyttGrunnlag(
-                behandlingerForOmgjoering.nyFoerstegangsbehandling,
-                persongalleri,
-                // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll
-                HardkodaSystembruker.opprettGrunnlag,
+            grunnlagService.opprettGrunnlag(
+                behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
+                opplysningsbehov(behandlingerForOmgjoering.nyFoerstegangsbehandling.sak, persongalleri),
             )
         }
 
@@ -460,7 +449,6 @@ class BehandlingFactory(
         sak: Sak,
         persongalleri: Persongalleri,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
     ): String? =
         if (persongalleri.soesken.isEmpty()) {
             null
@@ -470,10 +458,8 @@ class BehandlingFactory(
             val soesken: AvdoedesBarn =
                 runBlocking {
                     grunnlagService
-                        .hentGrunnlagForBehandling(
-                            behandlingId,
-                            brukerTokenInfo = brukerTokenInfo,
-                        ).hentSoeskenNy()!!
+                        .hentOpplysningsgrunnlag(behandlingId)!!
+                        .hentSoeskenNy()!!
                         .verdi
                 }
 

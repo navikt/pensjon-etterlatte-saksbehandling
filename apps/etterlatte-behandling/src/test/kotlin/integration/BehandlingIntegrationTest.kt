@@ -8,10 +8,10 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
+import io.mockk.MockKSettings.relaxed
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.brev.BrevKlient
@@ -20,6 +20,9 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.GrunnlagServiceTest
+import no.nav.etterlatte.grunnlag.aldersovergang.IAldersovergangDao
 import no.nav.etterlatte.kafka.KafkaKey
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -54,7 +57,8 @@ abstract class BehandlingIntegrationTest {
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
         skjermingKlient: SkjermingKlient? = null,
-        grunnlagklient: GrunnlagKlient? = null,
+        aldersovergangDao: IAldersovergangDao? = null,
+        grunnlagService: GrunnlagService? = null,
     ) {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
@@ -106,7 +110,6 @@ abstract class BehandlingIntegrationTest {
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                grunnlagKlientImpl = grunnlagklient ?: GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
@@ -120,8 +123,10 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
-                opplysningDaoProxy = mockk(relaxed = true),
-                aldersovergangDaoProxy = mockk(relaxed = true),
+//                opplysningDaoProxy = opplysningDao ?: mockk(relaxed = true),
+                aldersovergangDaoProxy = aldersovergangDao ?: mockk(relaxed = true),
+//                grunnlagHenter = grunnlagHenter ?: mockk(relaxed = true),
+                grunnlagService = grunnlagService ?: no.nav.etterlatte.GrunnlagServiceTest(),
             )
     }
 

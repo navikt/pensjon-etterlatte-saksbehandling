@@ -6,7 +6,7 @@ import { Box, Heading } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import styled from 'styled-components'
-import { RedigerFamilieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforhold'
+import { RedigerFamilieforholdModal } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforholdModal'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -32,7 +32,7 @@ export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: P
         <Heading spacing size="medium" level="2" as="div">
           Familieforhold
           {personopplysninger && redigerbar && (
-            <RedigerFamilieforhold behandling={behandling} personopplysninger={personopplysninger} />
+            <RedigerFamilieforholdModal behandling={behandling} personopplysninger={personopplysninger} />
           )}
         </Heading>
       </Box>

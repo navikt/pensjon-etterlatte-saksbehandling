@@ -1,7 +1,7 @@
 package no.nav.etterlatte.egenansatt
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
@@ -16,7 +16,7 @@ data class SakIdOgPersongalleri(
 
 class EgenAnsattService(
     private val sakService: SakService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val oppdaterTilgangService: OppdaterTilgangService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -26,7 +26,7 @@ class EgenAnsattService(
         val saker = sakService.finnSaker(skjermetHendelse.fnr)
         saker
             .map {
-                val pg = runBlocking { grunnlagKlient.hentPersongalleri(it.id) }
+                val pg = runBlocking { grunnlagService.hentPersongalleri(it.id)!! }
                 SakIdOgPersongalleri(sakId = it.id, persongalleri = pg)
             }.forEach {
                 oppdaterTilgangService.haandtergraderingOgEgenAnsatt(

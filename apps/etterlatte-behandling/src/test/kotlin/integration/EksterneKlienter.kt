@@ -9,7 +9,6 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
@@ -39,6 +38,10 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.PersonMedNavn
+import no.nav.etterlatte.grunnlag.PersongalleriSamsvar
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
@@ -57,7 +60,6 @@ import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -76,7 +78,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
-import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -87,6 +88,7 @@ import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.soeker
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -98,122 +100,113 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.random.Random
 
-class GrunnlagKlientTest : GrunnlagKlient {
-    override suspend fun grunnlagFinnes(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean = false
+class GrunnlagServiceTest : GrunnlagService {
+    override suspend fun grunnlagFinnesForSak(sakId: SakId): Boolean = false
 
-    override suspend fun finnPersonOpplysning(
+    override suspend fun hentGrunnlagAvType(
         behandlingId: UUID,
-        opplysningsType: Opplysningstype,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<JsonNode> {
+        opplysningstype: Opplysningstype,
+    ): Grunnlagsopplysning<JsonNode>? {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
     }
 
-    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri = defaultPersongalleriGydligeFnr
-
-    override suspend fun hentPersongalleri(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<Persongalleri> =
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-            meta = emptyMap<String, String>().toObjectNode(),
-            opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning = defaultPersongalleriGydligeFnr,
-        )
-
-    override suspend fun hentGrunnlagForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag() // evt Grunnlag.empty()
-
-    override suspend fun hentGrunnlagForBehandling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-    override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-    override suspend fun hentAlleSakIder(fnr: String): Set<SakId> = setOf(sakId1)
-
-    override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller =
-        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(sakId1, Saksrolle.SOEKER)))
-
-    override suspend fun leggInnNyttGrunnlag(
-        behandlingId: UUID,
-        opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
-    }
-
-    override suspend fun oppdaterGrunnlag(
-        behandlingId: UUID,
-        request: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
-    }
-
     override suspend fun lagreNyeSaksopplysninger(
+        sakId: SakId,
         behandlingId: UUID,
-        saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
-        // NO-OP
+        // do nothing
     }
 
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
-        saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
-        // NO-OP
+        // do nothing
     }
 
-    override suspend fun leggInnNyttGrunnlagSak(
+    override suspend fun lagreNyePersonopplysninger(
         sakId: SakId,
-        opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
-    }
-
-    override suspend fun laasTilGrunnlagIBehandling(
-        id: UUID,
-        forrigeBehandling: UUID,
-    ) {
-        // NO-OP
-    }
-
-    override suspend fun hentPersonopplysningerForBehandling(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        sakType: SakType,
+        fnr: Folkeregisteridentifikator,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
+    ) {
+        // do nothing
+    }
+
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri = defaultPersongalleriGydligeFnr
+
+    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri = defaultPersongalleriGydligeFnr
+
+    override suspend fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag? = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+    override suspend fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+    override suspend fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakstype: SakType,
     ): PersonopplysningerResponse = GrunnlagTestData().hentPersonopplysninger()
 
-    override suspend fun aldersovergangMaaned(
+    override suspend fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<SakId> = setOf(sakId1)
+
+    override suspend fun hentPersonerISak(sakId: SakId): Map<Folkeregisteridentifikator, PersonMedNavn>? {
+        TODO()
+    }
+
+    override suspend fun opprettGrunnlag(
+        behandlingId: UUID,
+        opplysningsbehov: Opplysningsbehov,
+    ) {
+        // do nothing
+    }
+
+    override suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest) {
+        // do nothing
+    }
+
+    override suspend fun opprettEllerOppdaterGrunnlagForSak(
+        sakId: SakId,
+        opplysningsbehov: Opplysningsbehov,
+    ) {
+        // do nothing
+    }
+
+    override suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        sakId: SakId,
+        sakType: SakType,
+    ) {
+        // do nothing
+    }
+
+    override suspend fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun laasTilVersjonForBehandling(
+        skalLaasesId: UUID,
+        idLaasesTil: UUID,
+    ): BehandlingGrunnlagVersjon = BehandlingGrunnlagVersjon(UUID.randomUUID(), sakId1, Random.nextLong(), true)
+
+    override suspend fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller =
+        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(sakId1, Saksrolle.SOEKER)))
+
+    override suspend fun laasVersjonForBehandling(behandlingId: UUID) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun aldersovergangMaaned(
         sakId: SakId,
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ) = YearMonth.now()
-
-    override val serviceName: String
-        get() = TODO("Not yet implemented")
-    override val beskrivelse: String
-        get() = TODO("Not yet implemented")
-    override val endpoint: String
-        get() = TODO("Not yet implemented")
-
-    override suspend fun ping(konsument: String?): PingResult {
-        TODO("Not yet implemented")
-    }
 }
 
 class BeregningKlientTest :
@@ -726,17 +719,13 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         foedselsnummer: String,
         rolle: PersonRolle,
         sakType: SakType,
-    ): Person {
-        TODO("Not yet implemented")
-    }
+    ): Person = soeker()
 
     override suspend fun hentOpplysningsperson(
         foedselsnummer: String,
         rolle: PersonRolle,
         sakType: SakType,
-    ): PersonDTO {
-        TODO("Not yet implemented")
-    }
+    ): PersonDTO = hentPdlModellForSaktype(foedselsnummer, rolle, sakType)
 
     override suspend fun hentHistoriskForeldreansvar(
         fnr: Folkeregisteridentifikator,
@@ -750,9 +739,7 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         foedselsnummer: String,
         sakType: SakType,
         innsender: String?,
-    ): Persongalleri? {
-        TODO("Not yet implemented")
-    }
+    ): Persongalleri? = persongalleri()
 
     override val serviceName: String
         get() = "Pdl tjenester"

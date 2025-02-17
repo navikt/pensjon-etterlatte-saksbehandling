@@ -24,14 +24,13 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspli
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.ktor.token.systembruker
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
@@ -68,7 +67,7 @@ class AktivitetspliktServiceTest {
     private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao = mockk()
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val grunnlagKlient: GrunnlagKlient = mockk()
+    private val grunnlagService: GrunnlagService = mockk()
     private val revurderingService: RevurderingService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val statistikkProduer: BehandlingHendelserKafkaProducer = mockk()
@@ -80,7 +79,7 @@ class AktivitetspliktServiceTest {
             aktivitetspliktAktivitetsgradDao,
             aktivitetspliktUnntakDao,
             behandlingService,
-            grunnlagKlient,
+            grunnlagService,
             revurderingService,
             statistikkProduer,
             kopierService,
@@ -523,10 +522,6 @@ class AktivitetspliktServiceTest {
                 jobbType = JobbType.OMS_DOED_12MND,
             )
         private val persongalleri: Persongalleri = mockk()
-        private val persongalleriOpplysning =
-            mockk<Grunnlagsopplysning<Persongalleri>> {
-                every { opplysning } returns persongalleri
-            }
 
         @Test
         fun `Skal opprette revurdering hvis kravene for aktivitetsplikt ikke er oppfylt 6mnd`() {
@@ -538,11 +533,11 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
-                    persongalleri = persongalleriOpplysning.opplysning,
+                    persongalleri = persongalleri,
                     forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
@@ -569,7 +564,7 @@ class AktivitetspliktServiceTest {
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd)
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -591,11 +586,11 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
-                    persongalleri = persongalleriOpplysning.opplysning,
+                    persongalleri = persongalleri,
                     forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
@@ -625,7 +620,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(any()) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd)
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -647,11 +642,11 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
-                    persongalleri = persongalleriOpplysning.opplysning,
+                    persongalleri = persongalleri,
                     forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
@@ -697,7 +692,7 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd)
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -719,11 +714,11 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
-                    persongalleri = persongalleriOpplysning.opplysning,
+                    persongalleri = persongalleri,
                     forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
@@ -769,7 +764,7 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd)
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -791,11 +786,11 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
-                    persongalleri = persongalleriOpplysning.opplysning,
+                    persongalleri = persongalleri,
                     forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
@@ -834,7 +829,7 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd)
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -860,7 +855,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling, aapenBehandling)
-            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 oppgaveService.opprettOppgave(
                     sakId = sakId,
@@ -872,7 +867,7 @@ class AktivitetspliktServiceTest {
                 )
             } returns oppgave
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd)
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -899,9 +894,9 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
-            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd)
 
             with(resultat) {
                 opprettetRevurdering shouldBe false

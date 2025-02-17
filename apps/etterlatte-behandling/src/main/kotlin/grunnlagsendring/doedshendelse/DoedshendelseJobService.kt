@@ -5,13 +5,14 @@ import io.ktor.util.toLowerCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
@@ -22,7 +23,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -36,7 +36,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
@@ -188,10 +187,9 @@ class DoedshendelseJobService(
             )
 
         runBlocking {
-            grunnlagService.leggInnNyttGrunnlagSak(
-                sak = opprettetSak,
-                persongalleri,
-                HardkodaSystembruker.doedshendelse,
+            grunnlagService.opprettEllerOppdaterGrunnlagForSak(
+                opprettetSak.id,
+                opplysningsbehov(opprettetSak, persongalleri),
             )
         }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
@@ -199,10 +197,9 @@ class DoedshendelseJobService(
         val spraak = hentSpraak(doedshendelse)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
         runBlocking {
-            grunnlagService.leggTilNyeOpplysningerBareSak(
+            grunnlagService.lagreNyeSaksopplysningerBareSak(
                 sakId = opprettetSak.id,
-                opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
-                HardkodaSystembruker.doedshendelse,
+                nyeOpplysninger = listOf(spraakOpplysning),
             )
         }
         return opprettetSak

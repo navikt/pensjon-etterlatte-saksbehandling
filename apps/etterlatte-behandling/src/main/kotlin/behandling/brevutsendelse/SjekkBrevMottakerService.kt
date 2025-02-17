@@ -2,13 +2,13 @@ package no.nav.etterlatte.behandling.brevutsendelse
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
 import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERTE_PERSON_OPPLYSNINGER
 import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERT_IDENT
 import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_VERGEMAAL
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 enum class SjekkGyldigBrevMottakerResultat {
@@ -35,10 +34,7 @@ class SjekkBrevMottakerService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun sjekkOmPersonErGyldigBrevmottaker(
-        sak: Sak,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): SjekkGyldigBrevMottakerResultat {
+    fun sjekkOmPersonErGyldigBrevmottaker(sak: Sak): SjekkGyldigBrevMottakerResultat {
         logger.info("Sjekker om person ${sak.ident.maskerFnr()} er en gyldig brev mottaker")
         sikkerlogger().info("Sjekker om person ${sak.ident} er en gyldig brev mottaker")
 
@@ -59,7 +55,7 @@ class SjekkBrevMottakerService(
         }
 
         val opplysningerPdl = hentPdlPersonopplysning(sak)
-        val opplysningerGjenny = hentOpplysningerGjenny(sak, sisteIverksatteBehandling, brukerTokenInfo)
+        val opplysningerGjenny = hentOpplysningerGjenny(sak, sisteIverksatteBehandling)
 
         // Sjekker vergemål
         if (!opplysningerPdl.vergemaalEllerFremtidsfullmakt.isNullOrEmpty()) {
@@ -114,14 +110,12 @@ class SjekkBrevMottakerService(
     private fun hentOpplysningerGjenny(
         sak: Sak,
         behandling: Behandling,
-        brukerTokenInfo: BrukerTokenInfo,
     ): Person =
         runBlocking {
             grunnlagService
                 .hentPersonopplysninger(
                     behandling.id,
                     sak.sakType,
-                    brukerTokenInfo,
                 ).soeker
                 ?.opplysning ?: throw InternfeilException("Fant ikke opplysninger for sak=${sak.id}")
         }

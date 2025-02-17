@@ -70,7 +70,6 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         request = applicationContext.behandlingFactory.hentDataForOpprettBehandling(sak.id),
-                        testUser.brukerTokenInfo,
                     ).behandling
             Pair(sak, behandling as Foerstegangsbehandling)
         }

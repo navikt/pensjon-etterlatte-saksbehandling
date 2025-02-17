@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -848,25 +849,48 @@ class AktivitetspliktService(
     }
 
     fun opprettOppgaveHvisIkkeVarigUnntak(dto: OpprettOppgaveForAktivitetspliktDto): OpprettOppgaveForAktivitetspliktResponse {
-        if (harVarigUnntak(dto.sakId)) {
+        val sakId = dto.sakId
+        if (harVarigUnntak(sakId)) {
             return OpprettOppgaveForAktivitetspliktResponse(
                 opprettetOppgave = false,
             )
         }
-        logger.info("Sak ${dto.sakId} har ikke varig unntak, oppretter oppgave for aktivitetsplikt infobrev")
+        logger.info("Sakid $sakId har ikke varig unntak, oppretter oppgave for aktivitetsplikt infobrev")
         val oppgaveType =
             when (dto.jobbType) {
                 JobbType.OMS_DOED_4MND -> OppgaveType.AKTIVITETSPLIKT
                 JobbType.OMS_DOED_10MND -> OppgaveType.AKTIVITETSPLIKT_12MND
                 else -> throw UgyldigForespoerselException(
                     "FEIL_JOBBTYPE",
-                    "Kan ikke opprette en aktivitetspliktoppgave for jobbtype=${dto.jobbType} i sak ${dto.sakId}",
+                    "Kan ikke opprette en aktivitetspliktoppgave for jobbtype=${dto.jobbType} i sak $sakId",
                 )
             }
+
+        val kanOpprette =
+            when (oppgaveType) {
+                OppgaveType.AKTIVITETSPLIKT -> validerMnd6KanOpprette(sakId)
+                OppgaveType.AKTIVITETSPLIKT_12MND -> valider12MndKanOpprette(sakId)
+                else -> throw UgyldigForespoerselException("FEIL_OPPGAVETYPE", "Kan ikke håndtere oppgavetype $oppgaveType i sak $sakId")
+            }
+        if (!kanOpprette) {
+            logger.info("Oppretter ikke oppgavetype $oppgaveType i sak $sakId da kravet for 6/12 mnd ikke oppfylles.")
+            return OpprettOppgaveForAktivitetspliktResponse(
+                opprettetOppgave = false,
+            )
+        }
+        if (validerFinnesIkkeAllerede(sakId, oppgaveType)) {
+            logger.info(
+                "Oppretter ikke oppgavetype $oppgaveType i sak $sakId da den finnes allerede som under behandling eller som ferdigdstilt",
+            )
+            return OpprettOppgaveForAktivitetspliktResponse(
+                opprettetOppgave = false,
+            )
+        }
+
         val opprettetOppgave =
             oppgaveService.opprettOppgave(
                 referanse = dto.referanse ?: "",
-                sakId = dto.sakId,
+                sakId = sakId,
                 kilde = OppgaveKilde.HENDELSE,
                 type = oppgaveType,
                 merknad = dto.jobbType.beskrivelse,
@@ -876,6 +900,39 @@ class AktivitetspliktService(
             opprettetOppgave = true,
             oppgaveId = opprettetOppgave.id,
         )
+    }
+
+    private fun validerFinnesIkkeAllerede(
+        sakId: SakId,
+        oppgaveType: OppgaveType,
+    ): Boolean =
+        oppgaveService
+            .hentOppgaverForSak(
+                sakId,
+                oppgaveType,
+            ).any {
+                it.erUnderBehandling() ||
+                    it.erFerdigstilt()
+            }
+
+    private fun validerMnd6KanOpprette(sakId: SakId): Boolean =
+        oppgaveService
+            .hentOppgaverForSak(
+                sakId,
+                OppgaveType.AKTIVITETSPLIKT_12MND,
+            ).none { it.status != Status.AVBRUTT }
+
+    private fun valider12MndKanOpprette(sakId: SakId): Boolean {
+        val oppfoelging6mnd =
+            oppgaveService.hentOppgaverForSak(
+                sakId,
+                OppgaveType.AKTIVITETSPLIKT,
+            )
+        if (oppfoelging6mnd.any { it.erUnderBehandling() }) {
+            return false
+        }
+        val ferdigstilt6mndOppgave = oppfoelging6mnd.filter { it.erFerdigstilt() }
+        return ferdigstilt6mndOppgave.isNotEmpty()
     }
 }
 

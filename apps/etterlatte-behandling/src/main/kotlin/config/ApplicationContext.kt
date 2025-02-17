@@ -20,7 +20,6 @@ import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.BrukerServiceImpl
-import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktBrevDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
@@ -53,8 +52,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
@@ -101,8 +98,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.grunnlag.IOpplysningDao
-import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.grunnlag.GrunnlagServiceImpl
 import no.nav.etterlatte.grunnlag.OpplysningDaoProxy
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDaoProxy
@@ -272,7 +268,6 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
@@ -296,8 +291,14 @@ internal class ApplicationContext(
             env.requireEnvValue(SKJERMING_URL),
         ),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
-    val opplysningDaoProxy: IOpplysningDao = OpplysningDaoProxy(config, httpClient()),
     val aldersovergangDaoProxy: IAldersovergangDao = AldersovergangDaoProxy(config, httpClient()),
+    // TODO: Service burde ikke ligge her, men gjør det nå for å få alle integrasjonstestene til å kjøre som de skal
+    val grunnlagService: GrunnlagService =
+        GrunnlagServiceImpl(
+            pdlTjenesterKlient,
+            OpplysningDaoProxy(config, httpClient()),
+            GrunnlagHenter(pdlTjenesterKlient),
+        ),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -358,20 +359,6 @@ internal class ApplicationContext(
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
     val skalBrukeDaoProxy = true
-    val opplysningDao =
-        if (skalBrukeDaoProxy) {
-            opplysningDaoProxy
-        } else {
-            OpplysningDao(dataSource)
-        }
-
-    val nyGrunnlagService: GrunnlagService =
-        no.nav.etterlatte.grunnlag.GrunnlagServiceImpl(
-            pdlTjenesterKlient,
-            opplysningDao,
-            GrunnlagHenter(pdlTjenesterKlient),
-        )
-
     val aldersovergangDao =
         if (skalBrukeDaoProxy) {
             aldersovergangDaoProxy
@@ -382,17 +369,15 @@ internal class ApplicationContext(
         no.nav.etterlatte.grunnlag.aldersovergang
             .AldersovergangService(aldersovergangDao)
 
-    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlientImpl)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao,
-            grunnlagKlient = grunnlagKlientImpl,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
-            grunnlagService = grunnlagsService,
+            grunnlagService = grunnlagService,
             beregningKlient = beregningsKlient,
         )
     val generellBehandlingService =
@@ -400,7 +385,7 @@ internal class ApplicationContext(
             generellbehandlingDao,
             oppgaveService,
             behandlingService,
-            grunnlagKlientImpl,
+            grunnlagService,
             hendelseDao,
             saksbehandlerInfoDao,
         )
@@ -433,7 +418,7 @@ internal class ApplicationContext(
     val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,
-            grunnlagService = grunnlagsService,
+            grunnlagService = grunnlagService,
             behandlingHendelser = behandlingsHendelser,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
@@ -446,7 +431,7 @@ internal class ApplicationContext(
         AutomatiskRevurderingService(
             revurderingService,
             behandlingService,
-            grunnlagsService,
+            grunnlagService,
             vedtakKlient,
             beregningsKlient,
         )
@@ -454,7 +439,7 @@ internal class ApplicationContext(
         ManuellRevurderingService(
             revurderingService = revurderingService,
             behandlingService = behandlingService,
-            grunnlagService = grunnlagsService,
+            grunnlagService = grunnlagService,
             oppgaveService = oppgaveService,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         )
@@ -464,7 +449,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             klageService = klageService,
             behandlingDao = behandlingDao,
-            grunnlagService = grunnlagsService,
+            grunnlagService = grunnlagService,
         )
 
     val aktivitetspliktService =
@@ -473,7 +458,7 @@ internal class ApplicationContext(
             aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
             aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
             behandlingService = behandlingService,
-            grunnlagKlient = grunnlagKlientImpl,
+            grunnlagService = grunnlagService,
             revurderingService = revurderingService,
             statistikkKafkaProducer = behandlingsHendelser,
             oppgaveService = oppgaveService,
@@ -499,7 +484,6 @@ internal class ApplicationContext(
             axsysKlient,
             navAnsattKlient,
             skjermingKlient,
-            grunnlagKlientImpl,
             pdlTjenesterKlient,
             klageKlient,
             tilbakekrevingKlient,
@@ -513,7 +497,7 @@ internal class ApplicationContext(
             sakendringerDao,
             skjermingKlient,
             brukerService,
-            grunnlagsService,
+            grunnlagService,
             krrKlient,
             pdlTjenesterKlient,
             featureToggleService,
@@ -537,12 +521,13 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             revurderingService = revurderingService,
             vedtakKlient = vedtakKlient,
-            grunnlagService = grunnlagsService,
+            grunnlagService = grunnlagService,
             beregningKlient = beregningsKlient,
             pdlTjenesterKlient = pdlTjenesterKlient,
             oppgaveService = oppgaveService,
             rapid = rapid,
             featureToggleService = featureToggleService,
+            aldersovergangService = nyAldersovergangService,
         )
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
@@ -560,7 +545,7 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
             pdltjenesterKlient = pdlTjenesterKlient,
-            grunnlagKlient = grunnlagKlientImpl,
+            grunnlagService = grunnlagService,
             sakService = sakService,
             doedshendelseService = doedshendelseService,
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
@@ -585,7 +570,7 @@ internal class ApplicationContext(
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 5 else 0,
             deodshendelserProducer = deodshendelserProducer,
-            grunnlagService = grunnlagsService,
+            grunnlagService = grunnlagService,
             pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
@@ -614,7 +599,7 @@ internal class ApplicationContext(
             sakService,
             brevKlient,
             vedtakKlient,
-            grunnlagKlientImpl,
+            grunnlagService,
         )
     val brevService =
         BrevService(vedtaksbehandlingService, brevKlient, brevApiKlient, vedtakKlient, tilbakekrevingBrevService)
@@ -657,7 +642,7 @@ internal class ApplicationContext(
         VilkaarsvurderingService(
             vilkaarsvurderingDao,
             behandlingService,
-            grunnlagKlientImpl,
+            grunnlagService,
             behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
@@ -665,7 +650,7 @@ internal class ApplicationContext(
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
-            grunnlagService = grunnlagsService,
+            grunnlagService = grunnlagService,
             revurderingService = revurderingService,
             gyldighetsproevingService = gyldighetsproevingService,
             sakService = sakService,

@@ -14,7 +14,6 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.GrunnlagKlientTest
 import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SkjermingKlientTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -37,7 +36,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
-import no.nav.etterlatte.persongalleri
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -50,9 +48,8 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val norg2Klient = mockk<Norg2Klient>()
     private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val skjermingHttpKlient = spyk<SkjermingKlientTest>()
-    private val grunnlagKlient = spyk<GrunnlagKlientTest>() // test versjon så vi får data for andre random ting som er brukt
+
     private val soeker = no.nav.etterlatte.soeker // Obs denne må matche med grunnlag sitt persongalleri
-    private val persongalleri = persongalleri()
 
     @BeforeEach
     fun start() =
@@ -60,9 +57,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             norg2Klient = norg2Klient,
             pdlTjenesterKlient = pdltjenesterKlient,
             skjermingKlient = skjermingHttpKlient,
-            grunnlagklient = grunnlagKlient,
         ).also { resetDatabase() }
-            .also { coEvery { grunnlagKlient.hentPersongalleri(any()) } returns persongalleri }
 
     @AfterEach
     fun afterEach() {

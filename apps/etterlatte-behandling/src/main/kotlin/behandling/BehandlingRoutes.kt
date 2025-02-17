@@ -184,7 +184,6 @@ internal fun Route.behandlingRoutes(
                         runBlocking {
                             behandlingService.erGyldigVirkningstidspunkt(
                                 behandlingId,
-                                brukerTokenInfo,
                                 body,
                                 overstyr,
                             )
@@ -441,7 +440,6 @@ internal fun Route.behandlingRoutes(
                                 behandlingsBehov.mottattDato,
                                 Vedtaksloesning.GJENNY,
                                 request = request,
-                                brukerTokenInfo = brukerTokenInfo,
                             )
                         }
                     behandlingOgOppgave.sendMeldingForHendelse()

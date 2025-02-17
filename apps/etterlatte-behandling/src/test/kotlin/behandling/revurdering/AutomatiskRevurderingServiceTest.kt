@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.revurdering.OmregningKreverLoependeVedtak
 import no.nav.etterlatte.behandling.revurdering.OmregningOverstyrtBeregning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -73,7 +74,7 @@ class AutomatiskRevurderingServiceTest {
                 },
             grunnlagService =
                 mockk {
-                    coEvery { hentPersongalleri(any()) } returns mockk()
+                    coEvery { hentPersongalleri(any<SakId>()) } returns mockk()
                 },
             vedtakKlient = vedtakKlient,
             beregningKlient = beregningKlient,

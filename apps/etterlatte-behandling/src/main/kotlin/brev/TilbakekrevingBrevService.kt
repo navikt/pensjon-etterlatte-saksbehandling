@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.erOver18
@@ -17,6 +16,7 @@ import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBeloeperDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingPeriodeDataNy
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -49,7 +49,7 @@ class TilbakekrevingBrevService(
     val sakService: SakService,
     val brevKlient: BrevKlient,
     val vedtakKlient: VedtakKlient,
-    val grunnlagKlient: GrunnlagKlient,
+    val grunnlagService: GrunnlagService,
 ) {
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
@@ -120,7 +120,7 @@ class TilbakekrevingBrevService(
                 }
             val grunnlagDef =
                 async {
-                    grunnlagKlient.hentGrunnlagForSak(sak.id, bruker)
+                    grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)!!
                 }
 
             // TODO trenger vi egt async?

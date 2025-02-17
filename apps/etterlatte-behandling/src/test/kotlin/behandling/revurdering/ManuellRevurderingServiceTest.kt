@@ -15,7 +15,6 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -35,6 +34,7 @@ import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.defaultPersongalleriGydligeFnr
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -51,6 +51,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -119,7 +120,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
-                        user.brukerTokenInfo,
                     )
             }.also { it.sendMeldingForHendelse() }.behandling
 
@@ -129,7 +129,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     @Test
     fun `kan opprette ny revurdering og lagre i db`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
-        val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val grunnlagService = spyk(applicationContext.grunnlagService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
         val aktivitetspliktDao = spyk(applicationContext.aktivitetspliktDao)
 
@@ -163,8 +163,8 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
 
         coVerify {
-            grunnlagService.hentPersongalleri(any())
-            grunnlagService.leggInnNyttGrunnlag(revurdering, any(), any())
+            grunnlagService.hentPersongalleri(any<SakId>())
+            grunnlagService.opprettGrunnlag(revurdering.id, any())
         }
         verify {
             oppgaveService.opprettOppgave(
@@ -190,7 +190,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     @Test
     fun `kan lagre og oppdatere revurderinginfo paa en revurdering`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
-        val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val grunnlagService = spyk(applicationContext.grunnlagService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
@@ -286,8 +286,8 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
             coVerify {
-                grunnlagService.hentPersongalleri(any())
-                grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
+                grunnlagService.hentPersongalleri(sak.id)
+                grunnlagService.opprettGrunnlag(revurdering.id, any())
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
@@ -296,7 +296,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     @Test
     fun `Ny regulering skal haandtere hendelser om nytt grunnbeløp`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
-        val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val grunnlagService = spyk(applicationContext.grunnlagService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
         val saksbehandler = simpleSaksbehandler()
 
@@ -397,9 +397,9 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 )
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
             coVerify {
-                grunnlagService.hentPersongalleri(any())
-                grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any(), any())
-                grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling.id, any())
+                grunnlagService.hentPersongalleri(sak.id)
+                grunnlagService.opprettGrunnlag(behandling!!.id, any())
+                grunnlagService.laasTilVersjonForBehandling(revurdering.id, behandling.id)
             }
             verify {
                 oppgaveService.hentOppgaverForSak(sak.id)
@@ -446,7 +446,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     @Test
     fun `kan opprette ny revurdering med aarsak = SLUTTBEHANDLING og lagre i db`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
-        val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val grunnlagService = spyk(applicationContext.grunnlagService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
@@ -493,8 +493,8 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
 
         coVerify {
-            grunnlagService.leggInnNyttGrunnlag(revurdering, any(), any())
-            grunnlagService.hentPersongalleri(any())
+            grunnlagService.hentPersongalleri(sak.id)
+            grunnlagService.opprettGrunnlag(revurdering.id, any())
         }
         verify {
             oppgaveService.opprettOppgave(
@@ -882,7 +882,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                                 every { it.revurderingsaarsak() } returns Revurderingaarsak.REVURDERE_ETTER_OPPHOER
                             }
                     },
-                grunnlagService = mockk<GrunnlagService>().also { coEvery { it.hentPersongalleri(any()) } returns mockk() },
             )
         service.opprettManuellRevurderingWrapper(
             sakId = sakId1,
@@ -947,7 +946,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     private fun manuellRevurderingService(
         revurderingService: RevurderingService,
         oppgaveService: OppgaveService = applicationContext.oppgaveService,
-        grunnlagService: GrunnlagService = applicationContext.grunnlagsService,
+        grunnlagService: GrunnlagService = applicationContext.grunnlagService,
         behandlingService: BehandlingService = applicationContext.behandlingService,
     ) = ManuellRevurderingService(
         revurderingService = revurderingService,
@@ -959,7 +958,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
 
     private fun revurderingService(
         oppgaveService: OppgaveService = applicationContext.oppgaveService,
-        grunnlagService: GrunnlagService = applicationContext.grunnlagsService,
+        grunnlagService: GrunnlagService = applicationContext.grunnlagService,
         behandlingsHendelser: BehandlingsHendelserKafkaProducerImpl = applicationContext.behandlingsHendelser,
         aktivitetspliktDao: AktivitetspliktDao = applicationContext.aktivitetspliktDao,
         aktivitetspliktKopierService: AktivitetspliktKopierService = applicationContext.aktivitetspliktKopierService,
@@ -978,7 +977,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     private fun behandlingFactory() =
         BehandlingFactory(
             oppgaveService = applicationContext.oppgaveService,
-            grunnlagService = applicationContext.grunnlagsService,
+            grunnlagService = applicationContext.grunnlagService,
             revurderingService = applicationContext.revurderingService,
             gyldighetsproevingService = applicationContext.gyldighetsproevingService,
             sakService = applicationContext.sakService,

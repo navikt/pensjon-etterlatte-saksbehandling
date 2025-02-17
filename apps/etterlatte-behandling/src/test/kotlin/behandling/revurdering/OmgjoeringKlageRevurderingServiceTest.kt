@@ -6,12 +6,12 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.defaultPersongalleriGydligeFnr
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -90,7 +90,6 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
-                        user.brukerTokenInfo,
                     )
             }.also { it.sendMeldingForHendelse() }.behandling
 
@@ -223,7 +222,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
 
     private fun revurderingService(
         oppgaveService: OppgaveService = applicationContext.oppgaveService,
-        grunnlagService: GrunnlagService = applicationContext.grunnlagsService,
+        grunnlagService: GrunnlagService = applicationContext.grunnlagService,
         behandlingsHendelser: BehandlingsHendelserKafkaProducerImpl = applicationContext.behandlingsHendelser,
         aktivitetspliktDao: AktivitetspliktDao = applicationContext.aktivitetspliktDao,
         aktivitetspliktKopierService: AktivitetspliktKopierService = applicationContext.aktivitetspliktKopierService,
@@ -249,7 +248,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
     private fun behandlingFactory() =
         BehandlingFactory(
             oppgaveService = applicationContext.oppgaveService,
-            grunnlagService = applicationContext.grunnlagsService,
+            grunnlagService = applicationContext.grunnlagService,
             revurderingService = applicationContext.revurderingService,
             gyldighetsproevingService = applicationContext.gyldighetsproevingService,
             sakService = applicationContext.sakService,

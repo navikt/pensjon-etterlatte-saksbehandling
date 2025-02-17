@@ -71,7 +71,6 @@ class ViderefoertOpphoerTest(
                 behandlingHendelser = mockk(),
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = mockk(),
-                grunnlagKlient = mockk(),
                 kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),

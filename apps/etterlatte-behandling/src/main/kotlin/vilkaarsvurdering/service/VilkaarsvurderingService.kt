@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -43,7 +43,7 @@ class VirkningstidspunktIkkeSattException(
 class VilkaarsvurderingService(
     private val repository: VilkaarsvurderingDao,
     private val behandlingService: BehandlingService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val behandlingStatus: BehandlingStatusService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -63,10 +63,7 @@ class VilkaarsvurderingService(
             ?.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
             ?: false
 
-    fun hentBehandlingensGrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
+    fun hentBehandlingensGrunnlag(behandlingId: UUID): Grunnlag = hentDataForVilkaarsvurdering(behandlingId).second
 
     fun oppdaterTotalVurdering(
         behandlingId: UUID,
@@ -74,7 +71,7 @@ class VilkaarsvurderingService(
         resultat: VilkaarsvurderingResultat,
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId)
             val vilkaarsvurdering = hentVilkaarsvurdering(behandlingId) ?: throw VilkaarsvurderingIkkeFunnet()
             val virkningstidspunkt =
                 behandling.virkningstidspunkt?.dato?.atDay(1)
@@ -159,7 +156,7 @@ class VilkaarsvurderingService(
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
-            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId)
             val tidligereVilkaarsvurdering =
                 repository.hent(kopierFraBehandling)
                     ?: throw NullPointerException("Fant ikke vilkårsvurdering fra behandling $kopierFraBehandling")
@@ -257,7 +254,7 @@ class VilkaarsvurderingService(
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
             }
 
-            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId)
 
             val virkningstidspunkt =
                 behandling.virkningstidspunkt
@@ -363,7 +360,7 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val behandling = oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
+            val behandling = oppdaterGrunnlagsversjon(behandlingId)
             val vilkaarsvurdering =
                 repository.hent(behandlingId)
                     ?: throw VilkaarsvurderingIkkeFunnet()
@@ -390,11 +387,8 @@ class VilkaarsvurderingService(
             }
         }
 
-    private fun oppdaterGrunnlagsversjon(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Behandling {
-        val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
+    private fun oppdaterGrunnlagsversjon(behandlingId: UUID): Behandling {
+        val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId)
         repository.oppdaterGrunnlagsversjon(
             behandlingId = behandlingId,
             grunnlagVersjon = grunnlag.metadata.versjon,
@@ -415,12 +409,9 @@ class VilkaarsvurderingService(
         return block()
     }
 
-    private fun hentDataForVilkaarsvurdering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<Behandling, Grunnlag> {
+    private fun hentDataForVilkaarsvurdering(behandlingId: UUID): Pair<Behandling, Grunnlag> {
         val behandling = behandlingService.hentBehandling(behandlingId)!!
-        val grunnlag = runBlocking { grunnlagKlient.hentGrunnlagForBehandling(behandlingId, brukerTokenInfo) }
+        val grunnlag = runBlocking { grunnlagService.hentOpplysningsgrunnlag(behandlingId)!! }
         return Pair(behandling, grunnlag)
     }
 
@@ -446,7 +437,8 @@ class VilkaarsvurderingService(
     }
 
     fun finnBehandlingMedVilkaarsvurderingForSammeAvdoede(behandlingId: UUID): UUID? {
-        val gjeldendeBehandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingIkkeFunnet(behandlingId)
+        val gjeldendeBehandling =
+            behandlingService.hentBehandling(behandlingId) ?: throw BehandlingIkkeFunnet(behandlingId)
         if (gjeldendeBehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
             logger.info("Støtter ikke å kopiere vilkår i vilkårsvurdering for annet enn førstegangsbehandling")
             return null
@@ -459,7 +451,7 @@ class VilkaarsvurderingService(
         }
 
         val avdoedeForGjeldendeBehandling: List<Folkeregisteridentifikator> =
-            runBlocking { grunnlagKlient.hentPersongalleri(gjeldendeBehandling.sak.id) }
+            runBlocking { grunnlagService.hentPersongalleri(gjeldendeBehandling.sak.id)!! }
                 .avdoed
                 .map { Folkeregisteridentifikator.of(it) }
 
@@ -473,8 +465,10 @@ class VilkaarsvurderingService(
             "Avdøde ${avdoedeForGjeldendeBehandling.joinToString(", ")} er funnet for gjeldende behandling $behandlingId",
         )
 
-        return behandlingerMedVilkaarsvurderingForAvdoede(avdoedeForGjeldendeBehandling.toSet(), gjeldendeBehandling.sak.id)
-            .firstOrNull { it != behandlingId }
+        return behandlingerMedVilkaarsvurderingForAvdoede(
+            avdoedeForGjeldendeBehandling.toSet(),
+            gjeldendeBehandling.sak.id,
+        ).firstOrNull { it != behandlingId }
     }
 
     private fun behandlingerMedVilkaarsvurderingForAvdoede(
@@ -485,7 +479,7 @@ class VilkaarsvurderingService(
         val kandidatSakerForAvdoede: Set<SakId> =
             avdoedeForGjeldendeBehandling
                 .flatMap { avdoed ->
-                    runBlocking { grunnlagKlient.hentPersonSakOgRolle(avdoed.value) }
+                    runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(avdoed.value)) }
                         .sakiderOgRoller
                         .filter { it.sakId != gjeldendeSak && it.rolle == Saksrolle.AVDOED }
                         .map { it.sakId }
@@ -501,7 +495,7 @@ class VilkaarsvurderingService(
         val aktuelleBehandlinger =
             kandidatSakerForAvdoede.mapNotNull { sakId ->
                 val avdoedeForKandidatSak =
-                    runBlocking { grunnlagKlient.hentPersongalleri(sakId) }
+                    runBlocking { grunnlagService.hentPersongalleri(sakId)!! }
                         .avdoed
                         .map { Folkeregisteridentifikator.of(it) }
                         .toSet()
@@ -567,9 +561,11 @@ class VilkaarsvurderingService(
             )
 
         logger.info(
-            "Antall vilkår som er kopiert er ${nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes.vilkaarsvurdering.vilkaar.count {
-                it.kopiertFraVilkaarId != null
-            }} av totalt ${nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes.vilkaarsvurdering.vilkaar.count()}",
+            "Antall vilkår som er kopiert er ${
+                nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes.vilkaarsvurdering.vilkaar.count {
+                    it.kopiertFraVilkaarId != null
+                }
+            } av totalt ${nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes.vilkaarsvurdering.vilkaar.count()}",
         )
 
         // Sett tilbake status (vilkårsvurdering er ikke oppfylt da kopiering her kun tar noen vilkår og ikke totalvurdering)

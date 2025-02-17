@@ -219,7 +219,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         egenAnsattService =
             EgenAnsattService(
                 applicationContext.sakService,
-                applicationContext.grunnlagKlientImpl,
+                applicationContext.grunnlagService,
                 applicationContext.oppdaterTilgangService,
             ),
         requestLogger = applicationContext.behandlingRequestLogger,
@@ -233,9 +233,9 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     aldersovergang(applicationContext.aldersovergangService)
 
     route("/api/grunnlag") {
-        behandlingGrunnlagRoute(applicationContext.nyGrunnlagService)
-        personRoute(applicationContext.nyGrunnlagService, applicationContext.tilgangService)
-        sakGrunnlagRoute(applicationContext.nyGrunnlagService)
+        behandlingGrunnlagRoute(applicationContext.grunnlagService)
+        personRoute(applicationContext.grunnlagService, applicationContext.tilgangService)
+        sakGrunnlagRoute(applicationContext.grunnlagService)
         aldersovergangRoutes(applicationContext.nyAldersovergangService)
     }
 }

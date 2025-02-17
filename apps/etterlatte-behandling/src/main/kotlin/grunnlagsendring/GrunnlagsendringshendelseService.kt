@@ -6,8 +6,8 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -44,7 +46,7 @@ class GrunnlagsendringshendelseService(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val behandlingService: BehandlingService,
     private val pdltjenesterKlient: PdlTjenesterKlient,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val sakService: SakService,
     private val doedshendelseService: DoedshendelseService,
     private val grunnlagsendringsHendelseFilter: GrunnlagsendringsHendelseFilter,
@@ -177,13 +179,16 @@ class GrunnlagsendringshendelseService(
         }
 
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
-        val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
+        val sakIder = grunnlagService.hentAlleSakerForFnr(Folkeregisteridentifikator.of(adressebeskyttelse.fnr))
         if (sakIder.isEmpty()) {
             logger.info("Forkaster hendelse da vi ikke fant noen saker på den.")
             return
         }
         sakIder.forEach {
-            val pg = grunnlagKlient.hentPersongalleri(it)
+            val pg =
+                krevIkkeNull(grunnlagService.hentPersongalleri(it)) {
+                    "Mangler persongalleri for sak=$it"
+                }
             inTransaction { tilgangsService.haandtergraderingOgEgenAnsatt(it, pg) }
         }
     }
@@ -203,7 +208,9 @@ class GrunnlagsendringshendelseService(
         type: GrunnlagsendringsType,
         samsvar: SamsvarMellomKildeOgGrunnlag,
     ): List<Grunnlagsendringshendelse> {
-        val personMedSakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
+        val personMedSakerOgRoller =
+            runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(fnr)).sakiderOgRoller }
+
         return inTransaction {
             personMedSakerOgRoller
                 .asSequence()
@@ -273,7 +280,8 @@ class GrunnlagsendringshendelseService(
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = now().toLocalDatetimeUTC()
-        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
+        val sakerOgRoller =
+            runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(fnr)).sakiderOgRoller }
 
         val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
@@ -370,7 +378,7 @@ class GrunnlagsendringshendelseService(
                 personRolle,
                 sak.sakType,
             )
-        val grunnlag = runBlocking { grunnlagKlient.hentGrunnlag(sak.id) }
+        val grunnlag = runBlocking { grunnlagService.hentOpplysningsgrunnlagForSak(sak.id) }
         try {
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)

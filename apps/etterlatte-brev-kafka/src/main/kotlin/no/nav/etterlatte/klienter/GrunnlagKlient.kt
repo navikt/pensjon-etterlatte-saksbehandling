@@ -14,10 +14,10 @@ import java.time.Duration
 
 class GrunnlagKlient(
     config: Config,
-    val httpClient: HttpClient,
+    private val httpClient: HttpClient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val baseUrl = config.getString("grunnlag.resource.url")
+    private val baseUrl = config.getString("behandling.resource.url")
 
     internal suspend fun hentGrunnlagForSak(sakid: SakId): Grunnlag {
         try {

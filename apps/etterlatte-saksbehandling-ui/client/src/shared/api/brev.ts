@@ -88,16 +88,11 @@ export const genererPdf = async (props: {
   sakId?: number
   behandlingId?: string
   brevtype: Brevtype
-  tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<ArrayBuffer>> => {
-  if (props.tilbakekrevingBrev) {
-    // TODO midlertidig - skal hånderes backend på sikt
+  if (props.brevtype === Brevtype.VEDTAK) {
     return apiClient.get(
       `/behandling/brev/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}&sakId=${props.sakId}`
     )
-  }
-  if (props.brevtype === Brevtype.VEDTAK) {
-    return apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}`)
   } else if (props.brevtype === Brevtype.VARSEL) {
     return apiClient.get(`/brev/behandling/${props.behandlingId}/varsel/pdf?brevId=${props.brevId}`)
   } else if (props.brevtype === Brevtype.OVERSENDELSE_KLAGE) {
@@ -123,18 +118,10 @@ export const tilbakestillManuellPayload = async (props: {
   brevtype: Brevtype
   tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<any>> => {
-  if (props.tilbakekrevingBrev) {
-    // TODO midlertidig - skal hånderes backend på sikt
-    return apiClient.put(
-      `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}`,
-      {}
-    )
-  }
-  return apiClient.put(`/brev/behandling/${props.behandlingId}/payload/tilbakestill`, {
-    brevId: props.brevId,
-    sakId: props.sakId,
-    brevtype: props.brevtype,
-  })
+  return apiClient.put(
+    `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}`,
+    {}
+  )
 }
 
 export const lagreManuellPayload = async (props: {

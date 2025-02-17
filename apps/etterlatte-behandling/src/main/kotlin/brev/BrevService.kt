@@ -73,8 +73,12 @@ class BrevService(
                 true
             }
 
-        // TODO finn ut hva slags behandling
-        return tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
+        return when (vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type) {
+            VedtaksbehandlingType.TILBAKEKREVING ->
+                tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
+            else ->
+                brevKlient.genererPdf(brevID, behandlingId, bruker)
+        }
     }
 
     suspend fun ferdigstillVedtaksbrev(
@@ -115,8 +119,12 @@ class BrevService(
             }
         }
 
-        // TODO finn ut hva slags behandling
-        return tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+        return when (vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type) {
+            VedtaksbehandlingType.TILBAKEKREVING ->
+                tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+            else ->
+                brevKlient.tilbakestillVedtaksbrev(brevID, behandlingId, bruker)
+        }
     }
 }
 

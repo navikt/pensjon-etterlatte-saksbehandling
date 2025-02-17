@@ -461,6 +461,22 @@ class BrevApiKlientTest : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId)
 
+    override suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevPayload {
+        TODO("Not yet implemented")
+    }
+
     private fun opprettetBrevDto(brevId: Long) =
         Brev(
             id = brevId,

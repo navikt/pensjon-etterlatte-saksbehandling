@@ -211,7 +211,7 @@ export default function RedigerbartBrev({
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>
-          <ForhaandsvisningBrev brev={brev} tilbakekrevingBrev={tilbakekrevingBrev} />
+          <ForhaandsvisningBrev brev={brev} />
         </Tabs.Panel>
       </Tabs>
     </Container>

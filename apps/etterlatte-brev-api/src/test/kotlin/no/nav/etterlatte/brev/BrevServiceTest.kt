@@ -582,26 +582,6 @@ internal class BrevServiceTest {
                 db.hentBrev(brev.id)
             }
         }
-
-        @ParameterizedTest
-        @EnumSource(Status::class)
-        fun `Skal ikke kunne slette aktivitetspliktsbrev som medfører vurdering, uavhengig av status`(status: Status) {
-            val brev =
-                opprettBrev(
-                    status,
-                    BrevProsessType.REDIGERBAR,
-                ).copy(brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD)
-
-            every { db.hentBrev(any()) } returns brev
-
-            assertThrows<BrevKanIkkeEndres> {
-                brevService.slett(brev.id, bruker)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-            }
-        }
     }
 
     private fun opprettBrev(

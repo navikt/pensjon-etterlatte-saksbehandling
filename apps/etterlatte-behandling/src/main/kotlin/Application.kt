@@ -7,6 +7,7 @@ import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.principal
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
@@ -32,7 +33,10 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
-import no.nav.etterlatte.grunnlag.tempGrunnlagRoutes
+import no.nav.etterlatte.grunnlag.aldersovergang.aldersovergangRoutes
+import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
+import no.nav.etterlatte.grunnlag.personRoute
+import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.inntektsjustering.aarligInntektsjusteringRoute
@@ -227,18 +231,13 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     kodeverk(applicationContext.kodeverkService)
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
-    tempGrunnlagRoutes(applicationContext.tempGrunnlagKlient)
 
-/*
-    TODO 👇
-
-    route("/grunnlag") {
-        behandlingGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
-        personRoute(applicationContext.tempGrunnlagServiceProxy, applicationContext.tilgangService)
-        sakGrunnlagRoute(applicationContext.tempGrunnlagServiceProxy)
-        aldersovergangRoutes(applicationContext.tempAldersovergangServiceProxy)
+    route("/api/grunnlag") {
+        behandlingGrunnlagRoute(applicationContext.nyGrunnlagService)
+        personRoute(applicationContext.nyGrunnlagService, applicationContext.tilgangService)
+        sakGrunnlagRoute(applicationContext.nyGrunnlagService)
+        aldersovergangRoutes(applicationContext.nyAldersovergangService)
     }
-*/
 }
 
 private fun Route.settOppTilganger(

@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.grunnlag.OpplysningDao.GrunnlagHendelse
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -20,9 +21,55 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
+// TODO: Dette kan fjernes så fort grunnlag er migrert over til behandling
+interface IOpplysningDao {
+    fun finnesGrunnlagForSak(sakId: SakId): Boolean
+
+    fun hentAlleGrunnlagForSak(sakId: SakId): List<GrunnlagHendelse>
+
+    fun hentAlleGrunnlagForBehandling(behandlingId: UUID): List<GrunnlagHendelse>
+
+    fun hentGrunnlagAvTypeForBehandling(
+        behandlingId: UUID,
+        vararg typer: Opplysningstype,
+    ): List<GrunnlagHendelse>
+
+    fun finnHendelserIGrunnlag(sakId: SakId): List<GrunnlagHendelse>
+
+    fun finnNyesteGrunnlagForSak(
+        sakId: SakId,
+        opplysningType: Opplysningstype,
+    ): GrunnlagHendelse?
+
+    fun finnNyesteGrunnlagForBehandling(
+        behandlingId: UUID,
+        opplysningType: Opplysningstype,
+    ): GrunnlagHendelse?
+
+    fun leggOpplysningTilGrunnlag(
+        sakId: SakId,
+        behandlingsopplysning: Grunnlagsopplysning<JsonNode>,
+        fnr: Folkeregisteridentifikator? = null,
+    ): Long
+
+    fun oppdaterVersjonForBehandling(
+        behandlingId: UUID,
+        sakId: SakId,
+        hendelsenummer: Long,
+    ): Int
+
+    fun laasGrunnlagVersjonForBehandling(behandlingId: UUID): Int
+
+    fun finnAllePersongalleriHvorPersonFinnes(fnr: Folkeregisteridentifikator): List<GrunnlagHendelse>
+
+    fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<SakId>
+
+    fun hentBehandlingVersjon(behandlingId: UUID): BehandlingGrunnlagVersjon?
+}
+
 class OpplysningDao(
     private val datasource: DataSource,
-) {
+) : IOpplysningDao {
     private val connection get() = datasource.connection
 
     data class GrunnlagHendelse(
@@ -55,7 +102,7 @@ class OpplysningDao(
             hendelseNummer = getLong("hendelsenummer"),
         )
 
-    fun finnesGrunnlagForSak(sakId: SakId): Boolean =
+    override fun finnesGrunnlagForSak(sakId: SakId): Boolean =
         connection.use {
             it
                 .prepareStatement("SELECT EXISTS(SELECT 1 FROM grunnlagshendelse WHERE sak_id = ?)")
@@ -64,7 +111,7 @@ class OpplysningDao(
                 .single { getBoolean(1) }
         }
 
-    fun hentAlleGrunnlagForSak(sakId: SakId): List<GrunnlagHendelse> =
+    override fun hentAlleGrunnlagForSak(sakId: SakId): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -79,7 +126,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun hentAlleGrunnlagForBehandling(behandlingId: UUID): List<GrunnlagHendelse> =
+    override fun hentAlleGrunnlagForBehandling(behandlingId: UUID): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -96,7 +143,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun hentGrunnlagAvTypeForBehandling(
+    override fun hentGrunnlagAvTypeForBehandling(
         behandlingId: UUID,
         vararg typer: Opplysningstype,
     ): List<GrunnlagHendelse> =
@@ -119,7 +166,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnHendelserIGrunnlag(sakId: SakId): List<GrunnlagHendelse> =
+    override fun finnHendelserIGrunnlag(sakId: SakId): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -140,7 +187,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnNyesteGrunnlagForSak(
+    override fun finnNyesteGrunnlagForSak(
         sakId: SakId,
         opplysningType: Opplysningstype,
     ): GrunnlagHendelse? =
@@ -166,7 +213,7 @@ class OpplysningDao(
                 .singleOrNull { asGrunnlagshendelse() }
         }
 
-    fun finnNyesteGrunnlagForBehandling(
+    override fun finnNyesteGrunnlagForBehandling(
         behandlingId: UUID,
         opplysningType: Opplysningstype,
     ): GrunnlagHendelse? =
@@ -190,10 +237,10 @@ class OpplysningDao(
                 .firstOrNull { asGrunnlagshendelse() }
         }
 
-    fun leggOpplysningTilGrunnlag(
+    override fun leggOpplysningTilGrunnlag(
         sakId: SakId,
         behandlingsopplysning: Grunnlagsopplysning<JsonNode>,
-        fnr: Folkeregisteridentifikator? = null,
+        fnr: Folkeregisteridentifikator?,
     ): Long =
         connection.use {
             it
@@ -216,7 +263,7 @@ class OpplysningDao(
                 .getLong("hendelsenummer")
         }
 
-    fun oppdaterVersjonForBehandling(
+    override fun oppdaterVersjonForBehandling(
         behandlingId: UUID,
         sakId: SakId,
         hendelsenummer: Long,
@@ -239,7 +286,7 @@ class OpplysningDao(
             }
     }
 
-    fun laasGrunnlagVersjonForBehandling(behandlingId: UUID) =
+    override fun laasGrunnlagVersjonForBehandling(behandlingId: UUID) =
         connection.use {
             it
                 .prepareStatement("UPDATE behandling_versjon SET laast = true WHERE behandling_id = ?::UUID")
@@ -247,7 +294,7 @@ class OpplysningDao(
                 .executeUpdate()
         }
 
-    fun finnAllePersongalleriHvorPersonFinnes(fnr: Folkeregisteridentifikator): List<GrunnlagHendelse> =
+    override fun finnAllePersongalleriHvorPersonFinnes(fnr: Folkeregisteridentifikator): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -263,7 +310,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<SakId> =
+    override fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<SakId> =
         connection.use {
             it
                 .prepareStatement(
@@ -281,7 +328,7 @@ class OpplysningDao(
                 .toSet()
         }
 
-    fun hentBehandlingVersjon(behandlingId: UUID): BehandlingGrunnlagVersjon? =
+    override fun hentBehandlingVersjon(behandlingId: UUID): BehandlingGrunnlagVersjon? =
         connection.use {
             it
                 .prepareStatement("SELECT * FROM behandling_versjon WHERE behandling_id = ?::UUID")

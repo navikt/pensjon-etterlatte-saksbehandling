@@ -9,21 +9,20 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.sakId
-import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import java.time.YearMonth
 
-fun Route.aldersovergangRoutes(aldersovergangService: IAldersovergangService) {
+fun Route.aldersovergangRoutes(aldersovergangService: AldersovergangService) {
     route("/aldersovergang") {
         get("{yearMonth}") {
             val yearMonth = call.parameters["yearMonth"].toString().let { YearMonth.parse(it) }
-            call.respond(aldersovergangService.hentSoekereFoedtIEnGittMaaned(yearMonth, brukerTokenInfo))
+            call.respond(aldersovergangService.hentSoekereFoedtIEnGittMaaned(yearMonth))
         }
         get("sak/{sakId}/{sakType}") {
             val sakType =
                 call.parameters["sakType"]?.let { SakType.valueOf(it) }
                     ?: throw UgyldigForespoerselException("MANGLER_SAKTYPE", "Mangler sakType")
 
-            when (val maaned = aldersovergangService.aldersovergangMaaned(sakId, sakType, brukerTokenInfo)) {
+            when (val maaned = aldersovergangService.aldersovergangMaaned(sakId, sakType)) {
                 null -> call.respond(HttpStatusCode.NoContent)
                 else -> call.respond(maaned)
             }
@@ -33,12 +32,7 @@ fun Route.aldersovergangRoutes(aldersovergangService: IAldersovergangService) {
     route("/doedsdato") {
         get("{yearMonth}") {
             val behandlingsmaaned = call.parameters["yearMonth"].toString().let { YearMonth.parse(it) }
-            call.respond(
-                aldersovergangService.hentSakerHvorDoedsfallForekomIGittMaaned(
-                    behandlingsmaaned,
-                    brukerTokenInfo,
-                ),
-            )
+            call.respond(aldersovergangService.hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned))
         }
     }
 }

@@ -99,9 +99,14 @@ import no.nav.etterlatte.config.JobbKeys.JOBB_METRIKKER_OPENING_HOURS
 import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlag.TempGrunnlagKlient
-import no.nav.etterlatte.grunnlag.TempGrunnlagServiceProxy
-import no.nav.etterlatte.grunnlag.aldersovergang.TempAldersovergangServiceProxy
+import no.nav.etterlatte.grunnlag.GrunnlagHenter
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.IOpplysningDao
+import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.grunnlag.OpplysningDaoProxy
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDaoProxy
+import no.nav.etterlatte.grunnlag.aldersovergang.IAldersovergangDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -267,15 +272,6 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    // TODO: Fjerne denne etter tabeller er opprettet i behandling
-    val tempGrunnlagKlient: TempGrunnlagKlient = TempGrunnlagKlient(config, httpClient()),
-    // TODO: Ta disse i bruk
-    val tempGrunnlagServiceProxy: TempGrunnlagServiceProxy = TempGrunnlagServiceProxy(config, httpClient()),
-    val tempAldersovergangServiceProxy: TempAldersovergangServiceProxy =
-        TempAldersovergangServiceProxy(
-            config,
-            httpClient(),
-        ),
     val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
@@ -300,6 +296,8 @@ internal class ApplicationContext(
             env.requireEnvValue(SKJERMING_URL),
         ),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
+    val opplysningDaoProxy: IOpplysningDao = OpplysningDaoProxy(config, httpClient()),
+    val aldersovergangDaoProxy: IAldersovergangDao = AldersovergangDaoProxy(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -358,6 +356,31 @@ internal class ApplicationContext(
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
+
+    val skalBrukeDaoProxy = true
+    val opplysningDao =
+        if (skalBrukeDaoProxy) {
+            opplysningDaoProxy
+        } else {
+            OpplysningDao(dataSource)
+        }
+
+    val nyGrunnlagService: GrunnlagService =
+        no.nav.etterlatte.grunnlag.GrunnlagServiceImpl(
+            pdlTjenesterKlient,
+            opplysningDao,
+            GrunnlagHenter(pdlTjenesterKlient),
+        )
+
+    val aldersovergangDao =
+        if (skalBrukeDaoProxy) {
+            aldersovergangDaoProxy
+        } else {
+            AldersovergangDao(dataSource)
+        }
+    val nyAldersovergangService =
+        no.nav.etterlatte.grunnlag.aldersovergang
+            .AldersovergangService(aldersovergangDao)
 
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlientImpl)
     val behandlingService =

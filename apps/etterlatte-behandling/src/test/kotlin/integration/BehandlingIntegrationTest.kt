@@ -107,9 +107,6 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientImpl = grunnlagklient ?: GrunnlagKlientTest(),
-                tempGrunnlagKlient = mockk(relaxed = true),
-                tempAldersovergangServiceProxy = mockk(relaxed = true),
-                tempGrunnlagServiceProxy = mockk(relaxed = true),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
@@ -123,6 +120,8 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
+                opplysningDaoProxy = mockk(relaxed = true),
+                aldersovergangDaoProxy = mockk(relaxed = true),
             )
     }
 

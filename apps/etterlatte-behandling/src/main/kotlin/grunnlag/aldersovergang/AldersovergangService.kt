@@ -5,41 +5,15 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.LocalDate
 import java.time.YearMonth
 
-interface IAldersovergangService {
-    suspend fun aldersovergangMaaned(
-        sakId: SakId,
-        sakType: SakType,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): YearMonth?
-
-    suspend fun hentSoekereFoedtIEnGittMaaned(
-        maaned: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): List<String>
-
-    suspend fun hentSakerHvorDoedsfallForekomIGittMaaned(
-        behandlingsmaaned: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): List<String>
-
-    fun hentAlder(
-        sakId: SakId,
-        rolle: PersonRolle,
-        paaDato: LocalDate,
-    ): Alder?
-}
-
 class AldersovergangService(
-    private val dao: AldersovergangDao,
-) : IAldersovergangService {
-    override suspend fun aldersovergangMaaned(
+    private val dao: IAldersovergangDao,
+) {
+    fun aldersovergangMaaned(
         sakId: SakId,
         sakType: SakType,
-        brukerTokenInfo: BrukerTokenInfo,
     ): YearMonth? {
         val foedselsdato = dao.hentFoedselsdato(sakId, Opplysningstype.SOEKER_PDL_V1)
         return when (sakType) {
@@ -52,17 +26,12 @@ class AldersovergangService(
         }
     }
 
-    override suspend fun hentSoekereFoedtIEnGittMaaned(
-        maaned: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = dao.hentSoekereFoedtIEnGittMaaned(maaned)
+    fun hentSoekereFoedtIEnGittMaaned(maaned: YearMonth) = dao.hentSoekereFoedtIEnGittMaaned(maaned)
 
-    override suspend fun hentSakerHvorDoedsfallForekomIGittMaaned(
-        behandlingsmaaned: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = dao.hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned)
+    fun hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned: YearMonth) =
+        dao.hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned)
 
-    override fun hentAlder(
+    fun hentAlder(
         sakId: SakId,
         rolle: PersonRolle,
         paaDato: LocalDate,

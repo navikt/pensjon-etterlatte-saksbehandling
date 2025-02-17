@@ -2,7 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -36,35 +36,28 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.jetbrains.annotations.TestOnly
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface GrunnlagService {
-    suspend fun grunnlagFinnesForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean
+    suspend fun grunnlagFinnesForSak(sakId: SakId): Boolean
 
     suspend fun hentGrunnlagAvType(
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
-        brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<JsonNode>?
 
     suspend fun lagreNyeSaksopplysninger(
         sakId: SakId,
         behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun lagreNyePersonopplysninger(
@@ -72,102 +65,63 @@ interface GrunnlagService {
         behandlingId: UUID,
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        brukerTokenInfo: BrukerTokenInfo,
     )
 
-    suspend fun hentOpplysningsgrunnlagForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag?
+    suspend fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag?
 
-    suspend fun hentPersongalleri(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Persongalleri?
+    suspend fun hentPersongalleri(sakId: SakId): Persongalleri?
 
-    suspend fun hentOpplysningsgrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag?
+    suspend fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
     suspend fun hentPersonopplysninger(
         behandlingId: UUID,
         sakstype: SakType,
-        brukerTokenInfo: BrukerTokenInfo,
     ): PersonopplysningerResponse
 
-    suspend fun hentSakerOgRoller(
-        fnr: Folkeregisteridentifikator,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): PersonMedSakerOgRoller
+    suspend fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
-    suspend fun laasVersjonForBehandling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    )
+    suspend fun laasVersjonForBehandling(behandlingId: UUID)
 
-    suspend fun hentAlleSakerForFnr(
-        fnr: Folkeregisteridentifikator,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Set<SakId>
+    suspend fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<SakId>
 
-    suspend fun hentPersonerISak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Map<Folkeregisteridentifikator, PersonMedNavn>?
+    suspend fun hentPersonerISak(sakId: SakId): Map<Folkeregisteridentifikator, PersonMedNavn>?
 
     suspend fun opprettGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo,
     )
 
-    suspend fun oppdaterGrunnlagForSak(
-        oppdaterGrunnlagRequest: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo,
-    )
+    suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest)
 
     suspend fun opprettEllerOppdaterGrunnlagForSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         sakId: SakId,
         sakType: SakType,
-        brukerTokenInfo: BrukerTokenInfo,
     )
 
-    suspend fun hentHistoriskForeldreansvar(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<JsonNode>?
+    suspend fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
-    suspend fun hentPersongalleriSamsvar(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): PersongalleriSamsvar
+    suspend fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar
 
     suspend fun laasTilVersjonForBehandling(
         skalLaasesId: UUID,
         idLaasesTil: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
     ): BehandlingGrunnlagVersjon
 }
 
 class GrunnlagServiceImpl(
-    private val pdltjenesterKlient: PdlTjenesterKlientImpl,
-    private val opplysningDao: OpplysningDao,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
+    private val opplysningDao: IOpplysningDao,
     private val grunnlagHenter: GrunnlagHenter,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun grunnlagFinnesForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
+    override suspend fun grunnlagFinnesForSak(sakId: SakId): Boolean {
         logger.info("Sjekker om det finnes grunnlag for sak=$sakId")
 
         return opplysningDao
@@ -175,10 +129,7 @@ class GrunnlagServiceImpl(
             .also { logger.info("Grunnlag finnes '$it' for sak=$sakId") }
     }
 
-    override suspend fun hentOpplysningsgrunnlagForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag? {
+    override suspend fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag? {
         val persongalleriJsonNode =
             opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
@@ -192,10 +143,7 @@ class GrunnlagServiceImpl(
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
     }
 
-    override suspend fun hentPersongalleri(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Persongalleri? {
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri? {
         val persongalleriJsonNode =
             opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
@@ -206,10 +154,7 @@ class GrunnlagServiceImpl(
         return objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
     }
 
-    override suspend fun hentOpplysningsgrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag? {
+    override suspend fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag? {
         val persongalleriJsonNode =
             opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, PERSONGALLERI_V1)?.opplysning
 
@@ -226,7 +171,6 @@ class GrunnlagServiceImpl(
     override suspend fun hentPersonopplysninger(
         behandlingId: UUID,
         sakstype: SakType,
-        brukerTokenInfo: BrukerTokenInfo,
     ): PersonopplysningerResponse {
         val grunnlag =
             opplysningDao.hentGrunnlagAvTypeForBehandling(
@@ -286,10 +230,7 @@ class GrunnlagServiceImpl(
             else -> false
         }
 
-    override suspend fun hentSakerOgRoller(
-        fnr: Folkeregisteridentifikator,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): PersonMedSakerOgRoller {
+    override suspend fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
         val result =
             opplysningDao
                 .finnAllePersongalleriHvorPersonFinnes(fnr)
@@ -303,16 +244,10 @@ class GrunnlagServiceImpl(
         return result
     }
 
-    override suspend fun hentAlleSakerForFnr(
-        fnr: Folkeregisteridentifikator,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Set<SakId> = opplysningDao.finnAlleSakerForPerson(fnr)
+    override suspend fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<SakId> = opplysningDao.finnAlleSakerForPerson(fnr)
 
-    override suspend fun hentPersonerISak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Map<Folkeregisteridentifikator, PersonMedNavn>? {
-        val grunnlag = hentOpplysningsgrunnlagForSak(sakId, brukerTokenInfo) ?: return null
+    override suspend fun hentPersonerISak(sakId: SakId): Map<Folkeregisteridentifikator, PersonMedNavn>? {
+        val grunnlag = hentOpplysningsgrunnlagForSak(sakId) ?: return null
 
         val personer = listOf(grunnlag.soeker) + grunnlag.familie
         return personer
@@ -331,7 +266,6 @@ class GrunnlagServiceImpl(
     override suspend fun opprettGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
 
@@ -341,7 +275,6 @@ class GrunnlagServiceImpl(
                 behandlingId,
                 fnr,
                 opplysninger,
-                brukerTokenInfo,
             )
         }
 
@@ -349,7 +282,6 @@ class GrunnlagServiceImpl(
             opplysningsbehov.sakId,
             behandlingId,
             grunnlag.saksopplysninger,
-            brukerTokenInfo,
         )
         logger.info("Oppdatert grunnlag (sakId=${opplysningsbehov.sakId}, behandlingId=$behandlingId)")
     }
@@ -358,7 +290,6 @@ class GrunnlagServiceImpl(
         behandlingId: UUID,
         sakId: SakId,
         sakType: SakType,
-        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val persongalleriJsonNode = opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
@@ -372,14 +303,10 @@ class GrunnlagServiceImpl(
         opprettGrunnlag(
             behandlingId,
             Opplysningsbehov(sakId, sakType, persongalleri, persongalleriJsonNode.kilde),
-            brukerTokenInfo,
         )
     }
 
-    override suspend fun hentHistoriskForeldreansvar(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<JsonNode>? {
+    override suspend fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>? {
         val grunnlagshendelse =
             opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, Opplysningstype.HISTORISK_FORELDREANSVAR)
 
@@ -387,7 +314,7 @@ class GrunnlagServiceImpl(
             return grunnlagshendelse.opplysning
         }
 
-        val grunnlag = hentOpplysningsgrunnlag(behandlingId, brukerTokenInfo)
+        val grunnlag = hentOpplysningsgrunnlag(behandlingId)
         val soekerFnr = grunnlag?.soeker?.hentFoedselsnummer()?.verdi ?: return null
         val historiskForeldreansvar =
             pdltjenesterKlient
@@ -405,10 +332,7 @@ class GrunnlagServiceImpl(
         return historiskForeldreansvar
     }
 
-    override suspend fun hentPersongalleriSamsvar(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): PersongalleriSamsvar {
+    override suspend fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {
         val grunnlag =
             opplysningDao.hentGrunnlagAvTypeForBehandling(behandlingId, PERSONGALLERI_PDL_V1, PERSONGALLERI_V1)
         val opplysningPersongalleriSak =
@@ -452,7 +376,6 @@ class GrunnlagServiceImpl(
     override suspend fun laasTilVersjonForBehandling(
         skalLaasesId: UUID,
         idLaasesTil: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
     ): BehandlingGrunnlagVersjon {
         val laastVersjon =
             opplysningDao.hentBehandlingVersjon(idLaasesTil) ?: throw IkkeFunnetException(
@@ -539,7 +462,6 @@ class GrunnlagServiceImpl(
     override suspend fun hentGrunnlagAvType(
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
-        brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<JsonNode>? = opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, opplysningstype)?.opplysning
 
     override suspend fun lagreNyePersonopplysninger(
@@ -547,7 +469,6 @@ class GrunnlagServiceImpl(
         behandlingId: UUID,
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Oppretter et grunnlag for personopplysninger")
         oppdaterGrunnlagOgVersjon(sakId, behandlingId, fnr, nyeOpplysninger)
@@ -557,7 +478,6 @@ class GrunnlagServiceImpl(
         sakId: SakId,
         behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Oppretter et grunnlag for saksopplysninger $sakId")
         oppdaterGrunnlagOgVersjon(sakId, behandlingId, fnr = null, nyeOpplysninger)
@@ -566,16 +486,12 @@ class GrunnlagServiceImpl(
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Oppretter et grunnlag for saksopplysninger $sakId")
         oppdaterGrunnlagForSak(sakId = sakId, nyeOpplysninger = nyeOpplysninger, fnr = null)
     }
 
-    override suspend fun oppdaterGrunnlagForSak(
-        oppdaterGrunnlagRequest: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    override suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest) {
         val persongalleriJsonNode =
             opplysningDao.finnNyesteGrunnlagForSak(oppdaterGrunnlagRequest.sakId, PERSONGALLERI_V1)?.opplysning
 
@@ -593,14 +509,12 @@ class GrunnlagServiceImpl(
                 persongalleri,
                 persongalleriJsonNode.kilde,
             ),
-            brukerTokenInfo,
         )
     }
 
     override suspend fun opprettEllerOppdaterGrunnlagForSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
 
@@ -671,10 +585,7 @@ class GrunnlagServiceImpl(
         }
     }
 
-    override suspend fun laasVersjonForBehandling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    override suspend fun laasVersjonForBehandling(behandlingId: UUID) {
         logger.info("Låser grunnlagsversjon for behandling (id=$behandlingId)")
         opplysningDao.laasGrunnlagVersjonForBehandling(behandlingId)
     }

@@ -86,9 +86,9 @@ fun Route.opplysningDaoRoutes(opplysningDao: OpplysningDao) {
 
             val request = call.receive<NyOpplysningRequest>()
 
-            opplysningDao.leggOpplysningTilGrunnlag(sakId, request.opplysning, request.fnr)
+            val hendelsesnummer = opplysningDao.leggOpplysningTilGrunnlag(sakId, request.opplysning, request.fnr)
 
-            call.respond(HttpStatusCode.OK)
+            call.respond(hendelsesnummer)
         }
 
         get("/oppdaterVersjonForBehandling") {

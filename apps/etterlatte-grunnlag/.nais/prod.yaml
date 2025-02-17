@@ -99,13 +99,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-brev-kafka
-        - application: etterlatte-brev-api
-        - application: etterlatte-beregning
         - application: etterlatte-behandling
-        - application: etterlatte-trygdetid
-        - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-tidshendelser
     outbound:
       rules:
         - application: etterlatte-behandling

@@ -77,7 +77,6 @@ spec:
         - application: etterlatte-hendelser-pdl
         - application: etterlatte-hendelser-joark
         - application: etterlatte-behandling
-        - application: etterlatte-grunnlag
         - application: etterlatte-migrering
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml

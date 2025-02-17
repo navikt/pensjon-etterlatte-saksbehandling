@@ -93,9 +93,6 @@ spec:
           namespace: aura
           cluster: dev-gcp
     outbound:
-      rules:
-        - application: etterlatte-behandling
-        - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
 

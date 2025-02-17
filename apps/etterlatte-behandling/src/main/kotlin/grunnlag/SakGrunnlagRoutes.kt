@@ -37,27 +37,27 @@ fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
 
             call.respond(persongalleri)
         }
-    }
 
-    post("opprett-grunnlag") {
-        val opplysningsbehov = call.receive<Opplysningsbehov>()
-        grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
-        call.respond(HttpStatusCode.OK)
-    }
+        post("opprett-grunnlag") {
+            val opplysningsbehov = call.receive<Opplysningsbehov>()
+            grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
+            call.respond(HttpStatusCode.OK)
+        }
 
-    post("/oppdater-grunnlag") {
-        val request = call.receive<OppdaterGrunnlagRequest>()
-        grunnlagService.oppdaterGrunnlagForSak(request)
-        call.respond(HttpStatusCode.OK)
-    }
+        post("/oppdater-grunnlag") {
+            val request = call.receive<OppdaterGrunnlagRequest>()
+            grunnlagService.oppdaterGrunnlagForSak(request)
+            call.respond(HttpStatusCode.OK)
+        }
 
-    post("/nye-opplysninger") {
-        val opplysningsbehov = call.receive<NyeSaksopplysninger>()
-        grunnlagService.lagreNyeSaksopplysningerBareSak(
-            opplysningsbehov.sakId,
-            opplysningsbehov.opplysninger,
-        )
-        call.respond(HttpStatusCode.OK)
+        post("/nye-opplysninger") {
+            val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+            grunnlagService.lagreNyeSaksopplysningerBareSak(
+                opplysningsbehov.sakId,
+                opplysningsbehov.opplysninger,
+            )
+            call.respond(HttpStatusCode.OK)
+        }
     }
 }
 

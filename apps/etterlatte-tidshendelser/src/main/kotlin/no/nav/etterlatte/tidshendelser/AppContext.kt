@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.ETTERLATTE_BEHANDLING_AZURE_SCOPE
-import no.nav.etterlatte.tidshendelser.TidshendelserKey.ETTERLATTE_GRUNNLAG_AZURE_SCOPE
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.HENDELSE_POLLER_INITIAL_DELAY
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.HENDELSE_POLLER_INTERVAL
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.HENDELSE_POLLER_MAX_ANTALL
@@ -44,15 +43,6 @@ class AppContext(
 
     val dataSource = DataSourceBuilder.createDataSource(env)
 
-    private val grunnlagHttpClient: HttpClient by lazy {
-        httpClientClientCredentials(
-            azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
-            azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
-            azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
-            azureAppScope = env.requireEnvValue(ETTERLATTE_GRUNNLAG_AZURE_SCOPE),
-        )
-    }
-
     private val behandlingHttpClient: HttpClient by lazy {
         httpClientClientCredentials(
             azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
@@ -64,8 +54,8 @@ class AppContext(
 
     private val grunnlagKlient =
         GrunnlagKlient(
-            grunnlagHttpClient,
-            config.getString("etterlatte.grunnlag.url"),
+            behandlingHttpClient,
+            config.getString("etterlatte.behandling.url"),
         )
 
     private val behandlingKlient =

@@ -70,18 +70,13 @@ spec:
       value: "PT30S"
     - name: HENDELSE_POLLER_MAX_ANTALL
       value: "3"
-    - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
-    - name: ETTERLATTE_GRUNNLAG_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: ETTERLATTE_BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-grunnlag
         - application: etterlatte-behandling
     inbound:
       rules:

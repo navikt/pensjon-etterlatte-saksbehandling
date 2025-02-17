@@ -19,7 +19,6 @@ import no.nav.etterlatte.SkjermingKlientTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.grunnlag.IOpplysningDao
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -37,7 +36,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
-import no.nav.etterlatte.persongalleri
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -51,10 +49,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val skjermingHttpKlient = spyk<SkjermingKlientTest>()
 
-//    private val grunnlagKlient = spyk<GrunnlagKlientTest>() // test versjon så vi får data for andre random ting som er brukt
-    private val opplysningDaoMock = mockk<IOpplysningDao>()
     private val soeker = no.nav.etterlatte.soeker // Obs denne må matche med grunnlag sitt persongalleri
-    private val persongalleri = persongalleri()
 
     @BeforeEach
     fun start() =
@@ -62,9 +57,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             norg2Klient = norg2Klient,
             pdlTjenesterKlient = pdltjenesterKlient,
             skjermingKlient = skjermingHttpKlient,
-//            opplysningDao = opplysningDaoMock,
         ).also { resetDatabase() }
-//            .also { coEvery { opplysningDaoMock.hentAlleGrunnlagForSak(any()) } returns persongalleri }
 
     @AfterEach
     fun afterEach() {

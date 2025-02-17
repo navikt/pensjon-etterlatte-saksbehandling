@@ -8,7 +8,6 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
-import io.mockk.MockKSettings.relaxed
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -21,7 +20,6 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.grunnlag.GrunnlagServiceTest
 import no.nav.etterlatte.grunnlag.aldersovergang.IAldersovergangDao
 import no.nav.etterlatte.kafka.KafkaKey
 import no.nav.etterlatte.kafka.TestProdusent
@@ -123,10 +121,8 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
-//                opplysningDaoProxy = opplysningDao ?: mockk(relaxed = true),
                 aldersovergangDaoProxy = aldersovergangDao ?: mockk(relaxed = true),
-//                grunnlagHenter = grunnlagHenter ?: mockk(relaxed = true),
-                grunnlagService = grunnlagService ?: no.nav.etterlatte.GrunnlagServiceTest(),
+                grunnlagService = grunnlagService ?: GrunnlagServiceTest(),
             )
     }
 

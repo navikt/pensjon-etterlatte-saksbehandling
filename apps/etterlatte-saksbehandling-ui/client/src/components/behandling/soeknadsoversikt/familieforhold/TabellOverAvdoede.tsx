@@ -7,8 +7,8 @@ import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { AdresseVedDoedsfall } from '~components/behandling/soeknadsoversikt/familieforhold/AdresseVedDoedsfall'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
-import { InnOgUtvandringer } from '~components/behandling/soeknadsoversikt/familieforhold/InnOgUtvandringer'
-
+import { ListeOverInnflyttingTilNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverInnflyttingTilNorge'
+import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverUtflyttingFraNorge'
 interface Props {
   avdoede: Personopplysning[] | undefined
   alleLand: ILand[]
@@ -29,7 +29,8 @@ export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
             <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
             <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
             <Table.HeaderCell scope="col">Bostedsadresse ved dødsdato</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Inn-/utvandring</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Innflyttning</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Utflytning</Table.HeaderCell>
             <Table.HeaderCell scope="col">Statsborgerskap</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
@@ -50,7 +51,16 @@ export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
                   <AdresseVedDoedsfall avdoed={avdoed} />
                 </Table.DataCell>
                 <Table.DataCell>
-                  <InnOgUtvandringer personopplysning={avdoed} alleLand={alleLand} />
+                  <ListeOverInnflyttingTilNorge
+                    innflyttingTilNorge={avdoed.opplysning.utland?.innflyttingTilNorge}
+                    alleLand={alleLand}
+                  />
+                </Table.DataCell>
+                <Table.DataCell>
+                  <ListeOverUtflyttingFraNorge
+                    utflyttingFraNorge={avdoed.opplysning.utland?.utflyttingFraNorge}
+                    alleLand={alleLand}
+                  />
                 </Table.DataCell>
                 <Table.DataCell>
                   {!!avdoed.opplysning.statsborgerskap
@@ -61,7 +71,7 @@ export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
             ))
           ) : (
             <Table.Row>
-              <Table.DataCell colSpan={5}>Ingen avdøde</Table.DataCell>
+              <Table.DataCell colSpan={6}>Ingen avdøde</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

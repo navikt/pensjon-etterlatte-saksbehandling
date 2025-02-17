@@ -4,6 +4,7 @@ export enum IBeslutning {
 }
 
 export enum IReturTypeBehandling {
+  saksbehandler_ba_om_retur = 'Saksbehandler ba om retur',
   inngangsvilkår_feilvurdert = 'Inngangsvilkår feilvurdert',
   feil_i_beregning = 'Feil i beregning',
   feil_i_brev = 'Feil i brev',

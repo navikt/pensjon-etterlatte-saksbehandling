@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coJustRun
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -11,10 +12,10 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarDNummer
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarUtvandret
@@ -25,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.mockPerson
@@ -42,7 +44,13 @@ class DoedshendelseJobServiceTest {
     private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val dataSource = mockk<DataSource>()
-    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
+    private val kontekst =
+        Context(
+            Self(this::class.java.simpleName),
+            DatabaseContextTest(dataSource),
+            mockk(),
+            HardkodaSystembruker.testdata,
+        )
     private val sakService =
         mockk<SakService> {
             every { finnEllerOpprettSakMedGrunnlag(any(), any()) } returns
@@ -62,8 +70,9 @@ class DoedshendelseJobServiceTest {
 
     private val grunnlagService =
         mockk<GrunnlagService> {
-            coEvery { leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
-            coEvery { leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
+            coJustRun { opprettGrunnlag(any(), any()) }
+            coJustRun { lagreNyeSaksopplysningerBareSak(any(), any()) }
+            coJustRun { opprettEllerOppdaterGrunnlagForSak(any(), any()) }
         }
 
     private val pdlTjenesterKlient =

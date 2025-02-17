@@ -2,15 +2,16 @@ package no.nav.etterlatte.behandling.revurdering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klage.KlageService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -68,7 +69,7 @@ class OmgjoeringKlageRevurderingService(
         return revurderingService
             .opprettRevurdering(
                 sakId = sakId,
-                persongalleri = persongalleri,
+                persongalleri = krevIkkeNull(persongalleri) { "Persongalleri mangler for sak=$sakId" },
                 forrigeBehandling = behandlingSomOmgjoeres,
                 mottattDato =
                     klagenViOmgjoerPaaGrunnAv.innkommendeDokument

@@ -361,7 +361,7 @@ private fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
     behandlingId: UUID,
 ): Long =
     vilkaarsvurderingService
-        .hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
+        .hentBehandlingensGrunnlag(behandlingId)
         .metadata
         .versjon
 

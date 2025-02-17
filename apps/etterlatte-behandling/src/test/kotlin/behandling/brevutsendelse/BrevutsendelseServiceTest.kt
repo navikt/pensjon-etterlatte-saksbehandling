@@ -41,7 +41,7 @@ internal class BrevutsendelseServiceTest {
         val oppgaveId = randomUUID()
 
         every { sakService.finnSak(any()) } returns sak
-        every { sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(any(), any()) } returns GYLDIG_MOTTAKER
+        every { sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(any()) } returns GYLDIG_MOTTAKER
 
         every { oppgaveService.opprettOppgave(brevutsendelse.id.toString(), sak.id, any(), any(), any(), any(), any(), any()) } returns
             mockk { every { id } returns oppgaveId }
@@ -57,7 +57,7 @@ internal class BrevutsendelseServiceTest {
 
         verifyOrder {
             sakService.finnSak(any())
-            sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, any())
+            sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak)
         }
 
         coVerifyOrder {
@@ -75,7 +75,7 @@ internal class BrevutsendelseServiceTest {
         val oppgaveId = randomUUID()
 
         every { sakService.finnSak(any()) } returns sak
-        every { sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(any(), any()) } returns UGYLDIG_MOTTAKER_UTDATERT_IDENT
+        every { sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(any()) } returns UGYLDIG_MOTTAKER_UTDATERT_IDENT
 
         every { oppgaveService.opprettOppgave(brevutsendelse.id.toString(), sak.id, any(), any(), any(), any(), any(), any()) } returns
             mockk { every { id } returns oppgaveId }
@@ -84,7 +84,7 @@ internal class BrevutsendelseServiceTest {
 
         verifyOrder {
             sakService.finnSak(any())
-            sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, any())
+            sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak)
             oppgaveService.opprettOppgave(any(), sak.id, any(), any(), any(), any(), any(), any())
         }
 

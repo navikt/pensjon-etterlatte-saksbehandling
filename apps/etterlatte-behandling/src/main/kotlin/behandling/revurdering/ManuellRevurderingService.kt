@@ -3,14 +3,15 @@ package no.nav.etterlatte.behandling.revurdering
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -107,7 +108,7 @@ class ManuellRevurderingService(
             revurderingService
                 .opprettRevurdering(
                     sakId = sakId,
-                    persongalleri = persongalleri,
+                    persongalleri = krevIkkeNull(persongalleri) { "Persongalleri mangler for sak=$sakId" },
                     forrigeBehandling = forrigeBehandling,
                     mottattDato = Tidspunkt.now().toLocalDatetimeUTC().toString(),
                     prosessType = Prosesstype.MANUELL,

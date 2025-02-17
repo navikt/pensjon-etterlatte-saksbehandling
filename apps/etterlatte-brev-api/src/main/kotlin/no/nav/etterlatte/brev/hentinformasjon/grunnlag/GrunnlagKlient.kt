@@ -26,8 +26,8 @@ class GrunnlagKlient(
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("grunnlag.client.id")
-    private val baseUrl = config.getString("grunnlag.resource.url")
+    private val clientId = config.getString("behandling.client.id")
+    private val baseUrl = config.getString("behandling.resource.url")
 
     internal suspend fun hentGrunnlagForSak(
         sakid: SakId,
@@ -41,7 +41,7 @@ class GrunnlagKlient(
                     Resource(clientId, "$baseUrl/api/grunnlag/sak/${sakid.sakId}"),
                     brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                    success = { deserialize(it.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: ResponseException) {
@@ -67,7 +67,7 @@ class GrunnlagKlient(
                     Resource(clientId, "$baseUrl/api/grunnlag/behandling/$behandlingId"),
                     brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                    success = { deserialize(it.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: ResponseException) {

@@ -23,10 +23,10 @@ import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -108,7 +108,7 @@ internal class VilkaarsvurderingServiceTest(
     private lateinit var repository: VilkaarsvurderingDao
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingStatus: BehandlingStatusService = mockk<BehandlingStatusServiceImpl>()
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingId: UUID = randomUUID()
 
     private val brukerTokenInfo = simpleSaksbehandler()
@@ -126,10 +126,7 @@ internal class VilkaarsvurderingServiceTest(
     @BeforeEach
     fun beforeEach() {
         coEvery {
-            grunnlagKlient.hentGrunnlagForBehandling(
-                any(),
-                any(),
-            )
+            grunnlagService.hentOpplysningsgrunnlag(any())
         } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(any()) } returns
@@ -148,7 +145,7 @@ internal class VilkaarsvurderingServiceTest(
             VilkaarsvurderingService(
                 VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
-                grunnlagKlient,
+                grunnlagService,
                 behandlingStatus,
             )
     }
@@ -250,7 +247,7 @@ internal class VilkaarsvurderingServiceTest(
                 opplysningsmapSakOverrides = mapOf(SOEKNAD_MOTTATT_DATO to soeknadMottattDatoOpplysning),
             ).hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
 
         val (vilkaarsvurdering) = vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, brukerTokenInfo)
 
@@ -414,7 +411,7 @@ internal class VilkaarsvurderingServiceTest(
     fun `kan opprette og kopiere vilkaarsvurdering fra forrige behandling`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyBehandlingId = randomUUID()
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
 
         runBlocking {
@@ -465,7 +462,7 @@ internal class VilkaarsvurderingServiceTest(
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val revurderingId = randomUUID()
 
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(revurderingId) } returns
             mockk {
@@ -526,7 +523,7 @@ internal class VilkaarsvurderingServiceTest(
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val revurderingId = randomUUID()
 
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(revurderingId) } returns
             mockk {
@@ -745,7 +742,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal sjekke gyldighet og oppdatere status hvis vilkaarsvurdering er oppfylt men status er OPPRETTET`() {
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag()
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(any()) } returns
             behandling(behandlingStatus = BehandlingStatus.OPPRETTET)
@@ -815,9 +812,9 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
+        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -866,9 +863,9 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
+        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -910,9 +907,11 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
-        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
-        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
+        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns
+            mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
+        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns
+            mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
+        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -920,7 +919,7 @@ internal class VilkaarsvurderingServiceTest(
                     SakidOgRolle(sakId2, Saksrolle.AVDOED),
                 ),
             )
-        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed2.value) } returns
+        coEvery { grunnlagService.hentSakerOgRoller(avdoed2) } returns
             PersonMedSakerOgRoller(
                 avdoed2.value,
                 listOf(
@@ -956,10 +955,11 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
-        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns
+            mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
+        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
 
-        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
+        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -968,7 +968,7 @@ internal class VilkaarsvurderingServiceTest(
                 ),
             )
 
-        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed2.value) } returns
+        coEvery { grunnlagService.hentSakerOgRoller(avdoed2) } returns
             PersonMedSakerOgRoller(
                 avdoed2.value,
                 listOf(
@@ -1046,7 +1046,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal feile ved sjekking av gyldighet dersom vilkaarsvurdering mangler totalvurdering`() {
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag()
         coEvery { behandlingService.hentBehandling(any()) } returns behandling()
 
         runBlocking {
@@ -1062,7 +1062,7 @@ internal class VilkaarsvurderingServiceTest(
     fun `skal feile ved sjekking av gyldighet dersom vilkaarsvurdering har virk som avviker fra behandling`() {
         val virkBehandling = YearMonth.of(2023, 1)
 
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag()
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(any()) } returns
             behandling(virk = virkBehandling) andThen // opprettelse

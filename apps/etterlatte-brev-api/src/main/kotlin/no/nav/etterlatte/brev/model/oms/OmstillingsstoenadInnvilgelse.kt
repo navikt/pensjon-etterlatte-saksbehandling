@@ -132,6 +132,7 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
     val utbetalingsbeloep: Kroner,
     val etterbetaling: Boolean,
     val tidligereFamiliepleier: Boolean,
+    val datoVedtakOmgjoering: LocalDate?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -139,6 +140,7 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
             tidligereFamiliepleier: Boolean,
+            klage: Klage?,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
@@ -150,6 +152,7 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                         ),
                 etterbetaling = etterbetaling != null,
                 tidligereFamiliepleier = tidligereFamiliepleier,
+                datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
             )
     }
 }

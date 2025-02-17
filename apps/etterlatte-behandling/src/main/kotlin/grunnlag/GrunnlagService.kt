@@ -71,6 +71,8 @@ interface GrunnlagService {
 
     suspend fun hentPersongalleri(sakId: SakId): Persongalleri?
 
+    suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri?
+
     suspend fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
     suspend fun hentPersonopplysninger(
@@ -151,6 +153,18 @@ class GrunnlagServiceImpl(
             logger.info("Fant ikke persongalleri i sak=$sakId")
             return null
         }
+        return objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
+    }
+
+    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri? {
+        val persongalleriJsonNode =
+            opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Fant ikke persongalleri i behandling=$behandlingId")
+            return null
+        }
+
         return objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
     }
 

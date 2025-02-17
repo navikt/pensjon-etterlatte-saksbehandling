@@ -15,14 +15,13 @@ import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BrukerServiceImpl
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -66,10 +65,10 @@ internal class EgenAnsattServiceTest(
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
     private lateinit var sakService: SakService
     private lateinit var oppgaveService: OppgaveService
-    private lateinit var grunnlagKlient: GrunnlagKlient
     private lateinit var egenAnsattService: EgenAnsattService
     private lateinit var oppdaterTilgangService: OppdaterTilgangService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
+    private val grunnlagService: GrunnlagService = mockk(relaxed = true)
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val persongalleri = persongalleri()
@@ -91,15 +90,13 @@ internal class EgenAnsattServiceTest(
                     )
             }
         val norg2Klient = mockk<Norg2Klient>()
-        val grunnlagservice =
-            mockk<GrunnlagService> {
-                coEvery { leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
-                coEvery { leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
-                coEvery { grunnlagFinnes(any(), any()) } returns false
-            }
+
+        coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
+        coEvery { grunnlagService.lagreNyeSaksopplysningerBareSak(any(), any()) } just runs
+        coEvery { grunnlagService.grunnlagFinnesForSak(any()) } returns false
+
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlientImpl>()
-        grunnlagKlient = mockk()
         oppdaterTilgangService = mockk()
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
         sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
@@ -115,7 +112,7 @@ internal class EgenAnsattServiceTest(
                     sakendringerDao,
                     skjermingKlient,
                     brukerService,
-                    grunnlagservice,
+                    grunnlagService,
                     krrKlient,
                     pdlTjenesterKlient,
                     featureToggleService,
@@ -125,7 +122,7 @@ internal class EgenAnsattServiceTest(
             spyk(
                 OppgaveService(oppgaveRepoMedSporing, sakLesDao, mockk(), hendelser),
             )
-        egenAnsattService = EgenAnsattService(sakService, grunnlagKlient, oppdaterTilgangService)
+        egenAnsattService = EgenAnsattService(sakService, grunnlagService, oppdaterTilgangService)
 
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
         val saksbehandlerMedRoller =
@@ -174,9 +171,10 @@ internal class EgenAnsattServiceTest(
             )
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
-        val bruktSak = sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
+        val bruktSak =
+            sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
-        coEvery { grunnlagKlient.hentPersongalleri(bruktSak.id) } returns persongalleri
+        coEvery { grunnlagService.hentPersongalleri(bruktSak.id) } returns persongalleri
         every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) } just Runs
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))

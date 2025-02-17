@@ -133,7 +133,7 @@ internal fun Route.generellbehandlingRoutes(
 
     get("/api/generellbehandling/kravpakkeForSak/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandler {
-            call.respond(generellBehandlingService.hentKravpakkeForSak(sakId, brukerTokenInfo))
+            call.respond(generellBehandlingService.hentKravpakkeForSak(sakId))
         }
     }
 }

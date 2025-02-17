@@ -11,13 +11,14 @@ import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -58,6 +59,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val sakService: SakService = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val grunnlagService: GrunnlagService = mockk()
+    private val aldersovergangService: AldersovergangService = mockk()
     private val revurderingService: RevurderingService = mockk()
     private val vedtakKlient: VedtakKlient = mockk()
     private val beregningKlient: BeregningKlient = mockk()
@@ -73,6 +75,7 @@ class AarligInntektsjusteringJobbServiceTest {
             behandlingService,
             revurderingService,
             grunnlagService,
+            aldersovergangService,
             vedtakKlient,
             beregningKlient,
             pdlTjenesterKlient,
@@ -106,7 +109,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 harInntektForAar = false,
                 harSanksjon = false,
             )
-        coEvery { grunnlagService.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(2050, 1)
+        coEvery { aldersovergangService.aldersovergangMaaned(any(), any()) } returns YearMonth.of(2050, 1)
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
@@ -127,7 +130,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 every { boddEllerArbeidetUtlandet } returns mockk()
                 every { opphoerFraOgMed } returns null
             }
-        coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
+        coEvery { grunnlagService.hentPersonopplysninger(any(), any()) } returns
             mockk {
                 every { soeker } returns
                     mockk {
@@ -135,7 +138,7 @@ class AarligInntektsjusteringJobbServiceTest {
                     }
             }
 
-        coEvery { grunnlagService.hentPersongalleri(any()) } returns persongalleri
+        coEvery { grunnlagService.hentPersongalleri(any<SakId>()) } returns persongalleri
         coEvery {
             revurderingService.opprettRevurdering(
                 any(),
@@ -524,7 +527,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 saker = listOf(SakId(123L)),
             )
 
-        coEvery { grunnlagService.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(2025, 3)
+        coEvery { aldersovergangService.aldersovergangMaaned(any(), any()) } returns YearMonth.of(2025, 3)
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
@@ -602,7 +605,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
             )
 
-        coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
+        coEvery { grunnlagService.hentPersonopplysninger(any(), any()) } returns
             mockk {
                 every { soeker } returns
                     mockk {

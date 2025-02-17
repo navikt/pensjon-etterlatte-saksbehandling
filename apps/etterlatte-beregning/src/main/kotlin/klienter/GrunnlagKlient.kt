@@ -1,13 +1,12 @@
 package no.nav.etterlatte.klienter
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -45,8 +44,8 @@ class GrunnlagKlientImpl(
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("grunnlag.client.id")
-    private val resourceUrl = config.getString("grunnlag.resource.url")
+    private val clientId = config.getString("behandling.client.id")
+    private val resourceUrl = config.getString("behandling.resource.url")
 
     override suspend fun hentGrunnlag(
         behandlingId: UUID,
@@ -64,7 +63,7 @@ class GrunnlagKlientImpl(
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { deserialize(it.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         }.let {
@@ -97,7 +96,7 @@ class GrunnlagKlientImpl(
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { deserialize(it.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         }.let {

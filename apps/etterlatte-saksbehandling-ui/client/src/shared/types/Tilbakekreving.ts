@@ -201,7 +201,7 @@ export const leggPaaOrginalIndex = (beloep: TilbakekrevingBeloep, index: number)
 export const tekstKlasseKode: Record<string, string> = {
   'BARNEPENSJON-OPTP': 'Barnepensjon',
   'BARNEPEFØR2024-OPTP': 'Barnepensjon før 2024',
-  OMSTILLINGSTOENAD_OPTP: 'Omstillingsstønad',
+  OMSTILLINGOR: 'Omstillingsstønad',
   KL_KODE_FEIL_PEN: 'Feilkonto barnepensjon',
   KL_KODE_FEIL_OMSTILL: 'Feilkonto omstillingsstønad',
 

@@ -452,9 +452,6 @@ class BrevService(
         sjekk(brev.behandlingId == null) {
             "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
         }
-        if (sjekkOmErAktivitetsipliktsvurderingsBrev(brev.brevkoder)) {
-            throw BrevKanIkkeEndres(brev, "brevkoden er feil, er ${brev.brevkoder}. Denne kan kun endres i aktivitetsplikts flyten")
-        }
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")

@@ -1,13 +1,17 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleLand } from '~shared/api/behandling'
 import { useEffect } from 'react'
-import { Heading, HStack, VStack } from '@navikt/ds-react'
+import { Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { RedigerFamilieforholdModal } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforholdModal'
+import { mapResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { TabellOverAvdoede } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoede'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -23,7 +27,7 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
   }, [])
 
   return (
-    <VStack paddingInline="16" paddingBlock="4" gap="4">
+    <VStack paddingInline="16" paddingBlock="4" gap="8">
       <HStack gap="4" justify="start" align="center" wrap={false}>
         <Heading size="medium" level="2">
           Familieforhold
@@ -45,6 +49,17 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
           <RedigerFamilieforholdModal behandling={behandling} personopplysninger={personopplysninger} />
         )}
       </HStack>
+      <Box paddingInline="4 0">
+        {mapResult(hentAlleLandResult, {
+          pending: <Spinner label="Henter alle land..." />,
+          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
+          success: (alleLand) => (
+            <>
+              <TabellOverAvdoede avdoede={personopplysninger?.avdoede} alleLand={alleLand} />
+            </>
+          ),
+        })}
+      </Box>
     </VStack>
   )
 }

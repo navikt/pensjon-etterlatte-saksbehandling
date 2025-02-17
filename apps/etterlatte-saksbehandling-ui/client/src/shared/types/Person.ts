@@ -122,6 +122,10 @@ export function formaterNavn(person: PersonNavn): string {
   return [person.fornavn, person.mellomnavn, person.etternavn].filter((navn) => !!navn).join(' ')
 }
 
+export const formaterAdresse = (adresse: IAdresse): string => {
+  return `${adresse.adresseLinje1 ?? '-'}, ${adresse.postnr ?? '-'}`
+}
+
 export interface Persongalleri {
   soeker?: string
   innsender?: string | null

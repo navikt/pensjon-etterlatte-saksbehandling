@@ -617,7 +617,7 @@ internal class ApplicationContext(
             grunnlagKlientImpl,
         )
     val brevService =
-        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
+        BrevService(vedtaksbehandlingService, brevKlient, brevApiKlient, vedtakKlient, tilbakekrevingBrevService)
 
     val tilbakekrevingService =
         TilbakekrevingService(

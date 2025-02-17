@@ -1,7 +1,9 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -16,7 +18,8 @@ import java.util.UUID
 
 class BrevService(
     val vedtaksbehandlingService: VedtaksbehandlingService,
-    val brevKlient: BrevKlient,
+    val nyBrevKlient: BrevKlient,
+    val brevKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
     val vedtakKlient: VedtakKlient,
     val tilbakekrevingBrevService: TilbakekrevingBrevService,
 ) {
@@ -37,8 +40,12 @@ class BrevService(
             }
         }
 
-        // TODO finn ut hva slags behandling
-        tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+        when (vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type) {
+            VedtaksbehandlingType.TILBAKEKREVING ->
+                tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+            else ->
+                brevKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
+        }
     }
 
     suspend fun genererPdf(
@@ -89,7 +96,7 @@ class BrevService(
             throw SaksbehandlerOgAttestantSammePerson(saksbehandlerIdent, brukerTokenInfo.ident())
         }
 
-        brevKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+        nyBrevKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
     }
 
     suspend fun tilbakestillVedtaksbrev(

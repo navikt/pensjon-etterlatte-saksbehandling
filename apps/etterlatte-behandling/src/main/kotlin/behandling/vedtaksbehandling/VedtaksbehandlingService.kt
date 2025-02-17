@@ -6,4 +6,6 @@ class VedtaksbehandlingService(
     private val vedtaksbehandlingDao: VedtaksbehandlingDao,
 ) {
     fun erBehandlingRedigerbar(behandlingId: UUID): Boolean = vedtaksbehandlingDao.erBehandlingRedigerbar(behandlingId)
+
+    fun hentVedtaksbehandling(bahandlingId: UUID): Vedtaksbehandling = vedtaksbehandlingDao.hentVedtaksbehandling(bahandlingId)
 }

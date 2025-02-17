@@ -33,11 +33,7 @@ export const opprettVedtaksbrev = async (args: {
   behandlingId: string
   tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<IBrev>> => {
-  if (args.tilbakekrevingBrev) {
-    // TODO midlertidig - skal hånderes backend på sikt
-    return apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
-  }
-  return apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+  return apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 }
 
 export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>

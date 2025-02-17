@@ -216,7 +216,6 @@ internal fun Route.aktivitetspliktRoutes(
                             runBlocking {
                                 aktivitetspliktService.hentAktivitetspliktDto(
                                     sakId,
-                                    brukerTokenInfo,
                                     behandlingId,
                                 )
                             }
@@ -252,7 +251,6 @@ internal fun Route.aktivitetspliktRoutes(
                         inTransaction {
                             aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
                                 request,
-                                brukerTokenInfo,
                             )
                         }
                     call.respond(opprettet)

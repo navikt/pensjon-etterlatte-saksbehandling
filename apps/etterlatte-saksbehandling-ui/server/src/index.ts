@@ -86,12 +86,11 @@ app.use(
     '/api/bosattutland',
     '/api/kodeverk',
     '/api/vilkaarsvurdering',
+    '/api/grunnlag',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)
 )
-
-app.use('/api/grunnlag', tokenMiddleware(ApiConfig.grunnlag.scope), proxy(ApiConfig.grunnlag.url))
 
 app.use('/api/pdltjenester', tokenMiddleware(ApiConfig.pdltjenester.scope), proxy(ApiConfig.pdltjenester.url))
 

@@ -20,9 +20,9 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -76,14 +76,10 @@ internal class VilkaarsvurderingIntegrationTest(
 ) : BehandlingIntegrationTest() {
     private lateinit var behandlingService: BehandlingService
     private lateinit var behandlingStatus: BehandlingStatusServiceImpl
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnService = mockk<GrunnlagService>()
     private val saksbehandlerService: SaksbehandlerService = mockk()
 
     private val grunnlagVersjon = 12L
-    private val grunnlagKlientMock =
-        mockk<GrunnlagKlient> {
-            coEvery { hentPersongalleri(any(), any()) } returns mockPersongalleri()
-        }
     private val saksbehandlerident = "Saksbehandler01"
     private val saksbehandler = mockSaksbehandler(saksbehandlerident)
     private val sbBrukertokenInfo = simpleSaksbehandler()
@@ -126,10 +122,9 @@ internal class VilkaarsvurderingIntegrationTest(
                 behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>(),
                 grunnlagsendringshendelseDao = applicationContext.grunnlagsendringshendelseDao,
                 hendelseDao = applicationContext.hendelseDao,
-                grunnlagKlient = grunnlagKlientMock,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = applicationContext.oppgaveService,
-                grunnlagService = applicationContext.grunnlagsService,
+                grunnlagService = applicationContext.grunnlagService,
                 beregningKlient = mockk(),
             )
         behandlingStatus =
@@ -148,12 +143,12 @@ internal class VilkaarsvurderingIntegrationTest(
             VilkaarsvurderingService(
                 VilkaarsvurderingDao(ConnectionAutoclosingImpl(ds), DelvilkaarDao()),
                 behandlingService,
-                grunnlagKlient,
+                grunnService,
                 behandlingStatus,
             )
 
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlagMock
+        coEvery { grunnService.hentOpplysningsgrunnlag(any()) } returns grunnlagMock
     }
 
     @AfterEach

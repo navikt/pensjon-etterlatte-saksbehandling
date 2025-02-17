@@ -51,7 +51,7 @@ class MigrertYrkesskadeTest(
             VilkaarsvurderingService(
                 dao,
                 behandlingService,
-                grunnlagKlient = mockk(),
+                grunnlagService = mockk(),
                 mockk(),
             )
         val behandlingId = UUID.randomUUID()

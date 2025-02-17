@@ -25,9 +25,9 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -89,7 +89,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingService = mockk<BehandlingService>()
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val grunnlagVersjon = 12L
     private val nyGrunnlagVersjon: Long = 4378
     private val behandlingStatus: BehandlingStatusService = mockk<BehandlingStatusServiceImpl>()
@@ -106,7 +106,7 @@ internal class VilkaarsvurderingRoutesTest(
             VilkaarsvurderingService(
                 VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
-                grunnlagKlient,
+                grunnlagService,
                 behandlingStatus,
             )
     }
@@ -118,7 +118,7 @@ internal class VilkaarsvurderingRoutesTest(
         every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
         every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlagMock
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagMock
     }
 
     @AfterEach
@@ -183,7 +183,7 @@ internal class VilkaarsvurderingRoutesTest(
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
-            coEvery { grunnlagKlient.hentGrunnlagForBehandling(behandlingId, any()) } returns
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(behandlingId) } returns
                 grunnlagMedVersjon(nyGrunnlagVersjon)
 
             val response =
@@ -719,7 +719,7 @@ internal class VilkaarsvurderingRoutesTest(
             VilkaarsvurderingService(
                 VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingServiceLocal,
-                grunnlagKlient,
+                grunnlagService,
                 behandlingStatusServiceLocal,
             )
 
@@ -751,7 +751,7 @@ internal class VilkaarsvurderingRoutesTest(
             VilkaarsvurderingService(
                 VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
-                grunnlagKlient,
+                grunnlagService,
                 behandlingStatusService,
             )
 
@@ -781,7 +781,7 @@ internal class VilkaarsvurderingRoutesTest(
             VilkaarsvurderingService(
                 VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
-                grunnlagKlient,
+                grunnlagService,
                 behandlingStatusService,
             )
 

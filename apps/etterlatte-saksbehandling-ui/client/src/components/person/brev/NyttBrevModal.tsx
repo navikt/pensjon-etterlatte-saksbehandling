@@ -166,9 +166,6 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                 <option value={FormType.KLAGE_SAKSBEHANDLINGSTID}>Klage saksbehandlingstid informasjon</option>
                 {sakType === SakType.OMSTILLINGSSTOENAD && (
                   <>
-                    <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
-                      Informasjon om aktivitetsplikt ved 6 måneder
-                    </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND}>
                       Informasjon ved 6 måneder - varig unntak for aktivitetsplikt
                     </option>

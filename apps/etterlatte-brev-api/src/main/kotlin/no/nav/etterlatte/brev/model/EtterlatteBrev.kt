@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -152,10 +153,10 @@ fun TrygdetidDto.fromDto(
     navnAvdoed = navnAvdoed,
     trygdetidsperioder =
         when (beregningsMetodeAnvendt) {
-            BeregningsMetode.NASJONAL -> trygdetidGrunnlag.filter { it.bosted == "NOR" }
+            BeregningsMetode.NASJONAL -> trygdetidGrunnlag.filter { it.bosted == LandNormalisert.NORGE.isoCode }
             BeregningsMetode.PRORATA -> {
                 // Kun ta med de som er avtaleland (Norge er alltid avtaleland)
-                trygdetidGrunnlag.filter { it.prorata || it.bosted == "NOR" }
+                trygdetidGrunnlag.filter { it.prorata || it.bosted == LandNormalisert.NORGE.isoCode }
             }
 
             else -> throw IllegalArgumentException("$beregningsMetodeAnvendt er ikke en gyldig beregningsmetode")

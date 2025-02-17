@@ -257,6 +257,11 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
+        get("oppgaver-sak") {
+            logger.info("Henter oppfølgingsoppgaver for $sakId")
+            val oppfoelgingsoppgaver = inTransaction { aktivitetspliktOppgaveService.hentOppfoelgingsoppgaver(sakId) }
+            call.respond(oppfoelgingsoppgaver)
+        }
 
         route("oppgave-oppfoelging") {
             post {
@@ -286,30 +291,48 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 
-    route("/api/aktivitetsplikt/oppgave/{${OPPGAVEID_CALL_PARAMETER}}") {
-        get {
-            val oppgaveOgVurdering = inTransaction { aktivitetspliktOppgaveService.hentVurderingForOppgave(oppgaveId) }
-            call.respond(oppgaveOgVurdering)
+    route("/api/aktivitetsplikt/oppgave") {
+        post("/opprett") {
+            val request = call.receive<OpprettOppfoelgingsoppgave>()
+            aktivitetspliktOppgaveService.opprettOppfoelgingsoppgave(request)
         }
-        post("brevdata") {
-            val brevdata = call.receive<AktivitetspliktInformasjonBrevdataRequest>()
-            val oppdaterBrevdata = inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata) }
-            call.respond(oppdaterBrevdata)
-        }
-        post("opprettbrev") {
-            val brevId =
-                inTransaction {
-                    aktivitetspliktOppgaveService.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId = oppgaveId, brukerTokenInfo)
-                }
-            call.respond(BrevIdDto(brevId))
-        }
-        post("ferdigstillbrev-og-oppgave") {
-            val oppgave = inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
-            call.respond(oppgave)
-        }
-        post("ferdigstill-oppgave") {
-            val oppgave = inTransaction { aktivitetspliktOppgaveService.ferdigstillOppgaveUtenBrev(oppgaveId, brukerTokenInfo) }
-            call.respond(oppgave)
+        route("/{${OPPGAVEID_CALL_PARAMETER}}") {
+            get {
+                val oppgaveOgVurdering =
+                    inTransaction { aktivitetspliktOppgaveService.hentVurderingForOppgave(oppgaveId) }
+                call.respond(oppgaveOgVurdering)
+            }
+            post("/brevdata") {
+                val brevdata = call.receive<AktivitetspliktInformasjonBrevdataRequest>()
+                val oppdaterBrevdata =
+                    inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata) }
+                call.respond(oppdaterBrevdata)
+            }
+            post("/opprettbrev") {
+                val brevId =
+                    inTransaction {
+                        aktivitetspliktOppgaveService.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
+                            oppgaveId = oppgaveId,
+                            brukerTokenInfo,
+                        )
+                    }
+                call.respond(BrevIdDto(brevId))
+            }
+            post("/ferdigstillbrev-og-oppgave") {
+                val oppgave =
+                    inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
+                call.respond(oppgave)
+            }
+            post("/ferdigstill-oppgave") {
+                val oppgave =
+                    inTransaction {
+                        aktivitetspliktOppgaveService.ferdigstillOppgaveUtenBrev(
+                            oppgaveId,
+                            brukerTokenInfo,
+                        )
+                    }
+                call.respond(oppgave)
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
+import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -9,6 +10,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -18,6 +20,8 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -28,6 +32,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveKanIkkeEndres
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -36,16 +41,22 @@ import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.util.UUID
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AktivitetspliktOppgaveServiceTest {
     private val aktivitetspliktService: AktivitetspliktService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val sakService: SakService = mockk()
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao = mockk()
     private val brevApiKlient: BrevApiKlient = mockk()
+    private val behandlingService: BehandlingService = mockk()
     private val service =
         AktivitetspliktOppgaveService(
             aktivitetspliktService = aktivitetspliktService,
@@ -53,12 +64,12 @@ class AktivitetspliktOppgaveServiceTest {
             sakService = sakService,
             aktivitetspliktBrevDao,
             brevApiKlient,
-            mockk(relaxed = true),
+            behandlingService = behandlingService,
         )
 
     private val sak =
         Sak(
-            "en ident",
+            SOEKER_FOEDSELSNUMMER.value,
             sakType = SakType.OMSTILLINGSSTOENAD,
             id = randomSakId(),
             enhet = Enheter.defaultEnhet.enhetNr,
@@ -72,6 +83,217 @@ class AktivitetspliktOppgaveServiceTest {
     @BeforeEach
     fun beforeEach() {
         every { sakService.finnSak(sak.id) } returns sak
+    }
+
+    @Test
+    fun `Kan ikke opprette oppfølgingsoppgave hvis det finnes varig unntak på saken`() {
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns true
+        assertThrows<HarVarigUnntak> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
+        }
+
+        verify(exactly = 1) {
+            aktivitetspliktService.harVarigUnntak(sak.id)
+        }
+    }
+
+    @Test
+    fun `Kan ikke opprette oppfølgingsoppgave hvis samme oppgavetype allerede finnes under behandling`() {
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
+            listOf(
+                mockk {
+                    every { erUnderBehandling() } returns true
+                    every { status } returns Status.UNDER_BEHANDLING
+                    every { type } returns OppgaveType.AKTIVITETSPLIKT
+                },
+            )
+
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
+        assertThrows<HarOppfoelgingsOppgaveUnderbehandling> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
+        }
+
+        verify(exactly = 1) {
+            aktivitetspliktService.harVarigUnntak(sak.id)
+            oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT)
+        }
+    }
+
+    @Test
+    fun `Kan ikke opprette oppfølgingsoppgave hvis det ikke finnes en iverksatt behandling`() {
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
+            listOf(
+                mockk {
+                    every { erUnderBehandling() } returns false
+                    every { status } returns Status.FERDIGSTILT
+                    every { type } returns OppgaveType.AKTIVITETSPLIKT
+                },
+            )
+        every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
+        every { behandlingService.hentSisteIverksatte(sak.id) } returns null
+
+        assertThrows<ManglerIverksattBehandling> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
+        }
+
+        verify(exactly = 1) {
+            aktivitetspliktService.harVarigUnntak(sak.id)
+            oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT)
+            behandlingService.hentSisteIverksatte(sak.id)
+        }
+    }
+
+    private fun statuserSomErUgyldigePaa12mndFor6MndOppgaveOpprettelse(): List<Status> = Status.entries.filter { it != Status.AVBRUTT }
+
+    @ParameterizedTest
+    @MethodSource("statuserSomErUgyldigePaa12mndFor6MndOppgaveOpprettelse")
+    fun `Kan ikke opprette 6mnd vurdering hvis 12 mnd er ferdigstilt`(genStatus: Status) {
+        val vurderingType: VurderingType = VurderingType.SEKS_MAANEDER
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every {
+            oppgaveService.hentOppgaverForSak(
+                sak.id,
+                OppgaveType.AKTIVITETSPLIKT_12MND,
+            )
+        } returns
+            listOf(
+                mockk {
+                    every { status } returns genStatus
+                },
+            )
+
+        val sisteIverksatteBehandlingId = UUID.randomUUID()
+        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+            mockk {
+                every { id } returns sisteIverksatteBehandlingId
+            }
+        assertThrows<Har12MndVurderingFerdigstilt> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(vurderingType, sak.id))
+        }
+    }
+
+    @Test
+    fun `Kan ikke opprette 12mnd vurdering hvis 6 mnd ferdigstilt mangler`() {
+        val vurderingType: VurderingType = VurderingType.TOLV_MAANEDER
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every {
+            oppgaveService.hentOppgaverForSak(
+                sak.id,
+                OppgaveType.AKTIVITETSPLIKT,
+            )
+        } returns
+            listOf(
+                mockk {
+                    every { erUnderBehandling() } returns false
+                    every { erFerdigstilt() } returns false
+                },
+            )
+
+        val sisteIverksatteBehandlingId = UUID.randomUUID()
+        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+            mockk {
+                every { id } returns sisteIverksatteBehandlingId
+            }
+        assertThrows<MaaHa6mndVurderingForAaOpprette12mnd> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(vurderingType, sak.id))
+        }
+    }
+
+    @Test
+    fun `Kan ikke opprette 12mnd vurdering hvis 6 mnd er under behandling`() {
+        val vurderingType: VurderingType = VurderingType.TOLV_MAANEDER
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every {
+            oppgaveService.hentOppgaverForSak(
+                sak.id,
+                OppgaveType.AKTIVITETSPLIKT,
+            )
+        } returns
+            listOf(
+                mockk {
+                    every { erFerdigstilt() } returns false
+                    every { erUnderBehandling() } returns true
+                },
+            )
+
+        val sisteIverksatteBehandlingId = UUID.randomUUID()
+        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+            mockk {
+                every { id } returns sisteIverksatteBehandlingId
+            }
+        assertThrows<KanIkkeopprette12mndOppaveOm6MndErUnderbehandling> {
+            service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(vurderingType, sak.id))
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(VurderingType::class)
+    fun `Kan opprette oppfølgingsoppgave`(vurderingType: VurderingType) {
+        val oppgaveType =
+            when (vurderingType) {
+                VurderingType.SEKS_MAANEDER -> OppgaveType.AKTIVITETSPLIKT
+                VurderingType.TOLV_MAANEDER -> OppgaveType.AKTIVITETSPLIKT_12MND
+            }
+        every { aktivitetspliktService.harVarigUnntak(sak.id) } returns false
+        every { oppgaveService.hentOppgaverForSak(sak.id, oppgaveType) } returns
+            listOf(
+                mockk {
+                    every { erUnderBehandling() } returns false
+                    every { status } returns Status.FERDIGSTILT
+                    every { type } returns oppgaveType
+                },
+            )
+
+        val sisteIverksatteBehandlingId = UUID.randomUUID()
+        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+            mockk {
+                every { id } returns sisteIverksatteBehandlingId
+            }
+        if (oppgaveType == OppgaveType.AKTIVITETSPLIKT_12MND) {
+            every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erFerdigstilt() } returns true
+                        every { erUnderBehandling() } returns false
+                    },
+                )
+        } else {
+            every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
+        }
+
+        val oppgaveId = UUID.randomUUID()
+        every {
+            oppgaveService.opprettOppgave(
+                sakId = sak.id,
+                referanse = sisteIverksatteBehandlingId.toString(),
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = oppgaveType,
+                merknad = any(),
+                frist = any(),
+            )
+        } returns
+            mockk {
+                every { id } returns oppgaveId
+            }
+
+        val hentetOppgaveId = service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(vurderingType, sak.id))
+        hentetOppgaveId shouldBe oppgaveId
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                sakId = sak.id,
+                referanse = sisteIverksatteBehandlingId.toString(),
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = oppgaveType,
+                merknad = any(),
+                frist = any(),
+            )
+            aktivitetspliktService.harVarigUnntak(sak.id)
+            oppgaveService.hentOppgaverForSak(sak.id, oppgaveType)
+            behandlingService.hentSisteIverksatte(sak.id)
+        }
     }
 
     @Test
@@ -370,6 +592,12 @@ class AktivitetspliktOppgaveServiceTest {
                 every { id } returns brevId
             }
         every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, brevId) } just Runs
+        every { behandlingService.hentUtlandstilknytningForSak(sakIdForOppgave) } returns
+            Utlandstilknytning(
+                type = UtlandstilknytningType.NASJONAL,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                begrunnelse = "Beskrivelse",
+            )
 
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }

@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -110,6 +111,215 @@ class AktivitetspliktServiceTest {
             val result = service.hentAktiviteter(behandlingId)
 
             result shouldBe listOf(aktivitet)
+        }
+    }
+
+    @Nested
+    inner class OppfoelgingsOppgaver {
+        @Test
+        fun `Godtar kun riktige jobbtyper`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+            assertThrows<UgyldigForespoerselException> {
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_12MND),
+                )
+            }
+        }
+
+        @Test
+        fun `6mnds oppgave kan ikke opprettes hvis 12 mnd oppgave finnes`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    mockk {
+                        every { status } returns Status.NY
+                    },
+                )
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_4MND),
+                )
+            res.opprettetOppgave shouldBe false
+        }
+
+        @Test
+        fun `6mnds oppgave kan ikke opprettes hvis 6 mnd finnes allerede under behandling`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns true
+                    },
+                )
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_4MND),
+                )
+            res.opprettetOppgave shouldBe false
+        }
+
+        @Test
+        fun `6mnds oppgave kan ikke opprettes hvis 6 mnd finnes allerede ferdigstilt`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns false
+                        every { erFerdigstilt() } returns true
+                    },
+                )
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_4MND),
+                )
+            res.opprettetOppgave shouldBe false
+        }
+
+        @Test
+        fun `6mnds oppgave kan opprettes`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns false
+                        every { erFerdigstilt() } returns false
+                    },
+                )
+            every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns
+                mockk {
+                    every { referanse } returns "ref"
+                    every { id } returns UUID.randomUUID()
+                }
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_4MND),
+                )
+            res.opprettetOppgave shouldBe true
+        }
+
+        @Test
+        fun `12mnds oppgave kan ikke opprettes hvis 6 mnd er under behandling`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns true
+                        every { status } returns Status.UNDER_BEHANDLING
+                    },
+                )
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_10MND),
+                )
+            res.opprettetOppgave shouldBe false
+        }
+
+        @Test
+        fun `12mnds oppgave kan ikke opprettes hvis 6 mnd oppgave mangler`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns emptyList()
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_10MND),
+                )
+            res.opprettetOppgave shouldBe false
+        }
+
+        @Test
+        fun `12mnds oppgave kan ikke opprettes hvis hvis en tilsvarende oppgave finnes under behandling`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns false
+                        every { erFerdigstilt() } returns true
+                    },
+                )
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns true
+                    },
+                )
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_10MND),
+                )
+            res.opprettetOppgave shouldBe false
+        }
+
+        @Test
+        fun `12mnds oppgave kan ikke opprettes hvis hvis en tilsvarende oppgave finnes ferdigstilt`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns false
+                        every { erFerdigstilt() } returns true
+                    },
+                )
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns false
+                        every { erFerdigstilt() } returns true
+                    },
+                )
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_10MND),
+                )
+            res.opprettetOppgave shouldBe false
+        }
+
+        @Test
+        fun `12mnds oppgave kan opprettes`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId2) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId2) } returns emptyList()
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns false
+                        every { erFerdigstilt() } returns true
+                    },
+                )
+
+            every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    mockk {
+                        every { erUnderBehandling() } returns false
+                        every { erFerdigstilt() } returns false
+                    },
+                )
+            every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns
+                mockk {
+                    every { referanse } returns "ref"
+                    every { id } returns UUID.randomUUID()
+                }
+            val res =
+                service.opprettOppgaveHvisIkkeVarigUnntak(
+                    OpprettOppgaveForAktivitetspliktDto(sakId2, null, Tidspunkt.now(), JobbType.OMS_DOED_10MND),
+                )
+            res.opprettetOppgave shouldBe true
         }
     }
 

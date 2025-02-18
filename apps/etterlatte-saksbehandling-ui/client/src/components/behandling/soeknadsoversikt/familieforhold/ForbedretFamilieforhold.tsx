@@ -13,6 +13,8 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TabellOverAvdoede } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoede'
 import { TabellOverGjenlevende } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverGjenlevende'
+import { SakType } from '~shared/types/sak'
+import { TabellOverAvdoedesBarn } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoedesBarn'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -57,10 +59,20 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
           success: (alleLand) => (
             <VStack gap="8">
               <TabellOverAvdoede avdoede={personopplysninger?.avdoede} alleLand={alleLand} />
-              <TabellOverGjenlevende
-                gjenlevende={!!personopplysninger?.soeker ? [personopplysninger?.soeker] : []}
-                alleLand={alleLand}
-              />
+              {behandling.sakType === SakType.OMSTILLINGSSTOENAD ? (
+                <>
+                  <TabellOverGjenlevende
+                    gjenlevende={!!personopplysninger?.soeker ? [personopplysninger?.soeker] : []}
+                    alleLand={alleLand}
+                  />
+                  <TabellOverAvdoedesBarn
+                    avdoedesBarn={personopplysninger?.avdoede.flatMap((it) => it.opplysning.avdoedesBarn ?? [])}
+                    soeker={personopplysninger?.soeker}
+                  />
+                </>
+              ) : (
+                <TabellOverGjenlevende gjenlevende={personopplysninger?.gjenlevende} alleLand={alleLand} />
+              )}
             </VStack>
           ),
         })}

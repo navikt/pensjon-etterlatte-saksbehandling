@@ -8,7 +8,7 @@ import { ListeOverInnflyttingTilNorge } from '~components/behandling/soeknadsove
 import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverUtflyttingFraNorge'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
 import React from 'react'
-import { AktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
+import { PersonopplysningAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
 
 interface Props {
   gjenlevende: Personopplysning[] | undefined
@@ -45,7 +45,7 @@ export const TabellOverGjenlevende = ({ gjenlevende, alleLand }: Props) => {
                   <KopierbarVerdi value={levende.opplysning.foedselsnummer} iconPosition="right" />
                 </Table.DataCell>
                 <Table.DataCell>
-                  <AktivEllerSisteAdresse person={levende} />
+                  <PersonopplysningAktivEllerSisteAdresse person={levende} />
                 </Table.DataCell>
                 <Table.DataCell>
                   <ListeOverInnflyttingTilNorge

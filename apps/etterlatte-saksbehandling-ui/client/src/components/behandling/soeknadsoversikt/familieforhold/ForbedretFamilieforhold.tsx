@@ -16,6 +16,7 @@ import { TabellOverGjenlevende } from '~components/behandling/soeknadsoversikt/f
 import { SakType } from '~shared/types/sak'
 import { TabellOverAvdoedesBarn } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoedesBarn'
 import { hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag } from '~shared/types/Person'
+import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/AnnenForelderSkjema'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -75,6 +76,9 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
               ) : (
                 <>
                   <TabellOverGjenlevende gjenlevende={personopplysninger?.gjenlevende} alleLand={alleLand} />
+                  {personopplysninger?.avdoede.length === 1 && personopplysninger.gjenlevende.length === 0 && (
+                    <AnnenForelderSkjema behandlingId={behandling.id} personopplysninger={personopplysninger} />
+                  )}
                   <TabellOverAvdoedesBarn
                     avdoedesBarn={hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag(
                       personopplysninger?.avdoede ?? [],

@@ -60,3 +60,7 @@ tasks {
         }
     }
 }
+
+tasks.test {
+    environment(mapOf("TEST_RUNNER" to "true"))
+}

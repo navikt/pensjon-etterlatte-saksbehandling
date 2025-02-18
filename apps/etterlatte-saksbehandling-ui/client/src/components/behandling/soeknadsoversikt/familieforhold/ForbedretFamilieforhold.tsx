@@ -15,6 +15,7 @@ import { TabellOverAvdoede } from '~components/behandling/soeknadsoversikt/famil
 import { TabellOverGjenlevende } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverGjenlevende'
 import { SakType } from '~shared/types/sak'
 import { TabellOverAvdoedesBarn } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoedesBarn'
+import { hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag } from '~shared/types/Person'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -68,10 +69,21 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
                   <TabellOverAvdoedesBarn
                     avdoedesBarn={personopplysninger?.avdoede.flatMap((it) => it.opplysning.avdoedesBarn ?? [])}
                     soeker={personopplysninger?.soeker}
+                    sakType={behandling.sakType}
                   />
                 </>
               ) : (
-                <TabellOverGjenlevende gjenlevende={personopplysninger?.gjenlevende} alleLand={alleLand} />
+                <>
+                  <TabellOverGjenlevende gjenlevende={personopplysninger?.gjenlevende} alleLand={alleLand} />
+                  <TabellOverAvdoedesBarn
+                    avdoedesBarn={hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag(
+                      personopplysninger?.avdoede ?? [],
+                      personopplysninger?.soeker?.opplysning.foedselsnummer ?? ''
+                    )}
+                    soeker={personopplysninger?.soeker}
+                    sakType={behandling.sakType}
+                  />
+                </>
               )}
             </VStack>
           ),

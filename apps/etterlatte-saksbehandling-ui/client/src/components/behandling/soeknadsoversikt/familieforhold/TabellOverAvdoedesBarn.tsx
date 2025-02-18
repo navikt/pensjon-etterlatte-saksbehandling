@@ -1,5 +1,5 @@
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
-import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { ChildHairEyesIcon } from '@navikt/aksel-icons'
 import React from 'react'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
@@ -7,13 +7,16 @@ import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { PdlPersonAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
 import { BarnAddressePeriode } from '~components/behandling/soeknadsoversikt/familieforhold/BarnAddressePeriode'
 import { Personopplysning } from '~shared/types/grunnlag'
+import { SakType } from '~shared/types/sak'
+import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 
 interface Props {
   avdoedesBarn: IPdlPerson[] | undefined
   soeker: Personopplysning | undefined
+  sakType: SakType
 }
 
-export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker }: Props) => {
+export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props) => {
   const erGjenlevendesBarn = (barn: IPdlPerson) =>
     soeker?.opplysning.familieRelasjon?.barn?.includes(barn.foedselsnummer) ?? false
 
@@ -22,7 +25,7 @@ export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker }: Props) => {
       <HStack gap="4" justify="start" align="center" wrap={false}>
         <ChildHairEyesIcon fontSize="1.75rem" aria-hidden />
         <Heading size="small" level="3">
-          Avdødes barn
+          {sakType === SakType.OMSTILLINGSSTOENAD ? 'Avdødes barn' : 'Avdødes barn (søsken)'}
         </Heading>
       </HStack>
       <Table size="small">
@@ -39,7 +42,12 @@ export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker }: Props) => {
           {!!avdoedesBarn?.length ? (
             avdoedesBarn.map((barn, index) => (
               <Table.Row key={index}>
-                <Table.DataCell>{`${formaterNavn(barn)} (${hentAlderForDato(barn.foedselsdato)} år)`}</Table.DataCell>
+                <Table.DataCell>
+                  <HStack gap="2" justify="start" align="center" wrap={false}>
+                    <BodyShort>{`${formaterNavn(barn)} (${hentAlderForDato(barn.foedselsdato)} år)`}</BodyShort>
+                    <DoedsdatoTag doedsdato={barn.doedsdato} />
+                  </HStack>
+                </Table.DataCell>
                 <Table.DataCell>
                   <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
                 </Table.DataCell>

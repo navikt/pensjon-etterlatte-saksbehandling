@@ -14,7 +14,7 @@ export const ListeOverUtflyttingFraNorge = ({ utflyttingFraNorge, alleLand }: Pr
       <ul>
         {utflyttingFraNorge.map((flytting, index) => (
           <li key={index}>
-            {`${finnLandSomTekst(flytting.tilflyttingsland ?? '-', alleLand)} den ${formaterDatoMedFallback(flytting.dato)}`}
+            {finnLandSomTekst(flytting.tilflyttingsland ?? '-', alleLand)} den {formaterDatoMedFallback(flytting.dato)}
           </li>
         ))}
       </ul>

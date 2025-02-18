@@ -30,7 +30,7 @@ export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
             <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
             <Table.HeaderCell scope="col">Bostedsadresse ved dødsdato</Table.HeaderCell>
             <Table.HeaderCell scope="col">Innflyttning</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Utflytning</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Utflyttning</Table.HeaderCell>
             <Table.HeaderCell scope="col">Statsborgerskap</Table.HeaderCell>
           </Table.Row>
         </Table.Header>

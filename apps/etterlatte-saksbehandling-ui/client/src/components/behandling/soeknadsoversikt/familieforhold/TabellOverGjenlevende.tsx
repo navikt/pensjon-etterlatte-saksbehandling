@@ -31,7 +31,7 @@ export const TabellOverGjenlevende = ({ gjenlevende, alleLand }: Props) => {
             <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
             <Table.HeaderCell scope="col">Bostedsadresse</Table.HeaderCell>
             <Table.HeaderCell scope="col">Innflyttning</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Utflytning</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Utflyttning</Table.HeaderCell>
             <Table.HeaderCell scope="col">Statsborgerskap</Table.HeaderCell>
             <Table.HeaderCell scope="col">Sivilstand</Table.HeaderCell>
           </Table.Row>

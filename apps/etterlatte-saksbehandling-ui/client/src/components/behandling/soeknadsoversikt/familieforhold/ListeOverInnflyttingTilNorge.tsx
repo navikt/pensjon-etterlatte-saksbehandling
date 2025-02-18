@@ -10,13 +10,12 @@ interface Props {
 }
 
 export const ListeOverInnflyttingTilNorge = ({ innflyttingTilNorge, alleLand }: Props) => {
-  console.log(innflyttingTilNorge)
   return !!innflyttingTilNorge ? (
     <Box width="fit-content" paddingInline="6 0">
       <ul>
         {innflyttingTilNorge.map((flytting, index) => (
           <li key={index}>
-            {`${finnLandSomTekst(flytting.fraflyttingsland ?? '-', alleLand)} den ${formaterDatoMedFallback(flytting.dato)}`}
+            {finnLandSomTekst(flytting.fraflyttingsland ?? '-', alleLand)} den {formaterDatoMedFallback(flytting.dato)}
           </li>
         ))}
       </ul>

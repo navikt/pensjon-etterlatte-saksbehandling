@@ -102,7 +102,7 @@ object OppdragMapper {
                             typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
 
                             // Vi vil teste om håndteringen for etteroppgjør som oppdrag gjør for uføretrygd i dag også fungerer for OMS
-                            if (isDev() && it.sakId.value == SakId(1004643).sakId && it.periode.fra.year == 2024) {
+                            if (isDev() && it.sakId.value == SakId(1004645).sakId && it.periode.fra.year == 2024) {
                                 typeSoknad = "EO"
                             }
 

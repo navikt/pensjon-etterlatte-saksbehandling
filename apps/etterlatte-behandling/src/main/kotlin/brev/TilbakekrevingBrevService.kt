@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBeloeperDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
@@ -55,7 +56,7 @@ class TilbakekrevingBrevService(
         behandlingId: UUID,
         sakId: SakId,
         bruker: BrukerTokenInfo,
-    ) {
+    ): Brev {
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(bruker, behandlingId, sakId)

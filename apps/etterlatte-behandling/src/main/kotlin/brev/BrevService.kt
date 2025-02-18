@@ -40,7 +40,11 @@ class BrevService(
             }
         }
 
-        when (vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type) {
+        val vedtaksbehandlingType =
+            inTransaction {
+                vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+            }
+        when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
             else ->
@@ -73,7 +77,11 @@ class BrevService(
                 true
             }
 
-        return when (vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type) {
+        val vedtaksbehandlingType =
+            inTransaction {
+                vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+            }
+        return when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
             else ->
@@ -119,7 +127,8 @@ class BrevService(
             }
         }
 
-        return when (vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type) {
+        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+        return when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
             else ->

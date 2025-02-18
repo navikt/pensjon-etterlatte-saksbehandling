@@ -7,5 +7,5 @@ class VedtaksbehandlingService(
 ) {
     fun erBehandlingRedigerbar(behandlingId: UUID): Boolean = vedtaksbehandlingDao.erBehandlingRedigerbar(behandlingId)
 
-    fun hentVedtaksbehandling(bahandlingId: UUID): Vedtaksbehandling = vedtaksbehandlingDao.hentVedtaksbehandling(bahandlingId)
+    fun hentVedtaksbehandling(behandlingId: UUID): Vedtaksbehandling = vedtaksbehandlingDao.hentVedtaksbehandling(behandlingId)
 }

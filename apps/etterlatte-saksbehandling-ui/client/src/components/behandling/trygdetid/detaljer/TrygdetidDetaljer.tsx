@@ -42,6 +42,7 @@ export const formaterBeregnetTrygdetid = (periode?: string) => {
   if (!periode) {
     return ''
   }
+  // ZERO-perioder representeres som P0D, så har spesialhåndtering for det tilfellet
   if (periode === 'P0D') {
     return `0 år 0 måneder`
   }

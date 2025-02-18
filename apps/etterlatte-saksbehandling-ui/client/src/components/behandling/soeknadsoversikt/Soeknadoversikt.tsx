@@ -51,7 +51,7 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
         <SoeknadInformasjon behandling={behandling} />
       </Box>
 
-      <Box paddingBlock="4 0" borderWidth="0 0 1 0" borderColor="border-subtle">
+      <Box paddingBlock="4" borderWidth="0 0 1 0" borderColor="border-subtle">
         <ForbedretFamilieforhold
           behandling={behandling}
           personopplysninger={personopplysninger}

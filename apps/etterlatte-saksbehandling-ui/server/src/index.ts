@@ -71,6 +71,7 @@ app.use(
   [
     '/api/aktivitetsplikt',
     '/api/behandling',
+    '/api/etteroppgjoer',
     '/api/personer',
     '/api/revurdering/:sakid',
     '/api/stoettederevurderinger',

@@ -20,6 +20,8 @@ import no.nav.etterlatte.regulering.ReguleringsforespoerselRiver
 import no.nav.etterlatte.regulering.VedtakAttestertRiver
 import no.nav.etterlatte.regulering.YtelseIkkeLoependeRiver
 import no.nav.etterlatte.tidshendelser.TidshendelseRiver
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRiver
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingTidshendelseRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
@@ -56,9 +58,8 @@ private fun settOppRivers(
 
     StartUthentingFraSoeknadRiver(rapidsConnection, Opplysningsuthenter())
 
-    // TODO tilgjengeliggjør disse riverene når etterlatte-vilkaarsvurdering-kafka er skrudd av
-    // VilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
-    // TidshendelseVilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
+    VilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
+    VilkaarsvurderingTidshendelseRiver(rapidsConnection, vilkaarsvurderingService)
 
     NySoeknadRiver(
         rapidsConnection = rapidsConnection,

@@ -6,10 +6,11 @@ import {
   oppdaterOpplysningsgrunnlag,
 } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { Alert, BodyShort, Box, Button, CopyButton, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { isPending } from '~shared/api/apiUtils'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
 export const Grunnlagopplysninger = ({
   trygdetid,
@@ -41,9 +42,9 @@ const OpplysningerTabell = ({ opplysninger, fnr }: { opplysninger: IGrunnlagOppl
     <Opplysningsgrunnlag label="66 år" opplysningsgrunnlag={opplysninger.avdoedFyllerSeksti} />
     <VStack>
       <Label size="small">Folkeregisteridentifikator</Label>
-      <HStack>
-        <CopyButton size="xsmall" copyText={fnr} /> {fnr}
-      </HStack>
+      <Box>
+        <KopierbarVerdi value={fnr} />
+      </Box>
     </VStack>
   </HStack>
 )

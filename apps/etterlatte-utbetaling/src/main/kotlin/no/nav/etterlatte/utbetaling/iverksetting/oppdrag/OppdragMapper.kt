@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
@@ -98,6 +99,13 @@ object OppdragMapper {
                             sats = it.beloep
                             fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG
                             typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
+
+                            // For å teste ifm etteroppgjøret
+                            // TODO: bytte ut sakid med riktig
+                            if (it.sakId.value == SakId(123).sakId && it.periode.fra.year == 2024) {
+                                typeSoknad = "EO"
+                            }
+
                             brukKjoreplan = it.kjoereplan.toString()
                             saksbehId = utbetaling.saksbehandler.value
                             utbetalesTilId = utbetaling.stoenadsmottaker.value

@@ -57,7 +57,10 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
           success: (alleLand) => (
             <VStack gap="8">
               <TabellOverAvdoede avdoede={personopplysninger?.avdoede} alleLand={alleLand} />
-              <TabellOverGjenlevende gjenlevende={personopplysninger?.soeker} alleLand={alleLand} />
+              <TabellOverGjenlevende
+                gjenlevende={!!personopplysninger?.soeker ? [personopplysninger?.soeker] : []}
+                alleLand={alleLand}
+              />
             </VStack>
           ),
         })}

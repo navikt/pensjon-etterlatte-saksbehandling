@@ -5,7 +5,7 @@ import { formaterAdresse } from '~shared/types/Person'
 import { IAdresse } from '~shared/types/IAdresse'
 
 export const AdresseVedDoedsfall = ({ avdoed }: { avdoed: Personopplysning }) => {
-  const AdresseVedDoedsfall = (): IAdresse | undefined => {
+  const adresseVedDoedsfall = (): IAdresse | undefined => {
     if (!!avdoed.opplysning.doedsdato) {
       return avdoed.opplysning.bostedsadresse?.find(
         (adresse) =>
@@ -17,7 +17,7 @@ export const AdresseVedDoedsfall = ({ avdoed }: { avdoed: Personopplysning }) =>
     }
   }
 
-  const bostedadresseVedDoedsfall = AdresseVedDoedsfall()
+  const bostedadresseVedDoedsfall = adresseVedDoedsfall()
 
   return bostedadresseVedDoedsfall ? (
     <BodyShort>{formaterAdresse(bostedadresseVedDoedsfall)}</BodyShort>

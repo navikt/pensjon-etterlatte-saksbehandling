@@ -1,5 +1,5 @@
 import { IPdlPerson } from '~shared/types/Person'
-import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
+import { PersonInfoAdresse } from './PersonInfoAdresse'
 import { hentAdresserEtterDoedsdato, hentAlderForDato } from '~components/behandling/felles/utils'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { BodyShort, HStack, Label, VStack } from '@navikt/ds-react'

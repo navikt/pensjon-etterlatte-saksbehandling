@@ -8,10 +8,9 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
-import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
-import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
+import { CheckmarkCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
 import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
@@ -204,7 +203,10 @@ export default function SluttbehandlingUtland({
       <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
         Tidligere sluttbehandlinger
       </Heading>
-      <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
+      <Button variant="tertiary" onClick={() => setVisHistorikk(!visHistorikk)}>
+        Historikk{' '}
+        {visHistorikk ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />}
+      </Button>
 
       {visHistorikk &&
         mapResult(hentRevurderingerForSakMedAarsakStatus, {

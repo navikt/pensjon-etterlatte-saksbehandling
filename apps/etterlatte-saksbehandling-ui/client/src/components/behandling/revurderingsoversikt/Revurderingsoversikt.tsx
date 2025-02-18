@@ -124,6 +124,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </BodyShort>
         )}
       </Box>
+      <Box paddingBlock="4 0" borderWidth="1 0 1 0" borderColor="border-subtle">
+        <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
+      </Box>
       <Box paddingBlock="8" paddingInline="16 8">
         <OppdaterGrunnlagModal
           behandlingId={behandling.id}
@@ -173,7 +176,6 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-        <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Start disabled={behandling.virkningstidspunkt === null} />

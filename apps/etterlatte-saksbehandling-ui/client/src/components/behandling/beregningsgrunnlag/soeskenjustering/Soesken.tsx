@@ -1,5 +1,5 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
+import { PersonInfoAdresse } from './PersonInfoAdresse'
 import React from 'react'
 import { hentAdresserEtterDoedsdato, hentAlderForDato } from '~components/behandling/felles/utils'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'

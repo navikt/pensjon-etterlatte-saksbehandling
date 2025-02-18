@@ -11,20 +11,16 @@ import { hentPersongalleriSamsvar } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
-import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { mapApiResult } from '~shared/api/apiUtils'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 import { ILand } from '~utils/kodeverk'
+import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
 
 export function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')
 }
 
-function PersonerUtenIdenterVisning(props: {
-  saktype: SakType
-  personer: Array<PersonUtenIdent>
-  landListeResult: Result<ILand[]>
-}) {
+function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<PersonUtenIdent>; landListe: ILand[] }) {
   const { personer, saktype } = props
   if (personer.length === 0) {
     return <BodyShort spacing>Ingen.</BodyShort>
@@ -41,7 +37,9 @@ function PersonerUtenIdenterVisning(props: {
             <li>Fødselsdato: {formaterKanskjeStringDatoMedFallback('Ukjent', person.person.foedselsdato)} </li>
             <li>
               Statsborgerskap:{' '}
-              {visLandInfoFraKodeverkEllerDefault(props.landListeResult, person.person.statsborgerskap)}
+              {!!person.person.statsborgerskap
+                ? finnLandSomTekst(person.person.statsborgerskap, props.landListe)
+                : 'Ukjent'}
             </li>
           </UstiletListe>
         </Box>
@@ -82,11 +80,7 @@ const erAvvikRelevantForSaktype = (avvik: MismatchPersongalleri, sakType: SakTyp
   }
 }
 
-function VisSamsvarPersongalleri(props: {
-  samsvar: PersongalleriSamsvar
-  saktype: SakType
-  landListeResult: Result<ILand[]>
-}) {
+function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype: SakType; landListe: ILand[] }) {
   const { samsvar, saktype } = props
   const personerUtenIdenterSak = samsvar.persongalleri?.personerUtenIdent ?? []
   const personerUtenIdenterPdl = samsvar.persongalleriPdl?.personerUtenIdent ?? []
@@ -201,18 +195,14 @@ function VisSamsvarPersongalleri(props: {
               <PersonerUtenIdenterVisning
                 saktype={saktype}
                 personer={personerUtenIdenterSak}
-                landListeResult={props.landListeResult}
+                landListe={props.landListe}
               />
             </>
           )}
           <Heading size="small" level="4">
             Personer uten identer i PDL:
           </Heading>
-          <PersonerUtenIdenterVisning
-            saktype={saktype}
-            personer={personerUtenIdenterPdl}
-            landListeResult={props.landListeResult}
-          />
+          <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterPdl} landListe={props.landListe} />
         </div>
       )}
     </>
@@ -223,7 +213,7 @@ const BredAlert = styled(Alert)`
   width: fit-content;
 `
 
-export function SamsvarPersongalleri(props: { landListeResult: Result<ILand[]> }) {
+export function SamsvarPersongalleri({ landListe }: { landListe: ILand[] }) {
   const behandling = useBehandling()
   const [samsvarPersongalleri, fetchSamsvarPersongalleri] = useApiCall(hentPersongalleriSamsvar)
 
@@ -242,11 +232,7 @@ export function SamsvarPersongalleri(props: { landListeResult: Result<ILand[]> }
     <Spinner label="Henter samsvar persongalleri" />,
     (error) => <ApiErrorAlert>Kunne ikke hente samsvar persongalleri: {error.detail}</ApiErrorAlert>,
     (samsvarPersongalleri) => (
-      <VisSamsvarPersongalleri
-        saktype={behandling.sakType}
-        samsvar={samsvarPersongalleri}
-        landListeResult={props.landListeResult}
-      />
+      <VisSamsvarPersongalleri saktype={behandling.sakType} samsvar={samsvarPersongalleri} landListe={landListe} />
     )
   )
 }

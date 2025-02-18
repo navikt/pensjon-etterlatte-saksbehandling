@@ -23,7 +23,7 @@ interface RHFRedigerbarFamilie {
   avdoede: Array<{ fnr: string }>
 }
 
-export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props) => {
+export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
   const [status, redigerFamilieforholdRequest] = useApiCall(redigerFamilieforhold)
 

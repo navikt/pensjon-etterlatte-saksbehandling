@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -26,7 +27,7 @@ class BrevService(
         behandlingId: UUID,
         sakId: SakId,
         bruker: BrukerTokenInfo,
-    ) {
+    ): Brev {
         if (bruker is Saksbehandler) {
             val kanRedigeres =
                 inTransaction {
@@ -38,7 +39,7 @@ class BrevService(
         }
 
         // TODO finn ut hva slags behandling
-        tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+        return tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
     }
 
     suspend fun genererPdf(

@@ -27,6 +27,11 @@ interface Props {
 export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysninger }: Props) => {
   const [hentAlleLandResult, hentAlleLandFetch] = useApiCall(hentAlleLand)
 
+  const skaViseAnnenForelderSkjema =
+    behandling.sakType === SakType.BARNEPENSJON &&
+    personopplysninger?.avdoede.length === 1 &&
+    personopplysninger.gjenlevende.length === 0
+
   useEffect(() => {
     hentAlleLandFetch(undefined)
   }, [])
@@ -60,6 +65,9 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
           success: (alleLand) => (
             <VStack gap="8">
+              {skaViseAnnenForelderSkjema && (
+                <AnnenForelderSkjema behandlingId={behandling.id} personopplysninger={personopplysninger} />
+              )}
               <TabellOverAvdoede avdoede={personopplysninger?.avdoede} alleLand={alleLand} />
               {behandling.sakType === SakType.OMSTILLINGSSTOENAD ? (
                 <>
@@ -76,9 +84,6 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
               ) : (
                 <>
                   <TabellOverGjenlevende gjenlevende={personopplysninger?.gjenlevende} alleLand={alleLand} />
-                  {personopplysninger?.avdoede.length === 1 && personopplysninger.gjenlevende.length === 0 && (
-                    <AnnenForelderSkjema behandlingId={behandling.id} personopplysninger={personopplysninger} />
-                  )}
                   <TabellOverAvdoedesBarn
                     avdoedesBarn={hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag(
                       personopplysninger?.avdoede ?? [],

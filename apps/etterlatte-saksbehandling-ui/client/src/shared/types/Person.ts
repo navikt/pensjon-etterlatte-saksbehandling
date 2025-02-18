@@ -118,6 +118,33 @@ enum Sivilstatus {
   GJENLEVENDE_PARTNER = 'GJENLEVENDE_PARTNER',
 }
 
+export const formaterSivilstatusTilLesbarStreng = (sivilstatus: Sivilstatus | undefined) => {
+  switch (sivilstatus) {
+    case Sivilstatus.UOPPGITT:
+      return 'Uoppgitt'
+    case Sivilstatus.UGIFT:
+      return 'Ugift'
+    case Sivilstatus.GIFT:
+      return 'Gift'
+    case Sivilstatus.ENKE_ELLER_ENKEMANN:
+      return 'Enke eller enkemann'
+    case Sivilstatus.SKILT:
+      return 'Skilt'
+    case Sivilstatus.SEPARERT:
+      return 'Separert'
+    case Sivilstatus.REGISTRERT_PARTNER:
+      return 'Registrert partner'
+    case Sivilstatus.SEPARERT_PARTNER:
+      return 'Separert partner'
+    case Sivilstatus.SKILT_PARTNER:
+      return 'Skilt partner'
+    case Sivilstatus.GJENLEVENDE_PARTNER:
+      return 'Gjenlevende partner'
+    default:
+      return 'Uoppgitt'
+  }
+}
+
 export function formaterNavn(person: PersonNavn): string {
   return [person.fornavn, person.mellomnavn, person.etternavn].filter((navn) => !!navn).join(' ')
 }

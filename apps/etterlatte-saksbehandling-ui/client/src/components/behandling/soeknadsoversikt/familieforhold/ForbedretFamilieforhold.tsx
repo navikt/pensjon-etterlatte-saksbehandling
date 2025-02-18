@@ -12,6 +12,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TabellOverAvdoede } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoede'
+import { TabellOverGjenlevende } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverGjenlevende'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -54,9 +55,10 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
           pending: <Spinner label="Henter alle land..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
           success: (alleLand) => (
-            <>
+            <VStack gap="8">
               <TabellOverAvdoede avdoede={personopplysninger?.avdoede} alleLand={alleLand} />
-            </>
+              <TabellOverGjenlevende gjenlevende={personopplysninger?.soeker} alleLand={alleLand} />
+            </VStack>
           ),
         })}
       </Box>

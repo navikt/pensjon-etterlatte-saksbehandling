@@ -71,7 +71,9 @@ export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
             ))
           ) : (
             <Table.Row>
-              <Table.DataCell colSpan={6}>Ingen avdøde</Table.DataCell>
+              <Table.DataCell colSpan={6}>
+                <Heading size="small"> Ingen avdøde</Heading>
+              </Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

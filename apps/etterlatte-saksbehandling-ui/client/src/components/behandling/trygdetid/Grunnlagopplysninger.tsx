@@ -6,7 +6,7 @@ import {
   oppdaterOpplysningsgrunnlag,
 } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { Alert, BodyShort, Box, Button, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, CopyButton, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { isPending } from '~shared/api/apiUtils'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -23,22 +23,28 @@ export const Grunnlagopplysninger = ({
   const visDifferanse = redigerbar ? trygdetid.opplysningerDifferanse?.differanse : false
   return (
     <VStack gap="4">
-      <Heading size="medium">Grunnlagsopplysninger</Heading>
+      <Heading size="medium">Grunnlagsopplysninger om avdød</Heading>
       {visDifferanse ? (
         <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
       ) : (
-        <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
+        <OpplysningerTabell opplysninger={trygdetid.opplysninger} fnr={trygdetid.ident} />
       )}
     </VStack>
   )
 }
 
-const OpplysningerTabell = ({ opplysninger }: { opplysninger: IGrunnlagOpplysninger }) => (
+const OpplysningerTabell = ({ opplysninger, fnr }: { opplysninger: IGrunnlagOpplysninger; fnr: string }) => (
   <HStack gap="24">
     <Opplysningsgrunnlag label="Fødselsdato" opplysningsgrunnlag={opplysninger.avdoedFoedselsdato} />
     <Opplysningsgrunnlag label="16 år" opplysningsgrunnlag={opplysninger.avdoedFylteSeksten} />
     <Opplysningsgrunnlag label="Dødsdato" opplysningsgrunnlag={opplysninger.avdoedDoedsdato} />
     <Opplysningsgrunnlag label="66 år" opplysningsgrunnlag={opplysninger.avdoedFyllerSeksti} />
+    <VStack>
+      <Label size="small">Folkeregisteridentifikator</Label>
+      <HStack>
+        <CopyButton size="xsmall" copyText={fnr} /> {fnr}
+      </HStack>
+    </VStack>
   </HStack>
 )
 
@@ -85,12 +91,12 @@ const DifferanseVisning = ({
       <Heading size="small" level="4">
         Eksisterende grunnlag
       </Heading>
-      <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
+      <OpplysningerTabell opplysninger={trygdetid.opplysninger} fnr={trygdetid.ident} />
 
       <Heading size="small" level="4">
         Nytt grunnlag
       </Heading>
-      <OpplysningerTabell opplysninger={opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} />
+      <OpplysningerTabell opplysninger={opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} fnr={trygdetid.ident} />
 
       <div>
         <Button

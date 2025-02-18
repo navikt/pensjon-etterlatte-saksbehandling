@@ -39,6 +39,7 @@ private fun settOppRivers(
     val behandlingservice = appBuilder.behandlingService
     val tidshendelseService = appBuilder.tidshendelserService
     val featureToggleService = appBuilder.featureToggleService
+    val vilkaarsvurderingService = appBuilder.vilkaarsvurderingService
 
     PdlHendelserRiver(rapidsConnection, behandlingservice)
     OmregningsHendelserBehandlingRiver(rapidsConnection, behandlingservice)
@@ -54,6 +55,10 @@ private fun settOppRivers(
     OmregningBrevDistribusjonRiver(rapidsConnection, behandlingservice)
 
     StartUthentingFraSoeknadRiver(rapidsConnection, Opplysningsuthenter())
+
+    // TODO tilgjengeliggjør disse riverene når etterlatte-vilkaarsvurdering-kafka er skrudd av
+    // VilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
+    // TidshendelseVilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
 
     NySoeknadRiver(
         rapidsConnection = rapidsConnection,

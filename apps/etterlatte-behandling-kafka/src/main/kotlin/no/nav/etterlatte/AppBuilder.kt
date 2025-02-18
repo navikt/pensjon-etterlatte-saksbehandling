@@ -25,12 +25,22 @@ import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.TidshendelseService
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingServiceImpl
 
 class AppBuilder(
     private val props: Miljoevariabler,
 ) {
     val behandlingService: BehandlingService by lazy {
         BehandlingServiceImpl(
+            behandlingAppExpectSuccess,
+            "http://etterlatte-behandling",
+        )
+    }
+
+    // TODO: Slå sammen med behandlingService?
+    val vilkaarsvurderingService: VilkaarsvurderingService by lazy {
+        VilkaarsvurderingServiceImpl(
             behandlingAppExpectSuccess,
             "http://etterlatte-behandling",
         )

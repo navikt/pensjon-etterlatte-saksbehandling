@@ -17,6 +17,7 @@ import { SakType } from '~shared/types/sak'
 import { TabellOverAvdoedesBarn } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoedesBarn'
 import { hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag } from '~shared/types/Person'
 import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/AnnenForelderSkjema'
+import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -65,6 +66,7 @@ export const ForbedretFamilieforhold = ({ behandling, redigerbar, personopplysni
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
           success: (alleLand) => (
             <VStack gap="8">
+              <SamsvarPersongalleri landListe={alleLand} />
               {skaViseAnnenForelderSkjema && (
                 <AnnenForelderSkjema behandlingId={behandling.id} personopplysninger={personopplysninger} />
               )}

@@ -4,9 +4,6 @@ import { useEffect } from 'react'
 import { Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Personopplysninger } from '~shared/types/grunnlag'
-import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
-import { PersonOversiktFane } from '~components/person/Person'
-import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { RedigerFamilieforholdModal } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforholdModal'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -43,18 +40,6 @@ export const Familieforhold = ({ behandling, redigerbar, personopplysninger }: P
         <Heading size="medium" level="2">
           Familieforhold
         </Heading>
-        <div>
-          <PersonButtonLink
-            variant="secondary"
-            size="small"
-            icon={<ExternalLinkIcon aria-hidden />}
-            fnr={personopplysninger?.soeker?.opplysning.foedselsnummer ?? ''}
-            fane={PersonOversiktFane.PERSONOPPLYSNINGER}
-            target="_blank"
-          >
-            Åpne personopplysninger i eget vindu
-          </PersonButtonLink>
-        </div>
 
         {redigerbar && personopplysninger && (
           <RedigerFamilieforholdModal behandling={behandling} personopplysninger={personopplysninger} />

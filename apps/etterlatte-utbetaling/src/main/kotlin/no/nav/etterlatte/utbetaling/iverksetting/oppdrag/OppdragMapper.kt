@@ -100,9 +100,8 @@ object OppdragMapper {
                             fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG
                             typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
 
-                            // For å teste ifm etteroppgjøret
-                            // TODO: bytte ut sakid med riktig
-                            if (it.sakId.value == SakId(123).sakId && it.periode.fra.year == 2024) {
+                            // Vi vil teste om håndteringen for etteroppgjør som oppdrag gjør for uføretrygd i dag også fungerer for OMS
+                            if (it.sakId.value == SakId(1004643).sakId && it.periode.fra.year == 2024) {
                                 typeSoknad = "EO"
                             }
 

@@ -434,7 +434,7 @@ class TrygdetidServiceImpl(
                 mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Ufoeretrygd.create())
             } ?: emptyList()
         if (mappedAlderspensjonTrygdetidsgrunnlag.isNotEmpty() && mappedUfoereTrygdetidsgrunnlag.isNotEmpty()) {
-            logger.error(
+            logger.warn(
                 "Vi fikk trygdetidsgrunnlag for både alderspensjon og uføretrygd, vi må sjekke om dette gir mening eller om det blir feil.",
             )
         }

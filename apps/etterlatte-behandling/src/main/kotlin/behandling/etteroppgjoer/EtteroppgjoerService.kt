@@ -1,40 +1,71 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.sak.SakLesDao
 import java.util.UUID
 
 class EtteroppgjoerService(
     private val dao: EtteroppgjoerDao,
+    private val sakDao: SakLesDao,
 ) {
     fun hentEtteroppgjoer(behandlingId: UUID): Etteroppgjoer {
-        val etteroppgjoerBehandling = dao.hentEtteroppgjoer(behandlingId) ?: throw Exception("todo")
+        val etteroppgjoerBehandling =
+            inTransaction {
+                dao.hentEtteroppgjoer(behandlingId)
+            } ?: throw IkkeFunnetException(
+                code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
+                detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
+            )
+
+        // TODO egen tabell? I beregning?
+        val opplysninger =
+            EtteroppgjoerOpplysninger(
+                skatt =
+                    OpplysnignerSkatt(
+                        aarsinntekt = 200000,
+                    ),
+                ainntekt =
+                    AInntekt(
+                        inntektsmaaneder =
+                            listOf(
+                                AInntektMaaned(
+                                    maaned = "Januar",
+                                    summertBeloep = 150000,
+                                ),
+                                AInntektMaaned(
+                                    maaned = "Januar",
+                                    summertBeloep = 150000,
+                                ),
+                            ),
+                    ),
+            )
+
         return Etteroppgjoer(
             behandling = etteroppgjoerBehandling,
-            // TODO egen tabell? I beregning?
-            opplysninger =
-                EtteroppgjoerOpplysninger(
-                    skatt =
-                        OpplysnignerSkatt(
-                            aarsinntekt = 200000,
-                        ),
-                    ainntekt =
-                        AInntekt(
-                            inntektsmaaneder =
-                                listOf(
-                                    AInntektMaaned(
-                                        maaned = "Januar",
-                                        summertBeloep = 150000,
-                                    ),
-                                    AInntektMaaned(
-                                        maaned = "Januar",
-                                        summertBeloep = 150000,
-                                    ),
-                                ),
-                        ),
-                ),
+            opplysninger = opplysninger,
         )
     }
 
-    fun opprettEtteroppgjoer() {
-        // dao.lagreEtteroppgjoer()
+    fun opprettEtteroppgjoer(sakId: SakId) {
+        inTransaction {
+            val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
+
+            // TODO skal opplysninger mottas eller hentes her?
+
+            val ny =
+                EtteroppgjoerBehandling(
+                    id = UUID.randomUUID(),
+                    status = "opprettet",
+                    sak = sak,
+                    aar = 2024,
+                    opprettet = Tidspunkt.now(),
+                )
+
+            dao.lagreEtteroppgjoer(ny)
+        }
     }
 }

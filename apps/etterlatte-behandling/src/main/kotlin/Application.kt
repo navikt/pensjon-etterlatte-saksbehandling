@@ -274,6 +274,9 @@ private fun Route.settOppTilganger(
             harTilgangTilTilbakekreving = { tilbakekrevingId, saksbehandlerMedRoller ->
                 tilgangService.harTilgangTilTilbakekreving(tilbakekrevingId, saksbehandlerMedRoller)
             }
+            harTilgangTilEtteroppgjoer = { etteroppgjoerId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilEtteroppgjoer(etteroppgjoerId, saksbehandlerMedRoller)
+            }
         }
     }
 }

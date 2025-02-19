@@ -44,6 +44,8 @@ class PluginConfiguration {
     -> Boolean = { _, _ -> false }
     var harTilgangTilTilbakekreving: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
+    var harTilgangTilEtteroppgjoer: (etteroppgjoerId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
 
@@ -82,7 +84,8 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
 
             if (bruker is Saksbehandler) {
                 val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
-                val funnetCallIdParametersType = CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
+                val funnetCallIdParametersType =
+                    CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
                 if (funnetCallIdParametersType == null) {
                     return@on
                 } else {
@@ -98,6 +101,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                             }
                             return@on
                         }
+
                         CallParamAuthId.SAKID -> {
                             if (!pluginConfig.harTilgangTilSak(
                                     idForRequest.tilSakId(),
@@ -108,6 +112,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                             }
                             return@on
                         }
+
                         CallParamAuthId.OPPGAVEID -> {
                             if (!pluginConfig.harTilgangTilOppgave(
                                     idForRequest,
@@ -118,6 +123,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                             }
                             return@on
                         }
+
                         CallParamAuthId.KLAGEID -> {
                             if (!pluginConfig.harTilgangTilKlage(
                                     idForRequest,
@@ -128,6 +134,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                             }
                             return@on
                         }
+
                         CallParamAuthId.GENERELLBEHANDLINGID -> {
                             if (!pluginConfig.harTilgangTilGenerellBehandling(
                                     idForRequest,
@@ -138,8 +145,20 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                             }
                             return@on
                         }
+
                         CallParamAuthId.TILBAKEKREVINGID -> {
                             if (!pluginConfig.harTilgangTilTilbakekreving(
+                                    idForRequest,
+                                    SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                                )
+                            ) {
+                                throw GenerellIkkeFunnetException()
+                            }
+                            return@on
+                        }
+
+                        CallParamAuthId.ETTEROPPGJOERID -> {
+                            if (!pluginConfig.harTilgangTilEtteroppgjoer(
                                     idForRequest,
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
@@ -199,6 +218,7 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
                 else -> user.enheterMedSkrivetilgang().contains(enhetNrSomSkalTestes)
             }
         }
+
         is SystemUser -> true
         else -> false
     }
@@ -222,8 +242,12 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Sa
             CallParamAuthId.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(idForRequest)?.enhetNr
             CallParamAuthId.GENERELLBEHANDLINGID ->
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(idForRequest)?.enhetNr
+
             CallParamAuthId.TILBAKEKREVINGID ->
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(idForRequest)?.enhetNr
+
+            CallParamAuthId.ETTEROPPGJOERID ->
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(idForRequest)?.enhetNr
         }
     }
 }
@@ -267,6 +291,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrive
                     application.log.debug("Har skrivetilgang, fortsetter")
                     onSuccess(token)
                 }
+
                 false -> {
                     application.log.debug("Mangler skrivetilgang, avviser forespørselen")
                     val enhetString = if (enhetNr == null) "enheten" else "enhet $enhetNr"

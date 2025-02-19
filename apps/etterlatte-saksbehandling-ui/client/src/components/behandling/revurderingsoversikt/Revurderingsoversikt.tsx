@@ -38,12 +38,12 @@ import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/s
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
-import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { RevurderingKravpakke } from '~components/behandling/revurderingsoversikt/RevurderingKravpakke'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
+import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -124,6 +124,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </BodyShort>
         )}
       </Box>
+      <Box paddingBlock="4 0" borderWidth="1 0 1 0" borderColor="border-subtle">
+        <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
+      </Box>
       <Box paddingBlock="8" paddingInline="16 8">
         <OppdaterGrunnlagModal
           behandlingId={behandling.id}
@@ -173,7 +176,6 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-        <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Start disabled={behandling.virkningstidspunkt === null} />

@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
-import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
+import { Barn } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Barn'
 import {
   FEIL_I_PERIODE,
   feilIKomplettePerioderOverIntervall,
@@ -19,7 +19,6 @@ import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/s
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 type SoeskenKanskjeMedIBeregning = {
@@ -285,6 +284,13 @@ export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
 
 export const UstiletListe = styled.ul`
   list-style-type: none;
+`
+
+const FamilieforholdWrapper = styled.div`
+  padding: 1em 4em;
+  display: grid;
+  gap: 4rem;
+  margin-bottom: 4rem;
 `
 
 export default Soeskenjustering

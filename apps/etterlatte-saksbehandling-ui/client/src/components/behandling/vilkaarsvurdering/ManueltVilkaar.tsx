@@ -62,7 +62,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                 {paragrafType(vilkaar)} {vilkaar.hovedvilkaar.lovreferanse.paragraf}
               </>
             )}
-            <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+            <Box marginBlock="3" marginInline="0" maxWidth="41rem" style={{ whiteSpace: 'pre-line' }}>
               {vilkaar.hovedvilkaar.beskrivelse}
             </Box>
           </VStack>

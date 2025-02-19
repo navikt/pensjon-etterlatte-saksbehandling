@@ -1,4 +1,3 @@
-import { Familieforhold } from './familieforhold/Familieforhold'
 import { Box, Heading, HStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -25,6 +24,7 @@ import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/vide
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import SluttBehandlingOmgjoering from '~components/behandling/soeknadsoversikt/SluttbehandlingOmgjoering'
 import { SoeknadInformasjon } from '~components/behandling/soeknadsoversikt/SoeknadInformasjon'
+import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 
 export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -46,11 +46,11 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
         </Heading>
       </Box>
 
-      <Box paddingInline="24 0" paddingBlock="8 8" maxWidth="70rem">
+      <Box paddingInline="20 0" paddingBlock="8 8" maxWidth="70rem">
         <SoeknadInformasjon behandling={behandling} />
       </Box>
 
-      <Box paddingBlock="4 0" borderWidth="0 0 1 0" borderColor="border-subtle">
+      <Box paddingBlock="4" borderWidth="0 0 1 0" borderColor="border-subtle">
         <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       </Box>
 

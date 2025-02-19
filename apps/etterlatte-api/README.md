@@ -39,13 +39,17 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 personen vedtaket gjelder og på vedtakets virkningsdato.
 
 ## API
+Tjenestepensjon endepunkter(maskinporten):
+```
+/api/vedtak?fomDato=YYYY-MM-DD, /api/vedtak?virkFom=YYYY-MM-DD, /api/vedtak/{nav-vedtak-id}
+```
 
-| Endepunkt                      | Headers                           | Body                                                              | Responstype        | Beskrivelse                                                                                                                         |
-|:-------------------------------|-----------------------------------|-------------------------------------------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| /api/vedtak?fomDato=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```                                  | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
-| /api/vedtak?virkFom=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```                                  | Samordningsvedtak[] | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
-| /api/vedtak/{nav-vedtak-id}    | tpnr                              |                                                                   | Samordningsvedtak  | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
-| /api/v1/oppgave/journalfoering |                                   | ```{ sakId: Long, journalpostId: String, beskrivelse: String }``` | UUID (`oppgaveId`)            | Oppretter journalføringsoppgave i Gjenny                                                                                            |
+| Endepunkt                      | Headers                           | Body                                      | Method                            | Responstype        | Beskrivelse                                                                                                                         |
+|:-------------------------------|-----------------------------------|-------------------------------------------|-----------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| /api/vedtak?fomDato=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```          | GET(deprecated)/ POST(fnr i body) | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
+| /api/vedtak?virkFom=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```          | GET(deprecated)/ POST(fnr i body) | Samordningsvedtak[] | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
+| /api/vedtak/{nav-vedtak-id}    | tpnr                              |                                           | GET                               | Samordningsvedtak   | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
+| /api/v1/oppgave/journalfoering |                                   | ```{ sakId: Long, journalpostId: String, beskrivelse: String }```| POST                              | UUID (`oppgaveId`) | Oppretter journalføringsoppgave i Gjenny (kun for internt bruk)                                                                     |
 
 | Header                                 | Beskrivelse                      |
 |----------------------------------------|----------------------------------|
@@ -126,7 +130,7 @@ personen vedtaket gjelder og på vedtakets virkningsdato.
 
 
 ## Eksempler
-### Løpende omstillingsstønad
+### Løpende omstillingsstønad (kun internt i NAV)
 
 Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før
 angitt dato, eller starter måneden etterpå så vil svaret være _nei_. **NB!** Merk at denne tjenesten _ikke gjør noe
@@ -144,7 +148,7 @@ avkortet, så vil svaret likevel være ja.
        }
       ```
 
-### Løpende barnepensjon
+### Løpende barnepensjon (kun internt i NAV)
 
 Som for omstillingsstønad.
 

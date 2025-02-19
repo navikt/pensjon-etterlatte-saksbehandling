@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingType
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -29,7 +30,7 @@ class BrevService(
         behandlingId: UUID,
         sakId: SakId,
         bruker: BrukerTokenInfo,
-    ) {
+    ): Brev {
         if (bruker is Saksbehandler) {
             val kanRedigeres =
                 inTransaction {

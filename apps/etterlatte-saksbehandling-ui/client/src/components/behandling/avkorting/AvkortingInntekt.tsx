@@ -4,13 +4,12 @@ import { NOK } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { lastDayOfMonth } from 'date-fns'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
 import { IAvkortingGrunnlagFrontend, SystemOverstyrtInnvilgaMaanederAarsak } from '~shared/types/IAvkorting'
-import { ArrowCirclepathIcon, HeadCloudIcon, PencilIcon } from '@navikt/aksel-icons'
+import { ArrowCirclepathIcon, ChevronDownIcon, ChevronUpIcon, HeadCloudIcon, PencilIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import {
   ForventetInntektHeaderHjelpeTekst,
@@ -179,7 +178,10 @@ export const AvkortingInntekt = ({
         avkortingGrunnlagFrontend &&
         ((avkortingGrunnlagFrontend.fraVirk == null && avkortingGrunnlagFrontend.historikk.length > 1) ||
           (avkortingGrunnlagFrontend.fraVirk != null && avkortingGrunnlagFrontend.historikk.length > 0)) && (
-          <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
+          <Button variant="tertiary" onClick={() => setVisHistorikk(!visHistorikk)}>
+            Historikk{' '}
+            {visHistorikk ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />}
+          </Button>
         )}
       {erRedigerbar && visForm && (
         <AvkortingInntektForm

@@ -62,7 +62,7 @@ class TilbakekrevingBrevService(
                 utledBrevRequest(bruker, behandlingId, sakId)
             }
 
-        brevKlient.opprettVedtaksbrev(
+        return brevKlient.opprettVedtaksbrev(
             behandlingId,
             bruker,
             brevRequest,

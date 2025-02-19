@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -338,14 +339,16 @@ class TrygdetidServiceImpl(
             avdoede
                 .map { avdoed ->
                     val fnr =
-                        krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        sjekkIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                             "Kunne ikke hente identifikator for avdød til trygdetid i " +
                                 "behandlingen med id=$behandlingId"
                         }
 
                     Pair(fnr, avdoed)
                 }.map { avdoedMedFnr ->
-                    val doedsdato = avdoedMedFnr.second.hentDoedsdato()?.verdi ?: throw InternfeilException("Avdød mangler dødsdato")
+                    val doedsdato =
+                        avdoedMedFnr.second.hentDoedsdato()?.verdi
+                            ?: throw UgyldigForespoerselException("INGEN_AVDOEDE", "Avdød mangler dødsdato")
                     val trygdetidForUfoereOgAlderspensjon =
                         pesysKlient.hentTrygdetidsgrunnlag(
                             Pair(avdoedMedFnr.first, doedsdato),
@@ -431,7 +434,7 @@ class TrygdetidServiceImpl(
                 mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Ufoeretrygd.create())
             } ?: emptyList()
         if (mappedAlderspensjonTrygdetidsgrunnlag.isNotEmpty() && mappedUfoereTrygdetidsgrunnlag.isNotEmpty()) {
-            logger.error(
+            logger.warn(
                 "Vi fikk trygdetidsgrunnlag for både alderspensjon og uføretrygd, vi må sjekke om dette gir mening eller om det blir feil.",
             )
         }

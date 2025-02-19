@@ -44,11 +44,11 @@ class VedtaksvurderingSamordningKlient(
                         header(
                             "orgnr",
                             callerContext.organisasjonsnr,
-                        ).also { logger.info("Henter vedtak med orgnr $it") }
+                        ).also { logger.info("Henter vedtak med orgnr ${callerContext.organisasjonsnr}") }
                     }
                 }.body()
         } catch (e: ClientRequestException) {
-            logger.error("Det oppstod feil i kall til vedtak API", e)
+            logger.warn("Det oppstod feil i kall til vedtak API", e)
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> throw VedtakvurderingManglendeTilgangException("Vedtak: Ikke tilgang")
                 HttpStatusCode.BadRequest -> throw VedtakvurderingUgyldigForesporselException("Vedtak: Ugyldig forespørsel")

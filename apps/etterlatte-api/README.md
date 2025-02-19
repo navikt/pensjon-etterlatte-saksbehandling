@@ -39,6 +39,10 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 personen vedtaket gjelder og på vedtakets virkningsdato.
 
 ## API
+Tjenestepensjon endepunkter(maskinporten):
+```
+/api/vedtak?fomDato=YYYY-MM-DD, /api/vedtak?virkFom=YYYY-MM-DD, /api/vedtak/{nav-vedtak-id}
+```
 
 | Endepunkt                      | Headers                           | Body                                      | Method                            | Responstype        | Beskrivelse                                                                                                                         |
 |:-------------------------------|-----------------------------------|-------------------------------------------|-----------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|

@@ -126,7 +126,7 @@ personen vedtaket gjelder og på vedtakets virkningsdato.
 
 
 ## Eksempler
-### Løpende omstillingsstønad
+### Løpende omstillingsstønad (kun internt i NAV)
 
 Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før
 angitt dato, eller starter måneden etterpå så vil svaret være _nei_. **NB!** Merk at denne tjenesten _ikke gjør noe
@@ -144,7 +144,7 @@ avkortet, så vil svaret likevel være ja.
        }
       ```
 
-### Løpende barnepensjon
+### Løpende barnepensjon (kun internt i NAV)
 
 Som for omstillingsstønad.
 

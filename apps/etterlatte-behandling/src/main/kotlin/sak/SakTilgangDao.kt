@@ -19,15 +19,7 @@ class SakTilgangDao(
                 connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where fnr = ?")
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
-                SakMedGraderingOgSkjermet(
-                    id = SakId(getLong("id")),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
-                )
+                toSakMedGraderingOgSkjermet()
             }
         }
     }
@@ -37,17 +29,7 @@ class SakTilgangDao(
             val statement =
                 connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
             statement.setSakId(1, id)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = SakId(getLong("id")),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
-                )
-            }
+            return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
@@ -63,17 +45,7 @@ class SakTilgangDao(
             statement.setString(1, behandlingId)
             statement.setString(2, behandlingId)
             statement.setString(3, behandlingId)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = SakId(getLong("id")),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
-                )
-            }
+            return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
@@ -89,17 +61,7 @@ class SakTilgangDao(
                     """.trimIndent(),
                 )
             statement.setString(1, oppgaveId)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = SakId(getLong("sak_id")),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
-                )
-            }
+            return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
@@ -115,17 +77,7 @@ class SakTilgangDao(
                     """.trimIndent(),
                 )
             statement.setString(1, klageId)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = SakId(getLong("sak_id")),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
-                )
-            }
+            return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
@@ -141,17 +93,7 @@ class SakTilgangDao(
                     """.trimIndent(),
                 )
             statement.setString(1, generellbehandlingId)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = SakId(getLong("sak_id")),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
-                )
-            }
+            return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
@@ -167,17 +109,7 @@ class SakTilgangDao(
                     """.trimIndent(),
                 )
             statement.setString(1, tilbakekrevingId)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = SakId(getLong("sak_id")),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
-                )
-            }
+            return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 

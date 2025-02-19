@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -72,7 +73,7 @@ class EtterlatteBrevTrygdetidTest {
                         trygdetidGrunnlagDto(
                             periodeFra = LocalDate.of(2020, 1, 1),
                             periodeTil = LocalDate.of(2024, 1, 1),
-                            bosted = "NOR",
+                            bosted = LandNormalisert.CUBA.isoCode,
                             type = TrygdetidType.FAKTISK,
                             prorata = false,
                         ),
@@ -90,8 +91,8 @@ class EtterlatteBrevTrygdetidTest {
             prorataBroek shouldBe null
             trygdetidsperioder.size shouldBe 1
             trygdetidsperioder.forEach {
-                it.landkode shouldNotBe "NOR"
-                it.land shouldNotBe "Norge"
+                it.landkode shouldNotBe LandNormalisert.CUBA.isoCode
+                it.land shouldNotBe LandNormalisert.CUBA.beskrivelse
             }
         }
     }

@@ -5,10 +5,10 @@ import { PersonIcon } from '@navikt/aksel-icons'
 import { formaterNavn } from '~shared/types/Person'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
-import { AdresseVedDoedsfall } from '~components/behandling/soeknadsoversikt/familieforhold/AdresseVedDoedsfall'
+import { AdresseVedDoedsfall } from '~components/behandling/soeknadsoversikt/familieforhold/components/AdresseVedDoedsfall'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
-import { ListeOverInnflyttingTilNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverInnflyttingTilNorge'
-import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverUtflyttingFraNorge'
+import { ListeOverInnflyttingTilNorge } from '~components/behandling/soeknadsoversikt/familieforhold/components/ListeOverInnflyttingTilNorge'
+import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsoversikt/familieforhold/components/ListeOverUtflyttingFraNorge'
 interface Props {
   avdoede: Personopplysning[] | undefined
   alleLand: ILand[]

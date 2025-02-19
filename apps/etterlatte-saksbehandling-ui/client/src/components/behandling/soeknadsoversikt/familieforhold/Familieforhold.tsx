@@ -14,7 +14,7 @@ import { SakType } from '~shared/types/sak'
 import { TabellOverAvdoedesBarn } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoedesBarn'
 import { hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag } from '~shared/types/Person'
 import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/AnnenForelderSkjema'
-import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
+import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/persongalleriSamsvar/SamsvarPersongalleri'
 
 interface Props {
   behandling: IDetaljertBehandling

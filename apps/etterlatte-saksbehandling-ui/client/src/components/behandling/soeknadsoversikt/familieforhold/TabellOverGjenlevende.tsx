@@ -4,11 +4,11 @@ import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 import { formaterNavn, formaterSivilstatusTilLesbarStreng } from '~shared/types/Person'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
-import { ListeOverInnflyttingTilNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverInnflyttingTilNorge'
-import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverUtflyttingFraNorge'
+import { ListeOverInnflyttingTilNorge } from '~components/behandling/soeknadsoversikt/familieforhold/components/ListeOverInnflyttingTilNorge'
+import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsoversikt/familieforhold/components/ListeOverUtflyttingFraNorge'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
 import React from 'react'
-import { PersonopplysningAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
+import { PersonopplysningAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/components/AktivEllerSisteAdresse'
 
 interface Props {
   gjenlevende: Personopplysning[] | undefined

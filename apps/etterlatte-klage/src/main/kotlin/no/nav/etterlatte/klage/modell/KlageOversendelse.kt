@@ -18,6 +18,7 @@ enum class KabalSakType {
     ANKE,
     ANKE_I_TRYGDERETTEN,
     OMGJOERINGSKRAV,
+    BEHANDLING_ETTER_TRYGDERETTEN_OPPHEVET,
 }
 
 enum class KabalKlagerType {

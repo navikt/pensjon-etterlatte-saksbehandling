@@ -53,9 +53,6 @@ fun DataSource.migrate(processExiter: () -> Unit = { exitProcess(1) }): MigrateR
             .configure()
             .dataSource(this)
             .apply {
-                println(appIsInGCP())
-                println(isDev())
-                println(isProd())
                 val dblocationsMiljoe = mutableListOf("db/migration")
                 if (appIsInGCP()) {
                     dblocationsMiljoe.add("db/gcp")

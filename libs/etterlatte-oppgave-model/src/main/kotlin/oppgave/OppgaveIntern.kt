@@ -202,11 +202,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
 ): OppgaveIntern {
     val opprettet = Tidspunkt.now()
 
-    val oppgaveFrist =
-        frist ?: opprettet
-            .toLocalDatetimeUTC()
-            .plusMonths(1L)
-            .toTidspunkt()
+    val oppgaveFrist = frist ?: standardfristForOppgave(opprettet, type)
 
     return OppgaveIntern(
         id = UUID.randomUUID(),
@@ -225,3 +221,12 @@ fun opprettNyOppgaveMedReferanseOgSak(
         type = type,
     )
 }
+
+fun standardfristForOppgave(
+    opprettet: Tidspunkt,
+    oppgaveType: OppgaveType,
+): Tidspunkt =
+    when (oppgaveType) {
+        OppgaveType.JOURNALFOERING -> opprettet.toLocalDatetimeUTC().plusDays(1L).toTidspunkt()
+        else -> opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
+    }

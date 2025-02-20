@@ -101,6 +101,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagServiceImpl
+import no.nav.etterlatte.grunnlag.IOpplysningDao
+import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.OpplysningDaoProxy
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDaoProxy
@@ -293,14 +295,8 @@ internal class ApplicationContext(
             env.requireEnvValue(SKJERMING_URL),
         ),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
-    val aldersovergangDaoProxy: IAldersovergangDao = AldersovergangDaoProxy(config, httpClient()),
-    // TODO: Service burde ikke ligge her, men gjør det nå for å få alle integrasjonstestene til å kjøre som de skal
-    val grunnlagService: GrunnlagService =
-        GrunnlagServiceImpl(
-            pdlTjenesterKlient,
-            OpplysningDaoProxy(config, httpClient()),
-            GrunnlagHenter(pdlTjenesterKlient),
-        ),
+    val aldersovergangDaoProxy: IAldersovergangDao? = AldersovergangDaoProxy(config, httpClient()),
+    val opplysningDaoProxy: IOpplysningDao? = OpplysningDaoProxy(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -361,16 +357,32 @@ internal class ApplicationContext(
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
+    // TODO fjerne proxier når vi har flyttet grunnlag i produksjon
     val skalBrukeDaoProxy = true
     val aldersovergangDao =
-        if (skalBrukeDaoProxy) {
+        if (skalBrukeDaoProxy && aldersovergangDaoProxy != null) {
             aldersovergangDaoProxy
         } else {
             AldersovergangDao(dataSource)
         }
+
+    val opplysningDao =
+        if (skalBrukeDaoProxy && opplysningDaoProxy != null) {
+            opplysningDaoProxy
+        } else {
+            OpplysningDao(dataSource)
+        }
+
     val nyAldersovergangService =
         no.nav.etterlatte.grunnlag.aldersovergang
             .AldersovergangService(aldersovergangDao)
+
+    val grunnlagService: GrunnlagService =
+        GrunnlagServiceImpl(
+            pdlTjenesterKlient,
+            opplysningDao,
+            GrunnlagHenter(pdlTjenesterKlient),
+        )
 
     val behandlingService =
         BehandlingServiceImpl(

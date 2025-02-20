@@ -433,12 +433,14 @@ class TrygdetidServiceImpl(
             pesysTrygdetidsgrunnlag.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Ufoeretrygd.create())
             } ?: emptyList()
-        if (mappedAlderspensjonTrygdetidsgrunnlag.isNotEmpty() && mappedUfoereTrygdetidsgrunnlag.isNotEmpty()) {
-            logger.warn(
-                "Vi fikk trygdetidsgrunnlag for både alderspensjon og uføretrygd, vi må sjekke om dette gir mening eller om det blir feil.",
-            )
+
+        if (mappedAlderspensjonTrygdetidsgrunnlag.isNotEmpty()) {
+            return mappedAlderspensjonTrygdetidsgrunnlag
+        } else if (mappedUfoereTrygdetidsgrunnlag.isNotEmpty()) {
+            return mappedUfoereTrygdetidsgrunnlag
         }
-        return mappedAlderspensjonTrygdetidsgrunnlag + mappedUfoereTrygdetidsgrunnlag
+        logger.info("Fant ingen trygdtidsgrunnlag som vi kunne mappe over")
+        return emptyList()
     }
 
     private fun mapPesysTrygdetidsgrunnlag(

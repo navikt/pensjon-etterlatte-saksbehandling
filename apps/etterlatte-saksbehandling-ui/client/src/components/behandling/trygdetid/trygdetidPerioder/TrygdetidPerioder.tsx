@@ -160,8 +160,8 @@ export const TrygdetidPerioder = ({
         kanHenteTrygdetidFraPesys &&
         mapResult(sjekkOmAvodedHarTTIPesysStatus, {
           initial: null,
-          pending: <Spinner label="Sjekker om avdøede har trygdetidsgrunnlag i Pesys" />,
-          error: () => <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>,
+          pending: <Spinner label="Sjekker om avdøde har trygdetidsgrunnlag i Pesys" />,
+          error: () => <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnlag i Pesys</Alert>,
           success: (harTrygdetidsgrunnlagIPesys) => {
             return (
               <>
@@ -169,7 +169,7 @@ export const TrygdetidPerioder = ({
                   <>
                     <Box maxWidth="fit-content">
                       <Heading size="small">Legg inn trygdetidsgrunnlag</Heading>
-                      <BodyShort>Avdøed har trygdetidsgrunnlag registrert på uføretrygd eller alderspensjon.</BodyShort>
+                      <BodyShort>Avdøde har trygdetidsgrunnlag registrert på uføretrygd eller alderspensjon.</BodyShort>
                       {isSuccess(hentTTPesysStatus) && !isSuccess(slettTrygdetidsgrunnlagStatus) && (
                         <>
                           {mapFailure(slettTrygdetidsgrunnlagStatus, (error) => (

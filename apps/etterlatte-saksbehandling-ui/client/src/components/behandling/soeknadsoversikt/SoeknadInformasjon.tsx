@@ -2,7 +2,6 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { BodyShort, Detail, Table, VStack } from '@navikt/ds-react'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
-import { SakType } from '~shared/types/sak'
 import { formaterNavn } from '~shared/types/Person'
 
 export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehandling }) => {
@@ -36,9 +35,6 @@ export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehan
         <Table.Row>
           <Table.HeaderCell scope="col">Søknad mottat</Table.HeaderCell>
           <Table.HeaderCell scope="col">Innsender</Table.HeaderCell>
-          {behandling.sakType === SakType.BARNEPENSJON && (
-            <Table.HeaderCell scope="col">Foreldreansvar</Table.HeaderCell>
-          )}
           <Table.HeaderCell scope="col">Vergemål</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
@@ -55,18 +51,6 @@ export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehan
               '-'
             )}
           </Table.DataCell>
-          {behandling.sakType === SakType.BARNEPENSJON && (
-            <Table.DataCell>
-              <VStack>
-                <BodyShort>
-                  {!!personopplysninger?.soeker?.opplysning.familieRelasjon?.barn?.length
-                    ? `${formaterNavn(personopplysninger?.soeker.opplysning)}`
-                    : 'Ingen barn'}
-                </BodyShort>
-                <Detail>{`${personopplysninger?.soeker?.kilde.type.toUpperCase()} ${formaterDatoMedFallback(personopplysninger?.soeker?.kilde.tidspunkt)}`}</Detail>
-              </VStack>
-            </Table.DataCell>
-          )}
           <Table.DataCell>
             <VStack>
               {!!personopplysninger?.soeker?.opplysning.vergemaalEllerFremtidsfullmakt?.length ? (

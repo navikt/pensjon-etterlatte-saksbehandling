@@ -8,13 +8,13 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
 import { useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
-import { isPending } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export function Etteroppgjoersbehandling() {
   const { etteroppgjoerId } = useParams()
 
-  const [etteroppgjoerStatus, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
+  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
   const [etteroppgjoer, setEtteroppgjoer] = useState<IEtteroppgjoer>()
 
   useEffect(() => {
@@ -27,24 +27,26 @@ export function Etteroppgjoersbehandling() {
   return (
     <>
       <StatusBar ident={etteroppgjoer?.behandling.sak.ident} />
-      <Spinner visible={isPending(etteroppgjoerStatus)} label="Henter etteroppgjørbehandling" />
 
-      {etteroppgjoer && (
-        <>
-          <Box paddingInline="16" paddingBlock="16 4">
-            <Heading level="1" size="large">
-              Etteroppgjør {etteroppgjoer.behandling.aar}
-            </Heading>
-          </Box>
-          <Box paddingInline="16" paddingBlock="4 2">
-            Skatteoppgjør mottatt: {formaterDato(etteroppgjoer.behandling.opprettet)}
-          </Box>
-          <EtteroppgjoerOpplysninger opplysninger={etteroppgjoer.opplysninger} />
-        </>
-      )}
+      {mapResult(etteroppgjoerResult, {
+        pending: <Spinner label="Henter etteroppgjørbehandling" />,
+        success: (etteroppgjoer) => (
+          <>
+            <Box paddingInline="16" paddingBlock="16 4">
+              <Heading level="1" size="large">
+                Etteroppgjør {etteroppgjoer.behandling.aar}
+              </Heading>
+            </Box>
+            <Box paddingInline="16" paddingBlock="4 2">
+              Skatteoppgjør mottatt: {formaterDato(etteroppgjoer.behandling.opprettet)}
+            </Box>
+            <EtteroppgjoerOpplysninger opplysninger={etteroppgjoer.opplysninger} />
+          </>
+        ),
+      })}
 
       {isFailureHandler({
-        apiResult: etteroppgjoerStatus,
+        apiResult: etteroppgjoerResult,
         errorMessage: 'Kunne ikke hente forbehandling etteroppgjør',
       })}
     </>

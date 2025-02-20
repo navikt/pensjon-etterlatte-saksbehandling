@@ -100,13 +100,13 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
 ) = withUuidParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
-    when (brukerTokenInfo) {
+    when (val bruker = brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
                 behandlingTilgangsSjekk.harTilgangTilBehandling(
                     behandlingId,
                     skrivetilgang,
-                    brukerTokenInfo as Saksbehandler,
+                    bruker,
                 )
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)

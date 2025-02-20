@@ -496,6 +496,7 @@ class OppgaveService(
                     -> {
                         hendelser.sendMeldingForEndretEnhet(it.referanse, enhetsID)
                     }
+
                     else -> Unit
                 }
             }
@@ -710,6 +711,7 @@ class OppgaveService(
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         OppgaveType.MELDT_INN_ENDRING,
                         OppgaveType.OPPFOELGING,
+                        OppgaveType.ETTEROPPGJOER,
                         -> {
                             logger.info(
                                 "Tilbakestiller ikke oppgave av type ${it.type} " +

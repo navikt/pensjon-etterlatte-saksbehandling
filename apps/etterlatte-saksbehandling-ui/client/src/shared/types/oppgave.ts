@@ -95,6 +95,7 @@ export enum Oppgavetype {
   MANUELL_UTSENDING_BREV = 'MANUELL_UTSENDING_BREV',
   OPPFOELGING = 'OPPFOELGING',
   MELDT_INN_ENDRING = 'MELDT_INN_ENDRING',
+  ETTEROPPGJOER = 'ETTEROPPGJOER',
 }
 
 export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [

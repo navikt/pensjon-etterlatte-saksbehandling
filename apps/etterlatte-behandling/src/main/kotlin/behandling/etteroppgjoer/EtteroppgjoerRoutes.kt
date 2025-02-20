@@ -7,6 +7,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
@@ -16,9 +19,22 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
-fun Route.etteroppgjoerRoutes(service: EtteroppgjoerService) {
+enum class EtteroppgjoerToggles(
+    private val toggle: String,
+) : FeatureToggle {
+    ETTEROPPGJOER("etteroppjoer"),
+    ;
+
+    override fun key(): String = toggle
+}
+
+fun Route.etteroppgjoerRoutes(
+    service: EtteroppgjoerService,
+    featureToggleService: FeatureToggleService,
+) {
     route("/api/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
         get {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
                 val etteroppgjoer = service.hentEtteroppgjoer(etteroppgjoerId)
                 call.respond(etteroppgjoer)
@@ -28,11 +44,18 @@ fun Route.etteroppgjoerRoutes(service: EtteroppgjoerService) {
 
     route("/etteroppgjoer/{$SAKID_CALL_PARAMETER}") {
         post {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
                 service.opprettEtteroppgjoer(sakId)
                 call.respond(HttpStatusCode.OK)
             }
         }
+    }
+}
+
+fun sjekkEtteroppgjoerEnabled(featureToggleService: FeatureToggleService) {
+    if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
+        throw IkkeTillattException("ETTEROPPGJOER_NOT_ENABLED", "Etteroppgjør er ikke skrudd på i miljøet.")
     }
 }
 

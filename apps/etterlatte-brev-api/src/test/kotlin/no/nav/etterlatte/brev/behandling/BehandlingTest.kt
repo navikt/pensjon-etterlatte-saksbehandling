@@ -268,11 +268,11 @@ internal class BehandlingTest {
                         Opplysningstype.PERSONGALLERI_V1 to
                             opprettOpplysning(
                                 Persongalleri(
-                                    soeker = SOEKER_FOEDSELSNUMMER.value,
-                                    innsender = GJENLEVENDE_FOEDSELSNUMMER.value,
+                                    soeker = SOEKER_FOEDSELSNUMMER,
+                                    innsender = GJENLEVENDE_FOEDSELSNUMMER,
                                     soesken = listOf(),
-                                    avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
-                                    gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                                    avdoed = listOf(AVDOED_FOEDSELSNUMMER),
+                                    gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER),
                                     personerUtenIdent = listOf(),
                                 ).toJsonNode(),
                             ),

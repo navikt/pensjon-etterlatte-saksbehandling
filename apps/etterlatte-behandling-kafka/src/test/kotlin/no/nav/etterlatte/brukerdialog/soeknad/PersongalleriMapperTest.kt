@@ -16,11 +16,11 @@ internal class PersongalleriMapperTest {
 
         val persongalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
 
-        assertEquals("24111258054", persongalleri.soeker)
-        assertEquals(listOf("01498344336"), persongalleri.gjenlevende)
-        assertEquals("01498344336", persongalleri.innsender)
+        assertEquals("24111258054", persongalleri.soeker.value)
+        assertEquals(listOf("01498344336"), persongalleri.gjenlevende.map { it.value })
+        assertEquals("01498344336", persongalleri.innsender?.value)
         assertTrue(persongalleri.soesken.isEmpty())
-        assertEquals(listOf("08498224343"), persongalleri.avdoed)
+        assertEquals(listOf("08498224343"), persongalleri.avdoed.map { it.value })
     }
 
     @Test
@@ -29,11 +29,11 @@ internal class PersongalleriMapperTest {
 
         val persongalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
 
-        assertEquals("13848599411", persongalleri.soeker)
+        assertEquals("13848599411", persongalleri.soeker.value)
         assertTrue(persongalleri.gjenlevende.isEmpty())
-        assertEquals("13848599411", persongalleri.innsender)
-        assertEquals(listOf("19021370870"), persongalleri.soesken)
-        assertEquals(listOf("03428317423"), persongalleri.avdoed)
+        assertEquals("13848599411", persongalleri.innsender?.value)
+        assertEquals(listOf("19021370870"), persongalleri.soesken.map { it.value })
+        assertEquals(listOf("03428317423"), persongalleri.avdoed.map { it.value })
     }
 
     private fun getSoeknad(file: String): InnsendtSoeknad {

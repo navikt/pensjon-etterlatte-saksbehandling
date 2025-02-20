@@ -1604,8 +1604,8 @@ internal class TrygdetidServiceTest {
                                 randomUUID(),
                                 Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
                                 Persongalleri(
-                                    soeker = SOEKER_FOEDSELSNUMMER.value,
-                                    avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                                    soeker = SOEKER_FOEDSELSNUMMER,
+                                    avdoed = listOf(AVDOED_FOEDSELSNUMMER),
                                 ).toJsonNode(),
                             ),
                     ),
@@ -1656,7 +1656,7 @@ internal class TrygdetidServiceTest {
                                 randomUUID(),
                                 Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
                                 Persongalleri(
-                                    soeker = SOEKER_FOEDSELSNUMMER.value,
+                                    soeker = SOEKER_FOEDSELSNUMMER,
                                     avdoed = emptyList(),
                                 ).toJsonNode(),
                             ),
@@ -1712,7 +1712,7 @@ internal class TrygdetidServiceTest {
                                 randomUUID(),
                                 Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
                                 Persongalleri(
-                                    soeker = SOEKER_FOEDSELSNUMMER.value,
+                                    soeker = SOEKER_FOEDSELSNUMMER,
                                     avdoed = emptyList(),
                                 ).toJsonNode(),
                             ),
@@ -2145,7 +2145,7 @@ internal class TrygdetidServiceTest {
                                 randomUUID(),
                                 Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
                                 Persongalleri(
-                                    soeker = SOEKER_FOEDSELSNUMMER.value,
+                                    soeker = SOEKER_FOEDSELSNUMMER,
                                     avdoed = emptyList(),
                                 ).toJsonNode(),
                             ),

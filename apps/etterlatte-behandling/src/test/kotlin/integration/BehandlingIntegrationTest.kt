@@ -8,7 +8,6 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
-import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -19,8 +18,6 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.grunnlag.aldersovergang.IAldersovergangDao
 import no.nav.etterlatte.kafka.KafkaKey
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -55,8 +52,6 @@ abstract class BehandlingIntegrationTest {
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
         skjermingKlient: SkjermingKlient? = null,
-        aldersovergangDao: IAldersovergangDao? = null,
-        grunnlagService: GrunnlagService? = null,
     ) {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
@@ -121,8 +116,6 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
-                aldersovergangDaoProxy = aldersovergangDao ?: mockk(relaxed = true),
-                grunnlagService = grunnlagService ?: GrunnlagServiceTest(),
             )
     }
 

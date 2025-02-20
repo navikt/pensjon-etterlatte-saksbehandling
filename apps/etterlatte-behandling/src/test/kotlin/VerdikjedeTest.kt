@@ -149,7 +149,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sakId1,
-                                Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(soeker, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )

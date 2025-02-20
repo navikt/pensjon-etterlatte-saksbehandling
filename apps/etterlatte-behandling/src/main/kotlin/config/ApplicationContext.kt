@@ -33,6 +33,8 @@ import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -334,6 +336,7 @@ internal class ApplicationContext(
     val gjenopprettingMetrikkerDao = GjenopprettingMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl(autoClosingDatabase)
     val tilbakekrevingDao = TilbakekrevingDao(autoClosingDatabase)
+    val etteroppgjoerDao = EtteroppgjoerDao(autoClosingDatabase)
     val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
@@ -616,6 +619,12 @@ internal class ApplicationContext(
             brevService = brevService,
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekrevingHendelserService,
+        )
+
+    val etteroppgjoerService =
+        EtteroppgjoerService(
+            dao = etteroppgjoerDao,
+            sakDao = sakLesDao,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

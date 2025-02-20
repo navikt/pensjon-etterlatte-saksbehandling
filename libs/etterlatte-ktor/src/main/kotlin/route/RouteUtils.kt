@@ -29,6 +29,7 @@ const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
 const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
+const val ETTEROPPGJOER_CALL_PARAMETER = "etteroppgjoerId"
 
 enum class CallParamAuthId(
     val value: String,
@@ -39,6 +40,7 @@ enum class CallParamAuthId(
     KLAGEID(KLAGEID_CALL_PARAMETER),
     GENERELLBEHANDLINGID(GENERELLBEHANDLINGID_CALL_PARAMETER),
     TILBAKEKREVINGID(TILBAKEKREVINGID_CALL_PARAMETER),
+    ETTEROPPGJOERID(ETTEROPPGJOER_CALL_PARAMETER),
 }
 
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
@@ -85,6 +87,12 @@ inline val PipelineContext<*, ApplicationCall>.tilbakekrevingId: UUID
             "TilbakekrevingId er ikke i path params",
         )
 
+inline val PipelineContext<*, ApplicationCall>.etteroppgjoerId: UUID
+    get() =
+        call.parameters[ETTEROPPGJOER_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+            "EtteroppgjoerId er ikke i path params",
+        )
+
 val logger = LoggerFactory.getLogger("TilgangsSjekk")
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
@@ -92,10 +100,14 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
 ) = withUuidParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
-    when (brukerTokenInfo) {
+    when (val bruker = brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
-                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, skrivetilgang, brukerTokenInfo as Saksbehandler)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(
+                    behandlingId,
+                    skrivetilgang,
+                    bruker,
+                )
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)
             } else {

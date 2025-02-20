@@ -18,13 +18,16 @@ import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
+/**
+ * Behandling i denne konteksten er vedtaksbehandling, altså tilbakekreving, klage eller behandling
+ */
 fun Route.brevRoute(service: BrevService) {
     val logger = LoggerFactory.getLogger("BrevRoute")
 
     route("api/behandling/brev/{$BEHANDLINGID_CALL_PARAMETER}/vedtak") {
         post {
             kunSkrivetilgang {
-                logger.info("Oppretter vedtaksbrev for tilbakekreving behandling (sakId=$sakId, behandlingId=$behandlingId)")
+                logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
 
                 measureTimedValue {
                     service.opprettVedtaksbrev(behandlingId, sakId, brukerTokenInfo)
@@ -41,7 +44,7 @@ fun Route.brevRoute(service: BrevService) {
                     krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
                         "Kan ikke generere PDF uten brevId"
                     }
-                logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
+                logger.info("Genererer PDF for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
                     service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
@@ -68,12 +71,17 @@ fun Route.brevRoute(service: BrevService) {
             kunSkrivetilgang {
                 val brevId =
                     krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
-                        "Kan ikke tilbaketille PDF uten brevId"
+                        "Kan ikke tilbakestille PDF uten brevId"
                     }
+                val brevType =
+                    krevIkkeNull(call.request.queryParameters["brevType"]) {
+                        "Kan ikke tilbakestille PDF uten brevType"
+                    }.let { Brevtype.valueOf(it) }
+
                 logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
-                    service.tilbakestillVedtaksbrev(brevId, behandlingId, sakId, brukerTokenInfo)
+                    service.tilbakestillVedtaksbrev(brevId, behandlingId, sakId, brevType, brukerTokenInfo)
                 }.let { (brevPayload, varighet) ->
                     logger.info(
                         "Oppretting av nytt innhold til brev (id=$brevId) tok ${

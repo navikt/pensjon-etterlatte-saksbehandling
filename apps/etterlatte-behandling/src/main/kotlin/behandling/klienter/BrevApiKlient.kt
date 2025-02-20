@@ -9,6 +9,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -134,6 +135,8 @@ interface BrevApiKlient {
     suspend fun tilbakestillVedtaksbrev(
         brevID: BrevID,
         behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload
 }
@@ -376,6 +379,8 @@ class BrevApiKlientObo(
     override suspend fun tilbakestillVedtaksbrev(
         brevID: BrevID,
         behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload =
         put(
@@ -384,6 +389,12 @@ class BrevApiKlientObo(
                 resource.response?.let { deserialize(it.toJson()) }
                     ?: throw InternfeilException("Feil ved tilbakestilling av pdf vedtaksbrev")
             },
+            putBody =
+                ResetPayloadRequest(
+                    brevId = brevID,
+                    sakId = sakId,
+                    brevtype = brevtype,
+                ),
             brukerTokenInfo = brukerTokenInfo,
         )
 
@@ -443,4 +454,10 @@ data class KlageNotatRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettJournalpostDto(
     val journalpostId: String,
+)
+
+private data class ResetPayloadRequest(
+    val brevId: Long,
+    val sakId: SakId,
+    val brevtype: Brevtype,
 )

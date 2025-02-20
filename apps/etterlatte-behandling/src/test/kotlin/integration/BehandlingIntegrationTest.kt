@@ -13,6 +13,7 @@ import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -57,6 +58,7 @@ abstract class BehandlingIntegrationTest {
         skjermingKlient: SkjermingKlient? = null,
         aldersovergangDao: IAldersovergangDao? = null,
         grunnlagService: GrunnlagService? = null,
+        vedtakKlient: VedtakKlient? = null,
     ) {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
@@ -108,7 +110,7 @@ abstract class BehandlingIntegrationTest {
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                vedtakKlient = spyk(VedtakKlientTest()),
+                vedtakKlient = vedtakKlient ?: spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),

@@ -45,11 +45,13 @@ class BrevService(
             inTransaction {
                 vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
             }
-        when (vedtaksbehandlingType) {
+        return when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
-            else ->
+            else -> {
+                println("Kaller opprettVedtaksbrev... $sakId")
                 brevKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
+            }
         }
     }
 
@@ -116,6 +118,7 @@ class BrevService(
         brevID: BrevID,
         behandlingId: UUID,
         sakId: SakId,
+        brevType: Brevtype,
         bruker: BrukerTokenInfo,
     ): BrevPayload {
         if (bruker is Saksbehandler) {
@@ -128,12 +131,15 @@ class BrevService(
             }
         }
 
-        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+        val vedtaksbehandlingType =
+            inTransaction {
+                vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+            }
         return when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
             else ->
-                brevKlient.tilbakestillVedtaksbrev(brevID, behandlingId, bruker)
+                brevKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
         }
     }
 }

@@ -465,6 +465,8 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun tilbakestillVedtaksbrev(
         brevID: BrevID,
         behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         TODO("Not yet implemented")

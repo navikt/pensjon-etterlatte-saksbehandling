@@ -119,7 +119,7 @@ export const tilbakestillManuellPayload = async (props: {
   tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<any>> => {
   return apiClient.put(
-    `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}`,
+    `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}&brevtype=${props.brevtype}`,
     {}
   )
 }

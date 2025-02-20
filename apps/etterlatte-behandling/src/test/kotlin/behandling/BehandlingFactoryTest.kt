@@ -58,6 +58,7 @@ import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -203,7 +204,8 @@ internal class BehandlingFactoryTest {
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
                 status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                // Hvis søknad mottatt dato er null (ukjent) så skal oppgave opprettes med null for frist
+                soeknadMottattDato = null,
                 gyldighetsproeving = null,
                 virkningstidspunkt =
                     Virkningstidspunkt(
@@ -288,7 +290,8 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
                 gruppeId = "Avdoed",
-                frist = any(),
+                // Sjekker at oppgave opprettes med null for frist
+                frist = null,
             )
         }
         coVerify(exactly = 1) { grunnlagService.opprettGrunnlag(any(), any()) }
@@ -304,6 +307,7 @@ internal class BehandlingFactoryTest {
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
+        val tidspunktMottattBehandling = Tidspunkt.now().toLocalDatetimeUTC().minusDays(15L)
         val opprettetBehandling =
             Foerstegangsbehandling(
                 id = UUID.randomUUID(),
@@ -317,7 +321,7 @@ internal class BehandlingFactoryTest {
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
                 status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                soeknadMottattDato = tidspunktMottattBehandling,
                 gyldighetsproeving = null,
                 virkningstidspunkt =
                     Virkningstidspunkt(
@@ -391,7 +395,7 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
                 gruppeId = persongalleri.avdoed.single(),
-                frist = any(),
+                frist = tidspunktMottattBehandling.plusMonths(1L).toNorskTidspunkt(),
             )
         }
         coVerify { grunnlagService.opprettGrunnlag(any(), any()) }

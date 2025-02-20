@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import org.slf4j.LoggerFactory
 
 object PersongalleriMapper {
@@ -29,15 +30,17 @@ object PersongalleriMapper {
 
     private fun opprettPersongalleriOMS(soeknad: Omstillingsstoenad): Persongalleri =
         Persongalleri(
-            soeker = soeknad.soeker.foedselsnummer.svar.value,
-            innsender = soeknad.innsender.foedselsnummer.svar.value,
+            soeker = Folkeregisteridentifikator.of(soeknad.soeker.foedselsnummer.svar.value),
+            innsender = Folkeregisteridentifikator.of(soeknad.innsender.foedselsnummer.svar.value),
             avdoed =
                 listOfNotNull(
-                    soeknad.avdoed.foedselsnummer
-                        ?.svar
-                        ?.value,
+                    Folkeregisteridentifikator.of(
+                        soeknad.avdoed.foedselsnummer
+                            ?.svar
+                            ?.value,
+                    ),
                 ),
-            soesken = soeknad.barn.mapNotNull { it.foedselsnummer?.svar?.value },
+            soesken = soeknad.barn.mapNotNull { it.foedselsnummer?.svar?.value }.map { Folkeregisteridentifikator.of(it) },
         )
 
     private fun opprettPersongalleriBP(soeknad: Barnepensjon): Persongalleri {
@@ -53,14 +56,20 @@ object PersongalleriMapper {
             }
 
         return Persongalleri(
-            soeker = soekerFnr,
-            innsender = soeknad.innsender.foedselsnummer.svar.value,
-            soesken = soeknad.soesken.mapNotNull { it.foedselsnummer?.svar?.value },
-            avdoed = soeknad.foreldre.filter { it.type == PersonType.AVDOED }.mapNotNull { it.foedselsnummer?.svar?.value },
+            soeker = Folkeregisteridentifikator.of(soekerFnr),
+            innsender = Folkeregisteridentifikator.of(soeknad.innsender.foedselsnummer.svar.value),
+            soesken = soeknad.soesken.mapNotNull { it.foedselsnummer?.svar?.value }.map { Folkeregisteridentifikator.of(it) },
+            avdoed =
+                soeknad.foreldre
+                    .filter {
+                        it.type == PersonType.AVDOED
+                    }.mapNotNull { it.foedselsnummer?.svar?.value }
+                    .map { Folkeregisteridentifikator.of(it) },
             gjenlevende =
                 soeknad.foreldre
                     .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-                    .mapNotNull { it.foedselsnummer?.svar?.value },
+                    .mapNotNull { it.foedselsnummer?.svar?.value }
+                    .map { Folkeregisteridentifikator.of(it) },
         )
     }
 }

@@ -298,11 +298,11 @@ class PersonService(
                 )?.plus(gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() })
 
         return Persongalleri(
-            soeker = mottaker.foedselsnummer.value,
-            innsender = innsender?.value,
-            soesken = soesken.map { it.foedselsnummer.value },
-            avdoed = avdoede.map { it.foedselsnummer.value },
-            gjenlevende = gjenlevende.map { it.foedselsnummer.value },
+            soeker = mottaker.foedselsnummer,
+            innsender = innsender,
+            soesken = soesken.map { it.foedselsnummer },
+            avdoed = avdoede.map { it.foedselsnummer },
+            gjenlevende = gjenlevende.map { it.foedselsnummer },
             personerUtenIdent = if (alleTilknyttedePersonerUtenIdent.isNullOrEmpty()) null else alleTilknyttedePersonerUtenIdent,
         )
     }
@@ -355,11 +355,11 @@ class PersonService(
             )
 
         return Persongalleri(
-            soeker = mottaker.foedselsnummer.value,
-            innsender = innsender?.value,
-            soesken = listOf(),
-            avdoed = avdoede.map { it.foedselsnummer.value },
-            gjenlevende = listOf(mottaker.foedselsnummer.value) + levende.map { it.foedselsnummer.value },
+            soeker = mottaker.foedselsnummer,
+            innsender = innsender,
+            soesken = listOf(), // TODO: emptylist?
+            avdoed = avdoede.map { it.foedselsnummer },
+            gjenlevende = listOf(mottaker.foedselsnummer) + levende.map { it.foedselsnummer },
             personerUtenIdent = personerUtenIdent.ifEmpty { null },
         )
     }

@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -170,7 +171,7 @@ class DoedshendelseJobService(
         logger.info("Oppretter sak for dødshendelse ${doedshendelse.id} avdøde ${doedshendelse.avdoedFnr.maskerFnr()}")
         val opprettetSak =
             sakService.finnEllerOpprettSakMedGrunnlag(
-                fnr = doedshendelse.beroertFnr,
+                fnr = Folkeregisteridentifikator.of(doedshendelse.beroertFnr),
                 type = doedshendelse.sakTypeForEpsEllerBarn(),
             )
 
@@ -181,9 +182,9 @@ class DoedshendelseJobService(
             }
         val persongalleri =
             Persongalleri(
-                soeker = doedshendelse.beroertFnr,
-                avdoed = listOf(doedshendelse.avdoedFnr),
-                gjenlevende = listOfNotNull(gjenlevende),
+                soeker = Folkeregisteridentifikator.of(doedshendelse.beroertFnr),
+                avdoed = listOf(doedshendelse.avdoedFnr).map { Folkeregisteridentifikator.of(it) },
+                gjenlevende = listOfNotNull(gjenlevende).map { Folkeregisteridentifikator.of(it) },
             )
 
         runBlocking {

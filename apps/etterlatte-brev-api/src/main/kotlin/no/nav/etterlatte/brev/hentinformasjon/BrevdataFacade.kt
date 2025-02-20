@@ -90,13 +90,14 @@ class BrevdataFacade(
             val sak = sakDeferred.await()
             val brevutfallDto = brevutfallDeferred?.await()
             val verge = grunnlagService.hentVergeForSak(sak.sakType, brevutfallDto, grunnlag)
+            // TODO: skal personerisak mappes til folkeregisteridentifikator?
             val personerISak =
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),
                     soeker = grunnlag.mapSoeker(brevutfallDto?.aldersgruppe),
                     avdoede = grunnlag.mapAvdoede(),
                     verge = verge,
-                    gjenlevende = grunnlag.hentGjenlevende(),
+                    gjenlevende = grunnlag.hentGjenlevende().map { it.value },
                 )
             val vedtak = vedtakDeferred?.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()

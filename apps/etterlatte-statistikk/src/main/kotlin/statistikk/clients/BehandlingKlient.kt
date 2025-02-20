@@ -4,7 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.PerongalleriStatistikk
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import java.util.UUID
 
 interface BehandlingKlient {
-    suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
+    suspend fun hentPersongalleri(behandlingId: UUID): PerongalleriStatistikk
 
     suspend fun hentStatistikkBehandling(behandlingId: UUID): StatistikkBehandling
 
@@ -30,7 +30,8 @@ class BehandlingKlientImpl(
     private val behandlingHttpClient: HttpClient,
     private val behandlingUrl: String,
 ) : BehandlingKlient {
-    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri = hentStatistikkBehandling(behandlingId).toPersongalleri()
+    override suspend fun hentPersongalleri(behandlingId: UUID): PerongalleriStatistikk =
+        hentStatistikkBehandling(behandlingId).toPersongalleri()
 
     override suspend fun hentStatistikkBehandling(behandlingId: UUID): StatistikkBehandling =
         try {
@@ -72,7 +73,7 @@ class KunneIkkeHenteFraBehandling(
 ) : Exception(message, cause)
 
 fun StatistikkBehandling.toPersongalleri() =
-    Persongalleri(
+    PerongalleriStatistikk(
         soeker = this.soeker,
         innsender = this.innsender,
         soesken = this.soesken ?: emptyList(),

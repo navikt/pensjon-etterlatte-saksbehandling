@@ -137,7 +137,7 @@ class BehandlingFactory(
         gyldighetsproevingService.lagreGyldighetsproeving(behandling.id, gyldighetsvurdering)
 
         val mottattDato = LocalDateTime.parse(request.mottattDato)
-        val kilde = Grunnlagsopplysning.Privatperson(soeker, mottattDato.toTidspunkt())
+        val kilde = Grunnlagsopplysning.Privatperson(soeker.value, mottattDato.toTidspunkt())
 
         val opplysninger =
             mutableListOf(
@@ -244,7 +244,7 @@ class BehandlingFactory(
                                     behandling.id,
                                 )
                         },
-                    gruppeId = persongalleri.avdoed.firstOrNull(),
+                    gruppeId = persongalleri.avdoed.map { it.value }.firstOrNull(),
                     soeknadMottattDato = behandling.soeknadMottattDato,
                 )
 
@@ -495,7 +495,7 @@ class BehandlingFactory(
     fun finnGjeldendeEnhet(
         persongalleri: Persongalleri,
         sakType: SakType,
-    ) = sakService.finnGjeldendeEnhet(persongalleri.soeker, sakType)
+    ) = sakService.finnGjeldendeEnhet(persongalleri.soeker.value, sakType)
 
     private fun opprettFoerstegangsbehandling(
         behandlingerUnderBehandling: List<Behandling>,

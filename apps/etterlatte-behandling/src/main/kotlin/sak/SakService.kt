@@ -57,7 +57,7 @@ interface SakService {
     fun finnSaker(ident: String): List<Sak>
 
     fun finnEllerOpprettSakMedGrunnlag(
-        fnr: String,
+        fnr: Folkeregisteridentifikator,
         type: SakType,
         overstyrendeEnhet: Enhetsnummer? = null,
     ): Sak
@@ -250,11 +250,11 @@ class SakServiceImpl(
     }
 
     override fun finnEllerOpprettSakMedGrunnlag(
-        fnr: String,
+        fnr: Folkeregisteridentifikator,
         type: SakType,
         overstyrendeEnhet: Enhetsnummer?,
     ): Sak {
-        val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
+        val sak = finnEllerOpprettSak(fnr.value, type, overstyrendeEnhet)
 
         leggTilGrunnlag(sak)
 
@@ -277,7 +277,7 @@ class SakServiceImpl(
 
             grunnlagService.opprettEllerOppdaterGrunnlagForSak(
                 sak.id,
-                opplysningsbehov(sak, Persongalleri(sak.ident)),
+                opplysningsbehov(sak, Persongalleri(Folkeregisteridentifikator.of(sak.ident))),
             )
 
             grunnlagService.lagreNyeSaksopplysningerBareSak(
@@ -312,7 +312,7 @@ class SakServiceImpl(
             val oppdatertPersongalleri =
                 grunnlagService
                     .hentPersongalleri(sak.id)!!
-                    .copy(soeker = gjeldendeIdent.value)
+                    .copy(soeker = Folkeregisteridentifikator.of(gjeldendeIdent.value))
 
             grunnlagService.opprettEllerOppdaterGrunnlagForSak(sak.id, opplysningsbehov(sak, oppdatertPersongalleri))
         }

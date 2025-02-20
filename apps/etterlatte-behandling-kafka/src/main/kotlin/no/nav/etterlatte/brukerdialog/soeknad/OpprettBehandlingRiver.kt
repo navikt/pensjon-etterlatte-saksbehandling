@@ -46,7 +46,7 @@ internal class OpprettBehandlingRiver(
                     SoeknadType.BARNEPENSJON -> SakType.BARNEPENSJON
                 }
 
-            val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, sakType)
+            val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker.value, sakType)
 
             val behandlingId =
                 try {

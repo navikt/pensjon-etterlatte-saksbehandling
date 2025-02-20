@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.PerongalleriStatistikk
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -239,7 +239,7 @@ class StatistikkService(
             behandlingKlient.hentStatistikkBehandling(behandlingId)
         }
 
-    private fun hentPersongalleri(behandlingId: UUID): Persongalleri =
+    private fun hentPersongalleri(behandlingId: UUID): PerongalleriStatistikk =
         runBlocking {
             behandlingKlient.hentPersongalleri(behandlingId)
         }

@@ -54,6 +54,9 @@ import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -354,7 +357,7 @@ internal class SakServiceTest {
         val thrown =
             assertThrows<ResponseException> {
                 service.finnEllerOpprettSakMedGrunnlag(
-                    KONTANT_FOT.value,
+                    KONTANT_FOT,
                     SakType.BARNEPENSJON,
                 )
             }
@@ -381,7 +384,7 @@ internal class SakServiceTest {
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
-                service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
+                service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT, SakType.BARNEPENSJON)
             }
 
         thrown.arbeidsFordelingRequest.tema shouldBe SakType.BARNEPENSJON.tema
@@ -432,7 +435,7 @@ internal class SakServiceTest {
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
 
-        val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
+        val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT, SakType.BARNEPENSJON)
 
         sak shouldBe
             sak1
@@ -508,7 +511,7 @@ internal class SakServiceTest {
 
         val sak =
             service.finnEllerOpprettSakMedGrunnlag(
-                KONTANT_FOT.value,
+                KONTANT_FOT,
                 SakType.BARNEPENSJON,
             )
 
@@ -581,7 +584,7 @@ internal class SakServiceTest {
                 ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
+        val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT, SakType.BARNEPENSJON)
 
         sak shouldBe
             Sak(
@@ -885,7 +888,15 @@ internal class SakServiceTest {
 
             val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
 
-            val persongalleri = Persongalleri("soeker", "innsender", listOf("soesken"), listOf("avdoed"))
+            val persongalleri =
+                Persongalleri(
+                    SOEKER_FOEDSELSNUMMER,
+                    INNSENDER_FOEDSELSNUMMER,
+                    listOf(SOEKER_FOEDSELSNUMMER),
+                    listOf(
+                        AVDOED_FOEDSELSNUMMER,
+                    ),
+                )
 
             coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
                 PdlFolkeregisterIdentListe(
@@ -913,7 +924,7 @@ internal class SakServiceTest {
                 pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
                 grunnlagservice.opprettEllerOppdaterGrunnlagForSak(
                     sak.id,
-                    match { it.persongalleri.soeker == oppdatertSak.ident },
+                    match { it.persongalleri.soeker == Folkeregisteridentifikator.of(oppdatertSak.ident) },
                 )
             }
 

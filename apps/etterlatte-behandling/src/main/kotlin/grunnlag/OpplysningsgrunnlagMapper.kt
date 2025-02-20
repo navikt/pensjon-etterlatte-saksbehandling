@@ -32,7 +32,7 @@ class OpplysningsgrunnlagMapper(
         val opplysninger = grupper.map { GruppertHendelser(it) }
 
         val (personopplysninger, saksopplysninger) = opplysninger.partition { it.fnr !== null }
-        val (soeker, familie) = personopplysninger.partition { it.fnr!!.value == persongalleri.soeker }
+        val (soeker, familie) = personopplysninger.partition { it.fnr!! == persongalleri.soeker }
 
         val soekerMap = soeker.associateBy({ it.opplysningstype }, { it.opplysning })
         val familieMap =

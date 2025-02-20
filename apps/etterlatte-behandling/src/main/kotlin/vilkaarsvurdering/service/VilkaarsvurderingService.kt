@@ -453,7 +453,6 @@ class VilkaarsvurderingService(
         val avdoedeForGjeldendeBehandling: List<Folkeregisteridentifikator> =
             runBlocking { grunnlagService.hentPersongalleri(gjeldendeBehandling.sak.id)!! }
                 .avdoed
-                .map { Folkeregisteridentifikator.of(it) }
 
         if (avdoedeForGjeldendeBehandling.isEmpty()) {
             logger.info("Ingen avdøde funnet for gjeldende behandling $behandlingId, det er ikke aktuelt å kopiere vilkår")
@@ -497,7 +496,6 @@ class VilkaarsvurderingService(
                 val avdoedeForKandidatSak =
                     runBlocking { grunnlagService.hentPersongalleri(sakId)!! }
                         .avdoed
-                        .map { Folkeregisteridentifikator.of(it) }
                         .toSet()
 
                 // Det er et kriterie at saken som skal brukes som utgangspunkt for å kopiere vilkår har akkurat de

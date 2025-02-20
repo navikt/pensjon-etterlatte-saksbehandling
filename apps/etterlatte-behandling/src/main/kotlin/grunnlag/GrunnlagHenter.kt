@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -32,25 +31,24 @@ class GrunnlagHenter(
             val persongalleri = opplysningsbehov.persongalleri
             val persongalleriFraPdl =
                 pdltjenesterKlient.hentPersongalleri(
-                    opplysningsbehov.persongalleri.soeker,
+                    opplysningsbehov.persongalleri.soeker.value,
                     opplysningsbehov.sakType,
-                    opplysningsbehov.persongalleri.innsender,
+                    opplysningsbehov.persongalleri.innsender?.value,
                 )
             val sakType = opplysningsbehov.sakType
             val requesterAvdoed =
                 persongalleri.avdoed.map {
-                    hentPersonAsync(it, PersonRolle.AVDOED, sakType)
+                    hentPersonAsync(it.value, PersonRolle.AVDOED, sakType)
                 }
             val requesterGjenlevende =
                 persongalleri.gjenlevende.map {
-                    hentPersonAsync(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType)
+                    hentPersonAsync(it.value, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType)
                 }
-            val soeker = hentPersonAsync(persongalleri.soeker, soekerRolle(sakType), opplysningsbehov.sakType)
+            val soeker = hentPersonAsync(persongalleri.soeker.value, soekerRolle(sakType), opplysningsbehov.sakType)
             val innsender =
                 persongalleri.innsender
-                    ?.takeIf { Folkeregisteridentifikator.isValid(it) }
                     ?.let { innsenderFnr ->
-                        hentPersonAsync(innsenderFnr, PersonRolle.INNSENDER, sakType)
+                        hentPersonAsync(innsenderFnr.value, PersonRolle.INNSENDER, sakType)
                     }
 
             val soekerPersonInfo =
@@ -146,18 +144,7 @@ class GrunnlagHenter(
             kilde = overstyrtKilde,
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
-            opplysning =
-                if (Folkeregisteridentifikator.isValid(this.innsender)) {
-                    this.toJsonNode()
-                } else {
-                    if (this.innsender == null) {
-                        this.toJsonNode()
-                    } else {
-                        // TODO: Denne skal slettes om vi ikke får noen flere i loggen, ref V24__fjerne_innsender_systemsaker.sql
-                        logger.error("Ugyldig ident er lagret, se relatert for opplysninstypeid: $opplysningid")
-                        this.copy(innsender = null).toJsonNode()
-                    }
-                },
+            opplysning = this.toJsonNode(),
             attestering = null,
             fnr = null,
             periode = null,

@@ -1,29 +1,29 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.FolkeregisteridentifikatorValidator
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import java.time.LocalDate
 
 /*
-    innsender: Denne brukes til å indikere system eller saksbehandler ident(manuelt opprettet behandling) i tillegg til faktisk innsender(innbygger)
+    innsender: Denne brukes til å indikere system eller saksbehandler
+    ident(manuelt opprettet behandling) i tillegg til faktisk innsender(innbygger)
  */
 
-// TODO: gjøre om alle strings her til Folkeregister identifikator
 data class Persongalleri(
-    val soeker: String,
-    val innsender: String? = null,
-    val soesken: List<String> = emptyList(),
-    val avdoed: List<String> = emptyList(),
-    val gjenlevende: List<String> = emptyList(),
+    val soeker: Folkeregisteridentifikator,
+    val innsender: Folkeregisteridentifikator? = null,
+    val soesken: List<Folkeregisteridentifikator> = emptyList(),
+    val avdoed: List<Folkeregisteridentifikator> = emptyList(),
+    val gjenlevende: List<Folkeregisteridentifikator> = emptyList(),
     val personerUtenIdent: List<PersonUtenIdent>? = null,
     val annenForelder: AnnenForelder? = null,
 ) {
     override fun toString(): String =
-        "Persongalleri(soeker=${soeker.maskerFnr()}," +
-            "innsender=${innsender?.maskerFnr()}," +
-            "soesken=${soesken.map { it.maskerFnr() }}," +
-            "avdoed=${avdoed.map { it.maskerFnr() }}," +
-            "gjenlevende=${gjenlevende.map { it.maskerFnr() }}," +
+        "Persongalleri(soeker=${soeker.value}," +
+            "innsender=${innsender?.value}," +
+            "soesken=${soesken.map { it.value }}," +
+            "avdoed=${avdoed.map { it.value }}," +
+            "gjenlevende=${gjenlevende.map { it.value }}," +
             "personerUtenIdent=${personerUtenIdent?.map { it.person.foedselsdato.toString() }})"
 
     fun validerFoedselesnummere(): Boolean =
@@ -33,8 +33,8 @@ data class Persongalleri(
             avdoed.all { validateFnrSimple(it) } &&
             gjenlevende.all { validateFnrSimple(it) }
 
-    fun hentAlleIdentifikatorer(): List<String> {
-        val idents = mutableListOf<String?>(soeker, innsender)
+    fun hentAlleIdentifikatorer(): List<Folkeregisteridentifikator> {
+        val idents = mutableListOf<Folkeregisteridentifikator?>(soeker, innsender)
         idents.addAll(soesken)
         idents.addAll(avdoed)
         idents.addAll(gjenlevende)
@@ -42,11 +42,12 @@ data class Persongalleri(
     }
 }
 
-fun validateFnrSimple(fnr: String?): Boolean {
+fun validateFnrSimple(fnr: Folkeregisteridentifikator?): Boolean {
     if (fnr == null) {
         return true
     }
-    return FolkeregisteridentifikatorValidator.isValid(fnr)
+
+    return FolkeregisteridentifikatorValidator.isValid(fnr.value)
 }
 
 enum class RelativPersonrolle {

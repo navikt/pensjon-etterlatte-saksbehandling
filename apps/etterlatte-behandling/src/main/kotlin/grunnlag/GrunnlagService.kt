@@ -237,10 +237,10 @@ class GrunnlagServiceImpl(
 
     private fun Persongalleri.inkluderer(it: Grunnlagsopplysning<JsonNode>) =
         when (it.opplysningType) {
-            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } == true
-            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } == true
-            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } == true
-            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } == true
+            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr) } == true
+            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr) } == true
+            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr } == true
+            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr } == true
             else -> false
         }
 
@@ -249,7 +249,7 @@ class GrunnlagServiceImpl(
             opplysningDao
                 .finnAllePersongalleriHvorPersonFinnes(fnr)
                 .map { it.sakId to deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
-                .map { (sakId, persongalleri) -> SakidOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
+                .map { (sakId, persongalleri) -> SakidOgRolle(sakId, rolle = mapTilRolle(fnr, persongalleri)) }
                 .let { PersonMedSakerOgRoller(fnr.value, it) }
 
         result.sakiderOgRoller.filter { it.rolle == Saksrolle.UKJENT }.forEach {
@@ -413,25 +413,26 @@ class GrunnlagServiceImpl(
         persongalleriISak: Persongalleri,
         persongalleriPdl: Persongalleri,
     ): List<MismatchPersongalleri> {
+        persongalleriISak.soeker
         val forskjellerSoeker =
             forskjellerMellomPersonerPdlOgSak(
-                personerPdl = listOf(persongalleriPdl.soeker),
-                personerSak = listOf(persongalleriISak.soeker),
+                personerPdl = listOf(persongalleriPdl.soeker.value),
+                personerSak = listOf(persongalleriISak.soeker.value),
             )
         val forskjellerAvdoede =
             forskjellerMellomPersonerPdlOgSak(
-                personerPdl = persongalleriPdl.avdoed,
-                personerSak = persongalleriISak.avdoed,
+                personerPdl = persongalleriPdl.avdoed.map { it.value },
+                personerSak = persongalleriISak.avdoed.map { it.value },
             )
         val forskjellerGjenlevende =
             forskjellerMellomPersonerPdlOgSak(
-                personerPdl = persongalleriPdl.gjenlevende,
-                personerSak = persongalleriISak.gjenlevende,
+                personerPdl = persongalleriPdl.gjenlevende.map { it.value },
+                personerSak = persongalleriISak.gjenlevende.map { it.value },
             )
         val forskjellerSoesken =
             forskjellerMellomPersonerPdlOgSak(
-                personerPdl = persongalleriPdl.soesken,
-                personerSak = persongalleriISak.soesken,
+                personerPdl = persongalleriPdl.soesken.map { it.value },
+                personerSak = persongalleriISak.soesken.map { it.value },
             )
         return listOfNotNull(
             MismatchPersongalleri.ENDRET_SOEKER_FNR.takeIf { forskjellerSoeker.kunPdl.isNotEmpty() },
@@ -461,7 +462,7 @@ class GrunnlagServiceImpl(
     }
 
     private fun mapTilRolle(
-        fnr: String,
+        fnr: Folkeregisteridentifikator,
         persongalleri: Persongalleri,
     ): Saksrolle =
         when (fnr) {

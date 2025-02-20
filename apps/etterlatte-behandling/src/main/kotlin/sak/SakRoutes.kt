@@ -170,7 +170,7 @@ internal fun Route.sakSystemRoutes(
         withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType =
                 enumValueOf(krevIkkeNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
-            val message = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(fnr = fnr.value, type) }
+            val message = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(fnr = fnr, type) }
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/saker")
             call.respond(message)
         }
@@ -394,7 +394,7 @@ internal fun Route.sakWebRoutes(
                     val sak =
                         inTransaction {
                             if (opprettHvisIkkeFinnes) {
-                                sakService.finnEllerOpprettSakMedGrunnlag(fnr.value, type)
+                                sakService.finnEllerOpprettSakMedGrunnlag(fnr, type)
                             } else {
                                 sakService.finnSak(fnr.value, type)
                             }

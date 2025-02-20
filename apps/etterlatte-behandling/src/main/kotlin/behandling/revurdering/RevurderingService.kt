@@ -249,7 +249,7 @@ class RevurderingService(
                                 merknad =
                                     begrunnelse ?: revurderingAarsak.lesbar(),
                                 frist = frist,
-                                gruppeId = persongalleri.avdoed.firstOrNull(),
+                                gruppeId = persongalleri.avdoed.map { it.value }.firstOrNull(),
                             )
                         if (saksbehandlerIdent != null &&
                             (prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn) ||

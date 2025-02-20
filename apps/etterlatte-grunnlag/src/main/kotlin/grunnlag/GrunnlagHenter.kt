@@ -32,25 +32,25 @@ class GrunnlagHenter(
             val persongalleri = opplysningsbehov.persongalleri
             val persongalleriFraPdl =
                 pdltjenesterKlient.hentPersongalleri(
-                    opplysningsbehov.persongalleri.soeker,
+                    opplysningsbehov.persongalleri.soeker.value,
                     opplysningsbehov.sakType,
-                    opplysningsbehov.persongalleri.innsender,
+                    opplysningsbehov.persongalleri.innsender?.value,
                 )
             val sakType = opplysningsbehov.sakType
             val requesterAvdoed =
                 persongalleri.avdoed.map {
-                    hentPersonAsync(it, PersonRolle.AVDOED, sakType)
+                    hentPersonAsync(it.value, PersonRolle.AVDOED, sakType)
                 }
             val requesterGjenlevende =
                 persongalleri.gjenlevende.map {
-                    hentPersonAsync(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType)
+                    hentPersonAsync(it.value, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType)
                 }
-            val soeker = hentPersonAsync(persongalleri.soeker, soekerRolle(sakType), opplysningsbehov.sakType)
+            val soeker = hentPersonAsync(persongalleri.soeker.value, soekerRolle(sakType), opplysningsbehov.sakType)
             val innsender =
                 persongalleri.innsender
-                    ?.takeIf { Folkeregisteridentifikator.isValid(it) }
+                    ?.takeIf { Folkeregisteridentifikator.isValid(it.value) }
                     ?.let { innsenderFnr ->
-                        hentPersonAsync(innsenderFnr, PersonRolle.INNSENDER, sakType)
+                        hentPersonAsync(innsenderFnr.value, PersonRolle.INNSENDER, sakType)
                     }
 
             val soekerPersonInfo =
@@ -147,7 +147,7 @@ class GrunnlagHenter(
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
             opplysning =
-                if (Folkeregisteridentifikator.isValid(this.innsender)) {
+                if (Folkeregisteridentifikator.isValid(this.innsender?.value)) {
                     this.toJsonNode()
                 } else {
                     if (this.innsender == null) {

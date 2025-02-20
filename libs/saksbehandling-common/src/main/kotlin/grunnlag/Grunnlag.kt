@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
 
@@ -47,7 +48,7 @@ class Grunnlag(
     private fun hentFamiliemedlemNullable(personRolle: PersonRolle): Grunnlagsdata<JsonNode>? {
         val aktuellePersoner = folkMedRolle(personRolle)
         return familie
-            .filter { it.hentFoedselsnummer()?.verdi?.value in aktuellePersoner }
+            .filter { it.hentFoedselsnummer()?.verdi in aktuellePersoner }
             .find { it.hentPersonrolle()?.verdi == personRolle }
     }
 
@@ -59,14 +60,14 @@ class Grunnlag(
         val aktuellePersoner = folkMedRolle(personRolle)
 
         return familie
-            .filter { it.hentFoedselsnummer()?.verdi?.value in aktuellePersoner }
+            .filter { it.hentFoedselsnummer()?.verdi in aktuellePersoner }
             .filter { it.hentPersonrolle()?.verdi == personRolle }
     }
 
     fun hentVersjon() = metadata.versjon
 }
 
-fun Grunnlag.folkMedRolle(rolle: PersonRolle): List<String> {
+fun Grunnlag.folkMedRolle(rolle: PersonRolle): List<Folkeregisteridentifikator> {
     val persongalleri = this.sak.hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)?.verdi
     return when (rolle) {
         PersonRolle.INNSENDER -> listOfNotNull(persongalleri?.innsender)

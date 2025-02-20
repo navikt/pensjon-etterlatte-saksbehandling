@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.PerongalleriStatistikk
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
@@ -122,7 +122,7 @@ class StatistikkServiceTest {
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
-            Persongalleri(
+            PerongalleriStatistikk(
                 "12312312312",
             )
         val mockBeregning =
@@ -192,7 +192,7 @@ class StatistikkServiceTest {
 
         every { sakRepo.lagreRad(any()) } returnsArgument 0
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
-            Persongalleri(
+            PerongalleriStatistikk(
                 "12312312312",
             )
         val mockBeregning =
@@ -270,7 +270,7 @@ class StatistikkServiceTest {
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
-            Persongalleri(
+            PerongalleriStatistikk(
                 "12312312312",
             )
         val mockBeregning =

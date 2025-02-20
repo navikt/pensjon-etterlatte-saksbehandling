@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
@@ -70,8 +69,7 @@ class OppdaterTilgangService(
 
         val identerMedGradering =
             alleIdenter
-                .filter { Folkeregisteridentifikator.isValid(it) }
-                .map { hentGraderingForIdent(it, sak) }
+                .map { hentGraderingForIdent(it.value, sak) }
 
         if (identerMedGradering.any { it.harAdressebeskyttelse() }) {
             val hoyesteGradering = identerMedGradering.hentPrioritertGradering()
@@ -96,7 +94,7 @@ class OppdaterTilgangService(
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(SakMedEnhet(sakId, enhet.enhetNr)))
             }
         } else {
-            val egenAnsattSkjerming = alleIdenter.map { fnr -> sjekkOmIdentErSkjermet(fnr) }
+            val egenAnsattSkjerming = alleIdenter.map { fnr -> sjekkOmIdentErSkjermet(fnr.value) }
             sakService.oppdaterAdressebeskyttelse(sakId, identerMedGradering.hentPrioritertGradering())
             if (egenAnsattSkjerming.any { it }) {
                 sakService.oppdaterSkjerming(sakId, true)

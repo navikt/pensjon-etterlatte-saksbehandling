@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
@@ -59,7 +60,7 @@ fun Grunnlag.mapSoeker(aldersgruppe: Aldersgruppe?): Soeker =
         )
     }
 
-fun Grunnlag.hentGjenlevende(): List<String> {
+fun Grunnlag.hentGjenlevende(): List<Folkeregisteridentifikator> {
     with(this.sak) {
         val opplysning = hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)
         val persongalleri =
@@ -80,7 +81,7 @@ fun Grunnlag.mapInnsender(): Innsender? =
             }
 
         persongalleri.innsender?.let {
-            Innsender(fnr = Foedselsnummer(it))
+            Innsender(fnr = Foedselsnummer(it.value))
         }
     }
 

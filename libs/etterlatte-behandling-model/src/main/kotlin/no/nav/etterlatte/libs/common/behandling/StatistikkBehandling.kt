@@ -32,6 +32,14 @@ data class StatistikkBehandling(
     val pesysId: Long?,
 )
 
+data class PerongalleriStatistikk(
+    val soeker: String,
+    val innsender: String? = null,
+    val soesken: List<String> = emptyList(),
+    val avdoed: List<String> = emptyList(),
+    val gjenlevende: List<String> = emptyList(),
+)
+
 enum class BehandlingHendelseType : EventnameHendelseType {
     OPPRETTET,
     PAA_VENT,

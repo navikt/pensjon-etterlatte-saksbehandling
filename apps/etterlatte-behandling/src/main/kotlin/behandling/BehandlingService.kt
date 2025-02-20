@@ -53,6 +53,7 @@ import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -617,8 +618,8 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo,
     ) { galleri ->
         galleri.copy(
-            avdoed = redigertFamilieforhold.avdoede,
-            gjenlevende = redigertFamilieforhold.gjenlevende,
+            avdoed = redigertFamilieforhold.avdoede.map { Folkeregisteridentifikator.of(it) },
+            gjenlevende = redigertFamilieforhold.gjenlevende.map { Folkeregisteridentifikator.of(it) },
         )
     }
 

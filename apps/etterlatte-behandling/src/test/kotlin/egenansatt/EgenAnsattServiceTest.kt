@@ -23,7 +23,6 @@ import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
@@ -154,19 +153,19 @@ internal class EgenAnsattServiceTest(
 
     @Test
     fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
-        val fnr2 = AVDOED2_FOEDSELSNUMMER.value
+        val fnr = AVDOED_FOEDSELSNUMMER
+        val fnr2 = AVDOED2_FOEDSELSNUMMER
 
-        coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(fnr) } returns
+        coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(fnr.value) } returns
             PdlFolkeregisterIdentListe(
                 listOf(
-                    PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr)),
+                    PdlIdentifikator.FolkeregisterIdent(fnr),
                 ),
             )
-        coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(fnr2) } returns
+        coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(fnr2.value) } returns
             PdlFolkeregisterIdentListe(
                 listOf(
-                    PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr)),
+                    PdlIdentifikator.FolkeregisterIdent(fnr),
                 ),
             )
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
@@ -177,10 +176,10 @@ internal class EgenAnsattServiceTest(
         coEvery { grunnlagService.hentPersongalleri(bruktSak.id) } returns persongalleri
         every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) } just Runs
 
-        assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
-        assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))
+        assertNotNull(sakService.finnSak(fnr.value, SakType.BARNEPENSJON))
+        assertNotNull(sakService.finnSak(fnr2.value, SakType.BARNEPENSJON))
 
-        val egenAnsattSkjermet = EgenAnsattSkjermet(fnr, Tidspunkt.now(), true)
+        val egenAnsattSkjermet = EgenAnsattSkjermet(fnr.value, Tidspunkt.now(), true)
         egenAnsattService.haandterSkjerming(egenAnsattSkjermet)
 
         verify(exactly = 1) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }

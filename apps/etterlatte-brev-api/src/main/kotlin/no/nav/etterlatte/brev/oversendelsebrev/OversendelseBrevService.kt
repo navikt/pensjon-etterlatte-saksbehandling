@@ -138,7 +138,7 @@ class OversendelseBrevServiceImpl(
                 soeker = grunnlag.mapSoeker(null),
                 avdoede = grunnlag.mapAvdoede(),
                 verge = verge,
-                gjenlevende = grunnlag.hentGjenlevende(),
+                gjenlevende = grunnlag.hentGjenlevende().map { it.value },
             )
         return Pair(grunnlag.mapSpraak(), personerISak)
     }

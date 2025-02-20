@@ -63,7 +63,7 @@ export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props)
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={5}>
-                <Heading size="small">Avøde har ingen barn</Heading>
+                <Heading size="small">Avdøde har ingen barn</Heading>
               </Table.DataCell>
             </Table.Row>
           )}

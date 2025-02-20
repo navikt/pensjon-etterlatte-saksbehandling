@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -163,6 +164,11 @@ class KlageServiceImpl(
             sakId = sakId,
             kilde = OppgaveKilde.EKSTERN,
             type = OppgaveType.KLAGE,
+            frist =
+                innkommendeKlage.mottattDato
+                    .plusMonths(1L)
+                    .atStartOfDay()
+                    .toNorskTidspunkt(),
             merknad = null,
         )
 

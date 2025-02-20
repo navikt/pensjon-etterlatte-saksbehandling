@@ -92,7 +92,7 @@ class TrygdetidBeregningServiceTest {
                 nordiskKonvensjon = false,
             )
 
-        beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe null
+        beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe 0
     }
 
     @Test

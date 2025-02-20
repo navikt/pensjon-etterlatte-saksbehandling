@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
+import no.nav.etterlatte.behandling.etteroppgjoer.etteroppgjoerRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
@@ -171,6 +172,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         featureToggleService = applicationContext.featureToggleService,
     )
     tilbakekrevingRoutes(service = applicationContext.tilbakekrevingService)
+    etteroppgjoerRoutes(service = applicationContext.etteroppgjoerService)
     behandlingRoutes(
         behandlingService = applicationContext.behandlingService,
         gyldighetsproevingService = applicationContext.gyldighetsproevingService,
@@ -271,6 +273,9 @@ private fun Route.settOppTilganger(
             }
             harTilgangTilTilbakekreving = { tilbakekrevingId, saksbehandlerMedRoller ->
                 tilgangService.harTilgangTilTilbakekreving(tilbakekrevingId, saksbehandlerMedRoller)
+            }
+            harTilgangTilEtteroppgjoer = { etteroppgjoerId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilEtteroppgjoer(etteroppgjoerId, saksbehandlerMedRoller)
             }
         }
     }

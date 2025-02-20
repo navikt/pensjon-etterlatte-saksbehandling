@@ -14,6 +14,15 @@ enum class GcpEnv(
     DEV("dev-gcp"),
 }
 
+enum class TestKey : EnvEnum {
+    TEST_RUNNER,
+    ;
+
+    override fun key() = name
+}
+
+fun isTestRunner(): Boolean = Miljoevariabler.systemEnv()[TestKey.TEST_RUNNER] == "true"
+
 fun isDev(): Boolean = clusterNavn() == GcpEnv.DEV.env
 
 fun isProd(): Boolean = clusterNavn() == GcpEnv.PROD.env

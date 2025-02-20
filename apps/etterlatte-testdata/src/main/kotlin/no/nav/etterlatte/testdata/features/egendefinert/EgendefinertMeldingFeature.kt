@@ -59,7 +59,8 @@ object EgendefinertMeldingFeature : TestDataFeature {
                         if (hendelseType == "omregning") {
                             val jsonNode = objectMapper.readTree(json)
                             jsonNode.get(HENDELSE_DATA_KEY).let {
-                                val omregningData: OmregningData = objectMapper.treeToValue(it)
+                                // Sjekker at vi kan parse egendefinert melding som OmregningData
+                                objectMapper.treeToValue<OmregningData>(it)
                             }
                         }
 

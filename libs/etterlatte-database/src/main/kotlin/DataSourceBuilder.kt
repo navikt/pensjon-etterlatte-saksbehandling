@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.isProd
+import no.nav.etterlatte.libs.common.isTestRunner
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import org.slf4j.LoggerFactory
@@ -56,7 +57,8 @@ fun DataSource.migrate(processExiter: () -> Unit = { exitProcess(1) }): MigrateR
                 if (appIsInGCP()) {
                     dblocationsMiljoe.add("db/gcp")
                 }
-                if (isDev() || !appIsInGCP()) {
+                // !appIsInGCP() er for å kunne kjøre lokalt med migreringer i dev.
+                if (!isTestRunner() && (isDev() || !appIsInGCP())) {
                     dblocationsMiljoe.add("db/dev")
                 }
                 if (isProd()) {

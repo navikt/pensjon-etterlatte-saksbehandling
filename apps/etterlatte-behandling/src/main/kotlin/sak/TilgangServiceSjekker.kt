@@ -41,6 +41,11 @@ interface TilgangServiceSjekker {
         tilbakekrevingId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
+
+    fun harTilgangTilEtteroppgjoer(
+        etteroppgjoerId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
 }
 
 class TilgangServiceSjekkerImpl(
@@ -93,6 +98,15 @@ class TilgangServiceSjekkerImpl(
     ): Boolean {
         val sakMedGraderingOgSkjermet =
             dao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId) ?: throw GenerellIkkeFunnetException()
+        return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
+    }
+
+    override fun harTilgangTilEtteroppgjoer(
+        etteroppgjoerId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean {
+        val sakMedGraderingOgSkjermet =
+            dao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(etteroppgjoerId) ?: throw GenerellIkkeFunnetException()
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 

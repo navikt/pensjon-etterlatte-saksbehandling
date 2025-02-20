@@ -40,10 +40,10 @@ export interface PersongalleriSamsvar {
   kilde: GrunnlagKilde
   persongalleriPdl: Persongalleri | null
   kildePdl: GrunnlagKilde | null
-  problemer: MismatchPersongalleri[]
+  problemer: PersongalleriProblem[]
 }
 
-export type MismatchPersongalleri =
+export type PersongalleriProblem =
   | 'ENDRET_SOEKER_FNR'
   | 'MANGLER_GJENLEVENDE'
   | 'MANGLER_AVDOED'

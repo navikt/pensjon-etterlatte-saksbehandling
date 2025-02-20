@@ -1,4 +1,4 @@
-import { MismatchPersongalleri, PersongalleriSamsvar } from '~shared/types/grunnlag'
+import { PersongalleriProblem, PersongalleriSamsvar } from '~shared/types/grunnlag'
 import { Alert, BodyShort, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
@@ -62,7 +62,7 @@ const PersonUtenIdentWrapper = styled.div`
   margin-bottom: 1rem;
 `
 
-const erAvvikRelevantForSaktype = (avvik: MismatchPersongalleri, sakType: SakType) => {
+const erAvvikRelevantForSaktype = (avvik: PersongalleriProblem, sakType: SakType) => {
   switch (avvik) {
     case 'ENDRET_SOEKER_FNR':
       return true

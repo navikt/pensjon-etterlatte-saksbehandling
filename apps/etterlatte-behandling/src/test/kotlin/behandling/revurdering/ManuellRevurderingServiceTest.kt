@@ -51,7 +51,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -82,7 +81,9 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
 
         coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(standardEnhet)
 
-        startServer(norg2Klient = norg2Klient)
+        startServer(
+            norg2Klient = norg2Klient,
+        )
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
@@ -163,8 +164,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
 
         coVerify {
-            grunnlagService.hentPersongalleri(any<SakId>())
-            grunnlagService.opprettGrunnlag(revurdering.id, any())
+            grunnlagService.opprettGrunnlag(any(), any())
+            grunnlagService.hentPersongalleri(sak.id)
+            grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
+            grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
         }
         verify {
             oppgaveService.opprettOppgave(
@@ -286,8 +289,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
             coVerify {
+                grunnlagService.opprettGrunnlag(any(), any())
                 grunnlagService.hentPersongalleri(sak.id)
-                grunnlagService.opprettGrunnlag(revurdering.id, any())
+                grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
+                grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
@@ -397,8 +402,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 )
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
             coVerify {
+                grunnlagService.opprettGrunnlag(any(), any())
                 grunnlagService.hentPersongalleri(sak.id)
-                grunnlagService.opprettGrunnlag(behandling!!.id, any())
+                grunnlagService.lagreNyePersonopplysninger(sak.id, behandling!!.id, any(), any())
+                grunnlagService.lagreNyeSaksopplysninger(sak.id, behandling.id, any())
                 grunnlagService.laasTilVersjonForBehandling(revurdering.id, behandling.id)
             }
             verify {
@@ -494,8 +501,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
 
         coVerify {
+            grunnlagService.opprettGrunnlag(any(), any())
             grunnlagService.hentPersongalleri(sak.id)
-            grunnlagService.opprettGrunnlag(revurdering.id, any())
+            grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
+            grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
         }
         verify {
             oppgaveService.opprettOppgave(

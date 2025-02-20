@@ -18,15 +18,6 @@ export const hentLevendeSoeskenFraAvdoedeForSoeker = (avdoede: Personopplysning[
   return unikeSoesken
 }
 
-export const hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag = (avdoede: Personopplysning[], soekerFnr: string) => {
-  const alleAvdoedesBarn = avdoede.flatMap((a) => a.opplysning.avdoedesBarn ?? [])
-  const soeskenliste = alleAvdoedesBarn.filter((person) => person.foedselsnummer !== soekerFnr)
-  const unikeSoesken = soeskenliste.filter(
-    (b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer)
-  )
-  return unikeSoesken.filter((soesken) => soesken.doedsdato === null)
-}
-
 export interface IFamilieRelasjon {
   ansvarligeForeldre?: string[]
   foreldre?: string[]

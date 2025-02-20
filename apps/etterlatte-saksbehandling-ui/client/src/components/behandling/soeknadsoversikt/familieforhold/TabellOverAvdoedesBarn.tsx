@@ -1,4 +1,4 @@
-import { formaterNavn, IPdlPerson } from '~shared/types/Person'
+import { formaterNavn, hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { BodyShort, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { ChildHairEyesIcon } from '@navikt/aksel-icons'
 import React from 'react'
@@ -6,19 +6,55 @@ import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { PdlPersonAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
 import { BarnAddressePeriode } from '~components/behandling/soeknadsoversikt/familieforhold/BarnAddressePeriode'
-import { Personopplysning } from '~shared/types/grunnlag'
+import { Personopplysninger } from '~shared/types/grunnlag'
 import { SakType } from '~shared/types/sak'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 interface Props {
-  avdoedesBarn: IPdlPerson[] | undefined
-  soeker: Personopplysning | undefined
   sakType: SakType
 }
 
-export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props) => {
-  const erGjenlevendesBarn = (barn: IPdlPerson) =>
-    soeker?.opplysning.familieRelasjon?.barn?.includes(barn.foedselsnummer) ?? false
+function tekstForForeldre(personopplysninger: Personopplysninger, barn: IPdlPerson): string {
+  if (personopplysninger.avdoede.length >= 2) {
+    const [avdoedEn, avdoedTo] = personopplysninger.avdoede
+    const harAvdoedEnSomForelder = !!(avdoedEn.opplysning.familieRelasjon?.barn ?? []).find(
+      (ident) => ident === barn.foedselsnummer
+    )
+    const harAvdoedToSomForelder = !!(avdoedTo.opplysning.familieRelasjon?.barn ?? []).find(
+      (ident) => ident === barn.foedselsnummer
+    )
+    if (harAvdoedEnSomForelder) {
+      if (harAvdoedToSomForelder) {
+        return 'Begge avdøde'
+      } else {
+        return `Kun ${formaterNavn(avdoedEn.opplysning)}`
+      }
+    } else {
+      return `Kun ${formaterNavn(avdoedTo.opplysning)}`
+    }
+  } else {
+    const harGjenlevendeSomForelder = !!personopplysninger.gjenlevende
+      .flatMap((gjenlevende) => gjenlevende.opplysning.familieRelasjon?.barn ?? [])
+      .find((ident) => ident === barn.foedselsnummer)
+
+    if (harGjenlevendeSomForelder) {
+      return 'Avdød og gjenlevende'
+    } else {
+      return 'Kun avdød'
+    }
+  }
+}
+
+export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
+  const opplysninger = usePersonopplysninger()
+  if (!opplysninger) {
+    return null
+  }
+  const avdoedesBarn = hentLevendeSoeskenFraAvdoedeForSoeker(
+    opplysninger.avdoede,
+    opplysninger.soeker?.opplysning?.foedselsnummer
+  )
 
   return (
     <VStack gap="4">
@@ -39,7 +75,7 @@ export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props)
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!avdoedesBarn?.length ? (
+          {!!avdoedesBarn.length ? (
             avdoedesBarn.map((barn, index) => (
               <Table.Row key={index}>
                 <Table.DataCell>
@@ -57,13 +93,17 @@ export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props)
                 <Table.DataCell>
                   <BarnAddressePeriode barn={barn} />
                 </Table.DataCell>
-                <Table.DataCell>{erGjenlevendesBarn(barn) ? 'Gjenlevende og avdød' : 'Kun avdød'}</Table.DataCell>
+                <Table.DataCell>{tekstForForeldre(opplysninger, barn)}</Table.DataCell>
               </Table.Row>
             ))
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={5}>
-                <Heading size="small">Avøde har ingen barn</Heading>
+                <Heading size="small">
+                  {sakType === SakType.OMSTILLINGSSTOENAD
+                    ? 'Avdøde har ingen barn'
+                    : 'Avdøde har ingen andre barn enn søker'}
+                </Heading>
               </Table.DataCell>
             </Table.Row>
           )}

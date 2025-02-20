@@ -16,7 +16,7 @@ class SakTilgangDao(
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
         datasource.connection.use { connection ->
             val statement =
-                connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where fnr = ?")
+                connection.prepareStatement("SELECT id as sak_id, adressebeskyttelse, erSkjermet, enhet from sak where fnr = ?")
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
                 toSakMedGraderingOgSkjermet()
@@ -27,7 +27,7 @@ class SakTilgangDao(
     fun hentSakMedGraderingOgSkjerming(id: SakId): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
-                connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
+                connection.prepareStatement("SELECT id as sak_id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
             statement.setSakId(1, id)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
@@ -37,7 +37,7 @@ class SakTilgangDao(
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
-                    "select id, adressebeskyttelse, erSkjermet, enhet from sak where id =" +
+                    "select id as sak_id, adressebeskyttelse, erSkjermet, enhet from sak where id =" +
                         " (select sak_id from behandling where id = ?::uuid" +
                         " union select sak_id from tilbakekreving where id = ?::uuid" +
                         " union select sak_id from klage where id = ?::uuid)",

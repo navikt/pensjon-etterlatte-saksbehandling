@@ -598,11 +598,12 @@ internal class ApplicationContext(
         TilbakekrevingBrevService(
             sakService,
             brevKlient,
+            brevApiKlient,
             vedtakKlient,
             grunnlagService,
         )
     val brevService =
-        BrevService(vedtaksbehandlingService, brevKlient, brevApiKlient, vedtakKlient, tilbakekrevingBrevService)
+        BrevService(vedtaksbehandlingService, brevApiKlient, vedtakKlient, tilbakekrevingBrevService)
 
     val tilbakekrevingService =
         TilbakekrevingService(

@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.erOver18
@@ -18,7 +19,6 @@ import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingPeriodeDataNy
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -49,6 +49,7 @@ import java.util.UUID
 class TilbakekrevingBrevService(
     val sakService: SakService,
     val brevKlient: BrevKlient,
+    val brevApiKlient: BrevApiKlient,
     val vedtakKlient: VedtakKlient,
     val grunnlagService: GrunnlagService,
 ) {
@@ -103,6 +104,18 @@ class TilbakekrevingBrevService(
         )
     }
 
+    suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        brevKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+    }
+
+    suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev? = brevApiKlient.hentVedtaksbrev(behandlingId, bruker)
+
     private suspend fun utledBrevRequest(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
@@ -110,10 +123,7 @@ class TilbakekrevingBrevService(
         skalLagres: Boolean = false,
     ): BrevRequest =
         coroutineScope {
-            val sak =
-                inTransaction {
-                    sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id=$sakId")
-                }
+            val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id=$sakId")
 
             val vedtakDeferred =
                 async {

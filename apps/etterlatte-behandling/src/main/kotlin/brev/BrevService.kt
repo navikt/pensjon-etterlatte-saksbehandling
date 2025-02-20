@@ -6,7 +6,6 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -19,8 +18,7 @@ import java.util.UUID
 
 class BrevService(
     val vedtaksbehandlingService: VedtaksbehandlingService,
-    val nyBrevKlient: BrevKlient,
-    val brevKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
+    val brevApiKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
     val vedtakKlient: VedtakKlient,
     val tilbakekrevingBrevService: TilbakekrevingBrevService,
 ) {
@@ -32,25 +30,19 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ): Brev {
         if (bruker is Saksbehandler) {
-            val kanRedigeres =
-                inTransaction {
-                    vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
-                }
+            val kanRedigeres = vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
             if (!kanRedigeres) {
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }
         }
 
-        val vedtaksbehandlingType =
-            inTransaction {
-                vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
-            }
+        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
         return when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+
             else -> {
-                println("Kaller opprettVedtaksbrev... $sakId")
-                brevKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
             }
         }
     }
@@ -80,15 +72,15 @@ class BrevService(
                 true
             }
 
-        val vedtaksbehandlingType =
-            inTransaction {
-                vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
-            }
+        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
         return when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
-            else ->
-                brevKlient.genererPdf(brevID, behandlingId, bruker)
+
+            else -> {
+                val pdf = brevApiKlient.genererPdf(brevID, behandlingId, bruker)
+                pdf
+            }
         }
     }
 
@@ -111,7 +103,15 @@ class BrevService(
             throw SaksbehandlerOgAttestantSammePerson(saksbehandlerIdent, brukerTokenInfo.ident())
         }
 
-        nyBrevKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+        when (vedtaksbehandlingType) {
+            VedtaksbehandlingType.TILBAKEKREVING ->
+                tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+
+            else -> {
+                brevApiKlient.ferdigstillVedtaksbrev(behandlingId, SakId(1), brukerTokenInfo)
+            }
+        }
     }
 
     suspend fun tilbakestillVedtaksbrev(
@@ -122,24 +122,31 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ): BrevPayload {
         if (bruker is Saksbehandler) {
-            val kanRedigeres =
-                inTransaction {
-                    vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
-                }
+            val kanRedigeres = vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
             if (!kanRedigeres) {
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }
         }
-
-        val vedtaksbehandlingType =
-            inTransaction {
-                vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
-            }
+        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
         return when (vedtaksbehandlingType) {
             VedtaksbehandlingType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+
             else ->
-                brevKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
+                brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
+        }
+    }
+
+    suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev? {
+        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+        return when (vedtaksbehandlingType) {
+            VedtaksbehandlingType.TILBAKEKREVING ->
+                tilbakekrevingBrevService.hentVedtaksbrev(behandlingId, bruker)
+            else ->
+                brevApiKlient.hentVedtaksbrev(behandlingId, bruker)
         }
     }
 }

@@ -247,7 +247,7 @@ class BrevApiKlientObo(
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
+        sakId: SakId, // TODO Fjern ubrukt parameter
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(

@@ -10,6 +10,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.put
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -17,10 +18,13 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
@@ -47,10 +51,12 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -64,11 +70,13 @@ import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.random.Random
 
@@ -95,20 +103,24 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
     private val brevApiKlientMock: BrevApiKlient =
         mockk {
             coEvery { opprettVedtaksbrev(any(), any<SakId>(), any()) } answers {
-                opprettetBrevDto(SakId(secondArg()))
+                opprettetBrevDto(behandlingId = firstArg(), sakId = SakId(secondArg()))
             }
             coEvery { tilbakestillVedtaksbrev(any(), any(), any(), any(), any()) } returns tilbakestiltPayload
             coEvery { genererPdf(any(), any(), any()) } returns generertPdf
+            coEvery { ferdigstillVedtaksbrev(any(), any(), any()) } just runs
+            coEvery { hentVedtaksbrev(any(), any()) } answers {
+                opprettetBrevDto(behandlingId = firstArg())
+            }
         }
     private val vedtakKlient: VedtakKlient = mockk()
     private val brevKlientMock: BrevKlient =
         mockk {
-            coEvery { opprettVedtaksbrev(any(), any(), any()) } returns opprettBrev()
-            coEvery { tilbakestillVedtaksbrev(any(), any(), any(), any()) } returns
-                mockk {
-                    every { hoveddel } returns Slate()
-                    every { vedlegg } returns emptyList()
-                }
+            coEvery { opprettVedtaksbrev(any(), any(), any()) } answers {
+                opprettetBrevDto(behandlingId = firstArg())
+            }
+            coEvery { tilbakestillVedtaksbrev(any(), any(), any(), any()) } returns tilbakestiltPayload
+            coEvery { ferdigstillVedtaksbrev(any(), any()) } just runs
+            coEvery { genererPdf(any(), any(), any(), any()) } returns generertPdf
         }
 
     @BeforeEach
@@ -153,17 +165,19 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         @Test
         fun `skal opprette vedtaksbrev for behandling`() {
             val sak = opprettSak()
-            val behandling = opprettBehandling(sak)
+            val behandling: no.nav.etterlatte.behandling.domain.Behandling = opprettBehandling(sak)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns
+                vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
             withTestApplication { client ->
                 val response =
-                    client.post("/api/behandling/brev/${behandling.id}/vedtak?sakId=${behandling.sakId}") {
+                    client.post("/api/behandling/brev/${behandling.id}/vedtak?sakId=${behandling.sak.id}") {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }
                 response.status shouldBe HttpStatusCode.Created
 
-                coVerify { brevApiKlientMock.opprettVedtaksbrev(behandling.id, behandling.sakId, any()) }
+                coVerify { brevApiKlientMock.opprettVedtaksbrev(behandling.id, behandling.sak.id, any()) }
             }
         }
 
@@ -171,12 +185,13 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         fun `skal tilbakestille vedtaksbrev`() {
             val sak = opprettSak()
             val behandling = opprettBehandling(sak)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
             withTestApplication { client ->
                 val response =
                     client.put(
                         "/api/behandling/brev/${behandling.id}/vedtak/tilbakestill?" +
-                            "brevId=42&sakId=${behandling.sakId}&brevtype=${Brevtype.VEDTAK}",
+                            "brevId=42&sakId=${behandling.sak.id}&brevtype=${Brevtype.VEDTAK}",
                     ) {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -188,7 +203,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                     brevApiKlientMock.tilbakestillVedtaksbrev(
                         42,
                         behandling.id,
-                        behandling.sakId,
+                        behandling.sak.id,
                         Brevtype.VEDTAK,
                         any(),
                     )
@@ -200,27 +215,61 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         fun `skal generere pdf`() {
             val sak = opprettSak()
             val behandling = opprettBehandling(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, behandling)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
             withTestApplication { client ->
                 val response =
                     client.get(
                         "/api/behandling/brev/${behandling.id}/vedtak/pdf?" +
-                            "brevId=42&sakId=${behandling.sakId}",
+                            "brevId=42&sakId=${behandling.sak.id}",
+                    ) {
+                        addAuthToken(tokenSaksbehandler)
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                assertArrayEquals(generertPdf.bytes, response.body())
+                coVerify { brevApiKlientMock.genererPdf(42, behandling.id, any()) }
+            }
+        }
+
+        @Test
+        fun `skal ferdigstille vedtaksbrev`() {
+            val sak = opprettSak()
+            val behandling = opprettBehandling(sak)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+
+            withTestApplication { client ->
+                val response =
+                    client.post(
+                        "/api/behandling/brev/${behandling.id}/vedtak/ferdigstill?brevId=42",
                     ) {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }
                 response.status shouldBe HttpStatusCode.OK
-                coVerify {
-                    val pdf =
-                        brevApiKlientMock.genererPdf(
-                            42,
-                            behandling.id,
-                            any(),
-                        )
-                    pdf shouldBeEqual generertPdf
-                }
+
+                coVerify { brevApiKlientMock.ferdigstillVedtaksbrev(behandling.id, any(), any()) }
+            }
+        }
+
+        @Test
+        fun `skal hente vedtaksbrev`() {
+            val sak = opprettSak()
+            val behandling = opprettBehandling(sak)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+
+            withTestApplication { client ->
+                val response =
+                    client.get(
+                        "/api/behandling/brev/${behandling.id}/vedtak",
+                    ) {
+                        addAuthToken(tokenSaksbehandler)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                val body: Brev = response.body()
+                body.behandlingId shouldBe behandling.id
+
+                coVerify { brevApiKlientMock.hentVedtaksbrev(behandling.id, any()) }
             }
         }
     }
@@ -230,30 +279,38 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         @Test
         fun `skal opprette vedtaksbrev for tilbakekreving`() {
             val sak = opprettSak()
-            val tilbakekreving = opprettTilbakekreving(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekreving.id, tilbakekreving)
+            val tilbakekrevingBehandling = opprettTilbakekreving(sak)
+            val tilbakekrevingId = tilbakekrevingBehandling.id
+            val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
 
             withTestApplication { client ->
                 val response =
-                    client.post("/api/behandling/brev/${tilbakekreving.id}/vedtak?sakId=${sak.id}") {
+                    client.post("/api/behandling/brev/$tilbakekrevingId/vedtak?sakId=${sak.id}") {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }
                 response.status shouldBe HttpStatusCode.Created
-                coVerify { brevKlientMock.opprettVedtaksbrev(tilbakekreving.id, any(), any()) }
+                val brev: Brev = response.body()
+                brev.behandlingId shouldBe tilbakekrevingId
+
+                coVerify { brevKlientMock.opprettVedtaksbrev(tilbakekrevingId, any(), any()) }
             }
         }
 
         @Test
         fun `skal tilbakestille vedtaksbrev for tilbakekreving`() {
             val sak = opprettSak()
-            val tilbakekreving = opprettTilbakekreving(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekreving.id, tilbakekreving)
+            val tilbakekrevingBehandling = opprettTilbakekreving(sak)
+            val tilbakekrevingId = tilbakekrevingBehandling.id
+            val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
+
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
 
             withTestApplication { client ->
                 val response =
                     client.put(
-                        "/api/behandling/brev/${tilbakekreving.id}/vedtak/tilbakestill?" +
+                        "/api/behandling/brev/$tilbakekrevingId/vedtak/tilbakestill?" +
                             "brevId=42&sakId=${sak.id}&brevtype=${Brevtype.VEDTAK}",
                     ) {
                         addAuthToken(tokenSaksbehandler)
@@ -264,8 +321,86 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                 coVerify {
                     brevKlientMock.tilbakestillVedtaksbrev(
                         42,
-                        tilbakekreving.id,
+                        tilbakekrevingId,
                         any(),
+                        any(),
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun `skal generere pdf for tilbakekreving`() {
+            val sak = opprettSak()
+            val tilbakekrevingBehandling = opprettTilbakekreving(sak)
+            val tilbakekrevingId = tilbakekrevingBehandling.id
+            val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
+
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+
+            withTestApplication { client ->
+                val response =
+                    client.get(
+                        "/api/behandling/brev/$tilbakekrevingId/vedtak/pdf?" +
+                            "brevId=42&sakId=${tilbakekrevingBehandling.sak.id}",
+                    ) {
+                        addAuthToken(tokenSaksbehandler)
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                assertArrayEquals(generertPdf.bytes, response.body())
+                coVerify { brevKlientMock.genererPdf(42, tilbakekrevingId, any(), any()) }
+            }
+        }
+
+        @Test
+        fun `skal ferdigstille vedtaksbrev for tilbakekreving`() {
+            val sak = opprettSak()
+            val tilbakekrevingBehandling = opprettTilbakekreving(sak)
+            val tilbakekrevingId = tilbakekrevingBehandling.id
+            val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+
+            withTestApplication { client ->
+                val response =
+                    client.post(
+                        "/api/behandling/brev/$tilbakekrevingId/vedtak/ferdigstill",
+                    ) {
+                        addAuthToken(tokenSaksbehandler)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldBeEqual ""
+                coVerify {
+                    brevKlientMock.ferdigstillVedtaksbrev(
+                        tilbakekrevingId,
+                        any(),
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun `skal hente vedtaksbrev for tilbakekreving`() {
+            val sak = opprettSak()
+            val tilbakekrevingBehandling = opprettTilbakekreving(sak)
+            val tilbakekrevingId = tilbakekrevingBehandling.id
+            val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
+            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+
+            withTestApplication { client ->
+                val response =
+                    client.get(
+                        "/api/behandling/brev/$tilbakekrevingId/vedtak",
+                    ) {
+                        addAuthToken(tokenSaksbehandler)
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                val body: Brev = response.body()
+                body.behandlingId shouldBe tilbakekrevingId
+
+                coVerify {
+                    brevApiKlientMock.hentVedtaksbrev(
+                        tilbakekrevingId,
                         any(),
                     )
                 }
@@ -304,10 +439,11 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         return tilbakekreving
     }
 
-    private fun opprettBehandling(sak: Sak) =
+    private fun opprettBehandling(sak: Sak): Foerstegangsbehandling =
         inTransaction {
-            opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, sak.id)
-                .also { behandlingDao.opprettBehandling(it) }
+            val opprettBehandling = opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, sak.id)
+            behandlingDao.opprettBehandling(opprettBehandling)
+            behandlingDao.hentBehandling(opprettBehandling.id) as Foerstegangsbehandling
         }
 
     private fun opprettSak() =
@@ -329,43 +465,45 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         }
     }
 
-    private fun opprettetBrevDto(sakId: SakId) =
-        Brev(
-            id = 1L,
-            status = Status.OPPRETTET,
-            mottakere =
-                listOf(
-                    Mottaker(
-                        UUID.randomUUID(),
-                        navn = "Mottaker mottakersen",
-                        foedselsnummer = MottakerFoedselsnummer("19448310410"),
-                        orgnummer = null,
-                        adresse =
-                            Adresse(
-                                adresseType = "",
-                                landkode = "",
-                                land = "",
-                            ),
-                        journalpostId = null,
-                        bestillingId = null,
-                    ),
+    private fun opprettetBrevDto(
+        sakId: SakId = randomSakId(),
+        behandlingId: UUID = UUID.randomUUID(),
+    ) = Brev(
+        id = 1L,
+        status = Status.OPPRETTET,
+        mottakere =
+            listOf(
+                Mottaker(
+                    UUID.randomUUID(),
+                    navn = "Mottaker mottakersen",
+                    foedselsnummer = MottakerFoedselsnummer("19448310410"),
+                    orgnummer = null,
+                    adresse =
+                        Adresse(
+                            adresseType = "",
+                            landkode = "",
+                            land = "",
+                        ),
+                    journalpostId = null,
+                    bestillingId = null,
                 ),
-            sakId = sakId,
-            behandlingId = null,
-            tittel = null,
-            spraak = Spraak.NB,
-            prosessType = BrevProsessType.REDIGERBAR,
-            soekerFnr = "",
-            statusEndret = Tidspunkt.now(),
-            opprettet = Tidspunkt.now(),
-            brevtype = Brevtype.MANUELT,
-            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
-        )
+            ),
+        sakId = sakId,
+        behandlingId = behandlingId,
+        tittel = null,
+        spraak = Spraak.NB,
+        prosessType = BrevProsessType.REDIGERBAR,
+        soekerFnr = "",
+        statusEndret = Tidspunkt.now(),
+        opprettet = Tidspunkt.now(),
+        brevtype = Brevtype.MANUELT,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
+    )
 
     private fun vedtak(
         sak: Sak,
         behandlingId: UUID,
-        vedtakInnhold: Any,
+        vedtakInnhold: VedtakInnholdDto,
         vedtakId: Long = 1,
         ident: String = "12345678913",
     ) = VedtakDto(
@@ -391,8 +529,22 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                 attesterendeEnhet = Enhetsnummer("1234"),
                 tidspunkt = Tidspunkt.now(),
             ),
-        innhold = VedtakInnholdDto.VedtakTilbakekrevingDto(vedtakInnhold.toObjectNode()),
+        innhold = vedtakInnhold,
     )
+
+    private fun vedtakBehandlingDto(behandling: no.nav.etterlatte.behandling.domain.Behandling) =
+        VedtakInnholdDto.VedtakBehandlingDto(
+            behandling = Behandling(behandling.type, behandling.id, behandling.revurderingsaarsak()),
+            virkningstidspunkt = YearMonth.of(2022, 1),
+            utbetalingsperioder =
+                emptyList(),
+            opphoerFraOgMed = null,
+        )
+
+    private fun vedtakTilbakekrevingBehandlingDto(tilbakekreving: Tilbakekreving) =
+        VedtakInnholdDto.VedtakTilbakekrevingDto(
+            tilbakekreving.toObjectNode(),
+        )
 
     private fun opprettBrev(
         status: Status = Status.OPPRETTET,

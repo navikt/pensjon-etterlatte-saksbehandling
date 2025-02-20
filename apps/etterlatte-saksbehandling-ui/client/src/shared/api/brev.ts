@@ -23,10 +23,10 @@ export const opprettVarselbrev = async (args: { sakId: number; behandlingId: str
   apiClient.post(`/brev/behandling/${args.behandlingId}/varsel?sakId=${args.sakId}`, {})
 
 export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
-  apiClient.get(`/brev/behandling/${behandlingId}/vedtak`)
+  apiClient.get(`/behandling/brev/${behandlingId}/vedtak`)
 
 export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
-  apiClient.post(`/brev/behandling/${behandlingId}/vedtak/ferdigstill`, {})
+  apiClient.post(`/behandling/brev/${behandlingId}/vedtak/ferdigstill`, {})
 
 export const opprettVedtaksbrev = async (args: {
   sakId: number
@@ -109,7 +109,7 @@ export const opprettBrevFraPDF = async (args: { sakId: number; formData: FormDat
 }
 
 export const hentManuellPayload = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
-  apiClient.get(`/brev/${props.brevId}/payload?sakId=${props.sakId}`)
+  apiClient.get(`/brev/${props.brevId}/payload?sakId=${props.sakId}`) //TODO Bruke behandling backend?
 
 export const tilbakestillManuellPayload = async (props: {
   brevId: number

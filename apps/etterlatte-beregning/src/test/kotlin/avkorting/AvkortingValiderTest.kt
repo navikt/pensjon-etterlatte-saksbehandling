@@ -4,7 +4,6 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.avkorting.FoersteRevurderingSenereEnnJanuar
 import no.nav.etterlatte.avkorting.HarFratrekkInnAarForFulltAar
-import no.nav.etterlatte.avkorting.InntektForTidligereAar
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkorting
@@ -18,41 +17,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 
 class AvkortingValiderTest {
-    @Test
-    fun `Skal ikke kunne endre inntekt tidligere aar`() {
-        val avkorting =
-            Avkorting(
-                aarsoppgjoer =
-                    listOf(
-                        aarsoppgjoer(
-                            aar = 2024,
-                            inntektsavkorting =
-                                listOf(
-                                    Inntektsavkorting(
-                                        avkortinggrunnlag(
-                                            innvilgaMaaneder = 11,
-                                            periode = Periode(fom = YearMonth.of(2024, 2), tom = null),
-                                        ),
-                                    ),
-                                ),
-                        ),
-                    ),
-            )
-
-        assertThrows<InntektForTidligereAar> {
-            val inntektMedFratrekk =
-                AvkortingGrunnlagLagreDto(
-                    inntektTom = 100000,
-                    fratrekkInnAar = 0,
-                    fratrekkInnAarUtland = 0,
-                    inntektUtlandTom = 100000,
-                    spesifikasjon = "asdf",
-                    fom = YearMonth.of(2024, 12),
-                )
-            validerInntekt(inntektMedFratrekk, avkorting, false, naa = YearMonth.of(2025, 1))
-        }
-    }
-
     @Test
     fun `Første revurdering i et nytt år må være fom januar`() {
         val avkorting =
@@ -141,7 +105,7 @@ class AvkortingValiderTest {
                     fratrekkInnAarUtland = 0,
                     fom = YearMonth.of(2024, 1),
                 )
-            validerInntekt(utenFratrekk, avkorting, true, naa = YearMonth.of(2024, 1))
+            validerInntekt(utenFratrekk, avkorting, true)
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
                 val inntektMedFratrekk =
@@ -150,7 +114,7 @@ class AvkortingValiderTest {
                         fratrekkInnAarUtland = 0,
                         fom = YearMonth.of(2024, 1),
                     )
-                validerInntekt(inntektMedFratrekk, avkorting, true, naa = YearMonth.of(2024, 1))
+                validerInntekt(inntektMedFratrekk, avkorting, true)
             }
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
@@ -161,7 +125,7 @@ class AvkortingValiderTest {
                         fom = YearMonth.of(2024, 1),
                     )
 
-                validerInntekt(inntektMedFratrekkUtland, avkorting, true, naa = YearMonth.of(2024, 1))
+                validerInntekt(inntektMedFratrekkUtland, avkorting, true)
             }
         }
 
@@ -234,7 +198,6 @@ class AvkortingValiderTest {
             ),
             Avkorting(),
             true,
-            naa = YearMonth.of(2024, 1),
         )
     }
 
@@ -251,7 +214,6 @@ class AvkortingValiderTest {
             ),
             avkorting(),
             false,
-            naa = YearMonth.of(2024, 1),
         )
     }
 }

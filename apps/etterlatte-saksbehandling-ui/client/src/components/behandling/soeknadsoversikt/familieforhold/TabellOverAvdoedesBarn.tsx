@@ -15,29 +15,27 @@ interface Props {
   sakType: SakType
 }
 
-function tekstForForeldre(personopplysninger: Personopplysninger, barn: IPdlPerson): string {
+function erBarnTilPerson(person: IPdlPerson, barnIdent: string): boolean {
+  return !!(person.familieRelasjon?.barn ?? []).find((ident) => ident == barnIdent)
+}
+
+function hvemErBarnetsForeldre(personopplysninger: Personopplysninger, barn: IPdlPerson): string {
   if (personopplysninger.avdoede.length >= 2) {
     const [avdoedEn, avdoedTo] = personopplysninger.avdoede
-    const harAvdoedEnSomForelder = !!(avdoedEn.opplysning.familieRelasjon?.barn ?? []).find(
-      (ident) => ident === barn.foedselsnummer
-    )
-    const harAvdoedToSomForelder = !!(avdoedTo.opplysning.familieRelasjon?.barn ?? []).find(
-      (ident) => ident === barn.foedselsnummer
-    )
-    if (harAvdoedEnSomForelder) {
-      if (harAvdoedToSomForelder) {
-        return 'Begge avdøde'
-      } else {
-        return `Kun ${formaterNavn(avdoedEn.opplysning)}`
-      }
+    const harAvdoedEnSomForelder = erBarnTilPerson(avdoedEn.opplysning, barn.foedselsnummer)
+    const harAvdoedToSomForelder = erBarnTilPerson(avdoedTo.opplysning, barn.foedselsnummer)
+
+    if (harAvdoedEnSomForelder && harAvdoedToSomForelder) {
+      return 'Begge avdøde'
+    } else if (harAvdoedEnSomForelder) {
+      return `Kun ${formaterNavn(avdoedEn.opplysning)}`
     } else {
       return `Kun ${formaterNavn(avdoedTo.opplysning)}`
     }
   } else {
-    const harGjenlevendeSomForelder = !!personopplysninger.gjenlevende
-      .flatMap((gjenlevende) => gjenlevende.opplysning.familieRelasjon?.barn ?? [])
-      .find((ident) => ident === barn.foedselsnummer)
-
+    const harGjenlevendeSomForelder = personopplysninger.gjenlevende.some((gjenlevende) =>
+      erBarnTilPerson(gjenlevende.opplysning, barn.foedselsnummer)
+    )
     if (harGjenlevendeSomForelder) {
       return 'Avdød og gjenlevende'
     } else {
@@ -93,7 +91,7 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
                 <Table.DataCell>
                   <BarnAddressePeriode barn={barn} />
                 </Table.DataCell>
-                <Table.DataCell>{tekstForForeldre(opplysninger, barn)}</Table.DataCell>
+                <Table.DataCell>{hvemErBarnetsForeldre(opplysninger, barn)}</Table.DataCell>
               </Table.Row>
             ))
           ) : (

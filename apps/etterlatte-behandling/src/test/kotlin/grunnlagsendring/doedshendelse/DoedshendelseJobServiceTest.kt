@@ -33,6 +33,7 @@ import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.soeker
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -55,7 +56,7 @@ class DoedshendelseJobServiceTest {
         mockk<SakService> {
             every { finnEllerOpprettSakMedGrunnlag(any(), any()) } returns
                 Sak(
-                    ident = "12345678901",
+                    ident = soeker.value,
                     sakType = SakType.BARNEPENSJON,
                     id = sakId1,
                     enhet = Enheter.AALESUND.enhetNr,
@@ -115,7 +116,7 @@ class DoedshendelseJobServiceTest {
             DoedshendelseInternal.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                 avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = "12345678901",
+                beroertFnr = soeker.value,
                 relasjon = Relasjon.BARN,
                 endringstype = Endringstype.OPPRETTET,
             )
@@ -148,7 +149,7 @@ class DoedshendelseJobServiceTest {
                 .nyHendelse(
                     avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                     avdoedDoedsdato = LocalDate.now(),
-                    beroertFnr = "12345678901",
+                    beroertFnr = soeker.value,
                     relasjon = Relasjon.BARN,
                     endringstype = Endringstype.OPPRETTET,
                 ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
@@ -173,7 +174,7 @@ class DoedshendelseJobServiceTest {
                 .nyHendelse(
                     avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                     avdoedDoedsdato = LocalDate.now(),
-                    beroertFnr = "12345678901",
+                    beroertFnr = soeker.value,
                     relasjon = Relasjon.BARN,
                     endringstype = Endringstype.OPPRETTET,
                 ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
@@ -205,7 +206,7 @@ class DoedshendelseJobServiceTest {
                 .nyHendelse(
                     avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                     avdoedDoedsdato = LocalDate.now(),
-                    beroertFnr = "12345678901",
+                    beroertFnr = soeker.value,
                     relasjon = Relasjon.BARN,
                     endringstype = Endringstype.OPPRETTET,
                 ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())

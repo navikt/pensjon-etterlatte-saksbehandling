@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -42,7 +43,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne håndtere en adressebeskyttelsesendring`() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr = AVDOED_FOEDSELSNUMMER
 
         testApplication {
             val client =
@@ -55,7 +56,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                     .post("personer/saker/${SakType.BARNEPENSJON}") {
                         addAuthToken(tokenSaksbehandler)
                         contentType(ContentType.Application.Json)
-                        setBody(FoedselsnummerDTO(fnr))
+                        setBody(FoedselsnummerDTO(fnr.value))
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }.let {
                         Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -71,7 +72,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sak.id,
-                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(fnr, INNSENDER_FOEDSELSNUMMER, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -94,7 +95,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                     setBody(
                         Adressebeskyttelse(
                             hendelseId = "1",
-                            fnr = fnr,
+                            fnr = fnr.value,
                             endringstype = Endringstype.OPPRETTET,
                         ),
                     )
@@ -109,7 +110,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                     setBody(
                         Adressebeskyttelse(
                             hendelseId = "1",
-                            fnr = fnr,
+                            fnr = fnr.value,
                             endringstype = Endringstype.OPPRETTET,
                         ),
                     )
@@ -124,7 +125,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                     setBody(
                         Adressebeskyttelse(
                             hendelseId = "1",
-                            fnr = fnr,
+                            fnr = fnr.value,
                             endringstype = Endringstype.OPPRETTET,
                         ),
                     )

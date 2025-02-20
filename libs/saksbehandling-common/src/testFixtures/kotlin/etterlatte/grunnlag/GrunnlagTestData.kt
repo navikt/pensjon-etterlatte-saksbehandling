@@ -136,11 +136,11 @@ data class GrunnlagTestData(
 
     fun hentPersonGalleri(): Persongalleri =
         Persongalleri(
-            soeker = soeker.foedselsnummer.value,
-            innsender = gjenlevende.foedselsnummer.value,
-            soesken = listOf(soesken.foedselsnummer.value, halvsoesken.foedselsnummer.value),
-            avdoed = avdoede.map { it.foedselsnummer.value },
-            gjenlevende = listOf(gjenlevende.foedselsnummer.value),
+            soeker = soeker.foedselsnummer,
+            innsender = gjenlevende.foedselsnummer,
+            soesken = listOf(soesken.foedselsnummer, halvsoesken.foedselsnummer),
+            avdoed = avdoede.map { it.foedselsnummer },
+            gjenlevende = listOf(gjenlevende.foedselsnummer),
             annenForelder = annenForelder,
         )
 

@@ -26,6 +26,7 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -36,7 +37,6 @@ import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -45,16 +45,13 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
+import no.nav.etterlatte.soeker
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -88,16 +85,9 @@ internal class BehandlingRoutesTest {
 
     @Test
     fun `Kan opprette ny behandling`() {
-        val persongalleri =
-            Persongalleri(
-                "11057523044",
-                INNSENDER_FOEDSELSNUMMER.value,
-                emptyList(),
-                listOf(AVDOED_FOEDSELSNUMMER.value),
-                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
-            )
+        val persongalleri = defaultPersongalleriGydligeFnr
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker.value, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
 
         every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
         val behandlingId = UUID.randomUUID()
@@ -126,51 +116,6 @@ internal class BehandlingRoutesTest {
 
             assertEquals(200, response.status.value)
             assertEquals(behandlingId.toString(), response.body<String>())
-        }
-    }
-
-    @Test
-    fun `Får feil ved rart fnr ved opprett ny behandling`() {
-        val behandlingId = UUID.randomUUID()
-        val persongalleri =
-            Persongalleri(
-                "1105752304,", // feil i fnr her
-                INNSENDER_FOEDSELSNUMMER.value,
-                emptyList(),
-                listOf(AVDOED_FOEDSELSNUMMER.value),
-                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
-            )
-
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
-
-        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
-        coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
-            mockk<Behandling> {
-                every { id } returns behandlingId
-            }
-        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
-        withTestApplication(systembruker) { client ->
-            val response =
-                client.post("/api/behandling") {
-                    header(HttpHeaders.Authorization, "Bearer $systembrukertoken")
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        NyBehandlingRequest(
-                            sak.sakType,
-                            persongalleri,
-                            LocalDateTime.now().toString(),
-                            "nb",
-                            Vedtaksloesning.GJENNY,
-                            null,
-                            null,
-                        ),
-                    )
-                }
-
-            assertEquals(400, response.status.value)
-
-            val errormeldingtilfrontend = response.body<String>()
-            assertTrue(errormeldingtilfrontend.contains("PERSONGALLERI_MAA_VAERE_GYLDIG"))
         }
     }
 

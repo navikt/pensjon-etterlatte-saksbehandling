@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import org.junit.jupiter.api.AfterAll
@@ -61,7 +62,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne se på en vanlig behandling før adressebeskyttelse men ikke etter med mindre systembruker`() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr = AVDOED_FOEDSELSNUMMER
 
         testApplication {
             val client =
@@ -74,7 +75,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     .post("personer/saker/${SakType.BARNEPENSJON}") {
                         addAuthToken(tokenSaksbehandler)
                         contentType(ContentType.Application.Json)
-                        setBody(FoedselsnummerDTO(fnr))
+                        setBody(FoedselsnummerDTO(fnr.value))
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }.let {
                         Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -90,7 +91,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sak.id,
-                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(fnr, INNSENDER_FOEDSELSNUMMER, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -114,7 +115,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
 
             val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value }) } returns
                 adressebeskyttelseGradering
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
@@ -123,7 +124,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         endringstype = Endringstype.OPPRETTET,
-                        fnr = fnr,
+                        fnr = fnr.value,
                     ),
                 )
             }
@@ -150,13 +151,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
         }
         coVerify(exactly = 3) {
-            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value })
         }
     }
 
     @Test
     fun `Skal kunne hente behandlinger på fnr før adressebeskyttelse`() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr = AVDOED_FOEDSELSNUMMER
 
         testApplication {
             val httpClient =
@@ -169,7 +170,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     .post("personer/saker/${SakType.BARNEPENSJON}") {
                         addAuthToken(tokenSaksbehandler)
                         contentType(ContentType.Application.Json)
-                        setBody(FoedselsnummerDTO(fnr))
+                        setBody(FoedselsnummerDTO(fnr.value))
                     }.let {
                         Assertions.assertEquals(HttpStatusCode.OK, it.status)
                         it.body()
@@ -184,7 +185,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sak.id,
-                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(fnr, INNSENDER_FOEDSELSNUMMER, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -200,7 +201,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 }
             val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value }) } returns
                 adressebeskyttelseGradering
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
@@ -208,20 +209,20 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 setBody(
                     Adressebeskyttelse(
                         hendelseId = "1",
-                        fnr = fnr,
+                        fnr = fnr.value,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
             }
         }
         coVerify(exactly = 3) {
-            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value })
         }
     }
 
     @Test
     fun `skal kunne aksessere tilgangsroutes også etter adressebeskyttelse`() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr = AVDOED_FOEDSELSNUMMER
 
         testApplication {
             val client =
@@ -234,7 +235,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     .post("personer/saker/${SakType.BARNEPENSJON}") {
                         addAuthToken(tokenSaksbehandler)
                         contentType(ContentType.Application.Json)
-                        setBody(FoedselsnummerDTO(fnr))
+                        setBody(FoedselsnummerDTO(fnr.value))
                     }.let {
                         Assertions.assertEquals(HttpStatusCode.OK, it.status)
                         it.body()
@@ -249,7 +250,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sak.id,
-                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(fnr, INNSENDER_FOEDSELSNUMMER, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -276,7 +277,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             Assertions.assertTrue(harTilgang)
 
             val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value }) } returns
                 adressebeskyttelseGradering
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
@@ -284,7 +285,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 setBody(
                     Adressebeskyttelse(
                         hendelseId = "1",
-                        fnr = fnr,
+                        fnr = fnr.value,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
@@ -301,13 +302,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             Assertions.assertFalse(harIkkeTilgang)
         }
         coVerify(exactly = 3) {
-            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value })
         }
     }
 
     @Test
     fun `Skal kunne hente saker på fnr før adressebeskyttelse`() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr = AVDOED_FOEDSELSNUMMER
         testApplication {
             val httpClient =
                 runServerWithModule(mockOAuth2Server) {
@@ -318,13 +319,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 .post("/personer/saker/${SakType.BARNEPENSJON}") {
                     addAuthToken(tokenSaksbehandler)
                     contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
+                    setBody(FoedselsnummerDTO(fnr.value))
                 }.apply {
                     Assertions.assertEquals(HttpStatusCode.OK, status)
                 }.body<Sak>()
 
             val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value }) } returns
                 adressebeskyttelseGradering
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@AdressebeskyttelseTest.systemBruker)
@@ -332,7 +333,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 setBody(
                     Adressebeskyttelse(
                         hendelseId = "1",
-                        fnr = fnr,
+                        fnr = fnr.value,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
@@ -342,13 +343,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 .post("/personer/saker/${SakType.BARNEPENSJON}") {
                     addAuthToken(tokenSaksbehandler)
                     contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
+                    setBody(FoedselsnummerDTO(fnr.value))
                 }.apply {
                     Assertions.assertEquals(HttpStatusCode.NotFound, status)
                 }
         }
         coVerify(exactly = 2) {
-            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value })
         }
     }
 }

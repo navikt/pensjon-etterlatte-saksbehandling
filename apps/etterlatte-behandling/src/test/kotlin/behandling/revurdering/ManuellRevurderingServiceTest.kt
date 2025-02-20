@@ -89,7 +89,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    val fnr: String = soeker
+    val fnr: String = soeker.value
 
     private fun opprettSakMedFoerstegangsbehandling(
         fnr: String,
@@ -173,7 +173,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.REVURDERING,
                 merknad = revurdering.revurderingsaarsak?.lesbar(),
-                gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
+                gruppeId = defaultPersongalleriGydligeFnr.avdoed.map { it.value }.first(),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -281,7 +281,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
                     merknad = revurdering.revurderingsaarsak?.lesbar(),
-                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.map { it.value }.first(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
@@ -412,7 +412,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     merknad = "2 søsken",
-                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.map { it.value }.first(),
                     frist = any(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
@@ -422,7 +422,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
                     merknad = revurdering.revurderingsaarsak?.lesbar(),
-                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.map { it.value }.first(),
                 )
                 oppgaveService.opprettOppgave(
                     referanse = revurdering.id.toString(),
@@ -430,7 +430,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
                     merknad = revurdering.revurderingsaarsak?.lesbar(),
-                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.map { it.value }.first(),
                 )
                 oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any())
                 hendelser.sendMeldingForHendelseStatistikk(
@@ -504,7 +504,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.REVURDERING,
                 merknad = revurdering.revurderingsaarsak?.lesbar(),
-                gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
+                gruppeId = defaultPersongalleriGydligeFnr.avdoed.map { it.value }.first(),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)

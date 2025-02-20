@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -52,6 +53,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
@@ -62,13 +64,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.soeker
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
@@ -220,14 +220,7 @@ internal class BehandlingFactoryTest {
                 sendeBrev = true,
             )
 
-        val persongalleri =
-            Persongalleri(
-                "Soeker",
-                "Innsender",
-                emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende"),
-            )
+        val persongalleri = defaultPersongalleriGydligeFnr
 
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
         every { sakServiceMock.finnSak(any()) } returns opprettetBehandling.sak
@@ -289,7 +282,7 @@ internal class BehandlingFactoryTest {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
-                gruppeId = "Avdoed",
+                gruppeId = any(),
                 // Sjekker at oppgave opprettes med null for frist
                 frist = null,
             )
@@ -336,14 +329,7 @@ internal class BehandlingFactoryTest {
                 sendeBrev = true,
             )
 
-        val persongalleri =
-            Persongalleri(
-                "Soeker",
-                "Innsender",
-                emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende"),
-            )
+        val persongalleri = defaultPersongalleriGydligeFnr
 
         every { sakServiceMock.hentGraderingForSak(any(), any()) } returns
             SakMedGraderingOgSkjermet(
@@ -394,7 +380,7 @@ internal class BehandlingFactoryTest {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
-                gruppeId = persongalleri.avdoed.single(),
+                gruppeId = persongalleri.avdoed.map { it.value }.single(),
                 frist = tidspunktMottattBehandling.plusMonths(1L).toNorskTidspunkt(),
             )
         }
@@ -439,14 +425,7 @@ internal class BehandlingFactoryTest {
                 sendeBrev = true,
             )
 
-        val persongalleri =
-            Persongalleri(
-                "Soeker",
-                "Innsender",
-                emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende"),
-            )
+        val persongalleri = defaultPersongalleriGydligeFnr.copy(soesken = emptyList())
 
         every { sakServiceMock.hentGraderingForSak(any(), any()) } returns
             SakMedGraderingOgSkjermet(
@@ -522,7 +501,7 @@ internal class BehandlingFactoryTest {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = null,
-                gruppeId = persongalleri.avdoed.single(),
+                gruppeId = any(),
                 frist = any(),
             )
         }
@@ -662,7 +641,7 @@ internal class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(Folkeregisteridentifikator.of(sak.ident))
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any())
@@ -765,7 +744,7 @@ internal class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(Folkeregisteridentifikator.of(sak.ident))
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any()) } returns oppgaveInternMock
         every { oppgaveService.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveInternMock)
@@ -825,7 +804,7 @@ internal class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(Folkeregisteridentifikator.of(sak.ident))
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any())
@@ -910,14 +889,7 @@ internal class BehandlingFactoryTest {
                 sendeBrev = true,
             )
 
-        val persongalleri =
-            Persongalleri(
-                "Soeker",
-                "Innsender",
-                emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende"),
-            )
+        val persongalleri = defaultPersongalleriGydligeFnr
         every { sakServiceMock.hentGraderingForSak(any(), any()) } returns
             SakMedGraderingOgSkjermet(
                 nyBehandling.sak.id,
@@ -1029,7 +1001,7 @@ internal class BehandlingFactoryTest {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
-                gruppeId = persongalleri.avdoed.single(),
+                gruppeId = persongalleri.avdoed.map { it.value }.single(),
                 frist = any(),
             )
             oppgaveService.opprettOppgave(
@@ -1038,7 +1010,7 @@ internal class BehandlingFactoryTest {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
-                gruppeId = persongalleri.avdoed.single(),
+                gruppeId = persongalleri.avdoed.map { it.value }.single(),
                 frist = any(),
             )
         }
@@ -1094,14 +1066,7 @@ internal class BehandlingFactoryTest {
                 sendeBrev = true,
             )
 
-        val persongalleri =
-            Persongalleri(
-                "Soeker",
-                "Innsender",
-                emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende"),
-            )
+        val persongalleri = defaultPersongalleriGydligeFnr
 
         every { sakServiceMock.finnSak(any()) } returns nyBehandling.sak
         every { sakServiceMock.hentGraderingForSak(any(), any()) } returns
@@ -1215,7 +1180,7 @@ internal class BehandlingFactoryTest {
                 type = any(),
                 merknad = any(),
                 frist = any(),
-                gruppeId = persongalleri.avdoed.single(),
+                gruppeId = persongalleri.avdoed.map { it.value }.single(),
             )
             oppgaveService.opprettOppgave(
                 referanse = any(),
@@ -1224,7 +1189,7 @@ internal class BehandlingFactoryTest {
                 type = any(),
                 merknad = any(),
                 frist = any(),
-                gruppeId = persongalleri.avdoed.single(),
+                gruppeId = persongalleri.avdoed.map { it.value }.single(),
             )
         }
         coVerify { grunnlagService.opprettGrunnlag(any(), any()) }
@@ -1250,18 +1215,11 @@ internal class BehandlingFactoryTest {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
 
-        val persongalleri =
-            Persongalleri(
-                "11057523044",
-                INNSENDER_FOEDSELSNUMMER.value,
-                emptyList(),
-                listOf(AVDOED_FOEDSELSNUMMER.value),
-                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
-            )
+        val persongalleri = defaultPersongalleriGydligeFnr
 
         val sak =
             Sak(
-                persongalleri.soeker,
+                persongalleri.soeker.value,
                 SakType.BARNEPENSJON,
                 sakId1,
                 Enheter.defaultEnhet.enhetNr,
@@ -1346,7 +1304,7 @@ internal class BehandlingFactoryTest {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
-                gruppeId = persongalleri.avdoed.single(),
+                gruppeId = persongalleri.avdoed.map { it.value }.single(),
                 frist = any(),
             )
         }
@@ -1366,7 +1324,7 @@ internal class BehandlingFactoryTest {
         enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     ): Sak =
         Sak(
-            ident = "Soeker",
+            ident = soeker.value,
             sakType = sakType,
             id = sakId,
             enhet = enhet,

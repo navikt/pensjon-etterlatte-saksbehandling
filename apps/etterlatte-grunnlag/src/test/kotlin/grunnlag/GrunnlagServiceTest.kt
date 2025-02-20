@@ -43,9 +43,12 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN3_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
@@ -108,32 +111,32 @@ internal class GrunnlagServiceTest {
                 when (personRolle) {
                     PersonRolle.INNSENDER ->
                         Persongalleri(
-                            soeker = "",
-                            innsender = fnr.value,
+                            soeker = SOEKER_FOEDSELSNUMMER,
+                            innsender = fnr,
                         )
 
                     PersonRolle.BARN ->
                         Persongalleri(
-                            soeker = fnr.value,
-                            soesken = listOf(fnr.value),
+                            soeker = fnr,
+                            soesken = listOf(fnr),
                         )
 
                     PersonRolle.AVDOED ->
                         Persongalleri(
-                            soeker = "",
-                            avdoed = listOf(fnr.value),
+                            soeker = SOEKER_FOEDSELSNUMMER,
+                            avdoed = listOf(fnr),
                         )
 
                     PersonRolle.GJENLEVENDE ->
                         Persongalleri(
-                            soeker = "",
-                            gjenlevende = listOf(fnr.value),
+                            soeker = SOEKER_FOEDSELSNUMMER,
+                            gjenlevende = listOf(fnr),
                         )
 
                     PersonRolle.TILKNYTTET_BARN ->
                         Persongalleri(
-                            soeker = "",
-                            soesken = listOf(fnr.value),
+                            soeker = SOEKER_FOEDSELSNUMMER,
+                            soesken = listOf(fnr),
                         )
                 }
             return listOf(
@@ -206,15 +209,15 @@ internal class GrunnlagServiceTest {
         fun `Skal lagre grunnlaget for kun sak`() {
             val galleri =
                 Persongalleri(
-                    testData.soeker.foedselsnummer.value,
-                    testData.soeker.foedselsnummer.value,
+                    testData.soeker.foedselsnummer,
+                    testData.soeker.foedselsnummer,
                     emptyList(),
                     listOf(
                         testData.avdoede
                             .first()
-                            .foedselsnummer.value,
+                            .foedselsnummer,
                     ),
-                    listOf(testData.gjenlevende.foedselsnummer.value),
+                    listOf(testData.gjenlevende.foedselsnummer),
                 )
             val sakId = sakId1
             val grunnlagshendelser =
@@ -257,15 +260,15 @@ internal class GrunnlagServiceTest {
                         .hentKonstantOpplysning<Persongalleri>(
                             PERSONGALLERI_V1,
                         )?.verdi ?: throw RuntimeException("failure")
-                assertEquals(testData.soeker.foedselsnummer.value, hentetGalleriPaaSoeker.soeker)
-                assertEquals(testData.soeker.foedselsnummer.value, hentetGalleriPaaSoeker.innsender)
+                assertEquals(testData.soeker.foedselsnummer, hentetGalleriPaaSoeker.soeker)
+                assertEquals(testData.soeker.foedselsnummer, hentetGalleriPaaSoeker.innsender)
                 assertEquals(
                     testData.avdoede
                         .first()
-                        .foedselsnummer.value,
+                        .foedselsnummer,
                     hentetGalleriPaaSoeker.avdoed.first(),
                 )
-                assertEquals(testData.gjenlevende.foedselsnummer.value, hentetGalleriPaaSoeker.gjenlevende.first())
+                assertEquals(testData.gjenlevende.foedselsnummer, hentetGalleriPaaSoeker.gjenlevende.first())
             }
         }
 
@@ -488,15 +491,15 @@ internal class GrunnlagServiceTest {
                 opplysningType = PERSONGALLERI_V1,
                 verdi =
                     Persongalleri(
-                        soeker = barnepensjonSoeker1.value,
-                        innsender = gjenlevendeFnr.value,
+                        soeker = barnepensjonSoeker1,
+                        innsender = gjenlevendeFnr,
                         soesken =
                             listOf(
-                                SOEKER2_FOEDSELSNUMMER.value,
-                                HELSOESKEN_FOEDSELSNUMMER.value,
+                                SOEKER2_FOEDSELSNUMMER,
+                                HELSOESKEN_FOEDSELSNUMMER,
                             ),
-                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
-                        gjenlevende = listOf(gjenlevendeFnr.value),
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER),
+                        gjenlevende = listOf(gjenlevendeFnr),
                     ).toJsonNode(),
             )
 
@@ -508,15 +511,15 @@ internal class GrunnlagServiceTest {
                 opplysningType = PERSONGALLERI_V1,
                 verdi =
                     Persongalleri(
-                        soeker = barnepensjonSoeker2.value,
-                        innsender = gjenlevendeFnr.value,
+                        soeker = barnepensjonSoeker2,
+                        innsender = gjenlevendeFnr,
                         soesken =
                             listOf(
-                                INNSENDER_FOEDSELSNUMMER.value,
-                                HELSOESKEN_FOEDSELSNUMMER.value,
+                                INNSENDER_FOEDSELSNUMMER,
+                                HELSOESKEN_FOEDSELSNUMMER,
                             ),
-                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
-                        gjenlevende = listOf(gjenlevendeFnr.value),
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER),
+                        gjenlevende = listOf(gjenlevendeFnr),
                     ).toJsonNode(),
             )
 
@@ -527,9 +530,9 @@ internal class GrunnlagServiceTest {
                 opplysningType = PERSONGALLERI_V1,
                 verdi =
                     Persongalleri(
-                        soeker = gjenlevendeFnr.value,
-                        innsender = gjenlevendeFnr.value,
-                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                        soeker = gjenlevendeFnr,
+                        innsender = gjenlevendeFnr,
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER),
                     ).toJsonNode(),
             )
 
@@ -621,7 +624,7 @@ internal class GrunnlagServiceTest {
                     verdi =
                         testData
                             .hentPersonGalleri()
-                            .copy(innsender = INNSENDER_FOEDSELSNUMMER.value)
+                            .copy(innsender = INNSENDER_FOEDSELSNUMMER)
                             .toJsonNode(),
                     kilde = kilde,
                 )
@@ -748,14 +751,15 @@ internal class GrunnlagServiceTest {
         fun `samsvar bryr seg ikke om rekkefølge på personer`() {
             val persongalleriSak =
                 Persongalleri(
-                    soeker = "søker",
-                    soesken = listOf("1", "2", "3"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    soesken = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
                 )
             val persongalleriPdl =
                 Persongalleri(
-                    soeker = "søker",
-                    soesken = listOf("3", "1", "2"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    soesken = listOf(HELSOESKEN3_FOEDSELSNUMMER, HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER),
                 )
+
             val valideringsfeil = grunnlagService.valideringsfeilPersongalleriSakPdl(persongalleriSak, persongalleriPdl)
             assertEquals(emptyList<MismatchPersongalleri>(), valideringsfeil)
         }
@@ -764,13 +768,13 @@ internal class GrunnlagServiceTest {
         fun `samsvar registerer feil hvis vi mangler avdøde`() {
             val persongalleriEkstraAvdoed =
                 Persongalleri(
-                    soeker = "",
-                    avdoed = listOf("1", "2"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    avdoed = listOf(AVDOED_FOEDSELSNUMMER, AVDOED2_FOEDSELSNUMMER),
                 )
             val persongalleriEnAvdoed =
                 Persongalleri(
-                    soeker = "",
-                    avdoed = listOf("1"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    avdoed = listOf(AVDOED_FOEDSELSNUMMER),
                 )
             val valideringsfeilPdlEkstraAvdoed =
                 grunnlagService.valideringsfeilPersongalleriSakPdl(
@@ -790,12 +794,12 @@ internal class GrunnlagServiceTest {
         fun `samsvar registerer feil hvis vi mangler gjenlevende`() {
             val persongalleriEkstraGjenlevende =
                 Persongalleri(
-                    soeker = "",
-                    gjenlevende = listOf("1"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER),
                 )
             val persongalleriIngenGjenlevende =
                 Persongalleri(
-                    soeker = "",
+                    soeker = SOEKER_FOEDSELSNUMMER,
                     gjenlevende = emptyList(),
                 )
             val valideringsfeilPdlEkstraGjenlevende =
@@ -816,13 +820,13 @@ internal class GrunnlagServiceTest {
         fun `samsvar registerer feil hvis vi mangler søsken`() {
             val persongalleriEkstraSoesken =
                 Persongalleri(
-                    soeker = "",
-                    soesken = listOf("1", "2"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    soesken = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER),
                 )
             val persongalleriEtSoesken =
                 Persongalleri(
-                    soeker = "",
-                    soesken = listOf("1"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    soesken = listOf(HELSOESKEN_FOEDSELSNUMMER),
                 )
             val valideringsfeilPdlEkstraSoesken =
                 grunnlagService.valideringsfeilPersongalleriSakPdl(
@@ -898,9 +902,9 @@ internal class GrunnlagServiceTest {
                         id = behandlingsid,
                         verdi =
                             Persongalleri(
-                                innsender = SOEKER_FOEDSELSNUMMER.value,
-                                soeker = SOEKER_FOEDSELSNUMMER.value,
-                                avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                                innsender = SOEKER_FOEDSELSNUMMER,
+                                soeker = SOEKER_FOEDSELSNUMMER,
+                                avdoed = listOf(AVDOED_FOEDSELSNUMMER),
                             ).toJsonNode(),
                         kilde = kilde,
                     ),
@@ -971,14 +975,14 @@ internal class GrunnlagServiceTest {
                     lagGrunnlagHendelse(
                         sakId1,
                         5,
-                        Opplysningstype.PERSONGALLERI_V1,
+                        PERSONGALLERI_V1,
                         id = behandlingsid,
                         verdi =
                             Persongalleri(
-                                innsender = GJENLEVENDE_FOEDSELSNUMMER.value,
-                                soeker = GJENLEVENDE_FOEDSELSNUMMER.value,
-                                avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
-                                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                                innsender = GJENLEVENDE_FOEDSELSNUMMER,
+                                soeker = GJENLEVENDE_FOEDSELSNUMMER,
+                                avdoed = listOf(AVDOED_FOEDSELSNUMMER),
+                                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER),
                             ).toJsonNode(),
                         kilde = kilde,
                     ),

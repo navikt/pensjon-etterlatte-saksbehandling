@@ -282,15 +282,15 @@ internal class GrunnlagDaoIntegrationTest(
         val barnepensjonSoeker1 = SOEKER_FOEDSELSNUMMER
         val persongalleri1 =
             Persongalleri(
-                soeker = barnepensjonSoeker1.value,
-                innsender = GJENLEVENDE_FOEDSELSNUMMER.value,
+                soeker = barnepensjonSoeker1,
+                innsender = GJENLEVENDE_FOEDSELSNUMMER,
                 soesken =
                     listOf(
-                        SOEKER2_FOEDSELSNUMMER.value,
-                        HELSOESKEN_FOEDSELSNUMMER.value,
+                        SOEKER2_FOEDSELSNUMMER,
+                        HELSOESKEN_FOEDSELSNUMMER,
                     ),
-                avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
-                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                avdoed = listOf(AVDOED_FOEDSELSNUMMER),
+                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER),
             )
 
         val opplysning1 =
@@ -300,15 +300,15 @@ internal class GrunnlagDaoIntegrationTest(
         val barnepensjonSoeker2 = SOEKER2_FOEDSELSNUMMER
         val persongalleri2 =
             Persongalleri(
-                soeker = barnepensjonSoeker2.value,
-                innsender = gjenlevendeFnr.value,
+                soeker = barnepensjonSoeker2,
+                innsender = gjenlevendeFnr,
                 soesken =
                     listOf(
-                        SOEKER_FOEDSELSNUMMER.value,
-                        HELSOESKEN_FOEDSELSNUMMER.value,
+                        SOEKER_FOEDSELSNUMMER,
+                        HELSOESKEN_FOEDSELSNUMMER,
                     ),
-                avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
-                gjenlevende = listOf(gjenlevendeFnr.value),
+                avdoed = listOf(AVDOED_FOEDSELSNUMMER),
+                gjenlevende = listOf(gjenlevendeFnr),
             )
 
         val opplysning2 =
@@ -317,9 +317,9 @@ internal class GrunnlagDaoIntegrationTest(
 
         val persongalleri3 =
             Persongalleri(
-                soeker = gjenlevendeFnr.value,
-                innsender = gjenlevendeFnr.value,
-                avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                soeker = gjenlevendeFnr,
+                innsender = gjenlevendeFnr,
+                avdoed = listOf(AVDOED_FOEDSELSNUMMER),
             )
 
         val opplysning3 =
@@ -353,10 +353,10 @@ internal class GrunnlagDaoIntegrationTest(
                 PERSONGALLERI_V1,
                 verdi =
                     Persongalleri(
-                        soeker = SOEKER_FOEDSELSNUMMER.value,
-                        innsender = AVDOED2_FOEDSELSNUMMER.value,
-                        gjenlevende = listOf(AVDOED2_FOEDSELSNUMMER.value),
-                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                        soeker = SOEKER_FOEDSELSNUMMER,
+                        innsender = AVDOED2_FOEDSELSNUMMER,
+                        gjenlevende = listOf(AVDOED2_FOEDSELSNUMMER),
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER),
                     ).toJsonNode(),
             )
         opplysningRepo.leggOpplysningTilGrunnlag(sakId2, grunnlagsopplysning2)
@@ -366,10 +366,10 @@ internal class GrunnlagDaoIntegrationTest(
                 PERSONGALLERI_V1,
                 verdi =
                     Persongalleri(
-                        soeker = SOEKER_FOEDSELSNUMMER.value,
+                        soeker = SOEKER_FOEDSELSNUMMER,
                         gjenlevende = emptyList(),
-                        innsender = INNSENDER_FOEDSELSNUMMER.value,
-                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value),
+                        innsender = INNSENDER_FOEDSELSNUMMER,
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER, AVDOED2_FOEDSELSNUMMER),
                     ).toJsonNode(),
             )
         opplysningRepo.leggOpplysningTilGrunnlag(sakId3, grunnlagsopplysning3)

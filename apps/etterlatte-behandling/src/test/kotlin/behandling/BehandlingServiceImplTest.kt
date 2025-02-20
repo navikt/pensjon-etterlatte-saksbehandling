@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlag.GenerellKilde
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -1225,14 +1226,7 @@ internal class BehandlingServiceImplTest {
         return oppgaveKlage
     }
 
-    private fun mockPersongalleri() =
-        Persongalleri(
-            "soeker",
-            "innsender",
-            listOf("soesken"),
-            listOf("avdoed"),
-            listOf("gjenlevende"),
-        )
+    private fun mockPersongalleri() = defaultPersongalleriGydligeFnr
 
     companion object {
         val SAK_ID = sakId1

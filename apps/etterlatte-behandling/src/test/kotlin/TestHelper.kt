@@ -263,7 +263,7 @@ fun foerstegangsbehandling(
     id = id,
     sak =
         Sak(
-            ident = persongalleri.soeker,
+            ident = persongalleri.soeker.value,
             sakType = sakType,
             id = sakId,
             enhet = enhet,
@@ -308,7 +308,7 @@ fun revurdering(
     id = id,
     sak =
         Sak(
-            ident = persongalleri.soeker,
+            ident = persongalleri.soeker.value,
             sakType = sakType,
             id = sakId,
             enhet = enhet,
@@ -331,22 +331,22 @@ fun revurdering(
     tidligereFamiliepleier = tidligereFamiliepleier,
 )
 
-val soeker = "11057523044"
+val soeker = Folkeregisteridentifikator.of("11057523044")
 val defaultPersongalleriGydligeFnr =
     Persongalleri(
         soeker,
-        INNSENDER_FOEDSELSNUMMER.value,
-        listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
-        listOf(AVDOED_FOEDSELSNUMMER.value),
-        listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+        INNSENDER_FOEDSELSNUMMER,
+        listOf(HELSOESKEN2_FOEDSELSNUMMER, HALVSOESKEN_FOEDSELSNUMMER),
+        listOf(AVDOED_FOEDSELSNUMMER),
+        listOf(GJENLEVENDE_FOEDSELSNUMMER),
     )
 
 fun persongalleri(
-    soeker: String = no.nav.etterlatte.soeker,
-    innsender: String = INNSENDER_FOEDSELSNUMMER.value,
-    soesken: List<String> = listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
-    avdoed: List<String> = listOf(AVDOED_FOEDSELSNUMMER.value),
-    gjenlevende: List<String> = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+    soeker: Folkeregisteridentifikator = no.nav.etterlatte.soeker,
+    innsender: Folkeregisteridentifikator = INNSENDER_FOEDSELSNUMMER,
+    soesken: List<Folkeregisteridentifikator> = listOf(HELSOESKEN2_FOEDSELSNUMMER, HALVSOESKEN_FOEDSELSNUMMER),
+    avdoed: List<Folkeregisteridentifikator> = listOf(AVDOED_FOEDSELSNUMMER),
+    gjenlevende: List<Folkeregisteridentifikator> = listOf(GJENLEVENDE_FOEDSELSNUMMER),
 ) = Persongalleri(
     soeker = soeker,
     innsender = innsender,

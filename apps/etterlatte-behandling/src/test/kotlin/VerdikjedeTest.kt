@@ -67,6 +67,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
@@ -126,7 +127,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     .post("/personer/saker/${SakType.BARNEPENSJON}") {
                         addAuthToken(tokenSaksbehandler)
                         contentType(ContentType.Application.Json)
-                        setBody(FoedselsnummerDTO(fnr))
+                        setBody(FoedselsnummerDTO(fnr.value))
                     }.apply {
                         assertEquals(HttpStatusCode.OK, status)
                     }.body()
@@ -137,7 +138,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val lestSak: Sak = it.body()
-                    assertEquals(fnr, lestSak.ident)
+                    assertEquals(fnr.value, lestSak.ident)
                     assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
                 }
 
@@ -149,7 +150,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sakId1,
-                                Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(soeker, INNSENDER_FOEDSELSNUMMER, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -204,7 +205,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val behandling: DetaljertBehandling = it.body()
                     assertNotNull(behandling.id)
-                    assertEquals(defaultPersongalleriGydligeFnr.soeker, behandling.soeker)
+                    assertEquals(defaultPersongalleriGydligeFnr.soeker.value, behandling.soeker)
                 }
 
             client
@@ -513,7 +514,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 .post("/grunnlagsendringshendelse/doedshendelse") {
                     addAuthToken(this@VerdikjedeTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
+                    setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr.value, LocalDate.now()))
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }
@@ -522,7 +523,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 .post("/grunnlagsendringshendelse/doedshendelse") {
                     addAuthToken(this@VerdikjedeTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
+                    setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr.value, LocalDate.now()))
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }
@@ -535,7 +536,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         UtflyttingsHendelse(
                             hendelseId = "1",
                             endringstype = Endringstype.OPPRETTET,
-                            fnr = fnr,
+                            fnr = fnr.value,
                             tilflyttingsLand = null,
                             tilflyttingsstedIUtlandet = null,
                             utflyttingsdato = null,
@@ -553,7 +554,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         ForelderBarnRelasjonHendelse(
                             hendelseId = "1",
                             endringstype = Endringstype.OPPRETTET,
-                            fnr = fnr,
+                            fnr = fnr.value,
                             relatertPersonsIdent = null,
                             relatertPersonsRolle = "",
                             minRolleForPerson = "",
@@ -572,7 +573,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sakId1,
-                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(fnr, INNSENDER_FOEDSELSNUMMER, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -610,7 +611,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }
 
             val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr.value }) } returns
                 adressebeskyttelseGradering
             client
                 .post("/grunnlagsendringshendelse/adressebeskyttelse") {
@@ -620,7 +621,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         Adressebeskyttelse(
                             hendelseId = "1",
                             endringstype = Endringstype.OPPRETTET,
-                            fnr = fnr,
+                            fnr = fnr.value,
                         ),
                     )
                 }.also {

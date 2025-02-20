@@ -710,7 +710,7 @@ internal class ApplicationContext(
                     .of(20, ChronoUnit.MINUTES)
                     .toMillis()
             },
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(2, ChronoUnit.HOURS),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(10, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

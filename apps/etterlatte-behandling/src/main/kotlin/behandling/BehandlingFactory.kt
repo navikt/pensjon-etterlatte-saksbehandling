@@ -44,6 +44,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -244,6 +245,7 @@ class BehandlingFactory(
                                 )
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
+                    soeknadMottattDato = behandling.soeknadMottattDato,
                 )
 
             tilgangsService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
@@ -360,6 +362,7 @@ class BehandlingFactory(
                         oppgaveKilde = OppgaveKilde.BEHANDLING,
                         merknad = merknad,
                         gruppeId = null,
+                        soeknadMottattDato = nyFoerstegangsbehandling.soeknadMottattDato,
                     )
                 oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
 
@@ -397,6 +400,7 @@ class BehandlingFactory(
         referanse: String,
         sakId: SakId,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
+        soeknadMottattDato: LocalDateTime?,
         merknad: String?,
         gruppeId: String?,
     ): OppgaveIntern {
@@ -409,6 +413,7 @@ class BehandlingFactory(
             type = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
             gruppeId = gruppeId,
+            frist = soeknadMottattDato?.plusMonths(1L)?.toNorskTidspunkt(),
         )
     }
 

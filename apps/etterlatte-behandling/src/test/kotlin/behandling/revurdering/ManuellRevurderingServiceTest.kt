@@ -413,6 +413,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     merknad = "2 søsken",
                     gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
+                    frist = any(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
                 oppgaveService.opprettOppgave(

@@ -1,9 +1,9 @@
 import { Box, Heading, Table, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { IEtteroppgjoerOpplysninger } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerOpplysninger } from '~shared/types/Etteroppgjoer'
 import { NOK } from '~utils/formatering/formatering'
 
-export const EtteroppgjoerOpplysninger = ({ opplysninger }: { opplysninger: IEtteroppgjoerOpplysninger }) => {
+export const OpplysningerForEtteroppgjoer = ({ opplysninger }: { opplysninger: EtteroppgjoerOpplysninger }) => {
   return (
     <>
       <VStack paddingBlock="8" paddingInline="16 8">

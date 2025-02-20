@@ -1,11 +1,11 @@
 import { ISak } from '~shared/types/sak'
 
-export interface IEtteroppgjoer {
-  behandling: IEtteroppgjoerBehandling
-  opplysninger: IEtteroppgjoerOpplysninger
+export interface Etteroppgjoer {
+  behandling: EtteroppgjoerBehandling
+  opplysninger: EtteroppgjoerOpplysninger
 }
 
-export interface IEtteroppgjoerBehandling {
+export interface EtteroppgjoerBehandling {
   id: string
   status: string
   sak: ISak
@@ -13,7 +13,7 @@ export interface IEtteroppgjoerBehandling {
   opprettet: string // Mottatt?
 }
 
-export interface IEtteroppgjoerOpplysninger {
+export interface EtteroppgjoerOpplysninger {
   skatt: OpplysnignerSkatt
   ainntekt: AInntekt
   // TODO..

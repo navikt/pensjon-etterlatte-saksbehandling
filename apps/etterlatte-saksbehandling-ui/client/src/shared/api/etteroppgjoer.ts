@@ -1,6 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { IEtteroppgjoer } from '~shared/types/Etteroppgjoer'
+import { Etteroppgjoer } from '~shared/types/Etteroppgjoer'
 
-export const hentEtteroppgjoer = async (behandlingId: string): Promise<ApiResponse<IEtteroppgjoer>> => {
+export const hentEtteroppgjoer = async (behandlingId: string): Promise<ApiResponse<Etteroppgjoer>> => {
   return apiClient.get(`/etteroppgjoer/${behandlingId}`)
 }

@@ -2,8 +2,8 @@ import { StatusBar } from '~shared/statusbar/Statusbar'
 import React, { useEffect, useState } from 'react'
 import { Box, Heading } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
-import { EtteroppgjoerOpplysninger } from '~components/etteroppgjoer/EtteroppgjoerOpplysninger'
-import { IEtteroppgjoer } from '~shared/types/Etteroppgjoer'
+import { OpplysningerForEtteroppgjoer } from '~components/etteroppgjoer/OpplysningerForEtteroppgjoer'
+import { Etteroppgjoer } from '~shared/types/Etteroppgjoer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
 import { useParams } from 'react-router-dom'
@@ -15,7 +15,7 @@ export function Etteroppgjoersbehandling() {
   const { etteroppgjoerId } = useParams()
 
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
-  const [etteroppgjoer, setEtteroppgjoer] = useState<IEtteroppgjoer>()
+  const [etteroppgjoer, setEtteroppgjoer] = useState<Etteroppgjoer>()
 
   useEffect(() => {
     if (!etteroppgjoerId) return
@@ -40,7 +40,7 @@ export function Etteroppgjoersbehandling() {
             <Box paddingInline="16" paddingBlock="4 2">
               Skatteoppgjør mottatt: {formaterDato(etteroppgjoer.behandling.opprettet)}
             </Box>
-            <EtteroppgjoerOpplysninger opplysninger={etteroppgjoer.opplysninger} />
+            <OpplysningerForEtteroppgjoer opplysninger={etteroppgjoer.opplysninger} />
           </>
         ),
       })}

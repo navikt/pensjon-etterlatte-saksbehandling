@@ -146,18 +146,7 @@ class GrunnlagHenter(
             kilde = overstyrtKilde,
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
-            opplysning =
-                if (Folkeregisteridentifikator.isValid(this.innsender?.value)) {
-                    this.toJsonNode()
-                } else {
-                    if (this.innsender == null) {
-                        this.toJsonNode()
-                    } else {
-                        // TODO: Denne skal slettes om vi ikke får noen flere i loggen, ref V24__fjerne_innsender_systemsaker.sql
-                        logger.error("Ugyldig ident er lagret, se relatert for opplysninstypeid: $opplysningid")
-                        this.copy(innsender = null).toJsonNode()
-                    }
-                },
+            opplysning = this.toJsonNode(),
             attestering = null,
             fnr = null,
             periode = null,

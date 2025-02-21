@@ -358,7 +358,7 @@ internal class ApplicationContext(
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
     // TODO fjerne proxier når vi har flyttet grunnlag i produksjon
-    val skalBrukeDaoProxy = true
+    val skalBrukeDaoProxy = if (isProd()) true else false
     val aldersovergangDao =
         if (skalBrukeDaoProxy && aldersovergangDaoProxy != null) {
             aldersovergangDaoProxy

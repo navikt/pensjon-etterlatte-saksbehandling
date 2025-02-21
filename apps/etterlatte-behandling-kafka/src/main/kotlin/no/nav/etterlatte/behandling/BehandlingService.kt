@@ -73,8 +73,8 @@ interface BehandlingService {
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<SakId> = listOf(),
-        ekskluderteSaker: List<SakId> = listOf(),
+        spesifikkeSaker: List<SakId> = emptyList(),
+        ekskluderteSaker: List<SakId> = emptyList(),
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
     ): SakslisteDTO

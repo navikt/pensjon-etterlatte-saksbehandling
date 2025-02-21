@@ -29,7 +29,7 @@ class ReguleringService(
             JobbType.FINN_SAKER_TIL_REGULERING -> finnSakerTilRegulering(konfigurasjon)
             else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
         }
-        return listOf()
+        return emptyList()
     }
 
     private fun startRegulering(konfigurasjon: Reguleringskonfigurasjon) {

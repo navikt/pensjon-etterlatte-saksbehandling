@@ -102,7 +102,7 @@ class VarselbrevTest(
                             PersonerISak(
                                 null,
                                 Soeker("", "", "", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
-                                listOf(),
+                                emptyList(),
                                 null,
                             )
                         every { it.utlandstilknytning } returns null
@@ -136,7 +136,7 @@ class VarselbrevTest(
                         any(),
                         any(),
                     )
-                } returns listOf()
+                } returns emptyList()
             }
         val behandlingService =
             mockk<BehandlingService>().also {

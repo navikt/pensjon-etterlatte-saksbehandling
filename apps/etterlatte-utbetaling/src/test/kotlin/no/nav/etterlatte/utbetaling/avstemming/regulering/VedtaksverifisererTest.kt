@@ -140,7 +140,7 @@ class VedtaksverifisererTest(
                         sak = sak,
                         behandling =
                         behandling,
-                        pensjonTilUtbetaling = listOf(),
+                        pensjonTilUtbetaling = emptyList(),
                         vedtakFattet =
                             VedtakFattet(
                                 ansvarligSaksbehandler = saksbehandler,
@@ -154,7 +154,7 @@ class VedtaksverifisererTest(
                     ),
                 saksbehandler = NavIdent(saksbehandler),
                 oppdrag = Oppdrag(),
-                utbetalingshendelser = listOf(),
+                utbetalingshendelser = emptyList(),
                 utbetalingslinjer =
                     linjer.map { linje ->
                         Utbetalingslinje(

@@ -191,7 +191,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                             dato = LocalDate.now().plusMonths(3),
                             type = setOf(OppgaveType.JOURNALFOERING),
                             oppgaveKilde = setOf(OppgaveKilde.EKSTERN),
-                            oppgaver = listOf(),
+                            oppgaver = emptyList(),
                         )
                     addAuthToken(this@OppgaveRoutesTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

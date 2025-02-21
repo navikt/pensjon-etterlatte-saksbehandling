@@ -210,7 +210,7 @@ class AvkortingValiderTest {
                         listOf(
                             aarsoppgjoer(
                                 aar = 2025,
-                                inntektsavkorting = listOf(),
+                                inntektsavkorting = emptyList(),
                             ),
                         ),
                 )

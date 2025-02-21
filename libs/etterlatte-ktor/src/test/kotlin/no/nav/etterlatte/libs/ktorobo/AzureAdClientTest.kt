@@ -57,7 +57,7 @@ internal class AzureAdClientTest {
     fun `henter OBO access token hvis det ikke finnes noe i cache`() {
         testApplication {
             val azureAdClient = AzureAdClient(config, FakeAzureAdHttpClient())
-            val response = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf(), "")
+            val response = azureAdClient.getOnBehalfOfAccessTokenForResource(emptyList(), "")
             response shouldBe Ok(AccessToken("token", 60, "testToken"))
         }
     }
@@ -127,7 +127,7 @@ internal class AzureAdClientTest {
     fun `henter client credentials access token hvis det ikke finnes noe i cache`() {
         testApplication {
             val azureAdClient = AzureAdClient(config, FakeAzureAdHttpClient())
-            val response = azureAdClient.getAccessTokenForResource(listOf())
+            val response = azureAdClient.getAccessTokenForResource(emptyList())
             response shouldBe Ok(AccessToken("token", 60, "testToken"))
         }
     }
@@ -201,7 +201,7 @@ internal class AzureAdClientTest {
         runBlocking {
             client.hentTokenFraAD(
                 systembruker(claims = mapOf(Claims.azp_name to "cluster:appname:dev")),
-                listOf(),
+                emptyList(),
             )
         }
         coVerify { client.getAccessTokenForResource(any()) }
@@ -219,7 +219,7 @@ internal class AzureAdClientTest {
         runBlocking {
             client.hentTokenFraAD(
                 simpleSaksbehandler(ident = "s1"),
-                listOf(),
+                emptyList(),
             )
         }
         coVerify { client.getOnBehalfOfAccessTokenForResource(any(), "token") }

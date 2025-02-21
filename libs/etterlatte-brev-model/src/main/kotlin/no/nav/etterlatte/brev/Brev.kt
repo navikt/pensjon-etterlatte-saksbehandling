@@ -50,7 +50,7 @@ data class Adresse(
             )
         } else if (adresseType == "NORSKPOSTADRESSE") {
             if (!(postnummer.isNullOrBlank() || poststed.isNullOrBlank())) {
-                listOf()
+                emptyList()
             } else {
                 listOf("Postnummer eller poststed er ikke angitt")
             }
@@ -60,10 +60,10 @@ data class Adresse(
             } else if (!postnummer.isNullOrBlank() || !poststed.isNullOrBlank()) {
                 listOf("Postnummer og poststed skal ikke brukes på utenlandsk adresse")
             } else {
-                listOf()
+                emptyList()
             }
         } else {
-            listOf()
+            emptyList()
         }
 }
 

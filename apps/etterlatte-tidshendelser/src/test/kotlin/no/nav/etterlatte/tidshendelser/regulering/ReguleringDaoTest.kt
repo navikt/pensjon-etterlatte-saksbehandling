@@ -56,8 +56,8 @@ class ReguleringDaoTest(
     @Test
     fun ignorerInaktivKonfigurasjon() {
         val dato = LocalDate.of(2024, Month.JUNE, 22)
-        leggInnReguleringskonfigurasjon(dato, 10, listOf(), listOf())
-        leggInnReguleringskonfigurasjon(dato, 20, listOf(), listOf(), false)
+        leggInnReguleringskonfigurasjon(dato, 10, emptyList(), emptyList())
+        leggInnReguleringskonfigurasjon(dato, 20, emptyList(), emptyList(), false)
         val dao = ReguleringDao(datasource = dataSource)
         val konfigurasjon: Reguleringskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(10, konfigurasjon.antall)

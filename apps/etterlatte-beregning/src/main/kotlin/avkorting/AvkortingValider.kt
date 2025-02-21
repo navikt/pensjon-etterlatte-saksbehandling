@@ -12,7 +12,7 @@ object AvkortingValider {
         erFoerstegangsbehandling: Boolean,
         naa: YearMonth = YearMonth.now(),
     ) {
-        skalIkkeKunneEndreInntektITidligereAar(erFoerstegangsbehandling, nyInntekt.fom, naa)
+        skalIkkeKunneEndreInntektITidligereAar(erFoerstegangsbehandling, nyInntekt.fom, avkorting, naa)
 
         foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
             nyInntekt,
@@ -34,10 +34,22 @@ object AvkortingValider {
     private fun skalIkkeKunneEndreInntektITidligereAar(
         erFoerstegangsbehandling: Boolean,
         nyInntektFom: YearMonth,
+        avkorting: Avkorting,
         naa: YearMonth,
     ) {
         if (!erFoerstegangsbehandling && nyInntektFom.year < naa.year) {
-            throw InntektForTidligereAar()
+            val sisteInntekt =
+                avkorting.aarsoppgjoer
+                    .single { it.aar == nyInntektFom.year }
+                    .inntektsavkorting
+                    .maxBy { it.grunnlag.periode.fom }
+                    .grunnlag
+            val forrigeBehandlingErIkkeOpphoer = sisteInntekt.periode.tom == null
+            // Hvis siste angitte inntekt har satt til og med betyr det at det var opphør og denne behandlingen er en gjenåpnging.
+            // Da må det være mulig og endre inntekten selv om det er et tidligere år
+            if (forrigeBehandlingErIkkeOpphoer) {
+                throw InntektForTidligereAar()
+            }
         }
     }
 

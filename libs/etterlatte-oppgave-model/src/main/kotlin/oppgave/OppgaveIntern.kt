@@ -128,6 +128,7 @@ enum class OppgaveType {
     MANUELL_UTSENDING_BREV,
     OPPFOELGING,
     MELDT_INN_ENDRING,
+    ETTEROPPGJOER,
     ;
 
     companion object {

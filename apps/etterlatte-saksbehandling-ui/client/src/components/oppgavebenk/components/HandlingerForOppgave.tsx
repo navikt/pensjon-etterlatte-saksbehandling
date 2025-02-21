@@ -121,6 +121,13 @@ export const HandlingerForOppgave = ({
           )}
         </>
       )
+    case Oppgavetype.ETTEROPPGJOER:
+      return (
+        <Button size="small" as="a" href={`/etteroppjoer/${referanse}`}>
+          Gå til etteroppgjør
+        </Button>
+      )
+
     case Oppgavetype.KLAGE:
       return (
         erInnloggetSaksbehandlerOppgave && (

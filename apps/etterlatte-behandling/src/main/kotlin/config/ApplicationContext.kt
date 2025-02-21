@@ -637,6 +637,7 @@ internal class ApplicationContext(
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
             sakDao = sakLesDao,
+            oppgaveService = oppgaveService,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

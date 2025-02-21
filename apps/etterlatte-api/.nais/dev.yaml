@@ -5,6 +5,8 @@ metadata:
   namespace: etterlatte
   labels:
     team: etterlatte
+  annotations:
+    config.linkerd.io/proxy-outbound-connect-timeout: "3000ms"
 spec:
   image: "{{image}}"
   port: 8080

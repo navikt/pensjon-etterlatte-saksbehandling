@@ -46,6 +46,24 @@ class BehandlingKlient(
                 .get("$behandlingUrl/saker/pleieforholdet-opphoerte/$doedsfallsmaaned")
                 .body()
         }
+
+    fun hentSaker(foedselsmaaned: YearMonth): List<SakId> =
+        runBlocking {
+            behandlingHttpClient
+                .get("$behandlingUrl/api/grunnlag/aldersovergang/$foedselsmaaned") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                }.body()
+        }
+
+    fun hentSakerForDoedsfall(doedsfallsmaaned: YearMonth): List<SakId> =
+        runBlocking {
+            behandlingHttpClient
+                .get("$behandlingUrl/api/grunnlag/doedsdato/$doedsfallsmaaned") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                }.body()
+        }
 }
 
 data class SakerDto(

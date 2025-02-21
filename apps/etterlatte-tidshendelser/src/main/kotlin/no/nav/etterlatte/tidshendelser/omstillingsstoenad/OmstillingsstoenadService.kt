@@ -8,12 +8,10 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
-import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.slf4j.LoggerFactory
 
 class OmstillingsstoenadService(
     private val hendelseDao: HendelseDao,
-    private val grunnlagKlient: GrunnlagKlient,
     private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -37,7 +35,7 @@ class OmstillingsstoenadService(
         val sakerMedAvdoedDoedsdatoIMaaned =
             runBlocking {
                 retryOgPakkUt {
-                    grunnlagKlient.hentSakerForDoedsfall(doedsfallsmaaned = aktuellMaaned)
+                    behandlingKlient.hentSakerForDoedsfall(doedsfallsmaaned = aktuellMaaned)
                 }
             }
         logger.info("Hentet ${sakerMedAvdoedDoedsdatoIMaaned.size} saker hvor dødsfall forekom i $aktuellMaaned")

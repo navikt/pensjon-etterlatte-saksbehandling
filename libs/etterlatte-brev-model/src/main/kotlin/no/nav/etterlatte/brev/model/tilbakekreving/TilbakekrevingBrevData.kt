@@ -50,15 +50,15 @@ data class TilbakekrevingBeloeperDataNy(
     /*
     Hensikten med disse metodene er for å slippe å legge til brevbaker-api-model i behandling
      */
-    fun feilutbetaling() = sumNettoRenter.value
+    fun feilutbetaling() = feilutbetaling.value
 
-    fun bruttoTilbakekreving() = sumNettoRenter.value
+    fun bruttoTilbakekreving() = bruttoTilbakekreving.value
 
-    fun nettoTilbakekreving() = sumNettoRenter.value
+    fun nettoTilbakekreving() = nettoTilbakekreving.value
 
-    fun fradragSkatt() = sumNettoRenter.value
+    fun fradragSkatt() = fradragSkatt.value
 
-    fun renteTillegg() = sumNettoRenter.value
+    fun renteTillegg() = renteTillegg.value
 
     companion object {
         fun opprett(

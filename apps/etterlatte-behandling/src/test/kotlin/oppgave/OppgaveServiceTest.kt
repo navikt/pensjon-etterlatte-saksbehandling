@@ -56,6 +56,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.random.Random
@@ -835,6 +837,53 @@ internal class OppgaveServiceTest(
                 null,
             )
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(OppgaveType::class)
+    fun `oppgaver opprettes med standard frist hvis ikke angitt, og angitt frist ellers`(oppgaveType: OppgaveType) {
+        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val nyOppgaveUtenFrist =
+            opprettOppgave(
+                referanse = "",
+                sakId = sak.id,
+                kilde = OppgaveKilde.EKSTERN,
+                type = oppgaveType,
+                merknad = null,
+                frist = null,
+                saksbehandler = null,
+                status = Status.NY,
+            )
+        if (oppgaveType == OppgaveType.JOURNALFOERING) {
+            assertEquals(
+                nyOppgaveUtenFrist.opprettet
+                    .toLocalDatetimeUTC()
+                    .plusDays(1L)
+                    .toTidspunkt(),
+                nyOppgaveUtenFrist.frist,
+            )
+        } else {
+            assertEquals(
+                nyOppgaveUtenFrist.opprettet
+                    .toLocalDatetimeUTC()
+                    .plusMonths(1L)
+                    .toTidspunkt(),
+                nyOppgaveUtenFrist.frist,
+            )
+        }
+        val egenFrist = Tidspunkt.now()
+        val nyOppgaveMedFrist =
+            opprettOppgave(
+                referanse = "",
+                sakId = sak.id,
+                kilde = OppgaveKilde.EKSTERN,
+                type = oppgaveType,
+                merknad = null,
+                frist = egenFrist,
+                saksbehandler = null,
+                status = Status.NY,
+            )
+        assertEquals(egenFrist, nyOppgaveMedFrist.frist)
     }
 
     @Test

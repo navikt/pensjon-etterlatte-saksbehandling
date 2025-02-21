@@ -58,6 +58,7 @@ import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -203,7 +204,8 @@ internal class BehandlingFactoryTest {
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
                 status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                // Hvis søknad mottatt dato er null (ukjent) så skal oppgave opprettes med null for frist
+                soeknadMottattDato = null,
                 gyldighetsproeving = null,
                 virkningstidspunkt =
                     Virkningstidspunkt(
@@ -242,7 +244,7 @@ internal class BehandlingFactoryTest {
             )
         } returns Unit
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } returns Unit
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any(), frist = any()) } returns mockOppgave
         every { sakServiceMock.hentGraderingForSak(any(), any()) } returns
             SakMedGraderingOgSkjermet(
                 opprettetBehandling.sak.id,
@@ -288,6 +290,8 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
                 gruppeId = "Avdoed",
+                // Sjekker at oppgave opprettes med null for frist
+                frist = null,
             )
         }
         coVerify(exactly = 1) { grunnlagService.opprettGrunnlag(any(), any()) }
@@ -303,6 +307,7 @@ internal class BehandlingFactoryTest {
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
+        val tidspunktMottattBehandling = Tidspunkt.now().toLocalDatetimeUTC().minusDays(15L)
         val opprettetBehandling =
             Foerstegangsbehandling(
                 id = UUID.randomUUID(),
@@ -316,7 +321,7 @@ internal class BehandlingFactoryTest {
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
                 status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                soeknadMottattDato = tidspunktMottattBehandling,
                 gyldighetsproeving = null,
                 virkningstidspunkt =
                     Virkningstidspunkt(
@@ -359,7 +364,7 @@ internal class BehandlingFactoryTest {
             )
         } returns Unit
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } returns Unit
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any(), frist = any()) } returns mockOppgave
 
         val foerstegangsbehandling =
             behandlingFactory
@@ -390,6 +395,7 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
                 gruppeId = persongalleri.avdoed.single(),
+                frist = tidspunktMottattBehandling.plusMonths(1L).toNorskTidspunkt(),
             )
         }
         coVerify { grunnlagService.opprettGrunnlag(any(), any()) }
@@ -464,7 +470,7 @@ internal class BehandlingFactoryTest {
             )
         } returns Unit
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } returns Unit
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any(), frist = any()) } returns mockOppgave
         every {
             oppgaveService.avbrytAapneOppgaverMedReferanse(any())
         } just runs
@@ -517,6 +523,7 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = null,
                 gruppeId = persongalleri.avdoed.single(),
+                frist = any(),
             )
         }
         verify(exactly = 1) {
@@ -658,7 +665,7 @@ internal class BehandlingFactoryTest {
         coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any())
         } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
@@ -703,7 +710,7 @@ internal class BehandlingFactoryTest {
             behandlingDaoMock.opprettBehandling(any())
             kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any())
             oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
-            oppgaveService.opprettOppgave(opprettetBehandling.id.toString(), sak.id, any(), any(), any())
+            oppgaveService.opprettOppgave(opprettetBehandling.id.toString(), sak.id, any(), any(), any(), frist = any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
             vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
@@ -760,7 +767,7 @@ internal class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns oppgaveInternMock
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any()) } returns oppgaveInternMock
         every { oppgaveService.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveInternMock)
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any()) } just runs
@@ -783,7 +790,7 @@ internal class BehandlingFactoryTest {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring på grunn av klage")
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), merknad = "Omgjøring på grunn av klage", frist = any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
             behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
@@ -821,7 +828,7 @@ internal class BehandlingFactoryTest {
         coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any())
         } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
@@ -858,7 +865,7 @@ internal class BehandlingFactoryTest {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring av førstegangsbehandling")
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring av førstegangsbehandling", frist = any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
             behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
@@ -937,7 +944,7 @@ internal class BehandlingFactoryTest {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring av førstegangsbehandling")
         } returns mockOppgave
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any(), frist = any())
         } returns mockOppgave
         every {
             oppgaveService.tildelSaksbehandler(any(), any())
@@ -1023,6 +1030,7 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
                 gruppeId = persongalleri.avdoed.single(),
+                frist = any(),
             )
             oppgaveService.opprettOppgave(
                 referanse = revurderingsBehandling.id.toString(),
@@ -1031,6 +1039,7 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
                 gruppeId = persongalleri.avdoed.single(),
+                frist = any(),
             )
         }
         coVerify { grunnlagService.opprettGrunnlag(any(), any()) }
@@ -1117,10 +1126,10 @@ internal class BehandlingFactoryTest {
         } returns Unit
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } returns Unit
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any(), gruppeId = any())
         } returns mockOppgave
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any(), gruppeId = any())
         } returns mockOppgave
         every {
             oppgaveService.oppdaterStatusOgMerknad(any(), any(), any())
@@ -1205,6 +1214,7 @@ internal class BehandlingFactoryTest {
                 kilde = any(),
                 type = any(),
                 merknad = any(),
+                frist = any(),
                 gruppeId = persongalleri.avdoed.single(),
             )
             oppgaveService.opprettOppgave(
@@ -1213,6 +1223,7 @@ internal class BehandlingFactoryTest {
                 kilde = any(),
                 type = any(),
                 merknad = any(),
+                frist = any(),
                 gruppeId = persongalleri.avdoed.single(),
             )
         }
@@ -1289,7 +1300,7 @@ internal class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } just Runs
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns emptyList()
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any(), frist = any()) } returns mockOppgave
 
         coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
 
@@ -1336,6 +1347,7 @@ internal class BehandlingFactoryTest {
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = any(),
                 gruppeId = persongalleri.avdoed.single(),
+                frist = any(),
             )
         }
         coVerify {

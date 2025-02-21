@@ -108,7 +108,7 @@ export const opprettBrevFraPDF = async (args: { sakId: number; formData: FormDat
 }
 
 export const hentManuellPayload = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
-  apiClient.get(`/brev/${props.brevId}/payload?sakId=${props.sakId}`) //TODO Bruke behandling backend?
+  apiClient.get(`/brev/${props.brevId}/payload?sakId=${props.sakId}`)
 
 export const tilbakestillManuellPayload = async (props: {
   brevId: number

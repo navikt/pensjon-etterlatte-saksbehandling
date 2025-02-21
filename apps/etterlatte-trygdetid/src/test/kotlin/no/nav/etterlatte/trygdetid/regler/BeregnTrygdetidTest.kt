@@ -206,8 +206,8 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge = null,
                         fremtidigTrygdetidTeoretisk = null,
-                        samletTrygdetidNorge = null,
-                        samletTrygdetidTeoretisk = null,
+                        samletTrygdetidNorge = 0,
+                        samletTrygdetidTeoretisk = 0,
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = false,
@@ -524,7 +524,7 @@ internal class BeregnTrygdetidTest {
                         ),
                     ),
                     DetaljertBeregnetTrygdetidResultat(
-                        faktiskTrygdetidNorge = null,
+                        faktiskTrygdetidNorge = FaktiskTrygdetid(Period.ZERO, 0),
                         faktiskTrygdetidTeoretisk =
                             FaktiskTrygdetid(
                                 periode = Period.of(12, 2, 0),
@@ -546,7 +546,7 @@ internal class BeregnTrygdetidTest {
                             ),
                         samletTrygdetidNorge = 19,
                         samletTrygdetidTeoretisk = 31,
-                        prorataBroek = null,
+                        prorataBroek = IntBroek(teller = 0, nevner = 146),
                         overstyrt = false,
                         yrkesskade = false,
                         beregnetSamletTrygdetidNorge = null,

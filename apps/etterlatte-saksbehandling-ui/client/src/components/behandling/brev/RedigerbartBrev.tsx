@@ -30,7 +30,6 @@ interface RedigerbartBrevProps {
   kanRedigeres: boolean
   lukkAdvarselBehandlingEndret?: () => void
   tilbakestillingsaction: () => void
-  tilbakekrevingBrev?: boolean // TODO midlertidig
 }
 
 export default function RedigerbartBrev({
@@ -38,7 +37,6 @@ export default function RedigerbartBrev({
   kanRedigeres,
   lukkAdvarselBehandlingEndret,
   tilbakestillingsaction,
-  tilbakekrevingBrev = false,
 }: RedigerbartBrevProps) {
   const [fane, setFane] = useState<string>(kanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
   const [content, setContent] = useState<any[]>([])
@@ -80,7 +78,6 @@ export default function RedigerbartBrev({
         sakId: brev.sakId,
         behandlingId: brev.behandlingId,
         brevtype: brev.brevtype,
-        tilbakekrevingBrev,
       },
       (payload: any) => {
         setContent(payload.hoveddel)

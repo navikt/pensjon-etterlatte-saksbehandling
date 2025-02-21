@@ -116,7 +116,7 @@ class KlageBrevService(
         saksbehandler: Saksbehandler,
     ) {
         runBlocking {
-            brevApiKlient.ferdigstillVedtaksbrev(klage.id, klage.sak.id, saksbehandler)
+            brevApiKlient.ferdigstillVedtaksbrev(klage.id, saksbehandler)
         }
     }
 

@@ -67,7 +67,6 @@ interface BrevApiKlient {
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -247,7 +246,6 @@ class BrevApiKlientObo(
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId, // TODO Fjern ubrukt parameter
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(

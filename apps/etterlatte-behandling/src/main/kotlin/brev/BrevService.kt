@@ -109,7 +109,7 @@ class BrevService(
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
             else -> {
-                brevApiKlient.ferdigstillVedtaksbrev(behandlingId, SakId(1), brukerTokenInfo)
+                brevApiKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
             }
         }
     }

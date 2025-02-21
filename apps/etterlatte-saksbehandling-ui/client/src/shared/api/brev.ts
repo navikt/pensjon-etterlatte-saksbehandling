@@ -31,7 +31,6 @@ export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiR
 export const opprettVedtaksbrev = async (args: {
   sakId: number
   behandlingId: string
-  tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<IBrev>> => {
   return apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 }
@@ -116,7 +115,6 @@ export const tilbakestillManuellPayload = async (props: {
   sakId: number
   behandlingId: string
   brevtype: Brevtype
-  tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<any>> => {
   return apiClient.put(
     `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}&brevtype=${props.brevtype}`,

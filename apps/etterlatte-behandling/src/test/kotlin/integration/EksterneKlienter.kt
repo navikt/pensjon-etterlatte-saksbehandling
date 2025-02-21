@@ -397,7 +397,6 @@ class BrevApiKlientTest : BrevApiKlient {
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }

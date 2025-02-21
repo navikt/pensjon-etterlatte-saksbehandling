@@ -78,7 +78,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
@@ -103,20 +102,20 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
     private val brevApiKlientMock: BrevApiKlient =
         mockk {
             coEvery { opprettVedtaksbrev(any(), any<SakId>(), any()) } answers {
-                opprettetBrevDto(behandlingId = firstArg(), sakId = SakId(secondArg()))
+                opprettetBrev(behandlingId = firstArg(), sakId = SakId(secondArg()))
             }
             coEvery { tilbakestillVedtaksbrev(any(), any(), any(), any(), any()) } returns tilbakestiltPayload
             coEvery { genererPdf(any(), any(), any()) } returns generertPdf
-            coEvery { ferdigstillVedtaksbrev(any(), any(), any()) } just runs
+            coEvery { ferdigstillVedtaksbrev(any(), any()) } just runs
             coEvery { hentVedtaksbrev(any(), any()) } answers {
-                opprettetBrevDto(behandlingId = firstArg())
+                opprettetBrev(behandlingId = firstArg())
             }
         }
     private val vedtakKlient: VedtakKlient = mockk()
     private val brevKlientMock: BrevKlient =
         mockk {
             coEvery { opprettVedtaksbrev(any(), any(), any()) } answers {
-                opprettetBrevDto(behandlingId = firstArg())
+                opprettetBrev(behandlingId = firstArg())
             }
             coEvery { tilbakestillVedtaksbrev(any(), any(), any(), any()) } returns tilbakestiltPayload
             coEvery { ferdigstillVedtaksbrev(any(), any()) } just runs
@@ -240,14 +239,14 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.post(
-                        "/api/behandling/brev/${behandling.id}/vedtak/ferdigstill?brevId=42",
+                        "/api/behandling/brev/${behandling.id}/vedtak/ferdigstill",
                     ) {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }
                 response.status shouldBe HttpStatusCode.OK
 
-                coVerify { brevApiKlientMock.ferdigstillVedtaksbrev(behandling.id, any(), any()) }
+                coVerify { brevApiKlientMock.ferdigstillVedtaksbrev(behandling.id, any()) }
             }
         }
 
@@ -465,7 +464,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         }
     }
 
-    private fun opprettetBrevDto(
+    private fun opprettetBrev(
         sakId: SakId = randomSakId(),
         behandlingId: UUID = UUID.randomUUID(),
     ) = Brev(
@@ -544,41 +543,5 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
     private fun vedtakTilbakekrevingBehandlingDto(tilbakekreving: Tilbakekreving) =
         VedtakInnholdDto.VedtakTilbakekrevingDto(
             tilbakekreving.toObjectNode(),
-        )
-
-    private fun opprettBrev(
-        status: Status = Status.OPPRETTET,
-        mottakere: List<Mottaker> = listOf(opprettMottaker(SOEKER_FOEDSELSNUMMER.value)),
-    ) = Brev(
-        id = Random.nextLong(10000),
-        sakId = randomSakId(),
-        behandlingId = null,
-        tittel = null,
-        spraak = Spraak.NB,
-        prosessType = BrevProsessType.REDIGERBAR,
-        soekerFnr = "fnr",
-        status = status,
-        statusEndret = Tidspunkt.now(),
-        opprettet = Tidspunkt.now(),
-        mottakere = mottakere,
-        brevtype = Brevtype.INFORMASJON,
-        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
-    )
-
-    private fun opprettMottaker(fnr: String) =
-        Mottaker(
-            id = UUID.randomUUID(),
-            navn = "Stor Snerk",
-            foedselsnummer = MottakerFoedselsnummer(fnr),
-            orgnummer = null,
-            adresse =
-                Adresse(
-                    adresseType = "NORSKPOSTADRESSE",
-                    adresselinje1 = "Testgaten 13",
-                    postnummer = "1234",
-                    poststed = "OSLO",
-                    land = "Norge",
-                    landkode = "NOR",
-                ),
         )
 }

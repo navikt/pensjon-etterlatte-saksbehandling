@@ -45,7 +45,7 @@ object AvkortingValider {
                     .maxBy { it.grunnlag.periode.fom }
                     .grunnlag
             val forrigeBehandlingErIkkeOpphoer = sisteInntekt.periode.tom == null
-            // Hvis siste angitte inntekt har satt til og med betyr det at det var opphør og denne behandlingen er en gjenåpnging.
+            // Hvis siste angitte inntekt har satt til og med betyr det at det var opphør og denne behandlingen er en gjenåpning.
             // Da må det være mulig og endre inntekten selv om det er et tidligere år
             if (forrigeBehandlingErIkkeOpphoer) {
                 throw InntektForTidligereAar()

@@ -706,7 +706,7 @@ internal class ApplicationContext(
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(6, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
@@ -716,7 +716,7 @@ internal class ApplicationContext(
         AktivitetspliktOppgaveUnntakUtloeperJob(
             aktivitetspliktOppgaveUnntakUtloeperJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
@@ -742,7 +742,7 @@ internal class ApplicationContext(
         DoedsmeldingReminderJob(
             doedshendelseReminderJob,
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(4, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,

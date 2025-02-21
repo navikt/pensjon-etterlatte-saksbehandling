@@ -12,7 +12,6 @@ import { TabellOverAvdoede } from '~components/behandling/soeknadsoversikt/famil
 import { TabellOverGjenlevende } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverGjenlevende'
 import { SakType } from '~shared/types/sak'
 import { TabellOverAvdoedesBarn } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoedesBarn'
-import { hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag } from '~shared/types/Person'
 import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/AnnenForelderSkjema'
 import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
 
@@ -62,23 +61,12 @@ export const Familieforhold = ({ behandling, redigerbar, personopplysninger }: P
                     gjenlevende={!!personopplysninger?.soeker ? [personopplysninger?.soeker] : []}
                     alleLand={alleLand}
                   />
-                  <TabellOverAvdoedesBarn
-                    avdoedesBarn={personopplysninger?.avdoede.flatMap((it) => it.opplysning.avdoedesBarn ?? [])}
-                    soeker={personopplysninger?.soeker}
-                    sakType={behandling.sakType}
-                  />
+                  <TabellOverAvdoedesBarn sakType={behandling.sakType} />
                 </>
               ) : (
                 <>
                   <TabellOverGjenlevende gjenlevende={personopplysninger?.gjenlevende} alleLand={alleLand} />
-                  <TabellOverAvdoedesBarn
-                    avdoedesBarn={hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag(
-                      personopplysninger?.avdoede ?? [],
-                      personopplysninger?.soeker?.opplysning.foedselsnummer ?? ''
-                    )}
-                    soeker={personopplysninger?.soeker}
-                    sakType={behandling.sakType}
-                  />
+                  <TabellOverAvdoedesBarn sakType={behandling.sakType} />
                 </>
               )}
             </VStack>

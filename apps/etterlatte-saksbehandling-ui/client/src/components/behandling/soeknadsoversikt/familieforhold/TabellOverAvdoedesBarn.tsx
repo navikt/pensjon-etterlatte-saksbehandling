@@ -1,4 +1,4 @@
-import { formaterNavn, IPdlPerson } from '~shared/types/Person'
+import { formaterNavn, hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { BodyShort, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { ChildHairEyesIcon } from '@navikt/aksel-icons'
 import React from 'react'
@@ -6,19 +6,53 @@ import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { PdlPersonAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
 import { BarnAddressePeriode } from '~components/behandling/soeknadsoversikt/familieforhold/BarnAddressePeriode'
-import { Personopplysning } from '~shared/types/grunnlag'
+import { Personopplysninger } from '~shared/types/grunnlag'
 import { SakType } from '~shared/types/sak'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 interface Props {
-  avdoedesBarn: IPdlPerson[] | undefined
-  soeker: Personopplysning | undefined
   sakType: SakType
 }
 
-export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props) => {
-  const erGjenlevendesBarn = (barn: IPdlPerson) =>
-    soeker?.opplysning.familieRelasjon?.barn?.includes(barn.foedselsnummer) ?? false
+function erBarnTilPerson(person: IPdlPerson, barnIdent: string): boolean {
+  return !!(person.familieRelasjon?.barn ?? []).find((ident) => ident == barnIdent)
+}
+
+function hvemErBarnetsForeldre(personopplysninger: Personopplysninger, barn: IPdlPerson): string {
+  if (personopplysninger.avdoede.length >= 2) {
+    const [avdoedEn, avdoedTo] = personopplysninger.avdoede
+    const harAvdoedEnSomForelder = erBarnTilPerson(avdoedEn.opplysning, barn.foedselsnummer)
+    const harAvdoedToSomForelder = erBarnTilPerson(avdoedTo.opplysning, barn.foedselsnummer)
+
+    if (harAvdoedEnSomForelder && harAvdoedToSomForelder) {
+      return 'Begge avdøde'
+    } else if (harAvdoedEnSomForelder) {
+      return `Kun ${formaterNavn(avdoedEn.opplysning)}`
+    } else {
+      return `Kun ${formaterNavn(avdoedTo.opplysning)}`
+    }
+  } else {
+    const harGjenlevendeSomForelder = personopplysninger.gjenlevende.some((gjenlevende) =>
+      erBarnTilPerson(gjenlevende.opplysning, barn.foedselsnummer)
+    )
+    if (harGjenlevendeSomForelder) {
+      return 'Avdød og gjenlevende'
+    } else {
+      return 'Kun avdød'
+    }
+  }
+}
+
+export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
+  const opplysninger = usePersonopplysninger()
+  if (!opplysninger) {
+    return null
+  }
+  const avdoedesBarn = hentLevendeSoeskenFraAvdoedeForSoeker(
+    opplysninger.avdoede,
+    opplysninger.soeker?.opplysning?.foedselsnummer
+  )
 
   return (
     <VStack gap="4">
@@ -39,7 +73,7 @@ export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props)
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!avdoedesBarn?.length ? (
+          {!!avdoedesBarn.length ? (
             avdoedesBarn.map((barn, index) => (
               <Table.Row key={index}>
                 <Table.DataCell>
@@ -57,13 +91,17 @@ export const TabellOverAvdoedesBarn = ({ avdoedesBarn, soeker, sakType }: Props)
                 <Table.DataCell>
                   <BarnAddressePeriode barn={barn} />
                 </Table.DataCell>
-                <Table.DataCell>{erGjenlevendesBarn(barn) ? 'Gjenlevende og avdød' : 'Kun avdød'}</Table.DataCell>
+                <Table.DataCell>{hvemErBarnetsForeldre(opplysninger, barn)}</Table.DataCell>
               </Table.Row>
             ))
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={5}>
-                <Heading size="small">Avdøde har ingen barn</Heading>
+                <Heading size="small">
+                  {sakType === SakType.OMSTILLINGSSTOENAD
+                    ? 'Avdøde har ingen barn'
+                    : 'Avdøde har ingen andre barn enn søker'}
+                </Heading>
               </Table.DataCell>
             </Table.Row>
           )}

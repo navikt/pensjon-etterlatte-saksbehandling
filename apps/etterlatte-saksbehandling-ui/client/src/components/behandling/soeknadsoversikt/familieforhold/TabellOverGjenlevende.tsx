@@ -1,6 +1,6 @@
 import { Personopplysning } from '~shared/types/grunnlag'
 import { ILand } from '~utils/kodeverk'
-import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 import { formaterNavn, formaterSivilstatusTilLesbarStreng } from '~shared/types/Person'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
@@ -9,6 +9,7 @@ import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsover
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
 import React from 'react'
 import { PersonopplysningAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
+import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 
 interface Props {
   gjenlevende: Personopplysning[] | undefined
@@ -40,7 +41,10 @@ export const TabellOverGjenlevende = ({ gjenlevende, alleLand }: Props) => {
           {!!gjenlevende?.length ? (
             gjenlevende.map((levende, index) => (
               <Table.Row key={index}>
-                <Table.DataCell>{formaterNavn(levende.opplysning)}</Table.DataCell>
+                <Table.DataCell>
+                  <BodyShort>{formaterNavn(levende.opplysning)}</BodyShort>
+                  <DoedsdatoTag doedsdato={levende.opplysning.doedsdato} />
+                </Table.DataCell>
                 <Table.DataCell>
                   <KopierbarVerdi value={levende.opplysning.foedselsnummer} iconPosition="right" />
                 </Table.DataCell>
@@ -70,7 +74,7 @@ export const TabellOverGjenlevende = ({ gjenlevende, alleLand }: Props) => {
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={7}>
-                <Heading size="small"> Ingen gjenlevende</Heading>
+                <Heading size="small">Ingen gjenlevende</Heading>
               </Table.DataCell>
             </Table.Row>
           )}

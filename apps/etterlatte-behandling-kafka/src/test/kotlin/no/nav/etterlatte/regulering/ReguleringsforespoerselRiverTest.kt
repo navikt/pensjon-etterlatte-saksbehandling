@@ -77,7 +77,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         every { vedtakServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
-            SakslisteDTO(listOf(sakId1, sakId2, sakId3)) andThen SakslisteDTO(listOf())
+            SakslisteDTO(listOf(sakId1, sakId2, sakId3)) andThen SakslisteDTO(emptyList())
 
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
@@ -189,7 +189,7 @@ internal class ReguleringsforespoerselRiverTest {
                 (0..MAKS_BATCHSTOERRELSE).map {
                     SakId(it.toLong())
                 },
-            ) andThen SakslisteDTO(listOf(randomSakId())) andThen SakslisteDTO(listOf())
+            ) andThen SakslisteDTO(listOf(randomSakId())) andThen SakslisteDTO(emptyList())
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 

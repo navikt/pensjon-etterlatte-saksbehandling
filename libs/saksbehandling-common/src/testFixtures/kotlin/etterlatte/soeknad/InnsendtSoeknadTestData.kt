@@ -277,6 +277,6 @@ object InnsendtSoeknadTestData {
                         ),
                     militaertjeneste = null,
                 ),
-            barn = listOf(),
+            barn = emptyList(),
         )
 }

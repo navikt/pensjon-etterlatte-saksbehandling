@@ -35,7 +35,7 @@ class SoeknadStatistikkRepositoryTest(
                     soeknadId = 1337,
                     gyldigForBehandling = true,
                     sakType = SakType.BARNEPENSJON,
-                    kriterierForIngenBehandling = listOf(),
+                    kriterierForIngenBehandling = emptyList(),
                 ),
         )
 
@@ -65,7 +65,7 @@ class SoeknadStatistikkRepositoryTest(
                     soeknadId = 2,
                     gyldigForBehandling = true,
                     sakType = SakType.BARNEPENSJON,
-                    kriterierForIngenBehandling = listOf(),
+                    kriterierForIngenBehandling = emptyList(),
                 ),
         )
         Assertions.assertEquals(1L, repo.hentAntallSoeknaderGyldigForBehandling())

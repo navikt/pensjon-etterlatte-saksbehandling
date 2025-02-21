@@ -357,7 +357,7 @@ class PersonService(
         return Persongalleri(
             soeker = mottaker.foedselsnummer.value,
             innsender = innsender?.value,
-            soesken = listOf(),
+            soesken = emptyList(),
             avdoed = avdoede.map { it.foedselsnummer.value },
             gjenlevende = listOf(mottaker.foedselsnummer.value) + levende.map { it.foedselsnummer.value },
             personerUtenIdent = personerUtenIdent.ifEmpty { null },

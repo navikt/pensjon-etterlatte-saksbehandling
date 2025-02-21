@@ -245,9 +245,9 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 FamilieRelasjon(
                                     ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER),
-                                    foreldre = listOf(),
-                                    barn = listOf(),
-                                    personerUtenIdent = listOf(),
+                                    foreldre = emptyList(),
+                                    barn = emptyList(),
+                                    personerUtenIdent = emptyList(),
                                 ).toJsonNode(),
                             ),
                         Opplysningstype.SOEKER_PDL_V1 to
@@ -270,10 +270,10 @@ internal class BehandlingTest {
                                 Persongalleri(
                                     soeker = SOEKER_FOEDSELSNUMMER.value,
                                     innsender = GJENLEVENDE_FOEDSELSNUMMER.value,
-                                    soesken = listOf(),
+                                    soesken = emptyList(),
                                     avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
                                     gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
-                                    personerUtenIdent = listOf(),
+                                    personerUtenIdent = emptyList(),
                                 ).toJsonNode(),
                             ),
                     ),
@@ -311,9 +311,9 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 FamilieRelasjon(
                                     ansvarligeForeldre = listOf(AVDOED2_FOEDSELSNUMMER),
-                                    foreldre = listOf(),
-                                    barn = listOf(),
-                                    personerUtenIdent = listOf(),
+                                    foreldre = emptyList(),
+                                    barn = emptyList(),
+                                    personerUtenIdent = emptyList(),
                                 ).toJsonNode(),
                             ),
                         Opplysningstype.SOEKER_PDL_V1 to
@@ -365,9 +365,9 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 FamilieRelasjon(
                                     ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER),
-                                    foreldre = listOf(),
-                                    barn = listOf(),
-                                    personerUtenIdent = listOf(),
+                                    foreldre = emptyList(),
+                                    barn = emptyList(),
+                                    personerUtenIdent = emptyList(),
                                 ).toJsonNode(),
                             ),
                         Opplysningstype.SOEKER_PDL_V1 to

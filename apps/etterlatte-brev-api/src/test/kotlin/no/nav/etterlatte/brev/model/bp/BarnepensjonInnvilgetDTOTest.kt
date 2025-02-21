@@ -194,7 +194,7 @@ internal class BarnepensjonInnvilgetDTOTest {
     )
 
     private fun lagInnholdMedVedlegg() =
-        InnholdMedVedlegg({ listOf() }, {
+        InnholdMedVedlegg({ emptyList() }, {
             listOf(
                 BrevInnholdVedlegg(
                     tittel = "Vedlegget",

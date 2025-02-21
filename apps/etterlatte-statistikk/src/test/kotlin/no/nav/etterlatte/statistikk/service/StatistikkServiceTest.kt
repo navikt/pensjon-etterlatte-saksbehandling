@@ -102,9 +102,9 @@ class StatistikkServiceTest {
                 soeknadMottattDato = null,
                 innsender = null,
                 soeker = "12312312312",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
+                gjenlevende = emptyList(),
+                avdoed = emptyList(),
+                soesken = emptyList(),
                 status = BehandlingStatus.FATTET_VEDTAK,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt = null,
@@ -131,7 +131,7 @@ class StatistikkServiceTest {
                 behandlingId = behandlingId,
                 type = Beregningstype.BP,
                 beregnetDato = Tidspunkt.now(),
-                beregningsperioder = listOf(),
+                beregningsperioder = emptyList(),
             )
         coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
 
@@ -201,7 +201,7 @@ class StatistikkServiceTest {
                 behandlingId = behandlingId,
                 type = Beregningstype.OMS,
                 beregnetDato = Tidspunkt.now(),
-                beregningsperioder = listOf(),
+                beregningsperioder = emptyList(),
             )
         coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
 
@@ -226,9 +226,9 @@ class StatistikkServiceTest {
                 soeknadMottattDato = null,
                 innsender = null,
                 soeker = "12312312312",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
+                gjenlevende = emptyList(),
+                avdoed = emptyList(),
+                soesken = emptyList(),
                 status = BehandlingStatus.FATTET_VEDTAK,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt = null,
@@ -279,7 +279,7 @@ class StatistikkServiceTest {
                 behandlingId = behandlingId,
                 type = Beregningstype.OMS,
                 beregnetDato = Tidspunkt.now(),
-                beregningsperioder = listOf(),
+                beregningsperioder = emptyList(),
             )
         coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
         val mockAvkorting =
@@ -326,9 +326,9 @@ class StatistikkServiceTest {
                 soeknadMottattDato = null,
                 innsender = null,
                 soeker = "12312312312",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
+                gjenlevende = emptyList(),
+                avdoed = emptyList(),
+                soesken = emptyList(),
                 status = BehandlingStatus.FATTET_VEDTAK,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt = null,

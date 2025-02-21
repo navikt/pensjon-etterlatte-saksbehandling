@@ -16,7 +16,7 @@ data class SamordningVedtakDto(
     val type: SamordningVedtakType,
     val aarsak: String?,
     val anvendtTrygdetid: Int,
-    val perioder: List<SamordningVedtakPeriode> = listOf(),
+    val perioder: List<SamordningVedtakPeriode> = emptyList(),
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

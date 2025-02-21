@@ -595,7 +595,7 @@ internal class BehandlingDaoTest(
         val gyldighetsResultat =
             GyldighetsResultat(
                 VurderingsResultat.OPPFYLT,
-                listOf(),
+                emptyList(),
                 Tidspunkt.now().toLocalDatetimeUTC(),
             )
 

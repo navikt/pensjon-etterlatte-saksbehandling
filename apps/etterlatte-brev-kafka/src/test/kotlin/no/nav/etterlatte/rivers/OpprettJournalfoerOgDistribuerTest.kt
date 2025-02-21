@@ -144,7 +144,7 @@ internal class OpprettJournalfoerOgDistribuer {
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
                             id = behandlingId,
                         ),
-                    utbetalingsperioder = listOf(),
+                    utbetalingsperioder = emptyList(),
                     opphoerFraOgMed = null,
                 ),
         )

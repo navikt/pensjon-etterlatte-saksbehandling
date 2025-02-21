@@ -26,7 +26,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
 fun main() {
-    initRogR("oppdater-behandling") { rapidsConnection, rapidEnv ->
+    initRogR("behandling-kafka") { rapidsConnection, rapidEnv ->
         settOppRivers(
             rapidsConnection,
             AppBuilder(rapidEnv),

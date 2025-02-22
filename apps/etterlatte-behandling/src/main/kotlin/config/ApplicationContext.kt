@@ -35,6 +35,8 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -241,6 +243,14 @@ private fun axsysKlient(config: Config) =
         azureAppScope = config.getString("axsys.scope"),
     )
 
+private fun inntektskomponentKlient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("inntektskomponenten.scope"),
+    )
+
 private fun finnBrukerIdent(): String {
     val kontekst = Kontekst.get()
     return when (kontekst) {
@@ -293,6 +303,11 @@ internal class ApplicationContext(
         SkjermingKlientImpl(
             skjermingHttpClient(config),
             env.requireEnvValue(SKJERMING_URL),
+        ),
+    val inntektskomponentKlient: InntektskomponentKlient =
+        InntektskomponentKlient(
+            inntektskomponentKlient(config),
+            config.getString("inntektskomponenten.url"),
         ),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
     val aldersovergangDaoProxy: IAldersovergangDao? = AldersovergangDaoProxy(config, httpClient()),
@@ -633,11 +648,17 @@ internal class ApplicationContext(
             tilbakekrevinghendelser = tilbakekrevingHendelserService,
         )
 
+    val inntektskomponentService =
+        InntektskomponentService(
+            klient = inntektskomponentKlient,
+        )
+
     val etteroppgjoerService =
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
+            inntektskomponentService = inntektskomponentService,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

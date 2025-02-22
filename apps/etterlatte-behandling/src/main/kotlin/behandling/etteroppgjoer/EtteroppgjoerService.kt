@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -15,6 +16,7 @@ class EtteroppgjoerService(
     private val dao: EtteroppgjoerDao,
     private val sakDao: SakLesDao,
     private val oppgaveService: OppgaveService,
+    private val inntektskomponentService: InntektskomponentService,
 ) {
     fun hentEtteroppgjoer(behandlingId: UUID): Etteroppgjoer {
         val etteroppgjoerBehandling =
@@ -27,29 +29,32 @@ class EtteroppgjoerService(
 
         val opplysningerSkatt = dao.hentOpplysningerSkatt(behandlingId)
         val opplysningerAInntekt = dao.hentOpplysningerAInntekt(behandlingId)
-        val opplysninger =
-            EtteroppgjoerOpplysninger(
-                skatt = opplysningerSkatt,
-                ainntekt = opplysningerAInntekt,
-            )
 
         return Etteroppgjoer(
             behandling = etteroppgjoerBehandling,
-            opplysninger = opplysninger,
+            opplysninger =
+                EtteroppgjoerOpplysninger(
+                    skatt = opplysningerSkatt,
+                    ainntekt = opplysningerAInntekt.toView(),
+                ),
         )
     }
 
-    fun opprettEtteroppgjoer(sakId: SakId) {
+    suspend fun opprettEtteroppgjoer(
+        sakId: SakId,
+        aar: Int,
+    ) {
+        val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
+
+        hentOgLagreOpplysninger(sak.ident, aar)
+
         inTransaction {
-            val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
-
-            hentOgLagreOpplysninger(sak.ident)
-
             val nyBehandling =
                 EtteroppgjoerBehandling(
                     id = UUID.randomUUID(),
-                    status = "opprettet",
                     sak = sak,
+                    sekvensnummerSkatt = "123",
+                    status = "opprettet",
                     aar = 2024,
                     opprettet = Tidspunkt.now(),
                 )
@@ -68,11 +73,18 @@ class EtteroppgjoerService(
         }
     }
 
-    private fun hentOgLagreOpplysninger(ident: String) {
+    private suspend fun hentOgLagreOpplysninger(
+        ident: String,
+        aar: Int,
+    ) {
         // TODO hent og lagre OpplysnignerSkatt
-        dao.lagreOpplysningerSkatt()
+        inTransaction {
+            dao.lagreOpplysningerSkatt()
+        }
 
-        // TODO hent og lagre AInntekt
-        dao.lagreOpplysningerAInntekt()
+        val aInntekt = inntektskomponentService.hentInntektFraAInntekt(ident, aar)
+        inTransaction {
+            dao.lagreOpplysningerAInntekt(aInntekt)
+        }
     }
 }

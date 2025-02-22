@@ -1,4 +1,4 @@
-package no.nav.etterlatte.avkorting.inntektskomponent
+package no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

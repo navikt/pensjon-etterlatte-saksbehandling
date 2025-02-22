@@ -80,7 +80,9 @@ data class EtteroppgjoerOpplysninger(
 )
 
 data class OpplysnignerSkatt(
-    val aarsinntekt: Int,
+    val arbeidsinntekt: Int,
+    val naeringsinntekt: Int,
+    val afp: Int,
 )
 
 data class AInntekt(

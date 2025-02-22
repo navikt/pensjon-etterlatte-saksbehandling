@@ -25,27 +25,12 @@ class EtteroppgjoerService(
                 detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
             )
 
-        // TODO egen tabell? I beregning?
+        val opplysningerSkatt = dao.hentOpplysningerSkatt(behandlingId)
+        val opplysningerAInntekt = dao.hentOpplysningerAInntekt(behandlingId)
         val opplysninger =
             EtteroppgjoerOpplysninger(
-                skatt =
-                    OpplysnignerSkatt(
-                        aarsinntekt = 200000,
-                    ),
-                ainntekt =
-                    AInntekt(
-                        inntektsmaaneder =
-                            listOf(
-                                AInntektMaaned(
-                                    maaned = "Januar",
-                                    summertBeloep = 150000,
-                                ),
-                                AInntektMaaned(
-                                    maaned = "Januar",
-                                    summertBeloep = 150000,
-                                ),
-                            ),
-                    ),
+                skatt = opplysningerSkatt,
+                ainntekt = opplysningerAInntekt,
             )
 
         return Etteroppgjoer(
@@ -58,7 +43,7 @@ class EtteroppgjoerService(
         inTransaction {
             val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
 
-            // TODO skal opplysninger mottas eller hentes her?
+            hentOgLagreOpplysninger(sak.ident)
 
             val nyBehandling =
                 EtteroppgjoerBehandling(
@@ -81,5 +66,13 @@ class EtteroppgjoerService(
                 gruppeId = null,
             )
         }
+    }
+
+    private fun hentOgLagreOpplysninger(ident: String) {
+        // TODO hent og lagre OpplysnignerSkatt
+        dao.lagreOpplysningerSkatt()
+
+        // TODO hent og lagre AInntekt
+        dao.lagreOpplysningerAInntekt()
     }
 }

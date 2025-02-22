@@ -71,4 +71,34 @@ class EtteroppgjoerDao(
             status = getString("status"),
             aar = 2024,
         )
+
+    fun lagreOpplysningerSkatt() {
+        // TODO("Not yet implemented")
+    }
+
+    fun hentOpplysningerSkatt(behandlingId: UUID): OpplysnignerSkatt =
+        OpplysnignerSkatt(
+            arbeidsinntekt = 200000,
+            naeringsinntekt = 0,
+            afp = 0,
+        )
+
+    fun lagreOpplysningerAInntekt() {
+        // TODO("Not yet implemented")
+    }
+
+    fun hentOpplysningerAInntekt(behandlingId: UUID): AInntekt =
+        AInntekt(
+            inntektsmaaneder =
+                listOf(
+                    AInntektMaaned(
+                        maaned = "Januar",
+                        summertBeloep = 150000,
+                    ),
+                    AInntektMaaned(
+                        maaned = "Januar",
+                        summertBeloep = 150000,
+                    ),
+                ),
+        )
 }

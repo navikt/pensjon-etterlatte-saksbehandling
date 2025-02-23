@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -64,6 +65,12 @@ class ManuellRevurderingService(
         val forrigeIverksatteBehandling =
             behandlingService.hentSisteIverksatte(sakId)
                 ?: throw RevurderingManglerIverksattBehandling(sakId)
+
+        if (forrigeIverksatteBehandling.status != BehandlingStatus.IVERKSATT) {
+            throw BadRequestException(
+                "Kan ikke opprette ny revurdering med behandling som ikke er iverksatt id=${forrigeIverksatteBehandling.id}",
+            )
+        }
 
         val sakType = forrigeIverksatteBehandling.sak.sakType
         if (!aarsak.gyldigForSakType(sakType)) {

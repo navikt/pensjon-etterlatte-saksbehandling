@@ -250,7 +250,7 @@ open class KonstantRegel<G, S>(
         SubsumsjonsNode(
             verdi = verdi,
             regel = this,
-            noder = listOf(),
+            noder = emptyList(),
         )
 }
 

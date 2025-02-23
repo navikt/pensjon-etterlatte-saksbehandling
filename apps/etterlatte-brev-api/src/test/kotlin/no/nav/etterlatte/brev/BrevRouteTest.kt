@@ -195,7 +195,7 @@ internal class BrevRouteTest {
                     parameter("sakId", SAK_ID)
                     header(HttpHeaders.Authorization, "Bearer $accessToken")
                     contentType(ContentType.Application.Json)
-                    setBody(OppdaterPayloadRequest(Slate(), listOf()))
+                    setBody(OppdaterPayloadRequest(Slate(), emptyList()))
                 }
 
             assertEquals(HttpStatusCode.OK, response.status)

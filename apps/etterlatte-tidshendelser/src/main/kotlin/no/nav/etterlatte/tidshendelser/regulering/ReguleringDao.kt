@@ -25,8 +25,8 @@ class ReguleringDao(
                     Reguleringskonfigurasjon(
                         antall = row.int(ANTALL),
                         dato = row.localDate(DATO),
-                        spesifikkeSaker = row.arrayOrNull<Long>(SPESIFIKKE_SAKER)?.toList()?.map { SakId(it) } ?: listOf(),
-                        ekskluderteSaker = row.arrayOrNull<Long>(EKSKLUDERTE_SAKER)?.toList()?.map { SakId(it) } ?: listOf(),
+                        spesifikkeSaker = row.arrayOrNull<Long>(SPESIFIKKE_SAKER)?.toList()?.map { SakId(it) } ?: emptyList(),
+                        ekskluderteSaker = row.arrayOrNull<Long>(EKSKLUDERTE_SAKER)?.toList()?.map { SakId(it) } ?: emptyList(),
                     )
                 }
             } ?: throw IllegalStateException("Kan ikke kjøre regulering uten å ha gyldig reguleringskonfigurasjon")

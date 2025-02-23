@@ -40,8 +40,8 @@ internal class VedtakhendelserRiverTest {
         StoenadRad(
             id = 0,
             fnrSoeker = "",
-            fnrForeldre = listOf(),
-            fnrSoesken = listOf(),
+            fnrForeldre = emptyList(),
+            fnrSoesken = emptyList(),
             anvendtTrygdetid = "",
             nettoYtelse = "",
             beregningType = "",

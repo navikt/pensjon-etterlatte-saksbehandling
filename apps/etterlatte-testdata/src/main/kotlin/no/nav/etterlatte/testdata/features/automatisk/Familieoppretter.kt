@@ -68,7 +68,7 @@ class Familieoppretter(
         dollyService.hentFamilier(gruppeid, accessToken)
     } catch (e: Exception) {
         logger.warn("Kunne ikke hente familie, prøver igjen snart", e)
-        listOf()
+        emptyList()
     }
 
     private fun hentStatusBestilling(

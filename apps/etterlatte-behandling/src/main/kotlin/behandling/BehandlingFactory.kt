@@ -29,7 +29,9 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
@@ -38,7 +40,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.hentAlder
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -460,17 +461,16 @@ class BehandlingFactory(
         } else if (sak.sakType == SakType.BARNEPENSJON) {
             "${persongalleri.soesken.size} søsken"
         } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            val soesken: AvdoedesBarn =
+            val grunnlag: Grunnlag? =
                 runBlocking {
                     grunnlagService
-                        .hentOpplysningsgrunnlag(behandlingId)!!
-                        .hentSoeskenNy()!!
-                        .verdi
+                        .hentOpplysningsgrunnlag(behandlingId)
                 }
 
-            val aldre = soesken.avdoedesBarn?.map { it.foedselsdato?.hentAlder() }?.mapNotNull { it }
+            val avdoede = grunnlag?.hentAvdoede()?.firstOrNull()
+            val barn = avdoede?.hentAvdoedesbarn()?.verdi?.avdoedesBarn
 
-            val barnUnder20 = aldre?.count { it < 20 }
+            val barnUnder20 = barn?.count { it.foedselsdato?.hentAlder()?.let { it < 20 } ?: false }
 
             "$barnUnder20 barn u/20år"
         } else {

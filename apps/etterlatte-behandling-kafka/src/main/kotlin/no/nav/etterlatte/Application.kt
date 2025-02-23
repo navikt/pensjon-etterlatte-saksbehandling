@@ -20,6 +20,8 @@ import no.nav.etterlatte.regulering.ReguleringsforespoerselRiver
 import no.nav.etterlatte.regulering.VedtakAttestertRiver
 import no.nav.etterlatte.regulering.YtelseIkkeLoependeRiver
 import no.nav.etterlatte.tidshendelser.TidshendelseRiver
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRiver
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingTidshendelseRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
@@ -39,6 +41,7 @@ private fun settOppRivers(
     val behandlingservice = appBuilder.behandlingService
     val tidshendelseService = appBuilder.tidshendelserService
     val featureToggleService = appBuilder.featureToggleService
+    val vilkaarsvurderingService = appBuilder.vilkaarsvurderingService
 
     PdlHendelserRiver(rapidsConnection, behandlingservice)
     OmregningsHendelserBehandlingRiver(rapidsConnection, behandlingservice)
@@ -54,6 +57,9 @@ private fun settOppRivers(
     OmregningBrevDistribusjonRiver(rapidsConnection, behandlingservice)
 
     StartUthentingFraSoeknadRiver(rapidsConnection, Opplysningsuthenter())
+
+    VilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
+    VilkaarsvurderingTidshendelseRiver(rapidsConnection, vilkaarsvurderingService)
 
     NySoeknadRiver(
         rapidsConnection = rapidsConnection,

@@ -177,7 +177,7 @@ internal class BeregningsGrunnlagRoutesTest {
                         ident = "",
                         tidspunkt = Tidspunkt.now(),
                     ),
-                soeskenMedIBeregning = listOf(),
+                soeskenMedIBeregning = emptyList(),
                 institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
             )

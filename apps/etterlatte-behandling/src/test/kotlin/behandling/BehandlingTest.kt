@@ -34,7 +34,7 @@ internal class BehandlingTest {
     private val gyldighetsResultat =
         GyldighetsResultat(
             VurderingsResultat.OPPFYLT,
-            listOf(),
+            emptyList(),
             Tidspunkt.now().toLocalDatetimeUTC(),
         )
 

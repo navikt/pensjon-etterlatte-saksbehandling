@@ -172,7 +172,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         featureToggleService = applicationContext.featureToggleService,
     )
     tilbakekrevingRoutes(service = applicationContext.tilbakekrevingService)
-    etteroppgjoerRoutes(service = applicationContext.etteroppgjoerService)
+    etteroppgjoerRoutes(
+        service = applicationContext.etteroppgjoerService,
+        featureToggleService = applicationContext.featureToggleService,
+    )
     behandlingRoutes(
         behandlingService = applicationContext.behandlingService,
         gyldighetsproevingService = applicationContext.gyldighetsproevingService,

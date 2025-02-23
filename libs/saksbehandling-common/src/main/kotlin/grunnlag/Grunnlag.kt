@@ -17,7 +17,7 @@ class Grunnlag(
         fun empty() =
             Grunnlag(
                 soeker = emptyMap(),
-                familie = listOf(),
+                familie = emptyList(),
                 sak = mapOf(),
                 metadata = Metadata(SakId(0), 0),
             )

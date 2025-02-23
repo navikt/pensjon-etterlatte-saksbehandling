@@ -23,7 +23,7 @@ class AarligInntektsjusteringService(
         logger.info("Handling jobb ${jobb.id}, type ${jobb.type} (${jobb.type.beskrivelse})")
         val konfigurasjon = reguleringDao.hentNyesteKonfigurasjon()
         startAarligInntektsjustering(konfigurasjon)
-        return listOf()
+        return emptyList()
     }
 
     private fun startAarligInntektsjustering(konfigurasjon: Reguleringskonfigurasjon) {

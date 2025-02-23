@@ -366,7 +366,7 @@ class GrunnlagServiceImpl(
                 kilde = opplysningPersongalleriSak.opplysning.kilde.tilGenerellKilde(),
                 persongalleriPdl = null,
                 kildePdl = null,
-                problemer = listOf(),
+                problemer = emptyList(),
             )
         }
         val persongalleriPdl: Persongalleri =

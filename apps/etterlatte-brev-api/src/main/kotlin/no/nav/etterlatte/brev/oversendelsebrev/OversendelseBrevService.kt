@@ -105,7 +105,7 @@ class OversendelseBrevServiceImpl(
                             tittel = Brevkoder.OVERSENDELSE_KLAGE.tittel,
                             spraak = spraak,
                         ),
-                    innholdVedlegg = listOf(),
+                    innholdVedlegg = emptyList(),
                     brevtype = Brevtype.OVERSENDELSE_KLAGE,
                     brevkoder = Brevkoder.OVERSENDELSE_KLAGE,
                 ),

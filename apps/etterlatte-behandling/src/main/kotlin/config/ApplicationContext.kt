@@ -358,7 +358,7 @@ internal class ApplicationContext(
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
     // TODO fjerne proxier når vi har flyttet grunnlag i produksjon
-    val skalBrukeDaoProxy = true
+    val skalBrukeDaoProxy = if (isProd()) true else false
     val aldersovergangDao =
         if (skalBrukeDaoProxy && aldersovergangDaoProxy != null) {
             aldersovergangDaoProxy
@@ -637,6 +637,7 @@ internal class ApplicationContext(
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
             sakDao = sakLesDao,
+            oppgaveService = oppgaveService,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
@@ -705,7 +706,7 @@ internal class ApplicationContext(
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(6, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
@@ -715,7 +716,7 @@ internal class ApplicationContext(
         AktivitetspliktOppgaveUnntakUtloeperJob(
             aktivitetspliktOppgaveUnntakUtloeperJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
@@ -741,7 +742,7 @@ internal class ApplicationContext(
         DoedsmeldingReminderJob(
             doedshendelseReminderJob,
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(4, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
@@ -753,7 +754,7 @@ internal class ApplicationContext(
         SaksbehandlerJob(
             saksbehandlerJobService = saksbehandlerJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
         )

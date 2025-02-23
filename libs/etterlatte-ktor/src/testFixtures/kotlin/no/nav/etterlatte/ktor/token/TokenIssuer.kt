@@ -11,7 +11,7 @@ const val CLIENT_ID = "CLIENT_ID for saksbehandler"
 fun MockOAuth2Server.issueSaksbehandlerToken(
     navn: String = "Navn Navnesen",
     navIdent: String = "Saksbehandler01",
-    groups: List<String> = listOf(),
+    groups: List<String> = emptyList(),
 ): String =
     this
         .issueToken(
@@ -27,7 +27,7 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
 
 fun MockOAuth2Server.issueSystembrukerToken(
     mittsystem: String = UUID.randomUUID().toString(),
-    roles: List<String> = listOf(),
+    roles: List<String> = emptyList(),
 ): String =
     this
         .issueToken(

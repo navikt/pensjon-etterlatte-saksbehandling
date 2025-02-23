@@ -17,18 +17,26 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
 
-class InntektskomponentKlient(
+interface InntektskomponentKlient {
+    suspend fun hentInntekt(
+        personident: String,
+        maanedFom: YearMonth,
+        maanedTom: YearMonth,
+    ): AInntektReponsData
+}
+
+class InntektskomponentKlientImpl(
     val httpClient: HttpClient,
     val url: String,
-) {
-    private val logger = LoggerFactory.getLogger(InntektskomponentKlient::class.java)
+) : InntektskomponentKlient {
+    private val logger = LoggerFactory.getLogger(InntektskomponentKlientImpl::class.java)
     private val sikkerlogg = sikkerlogger()
 
     companion object {
         const val ETTERLATTEYTELSER = "Etterlatteytelser"
     }
 
-    suspend fun hentInntekt(
+    override suspend fun hentInntekt(
         personident: String,
         maanedFom: YearMonth,
         maanedTom: YearMonth,

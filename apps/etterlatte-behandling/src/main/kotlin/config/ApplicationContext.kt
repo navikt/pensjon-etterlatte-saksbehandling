@@ -36,6 +36,7 @@ import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
@@ -305,10 +306,10 @@ internal class ApplicationContext(
             env.requireEnvValue(SKJERMING_URL),
         ),
     val inntektskomponentKlient: InntektskomponentKlient =
-        InntektskomponentKlient(
+        InntektskomponentKlientImpl(
             inntektskomponentKlient(config),
             config.getString("inntektskomponenten.url"),
-        ),
+        ), // TODO interface og stub osv...
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
     val aldersovergangDaoProxy: IAldersovergangDao? = AldersovergangDaoProxy(config, httpClient()),
     val opplysningDaoProxy: IOpplysningDao? = OpplysningDaoProxy(config, httpClient()),

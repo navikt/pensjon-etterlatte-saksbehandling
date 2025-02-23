@@ -141,7 +141,12 @@ internal class ApplicationContext {
     val migreringBrevDataService = MigreringBrevDataService(beregningService)
 
     val brevDataMapperRedigerbartUtfallVedtak =
-        BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService)
+        BrevDataMapperRedigerbartUtfallVedtak(
+            behandlingService,
+            beregningService,
+            migreringBrevDataService,
+            trygdetidService,
+        )
 
     val brevDataMapperFerdigstilling =
         BrevDataMapperFerdigstillingVedtak(

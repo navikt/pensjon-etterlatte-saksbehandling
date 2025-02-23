@@ -135,7 +135,7 @@ internal class VedtaksbrevServiceTest {
             brevKodeMappingVedtak,
             brevoppretter,
             pdfGenerator,
-            BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService),
+            BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService, trygdetidService),
             brevDataMapperFerdigstilling,
             behandlingService,
         )

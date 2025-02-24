@@ -77,8 +77,8 @@ spec:
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
-    max: 4
-    min: 2
+    max: 0
+    min: 0
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser

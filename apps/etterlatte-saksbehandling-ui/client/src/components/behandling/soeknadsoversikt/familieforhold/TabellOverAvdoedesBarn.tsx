@@ -19,7 +19,7 @@ function erBarnTilPerson(person: IPdlPerson, barnIdent: string): boolean {
   return !!(person.familieRelasjon?.barn ?? []).find((ident) => ident == barnIdent)
 }
 
-function hvemErBarnetsForeldre(personopplysninger: Personopplysninger, barn: IPdlPerson): string {
+function hvemErBarnetsForeldre(sakType: SakType, personopplysninger: Personopplysninger, barn: IPdlPerson): string {
   if (personopplysninger.avdoede.length >= 2) {
     const [avdoedEn, avdoedTo] = personopplysninger.avdoede
     const harAvdoedEnSomForelder = erBarnTilPerson(avdoedEn.opplysning, barn.foedselsnummer)
@@ -33,7 +33,13 @@ function hvemErBarnetsForeldre(personopplysninger: Personopplysninger, barn: IPd
       return `Kun ${formaterNavn(avdoedTo.opplysning)}`
     }
   } else {
-    const harGjenlevendeSomForelder = personopplysninger.gjenlevende.some((gjenlevende) =>
+    // Hvis det er en omstillingsstønad-sak er søker gjenlevende
+    const aktuellGjenlevende =
+      sakType === SakType.OMSTILLINGSSTOENAD
+        ? [personopplysninger.soeker!!, ...personopplysninger.gjenlevende]
+        : personopplysninger.gjenlevende
+
+    const harGjenlevendeSomForelder = aktuellGjenlevende.some((gjenlevende) =>
       erBarnTilPerson(gjenlevende.opplysning, barn.foedselsnummer)
     )
     if (harGjenlevendeSomForelder) {
@@ -91,7 +97,7 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
                 <Table.DataCell>
                   <BarnAddressePeriode barn={barn} />
                 </Table.DataCell>
-                <Table.DataCell>{hvemErBarnetsForeldre(opplysninger, barn)}</Table.DataCell>
+                <Table.DataCell>{hvemErBarnetsForeldre(sakType, opplysninger, barn)}</Table.DataCell>
               </Table.Row>
             ))
           ) : (

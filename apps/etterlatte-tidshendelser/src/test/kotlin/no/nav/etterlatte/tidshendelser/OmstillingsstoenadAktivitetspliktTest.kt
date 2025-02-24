@@ -11,7 +11,6 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
 import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
-import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -20,23 +19,22 @@ import java.time.Month
 import java.time.YearMonth
 
 class OmstillingsstoenadAktivitetspliktTest {
-    private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
     private val behandlingKlient: BehandlingKlient = mockk<BehandlingKlient>()
     private val hendelseDao: HendelseDao = mockk<HendelseDao>()
-    private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient, behandlingKlient)
+    private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, behandlingKlient)
 
     @Test
     fun `ingen saker for aktuell maaned gir ingen hendelser`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val jobb = hendelserJobb(JobbType.OMS_DOED_4MND, behandlingsmaaned)
 
-        every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns emptyList()
+        every { behandlingKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns emptyList()
         every { behandlingKlient.hentSaker(emptyList()) } returns emptyMap()
         every { behandlingKlient.hentSakerForPleieforholdetOpphoerte(any()) } returns emptyList()
 
         omstillingsstoenadService.execute(jobb)
 
-        verify { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) }
+        verify { behandlingKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) }
         verify(exactly = 0) { hendelseDao.opprettHendelserForSaker(jobb.id, any(), any()) }
     }
 
@@ -54,7 +52,7 @@ class OmstillingsstoenadAktivitetspliktTest {
                     sak(it, SakType.OMSTILLINGSSTOENAD)
                 }.associateBy { it.id }
 
-        every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns sakIder
+        every { behandlingKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns sakIder
         every { behandlingKlient.hentSakerForPleieforholdetOpphoerte(any()) } returns emptyList()
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
@@ -68,7 +66,7 @@ class OmstillingsstoenadAktivitetspliktTest {
 
         omstillingsstoenadService.execute(jobb)
 
-        verify { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) }
+        verify { behandlingKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) }
         verify { hendelseDao.opprettHendelserForSaker(jobb.id, listOf(sak1, sak2, sak3), Steg.IDENTIFISERT_SAK) }
     }
 

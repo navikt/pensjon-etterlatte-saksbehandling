@@ -16,7 +16,6 @@ import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseStatus
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
-import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -30,11 +29,10 @@ import javax.sql.DataSource
 class AldersovergangerIntegrationTest(
     dataSource: DataSource,
 ) {
-    private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
     private val behandlingKlient: BehandlingKlient = mockk<BehandlingKlient>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
-    private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient, behandlingKlient)
+    private val aldersovergangerService = AldersovergangerService(hendelseDao, behandlingKlient)
 
     @AfterEach
     fun afterEach() {
@@ -46,7 +44,7 @@ class AldersovergangerIntegrationTest(
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
-        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns emptyList()
+        every { behandlingKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns emptyList()
         every { behandlingKlient.hentSaker(emptyList()) } returns emptyMap()
 
         aldersovergangerService.execute(jobb)
@@ -67,7 +65,7 @@ class AldersovergangerIntegrationTest(
                     sak(it, sakType)
                 }.associateBy { it.id }
 
-        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
+        every { behandlingKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
         aldersovergangerService.execute(jobb)
@@ -87,7 +85,7 @@ class AldersovergangerIntegrationTest(
                     sak(it, SakType.BARNEPENSJON)
                 }.associateBy { it.id }
 
-        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
+        every { behandlingKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
         aldersovergangerService.execute(jobb)

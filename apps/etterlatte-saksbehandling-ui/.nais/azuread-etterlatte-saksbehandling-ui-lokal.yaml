@@ -25,9 +25,6 @@ spec:
     - application: etterlatte-beregning
       cluster: dev-gcp
       namespace: etterlatte
-    - application: etterlatte-grunnlag
-      cluster: dev-gcp
-      namespace: etterlatte
     - application: etterlatte-trygdetid
       cluster: dev-gcp
       namespace: etterlatte

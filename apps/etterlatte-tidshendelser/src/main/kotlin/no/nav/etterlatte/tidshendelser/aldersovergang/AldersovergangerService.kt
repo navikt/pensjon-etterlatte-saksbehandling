@@ -8,12 +8,10 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
-import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.slf4j.LoggerFactory
 
 class AldersovergangerService(
     private val hendelseDao: HendelseDao,
-    private val grunnlagKlient: GrunnlagKlient,
     private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -34,7 +32,7 @@ class AldersovergangerService(
         val saker =
             runBlocking {
                 retryOgPakkUt {
-                    grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
+                    behandlingKlient.hentSaker(foedselsmaaned = foedselsmaaned)
                 }
             }
 

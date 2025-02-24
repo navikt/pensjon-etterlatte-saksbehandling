@@ -10,7 +10,14 @@ export const AdresseVedDoedsfall = ({ avdoed }: { avdoed: Personopplysning }) =>
       const kopiAvAdoedesBostedsadresser = [...(avdoed.opplysning.bostedsadresse ?? [])]
       // Sorterer bostedsadresser slik at nyligste fra-og-med dato kommer først
       kopiAvAdoedesBostedsadresser.sort((a, b) => {
-        return new Date(a.gyldigFraOgMed!).getDate() - new Date(b.gyldigFraOgMed!).getDate()
+        if (b.gyldigFraOgMed === undefined) {
+          return -1
+        }
+        if (a.gyldigFraOgMed === undefined) {
+          return 1
+        }
+
+        return new Date(b.gyldigFraOgMed).getUTCMilliseconds() - new Date(a.gyldigFraOgMed).getUTCMilliseconds()
       })
 
       return kopiAvAdoedesBostedsadresser?.find(

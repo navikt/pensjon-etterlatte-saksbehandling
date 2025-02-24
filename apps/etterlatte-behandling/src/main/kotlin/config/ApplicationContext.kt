@@ -311,6 +311,7 @@ internal class ApplicationContext(
             config.getString("inntektskomponenten.url"),
         ), // TODO interface og stub osv...
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
+    // TODO: slette disse
     val aldersovergangDaoProxy: IAldersovergangDao? = AldersovergangDaoProxy(config, httpClient()),
     val opplysningDaoProxy: IOpplysningDao? = OpplysningDaoProxy(config, httpClient()),
 ) {
@@ -373,8 +374,7 @@ internal class ApplicationContext(
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
-    // TODO fjerne proxier når vi har flyttet grunnlag i produksjon
-    val skalBrukeDaoProxy = if (isProd()) true else false
+    val skalBrukeDaoProxy = false
     val aldersovergangDao =
         if (skalBrukeDaoProxy && aldersovergangDaoProxy != null) {
             aldersovergangDaoProxy

@@ -141,7 +141,7 @@ export function formaterNavn(person: PersonNavn): string {
 }
 
 export const formaterAdresse = (adresse: IAdresse): string => {
-  return `${adresse.adresseLinje1 ?? '-'}, ${adresse.postnr ?? '-'}`
+  return `${adresse.adresseLinje1 ?? '-'}, ${adresse.postnr ?? '-'} ${adresse.poststed ?? '-'}`
 }
 
 export interface Persongalleri {

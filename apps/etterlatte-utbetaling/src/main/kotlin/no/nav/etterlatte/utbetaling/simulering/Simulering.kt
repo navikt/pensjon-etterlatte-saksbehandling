@@ -47,7 +47,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         perioder
             .asSequence()
             .filter { !it.forfall.isAfter(simulertPaaDato) }
-            .filter { it.klassekode != OppdragKlassifikasjonskode.MOTPOSTERING.oppdragVerdi }
+            .filter { it.klassekode != OppdragKlassifikasjonskode.MOTPOSTERING.oppdragVerdi } // filterer på det som ikke er av tekniskArt
             .filter { it.klasseType != KlasseType.FEIL }
             .toList()
 
@@ -55,7 +55,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         perioder
             .asSequence()
             .filter { !it.forfall.isAfter(simulertPaaDato) }
-            .filter { it.klassekode != OppdragKlassifikasjonskode.MOTPOSTERING.oppdragVerdi }
+            .filter { it.klassekode != OppdragKlassifikasjonskode.MOTPOSTERING.oppdragVerdi } // filterer på det som ikke er av tekniskArt
             .filter { it.klasseType == KlasseType.FEIL }
             .toList()
 

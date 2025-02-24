@@ -68,7 +68,7 @@ class ManuellRevurderingService(
 
         if (forrigeIverksatteBehandling.status != BehandlingStatus.IVERKSATT) {
             throw BadRequestException(
-                "Kan ikke opprette ny revurdering med behandling som ikke er iverksatt id=${forrigeIverksatteBehandling.id}",
+                "Kan ikke opprette ny revurdering når forrige behandling har status ${forrigeIverksatteBehandling.status}, id=${forrigeIverksatteBehandling.id}",
             )
         }
 

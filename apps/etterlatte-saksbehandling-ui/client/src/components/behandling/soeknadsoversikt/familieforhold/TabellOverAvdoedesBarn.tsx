@@ -34,12 +34,12 @@ function hvemErBarnetsForeldre(sakType: SakType, personopplysninger: Personopply
     }
   } else {
     // Hvis det er en omstillingsstønad-sak er søker gjenlevende
-    const aktuellGjenlevende =
+    const aktuelleGjenlevende =
       sakType === SakType.OMSTILLINGSSTOENAD
-        ? [personopplysninger.soeker!!, ...personopplysninger.gjenlevende]
+        ? [personopplysninger.soeker!, ...personopplysninger.gjenlevende]
         : personopplysninger.gjenlevende
 
-    const harGjenlevendeSomForelder = aktuellGjenlevende.some((gjenlevende) =>
+    const harGjenlevendeSomForelder = aktuelleGjenlevende.some((gjenlevende) =>
       erBarnTilPerson(gjenlevende.opplysning, barn.foedselsnummer)
     )
     if (harGjenlevendeSomForelder) {

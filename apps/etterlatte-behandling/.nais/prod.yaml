@@ -28,10 +28,10 @@ spec:
           - name: sakogbehandlinger
             envVarPrefix: DB
   liveness:
-    initialDelay: 300
+    initialDelay: 600
     path: /health/isalive
   readiness:
-    initialDelay: 300
+    initialDelay: 600
     path: /health/isready
   leaderElection: true
   prometheus:
@@ -76,8 +76,8 @@ spec:
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
-    max: 4
-    min: 2
+    max: 1
+    min: 1
   env:
     - name: KODEVERK_URL
       value: "http://kodeverk-api.team-rocket/api/v1/kodeverk"

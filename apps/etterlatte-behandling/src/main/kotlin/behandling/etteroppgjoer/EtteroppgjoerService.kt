@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -15,6 +16,7 @@ class EtteroppgjoerService(
     private val dao: EtteroppgjoerDao,
     private val sakDao: SakLesDao,
     private val oppgaveService: OppgaveService,
+    private val inntektskomponentService: InntektskomponentService,
 ) {
     fun hentEtteroppgjoer(behandlingId: UUID): Etteroppgjoer {
         val etteroppgjoerBehandling =
@@ -25,46 +27,34 @@ class EtteroppgjoerService(
                 detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
             )
 
-        // TODO egen tabell? I beregning?
-        val opplysninger =
-            EtteroppgjoerOpplysninger(
-                skatt =
-                    OpplysnignerSkatt(
-                        aarsinntekt = 200000,
-                    ),
-                ainntekt =
-                    AInntekt(
-                        inntektsmaaneder =
-                            listOf(
-                                AInntektMaaned(
-                                    maaned = "Januar",
-                                    summertBeloep = 150000,
-                                ),
-                                AInntektMaaned(
-                                    maaned = "Januar",
-                                    summertBeloep = 150000,
-                                ),
-                            ),
-                    ),
-            )
+        val opplysningerSkatt = dao.hentOpplysningerSkatt(behandlingId)
+        val opplysningerAInntekt = dao.hentOpplysningerAInntekt(behandlingId)
 
         return Etteroppgjoer(
             behandling = etteroppgjoerBehandling,
-            opplysninger = opplysninger,
+            opplysninger =
+                EtteroppgjoerOpplysninger(
+                    skatt = opplysningerSkatt,
+                    ainntekt = opplysningerAInntekt.toView(),
+                ),
         )
     }
 
-    fun opprettEtteroppgjoer(sakId: SakId) {
+    suspend fun opprettEtteroppgjoer(
+        sakId: SakId,
+        aar: Int,
+    ) {
+        val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
+
+        hentOgLagreOpplysninger(sak.ident, aar)
+
         inTransaction {
-            val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
-
-            // TODO skal opplysninger mottas eller hentes her?
-
             val nyBehandling =
                 EtteroppgjoerBehandling(
                     id = UUID.randomUUID(),
-                    status = "opprettet",
                     sak = sak,
+                    sekvensnummerSkatt = "123",
+                    status = "opprettet",
                     aar = 2024,
                     opprettet = Tidspunkt.now(),
                 )
@@ -80,6 +70,21 @@ class EtteroppgjoerService(
                 saksbehandler = null,
                 gruppeId = null,
             )
+        }
+    }
+
+    private suspend fun hentOgLagreOpplysninger(
+        ident: String,
+        aar: Int,
+    ) {
+        // TODO hent og lagre OpplysnignerSkatt
+        inTransaction {
+            dao.lagreOpplysningerSkatt()
+        }
+
+        val aInntekt = inntektskomponentService.hentInntektFraAInntekt(ident, aar)
+        inTransaction {
+            dao.lagreOpplysningerAInntekt(aInntekt)
         }
     }
 }

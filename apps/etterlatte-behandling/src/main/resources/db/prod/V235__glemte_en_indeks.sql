@@ -1,1 +1,1 @@
-DROP INDEX IF EXISTS grunnlagshendelse_pkey;
+-- Like greit å beholde primary keys

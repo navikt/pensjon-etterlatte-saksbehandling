@@ -44,7 +44,10 @@ class EtteroppgjoerService(
         sakId: SakId,
         aar: Int,
     ) {
-        val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
+        val sak =
+            inTransaction {
+                sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
+            }
 
         hentOgLagreOpplysninger(sak.ident, aar)
 

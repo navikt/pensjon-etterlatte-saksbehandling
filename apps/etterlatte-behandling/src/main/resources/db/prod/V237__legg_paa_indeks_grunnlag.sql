@@ -1,8 +1,9 @@
-ALTER TABLE ONLY public.behandling_versjon
-    ADD CONSTRAINT behandling_versjon_behandling_id_key UNIQUE (behandling_id);
+CREATE EXTENSION IF NOT EXISTS btree_gin WITH SCHEMA public;
+COMMENT ON EXTENSION btree_gin IS 'support for indexing common datatypes in GIN';
 
-ALTER TABLE ONLY public.grunnlagshendelse
-    ADD CONSTRAINT grunnlagshendelse_pkey PRIMARY KEY (sak_id, hendelsenummer);
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
+
 
 CREATE INDEX behandling_versjon_behandling_id_sak_id_idx
     ON public.behandling_versjon USING btree (behandling_id, sak_id);

@@ -19,4 +19,4 @@ opp sendes med et HTTP-kall til behandlings-appen.
 
 ### Opplysninger fra søknad
 Når `OpprettBehandlingRiver.kt` har opprettet en behandling, vil den sende ut melding om nye opplysninger tilknyttet 
-søknaden. Dette blir så behandlet i `StartUthentingFraSoeknadRiver.kt` og deretter plukket opp av `etterlatte-grunnlag`. 
+søknaden. Dette blir så behandlet i `StartUthentingFraSoeknadRiver.kt` og deretter plukket opp av `etterlatte-behandling`. 

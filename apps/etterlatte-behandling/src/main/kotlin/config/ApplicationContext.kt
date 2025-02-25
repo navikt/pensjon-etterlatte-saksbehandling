@@ -314,6 +314,7 @@ internal class ApplicationContext(
     // TODO: slette disse
     val aldersovergangDaoProxy: IAldersovergangDao? = AldersovergangDaoProxy(config, httpClient()),
     val opplysningDaoProxy: IOpplysningDao? = OpplysningDaoProxy(config, httpClient()),
+    grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -394,7 +395,7 @@ internal class ApplicationContext(
             .AldersovergangService(aldersovergangDao)
 
     val grunnlagService: GrunnlagService =
-        GrunnlagServiceImpl(
+        grunnlagServiceOverride ?: GrunnlagServiceImpl(
             pdlTjenesterKlient,
             opplysningDao,
             GrunnlagHenter(pdlTjenesterKlient),

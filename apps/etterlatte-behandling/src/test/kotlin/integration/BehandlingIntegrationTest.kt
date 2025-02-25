@@ -19,6 +19,7 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.IOpplysningDao
 import no.nav.etterlatte.grunnlag.aldersovergang.IAldersovergangDao
 import no.nav.etterlatte.kafka.KafkaKey
@@ -58,6 +59,7 @@ abstract class BehandlingIntegrationTest {
         aldersovergangDao: IAldersovergangDao? = null,
         opplysningDao: IOpplysningDao? = null,
         vedtakKlient: VedtakKlient? = null,
+        grunnlagService: GrunnlagService? = null,
     ) {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
@@ -125,6 +127,7 @@ abstract class BehandlingIntegrationTest {
                 aldersovergangDaoProxy = aldersovergangDao,
                 opplysningDaoProxy = opplysningDao,
                 inntektskomponentKlient = InntektskomponentKlientTest(),
+                grunnlagServiceOverride = grunnlagService,
             )
     }
 

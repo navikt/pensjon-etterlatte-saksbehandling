@@ -56,7 +56,10 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
     return null
   }
 
-  const avdoedesBarn = opplysninger.avdoede.flatMap((avdoed) => avdoed.opplysning.avdoedesBarn ?? [])
+  // Filtrerer bort duplikate søsken
+  const avdoedesBarn = opplysninger.avdoede
+    .flatMap((avdoed) => avdoed.opplysning.avdoedesBarn ?? [])
+    .filter((b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer))
 
   return (
     <VStack gap="4">

@@ -136,7 +136,7 @@ export const AktivitetspliktSakoversikt = ({
                       onClick={() =>
                         opprettOppfoelgingsoppgaveReq({
                           sakId: data.sak.id,
-                          vurderingType: AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER,
+                          vurderingType: AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
                         })
                       }
                     >

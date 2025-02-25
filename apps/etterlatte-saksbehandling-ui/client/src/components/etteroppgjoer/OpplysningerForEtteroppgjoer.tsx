@@ -3,6 +3,7 @@ import React from 'react'
 import { EtteroppgjoerOpplysninger } from '~shared/types/Etteroppgjoer'
 import { NOK } from '~utils/formatering/formatering'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
+import { AvkortingInntektTabell } from '~components/behandling/avkorting/AvkortingInntektTabell'
 
 export const OpplysningerForEtteroppgjoer = ({ opplysninger }: { opplysninger: EtteroppgjoerOpplysninger }) => {
   return (
@@ -31,6 +32,12 @@ export const OpplysningerForEtteroppgjoer = ({ opplysninger }: { opplysninger: E
             })}
           </Table.Body>
         </Table>
+      </VStack>
+      <VStack maxWidth="80rem" paddingBlock="8" paddingInline="16 8">
+        <AvkortingInntektTabell
+          avkortingGrunnlagListe={opplysninger.tidligereAvkorting.avkortingGrunnlag}
+          fyller67={false}
+        />
       </VStack>
       <VStack paddingBlock="8" paddingInline="16 8">
         <YtelseEtterAvkorting

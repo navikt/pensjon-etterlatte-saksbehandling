@@ -257,10 +257,19 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
+
         get("oppgaver-sak") {
             logger.info("Henter oppfølgingsoppgaver for $sakId")
             val oppfoelgingsoppgaver = inTransaction { aktivitetspliktOppgaveService.hentOppfoelgingsoppgaver(sakId) }
             call.respond(oppfoelgingsoppgaver)
+        }
+
+        post("/opprett") {
+            val request = call.receive<OpprettOppfoelgingsoppgave>()
+            inTransaction {
+                aktivitetspliktOppgaveService.opprettOppfoelgingsoppgave(request)
+            }
+            call.respond(HttpStatusCode.OK)
         }
 
         route("oppgave-oppfoelging") {
@@ -292,10 +301,6 @@ internal fun Route.aktivitetspliktRoutes(
     }
 
     route("/api/aktivitetsplikt/oppgave") {
-        post("/opprett") {
-            val request = call.receive<OpprettOppfoelgingsoppgave>()
-            aktivitetspliktOppgaveService.opprettOppfoelgingsoppgave(request)
-        }
         route("/{${OPPGAVEID_CALL_PARAMETER}}") {
             get {
                 val oppgaveOgVurdering =

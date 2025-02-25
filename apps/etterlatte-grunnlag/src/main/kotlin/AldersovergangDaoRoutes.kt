@@ -6,7 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
+import no.nav.etterlatte.grunnlag.AldersovergangDao
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.sak.tilSakId
 import java.time.YearMonth

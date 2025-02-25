@@ -172,7 +172,7 @@ class AktivitetspliktServiceKtTest {
 
         val vurderingNy =
             AktivitetspliktVurdering(
-                aktivitet = listOf(),
+                aktivitet = emptyList(),
                 unntak =
                     listOf(
                         unntak(

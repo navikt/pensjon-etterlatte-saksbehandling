@@ -38,7 +38,7 @@ class SakRepositoryTest(
             behandlingId = UUID.randomUUID(),
             type = Beregningstype.BP,
             beregnetDato = Tidspunkt.now(),
-            beregningsperioder = listOf(),
+            beregningsperioder = emptyList(),
         )
 
     val mockAvkorting =

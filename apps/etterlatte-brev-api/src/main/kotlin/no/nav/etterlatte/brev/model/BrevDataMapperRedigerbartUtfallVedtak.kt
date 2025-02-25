@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslagRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
@@ -38,6 +39,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val migreringBrevDataService: MigreringBrevDataService,
+    private val trygdetidService: TrygdetidService,
 ) {
     suspend fun brevData(brevDataRedigerbarRequest: BrevDataRedigerbarRequest) =
         with(brevDataRedigerbarRequest) {
@@ -169,6 +171,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             behandlingId,
                             virkningstidspunkt!!,
                             sakType,
+                            avdoede,
                             vedtakType,
                             klage,
                         )
@@ -308,17 +311,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         sakType: SakType,
+        avdoede: List<Avdoed>,
         vedtakType: VedtakType,
         klage: Klage?,
     ) = coroutineScope {
-        val utbetalingsinfo =
-            async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt,
-                    bruker,
-                )
-            }
         val avkortingsinfo =
             async {
                 beregningService.finnAvkortingsinfo(
@@ -330,15 +326,19 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 )
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
 
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
-            utbetalingsinfo.await(),
-            krevIkkeNull(avkortingsinfo.await()) { "Avkortingsinfo mangler i brevutfall" },
-            etterbetaling.await(),
-            behandling.tidligereFamiliepleier?.svar ?: false,
-            klage,
+            avkortingsinfo = avkortingsinfo.await(),
+            etterbetaling = etterbetaling.await(),
+            behandling = behandling,
+            erSluttbehandling = behandling.erSluttbehandling,
+            avdoede = avdoede,
+            trygdetid = krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
+            tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false,
+            klage = klage,
         )
     }
 

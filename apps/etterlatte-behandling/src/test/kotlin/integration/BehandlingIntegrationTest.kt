@@ -124,6 +124,7 @@ abstract class BehandlingIntegrationTest {
                 kodeverkKlient = KodeverkKlientTest(),
                 aldersovergangDaoProxy = aldersovergangDao,
                 opplysningDaoProxy = opplysningDao,
+                inntektskomponentKlient = InntektskomponentKlientTest(),
             )
     }
 

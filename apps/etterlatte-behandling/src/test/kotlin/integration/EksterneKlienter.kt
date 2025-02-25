@@ -6,6 +6,8 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -766,4 +768,15 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         get() = "endpoint"
 
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+}
+
+class InntektskomponentKlientTest : InntektskomponentKlient {
+    override suspend fun hentInntekt(
+        personident: String,
+        maanedFom: YearMonth,
+        maanedTom: YearMonth,
+    ): AInntektReponsData =
+        AInntektReponsData(
+            emptyList(),
+        )
 }

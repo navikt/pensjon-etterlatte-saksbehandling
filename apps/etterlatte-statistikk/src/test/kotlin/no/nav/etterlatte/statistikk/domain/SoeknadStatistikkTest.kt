@@ -13,7 +13,7 @@ class SoeknadStatistikkTest {
                 soeknadId = 1L,
                 gyldigForBehandling = false,
                 sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf(),
+                kriterierForIngenBehandling = emptyList(),
             )
         }
         assertThrows<Exception> {
@@ -29,7 +29,7 @@ class SoeknadStatistikkTest {
                 soeknadId = 0,
                 gyldigForBehandling = true,
                 sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf(),
+                kriterierForIngenBehandling = emptyList(),
             )
         }
         assertDoesNotThrow {

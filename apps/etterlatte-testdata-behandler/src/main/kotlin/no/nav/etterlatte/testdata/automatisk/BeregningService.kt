@@ -35,8 +35,8 @@ class BeregningService(
                 Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId"),
                 bruker,
                 LagreBeregningsGrunnlag(
-                    soeskenMedIBeregning = listOf(),
-                    institusjonsopphold = listOf(),
+                    soeskenMedIBeregning = emptyList(),
+                    institusjonsopphold = emptyList(),
                     beregningsMetode =
                         BeregningsMetodeBeregningsgrunnlag(
                             beregningsMetode = BeregningsMetode.NASJONAL,

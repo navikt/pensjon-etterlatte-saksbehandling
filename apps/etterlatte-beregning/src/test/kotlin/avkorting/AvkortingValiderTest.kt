@@ -54,6 +54,43 @@ class AvkortingValiderTest {
     }
 
     @Test
+    fun `Skal kunne endre inntekt tidligere aar hvis det gjenaapnes etter opphoer`() {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(
+                            aar = 2024,
+                            inntektsavkorting =
+                                listOf(
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(
+                                            innvilgaMaaneder = 10,
+                                            periode =
+                                                Periode(
+                                                    fom = YearMonth.of(2024, 2),
+                                                    tom = YearMonth.of(2024, 11),
+                                                ),
+                                        ),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = YearMonth.of(2024, 12),
+            )
+        validerInntekt(inntektMedFratrekk, avkorting, false, naa = YearMonth.of(2025, 1))
+    }
+
+    @Test
     fun `Første revurdering i et nytt år må være fom januar`() {
         val avkorting =
             Avkorting(
@@ -173,7 +210,7 @@ class AvkortingValiderTest {
                         listOf(
                             aarsoppgjoer(
                                 aar = 2025,
-                                inntektsavkorting = listOf(),
+                                inntektsavkorting = emptyList(),
                             ),
                         ),
                 )

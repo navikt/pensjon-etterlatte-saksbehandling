@@ -19,7 +19,6 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
-import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -28,9 +27,9 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
-class TidshendelseRiverTest {
+class VilkaarsvurderingTidshendelseRiverTest {
     private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
-    private val inspector = TestRapid().apply { TidshendelseRiver(this, vilkaarsvurderingService) }
+    private val inspector = TestRapid().apply { VilkaarsvurderingTidshendelseRiver(this, vilkaarsvurderingService) }
 
     @Test
     fun `skal sjekke yrkesskadefordel og angi property i melding lik true`() {

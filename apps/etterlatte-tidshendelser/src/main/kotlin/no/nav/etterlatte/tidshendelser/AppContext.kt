@@ -28,7 +28,6 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelsePoller
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePollerTask
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePublisher
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
-import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
@@ -52,12 +51,6 @@ class AppContext(
         )
     }
 
-    private val grunnlagKlient =
-        GrunnlagKlient(
-            behandlingHttpClient,
-            config.getString("etterlatte.behandling.url"),
-        )
-
     private val behandlingKlient =
         BehandlingKlient(
             behandlingHttpClient,
@@ -65,8 +58,8 @@ class AppContext(
         )
 
     val hendelseDao = HendelseDao(dataSource)
-    private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient, behandlingKlient)
-    private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient, behandlingKlient)
+    private val aldersovergangerService = AldersovergangerService(hendelseDao, behandlingKlient)
+    private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, behandlingKlient)
     private val reguleringDao = ReguleringDao(dataSource)
     private val reguleringService = ReguleringService(publisher, reguleringDao)
     private val inntektsjusteringService = AarligInntektsjusteringService(publisher, reguleringDao)

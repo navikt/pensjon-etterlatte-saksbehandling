@@ -23,7 +23,6 @@ include(
     "apps:etterlatte-hendelser-ufoere",
     "apps:etterlatte-migrering",
     "apps:etterlatte-statistikk",
-    "apps:etterlatte-vilkaarsvurdering-kafka",
     "apps:etterlatte-tidshendelser",
     "apps:etterlatte-trygdetid",
     "apps:etterlatte-trygdetid-kafka",

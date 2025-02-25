@@ -135,7 +135,7 @@ internal class VedtaksbrevServiceTest {
             brevKodeMappingVedtak,
             brevoppretter,
             pdfGenerator,
-            BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService),
+            BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService, trygdetidService),
             brevDataMapperFerdigstilling,
             behandlingService,
         )
@@ -425,7 +425,7 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE)
             val mottaker = opprettMottaker()
 
-            every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns listOf()
+            every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakere(any(), any(), any()) } returns listOf(mottaker)
 

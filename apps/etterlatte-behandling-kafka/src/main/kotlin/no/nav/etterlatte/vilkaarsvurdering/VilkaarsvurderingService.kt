@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering.services
+package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -9,8 +9,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
-import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingMotBehandling
 import java.util.UUID
 
 interface VilkaarsvurderingService {

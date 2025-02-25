@@ -10,7 +10,12 @@ import {
   sisteBehandlingHendelse,
   statusErRedigerbar,
 } from '~components/behandling/felles/utils'
-import { IBehandlingStatus, IDetaljertBehandling, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  Vedtaksloesning,
+} from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
@@ -36,6 +41,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { formaterDato } from '~utils/formatering/dato'
+import { SakType } from '~shared/types/sak'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -66,6 +72,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
   const [tilbakestilt, setTilbakestilt] = useState(false)
+
+  const erMuligOmsInnvilgelse =
+    behandling?.sakType === SakType.OMSTILLINGSSTOENAD &&
+    behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     if (!redigerbar) {
@@ -173,6 +183,19 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             <Heading spacing size="large" level="1">
               Vedtaksbrev
             </Heading>
+
+            {erMuligOmsInnvilgelse &&
+              behandling &&
+              (statusErRedigerbar(behandling.status) || behandling.status === IBehandlingStatus.FATTET_VEDTAK) && (
+                <Box maxWidth="42.5rem">
+                  <Alert variant="warning">
+                    Innvilgelsesmalen for OMS ble nylig gjort redigerbar. For allerede opprettede brev kan den faste
+                    teksten mangle fra den redigerbare. Dobbeltsjekk i forhåndsvisningen, og tilbakestill brevet hvis
+                    det mangler tekst (NB: dette nullstiller eventuelle endringer i det redigerbare, så det kan være
+                    lurt å kopiere det ut før tilbakestilling).
+                  </Alert>
+                </Box>
+              )}
 
             {soeknadMottattDato && <Label>Søknad mottatt: {formaterDato(soeknadMottattDato)}</Label>}
 

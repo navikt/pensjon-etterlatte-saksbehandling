@@ -33,7 +33,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
                         behandlingskode = det.behandlingskode,
                         beloep = det.belop,
                         tilbakefoering = det.isTilbakeforing,
-                        klassekode = OppdragKlassifikasjonskode.fraString(det.klassekode).toString(),
+                        klassekode = det.klassekode,
                         klassekodeBeskrivelse = det.klasseKodeBeskrivelse,
                         klasseType = KlasseType.valueOf(det.typeKlasse),
                     ),
@@ -47,7 +47,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         perioder
             .asSequence()
             .filter { !it.forfall.isAfter(simulertPaaDato) }
-            .filter { !OppdragKlassifikasjonskode.fraString(it.klassekode).tekniskArt }
+            .filter { it.klassekode != OppdragKlassifikasjonskode.MOTPOSTERING.oppdragVerdi } // filterer på det som ikke er av tekniskArt
             .filter { it.klasseType != KlasseType.FEIL }
             .toList()
 
@@ -55,7 +55,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         perioder
             .asSequence()
             .filter { !it.forfall.isAfter(simulertPaaDato) }
-            .filter { !OppdragKlassifikasjonskode.fraString(it.klassekode).tekniskArt }
+            .filter { it.klassekode != OppdragKlassifikasjonskode.MOTPOSTERING.oppdragVerdi } // filterer på det som ikke er av tekniskArt
             .filter { it.klasseType == KlasseType.FEIL }
             .toList()
 

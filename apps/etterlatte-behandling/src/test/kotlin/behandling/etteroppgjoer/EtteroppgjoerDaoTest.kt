@@ -63,6 +63,7 @@ class EtteroppgjoerDaoTest(
         val ny =
             EtteroppgjoerBehandling(
                 id = UUID.randomUUID(),
+                sekvensnummerSkatt = "123",
                 status = "status",
                 aar = 2024,
                 opprettet = Tidspunkt.now(),

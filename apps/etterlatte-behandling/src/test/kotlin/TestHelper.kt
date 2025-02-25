@@ -499,9 +499,9 @@ fun mockPerson(
                 UUID.randomUUID().toString(),
             ),
         ),
-    deltBostedsadresse = listOf(),
-    kontaktadresse = listOf(),
-    oppholdsadresse = listOf(),
+    deltBostedsadresse = emptyList(),
+    kontaktadresse = emptyList(),
+    oppholdsadresse = emptyList(),
     sivilstatus = null,
     sivilstand = null,
     statsborgerskap = OpplysningDTO("Norsk", UUID.randomUUID().toString()),
@@ -533,6 +533,6 @@ fun virkningstidspunktVurdering() =
 fun gyldighetsresultatVurdering() =
     GyldighetsResultat(
         VurderingsResultat.OPPFYLT,
-        vurderinger = listOf(),
+        vurderinger = emptyList(),
         vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
     )

@@ -885,6 +885,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                                         enhet = Enheter.defaultEnhet.enhetNr,
                                         ident = "",
                                     )
+                                every { it.status } returns BehandlingStatus.IVERKSATT
                                 every { it.opphoerFraOgMed } returns YearMonth.now()
                                 every { it.id } returns UUID.randomUUID()
                                 every { it.utlandstilknytning } returns null

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlag.aldersovergang
+package no.nav.etterlatte.grunnlag
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype

@@ -27,7 +27,7 @@ fun initEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
     withMetrics: Boolean = true,
-    cronJobs: List<TimerJob> = listOf(),
+    cronJobs: List<TimerJob> = emptyList(),
     routes: (Route.() -> Unit)? = null,
     routePrefix: String? = null,
     authenticatedRoutes: Route.() -> Unit,
@@ -50,7 +50,7 @@ fun initEmbeddedServerUtenRest(
 private fun settOppEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
-    cronjobs: List<TimerJob> = listOf(),
+    cronjobs: List<TimerJob> = emptyList(),
     body: Application.() -> Unit,
 ): CIOApplicationEngine =
     embeddedServer(

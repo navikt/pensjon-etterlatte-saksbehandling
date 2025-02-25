@@ -47,7 +47,7 @@ class ParallelleSannheterKlient(
             etternavn = "Navnesen",
             metadata =
                 PdlMetadata(
-                    endringer = listOf(),
+                    endringer = emptyList(),
                     historisk = false,
                     master = "Hardkoda data fra Gjenny",
                     opplysningsId = "-1",

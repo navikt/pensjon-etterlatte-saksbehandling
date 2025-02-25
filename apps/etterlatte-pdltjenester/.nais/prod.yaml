@@ -75,6 +75,5 @@ spec:
         - application: etterlatte-hendelser-pdl
         - application: etterlatte-hendelser-joark
         - application: etterlatte-behandling
-        - application: etterlatte-grunnlag
         - application: etterlatte-migrering
         - application: etterlatte-saksbehandling-ui

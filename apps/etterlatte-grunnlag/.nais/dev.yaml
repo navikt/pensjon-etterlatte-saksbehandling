@@ -68,8 +68,8 @@ spec:
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
-    max: 2
-    min: 1
+    max: 0
+    min: 0
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
@@ -93,9 +93,6 @@ spec:
           namespace: aura
           cluster: dev-gcp
     outbound:
-      rules:
-        - application: etterlatte-behandling
-        - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
 

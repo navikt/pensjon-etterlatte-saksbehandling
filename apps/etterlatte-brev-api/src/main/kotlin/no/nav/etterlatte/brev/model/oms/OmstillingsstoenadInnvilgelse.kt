@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -30,7 +29,6 @@ import java.time.LocalDate
 
 data class OmstillingsstoenadInnvilgelse(
     override val innhold: List<Slate.Element>,
-    val avdoed: Avdoed?,
     val beregning: OmstillingsstoenadBeregning,
     val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
     val omsRettUtenTidsbegrensning: Boolean,
@@ -67,14 +65,6 @@ data class OmstillingsstoenadInnvilgelse(
                         )
                 }
 
-            val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
-            val avdoed =
-                if (erTidligereFamiliepleier) {
-                    null
-                } else {
-                    avdoede.minBy { it.doedsdato }
-                }
-
             val doedsdatoEllerOpphoertPleieforhold =
                 if (erTidligereFamiliepleier) {
                     behandling.tidligereFamiliepleier!!.opphoertPleieforhold!!
@@ -84,25 +74,13 @@ data class OmstillingsstoenadInnvilgelse(
 
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
-                avdoed = avdoed,
                 beregning =
-                    OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
-                        virkningsdato = avkortingsinfo.virkningsdato,
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                        trygdetid =
-                            trygdetid.fromDto(
-                                beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = null,
-                                landKodeverk = landKodeverk,
-                            ),
-                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                        opphoerNesteAar =
-                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-                        erYrkesskade = trygdetid.erYrkesskade(),
+                    omsBeregning(
+                        vedleggInnhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                        behandling = behandling,
+                        trygdetid = trygdetid,
+                        avkortingsinfo = avkortingsinfo,
+                        landKodeverk = landKodeverk,
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     innvilgetMindreEnnFireMndEtterDoedsfall(
@@ -131,19 +109,26 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
     val utbetalingsbeloep: Kroner,
     val etterbetaling: Boolean,
+    val avdoed: Avdoed?,
+    val harUtbetaling: Boolean,
+    val beregning: OmstillingsstoenadBeregning,
+    val erSluttbehandling: Boolean = false,
     val tidligereFamiliepleier: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
-            utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
+            behandling: DetaljertBehandling,
             etterbetaling: EtterbetalingDTO?,
             tidligereFamiliepleier: Boolean,
             klage: Klage?,
+            erSluttbehandling: Boolean?,
+            avdoede: List<Avdoed>,
+            trygdetid: TrygdetidDto,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
-                virkningsdato = utbetalingsinfo.virkningsdato,
+                virkningsdato = avkortingsinfo.virkningsdato,
                 utbetalingsbeloep =
                     avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
                         ?: throw UgyldigForespoerselException(
@@ -153,6 +138,47 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 etterbetaling = etterbetaling != null,
                 tidligereFamiliepleier = tidligereFamiliepleier,
                 datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                avdoed = if (tidligereFamiliepleier) null else avdoede.single(),
+                erSluttbehandling = erSluttbehandling ?: false,
+                harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                beregning =
+                    omsBeregning(
+                        vedleggInnhold = emptyList(),
+                        behandling = behandling,
+                        trygdetid = trygdetid,
+                        avkortingsinfo = avkortingsinfo,
+                        landKodeverk = emptyList(),
+                    ),
             )
     }
+}
+
+fun omsBeregning(
+    vedleggInnhold: List<Slate.Element>,
+    behandling: DetaljertBehandling,
+    trygdetid: TrygdetidDto,
+    avkortingsinfo: Avkortingsinfo,
+    landKodeverk: List<LandDto>,
+): OmstillingsstoenadBeregning {
+    val beregningsperioder =
+        avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+    val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
+    return OmstillingsstoenadBeregning(
+        innhold = vedleggInnhold,
+        virkningsdato = avkortingsinfo.virkningsdato,
+        beregningsperioder = beregningsperioder,
+        sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode,
+        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+        trygdetid =
+            trygdetid.fromDto(
+                beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
+                navnAvdoed = null,
+                landKodeverk = landKodeverk,
+            ),
+        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+        opphoerNesteAar =
+            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+        erYrkesskade = trygdetid.erYrkesskade(),
+    )
 }

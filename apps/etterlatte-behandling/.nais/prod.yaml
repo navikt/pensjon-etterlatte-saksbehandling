@@ -170,6 +170,10 @@ spec:
       value: https://axsys.prod-fss-pub.nais.io
     - name: AXSYS_SCOPE
       value: api://prod-fss.org.axsys/.default
+    - name: INNTEKTSKOMPONENT_URL
+      value: https://team-inntekt-proxy.prod-fss-pub.nais.io/proxy/inntektskomponenten
+    - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
+      value: api://prod-fss.team-inntekt.inntektskomponenten/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -198,9 +202,9 @@ spec:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen.prod-fss-pub.nais.io
         - host: axsys.prod-fss-pub.nais.io
+        - host: team-inntekt-proxy.prod-fss-pub.nais.io
     inbound:
       rules:
-        - application: etterlatte-vilkaarsvurdering-kafka
         - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui

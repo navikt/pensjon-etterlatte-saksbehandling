@@ -78,7 +78,7 @@ class VedtakOgBeregningSammenlignerTest {
 
     private fun lagAvkorting(ytelseEtterAvkorting: Int = 1000) =
         AvkortingDto(
-            avkortingGrunnlag = listOf(),
+            avkortingGrunnlag = emptyList(),
             avkortetYtelse =
                 listOf(
                     AvkortetYtelseDto(

@@ -217,7 +217,7 @@ internal class BeregnBarnepensjonTest {
             beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
-                        soeskenKull = listOf(),
+                        soeskenKull = emptyList(),
                         trygdeTid = Beregningstall(40),
                         institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                     ),

@@ -1,4 +1,4 @@
-import { formaterNavn, hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
+import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { BodyShort, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { ChildHairEyesIcon } from '@navikt/aksel-icons'
 import React from 'react'
@@ -19,7 +19,7 @@ function erBarnTilPerson(person: IPdlPerson, barnIdent: string): boolean {
   return !!(person.familieRelasjon?.barn ?? []).find((ident) => ident == barnIdent)
 }
 
-function hvemErBarnetsForeldre(personopplysninger: Personopplysninger, barn: IPdlPerson): string {
+function hvemErBarnetsForeldre(sakType: SakType, personopplysninger: Personopplysninger, barn: IPdlPerson): string {
   if (personopplysninger.avdoede.length >= 2) {
     const [avdoedEn, avdoedTo] = personopplysninger.avdoede
     const harAvdoedEnSomForelder = erBarnTilPerson(avdoedEn.opplysning, barn.foedselsnummer)
@@ -33,7 +33,13 @@ function hvemErBarnetsForeldre(personopplysninger: Personopplysninger, barn: IPd
       return `Kun ${formaterNavn(avdoedTo.opplysning)}`
     }
   } else {
-    const harGjenlevendeSomForelder = personopplysninger.gjenlevende.some((gjenlevende) =>
+    // Hvis det er en omstillingsstønad-sak er søker gjenlevende
+    const aktuelleGjenlevende =
+      sakType === SakType.OMSTILLINGSSTOENAD
+        ? [personopplysninger.soeker!, ...personopplysninger.gjenlevende]
+        : personopplysninger.gjenlevende
+
+    const harGjenlevendeSomForelder = aktuelleGjenlevende.some((gjenlevende) =>
       erBarnTilPerson(gjenlevende.opplysning, barn.foedselsnummer)
     )
     if (harGjenlevendeSomForelder) {
@@ -49,17 +55,18 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
   if (!opplysninger) {
     return null
   }
-  const avdoedesBarn = hentLevendeSoeskenFraAvdoedeForSoeker(
-    opplysninger.avdoede,
-    opplysninger.soeker?.opplysning?.foedselsnummer
-  )
+
+  // Filtrerer bort duplikate søsken
+  const avdoedesBarn = opplysninger.avdoede
+    .flatMap((avdoed) => avdoed.opplysning.avdoedesBarn ?? [])
+    .filter((b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer))
 
   return (
     <VStack gap="4">
       <HStack gap="4" justify="start" align="center" wrap={false}>
         <ChildHairEyesIcon fontSize="1.75rem" aria-hidden />
         <Heading size="small" level="3">
-          {sakType === SakType.OMSTILLINGSSTOENAD ? 'Avdødes barn' : 'Avdødes barn (søsken)'}
+          Avdødes barn
         </Heading>
       </HStack>
       <Table size="small">
@@ -91,17 +98,13 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
                 <Table.DataCell>
                   <BarnAddressePeriode barn={barn} />
                 </Table.DataCell>
-                <Table.DataCell>{hvemErBarnetsForeldre(opplysninger, barn)}</Table.DataCell>
+                <Table.DataCell>{hvemErBarnetsForeldre(sakType, opplysninger, barn)}</Table.DataCell>
               </Table.Row>
             ))
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={5}>
-                <Heading size="small">
-                  {sakType === SakType.OMSTILLINGSSTOENAD
-                    ? 'Avdøde har ingen barn'
-                    : 'Avdøde har ingen andre barn enn søker'}
-                </Heading>
+                <Heading size="small">Avdøde har ingen barn</Heading>
               </Table.DataCell>
             </Table.Row>
           )}

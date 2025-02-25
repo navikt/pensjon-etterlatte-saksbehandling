@@ -145,7 +145,7 @@ enum class Kjoereplan(
     https://confluence.adeo.no/pages/viewpage.action?pageId=329267485
  */
 enum class OppdragKlassifikasjonskode(
-    private val oppdragVerdi: String,
+    val oppdragVerdi: String,
     val tekniskArt: Boolean = false,
 ) {
     BARNEPENSJON_OPTP("BARNEPENSJON-OPTP"),

@@ -3,6 +3,7 @@ import {
   AktivitetspliktOppfoelgingsOppgave,
   AktivitetspliktOppfolging,
   AktivitetspliktOppgaveVurdering,
+  AktivitetspliktOppgaveVurderingType,
   IAktivitetHendelse,
   IAktivitetPeriode,
   IAktivitetPerioderOgHendelser,
@@ -88,6 +89,15 @@ export const hentOppfoelgingsoppgaver = async (args: {
   sakId: number
 }): Promise<ApiResponse<AktivitetspliktOppfoelgingsOppgave[]>> =>
   apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/oppgaver-sak`)
+
+export const opprettOppfoelgingsoppgave = async (args: {
+  sakId: number
+  vurderingType: AktivitetspliktOppgaveVurderingType
+}) =>
+  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/opprett`, {
+    sakId: args.sakId,
+    type: args.vurderingType,
+  })
 
 export const redigerAktivitetsgradForOppgave = async (args: {
   sakId: number

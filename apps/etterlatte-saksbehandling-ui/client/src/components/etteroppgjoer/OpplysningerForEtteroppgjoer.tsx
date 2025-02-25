@@ -2,6 +2,7 @@ import { Box, Heading, Table, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { EtteroppgjoerOpplysninger } from '~shared/types/Etteroppgjoer'
 import { NOK } from '~utils/formatering/formatering'
+import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
 
 export const OpplysningerForEtteroppgjoer = ({ opplysninger }: { opplysninger: EtteroppgjoerOpplysninger }) => {
   return (
@@ -30,6 +31,12 @@ export const OpplysningerForEtteroppgjoer = ({ opplysninger }: { opplysninger: E
             })}
           </Table.Body>
         </Table>
+      </VStack>
+      <VStack paddingBlock="8" paddingInline="16 8">
+        <YtelseEtterAvkorting
+          avkortetYtelse={opplysninger.tidligereAvkorting.avkortetYtelse}
+          tidligereAvkortetYtelse={[]}
+        />
       </VStack>
     </>
   )

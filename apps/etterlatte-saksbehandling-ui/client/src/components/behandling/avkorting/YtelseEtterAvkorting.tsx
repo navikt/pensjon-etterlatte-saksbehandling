@@ -7,7 +7,6 @@ import { formaterDato } from '~utils/formatering/dato'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { lastDayOfMonth } from 'date-fns'
-import { useAppSelector } from '~store/Store'
 import { tekstSanksjon } from '~shared/types/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
@@ -24,12 +23,17 @@ const restanseOgSanksjon = (ytelse: IAvkortetYtelse): string => {
   return restanseIKroner(ytelse.restanse)
 }
 
-export const YtelseEtterAvkorting = () => {
+export const YtelseEtterAvkorting = ({
+  avkortetYtelse,
+  tidligereAvkortetYtelse,
+}: {
+  avkortetYtelse: IAvkortetYtelse[]
+  tidligereAvkortetYtelse: IAvkortetYtelse[]
+}) => {
   const sanksjonTilgjengelig = useFeaturetoggle(FeatureToggle.sanksjon)
 
-  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
-  const ytelser = [...(avkorting?.avkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)
-  const tidligereYtelser = [...(avkorting?.tidligereAvkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)
+  const ytelser = avkortetYtelse.sort(sorterNyligsteFoerstOgBakover)
+  const tidligereYtelser = tidligereAvkortetYtelse.sort(sorterNyligsteFoerstOgBakover)
 
   const finnTidligereTidligereYtelseIPeriode = (ytelse: IAvkortetYtelse) => {
     return tidligereYtelser.find(

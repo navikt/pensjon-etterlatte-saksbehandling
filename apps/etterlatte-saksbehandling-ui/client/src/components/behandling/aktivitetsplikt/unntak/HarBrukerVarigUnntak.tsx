@@ -47,12 +47,16 @@ function harAktivitetspliktFraVurdering(
   }
 }
 
-const formvaluesFraVurdering = (vurdering: IAktivitetspliktVurderingNyDto): Partial<HarBrukerVarigUnntakFormdata> => ({
-  harAktivitetsplikt: harAktivitetspliktFraVurdering(vurdering),
+const formvaluesFraVurdering = (
+  vurdering: IAktivitetspliktVurderingNyDto,
+  varigUnntak?: IAktivitetspliktUnntak
+): Partial<HarBrukerVarigUnntakFormdata> => ({
+  harAktivitetsplikt: harAktivitetspliktFraVurdering(vurdering, varigUnntak),
   beskrivelse: vurdering.unntak.find(
     (u) => u.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
   )?.beskrivelse,
 })
+
 export function HarBrukerVarigUnntak(props: {
   behandling: IDetaljertBehandling
   doedsdato: Date
@@ -65,6 +69,7 @@ export function HarBrukerVarigUnntak(props: {
   const [redigerer, setRedigerer] = useState<boolean>(!harAktivitetspliktFraVurdering(vurdering))
   const [slettStatus, slettApi] = useApiCall(slettUnntakForBehandling)
 
+  const eksisterendeVarigUnntak = finnVarigUnntak(vurdering)
   const {
     handleSubmit,
     register,
@@ -73,15 +78,13 @@ export function HarBrukerVarigUnntak(props: {
     reset,
     formState: { errors },
   } = useForm<HarBrukerVarigUnntakFormdata>({
-    defaultValues: formvaluesFraVurdering(vurdering),
+    defaultValues: formvaluesFraVurdering(vurdering, eksisterendeVarigUnntak),
   })
 
-  const eksisterendeVarigUnntak = finnVarigUnntak(vurdering)
-
   useEffect(() => {
-    setRedigerer(!harAktivitetspliktFraVurdering(vurdering))
-    reset(formvaluesFraVurdering(vurdering))
-  }, [vurdering])
+    setRedigerer(!harAktivitetspliktFraVurdering(vurdering, eksisterendeVarigUnntak))
+    reset(formvaluesFraVurdering(vurdering, eksisterendeVarigUnntak))
+  }, [vurdering, eksisterendeVarigUnntak])
 
   function avbrytRedigering(nyVurdering?: IAktivitetspliktVurderingNyDto) {
     reset(formvaluesFraVurdering(nyVurdering ?? vurdering))

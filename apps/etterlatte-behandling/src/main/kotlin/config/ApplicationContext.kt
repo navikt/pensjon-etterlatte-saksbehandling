@@ -104,12 +104,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagServiceImpl
-import no.nav.etterlatte.grunnlag.IOpplysningDao
 import no.nav.etterlatte.grunnlag.OpplysningDao
-import no.nav.etterlatte.grunnlag.OpplysningDaoProxy
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDaoProxy
-import no.nav.etterlatte.grunnlag.aldersovergang.IAldersovergangDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -311,9 +307,6 @@ internal class ApplicationContext(
             config.getString("inntektskomponenten.url"),
         ), // TODO interface og stub osv...
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
-    // TODO: slette disse
-    val aldersovergangDaoProxy: IAldersovergangDao? = AldersovergangDaoProxy(config, httpClient()),
-    val opplysningDaoProxy: IOpplysningDao? = OpplysningDaoProxy(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -374,20 +367,9 @@ internal class ApplicationContext(
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
-    val skalBrukeDaoProxy = false
-    val aldersovergangDao =
-        if (skalBrukeDaoProxy && aldersovergangDaoProxy != null) {
-            aldersovergangDaoProxy
-        } else {
-            AldersovergangDao(dataSource)
-        }
+    val aldersovergangDao = AldersovergangDao(dataSource)
 
-    val opplysningDao =
-        if (skalBrukeDaoProxy && opplysningDaoProxy != null) {
-            opplysningDaoProxy
-        } else {
-            OpplysningDao(dataSource)
-        }
+    val opplysningDao = OpplysningDao(dataSource)
 
     val nyAldersovergangService =
         no.nav.etterlatte.grunnlag.aldersovergang

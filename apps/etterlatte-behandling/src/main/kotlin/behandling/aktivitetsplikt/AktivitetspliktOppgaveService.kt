@@ -17,7 +17,6 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -147,9 +146,7 @@ class AktivitetspliktOppgaveService(
          */
         return behandlingService
             .hentBehandlingerForSak(sakId)
-            .filter {
-                it.status.aapenBehandling() || BehandlingStatus.iverksattEllerAttestert().contains(it.status)
-            }.maxByOrNull { it.behandlingOpprettet }
+            .maxByOrNull { it.behandlingOpprettet }
             ?: throw ManglerBehandlingMedGyldigStatus("Har ingen iverksatt behandling for sak. Sakid=$sakId")
     }
 

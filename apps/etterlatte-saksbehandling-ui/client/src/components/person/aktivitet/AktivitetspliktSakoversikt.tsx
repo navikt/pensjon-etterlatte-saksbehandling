@@ -1,7 +1,7 @@
 import { isFailure, isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
-import { BodyShort, Box, Button, Heading, Label, Tag, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, Label, Tag, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentAktivitspliktVurderingForSak,
@@ -147,6 +147,9 @@ export const AktivitetspliktSakoversikt = ({
                   <Tag variant="success">
                     <CheckmarkIcon aria-hidden /> Oppgaven ble opprettet
                   </Tag>
+                )}
+                {isFailure(svaropprettOppgave) && (
+                  <Alert variant="error">Kunne ikke opprett oppgave person: {svaropprettOppgave.error.detail}</Alert>
                 )}
               </>
             ),

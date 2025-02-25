@@ -267,6 +267,7 @@ internal fun Route.aktivitetspliktRoutes(
         post("/opprett") {
             val request = call.receive<OpprettOppfoelgingsoppgave>()
             aktivitetspliktOppgaveService.opprettOppfoelgingsoppgave(request)
+            call.respond(HttpStatusCode.OK)
         }
 
         route("oppgave-oppfoelging") {

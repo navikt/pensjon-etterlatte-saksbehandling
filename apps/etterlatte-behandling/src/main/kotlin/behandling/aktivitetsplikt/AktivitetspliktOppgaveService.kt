@@ -147,7 +147,7 @@ class AktivitetspliktOppgaveService(
         return behandlingService
             .hentBehandlingerForSak(sakId)
             .maxByOrNull { it.behandlingOpprettet }
-            ?: throw ManglerBehandlingMedGyldigStatus("Har ingen iverksatt behandling for sak. Sakid=$sakId")
+            ?: throw ManglerBehandling("Har ingen iverksatt behandling for sak. Sakid=$sakId")
     }
 
     private fun validerMnd6KanOpprette(sakId: SakId) {
@@ -512,7 +512,7 @@ class HarOppfoelgingsOppgaveUnderbehandling(
         detail = msg,
     )
 
-class ManglerBehandlingMedGyldigStatus(
+class ManglerBehandling(
     msg: String,
 ) : UgyldigForespoerselException(
         code = "HAR_INGEN_GYLDIG_BEHANDLING",

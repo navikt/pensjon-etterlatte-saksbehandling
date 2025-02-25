@@ -136,7 +136,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
 
-        assertThrows<ManglerBehandlingMedGyldigStatus> {
+        assertThrows<ManglerBehandling> {
             service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
         }
 

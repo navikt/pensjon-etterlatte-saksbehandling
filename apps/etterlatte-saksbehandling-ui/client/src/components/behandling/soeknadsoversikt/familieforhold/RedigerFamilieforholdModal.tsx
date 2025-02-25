@@ -74,13 +74,13 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
   return (
     <>
       <Button
-        variant="tertiary"
+        variant="secondary"
         size="small"
         onClick={() => setIsOpen(true)}
         icon={<PencilIcon aria-hidden />}
-        style={{ float: 'right' }}
+        iconPosition="right"
       >
-        Rediger
+        Rediger familieforhold
       </Button>
 
       <Modal open={isOpen} onClose={avbryt} aria-label="Rediger familieforhold">

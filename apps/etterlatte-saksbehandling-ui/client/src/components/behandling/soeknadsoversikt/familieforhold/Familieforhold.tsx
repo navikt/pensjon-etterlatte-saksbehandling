@@ -14,6 +14,7 @@ import { SakType } from '~shared/types/sak'
 import { TabellOverAvdoedesBarn } from '~components/behandling/soeknadsoversikt/familieforhold/TabellOverAvdoedesBarn'
 import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/AnnenForelderSkjema'
 import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
+import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -39,7 +40,13 @@ export const Familieforhold = ({ behandling, redigerbar, personopplysninger }: P
         <Heading size="medium" level="2">
           Familieforhold
         </Heading>
-
+        {redigerbar && (
+          <OppdaterGrunnlagModal
+            behandlingId={behandling.id}
+            behandlingStatus={behandling.status}
+            enhetId={behandling.sakEnhetId}
+          />
+        )}
         {redigerbar && personopplysninger && (
           <RedigerFamilieforholdModal behandling={behandling} personopplysninger={personopplysninger} />
         )}

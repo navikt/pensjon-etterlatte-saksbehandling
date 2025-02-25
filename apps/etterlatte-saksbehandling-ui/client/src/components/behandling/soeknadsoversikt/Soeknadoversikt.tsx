@@ -1,4 +1,4 @@
-import { Box, Heading, HStack } from '@navikt/ds-react'
+import { Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar, soeknadsoversiktErFerdigUtfylt } from '../felles/utils'
@@ -10,7 +10,6 @@ import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsover
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
-import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
 import {
   beskrivelseVirkningstidspunkt,
@@ -55,16 +54,6 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
       </Box>
 
       <Box paddingBlock="8" paddingInline="16 8">
-        {redigerbar && (
-          <HStack justify="end">
-            <OppdaterGrunnlagModal
-              behandlingId={behandling.id}
-              behandlingStatus={behandling.status}
-              enhetId={behandling.sakEnhetId}
-            />
-          </HStack>
-        )}
-
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
 
         {personopplysninger && (

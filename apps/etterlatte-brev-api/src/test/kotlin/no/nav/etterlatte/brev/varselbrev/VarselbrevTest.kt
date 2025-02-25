@@ -15,11 +15,11 @@ import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
@@ -154,8 +154,8 @@ class VarselbrevTest(
                     }
             }
 
-        val grunnlagKlient =
-            mockk<GrunnlagKlient>().also {
+        val behandlingklient =
+            mockk<BehandlingKlient>().also {
                 coEvery { it.hentGrunnlag(any(), any()) } returns mockk()
             }
 
@@ -169,7 +169,7 @@ class VarselbrevTest(
                 innholdTilRedigerbartBrevHenter,
             )
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk(), grunnlagKlient)
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk(), behandlingklient)
     }
 
     @Test

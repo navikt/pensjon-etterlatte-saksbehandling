@@ -48,7 +48,7 @@ export const AvdoedesBarn = ({ sakType, avdoede }: { sakType: SakType; avdoede?:
                       {!!barn.foedselsdato && <AlderTag foedselsdato={barn.foedselsdato} />}
                     </HStack>
                   </Table.DataCell>
-                  <BostedsadresseDataCell bostedsadresse={barn.bostedsadresse} index={0} />
+                  <BostedsadresseDataCell bostedsadresser={barn.bostedsadresse} index={0} />
                 </Table.Row>
               ))
             ) : (

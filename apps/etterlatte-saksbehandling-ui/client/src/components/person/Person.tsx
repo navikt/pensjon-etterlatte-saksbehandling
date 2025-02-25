@@ -29,6 +29,7 @@ import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { AktivitetspliktSakoversikt } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
+import { NyPersonopplysninger } from '~components/person/personopplysninger/NyPersonopplysninger'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -106,6 +107,7 @@ export const Person = () => {
           <SakOversikt sakResult={sakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
+          <NyPersonopplysninger sakResult={sakResult} fnr={fnr} />
           <Personopplysninger sakResult={sakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.HENDELSER}>

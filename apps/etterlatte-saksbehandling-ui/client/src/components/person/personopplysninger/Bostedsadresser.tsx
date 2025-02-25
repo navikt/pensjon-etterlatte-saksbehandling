@@ -34,7 +34,7 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsad
             <>
               {sortedBostedsadresse.map((adresse: Bostedsadresse, index: number) => (
                 <Table.Row key={index}>
-                  <BostedsadresseDataCell bostedsadresse={bostedsadresse} index={index} visAktiv />
+                  <BostedsadresseDataCell bostedsadresser={bostedsadresse} index={index} visAktiv />
                   <Table.DataCell>
                     {!!adresse.gyldigFraOgMed ? formaterDato(adresse.gyldigFraOgMed) : ''}
                   </Table.DataCell>

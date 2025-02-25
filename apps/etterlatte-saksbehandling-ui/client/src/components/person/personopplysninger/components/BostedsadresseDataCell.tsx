@@ -3,24 +3,24 @@ import { HStack, Table, Tag } from '@navikt/ds-react'
 import { Bostedsadresse } from '~shared/types/familieOpplysninger'
 
 export const BostedsadresseDataCell = ({
-  bostedsadresse,
+  bostedsadresser,
   index,
   visAktiv,
 }: {
-  bostedsadresse?: Bostedsadresse[]
+  bostedsadresser?: Bostedsadresse[]
   index: number
   visAktiv?: boolean
 }) => {
   return (
     <>
-      {!!bostedsadresse && !!bostedsadresse[index] ? (
+      {!!bostedsadresser && !!bostedsadresser[index] ? (
         <Table.DataCell>
           <HStack gap="4">
             <>
-              {!!bostedsadresse[index].adresse ? bostedsadresse[index].adresse : '-'},
-              {!!bostedsadresse[index].postnr ? bostedsadresse[index].postnr : ''}
+              {!!bostedsadresser[index].adresse ? bostedsadresser[index].adresse : '-'},
+              {!!bostedsadresser[index].postnr ? bostedsadresser[index].postnr : ''}
             </>
-            {bostedsadresse[index].aktiv && visAktiv && (
+            {bostedsadresser[index].aktiv && visAktiv && (
               <Tag variant="success" size="small">
                 Gjeldende
               </Tag>

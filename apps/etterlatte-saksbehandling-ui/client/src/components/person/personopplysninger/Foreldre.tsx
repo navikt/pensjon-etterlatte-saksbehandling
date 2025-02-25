@@ -49,7 +49,7 @@ export const Foreldre = ({
                       {!!doed.foedselsdato && <AlderTag foedselsdato={doed.foedselsdato} />}
                     </HStack>
                   </Table.DataCell>
-                  <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
+                  <BostedsadresseDataCell bostedsadresser={doed.bostedsadresse} index={0} />
                   <Table.DataCell>-</Table.DataCell>
                 </Table.Row>
               ))}
@@ -75,7 +75,7 @@ export const Foreldre = ({
                   {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
                 </HStack>
               </Table.DataCell>
-              <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
+              <BostedsadresseDataCell bostedsadresser={levende.bostedsadresse} index={0} />
               <Table.DataCell>{harForeldreansvar(levende.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
             </Table.Row>
           ))}

@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.every
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
@@ -71,7 +72,7 @@ class DoedshendelseJobServiceTest {
     private val grunnlagService =
         mockk<GrunnlagService> {
             coJustRun { opprettGrunnlag(any(), any()) }
-            coJustRun { lagreNyeSaksopplysningerBareSak(any(), any()) }
+            justRun { lagreNyeSaksopplysningerBareSak(any(), any()) }
             coJustRun { opprettEllerOppdaterGrunnlagForSak(any(), any()) }
         }
 

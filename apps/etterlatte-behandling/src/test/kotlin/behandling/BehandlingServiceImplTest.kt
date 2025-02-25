@@ -248,7 +248,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
         every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
 
-        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(revurderingbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
 
@@ -288,7 +288,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
         every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
         every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
-        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
 
@@ -328,7 +328,7 @@ internal class BehandlingServiceImplTest {
 
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
 
-        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         val saksbehandler = simpleSaksbehandler()
         assertThrows<BehandlingKanIkkeAvbrytesException> {
@@ -360,7 +360,7 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
-        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "test")
 
@@ -434,7 +434,7 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
-        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
 
@@ -464,7 +464,7 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
-        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
         verify(exactly = 1) {
@@ -1090,8 +1090,8 @@ internal class BehandlingServiceImplTest {
         nyKontekstMedBruker(mockSaksbehandler())
         val behandling = foerstegangsbehandling(sakId = randomSakId(), id = UUID.randomUUID())
         every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
-        coEvery { grunnlagService.hentPersongalleri(behandling.id) } returns mockPersongalleri()
-        coEvery { grunnlagService.lagreNyeSaksopplysninger(any(), behandling.id, any()) } just runs
+        every { grunnlagService.hentPersongalleri(behandling.id) } returns mockPersongalleri()
+        every { grunnlagService.lagreNyeSaksopplysninger(any(), behandling.id, any()) } just runs
         coEvery { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
         every { behandlingDaoMock.lagreStatus(any()) } just runs
         every { behandlingDaoMock.lagreStatus(any()) } just runs
@@ -1110,8 +1110,10 @@ internal class BehandlingServiceImplTest {
         }
         val slot = slot<List<Grunnlagsopplysning<JsonNode>>>()
         coVerify {
-            grunnlagService.lagreNyeSaksopplysninger(any(), behandling.id, capture(slot))
             grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, any())
+        }
+        verify {
+            grunnlagService.lagreNyeSaksopplysninger(any(), behandling.id, capture(slot))
         }
 
         val grunnlagsopplysning = slot.captured.single()
@@ -1187,7 +1189,7 @@ internal class BehandlingServiceImplTest {
                     )
             }
 
-        coEvery {
+        every {
             grunnlagService.hentPersonopplysninger(behandling.id, sakType)
         } returns
             PersonopplysningerResponse(
@@ -1205,7 +1207,7 @@ internal class BehandlingServiceImplTest {
                 soeker = null,
                 annenForelder = null,
             )
-        coEvery { grunnlagService.hentPersongalleri(behandling.id) } answers { callOriginal() }
+        every { grunnlagService.hentPersongalleri(behandling.id) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger // TODO fjern?

@@ -178,7 +178,7 @@ class GrunnlagsendringshendelseService(
             )
         }
 
-    suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
+    fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val sakIder = grunnlagService.hentAlleSakerForFnr(Folkeregisteridentifikator.of(adressebeskyttelse.fnr))
         if (sakIder.isEmpty()) {
             logger.info("Forkaster hendelse da vi ikke fant noen saker på den.")
@@ -209,7 +209,7 @@ class GrunnlagsendringshendelseService(
         samsvar: SamsvarMellomKildeOgGrunnlag,
     ): List<Grunnlagsendringshendelse> {
         val personMedSakerOgRoller =
-            runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(fnr)).sakiderOgRoller }
+            grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(fnr)).sakiderOgRoller
 
         return inTransaction {
             personMedSakerOgRoller
@@ -281,7 +281,7 @@ class GrunnlagsendringshendelseService(
     ): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = now().toLocalDatetimeUTC()
         val sakerOgRoller =
-            runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(fnr)).sakiderOgRoller }
+            grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(fnr)).sakiderOgRoller
 
         val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
@@ -378,7 +378,7 @@ class GrunnlagsendringshendelseService(
                 personRolle,
                 sak.sakType,
             )
-        val grunnlag = runBlocking { grunnlagService.hentOpplysningsgrunnlagForSak(sak.id) }
+        val grunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)
         try {
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)

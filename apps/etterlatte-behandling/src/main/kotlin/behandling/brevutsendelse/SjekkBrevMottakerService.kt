@@ -111,14 +111,12 @@ class SjekkBrevMottakerService(
         sak: Sak,
         behandling: Behandling,
     ): Person =
-        runBlocking {
-            grunnlagService
-                .hentPersonopplysninger(
-                    behandling.id,
-                    sak.sakType,
-                ).soeker
-                ?.opplysning ?: throw InternfeilException("Fant ikke opplysninger for sak=${sak.id}")
-        }
+        grunnlagService
+            .hentPersonopplysninger(
+                behandling.id,
+                sak.sakType,
+            ).soeker
+            ?.opplysning ?: throw InternfeilException("Fant ikke opplysninger for sak=${sak.id}")
 
     private fun erLikeVergemaal(
         vergerEn: List<VergemaalEllerFremtidsfullmakt>?,

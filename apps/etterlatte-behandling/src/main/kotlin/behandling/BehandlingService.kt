@@ -407,7 +407,7 @@ internal class BehandlingServiceImpl(
             grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
         }
 
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(behandlingId)!! }
+        val persongalleri = grunnlagService.hentPersongalleri(behandlingId)!!
 
         behandlingHendelser.sendMeldingForHendelseStatistikk(
             behandling.toStatistikkBehandling(persongalleri = persongalleri),
@@ -434,9 +434,8 @@ internal class BehandlingServiceImpl(
     ): DetaljertBehandling? =
         hentBehandling(behandlingId)?.let {
             val persongalleri: Persongalleri =
-                runBlocking {
-                    grunnlagService.hentPersongalleri(behandlingId)
-                } ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
+                grunnlagService.hentPersongalleri(behandlingId)
+                    ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toDetaljertBehandlingWithPersongalleri(persongalleri)
         }
@@ -487,7 +486,7 @@ internal class BehandlingServiceImpl(
      * https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-12
      * https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-13
      */
-    private suspend fun erGyldigVirkningstidspunktFoerstegangsbehandling(
+    private fun erGyldigVirkningstidspunktFoerstegangsbehandling(
         request: VirkningstidspunktRequest,
         behandling: Behandling,
     ): Boolean {
@@ -578,7 +577,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    private suspend fun hentFoersteDoedsdato(
+    private fun hentFoersteDoedsdato(
         behandlingId: UUID,
         sakType: SakType,
     ): LocalDate? {
@@ -970,7 +969,7 @@ internal class BehandlingServiceImpl(
         virkningstidspunkt != null &&
         virkningstidspunkt.isAfter(opphoerFraOgMed)
 
-    private suspend fun endrePersongalleriOgOppdaterGrunnlag(
+    private fun endrePersongalleriOgOppdaterGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         transform: (Persongalleri) -> Persongalleri,
@@ -993,13 +992,11 @@ internal class BehandlingServiceImpl(
                                 periode = null,
                             ),
                         )
-                    runBlocking {
-                        grunnlagService.lagreNyeSaksopplysninger(
-                            behandling.sak.id,
-                            behandlingId,
-                            nyeOpplysinger,
-                        )
-                    }
+                    grunnlagService.lagreNyeSaksopplysninger(
+                        behandling.sak.id,
+                        behandlingId,
+                        nyeOpplysinger,
+                    )
 
                     runBlocking {
                         grunnlagService.oppdaterGrunnlag(

@@ -10,7 +10,6 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -620,7 +619,7 @@ internal class VilkaarsvurderingServiceTest(
 
         vilkaarsvurderingMedKopierteOppdaterteVilkaar.resultat shouldBe null
 
-        coVerify { behandlingService.hentBehandling(any()) }
+        verify { behandlingService.hentBehandling(any()) }
 
         verify(exactly = 1) { behandlingStatus.settVilkaarsvurdert(any(), brukerTokenInfo, true) }
         verify(exactly = 0) { behandlingStatus.settVilkaarsvurdert(any(), brukerTokenInfo, false) }
@@ -812,9 +811,9 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
+        every { grunnlagService.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        every { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        every { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -863,9 +862,9 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
-        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
+        every { grunnlagService.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        every { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        every { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -907,11 +906,11 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns
+        every { grunnlagService.hentPersongalleri(sakId1) } returns
             mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
-        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns
+        every { grunnlagService.hentPersongalleri(sakId2) } returns
             mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
-        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
+        every { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -919,7 +918,7 @@ internal class VilkaarsvurderingServiceTest(
                     SakidOgRolle(sakId2, Saksrolle.AVDOED),
                 ),
             )
-        coEvery { grunnlagService.hentSakerOgRoller(avdoed2) } returns
+        every { grunnlagService.hentSakerOgRoller(avdoed2) } returns
             PersonMedSakerOgRoller(
                 avdoed2.value,
                 listOf(
@@ -955,11 +954,11 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(behandling2.id) } returns behandling2
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        coEvery { grunnlagService.hentPersongalleri(sakId1) } returns
+        every { grunnlagService.hentPersongalleri(sakId1) } returns
             mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
-        coEvery { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        every { grunnlagService.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
 
-        coEvery { grunnlagService.hentSakerOgRoller(avdoed1) } returns
+        every { grunnlagService.hentSakerOgRoller(avdoed1) } returns
             PersonMedSakerOgRoller(
                 avdoed1.value,
                 listOf(
@@ -968,7 +967,7 @@ internal class VilkaarsvurderingServiceTest(
                 ),
             )
 
-        coEvery { grunnlagService.hentSakerOgRoller(avdoed2) } returns
+        every { grunnlagService.hentSakerOgRoller(avdoed2) } returns
             PersonMedSakerOgRoller(
                 avdoed2.value,
                 listOf(

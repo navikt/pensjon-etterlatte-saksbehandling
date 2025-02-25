@@ -48,6 +48,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -253,6 +254,7 @@ class AktivitetspliktOppgaveServiceTest {
                 mockk {
                     every { id } returns sistegyldigeBehandling
                     every { status } returns BehandlingStatus.ATTESTERT
+                    every { behandlingOpprettet } returns LocalDateTime.now()
                 },
             )
         if (oppgaveType == OppgaveType.AKTIVITETSPLIKT_12MND) {

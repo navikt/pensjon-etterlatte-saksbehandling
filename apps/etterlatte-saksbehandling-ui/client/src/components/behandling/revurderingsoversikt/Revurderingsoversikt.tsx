@@ -36,7 +36,6 @@ import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderin
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
 import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
-import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
@@ -128,11 +127,6 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
       </Box>
       <Box paddingBlock="8" paddingInline="16 8">
-        <OppdaterGrunnlagModal
-          behandlingId={behandling.id}
-          behandlingStatus={behandling.status}
-          enhetId={behandling.sakEnhetId}
-        />
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {!!behandling.begrunnelse && (
           <>

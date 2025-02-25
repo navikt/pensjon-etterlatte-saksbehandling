@@ -1,4 +1,4 @@
-import { formaterNavn, hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
+import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { BodyShort, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { ChildHairEyesIcon } from '@navikt/aksel-icons'
 import React from 'react'
@@ -55,17 +55,18 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
   if (!opplysninger) {
     return null
   }
-  const avdoedesBarn = hentLevendeSoeskenFraAvdoedeForSoeker(
-    opplysninger.avdoede,
-    opplysninger.soeker?.opplysning?.foedselsnummer
-  )
+
+  // Filtrerer bort duplikate søsken
+  const avdoedesBarn = opplysninger.avdoede
+    .flatMap((avdoed) => avdoed.opplysning.avdoedesBarn ?? [])
+    .filter((b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer))
 
   return (
     <VStack gap="4">
       <HStack gap="4" justify="start" align="center" wrap={false}>
         <ChildHairEyesIcon fontSize="1.75rem" aria-hidden />
         <Heading size="small" level="3">
-          {sakType === SakType.OMSTILLINGSSTOENAD ? 'Avdødes barn' : 'Avdødes barn (søsken)'}
+          Avdødes barn
         </Heading>
       </HStack>
       <Table size="small">
@@ -103,11 +104,7 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={5}>
-                <Heading size="small">
-                  {sakType === SakType.OMSTILLINGSSTOENAD
-                    ? 'Avdøde har ingen barn'
-                    : 'Avdøde har ingen andre barn enn søker'}
-                </Heading>
+                <Heading size="small">Avdøde har ingen barn</Heading>
               </Table.DataCell>
             </Table.Row>
           )}

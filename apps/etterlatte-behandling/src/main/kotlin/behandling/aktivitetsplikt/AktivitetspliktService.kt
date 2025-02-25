@@ -270,7 +270,7 @@ class AktivitetspliktService(
             } else {
                 aktivitetspliktDao.opprettAktivitetForBehandling(behandlingId, aktivitet, kilde)
             }
-            runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo, behandlingId) }
+            runBlocking { sendDtoTilStatistikk(aktivitet.sakId, behandlingId) }
         } else if (sakId != null) {
             if (aktivitet.sakId != sakId) {
                 throw SakidTilhoererIkkeBehandlingException()
@@ -295,7 +295,7 @@ class AktivitetspliktService(
         if (behandlingId != null) {
             val behandling = hentBehandlingOgSjekkOmRedigerbar(behandlingId)
             aktivitetspliktDao.slettAktivitetForBehandling(aktivitetId, behandlingId)
-            runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, behandlingId) }
+            runBlocking { sendDtoTilStatistikk(behandling.sak.id, behandlingId) }
         } else if (sakId != null) {
             aktivitetspliktDao.slettAktivitetForSak(aktivitetId, sakId)
         } else {
@@ -336,7 +336,7 @@ class AktivitetspliktService(
             }
             aktivitetspliktDao.upsertHendelse(behandlingId, hendelse, kilde)
 
-            runBlocking { sendDtoTilStatistikk(hendelse.sakId, brukerTokenInfo, behandlingId) }
+            runBlocking { sendDtoTilStatistikk(hendelse.sakId, behandlingId) }
         } else if (sakId != null) {
             if (hendelse.sakId != sakId) {
                 throw SakidTilhoererIkkeBehandlingException()
@@ -365,7 +365,7 @@ class AktivitetspliktService(
                 throw BehandlingKanIkkeEndres()
             }
             aktivitetspliktDao.slettHendelse(hendelseId)
-            runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, hendelseForSak.behandlingId) }
+            runBlocking { sendDtoTilStatistikk(behandling.sak.id, hendelseForSak.behandlingId) }
         } else {
             aktivitetspliktDao.slettHendelse(hendelseId)
         }
@@ -388,7 +388,7 @@ class AktivitetspliktService(
             oppgaveId = oppgaveId,
         )
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+        runBlocking { sendDtoTilStatistikk(sakId) }
 
         val vurdering = hentVurderingForOppgave(oppgaveId)
         if (vurdering.erTom()) {
@@ -438,7 +438,7 @@ class AktivitetspliktService(
             oppgaveId = oppgaveId,
         )
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+        runBlocking { sendDtoTilStatistikk(sakId) }
         return hentVurderingForOppgave(oppgaveId)
     }
 
@@ -475,7 +475,7 @@ class AktivitetspliktService(
             behandlingId = behandlingId,
         )
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
+        runBlocking { sendDtoTilStatistikk(sakId, behandlingId) }
         val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
         val aktivitet = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
 
@@ -499,7 +499,6 @@ class AktivitetspliktService(
         runBlocking {
             sendDtoTilStatistikk(
                 sakId = sakId,
-                brukerTokenInfo = brukerTokenInfo,
             )
         }
 
@@ -517,7 +516,7 @@ class AktivitetspliktService(
 
         aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForOppgave(aktivitetsgradId, oppgaveId)
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+        runBlocking { sendDtoTilStatistikk(sakId) }
         return hentVurderingForOppgave(oppgaveId)
     }
 
@@ -530,7 +529,7 @@ class AktivitetspliktService(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+        runBlocking { sendDtoTilStatistikk(sakId) }
         aktivitetspliktUnntakDao.slettUnntakForOppgave(oppgaveId, unntakId)
         return hentVurderingForOppgave(oppgaveId)
     }
@@ -565,7 +564,7 @@ class AktivitetspliktService(
             behandlingId = behandlingId,
         )
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId = behandlingId) }
+        runBlocking { sendDtoTilStatistikk(sakId, behandlingId = behandlingId) }
 
         return hentVurderingForBehandlingNy(behandlingId)
     }
@@ -579,7 +578,7 @@ class AktivitetspliktService(
         hentBehandlingOgSjekkOmRedigerbar(behandlingId)
         aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForBehandling(aktivitetsgradId, behandlingId)
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId = behandlingId) }
+        runBlocking { sendDtoTilStatistikk(sakId, behandlingId = behandlingId) }
         return hentVurderingForBehandlingNy(behandlingId)
     }
 
@@ -591,7 +590,7 @@ class AktivitetspliktService(
     ): AktivitetspliktVurdering {
         hentBehandlingOgSjekkOmRedigerbar(behandlingId)
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId = behandlingId) }
+        runBlocking { sendDtoTilStatistikk(sakId, behandlingId = behandlingId) }
         aktivitetspliktUnntakDao.slettUnntakForBehandling(unntakId = unntakId, behandlingId = behandlingId)
         return hentVurderingForBehandlingNy(behandlingId)
     }
@@ -612,7 +611,6 @@ class AktivitetspliktService(
         runBlocking {
             sendDtoTilStatistikk(
                 sakId = sakId,
-                brukerTokenInfo = brukerTokenInfo,
             )
         }
 
@@ -781,7 +779,6 @@ class AktivitetspliktService(
 
     private suspend fun sendDtoTilStatistikk(
         sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID? = null,
     ) {
         try {

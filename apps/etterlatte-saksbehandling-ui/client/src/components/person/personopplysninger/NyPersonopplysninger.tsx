@@ -8,6 +8,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VStack } from '@navikt/ds-react'
 import { BostedsadresserExpansionCard } from '~components/person/personopplysninger/opplysninger/BostedsadresserExpansionCard'
+import { VergemaalExpansionCard } from '~components/person/personopplysninger/opplysninger/VergemaalExpansionCard'
 
 interface Props {
   sakResult: Result<SakMedBehandlinger>
@@ -39,6 +40,7 @@ export const NyPersonopplysninger = ({ sakResult, fnr }: Props) => {
         success: ({ soeker, avdoede, gjenlevende }) => (
           <VStack padding="8" gap="4">
             <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />
+            <VergemaalExpansionCard vergemaal={soeker?.vergemaalEllerFremtidsfullmakt} />
           </VStack>
         ),
       }),

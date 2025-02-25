@@ -12,6 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingEtteropppgjoerRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
@@ -108,6 +109,9 @@ fun Route.avkorting(
     }
 
     route("/api/beregning/avkorting") {
+        get("sisteAvkorting") {
+        }
+
         post("aarlig-inntektsjustering-sjekk") {
             val request = call.receive<InntektsjusteringAvkortingInfoRequest>()
             logger.info("Henter har inntekt for ${request.aar} for sakId=${request.sakId}")
@@ -134,6 +138,15 @@ fun Route.avkorting(
             val respons =
                 mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
             call.respond(respons.toDto())
+        }
+
+        post("etteroppgjoer") {
+            val request = call.receive<AvkortingEtteropppgjoerRequest>()
+            logger.info(
+                "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
+            )
+            val avkorting = avkortingService.hentSisteAvkortingForEtteroppgjoer(request.sisteIverksatteBehandling, request.aar)
+            call.respond(avkorting)
         }
     }
 }

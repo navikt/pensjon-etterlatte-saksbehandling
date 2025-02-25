@@ -1,13 +1,17 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import java.util.UUID
@@ -17,8 +21,13 @@ class EtteroppgjoerService(
     private val sakDao: SakLesDao,
     private val oppgaveService: OppgaveService,
     private val inntektskomponentService: InntektskomponentService,
+    private val beregningKlient: BeregningKlient,
+    private val behandlingService: BehandlingService,
 ) {
-    fun hentEtteroppgjoer(behandlingId: UUID): Etteroppgjoer {
+    suspend fun hentEtteroppgjoer(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID,
+    ): Etteroppgjoer {
         val etteroppgjoerBehandling =
             inTransaction {
                 dao.hentEtteroppgjoer(behandlingId)
@@ -27,17 +36,33 @@ class EtteroppgjoerService(
                 detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
             )
 
-        val opplysningerSkatt = dao.hentOpplysningerSkatt(behandlingId)
-        val opplysningerAInntekt = dao.hentOpplysningerAInntekt(behandlingId)
+        val sisteIverksatteBehandling =
+            inTransaction {
+                behandlingService.hentSisteIverksatte(etteroppgjoerBehandling.sak.id)
+                    ?: throw InternfeilException("Fant ikke siste iverksatte")
+            }
 
-        return Etteroppgjoer(
-            behandling = etteroppgjoerBehandling,
-            opplysninger =
-                EtteroppgjoerOpplysninger(
-                    skatt = opplysningerSkatt,
-                    ainntekt = opplysningerAInntekt.toView(),
-                ),
-        )
+        val tidligereAvkorting =
+            beregningKlient.hentSisteAvkortingForEtteroppgjoer(
+                sisteIverksatteBehandling.id,
+                etteroppgjoerBehandling.aar,
+                brukerTokenInfo,
+            )
+
+        return inTransaction {
+            val opplysningerSkatt = dao.hentOpplysningerSkatt(behandlingId)
+            val opplysningerAInntekt = dao.hentOpplysningerAInntekt(behandlingId)
+
+            Etteroppgjoer(
+                behandling = etteroppgjoerBehandling,
+                opplysninger =
+                    EtteroppgjoerOpplysninger(
+                        skatt = opplysningerSkatt,
+                        ainntekt = opplysningerAInntekt.toView(),
+                        tidligereAvkorting = tidligereAvkorting,
+                    ),
+            )
+        }
     }
 
     suspend fun opprettEtteroppgjoer(

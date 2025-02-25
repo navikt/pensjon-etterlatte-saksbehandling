@@ -78,8 +78,7 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             else -> {
-                val pdf = brevApiKlient.genererPdf(brevID, behandlingId, bruker)
-                pdf
+                brevApiKlient.genererPdf(brevID, behandlingId, bruker)
             }
         }
     }

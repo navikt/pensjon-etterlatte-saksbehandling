@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -132,16 +133,16 @@ class AktivitetspliktOppgaveServiceTest {
                 },
             )
         every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT_12MND) } returns emptyList()
-        every { behandlingService.hentSisteIverksatte(sak.id) } returns null
+        every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
 
-        assertThrows<ManglerIverksattBehandling> {
+        assertThrows<ManglerBehandlingMedGyldigStatus> {
             service.opprettOppfoelgingsoppgave(OpprettOppfoelgingsoppgave(VurderingType.SEKS_MAANEDER, sak.id))
         }
 
         verify(exactly = 1) {
             aktivitetspliktService.harVarigUnntak(sak.id)
             oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT)
-            behandlingService.hentSisteIverksatte(sak.id)
+            behandlingService.hentBehandlingerForSak(sak.id)
         }
     }
 
@@ -246,11 +247,14 @@ class AktivitetspliktOppgaveServiceTest {
                 },
             )
 
-        val sisteIverksatteBehandlingId = UUID.randomUUID()
-        every { behandlingService.hentSisteIverksatte(sak.id) } returns
-            mockk {
-                every { id } returns sisteIverksatteBehandlingId
-            }
+        val sistegyldigeBehandling = UUID.randomUUID()
+        every { behandlingService.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                mockk {
+                    every { id } returns sistegyldigeBehandling
+                    every { status } returns BehandlingStatus.ATTESTERT
+                },
+            )
         if (oppgaveType == OppgaveType.AKTIVITETSPLIKT_12MND) {
             every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
@@ -267,7 +271,7 @@ class AktivitetspliktOppgaveServiceTest {
         every {
             oppgaveService.opprettOppgave(
                 sakId = sak.id,
-                referanse = sisteIverksatteBehandlingId.toString(),
+                referanse = sistegyldigeBehandling.toString(),
                 kilde = OppgaveKilde.SAKSBEHANDLER,
                 type = oppgaveType,
                 merknad = any(),
@@ -284,7 +288,7 @@ class AktivitetspliktOppgaveServiceTest {
         verify(exactly = 1) {
             oppgaveService.opprettOppgave(
                 sakId = sak.id,
-                referanse = sisteIverksatteBehandlingId.toString(),
+                referanse = sistegyldigeBehandling.toString(),
                 kilde = OppgaveKilde.SAKSBEHANDLER,
                 type = oppgaveType,
                 merknad = any(),
@@ -292,7 +296,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
             aktivitetspliktService.harVarigUnntak(sak.id)
             oppgaveService.hentOppgaverForSak(sak.id, oppgaveType)
-            behandlingService.hentSisteIverksatte(sak.id)
+            behandlingService.hentBehandlingerForSak(sak.id)
         }
     }
 

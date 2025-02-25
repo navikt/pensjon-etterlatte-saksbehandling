@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -141,9 +142,15 @@ class AktivitetspliktOppgaveService(
                 "Det finnes allerede en tilsvarende oppgave som ikke er ferdigbehandlet for denne saken. Sakid=$sakId",
             )
         }
-
-        return behandlingService.hentSisteIverksatte(sakId)
-            ?: throw ManglerIverksattBehandling("Har ingen iverksatt behandling for sak. Sakid=$sakId")
+        /*
+        attestering kan ta noen uker og ofte vil sb gjerne sende ut brevet tidligst mulig, selvom den er under behandling feks.
+         */
+        return behandlingService
+            .hentBehandlingerForSak(sakId)
+            .filter {
+                it.status.aapenBehandling() || BehandlingStatus.iverksattEllerAttestert().contains(it.status)
+            }.maxByOrNull { it.behandlingOpprettet }
+            ?: throw ManglerBehandlingMedGyldigStatus("Har ingen iverksatt behandling for sak. Sakid=$sakId")
     }
 
     private fun validerMnd6KanOpprette(sakId: SakId) {
@@ -508,10 +515,10 @@ class HarOppfoelgingsOppgaveUnderbehandling(
         detail = msg,
     )
 
-class ManglerIverksattBehandling(
+class ManglerBehandlingMedGyldigStatus(
     msg: String,
 ) : UgyldigForespoerselException(
-        code = "HAR_INGEN_IVERKSATT_BEHANDLING",
+        code = "HAR_INGEN_GYLDIG_BEHANDLING",
         detail = msg,
     )
 

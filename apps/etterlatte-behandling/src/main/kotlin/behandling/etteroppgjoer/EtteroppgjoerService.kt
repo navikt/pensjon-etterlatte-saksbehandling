@@ -2,8 +2,12 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -21,8 +25,10 @@ class EtteroppgjoerService(
     private val sakDao: SakLesDao,
     private val oppgaveService: OppgaveService,
     private val inntektskomponentService: InntektskomponentService,
+    private val sigrunService: SigrunService,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     suspend fun hentEtteroppgjoer(
         brukerTokenInfo: BrukerTokenInfo,
@@ -50,15 +56,15 @@ class EtteroppgjoerService(
             )
 
         return inTransaction {
-            val opplysningerSkatt = dao.hentOpplysningerSkatt(behandlingId)
-            val opplysningerAInntekt = dao.hentOpplysningerAInntekt(behandlingId)
+            val fraSkatt = dao.hentOpplysningerSkatt(behandlingId)
+            val aInntekt = dao.hentOpplysningerAInntekt(behandlingId)
 
             Etteroppgjoer(
                 behandling = etteroppgjoerBehandling,
                 opplysninger =
                     EtteroppgjoerOpplysninger(
-                        skatt = opplysningerSkatt,
-                        ainntekt = opplysningerAInntekt.toView(),
+                        skatt = fraSkatt,
+                        ainntekt = aInntekt,
                         tidligereAvkorting = tidligereAvkorting,
                     ),
             )
@@ -105,12 +111,26 @@ class EtteroppgjoerService(
         ident: String,
         aar: Int,
     ) {
+        val skalStubbe = featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_INNTEKT, false)
+
+        val skatt =
+            if (skalStubbe) {
+                PensjonsgivendeInntektFraSkatt.stub()
+            } else {
+                sigrunService.hentPensjonsgivendeInntekt(ident)
+            }
         // TODO hent og lagre OpplysnignerSkatt
         inTransaction {
-            dao.lagreOpplysningerSkatt()
+            dao.lagreOpplysningerSkatt(skatt)
         }
 
-        val aInntekt = inntektskomponentService.hentInntektFraAInntekt(ident, aar)
+        val aInntekt =
+            if (skalStubbe) {
+                AInntekt.stub()
+            } else {
+                inntektskomponentService.hentInntektFraAInntekt(ident, aar)
+            }
+
         inTransaction {
             dao.lagreOpplysningerAInntekt(aInntekt)
         }

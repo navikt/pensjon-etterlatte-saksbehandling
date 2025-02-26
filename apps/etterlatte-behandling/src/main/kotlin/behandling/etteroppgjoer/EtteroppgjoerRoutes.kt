@@ -21,6 +21,7 @@ enum class EtteroppgjoerToggles(
     private val toggle: String,
 ) : FeatureToggle {
     ETTEROPPGJOER("etteroppjoer"),
+    ETTEROPPGJOER_STUB_INNTEKT("etteroppjoer_stub_inntekt"),
     ;
 
     override fun key(): String = toggle

@@ -38,6 +38,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -642,8 +643,10 @@ internal class ApplicationContext(
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
             inntektskomponentService = inntektskomponentService,
+            sigrunService = SigrunService(),
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
+            featureToggleService = featureToggleService,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

@@ -1,11 +1,16 @@
 import { Bostedsadresse } from '~shared/types/familieOpplysninger'
-import { ExpansionCard, Heading, HStack, Table } from '@navikt/ds-react'
+import { Box, ExpansionCard, Heading, HStack, Table } from '@navikt/ds-react'
 import { HouseIcon } from '@navikt/aksel-icons'
 import { compareDesc } from 'date-fns'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 
-export const BostedsadresserExpansionCard = ({ bostedsadresser }: { bostedsadresser?: Bostedsadresse[] }) => {
+interface Props {
+  bostedsadresser?: Bostedsadresse[]
+  erAvdoedesAddresser?: boolean
+}
+
+export const BostedsadresserExpansionCard = ({ bostedsadresser, erAvdoedesAddresser = false }: Props) => {
   const sorterteBostedsadresse = bostedsadresser?.sort((a: Bostedsadresse, b: Bostedsadresse) => {
     if (a.gyldigFraOgMed && b.gyldigFraOgMed) {
       return compareDesc(new Date(a.gyldigFraOgMed), new Date(b.gyldigFraOgMed))
@@ -22,7 +27,9 @@ export const BostedsadresserExpansionCard = ({ bostedsadresser }: { bostedsadres
       <ExpansionCard.Header>
         <HStack gap="4" align="center">
           <HouseIcon aria-hidden fontSize="1.5rem" />
-          <ExpansionCard.Title size="small">Bostedsadresser</ExpansionCard.Title>
+          <ExpansionCard.Title size="small">
+            {erAvdoedesAddresser ? 'Avdødes bostedsadresser' : 'Bostedsadresser'}
+          </ExpansionCard.Title>
         </HStack>
       </ExpansionCard.Header>
       <ExpansionCard.Content>

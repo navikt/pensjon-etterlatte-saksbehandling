@@ -6,9 +6,11 @@ import { hentAlleLand } from '~shared/api/behandling'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { VStack } from '@navikt/ds-react'
+import { Box, HStack, VStack } from '@navikt/ds-react'
 import { BostedsadresserExpansionCard } from '~components/person/personopplysninger/opplysninger/BostedsadresserExpansionCard'
 import { VergemaalExpansionCard } from '~components/person/personopplysninger/opplysninger/VergemaalExpansionCard'
+import { SakType } from '~shared/types/sak'
+import { SivilstandExpansionCard } from '~components/person/personopplysninger/opplysninger/SivilstandExpansionCard'
 
 interface Props {
   sakResult: Result<SakMedBehandlinger>
@@ -39,8 +41,21 @@ export const NyPersonopplysninger = ({ sakResult, fnr }: Props) => {
         error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente familieopplysninger'}</ApiErrorAlert>,
         success: ({ soeker, avdoede, gjenlevende }) => (
           <VStack padding="8" gap="4">
-            <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />
+            <HStack gap="4" wrap={false}>
+              <Box width="100%">
+                <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />
+              </Box>
+              <Box width="100%">
+                <BostedsadresserExpansionCard
+                  bostedsadresser={avdoede?.flatMap((avdoed) => avdoed.bostedsadresse ?? [])}
+                  erAvdoedesAddresser
+                />
+              </Box>
+            </HStack>
             <VergemaalExpansionCard vergemaal={soeker?.vergemaalEllerFremtidsfullmakt} />
+            {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
+              <SivilstandExpansionCard sivilstand={soeker?.sivilstand} avdoede={avdoede} />
+            )}
           </VStack>
         ),
       }),

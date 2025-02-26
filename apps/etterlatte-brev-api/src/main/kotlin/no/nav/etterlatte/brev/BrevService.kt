@@ -505,7 +505,7 @@ class BrevService(
         }
     }
 
-    // for å håndtere tilfeller hvor brevet allerede er slettet
+    // denne er egentlig lik sjekkomBrevKanEndres, men tar også høyde for brev som allerede er SLETTET
     private fun sjekkOmBrevKanSlettes(brevID: BrevID): Brev {
         val brev = db.hentBrev(brevID)
 

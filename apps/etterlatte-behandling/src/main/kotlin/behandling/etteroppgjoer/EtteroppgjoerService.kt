@@ -2,9 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService

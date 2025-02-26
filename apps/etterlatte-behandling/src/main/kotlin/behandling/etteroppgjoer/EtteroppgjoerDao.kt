@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntekt
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev

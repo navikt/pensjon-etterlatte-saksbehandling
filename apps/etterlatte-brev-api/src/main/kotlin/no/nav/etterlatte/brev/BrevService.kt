@@ -446,7 +446,7 @@ class BrevService(
             val result = db.settBrevSlettet(id, bruker)
             logger.info("Brev med id=$id slettet=$result")
         } catch (e: UgyldigForespoerselException) {
-            throw e
+            throw e // hvis brevet er et vedtaksbrev skal vi kaste feil
         } catch (e: BrevKanIkkeEndres) {
             if (e.meta?.get("status") == Status.SLETTET) {
                 // skal egentlig ikke kunne slette noe som allerede er slettet

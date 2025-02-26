@@ -174,3 +174,8 @@ data class MottattInntektsjusteringAvkortigRequest(
     val virkningstidspunkt: YearMonth,
     val mottattInntektsjustering: MottattInntektsjustering,
 )
+
+data class AvkortingEtteropppgjoerRequest(
+    val sisteIverksatteBehandling: UUID,
+    val aar: Int,
+)

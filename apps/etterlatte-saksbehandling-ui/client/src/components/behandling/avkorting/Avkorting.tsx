@@ -48,7 +48,6 @@ export const Avkorting = ({
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-
   useEffect(() => {
     if (!avkorting) {
       dispatch(resetAvkorting())
@@ -66,6 +65,9 @@ export const Avkorting = ({
       (grunnlag) => grunnlag.aar == aarFraDatoString(virkningstidspunkt(behandling).dato)
     )
   }
+
+  const avkortetYtelse = [...(avkorting?.avkortetYtelse ?? [])]
+  const tidligereAvkortetYtelse = [...(avkorting?.tidligereAvkortetYtelse ?? [])]
 
   return (
     <Box paddingBlock="8 0">
@@ -119,7 +121,9 @@ export const Avkorting = ({
         {visSanksjon && (
           <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
         )}
-        {avkorting && <YtelseEtterAvkorting />}
+        {avkorting && (
+          <YtelseEtterAvkorting avkortetYtelse={avkortetYtelse} tidligereAvkortetYtelse={tidligereAvkortetYtelse} />
+        )}
       </VStack>
     </Box>
   )

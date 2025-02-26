@@ -1,4 +1,5 @@
 import { ISak } from '~shared/types/sak'
+import { IAvkortetYtelse, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 
 export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
@@ -16,7 +17,7 @@ export interface EtteroppgjoerBehandling {
 export interface EtteroppgjoerOpplysninger {
   skatt: OpplysnignerSkatt
   ainntekt: AInntekt
-  // TODO..
+  tidligereAvkorting: Avkorting
 }
 
 export interface OpplysnignerSkatt {
@@ -30,4 +31,9 @@ export interface AInntekt {
 export interface AInntektMaaned {
   maaned: string
   summertBeloep: number
+}
+
+export interface Avkorting {
+  avkortingGrunnlag: IAvkortingGrunnlag[]
+  avkortetYtelse: IAvkortetYtelse[]
 }

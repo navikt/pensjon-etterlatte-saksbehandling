@@ -57,6 +57,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -237,6 +238,16 @@ class BeregningKlientTest :
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = true
+
+    override suspend fun hentSisteAvkortingForEtteroppgjoer(
+        behandlingId: UUID,
+        aar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingDto =
+        AvkortingDto(
+            avkortingGrunnlag = emptyList(),
+            avkortetYtelse = emptyList(),
+        )
 }
 
 class VedtakKlientTest : VedtakKlient {

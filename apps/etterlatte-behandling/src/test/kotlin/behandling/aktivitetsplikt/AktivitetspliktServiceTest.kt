@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.Called
 import io.mockk.Runs
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
@@ -390,7 +389,7 @@ class AktivitetspliktServiceTest {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
                 }
 
-            service.slettAktivitet(aktivitetId, brukerTokenInfo, behandling.id)
+            service.slettAktivitet(aktivitetId, behandling.id)
 
             coVerify { aktivitetspliktDao.slettAktivitetForBehandling(aktivitetId, behandling.id) }
         }
@@ -403,7 +402,7 @@ class AktivitetspliktServiceTest {
                 }
 
             assertThrows<BehandlingKanIkkeEndres> {
-                service.slettAktivitet(aktivitetId, brukerTokenInfo, behandling.id)
+                service.slettAktivitet(aktivitetId, behandling.id)
             }
         }
     }
@@ -482,8 +481,8 @@ class AktivitetspliktServiceTest {
             val vurdering = service.hentVurderingForOppgave(oppgaveId)
 
             vurdering shouldNotBe null
-            vurdering?.aktivitet?.isEmpty() shouldNotBe true
-            vurdering?.unntak shouldBe emptyList()
+            vurdering.aktivitet.isEmpty() shouldNotBe true
+            vurdering.unntak shouldBe emptyList()
 
             verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) }
@@ -555,8 +554,8 @@ class AktivitetspliktServiceTest {
             val vurdering = service.hentVurderingForOppgave(oppgaveId)
 
             vurdering shouldNotBe null
-            vurdering?.aktivitet shouldBe emptyList()
-            vurdering?.unntak?.isEmpty() shouldBe false
+            vurdering.aktivitet shouldBe emptyList()
+            vurdering.unntak.isEmpty() shouldBe false
 
             verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) }
@@ -743,7 +742,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
+            every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
@@ -796,7 +795,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
+            every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
@@ -852,7 +851,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
+            every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
@@ -924,7 +923,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
+            every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
@@ -996,7 +995,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
-            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
+            every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
@@ -1065,7 +1064,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling, aapenBehandling)
-            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
+            every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
                 oppgaveService.opprettOppgave(
                     sakId = sakId,
@@ -1104,7 +1103,7 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
-            coEvery { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
+            every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
 
             val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd)
 

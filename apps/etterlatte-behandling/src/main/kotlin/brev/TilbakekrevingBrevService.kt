@@ -119,13 +119,8 @@ class TilbakekrevingBrevService(
                 async {
                     vedtakKlient.hentVedtak(behandlingId, bruker)
                 }
-            val grunnlagDef =
-                async {
-                    grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)!!
-                }
-
-            // TODO trenger vi egt async?
-            val grunnlag = grunnlagDef.await()
+            val grunnlag =
+                grunnlagService.hentOpplysningsgrunnlagForSak(sak.id) ?: throw InternfeilException("Fant ikke grunnlag med sakId=$sakId")
 
             val vedtak =
                 vedtakDeferred.await()

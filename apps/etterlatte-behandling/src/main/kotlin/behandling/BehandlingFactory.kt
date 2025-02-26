@@ -370,7 +370,7 @@ class BehandlingFactory(
                 OmgjoerBehandling(nyFoerstegangsbehandling, sisteAvslaatteBehandling, foerstegangsbehandlingViOmgjoerer)
             }
 
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId)!! }
+        val persongalleri = grunnlagService.hentPersongalleri(sakId)!!
 
         runBlocking {
             grunnlagService.opprettGrunnlag(
@@ -462,10 +462,8 @@ class BehandlingFactory(
             "${persongalleri.soesken.size} søsken"
         } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
             val grunnlag: Grunnlag? =
-                runBlocking {
-                    grunnlagService
-                        .hentOpplysningsgrunnlag(behandlingId)
-                }
+                grunnlagService
+                    .hentOpplysningsgrunnlag(behandlingId)
 
             val avdoede = grunnlag?.hentAvdoede()?.firstOrNull()
             val barn = avdoede?.hentAvdoedesbarn()?.verdi?.avdoedesBarn

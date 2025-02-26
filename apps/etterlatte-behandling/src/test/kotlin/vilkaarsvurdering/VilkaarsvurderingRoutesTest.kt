@@ -114,11 +114,11 @@ internal class VilkaarsvurderingRoutesTest(
     // TODO: må se på mock strukturen her kontra alle steder man gjør alt dette x**y ganger
     @BeforeEach
     fun beforeEach() {
-        coEvery { behandlingService.hentBehandling(any()) } returns behandling()
+        every { behandlingService.hentBehandling(any()) } returns behandling()
         every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
         every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
-        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagMock
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagMock
     }
 
     @AfterEach
@@ -183,7 +183,7 @@ internal class VilkaarsvurderingRoutesTest(
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
-            coEvery { grunnlagService.hentOpplysningsgrunnlag(behandlingId) } returns
+            every { grunnlagService.hentOpplysningsgrunnlag(behandlingId) } returns
                 grunnlagMedVersjon(nyGrunnlagVersjon)
 
             val response =

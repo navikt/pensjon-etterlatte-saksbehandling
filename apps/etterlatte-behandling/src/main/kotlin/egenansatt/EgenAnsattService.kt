@@ -1,6 +1,5 @@
 package no.nav.etterlatte.egenansatt
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -26,7 +25,7 @@ class EgenAnsattService(
         val saker = sakService.finnSaker(skjermetHendelse.fnr)
         saker
             .map {
-                val pg = runBlocking { grunnlagService.hentPersongalleri(it.id)!! }
+                val pg = grunnlagService.hentPersongalleri(it.id)!!
                 SakIdOgPersongalleri(sakId = it.id, persongalleri = pg)
             }.forEach {
                 oppdaterTilgangService.haandtergraderingOgEgenAnsatt(

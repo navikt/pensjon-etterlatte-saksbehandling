@@ -74,7 +74,7 @@ class AutomatiskRevurderingServiceTest {
                 },
             grunnlagService =
                 mockk {
-                    coEvery { hentPersongalleri(any<SakId>()) } returns mockk()
+                    every { hentPersongalleri(any<SakId>()) } returns mockk()
                 },
             vedtakKlient = vedtakKlient,
             beregningKlient = beregningKlient,

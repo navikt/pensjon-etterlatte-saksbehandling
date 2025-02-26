@@ -102,7 +102,7 @@ internal fun Route.aktivitetspliktRoutes(
 
                         val aktiviteter =
                             inTransaction {
-                                aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, behandlingId)
+                                aktivitetspliktService.slettAktivitet(aktivitetId, behandlingId)
                                 aktivitetspliktService.hentAktiviteter(behandlingId)
                             }
 
@@ -136,7 +136,7 @@ internal fun Route.aktivitetspliktRoutes(
 
                         val aktiviteter =
                             inTransaction {
-                                aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, sakId = sakId)
+                                aktivitetspliktService.slettAktivitet(aktivitetId, sakId = sakId)
                                 aktivitetspliktService.hentAktiviteter(sakId = sakId)
                             }
 
@@ -167,12 +167,10 @@ internal fun Route.aktivitetspliktRoutes(
                     logger.info("Henter hendelser for sak $sakId")
                     val dto =
                         inTransaction {
-                            runBlocking {
-                                aktivitetspliktService.hentHendelser(
-                                    sakId = sakId,
-                                    behandlingId = behandlingId,
-                                )
-                            }
+                            aktivitetspliktService.hentHendelser(
+                                sakId = sakId,
+                                behandlingId = behandlingId,
+                            )
                         }
                     call.respond(dto)
                 }
@@ -197,7 +195,7 @@ internal fun Route.aktivitetspliktRoutes(
 
                         val hendelser =
                             inTransaction {
-                                aktivitetspliktService.slettHendelse(hendelseId, brukerTokenInfo, sakId = sakId)
+                                aktivitetspliktService.slettHendelse(hendelseId, sakId = sakId)
                                 aktivitetspliktService.hentHendelser(sakId = sakId)
                             }
 
@@ -369,7 +367,6 @@ internal fun Route.aktivitetspliktRoutes(
                                 oppgaveId = oppgaveId,
                                 aktivitetsgradId = aktivitetsgradId,
                                 sakId = sakId,
-                                brukerTokenInfo = brukerTokenInfo,
                             )
                         }
                     call.respond(vurdering)
@@ -421,7 +418,6 @@ internal fun Route.aktivitetspliktRoutes(
                                 oppgaveId = oppgaveId,
                                 sakId = sakId,
                                 unntakId = unntakId,
-                                brukerTokenInfo = brukerTokenInfo,
                             )
                         }
                     call.respond(vurdering)
@@ -481,7 +477,6 @@ internal fun Route.aktivitetspliktRoutes(
                             behandlingId = behandlingId,
                             aktivitetsgradId = aktivitetsgradId,
                             sakId = sakId,
-                            brukerTokenInfo = brukerTokenInfo,
                         )
                     }
                 call.respond(vurdering)
@@ -514,7 +509,6 @@ internal fun Route.aktivitetspliktRoutes(
                                 behandlingId = behandlingId,
                                 sakId = sakId,
                                 unntakId = unntakId,
-                                brukerTokenInfo = brukerTokenInfo,
                             )
                         }
                     call.respond(vurdering)

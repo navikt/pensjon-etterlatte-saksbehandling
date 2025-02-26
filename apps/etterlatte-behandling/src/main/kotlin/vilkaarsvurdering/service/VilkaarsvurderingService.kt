@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering.service
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -411,7 +410,7 @@ class VilkaarsvurderingService(
 
     private fun hentDataForVilkaarsvurdering(behandlingId: UUID): Pair<Behandling, Grunnlag> {
         val behandling = behandlingService.hentBehandling(behandlingId)!!
-        val grunnlag = runBlocking { grunnlagService.hentOpplysningsgrunnlag(behandlingId)!! }
+        val grunnlag = grunnlagService.hentOpplysningsgrunnlag(behandlingId)!!
         return Pair(behandling, grunnlag)
     }
 
@@ -451,7 +450,8 @@ class VilkaarsvurderingService(
         }
 
         val avdoedeForGjeldendeBehandling: List<Folkeregisteridentifikator> =
-            runBlocking { grunnlagService.hentPersongalleri(gjeldendeBehandling.sak.id)!! }
+            grunnlagService
+                .hentPersongalleri(gjeldendeBehandling.sak.id)!!
                 .avdoed
                 .map { Folkeregisteridentifikator.of(it) }
 
@@ -479,7 +479,8 @@ class VilkaarsvurderingService(
         val kandidatSakerForAvdoede: Set<SakId> =
             avdoedeForGjeldendeBehandling
                 .flatMap { avdoed ->
-                    runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(avdoed.value)) }
+                    grunnlagService
+                        .hentSakerOgRoller(Folkeregisteridentifikator.of(avdoed.value))
                         .sakiderOgRoller
                         .filter { it.sakId != gjeldendeSak && it.rolle == Saksrolle.AVDOED }
                         .map { it.sakId }
@@ -495,7 +496,8 @@ class VilkaarsvurderingService(
         val aktuelleBehandlinger =
             kandidatSakerForAvdoede.mapNotNull { sakId ->
                 val avdoedeForKandidatSak =
-                    runBlocking { grunnlagService.hentPersongalleri(sakId)!! }
+                    grunnlagService
+                        .hentPersongalleri(sakId)!!
                         .avdoed
                         .map { Folkeregisteridentifikator.of(it) }
                         .toSet()

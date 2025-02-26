@@ -5,6 +5,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
@@ -23,6 +25,7 @@ import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
@@ -33,9 +36,16 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
+        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
     ) = medToken(resource, brukerTokenInfo) { token ->
         httpClient.get(resource.url) {
             bearerAuth(token.accessToken)
+            timeoutConfig?.let { config ->
+                timeout {
+                    apply(config)
+                }
+            }
+
             resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
         }
     }
@@ -46,6 +56,10 @@ class DownstreamResourceClient(
     ) = httpClient.get(url) {
         accept(ContentType.Application.Json)
         navConsumerId(konsument)
+        timeout {
+            socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+            requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+        }
     }
 
     suspend fun post(

@@ -435,26 +435,16 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
-        try {
-            logger.info("Sjekker om brev med id=$id kan slettes")
-            val brev = sjekkOmBrevKanEndres(id)
+        logger.info("Sjekker om brev med id=$id kan slettes")
 
-            sjekk(brev.behandlingId == null) {
-                "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
-            }
+        val brev = sjekkOmBrevKanEndres(id)
 
-            val result = db.settBrevSlettet(id, bruker)
-            logger.info("Brev med id=$id slettet=$result")
-        } catch (e: UgyldigForespoerselException) {
-            throw e // hvis brevet er et vedtaksbrev skal vi kaste feil
-        } catch (e: BrevKanIkkeEndres) {
-            if (e.meta?.get("status") == Status.SLETTET) {
-                // skal egentlig ikke kunne slette noe som allerede er slettet
-                logger.warn("Brev ble forsøkt slettet, men brevid=$id har allerede status=SLETTET.")
-            } else {
-                throw e
-            }
+        sjekk(brev.behandlingId == null) {
+            "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
         }
+
+        val result = db.settBrevSlettet(id, bruker)
+        logger.info("Brev med id=$id slettet=$result")
     }
 
     fun markerSomUtgaatt(
@@ -527,7 +517,6 @@ class BrevKanIkkeEndres(
             mapOf(
                 "brevId" to brev.id,
                 "status" to brev.status,
-                "behandlingId" to brev.behandlingId.toString(),
             ),
     )
 

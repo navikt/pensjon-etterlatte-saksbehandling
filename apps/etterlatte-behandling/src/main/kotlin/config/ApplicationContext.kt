@@ -635,6 +635,12 @@ internal class ApplicationContext(
     val inntektskomponentService =
         InntektskomponentService(
             klient = inntektskomponentKlient,
+            featureToggleService = featureToggleService,
+        )
+
+    val sigrunService =
+        SigrunService(
+            featureToggleService = featureToggleService,
         )
 
     val etteroppgjoerService =
@@ -643,10 +649,9 @@ internal class ApplicationContext(
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
             inntektskomponentService = inntektskomponentService,
-            sigrunService = SigrunService(),
+            sigrunService = sigrunService,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
-            featureToggleService = featureToggleService,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

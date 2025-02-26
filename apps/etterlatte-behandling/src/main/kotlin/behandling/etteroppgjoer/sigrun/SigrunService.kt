@@ -1,10 +1,14 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 
-class SigrunService {
+class SigrunService(
+    featureToggleService: FeatureToggleService,
+) {
     fun hentPensjonsgivendeInntekt(ident: String): PensjonsgivendeInntektFraSkatt {
         // TODO klient mot Sigrun
+        // val skalStubbe = featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_INNTEKT, false)
         return PensjonsgivendeInntektFraSkatt.stub()
     }
 }

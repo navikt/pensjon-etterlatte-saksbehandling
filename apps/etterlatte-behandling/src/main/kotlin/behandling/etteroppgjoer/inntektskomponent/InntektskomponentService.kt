@@ -2,16 +2,24 @@ package no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent
 
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntektMaaned
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.Inntekt
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import java.time.YearMonth
 
 class InntektskomponentService(
     val klient: InntektskomponentKlient,
+    val featureToggleService: FeatureToggleService,
 ) {
     suspend fun hentInntektFraAInntekt(
         personident: String,
         aar: Int,
     ): AInntekt {
+        val skalStubbe = featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_INNTEKT, false)
+        if (skalStubbe) {
+            return AInntekt.stub()
+        }
+
         val responsFraInntekt = hentInntekt(personident, aar)
 
         val inntektsmaaneder =

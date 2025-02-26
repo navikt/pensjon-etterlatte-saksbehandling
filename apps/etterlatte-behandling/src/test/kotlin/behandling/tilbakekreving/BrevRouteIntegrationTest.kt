@@ -42,7 +42,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.grunnlag.IOpplysningDao
+import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -87,7 +87,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
-    private lateinit var opplysningDao: IOpplysningDao
+    private lateinit var opplysningDao: OpplysningDao
 
     private val tilbakestiltPayload =
         BrevPayload(

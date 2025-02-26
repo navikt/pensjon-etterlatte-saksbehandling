@@ -9,10 +9,12 @@ import React from 'react'
 
 interface Props {
   sivilstand?: Sivilstand[]
+  soeker?: Sivilstand
   avdoede?: Familiemedlem[]
+  erAvdoedesSivilstand?: boolean
 }
 
-export const SivilstandExpansionCard = ({ sivilstand, avdoede }: Props) => {
+export const SivilstandExpansionCard = ({ sivilstand, avdoede, erAvdoedesSivilstand = false }: Props) => {
   const relatertAvdoed = (relatertVedSiviltilstand: string, avdoede: Familiemedlem[]): Familiemedlem | undefined =>
     avdoede.find((val) => val.foedselsnummer === relatertVedSiviltilstand)
 
@@ -21,7 +23,9 @@ export const SivilstandExpansionCard = ({ sivilstand, avdoede }: Props) => {
       <ExpansionCard.Header>
         <HStack gap="4" align="center">
           <HeartIcon aria-hidden fontSize="1.5rem" />
-          <ExpansionCard.Title size="small">Sivilstand</ExpansionCard.Title>
+          <ExpansionCard.Title size="small">
+            {erAvdoedesSivilstand ? 'Avdødes sivilstand' : 'Sivilstand'}
+          </ExpansionCard.Title>
         </HStack>
       </ExpansionCard.Header>
       <ExpansionCard.Content>

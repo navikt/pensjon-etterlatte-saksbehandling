@@ -81,6 +81,11 @@ export interface InnflyttingDTO {
   ajourholdsdato?: string
 }
 
+export interface UtflyttingDTO {
+  tilflyttingsland?: string
+  dato?: string
+}
+
 export interface Statsborgerskap {
   land: string
   gyldigFraOgMed?: string

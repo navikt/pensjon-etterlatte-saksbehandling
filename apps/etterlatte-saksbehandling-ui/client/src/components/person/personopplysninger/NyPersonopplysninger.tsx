@@ -9,10 +9,11 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Box, HStack, VStack } from '@navikt/ds-react'
 import { BostedsadresserExpansionCard } from '~components/person/personopplysninger/opplysninger/BostedsadresserExpansionCard'
 import { VergemaalExpansionCard } from '~components/person/personopplysninger/opplysninger/VergemaalExpansionCard'
-import { SakType } from '~shared/types/sak'
 import { SivilstandExpansionCard } from '~components/person/personopplysninger/opplysninger/SivilstandExpansionCard'
 import { AvdoedesBarnExpansionCard } from '~components/person/personopplysninger/opplysninger/AvdoedesBarnExpansionCard'
 import { StatsborgerskapExpansionCard } from '~components/person/personopplysninger/opplysninger/StatsborgerskapExpansionCard'
+import { InnflyttingExpansionCard } from '~components/person/personopplysninger/opplysninger/InnflyttingExpansionCard'
+import { UtflyttingExpansionCard } from '~components/person/personopplysninger/opplysninger/UtflyttingExpansionCard'
 
 interface Props {
   sakResult: Result<SakMedBehandlinger>
@@ -34,58 +35,86 @@ export const NyPersonopplysninger = ({ sakResult, fnr }: Props) => {
     alleLandFetch(null)
   }, [])
 
-  return mapResult(sakResult, {
-    pending: <Spinner label="Henter sak..." />,
-    error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente sak'}</ApiErrorAlert>,
-    success: ({ sak }) =>
-      mapResult(familieOpplysningerResult, {
-        pending: <Spinner label="Henter familieopplysninger..." />,
-        error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente familieopplysninger'}</ApiErrorAlert>,
-        success: ({ soeker, avdoede, gjenlevende }) => (
-          <VStack padding="8" gap="4">
-            <HStack gap="4" wrap={false}>
-              <Box width="100%">
-                <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />
-              </Box>
-              <Box width="100%">
-                <BostedsadresserExpansionCard
-                  bostedsadresser={avdoede?.flatMap((avdoed) => avdoed.bostedsadresse ?? [])}
-                  erAvdoedesAddresser
-                />
-              </Box>
-            </HStack>
-            <VergemaalExpansionCard vergemaal={soeker?.vergemaalEllerFremtidsfullmakt} />
-            {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
-              <SivilstandExpansionCard sivilstand={soeker?.sivilstand} avdoede={avdoede} />
-            )}
-            <AvdoedesBarnExpansionCard avdoede={avdoede} />
-            {mapResult(alleLandResult, {
-              pending: <Spinner label="Henter alle land..." />,
-              error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
-              success: (alleLand) => (
-                <>
-                  <HStack gap="4" wrap={false}>
-                    <Box width="100%">
-                      <StatsborgerskapExpansionCard
-                        statsborgerskap={soeker?.statsborgerskap ? [soeker.statsborgerskap] : []}
-                        pdlStatsborgerskap={soeker?.pdlStatsborgerskap}
-                        alleLand={alleLand}
-                      />
-                    </Box>
-                    <Box width="100%">
-                      <StatsborgerskapExpansionCard
-                        statsborgerskap={avdoede?.flatMap((avdoed) => avdoed.statsborgerskap ?? [])}
-                        pdlStatsborgerskap={avdoede?.flatMap((avdoed) => avdoed.pdlStatsborgerskap ?? [])}
-                        alleLand={alleLand}
-                        erAvdoedesStatsborgerskap
-                      />
-                    </Box>
-                  </HStack>
-                </>
-              ),
-            })}
-          </VStack>
-        ),
-      }),
+  return mapResult(familieOpplysningerResult, {
+    pending: <Spinner label="Henter familieopplysninger..." />,
+    error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente familieopplysninger'}</ApiErrorAlert>,
+    success: ({ soeker, avdoede }) => (
+      <VStack padding="8" gap="8">
+        <HStack gap="4" wrap={false}>
+          <Box width="100%">
+            <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />
+          </Box>
+          <Box width="100%">
+            <BostedsadresserExpansionCard
+              bostedsadresser={avdoede?.flatMap((avdoed) => avdoed.bostedsadresse ?? [])}
+              erAvdoedesAddresser
+            />
+          </Box>
+        </HStack>
+        <VergemaalExpansionCard vergemaal={soeker?.vergemaalEllerFremtidsfullmakt} />
+        <AvdoedesBarnExpansionCard avdoede={avdoede} />
+        <HStack gap="4" wrap={false}>
+          <Box width="100%">
+            <SivilstandExpansionCard sivilstand={soeker?.sivilstand} avdoede={avdoede} />
+          </Box>
+          <Box width="100%">
+            <SivilstandExpansionCard
+              sivilstand={avdoede?.flatMap((avdoed) => avdoed.sivilstand ?? [])}
+              avdoede={avdoede}
+              erAvdoedesSivilstand
+            />
+          </Box>
+        </HStack>
+        {mapResult(alleLandResult, {
+          pending: <Spinner label="Henter alle land..." />,
+          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
+          success: (alleLand) => (
+            <>
+              <HStack gap="4" wrap={false}>
+                <Box width="100%">
+                  <StatsborgerskapExpansionCard
+                    statsborgerskap={soeker?.statsborgerskap ? [soeker.statsborgerskap] : []}
+                    pdlStatsborgerskap={soeker?.pdlStatsborgerskap}
+                    alleLand={alleLand}
+                  />
+                </Box>
+                <Box width="100%">
+                  <StatsborgerskapExpansionCard
+                    statsborgerskap={avdoede?.flatMap((avdoed) => avdoed.statsborgerskap ?? [])}
+                    pdlStatsborgerskap={avdoede?.flatMap((avdoed) => avdoed.pdlStatsborgerskap ?? [])}
+                    alleLand={alleLand}
+                    erAvdoedesStatsborgerskap
+                  />
+                </Box>
+              </HStack>
+              <HStack gap="4" wrap={false}>
+                <Box width="100%">
+                  <InnflyttingExpansionCard innflytting={soeker?.utland?.innflyttingTilNorge} alleLand={alleLand} />
+                </Box>
+                <Box width="100%">
+                  <InnflyttingExpansionCard
+                    innflytting={avdoede?.flatMap((avdoed) => avdoed.utland?.innflyttingTilNorge ?? [])}
+                    alleLand={alleLand}
+                    erAvdoedesInnflytting
+                  />
+                </Box>
+              </HStack>
+              <HStack gap="4" wrap={false}>
+                <Box width="100%">
+                  <UtflyttingExpansionCard utflytting={soeker?.utland?.utflyttingFraNorge} alleLand={alleLand} />
+                </Box>
+                <Box width="100%">
+                  <UtflyttingExpansionCard
+                    utflytting={avdoede?.flatMap((avdoed) => avdoed.utland?.utflyttingFraNorge ?? [])}
+                    alleLand={alleLand}
+                    erAvdoedesUtflytting
+                  />
+                </Box>
+              </HStack>
+            </>
+          ),
+        })}
+      </VStack>
+    ),
   })
 }

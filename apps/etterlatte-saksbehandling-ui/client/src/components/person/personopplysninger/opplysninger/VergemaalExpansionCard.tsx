@@ -17,11 +17,13 @@ export const VergemaalExpansionCard = ({ vergemaal }: { vergemaal?: VergemaalEll
       <ExpansionCard.Content>
         <Table size="small">
           <Table.Header>
-            <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Omfang</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Type</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Embete</Table.HeaderCell>
+            <Table.Row>
+              <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Omfang</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Type</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Embete</Table.HeaderCell>
+            </Table.Row>
           </Table.Header>
           <Table.Body>
             {!!vergemaal?.length ? (

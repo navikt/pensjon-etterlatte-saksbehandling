@@ -1,5 +1,5 @@
 import { Bostedsadresse } from '~shared/types/familieOpplysninger'
-import { Box, ExpansionCard, Heading, HStack, Table } from '@navikt/ds-react'
+import { ExpansionCard, Heading, HStack, Table } from '@navikt/ds-react'
 import { HouseIcon } from '@navikt/aksel-icons'
 import { compareDesc } from 'date-fns'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
@@ -28,7 +28,7 @@ export const BostedsadresserExpansionCard = ({ bostedsadresser, erAvdoedesAddres
         <HStack gap="4" align="center">
           <HouseIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">
-            {erAvdoedesAddresser ? 'Avdødes bostedsadresser' : 'Bostedsadresser'}
+            {erAvdoedesAddresser ? 'Avdødes bostedsadresser' : 'Søkers bostedsadresser'}
           </ExpansionCard.Title>
         </HStack>
       </ExpansionCard.Header>

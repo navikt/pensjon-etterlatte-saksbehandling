@@ -18,7 +18,7 @@ export const AvdoedesBarnExpansionCard = ({ avdoede }: { avdoede?: Familiemedlem
       <ExpansionCard.Header>
         <HStack gap="4" align="center">
           <ChildHairEyesIcon aria-hidden fontSize="1.5rem" />
-          <ExpansionCard.Title size="small">Avødes barn</ExpansionCard.Title>
+          <ExpansionCard.Title size="small">Avdødes barn</ExpansionCard.Title>
         </HStack>
       </ExpansionCard.Header>
       <ExpansionCard.Content>

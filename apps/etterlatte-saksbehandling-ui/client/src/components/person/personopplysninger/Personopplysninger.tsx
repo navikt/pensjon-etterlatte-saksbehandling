@@ -1,34 +1,30 @@
-import React, { ReactNode, useEffect } from 'react'
-import { LenkeTilAndreSystemer } from '~components/person/personopplysninger/LenkeTilAndreSystemer'
-import { Bostedsadresser } from '~components/person/personopplysninger/Bostedsadresser'
-import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
+import { hentAlleLand } from '~shared/api/behandling'
+import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
-import { Box, Heading, ReadMore, VStack } from '@navikt/ds-react'
-import { SakType } from '~shared/types/sak'
-import { Foreldre } from '~components/person/personopplysninger/Foreldre'
-import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
-import { Sivilstatus } from '~components/person/personopplysninger/Sivilstatus'
-import { Innflytting } from '~components/person/personopplysninger/Innflytting'
-import { Utflytting } from '~components/person/personopplysninger/Utflytting'
-import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
-import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
-import styled from 'styled-components'
-import { hentAlleLand } from '~shared/api/behandling'
+import { Box, HStack, VStack } from '@navikt/ds-react'
+import { BostedsadresserExpansionCard } from '~components/person/personopplysninger/opplysninger/BostedsadresserExpansionCard'
+import { VergemaalExpansionCard } from '~components/person/personopplysninger/opplysninger/VergemaalExpansionCard'
+import { SivilstandExpansionCard } from '~components/person/personopplysninger/opplysninger/SivilstandExpansionCard'
+import { AvdoedesBarnExpansionCard } from '~components/person/personopplysninger/opplysninger/AvdoedesBarnExpansionCard'
+import { StatsborgerskapExpansionCard } from '~components/person/personopplysninger/opplysninger/StatsborgerskapExpansionCard'
+import { InnflyttingExpansionCard } from '~components/person/personopplysninger/opplysninger/InnflyttingExpansionCard'
+import { UtflyttingExpansionCard } from '~components/person/personopplysninger/opplysninger/UtflyttingExpansionCard'
+import { BrukersOpplysningerIAndreSystemerExpansionCard } from '~components/person/personopplysninger/opplysninger/BrukersOpplysningerIAndreSystemerExpansionCard'
 
-export const Personopplysninger = ({
-  sakResult,
-  fnr,
-}: {
+interface Props {
   sakResult: Result<SakMedBehandlinger>
   fnr: string
-}): ReactNode => {
+}
+
+export const Personopplysninger = ({ sakResult, fnr }: Props) => {
   const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
 
-  const [landListeResult, landListeFetch] = useApiCall(hentAlleLand)
+  const [alleLandResult, alleLandFetch] = useApiCall(hentAlleLand)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -37,65 +33,90 @@ export const Personopplysninger = ({
   }, [fnr, sakResult])
 
   useEffect(() => {
-    landListeFetch(null)
+    alleLandFetch(null)
   }, [])
 
-  return (
-    <Box padding="8">
-      <VStack gap="4">
-        {mapSuccess(sakResult, ({ sak }) => (
-          <>
-            <PDLInfoReadMore header="Personopplysningene kommer i sanntid fra PDL, hva betyr dette for meg?">
-              Personopplysningene som vises på denne siden kommer i sanntid fra PDL. Dette betyr at hvis PDL oppdaterer
-              informasjonen for en person, vil denne siden også endre seg til å speile det. Det kan derfor være
-              forskjell i informasjonen på denne siden og den som er gitt i en behandling.
-            </PDLInfoReadMore>
-            <LenkeTilAndreSystemer fnr={fnr} />
-            {!!sak ? (
-              <>
-                {mapResult(familieOpplysningerResult, {
-                  pending: <Spinner label="Henter opplysninger" />,
-                  error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger'}</ApiErrorAlert>,
-                  success: ({ soeker, avdoede, gjenlevende }) => (
-                    <>
-                      <Bostedsadresser bostedsadresse={soeker?.bostedsadresse} />
-                      {sak.sakType === SakType.BARNEPENSJON && (
-                        <Foreldre
-                          avdoed={avdoede}
-                          gjenlevende={gjenlevende}
-                          foreldreansvar={soeker?.familierelasjon?.ansvarligeForeldre}
-                        />
-                      )}
-                      <Vergemaal vergemaalEllerFremtidsfullmakt={soeker?.vergemaalEllerFremtidsfullmakt} />
-                      {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
-                        <Sivilstatus sivilstand={soeker?.sivilstand} avdoede={avdoede} />
-                      )}
-                      <AvdoedesBarn sakType={sak.sakType} avdoede={avdoede} />
-                      {mapSuccess(landListeResult, (landListe) => (
-                        <>
-                          <Statsborgerskap
-                            statsborgerskap={soeker?.statsborgerskap}
-                            pdlStatsborgerskap={soeker?.pdlStatsborgerskap}
-                            landListe={landListe}
-                          />
-                          <Innflytting innflytting={soeker?.utland?.innflyttingTilNorge} landListe={landListe} />
-                          <Utflytting utflytting={soeker?.utland?.utflyttingFraNorge} landListe={landListe} />
-                        </>
-                      ))}
-                    </>
-                  ),
-                })}
-              </>
-            ) : (
-              <Heading size="medium">Bruker har ingen sak i Gjenny</Heading>
-            )}
-          </>
-        ))}
+  return mapResult(familieOpplysningerResult, {
+    pending: <Spinner label="Henter familieopplysninger..." />,
+    error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente familieopplysninger'}</ApiErrorAlert>,
+    success: ({ soeker, avdoede }) => (
+      <VStack padding="8" gap="8">
+        <BrukersOpplysningerIAndreSystemerExpansionCard fnr={fnr} />
+        <HStack gap="4" wrap={false}>
+          <Box width="100%">
+            <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />
+          </Box>
+          <Box width="100%">
+            <BostedsadresserExpansionCard
+              bostedsadresser={avdoede?.flatMap((avdoed) => avdoed.bostedsadresse ?? [])}
+              erAvdoedesAddresser
+            />
+          </Box>
+        </HStack>
+        <VergemaalExpansionCard vergemaal={soeker?.vergemaalEllerFremtidsfullmakt} />
+        <AvdoedesBarnExpansionCard avdoede={avdoede} />
+        <HStack gap="4" wrap={false}>
+          <Box width="100%">
+            <SivilstandExpansionCard sivilstand={soeker?.sivilstand} avdoede={avdoede} />
+          </Box>
+          <Box width="100%">
+            <SivilstandExpansionCard
+              sivilstand={avdoede?.flatMap((avdoed) => avdoed.sivilstand ?? [])}
+              avdoede={avdoede}
+              erAvdoedesSivilstand
+            />
+          </Box>
+        </HStack>
+        {mapResult(alleLandResult, {
+          pending: <Spinner label="Henter alle land..." />,
+          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
+          success: (alleLand) => (
+            <>
+              <HStack gap="4" wrap={false}>
+                <Box width="100%">
+                  <StatsborgerskapExpansionCard
+                    statsborgerskap={soeker?.statsborgerskap ? [soeker.statsborgerskap] : []}
+                    pdlStatsborgerskap={soeker?.pdlStatsborgerskap}
+                    alleLand={alleLand}
+                  />
+                </Box>
+                <Box width="100%">
+                  <StatsborgerskapExpansionCard
+                    statsborgerskap={avdoede?.flatMap((avdoed) => avdoed.statsborgerskap ?? [])}
+                    pdlStatsborgerskap={avdoede?.flatMap((avdoed) => avdoed.pdlStatsborgerskap ?? [])}
+                    alleLand={alleLand}
+                    erAvdoedesStatsborgerskap
+                  />
+                </Box>
+              </HStack>
+              <HStack gap="4" wrap={false}>
+                <Box width="100%">
+                  <InnflyttingExpansionCard innflytting={soeker?.utland?.innflyttingTilNorge} alleLand={alleLand} />
+                </Box>
+                <Box width="100%">
+                  <InnflyttingExpansionCard
+                    innflytting={avdoede?.flatMap((avdoed) => avdoed.utland?.innflyttingTilNorge ?? [])}
+                    alleLand={alleLand}
+                    erAvdoedesInnflytting
+                  />
+                </Box>
+              </HStack>
+              <HStack gap="4" wrap={false}>
+                <Box width="100%">
+                  <UtflyttingExpansionCard utflytting={soeker?.utland?.utflyttingFraNorge} alleLand={alleLand} />
+                </Box>
+                <Box width="100%">
+                  <UtflyttingExpansionCard
+                    utflytting={avdoede?.flatMap((avdoed) => avdoed.utland?.utflyttingFraNorge ?? [])}
+                    alleLand={alleLand}
+                    erAvdoedesUtflytting
+                  />
+                </Box>
+              </HStack>
+            </>
+          ),
+        })}
       </VStack>
-    </Box>
-  )
+    ),
+  })
 }
-
-const PDLInfoReadMore = styled(ReadMore)`
-  max-width: 43.5rem;
-`

@@ -17,7 +17,7 @@ export const BostedsadresseDataCell = ({
         <Table.DataCell>
           <HStack gap="4">
             <>
-              {!!bostedsadresser[index].adresse ? bostedsadresser[index].adresse : '-'},
+              {!!bostedsadresser[index].adresse ? bostedsadresser[index].adresse : '-'},{' '}
               {!!bostedsadresser[index].postnr ? bostedsadresser[index].postnr : ''}
             </>
             {bostedsadresser[index].aktiv && visAktiv && (

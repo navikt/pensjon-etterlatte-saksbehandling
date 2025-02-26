@@ -1,0 +1,1 @@
+update sak set adressebeskyttelse = 'STRENGT_FORTROLIG' where enhet = '2103' and adressebeskyttelse != 'STRENGT_FORTROLIG'

@@ -435,16 +435,24 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
-        logger.info("Sjekker om brev med id=$id kan slettes")
+        try {
+            logger.info("Sjekker om brev med id=$id kan slettes")
+            val brev = sjekkOmBrevKanEndres(id)
 
-        val brev = sjekkOmBrevKanEndres(id)
+            sjekk(brev.behandlingId == null) {
+                "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+            }
 
-        sjekk(brev.behandlingId == null) {
-            "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+            val result = db.settBrevSlettet(id, bruker)
+            logger.info("Brev med id=$id slettet=$result")
+        } catch (e: BrevKanIkkeEndres) {
+            if (e.meta?.get("status").toString() == Status.SLETTET.name) {
+                // skal egentlig ikke kunne slette noe som allerede er slettet
+                logger.warn("Sletting av brev med id=$id ble forsøkt, men det har allerede status=SLETTET.")
+            } else {
+                throw e
+            }
         }
-
-        val result = db.settBrevSlettet(id, bruker)
-        logger.info("Brev med id=$id slettet=$result")
     }
 
     fun markerSomUtgaatt(

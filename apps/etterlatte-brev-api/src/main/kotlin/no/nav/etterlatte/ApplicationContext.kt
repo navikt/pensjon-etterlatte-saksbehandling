@@ -44,7 +44,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
-import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
@@ -97,7 +96,6 @@ internal class ApplicationContext {
     val regoppslagKlient =
         RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL))
     val saksbehandlerKlient = SaksbehandlerKlient(config, httpClient())
-    val grunnlagKlient = GrunnlagKlient(config, httpClient())
     val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     val beregningKlient = BeregningKlient(config, httpClient())
     val pdltjenesterKlient = PdlTjenesterKlient(config, httpClient())
@@ -114,7 +112,7 @@ internal class ApplicationContext {
     val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
     val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient, pdltjenesterKlient)
 
-    val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
+    val grunnlagService = GrunnlagService(behandlingKlient, adresseService)
     val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
     val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
 
@@ -198,7 +196,7 @@ internal class ApplicationContext {
             behandlingService,
             pdfGenerator,
             brevDataMapperFerdigstillVarsel,
-            grunnlagKlient,
+            behandlingKlient,
         )
 
     val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)

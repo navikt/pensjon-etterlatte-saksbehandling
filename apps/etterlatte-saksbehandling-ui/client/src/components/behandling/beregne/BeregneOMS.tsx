@@ -114,6 +114,7 @@ export const BeregneOMS = () => {
     <>
       {erOpphoer ? (
         <Box paddingInline="18" paddingBlock="4">
+          <SimulerUtbetaling behandling={behandling} />
           <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
         </Box>
       ) : (

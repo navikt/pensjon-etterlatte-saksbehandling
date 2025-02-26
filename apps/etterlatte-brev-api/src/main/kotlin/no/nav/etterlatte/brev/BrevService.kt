@@ -445,8 +445,10 @@ class BrevService(
 
             val result = db.settBrevSlettet(id, bruker)
             logger.info("Brev med id=$id slettet=$result")
+        } catch (e: UgyldigForespoerselException) {
+            throw e
         } catch (e: BrevKanIkkeEndres) {
-            if (e.meta?.get("status") == Status.SLETTET && e.meta?.get("behandlingId") == null) {
+            if (e.meta?.get("status") == Status.SLETTET) {
                 // skal egentlig ikke kunne slette noe som allerede er slettet
                 logger.warn("Brev ble forsøkt slettet, men brevid=$id har allerede status=SLETTET.")
             } else {

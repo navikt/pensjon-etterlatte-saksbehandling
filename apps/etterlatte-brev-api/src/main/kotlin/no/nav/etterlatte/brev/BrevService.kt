@@ -435,18 +435,16 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
+        logger.info("Sjekker om brev med id=$id kan slettes")
+        val brev = sjekkOmBrevKanEndres(id)
+
+        sjekk(brev.behandlingId == null) {
+            "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+        }
+
         try {
-            logger.info("Sjekker om brev med id=$id kan slettes")
-            val brev = sjekkOmBrevKanEndres(id)
-
-            sjekk(brev.behandlingId == null) {
-                "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
-            }
-
             val result = db.settBrevSlettet(id, bruker)
             logger.info("Brev med id=$id slettet=$result")
-        } catch (e: UgyldigForespoerselException) {
-            throw e
         } catch (e: BrevKanIkkeEndres) {
             if (e.meta?.get("status") == Status.SLETTET) {
                 // skal egentlig ikke kunne slette noe som allerede er slettet

@@ -14,7 +14,9 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -69,7 +71,7 @@ internal class SakGrunnlagRoutesKtTest {
     fun `returnerer 404 hvis grunnlag ikke finnes`() {
         val sakId = randomSakId()
 
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns null
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns null
         coEvery { tilgangsservice.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
@@ -84,7 +86,7 @@ internal class SakGrunnlagRoutesKtTest {
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
-        coVerify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(any()) }
+        verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(any()) }
     }
 
     @Test
@@ -92,7 +94,7 @@ internal class SakGrunnlagRoutesKtTest {
         val sakId = randomSakId()
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns testData
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns testData
         coEvery { tilgangsservice.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
@@ -108,7 +110,7 @@ internal class SakGrunnlagRoutesKtTest {
             assertEquals(serialize(testData), response.body<String>())
         }
 
-        coVerify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) }
+        verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) }
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient =

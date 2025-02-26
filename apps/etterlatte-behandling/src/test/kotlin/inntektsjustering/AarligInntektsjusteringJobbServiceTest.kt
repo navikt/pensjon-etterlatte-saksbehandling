@@ -130,7 +130,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 every { boddEllerArbeidetUtlandet } returns mockk()
                 every { opphoerFraOgMed } returns null
             }
-        coEvery { grunnlagService.hentPersonopplysninger(any(), any()) } returns
+        every { grunnlagService.hentPersonopplysninger(any(), any()) } returns
             mockk {
                 every { soeker } returns
                     mockk {
@@ -138,7 +138,7 @@ class AarligInntektsjusteringJobbServiceTest {
                     }
             }
 
-        coEvery { grunnlagService.hentPersongalleri(any<SakId>()) } returns persongalleri
+        every { grunnlagService.hentPersongalleri(any<SakId>()) } returns persongalleri
         coEvery {
             revurderingService.opprettRevurdering(
                 any(),
@@ -605,7 +605,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
             )
 
-        coEvery { grunnlagService.hentPersonopplysninger(any(), any()) } returns
+        every { grunnlagService.hentPersonopplysninger(any(), any()) } returns
             mockk {
                 every { soeker } returns
                     mockk {

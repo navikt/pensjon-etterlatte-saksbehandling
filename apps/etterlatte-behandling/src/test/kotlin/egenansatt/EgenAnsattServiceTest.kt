@@ -92,8 +92,8 @@ internal class EgenAnsattServiceTest(
         val norg2Klient = mockk<Norg2Klient>()
 
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
-        coEvery { grunnlagService.lagreNyeSaksopplysningerBareSak(any(), any()) } just runs
-        coEvery { grunnlagService.grunnlagFinnesForSak(any()) } returns false
+        every { grunnlagService.lagreNyeSaksopplysningerBareSak(any(), any()) } just runs
+        every { grunnlagService.grunnlagFinnesForSak(any()) } returns false
 
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlientImpl>()
@@ -174,7 +174,7 @@ internal class EgenAnsattServiceTest(
         val bruktSak =
             sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
-        coEvery { grunnlagService.hentPersongalleri(bruktSak.id) } returns persongalleri
+        every { grunnlagService.hentPersongalleri(bruktSak.id) } returns persongalleri
         every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) } just Runs
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))

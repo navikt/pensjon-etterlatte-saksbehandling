@@ -196,12 +196,10 @@ class DoedshendelseJobService(
 
         val spraak = hentSpraak(doedshendelse)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
-        runBlocking {
-            grunnlagService.lagreNyeSaksopplysningerBareSak(
-                sakId = opprettetSak.id,
-                nyeOpplysninger = listOf(spraakOpplysning),
-            )
-        }
+        grunnlagService.lagreNyeSaksopplysningerBareSak(
+            sakId = opprettetSak.id,
+            nyeOpplysninger = listOf(spraakOpplysning),
+        )
         return opprettetSak
     }
 

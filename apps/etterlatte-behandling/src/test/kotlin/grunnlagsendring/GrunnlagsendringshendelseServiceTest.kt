@@ -327,9 +327,9 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns emptyList()
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
         val sak2 = sakId2
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     fnr,
@@ -381,7 +381,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `Gyldige hendelser for saktype BP`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
         val sakId = sakId1
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     soekerFnr,
@@ -395,7 +395,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         } returns sak
         every { pdlService.hentPdlModellForSaktype(soekerFnr, any(), sak.sakType) } returns
             mockPerson()
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
@@ -438,7 +438,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `Gyldige hendelser for saktype OMS`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
         val sakId = sakId1
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     soekerFnr,
@@ -452,7 +452,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         } returns sak
         every { pdlService.hentPdlModellForSaktype(soekerFnr, any(), sak.sakType) } returns
             mockPerson()
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
@@ -490,7 +490,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `Skal filtrere bort sivilstandshendelser for BP saker men ikke andre, OMS skal få de`() {
         val soekerFnr = KONTANT_FOT.value
         val sakId = sakId1
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     soekerFnr,
@@ -515,7 +515,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every { pdlService.hentPdlModellForSaktype(soekerFnr, any(), SakType.OMSTILLINGSSTOENAD) } returns
             mockPerson()
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
@@ -559,12 +559,12 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { pdlService.hentPdlModellForSaktype(gjenlevendeFnr, any(), SakType.BARNEPENSJON) } returns
             mockPerson()
                 .copy(bostedsadresse = listOf(OpplysningDTO(bostedAdresse, "adresse")))
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
         every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
         every {
             sakService.finnSak(sakId)
         } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     soekerFnr,
@@ -658,13 +658,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val adressebeskyttelse =
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
-        coEvery { grunnlagService.hentAlleSakerForFnr(any()) } returns emptySet()
+        every { grunnlagService.hentAlleSakerForFnr(any()) } returns emptySet()
 
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }
 
-        coVerify(exactly = 1) {
+        verify(exactly = 1) {
             grunnlagService.hentAlleSakerForFnr(Folkeregisteridentifikator.of(adressebeskyttelse.fnr))
         }
     }
@@ -676,18 +676,18 @@ internal class GrunnlagsendringshendelseServiceTest {
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
         val sakId = SakId(1L)
-        coEvery { grunnlagService.hentAlleSakerForFnr(any()) } returns setOf(sakId)
+        every { grunnlagService.hentAlleSakerForFnr(any()) } returns setOf(sakId)
         val persongalleri = persongalleri()
-        coEvery { grunnlagService.hentPersongalleri(sakId) } returns persongalleri
+        every { grunnlagService.hentPersongalleri(sakId) } returns persongalleri
         coEvery { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri) } just Runs
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }
 
         coVerify(exactly = 1) {
-            grunnlagService.hentAlleSakerForFnr(Folkeregisteridentifikator.of(adressebeskyttelse.fnr))
             oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
         }
+        verify { grunnlagService.hentAlleSakerForFnr(Folkeregisteridentifikator.of(adressebeskyttelse.fnr)) }
     }
 
     @Test
@@ -724,7 +724,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
 
-        coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) } returns Grunnlag.empty()
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) } returns Grunnlag.empty()
 
         grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(sakId)
 
@@ -747,7 +747,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     KONTANT_FOT.value,
@@ -794,7 +794,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     KONTANT_FOT.value,
@@ -829,7 +829,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every { sakService.finnSak(sakId) } returns null
 
-        coEvery { grunnlagService.hentSakerOgRoller(any()) }
+        every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
                     KONTANT_FOT.value,
@@ -878,7 +878,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
             every { sakService.finnSaker(any()) } returns listOf(sak)
             every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.OMSTILLINGSSTOENAD) } returns mockPerson()
-            coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
+            every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
             every {
                 grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
             } returns emptyList()
@@ -912,9 +912,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                     (this.samsvarMellomKildeOgGrunnlag as SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar).fraPdl!!.value,
                 )
             }
-
-            coVerify { grunnlagService.hentOpplysningsgrunnlagForSak(sak.id) }
             verify {
+                grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)
                 sakService.finnSaker(hendelse.fnr)
                 pdlService.hentPdlModellForSaktype(sak.ident, PersonRolle.GJENLEVENDE, sak.sakType)
                 grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sak.id, any())
@@ -943,7 +942,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
             every { sakService.finnSaker(any()) } returns listOf(sak)
             every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
-            coEvery { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
+            every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
             every {
                 grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
             } returns emptyList()
@@ -978,8 +977,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                 )
             }
 
-            coVerify { grunnlagService.hentOpplysningsgrunnlagForSak(sak.id) }
             verify {
+                grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)
                 sakService.finnSaker(hendelse.fnr)
                 pdlService.hentPdlModellForSaktype(sak.ident, PersonRolle.BARN, sak.sakType)
                 grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sak.id, any())

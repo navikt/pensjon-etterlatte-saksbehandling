@@ -142,6 +142,12 @@ class VilkaarMaaFinnesHvisViderefoertOpphoer :
         "Vilkår må angis hvis opphør skal videreføres",
     )
 
+class DatoMaaFinnesHvisViderefoertOpphoer :
+    UgyldigForespoerselException(
+        "VIDEREFOERT_OPPHOER_MAA_HA_DATO",
+        "Dato må angis hvis opphør skal videreføres",
+    )
+
 class PleieforholdMaaStarteFoerDetOpphoerer :
     UgyldigForespoerselException(
         code = "PLEIEFORHOLD_MAA_STARTE_FOER_DET_OPPHOERER",
@@ -846,17 +852,19 @@ internal class BehandlingServiceImpl(
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes")
 
-        if (viderefoertOpphoer.skalViderefoere == JaNei.JA &&
-            viderefoertOpphoer.vilkaar == null
-        ) {
-            throw VilkaarMaaFinnesHvisViderefoertOpphoer()
-        }
-
-        if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer(
-                behandling.virkningstidspunkt?.dato,
-                viderefoertOpphoer.dato,
-            )
+        if (viderefoertOpphoer.skalViderefoere == JaNei.JA) {
+            if (viderefoertOpphoer.vilkaar == null) {
+                throw VilkaarMaaFinnesHvisViderefoertOpphoer()
+            }
+            if (viderefoertOpphoer.dato == null) {
+                throw DatoMaaFinnesHvisViderefoertOpphoer()
+            }
+            if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
+                throw VirkningstidspunktKanIkkeVaereEtterOpphoer(
+                    behandling.virkningstidspunkt?.dato,
+                    viderefoertOpphoer.dato,
+                )
+            }
         }
 
         behandling

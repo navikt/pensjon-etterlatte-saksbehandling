@@ -446,9 +446,9 @@ class BrevService(
             val result = db.settBrevSlettet(id, bruker)
             logger.info("Brev med id=$id slettet=$result")
         } catch (e: BrevKanIkkeEndres) {
-            if (e.meta?.get("status").toString() == Status.SLETTET.name) {
+            if (e.meta?.get("status") == Status.SLETTET && e.meta?.get("behandlingId") == null) {
                 // skal egentlig ikke kunne slette noe som allerede er slettet
-                logger.warn("Sletting av brev med id=$id ble forsøkt, men det har allerede status=SLETTET.")
+                logger.warn("Brev ble forsøkt slettet, men brevid=$id har allerede status=SLETTET.")
             } else {
                 throw e
             }
@@ -525,6 +525,7 @@ class BrevKanIkkeEndres(
             mapOf(
                 "brevId" to brev.id,
                 "status" to brev.status,
+                "behandlingId" to brev.behandlingId.toString(),
             ),
     )
 

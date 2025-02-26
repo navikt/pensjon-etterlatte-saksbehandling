@@ -472,8 +472,8 @@ internal class BrevServiceTest {
     @Nested
     inner class SlettingAvBrev {
         @ParameterizedTest
-        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
-        fun `Sletting av brev som er under arbeid skal virke`(status: Status) {
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT", "SLETTET"], mode = EnumSource.Mode.INCLUDE)
+        fun `Sletting av brev som er under arbeid, eller allerede er slettet skal virke`(status: Status) {
             val brev = opprettBrev(status, BrevProsessType.MANUELL)
 
             every { db.hentBrev(any()) } returns brev
@@ -486,10 +486,9 @@ internal class BrevServiceTest {
             }
         }
 
-        // Hvis noe har status SLETTET, så trenger vi ikke kaste exception
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT", "SLETTET"], mode = EnumSource.Mode.EXCLUDE)
-        fun `Brev som ikke lenger kan endres skal IKKE kunne slettes`(status: Status) {
+        fun `Brev som ikke lenger er under arbeid skal IKKE kunne slettes`(status: Status) {
             val brev = opprettBrev(status, BrevProsessType.MANUELL)
 
             every { db.hentBrev(any()) } returns brev

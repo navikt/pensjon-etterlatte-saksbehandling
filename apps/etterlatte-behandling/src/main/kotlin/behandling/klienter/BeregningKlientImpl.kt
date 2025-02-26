@@ -1,13 +1,17 @@
 package no.nav.etterlatte.behandling.klienter
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingEtteropppgjoerRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -33,6 +37,12 @@ interface BeregningKlient {
         sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): InntektsjusteringAvkortingInfoResponse
+
+    suspend fun hentSisteAvkortingForEtteroppgjoer(
+        behandlingId: UUID,
+        aar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingDto
 }
 
 class BeregningKlientImpl(
@@ -106,5 +116,37 @@ class BeregningKlientImpl(
                 )
             },
         )
+    }
+
+    override suspend fun hentSisteAvkortingForEtteroppgjoer(
+        behandlingId: UUID,
+        aar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingDto {
+        logger.info("Henter siste avkorting med behandlingId=$behandlingId for etteropgjør ")
+        try {
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody =
+                        AvkortingEtteropppgjoerRequest(
+                            sisteIverksatteBehandling = behandlingId,
+                            aar = aar,
+                        ),
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
+                e,
+            )
+        }
     }
 }

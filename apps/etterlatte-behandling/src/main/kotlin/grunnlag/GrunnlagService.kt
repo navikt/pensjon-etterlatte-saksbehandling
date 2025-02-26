@@ -118,7 +118,7 @@ interface GrunnlagService {
 
 class GrunnlagServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
-    private val opplysningDao: IOpplysningDao,
+    private val opplysningDao: OpplysningDao,
     private val grunnlagHenter: GrunnlagHenter,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(this::class.java)

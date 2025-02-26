@@ -9,9 +9,10 @@ import { fattVedtakOmAvvistKlage, ferdigstillKlagebehandling } from '~shared/api
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { formaterKlageutfall, VisInnstilling, VisOmgjoering } from '~components/klage/vurdering/KlageVurderingFelles'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
   const navigate = useNavigate()
@@ -78,6 +79,10 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
           'Kunne ikke ferdigstille klagebehandling på grunn av en feil. Prøv igjen etter å ha ' +
           'lastet siden på nytt, og meld sak hvis problemet vedvarer.',
       })}
+
+      {mapFailure(fattVedtakStatus, (error) => (
+        <ApiErrorAlert>Kunne ikke fatte vedtak om avvist klage, på grunn av feil: {error.detail}.</ApiErrorAlert>
+      ))}
 
       <HStack gap="4" justify="center">
         <Button variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'oppsummering'))}>

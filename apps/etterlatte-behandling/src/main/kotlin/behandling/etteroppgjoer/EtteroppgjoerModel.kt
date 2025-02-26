@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntekt
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
@@ -22,7 +23,7 @@ data class EtteroppgjoerBehandling(
 data class EtteroppgjoerOpplysninger(
     val skatt: OpplysnignerSkatt,
     val ainntekt: AInntektView,
-    // TODO..
+    val tidligereAvkorting: AvkortingDto,
 )
 
 data class OpplysnignerSkatt(

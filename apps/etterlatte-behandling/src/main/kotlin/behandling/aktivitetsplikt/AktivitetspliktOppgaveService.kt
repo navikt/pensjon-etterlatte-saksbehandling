@@ -141,9 +141,13 @@ class AktivitetspliktOppgaveService(
                 "Det finnes allerede en tilsvarende oppgave som ikke er ferdigbehandlet for denne saken. Sakid=$sakId",
             )
         }
-
-        return behandlingService.hentSisteIverksatte(sakId)
-            ?: throw ManglerIverksattBehandling("Har ingen iverksatt behandling for sak. Sakid=$sakId")
+        /*
+        attestering kan ta noen uker og ofte vil sb gjerne sende ut brevet tidligst mulig, selvom den er under behandling feks.
+         */
+        return behandlingService
+            .hentBehandlingerForSak(sakId)
+            .maxByOrNull { it.behandlingOpprettet }
+            ?: throw ManglerBehandling("Har ingen iverksatt behandling for sak. Sakid=$sakId")
     }
 
     private fun validerMnd6KanOpprette(sakId: SakId) {
@@ -508,10 +512,10 @@ class HarOppfoelgingsOppgaveUnderbehandling(
         detail = msg,
     )
 
-class ManglerIverksattBehandling(
+class ManglerBehandling(
     msg: String,
 ) : UgyldigForespoerselException(
-        code = "HAR_INGEN_IVERKSATT_BEHANDLING",
+        code = "HAR_INGEN_GYLDIG_BEHANDLING",
         detail = msg,
     )
 

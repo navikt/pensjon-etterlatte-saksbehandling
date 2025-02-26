@@ -109,9 +109,6 @@ fun Route.avkorting(
     }
 
     route("/api/beregning/avkorting") {
-        get("sisteAvkorting") {
-        }
-
         post("aarlig-inntektsjustering-sjekk") {
             val request = call.receive<InntektsjusteringAvkortingInfoRequest>()
             logger.info("Henter har inntekt for ${request.aar} for sakId=${request.sakId}")

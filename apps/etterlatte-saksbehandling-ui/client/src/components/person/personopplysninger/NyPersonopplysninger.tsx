@@ -14,6 +14,7 @@ import { AvdoedesBarnExpansionCard } from '~components/person/personopplysninger
 import { StatsborgerskapExpansionCard } from '~components/person/personopplysninger/opplysninger/StatsborgerskapExpansionCard'
 import { InnflyttingExpansionCard } from '~components/person/personopplysninger/opplysninger/InnflyttingExpansionCard'
 import { UtflyttingExpansionCard } from '~components/person/personopplysninger/opplysninger/UtflyttingExpansionCard'
+import { BrukersOpplysningerIAndreSystemerExpansionCard } from '~components/person/personopplysninger/opplysninger/BrukersOpplysningerIAndreSystemerExpansionCard'
 
 interface Props {
   sakResult: Result<SakMedBehandlinger>
@@ -40,6 +41,7 @@ export const NyPersonopplysninger = ({ sakResult, fnr }: Props) => {
     error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente familieopplysninger'}</ApiErrorAlert>,
     success: ({ soeker, avdoede }) => (
       <VStack padding="8" gap="8">
+        <BrukersOpplysningerIAndreSystemerExpansionCard fnr={fnr} />
         <HStack gap="4" wrap={false}>
           <Box width="100%">
             <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />

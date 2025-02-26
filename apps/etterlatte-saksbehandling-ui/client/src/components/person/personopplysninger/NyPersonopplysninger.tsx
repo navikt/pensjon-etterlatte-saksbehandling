@@ -12,6 +12,7 @@ import { VergemaalExpansionCard } from '~components/person/personopplysninger/op
 import { SakType } from '~shared/types/sak'
 import { SivilstandExpansionCard } from '~components/person/personopplysninger/opplysninger/SivilstandExpansionCard'
 import { AvdoedesBarnExpansionCard } from '~components/person/personopplysninger/opplysninger/AvdoedesBarnExpansionCard'
+import { StatsborgerskapExpansionCard } from '~components/person/personopplysninger/opplysninger/StatsborgerskapExpansionCard'
 
 interface Props {
   sakResult: Result<SakMedBehandlinger>
@@ -58,6 +59,31 @@ export const NyPersonopplysninger = ({ sakResult, fnr }: Props) => {
               <SivilstandExpansionCard sivilstand={soeker?.sivilstand} avdoede={avdoede} />
             )}
             <AvdoedesBarnExpansionCard avdoede={avdoede} />
+            {mapResult(alleLandResult, {
+              pending: <Spinner label="Henter alle land..." />,
+              error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
+              success: (alleLand) => (
+                <>
+                  <HStack gap="4" wrap={false}>
+                    <Box width="100%">
+                      <StatsborgerskapExpansionCard
+                        statsborgerskap={soeker?.statsborgerskap ? [soeker.statsborgerskap] : []}
+                        pdlStatsborgerskap={soeker?.pdlStatsborgerskap}
+                        alleLand={alleLand}
+                      />
+                    </Box>
+                    <Box width="100%">
+                      <StatsborgerskapExpansionCard
+                        statsborgerskap={avdoede?.flatMap((avdoed) => avdoed.statsborgerskap ?? [])}
+                        pdlStatsborgerskap={avdoede?.flatMap((avdoed) => avdoed.pdlStatsborgerskap ?? [])}
+                        alleLand={alleLand}
+                        erAvdoedesStatsborgerskap
+                      />
+                    </Box>
+                  </HStack>
+                </>
+              ),
+            })}
           </VStack>
         ),
       }),

@@ -487,7 +487,7 @@ internal class BrevServiceTest {
         }
 
         @ParameterizedTest
-        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT", "SLETTET"], mode = EnumSource.Mode.EXCLUDE)
         fun `Brev som ikke lenger er under arbeid skal IKKE kunne slettes`(status: Status) {
             val brev = opprettBrev(status, BrevProsessType.MANUELL)
 

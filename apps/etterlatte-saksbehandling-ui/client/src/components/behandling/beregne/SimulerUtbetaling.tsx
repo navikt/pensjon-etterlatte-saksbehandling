@@ -15,6 +15,7 @@ import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useAppSelector } from '~store/Store'
 import { compareDesc } from 'date-fns'
 import { SakType } from '~shared/types/sak'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -24,6 +25,8 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 
   // For OMS, lytte etter oppdatert beregning/avkorting
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
+
+  const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   function behandlingStatusFerdigEllerVedtakFattet() {
     return erFerdigBehandlet(behandling.status) || behandling.status === IBehandlingStatus.FATTET_VEDTAK
@@ -42,7 +45,11 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
   }, [behandling.status, avkorting])
 
   const simuler = () => {
-    if (behandling.status === IBehandlingStatus.BEREGNET || behandling.status === IBehandlingStatus.AVKORTET) {
+    if (
+      behandling.status === IBehandlingStatus.BEREGNET ||
+      behandling.status === IBehandlingStatus.AVKORTET ||
+      erOpphoer
+    ) {
       simulerUtbetalingRequest(behandling.id)
     }
   }

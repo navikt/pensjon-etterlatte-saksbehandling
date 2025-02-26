@@ -42,7 +42,7 @@ export const SivilstandExpansionCard = ({ sivilstand, avdoede }: Props) => {
                     <HStack gap="4">
                       {!!stand.relatertVedSivilstand ? (
                         <>
-                          <KopierbarVerdi value={stand.relatertVedSivilstand} />
+                          <KopierbarVerdi value={stand.relatertVedSivilstand} iconPosition="right" />
                           {avdoede && avdoede.length >= 0 && (
                             <DoedsdatoTag doedsdato={relatertAvdoed(stand.relatertVedSivilstand, avdoede)?.doedsdato} />
                           )}

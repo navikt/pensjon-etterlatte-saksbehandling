@@ -11,6 +11,7 @@ import { BostedsadresserExpansionCard } from '~components/person/personopplysnin
 import { VergemaalExpansionCard } from '~components/person/personopplysninger/opplysninger/VergemaalExpansionCard'
 import { SakType } from '~shared/types/sak'
 import { SivilstandExpansionCard } from '~components/person/personopplysninger/opplysninger/SivilstandExpansionCard'
+import { AvdoedesBarnExpansionCard } from '~components/person/personopplysninger/opplysninger/AvdoedesBarnExpansionCard'
 
 interface Props {
   sakResult: Result<SakMedBehandlinger>
@@ -56,6 +57,7 @@ export const NyPersonopplysninger = ({ sakResult, fnr }: Props) => {
             {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
               <SivilstandExpansionCard sivilstand={soeker?.sivilstand} avdoede={avdoede} />
             )}
+            <AvdoedesBarnExpansionCard avdoede={avdoede} />
           </VStack>
         ),
       }),

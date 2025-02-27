@@ -325,7 +325,7 @@ class AarligInntektsjusteringJobbService(
         loependeFom: YearMonth,
         begrunnelse: String,
     ): Revurdering {
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+        val persongalleri = grunnlagService.hentPersongalleri(sakId)
 
         val revurdering =
             revurderingService
@@ -416,13 +416,11 @@ class AarligInntektsjusteringJobbService(
         sak: Sak,
         sisteBehandlingId: UUID,
     ): Personopplysning =
-        runBlocking {
-            grunnlagService
-                .hentPersonopplysninger(
-                    sisteBehandlingId,
-                    sak.sakType,
-                ).soeker ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
-        }
+        grunnlagService
+            .hentPersonopplysninger(
+                sisteBehandlingId,
+                sak.sakType,
+            ).soeker ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
 
     private fun manuellBehandlingSkruddPaa(): Boolean =
         featureToggleService.isEnabled(ManuellBehandlingToggle.MANUELL_BEHANDLING, defaultValue = false)

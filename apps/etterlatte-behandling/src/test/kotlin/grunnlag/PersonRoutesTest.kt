@@ -13,10 +13,11 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
@@ -85,7 +86,7 @@ internal class PersonRoutesTest {
                     SakidOgRolle(sakId1, Saksrolle.SOEKER),
                 ),
             )
-        coEvery { grunnlagService.hentSakerOgRoller(any()) } returns response
+        every { grunnlagService.hentSakerOgRoller(any()) } returns response
 
         testApplication {
             val httpClient = createHttpClient()
@@ -102,14 +103,14 @@ internal class PersonRoutesTest {
             assertEquals(serialize(response), actualResponse.body<String>())
         }
 
-        coVerify(exactly = 1) { grunnlagService.hentSakerOgRoller(any()) }
+        verify(exactly = 1) { grunnlagService.hentSakerOgRoller(any()) }
         coVerify { tilgangsservice wasNot Called }
     }
 
     @Test
     fun `Hent alle saker tilknyttet person`() {
         val response: Set<SakId> = setOf(sakId1, sakId2, sakId3)
-        coEvery { grunnlagService.hentAlleSakerForFnr(any()) } returns response
+        every { grunnlagService.hentAlleSakerForFnr(any()) } returns response
 
         testApplication {
             val httpClient = createHttpClient()
@@ -126,7 +127,7 @@ internal class PersonRoutesTest {
             assertEquals(serialize(response), actualResponse.body<String>())
         }
 
-        coVerify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
+        verify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
         coVerify { tilgangsservice wasNot Called }
     }
 

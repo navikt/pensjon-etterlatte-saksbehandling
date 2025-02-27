@@ -436,8 +436,7 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ) {
         logger.info("Sjekker om brev med id=$id kan slettes")
-
-        val brev = sjekkOmBrevKanEndres(id)
+        val brev = sjekkOmBrevKanSlettes(id)
 
         sjekk(brev.behandlingId == null) {
             "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
@@ -505,6 +504,17 @@ class BrevService(
             throw BrevKanIkkeEndres(brev)
         }
     }
+
+    // denne er egentlig lik sjekkomBrevKanEndres, men tar også høyde for brev som allerede er SLETTET
+    private fun sjekkOmBrevKanSlettes(brevID: BrevID): Brev {
+        val brev = db.hentBrev(brevID)
+
+        return if (brev.kanEndres() || brev.status == Status.SLETTET) {
+            brev
+        } else {
+            throw BrevKanIkkeEndres(brev)
+        }
+    }
 }
 
 class BrevKanIkkeEndres(
@@ -517,6 +527,7 @@ class BrevKanIkkeEndres(
             mapOf(
                 "brevId" to brev.id,
                 "status" to brev.status,
+                "behandlingId" to brev.behandlingId.toString(),
             ),
     )
 

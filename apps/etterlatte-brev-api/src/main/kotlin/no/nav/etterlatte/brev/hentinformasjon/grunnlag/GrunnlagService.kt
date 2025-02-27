@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.erOver18
 import no.nav.etterlatte.brev.behandling.hentForelderVerge
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -22,7 +23,7 @@ import no.nav.etterlatte.sikkerLogg
 import java.util.UUID
 
 class GrunnlagService(
-    private val klient: GrunnlagKlient,
+    private val klient: BehandlingKlient,
     private val adresseService: AdresseService,
 ) {
     suspend fun hentGrunnlag(

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class EtteroppgjoerToggles(
@@ -48,7 +49,7 @@ fun Route.etteroppgjoerRoutes(
         get {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val etteroppgjoer = service.hentEtteroppgjoer(etteroppgjoerId)
+                val etteroppgjoer = service.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
                 call.respond(etteroppgjoer)
             }
         }

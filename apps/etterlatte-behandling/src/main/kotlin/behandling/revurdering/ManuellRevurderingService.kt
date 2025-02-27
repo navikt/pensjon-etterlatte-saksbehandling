@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.server.plugins.BadRequestException
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -109,7 +108,7 @@ class ManuellRevurderingService(
         saksbehandler: Saksbehandler,
     ): Revurdering =
         forrigeBehandling.let {
-            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+            val persongalleri = grunnlagService.hentPersongalleri(sakId)
             val triggendeOppgave = paaGrunnAvOppgave?.let { oppgaveService.hentOppgave(it) }
 
             revurderingService

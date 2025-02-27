@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -176,7 +176,7 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
             <Button variant="secondary" onClick={avbryt} disabled={isPending(status)}>
               Avbryt
             </Button>
-            <Button onClick={handleSubmit(lagre)} loading={isPending(status)}>
+            <Button onClick={handleSubmit(lagre)} loading={isPending(status) || isSuccess(status)}>
               Lagre
             </Button>
           </HStack>

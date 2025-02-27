@@ -4,8 +4,6 @@ import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -178,12 +176,11 @@ internal class GenerellBehandlingServiceTest(
         )
         val foerstegangsbehandlingHentet =
             behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling
-        val brukerTokenInfo = simpleSaksbehandler()
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns listOf(foerstegangsbehandlingHentet)
         val doedsdato = LocalDate.parse("2016-12-30")
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
-        coEvery {
+        every {
             grunnlagKlient.hentGrunnlagAvType(
                 foerstegangsbehandling.id,
                 Opplysningstype.AVDOED_PDL_V1,
@@ -201,7 +198,7 @@ internal class GenerellBehandlingServiceTest(
         val kravpakkeMedArbeidetUtlandet = runBlocking { service.hentKravpakkeForSak(sak.id) }
         assertEquals(opprettBehandlingGenerell.id, kravpakkeMedArbeidetUtlandet.kravpakke.id)
         assertEquals(foerstegangsbehandling.id, kravpakkeMedArbeidetUtlandet.kravpakke.tilknyttetBehandling)
-        coVerify { grunnlagKlient.hentGrunnlagAvType(any(), any()) }
+        verify { grunnlagKlient.hentGrunnlagAvType(any(), any()) }
         verify { behandlingService.hentBehandlingerForSak(any()) }
     }
 

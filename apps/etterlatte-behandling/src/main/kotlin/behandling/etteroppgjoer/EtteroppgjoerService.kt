@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -68,7 +69,7 @@ class EtteroppgjoerService(
     suspend fun opprettEtteroppgjoer(
         sakId: SakId,
         aar: Int,
-    ) {
+    ): EtteroppgjoerOgOppgave {
         val sak =
             inTransaction {
                 sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
@@ -76,7 +77,7 @@ class EtteroppgjoerService(
 
         hentOgLagreOpplysninger(sak.ident, aar)
 
-        inTransaction {
+        return inTransaction {
             val nyBehandling =
                 EtteroppgjoerBehandling(
                     id = UUID.randomUUID(),
@@ -88,15 +89,20 @@ class EtteroppgjoerService(
                 )
 
             dao.lagreEtteroppgjoer(nyBehandling)
-            oppgaveService.opprettOppgave(
-                referanse = nyBehandling.id.toString(),
-                sakId = sakId,
-                kilde = OppgaveKilde.BEHANDLING,
-                type = OppgaveType.ETTEROPPGJOER,
-                merknad = null,
-                frist = null,
-                saksbehandler = null,
-                gruppeId = null,
+            val oppgave =
+                oppgaveService.opprettOppgave(
+                    referanse = nyBehandling.id.toString(),
+                    sakId = sakId,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.ETTEROPPGJOER,
+                    merknad = null,
+                    frist = null,
+                    saksbehandler = null,
+                    gruppeId = null,
+                )
+            EtteroppgjoerOgOppgave(
+                etteroppgjoerBehandling = nyBehandling,
+                oppgave = oppgave,
             )
         }
     }
@@ -116,3 +122,8 @@ class EtteroppgjoerService(
         }
     }
 }
+
+data class EtteroppgjoerOgOppgave(
+    val etteroppgjoerBehandling: EtteroppgjoerBehandling,
+    val oppgave: OppgaveIntern,
+)

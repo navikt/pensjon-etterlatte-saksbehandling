@@ -123,7 +123,7 @@ export const HandlingerForOppgave = ({
       )
     case Oppgavetype.ETTEROPPGJOER:
       return (
-        <Button size="small" as="a" href={`/etteroppjoer/${referanse}`}>
+        <Button size="small" as="a" href={`/etteroppgjoer/${referanse}`}>
           Gå til etteroppgjør
         </Button>
       )

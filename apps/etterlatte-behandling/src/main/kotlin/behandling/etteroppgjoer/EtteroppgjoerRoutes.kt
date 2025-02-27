@@ -33,7 +33,7 @@ fun Route.etteroppgjoerRoutes(
     service: EtteroppgjoerService,
     featureToggleService: FeatureToggleService,
 ) {
-    route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER") {
+    route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER}") {
         post {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             if (appIsInGCP() && !isDev()) {

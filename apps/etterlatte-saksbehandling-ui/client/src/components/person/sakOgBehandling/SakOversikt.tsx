@@ -1,7 +1,7 @@
 import Spinner from '~shared/Spinner'
-import { Box, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
+import { Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { SakOversiktHeader } from '~components/person/sakOgBehandling/SakOversiktHeader'
@@ -20,6 +20,8 @@ import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
 import { OpprettOppfoelgingsoppgaveModal } from '~components/person/sakOgBehandling/OpprettOppfoelgingsoppgaveModal'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -29,9 +31,11 @@ export enum OppgaveValg {
 export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
+  const etteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
+  const [opprettEtteroppgjoerStatus, apiOpprettEtteroppjoer] = useApiCall(opprettEtteroppgjoerIDev)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -119,6 +123,17 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <Heading size="medium">Tilbakekrevinger</Heading>
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>
+
+              {etteroppgjoerEnabled && (
+                <div>
+                  <Button
+                    loading={isPending(opprettEtteroppgjoerStatus)}
+                    onClick={() => apiOpprettEtteroppjoer(sak.id)}
+                  >
+                    Opprett etteroppgjør
+                  </Button>
+                </div>
+              )}
             </VStack>
           </HStack>
         ),

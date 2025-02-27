@@ -8,6 +8,9 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
+import no.nav.etterlatte.brev.BrevPayload
+import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevStatusResponse
@@ -64,7 +67,6 @@ interface BrevApiKlient {
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -122,6 +124,20 @@ interface BrevApiKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev?
+
+    suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf
+
+    suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevPayload
 }
 
 class BrevApiKlientObo(
@@ -230,7 +246,6 @@ class BrevApiKlientObo(
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
@@ -345,6 +360,42 @@ class BrevApiKlientObo(
             ).mapError { error -> throw error }
     }
 
+    override suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf =
+        get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=$brevID",
+            onSuccess = { resource ->
+                resource.response?.let { deserialize(it.toJson()) }
+                    ?: throw InternfeilException("Feil ved generering av pdf vedtaksbrev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
+    override suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevPayload =
+        put(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/payload/tilbakestill",
+            onSuccess = { resource ->
+                resource.response?.let { deserialize(it.toJson()) }
+                    ?: throw InternfeilException("Feil ved tilbakestilling av pdf vedtaksbrev")
+            },
+            putBody =
+                ResetPayloadRequest(
+                    brevId = brevID,
+                    sakId = sakId,
+                    brevtype = brevtype,
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
     private suspend fun <T> post(
         url: String,
         postBody: Any = Unit,
@@ -374,6 +425,22 @@ class BrevApiKlientObo(
                 success = onSuccess,
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
+
+    private suspend fun <T> put(
+        url: String,
+        putBody: Any = Unit,
+        onSuccess: (Resource) -> T,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): T =
+        downstreamResourceClient
+            .put(
+                resource = Resource(clientId = clientId, url = url),
+                brukerTokenInfo = brukerTokenInfo,
+                putBody = putBody,
+            ).mapBoth(
+                success = onSuccess,
+                failure = { errorResponse -> throw errorResponse },
+            )
 }
 
 data class KlageNotatRequest(
@@ -385,4 +452,10 @@ data class KlageNotatRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettJournalpostDto(
     val journalpostId: String,
+)
+
+private data class ResetPayloadRequest(
+    val brevId: Long,
+    val sakId: SakId,
+    val brevtype: Brevtype,
 )

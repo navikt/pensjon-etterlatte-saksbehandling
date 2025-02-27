@@ -23,6 +23,7 @@ export const enum FeatureToggle {
   opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
   aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
   aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
+  etteroppgjoer = 'etteroppgjoer',
 }
 
 export interface Toggle {
@@ -88,6 +89,11 @@ const aktivitetsplikt_oppgave_unntak_med_frist: Toggle = {
   togglename: FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist,
   enabled: false,
 }
+
+const etteroppgjoer: Toggle = {
+  togglename: FeatureToggle.etteroppgjoer,
+  enabled: false,
+}
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
@@ -105,6 +111,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.opprette_oppfoelgingsoppgave]: opprette_oppfoelgingsoppgave,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist]: aktivitetsplikt_oppgave_unntak_med_frist,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist]: aktivitetsplikt_oppgave_unntak_uten_frist,
+  [FeatureToggle.etteroppgjoer]: etteroppgjoer,
 }
 
 export const Unleashcontext = createContext<{

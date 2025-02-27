@@ -9,7 +9,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
@@ -31,6 +33,19 @@ fun Route.etteroppgjoerRoutes(
     service: EtteroppgjoerService,
     featureToggleService: FeatureToggleService,
 ) {
+    route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER") {
+        post {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            if (appIsInGCP() && !isDev()) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+            kunSkrivetilgang {
+                val eo = service.opprettEtteroppgjoer(sakId, 2024)
+                call.respond(eo)
+            }
+        }
+    }
+
     route("/api/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
         get {
             sjekkEtteroppgjoerEnabled(featureToggleService)
@@ -45,8 +60,8 @@ fun Route.etteroppgjoerRoutes(
         post {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                service.opprettEtteroppgjoer(sakId, 2024)
-                call.respond(HttpStatusCode.OK)
+                val eo = service.opprettEtteroppgjoer(sakId, 2024)
+                call.respond(eo)
             }
         }
     }

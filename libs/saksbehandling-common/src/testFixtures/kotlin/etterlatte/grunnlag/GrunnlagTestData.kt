@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.testdata.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.grunnlag.GenerellKilde
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
@@ -19,6 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.G
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SPRAAK
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -54,6 +56,15 @@ data class GrunnlagTestData(
                         opplysningsType = PERSONGALLERI_V1,
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                         opplysning = hentPersonGalleri().toJsonNode(),
+                        periode = null,
+                    ),
+                ),
+            SPRAAK to
+                Opplysning.Konstant.create(
+                    lagOpplysning(
+                        opplysningsType = SPRAAK,
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        opplysning = Spraak.NB.toJsonNode(),
                         periode = null,
                     ),
                 ),

@@ -23,21 +23,16 @@ export const opprettVarselbrev = async (args: { sakId: number; behandlingId: str
   apiClient.post(`/brev/behandling/${args.behandlingId}/varsel?sakId=${args.sakId}`, {})
 
 export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
-  apiClient.get(`/brev/behandling/${behandlingId}/vedtak`)
+  apiClient.get(`/behandling/brev/${behandlingId}/vedtak`)
 
 export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
-  apiClient.post(`/brev/behandling/${behandlingId}/vedtak/ferdigstill`, {})
+  apiClient.post(`/behandling/brev/${behandlingId}/vedtak/ferdigstill`, {})
 
 export const opprettVedtaksbrev = async (args: {
   sakId: number
   behandlingId: string
-  tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<IBrev>> => {
-  if (args.tilbakekrevingBrev) {
-    // TODO midlertidig - skal hånderes backend på sikt
-    return apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
-  }
-  return apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+  return apiClient.post(`/behandling/brev/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 }
 
 export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>
@@ -92,16 +87,11 @@ export const genererPdf = async (props: {
   sakId?: number
   behandlingId?: string
   brevtype: Brevtype
-  tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<ArrayBuffer>> => {
-  if (props.tilbakekrevingBrev) {
-    // TODO midlertidig - skal hånderes backend på sikt
+  if (props.brevtype === Brevtype.VEDTAK) {
     return apiClient.get(
       `/behandling/brev/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}&sakId=${props.sakId}`
     )
-  }
-  if (props.brevtype === Brevtype.VEDTAK) {
-    return apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}`)
   } else if (props.brevtype === Brevtype.VARSEL) {
     return apiClient.get(`/brev/behandling/${props.behandlingId}/varsel/pdf?brevId=${props.brevId}`)
   } else if (props.brevtype === Brevtype.OVERSENDELSE_KLAGE) {
@@ -125,20 +115,11 @@ export const tilbakestillManuellPayload = async (props: {
   sakId: number
   behandlingId: string
   brevtype: Brevtype
-  tilbakekrevingBrev: boolean
 }): Promise<ApiResponse<any>> => {
-  if (props.tilbakekrevingBrev) {
-    // TODO midlertidig - skal hånderes backend på sikt
-    return apiClient.put(
-      `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}`,
-      {}
-    )
-  }
-  return apiClient.put(`/brev/behandling/${props.behandlingId}/payload/tilbakestill`, {
-    brevId: props.brevId,
-    sakId: props.sakId,
-    brevtype: props.brevtype,
-  })
+  return apiClient.put(
+    `/behandling/brev/${props.behandlingId}/vedtak/tilbakestill?brevId=${props.brevId}&sakId=${props.sakId}&brevtype=${props.brevtype}`,
+    {}
+  )
 }
 
 export const lagreManuellPayload = async (props: {

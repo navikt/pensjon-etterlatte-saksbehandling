@@ -308,6 +308,7 @@ internal class ApplicationContext(
             config.getString("inntektskomponenten.url"),
         ), // TODO interface og stub osv...
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
+    grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -377,7 +378,7 @@ internal class ApplicationContext(
             .AldersovergangService(aldersovergangDao)
 
     val grunnlagService: GrunnlagService =
-        GrunnlagServiceImpl(
+        grunnlagServiceOverride ?: GrunnlagServiceImpl(
             pdlTjenesterKlient,
             opplysningDao,
             GrunnlagHenter(pdlTjenesterKlient),
@@ -612,11 +613,12 @@ internal class ApplicationContext(
         TilbakekrevingBrevService(
             sakService,
             brevKlient,
+            brevApiKlient,
             vedtakKlient,
             grunnlagService,
         )
     val brevService =
-        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
+        BrevService(vedtaksbehandlingService, brevApiKlient, vedtakKlient, tilbakekrevingBrevService)
 
     val tilbakekrevingService =
         TilbakekrevingService(

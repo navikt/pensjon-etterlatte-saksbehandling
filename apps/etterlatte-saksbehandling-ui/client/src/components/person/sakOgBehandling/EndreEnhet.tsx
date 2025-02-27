@@ -97,11 +97,14 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                     label="Enhet"
                     error={errors.enhet?.message}
                   >
-                    {Object.entries(ENHETER).map(([id, navn]) => (
-                      <option key={id} value={id}>
-                        {navn}
-                      </option>
-                    ))}
+                    {Object.entries(ENHETER)
+                      .filter(([id]) => id != '2103')
+                      .filter(([id]) => id != '4883')
+                      .map(([id, navn]) => (
+                        <option key={id} value={id}>
+                          {navn}
+                        </option>
+                      ))}
                   </Select>
 
                   {valgtEnhet !== gjeldendeEnhet && !innloggetSaksbehandler.enheter.includes(valgtEnhet) && (

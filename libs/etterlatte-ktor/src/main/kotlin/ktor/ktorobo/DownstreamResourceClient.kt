@@ -25,7 +25,6 @@ import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.time.Duration
 
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
@@ -56,10 +55,6 @@ class DownstreamResourceClient(
     ) = httpClient.get(url) {
         accept(ContentType.Application.Json)
         navConsumerId(konsument)
-        timeout {
-            socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
-            requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
-        }
     }
 
     suspend fun post(

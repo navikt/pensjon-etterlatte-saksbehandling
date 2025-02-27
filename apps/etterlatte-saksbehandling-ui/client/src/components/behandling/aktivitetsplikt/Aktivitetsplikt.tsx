@@ -28,8 +28,7 @@ const isValidDateOfDeath = (date?: Date) => {
   return false
 }
 
-export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandling } = props
+export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useContext(BehandlingRouteContext)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -126,7 +125,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         <AktivitetspliktVurdering
           behandling={behandling}
           setManglerAktivitetspliktVurdering={setManglerAktivitetspliktVurdering}
-          doedsdato={avdoedesDoedsdato!!}
+          doedsdato={avdoedesDoedsdato!}
         />
 
         {aktivitetOppfolging && (

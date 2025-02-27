@@ -99,6 +99,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                   >
                     {Object.entries(ENHETER)
                       .filter(([id]) => id != '2103')
+                      .filter(([id]) => id != '4883')
                       .map(([id, navn]) => (
                         <option key={id} value={id}>
                           {navn}

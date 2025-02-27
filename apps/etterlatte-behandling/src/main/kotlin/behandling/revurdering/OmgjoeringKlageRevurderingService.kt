@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klage.KlageService
@@ -65,7 +64,7 @@ class OmgjoeringKlageRevurderingService(
             behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
 
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+        val persongalleri = grunnlagService.hentPersongalleri(sakId)
         return revurderingService
             .opprettRevurdering(
                 sakId = sakId,

@@ -662,7 +662,7 @@ internal class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
+        every { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any())
@@ -714,9 +714,9 @@ internal class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
             vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
+            grunnlagService.hentPersongalleri(sak.id)
         }
         coVerify {
-            grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.opprettGrunnlag(any(), any())
         }
     }
@@ -765,7 +765,7 @@ internal class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
+        every { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any()) } returns oppgaveInternMock
         every { oppgaveService.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveInternMock)
@@ -795,9 +795,9 @@ internal class BehandlingFactoryTest {
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
             behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
             oppgaveService.ferdigstillOppgave(omgjoeringsOppgaveId, saksbehandler)
+            grunnlagService.hentPersongalleri(sak.id)
         }
         coVerify {
-            grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.opprettGrunnlag(any(), any())
         }
     }
@@ -825,7 +825,7 @@ internal class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
+        every { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just runs
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), frist = any())
@@ -869,9 +869,9 @@ internal class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
             behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
+            grunnlagService.hentPersongalleri(sak.id)
         }
         coVerify {
-            grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.opprettGrunnlag(any(), any())
         }
     }
@@ -1352,11 +1352,11 @@ internal class BehandlingFactoryTest {
         }
         coVerify {
             grunnlagService.opprettGrunnlag(any(), any())
-            grunnlagService.lagreNyeSaksopplysninger(any(), any(), any())
         }
         verify(exactly = 1) {
             sakServiceMock.oppdaterAdressebeskyttelse(any(), any())
             sakServiceMock.hentGraderingForSak(any(), any())
+            grunnlagService.lagreNyeSaksopplysninger(any(), any(), any())
         }
     }
 

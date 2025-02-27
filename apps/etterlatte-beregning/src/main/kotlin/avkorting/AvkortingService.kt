@@ -295,6 +295,20 @@ class AvkortingService(
             throw AvkortingBehandlingFeilStatus(behandlingId)
         }
     }
+
+    fun hentSisteAvkortingForEtteroppgjoer(
+        sisteIverksatteBehandling: UUID,
+        aar: Int,
+    ): AvkortingDto {
+        val avkorting =
+            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)
+                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandling")
+        val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.aar == aar }
+        return AvkortingDto(
+            avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
+            avkortetYtelse = aarsoppgjoer.avkortetYtelseAar.map { it.toDto() },
+        )
+    }
 }
 
 class AvkortingFinnesIkkeException(

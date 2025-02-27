@@ -213,7 +213,7 @@ class SakServiceImpl(
     override fun finnSakerOmsOgHvisAvdoed(ident: String): List<SakId> {
         val saker = finnSakerForPerson(ident, SakType.OMSTILLINGSSTOENAD).filterForEnheter()
         val sakerOgRollerForPerson =
-            runBlocking { grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(ident)) }
+            grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(ident))
         val sakerOgRollerGruppert = sakerOgRollerForPerson.sakiderOgRoller.distinct()
         val avdoedSak = sakerOgRollerGruppert.filter { it.rolle == Saksrolle.AVDOED }
         val sakerForAvdoed = avdoedSak.map { it.sakId }
@@ -262,13 +262,13 @@ class SakServiceImpl(
     }
 
     private fun leggTilGrunnlag(sak: Sak) {
-        runBlocking {
-            val harGrunnlag = grunnlagService.grunnlagFinnesForSak(sak.id)
+        val harGrunnlag = grunnlagService.grunnlagFinnesForSak(sak.id)
 
-            if (harGrunnlag) {
-                logger.info("Finnes allerede grunnlag på sak=${sak.id}")
-                return@runBlocking
-            }
+        if (harGrunnlag) {
+            logger.info("Finnes allerede grunnlag på sak=${sak.id}")
+            return
+        }
+        runBlocking {
             logger.info("Fant ingen grunnlag på sak=${sak.id} - oppretter grunnlag")
 
             val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
@@ -307,13 +307,12 @@ class SakServiceImpl(
                 ?: throw InternfeilException("Sak ${sak.id} har flere eller ingen gyldige identer samtidig. Kan ikke oppdatere ident.")
 
         dao.oppdaterIdent(sak.id, gjeldendeIdent)
+        val oppdatertPersongalleri =
+            grunnlagService
+                .hentPersongalleri(sak.id)!!
+                .copy(soeker = gjeldendeIdent.value)
 
         runBlocking {
-            val oppdatertPersongalleri =
-                grunnlagService
-                    .hentPersongalleri(sak.id)!!
-                    .copy(soeker = gjeldendeIdent.value)
-
             grunnlagService.opprettEllerOppdaterGrunnlagForSak(sak.id, opplysningsbehov(sak, oppdatertPersongalleri))
         }
 

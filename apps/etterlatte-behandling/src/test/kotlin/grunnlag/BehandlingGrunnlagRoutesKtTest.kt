@@ -18,9 +18,11 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -84,7 +86,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
     fun `returnerer 404 hvis grunnlag ikke finnes`() {
         val behandlingId = UUID.randomUUID()
 
-        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns null
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns null
 
         testApplication {
             runServer(mockOAuth2Server, "api/grunnlag") {
@@ -104,7 +106,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
-        coVerify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
+        verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
     }
 
     @Test
@@ -112,7 +114,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val behandlingId = UUID.randomUUID()
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagService.hentOpplysningsgrunnlag(any<UUID>()) } returns testData
+        every { grunnlagService.hentOpplysningsgrunnlag(any<UUID>()) } returns testData
 
         testApplication {
             val response =
@@ -127,7 +129,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
             assertEquals(serialize(testData), response.body<String>())
         }
 
-        coVerify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
+        verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
     }
 
     @ParameterizedTest
@@ -144,7 +146,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 opplysning = """{}""".toJsonNode(),
             )
 
-        coEvery { grunnlagService.hentGrunnlagAvType(any<UUID>(), any<Opplysningstype>()) } returns opplysning
+        every { grunnlagService.hentGrunnlagAvType(any<UUID>(), any<Opplysningstype>()) } returns opplysning
 
         testApplication {
             val response =
@@ -159,7 +161,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
             assertEquals(serialize(opplysning), response.body<String>())
         }
 
-        coVerify(exactly = 1) { grunnlagService.hentGrunnlagAvType(behandlingId, type) }
+        verify(exactly = 1) { grunnlagService.hentGrunnlagAvType(behandlingId, type) }
     }
 
     @Test
@@ -208,7 +210,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 ),
             )
 
-        coEvery { grunnlagService.lagreNyeSaksopplysninger(any(), any(), any()) } just Runs
+        every { grunnlagService.lagreNyeSaksopplysninger(any(), any(), any()) } just Runs
 
         testApplication {
             val actualResponse =

@@ -7,9 +7,9 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.pdf.PDFGenerator
@@ -26,7 +26,7 @@ internal class VarselbrevService(
     private val behandlingService: BehandlingService,
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperFerdigstillVarsel: BrevDataMapperFerdigstillVarsel,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagKlient: BehandlingKlient,
 ) {
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 

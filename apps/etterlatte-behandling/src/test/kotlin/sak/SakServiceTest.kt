@@ -106,7 +106,7 @@ internal class SakServiceTest {
          Gjelder ikke for oppdaterIdentForSak()
          */
         coEvery { grunnlagservice.opprettGrunnlag(any(), any()) } just runs
-        coEvery { grunnlagservice.lagreNyeSaksopplysningerBareSak(any(), any()) } just runs
+        every { grunnlagservice.lagreNyeSaksopplysningerBareSak(any(), any()) } just runs
 
         coEvery { krrKlient.hentDigitalKontaktinformasjon(any()) } returns
             DigitalKontaktinformasjon(
@@ -293,7 +293,7 @@ internal class SakServiceTest {
         val sakId = sakId1
 
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
-        coEvery { grunnlagservice.hentSakerOgRoller(KONTANT_FOT) } returns
+        every { grunnlagservice.hentSakerOgRoller(KONTANT_FOT) } returns
             PersonMedSakerOgRoller(
                 KONTANT_FOT.value,
                 emptyList(),
@@ -312,7 +312,7 @@ internal class SakServiceTest {
 
         finnSakerOmsOgHvisAvdoed shouldContainExactly listOf(sakId)
 
-        coVerify { grunnlagservice.hentSakerOgRoller(KONTANT_FOT) }
+        verify { grunnlagservice.hentSakerOgRoller(KONTANT_FOT) }
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
         verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
     }
@@ -323,7 +323,7 @@ internal class SakServiceTest {
         val sakId = sakId1
 
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
-        coEvery { grunnlagservice.hentSakerOgRoller(KONTANT_FOT) } returns
+        every { grunnlagservice.hentSakerOgRoller(KONTANT_FOT) } returns
             PersonMedSakerOgRoller(
                 KONTANT_FOT.value,
                 listOf(
@@ -336,9 +336,11 @@ internal class SakServiceTest {
 
         finnSakerOmsOgHvisAvdoed shouldContainExactly listOf(sakId)
 
-        coVerify { grunnlagservice.hentSakerOgRoller(KONTANT_FOT) }
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
-        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
+        verify(exactly = 1) {
+            sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
+            grunnlagservice.hentSakerOgRoller(KONTANT_FOT)
+        }
     }
 
     @Test
@@ -419,7 +421,7 @@ internal class SakServiceTest {
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakSkrivDao.oppdaterSkjerming(any(), any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
-        coEvery { grunnlagservice.grunnlagFinnesForSak(any()) } returns true
+        every { grunnlagservice.grunnlagFinnesForSak(any()) } returns true
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
                 ArbeidsFordelingRequest(
@@ -471,7 +473,7 @@ internal class SakServiceTest {
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
-        coEvery { grunnlagservice.grunnlagFinnesForSak(any()) } returns true
+        every { grunnlagservice.grunnlagFinnesForSak(any()) } returns true
         every { sakSkrivDao.oppdaterSkjerming(any(), any()) } just runs
         val sak1 =
             Sak(
@@ -567,7 +569,7 @@ internal class SakServiceTest {
         every { sakSkrivDao.oppdaterEnhet(any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
         every { sakSkrivDao.oppdaterSkjerming(any(), any()) } just runs
-        coEvery { grunnlagservice.grunnlagFinnesForSak(any()) } returns true
+        every { grunnlagservice.grunnlagFinnesForSak(any()) } returns true
 
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
@@ -896,8 +898,8 @@ internal class SakServiceTest {
                 )
             justRun { sakSkrivDao.oppdaterIdent(any(), any()) }
             every { sakLesDao.hentSak(any()) } returns sak.copy(ident = JOVIAL_LAMA.value)
-            coEvery { grunnlagservice.hentPersongalleri(any<SakId>()) } returns persongalleri
-            coJustRun { grunnlagservice.lagreNyeSaksopplysningerBareSak(any(), any()) }
+            every { grunnlagservice.hentPersongalleri(any<SakId>()) } returns persongalleri
+            justRun { grunnlagservice.lagreNyeSaksopplysningerBareSak(any(), any()) }
             coJustRun { grunnlagservice.opprettEllerOppdaterGrunnlagForSak(any(), any()) }
 
             val oppdatertSak = service.oppdaterIdentForSak(sak, saksbehandler)

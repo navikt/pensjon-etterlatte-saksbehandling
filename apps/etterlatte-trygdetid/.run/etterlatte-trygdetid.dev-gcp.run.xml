@@ -6,8 +6,6 @@
       <env name="DB_USERNAME" value="postgres" />
       <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
-      <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
-      <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no" />
       <env name="ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vedtaksvurdering" />
       <env name="ETTERLATTE_VEDTAKSVURDERING_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="HTTP_PORT" value="8088" />

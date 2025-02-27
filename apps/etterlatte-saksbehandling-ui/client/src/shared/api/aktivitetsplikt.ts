@@ -36,11 +36,11 @@ export const opprettHendelse = async (args: {
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse`, { ...args.request })
 
-export const slettAktivitetHendelse = async (args: {
+export const slettAktivitetHendelseForBehandling = async (args: {
   behandlingId: string
-  hendelseId: string
+  aktivitetHendelseId: string
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
-  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse/${args.hendelseId}`)
+  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse/${args.aktivitetHendelseId}`)
 
 export const slettAktivitet = async (args: {
   behandlingId: string
@@ -76,9 +76,9 @@ export const slettAktivitetForSak = async (args: {
 
 export const slettAktivitetHendelseForSak = async (args: {
   sakId: number
-  hendelseId: string
+  aktivitetHendelseId: string
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
-  apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/hendelse/${args.hendelseId}`)
+  apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/hendelse/${args.aktivitetHendelseId}`)
 
 export const hentAktivitspliktVurderingForSak = async (args: {
   sakId: number

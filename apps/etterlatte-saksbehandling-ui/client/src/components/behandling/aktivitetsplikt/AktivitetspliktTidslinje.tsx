@@ -13,7 +13,7 @@ import {
   hentAktiviteterOgHendelser,
   slettAktivitet,
   slettAktivitetForSak,
-  slettAktivitetHendelse,
+  slettAktivitetHendelseForBehandling,
   slettAktivitetHendelseForSak,
 } from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
@@ -27,6 +27,23 @@ import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { AktivitetOgHendelse } from '~components/behandling/aktivitetsplikt/AktivitetOgHendelse'
 
+export enum AktivitetspliktSkjemaAaVise {
+  AKTIVITET_HENDELSE,
+  AKTIVITET_PERIODE,
+  INGEN,
+}
+
+export interface AktivitetspliktRedigeringModus {
+  aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise
+  aktivitetHendelse: IAktivitetHendelse | undefined
+  aktivitetPeriode: IAktivitetPeriode | undefined
+}
+
+const defaultAktivitetspliktRedigeringModus: AktivitetspliktRedigeringModus = {
+  aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.INGEN,
+  aktivitetHendelse: undefined,
+  aktivitetPeriode: undefined,
+}
 interface Props {
   behandling?: IDetaljertBehandling
   doedsdato: Date
@@ -36,7 +53,7 @@ interface Props {
 export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props) => {
   const [hentAktivitetOgHendelserResult, hentAktiviteterOgHendelserRequest] = useApiCall(hentAktiviteterOgHendelser)
   const [slettAktivitetResult, slettAktivitetRequest] = useApiCall(slettAktivitet)
-  const [slettHendelseResult, slettHendelseRequest] = useApiCall(slettAktivitetHendelse)
+  const [slettHendelseResult, slettHendelseRequest] = useApiCall(slettAktivitetHendelseForBehandling)
   const [slettAktivitetForSakResult, slettAktivitetForSakRequest] = useApiCall(slettAktivitetForSak)
   const [slettHendelseForSakResult, slettHendelseForSakRequest] = useApiCall(slettAktivitetHendelseForSak)
   const seksMndEtterDoedsfall = addMonths(doedsdato, 6)
@@ -47,6 +64,10 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
   const [redigerHendelse, setRedigerHendelse] = useState<IAktivitetHendelse | undefined>(undefined)
   const [aktivitetsTypeProps, setAktivitetsTypeProps] = useState<AktivitetstypeProps[]>([])
   const [sluttdato, setSluttdato] = useState<Date>(addYears(doedsdato, 3))
+
+  const [aktivitetspliktRedigeringModus, setAktivitetspliktRedigeringModus] = useState<AktivitetspliktRedigeringModus>(
+    defaultAktivitetspliktRedigeringModus
+  )
 
   useEffect(() => {
     hentAktiviteterOgHendelserRequest({ sakId: sakId, behandlingId: behandling?.id }, (aktiviteter) => {
@@ -74,11 +95,11 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
 
   const fjernHendelse = (hendelseId: string) => {
     if (behandling) {
-      slettHendelseRequest({ behandlingId: behandling.id, hendelseId: hendelseId }, (hendelser) => {
+      slettHendelseRequest({ behandlingId: behandling.id, aktivitetHendelseId: hendelseId }, (hendelser) => {
         setHendelser(hendelser)
       })
     } else {
-      slettHendelseForSakRequest({ sakId: sakId, hendelseId: hendelseId }, (hendelser) => {
+      slettHendelseForSakRequest({ sakId: sakId, aktivitetHendelseId: hendelseId }, (hendelser) => {
         setHendelser(hendelser)
       })
     }
@@ -90,7 +111,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
   }
 
   return (
-    <VStack gap="8" className="min-w-[800px]">
+    <VStack gap="8" minWidth="50rem">
       <Timeline startDate={doedsdato} endDate={sluttdato}>
         <Timeline.Pin date={doedsdato}>
           <BodyShort>Dødsdato: {formaterDato(doedsdato)}</BodyShort>

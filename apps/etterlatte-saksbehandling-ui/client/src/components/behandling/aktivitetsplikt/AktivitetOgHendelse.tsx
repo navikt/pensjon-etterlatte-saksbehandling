@@ -71,7 +71,7 @@ export const AktivitetOgHendelse = ({
           sakId={sakId}
           avbryt={avbryt}
           behandling={behandling}
-        ></NyAktivitet>
+        />
       )}
       {visForm === Skjemavisning.HENDELSE && (
         <NyHendelse

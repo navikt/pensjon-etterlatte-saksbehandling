@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
-import no.nav.etterlatte.EnvKey.ETTERLATTE_MIGRERING_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.NAVANSATT_URL
@@ -59,7 +58,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
-import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -217,14 +215,6 @@ private fun tilbakekrevingHttpClient(config: Config) =
         azureAppScope = config.getString("tilbakekreving.azure.scope"),
     )
 
-private fun migreringHttpClient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("migrering.outbound.scope"),
-    )
-
 private fun krrHttKlient(config: Config) =
     httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),
@@ -291,7 +281,6 @@ internal class ApplicationContext(
             tilbakekrevingHttpClient(config),
             url = env.requireEnvValue(ETTERLATTE_TILBAKEKREVING_URL),
         ),
-    val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
@@ -358,7 +347,6 @@ internal class ApplicationContext(
     val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
-    val migreringKlient = MigreringKlient(migreringHttpClient, env.requireEnvValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
     val kodeverkService = KodeverkService(kodeverkKlient)
 
@@ -695,7 +683,6 @@ internal class ApplicationContext(
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
-            migreringKlient = migreringKlient,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,

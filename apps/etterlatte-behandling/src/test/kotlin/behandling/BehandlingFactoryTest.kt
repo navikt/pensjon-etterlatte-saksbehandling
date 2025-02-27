@@ -148,7 +148,6 @@ internal class BehandlingFactoryTest {
             behandlingDaoMock,
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
-            mockk(),
             vilkaarsvurderingService = vilkaarsvurderingService,
             kommerBarnetTilGodeService = kommerBarnetTilGodeServiceMock,
             behandlingInfoService = mockk(),

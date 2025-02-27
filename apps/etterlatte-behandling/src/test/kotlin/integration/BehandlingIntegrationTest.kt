@@ -114,7 +114,6 @@ abstract class BehandlingIntegrationTest {
                 brevKlient = brevKlient ?: BrevKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingKlient = tilbakekrevingKlient ?: TilbakekrevingKlientTest(),
-                migreringHttpClient = migreringHttpClientTest(),
                 pesysKlient = PesysKlientTest(),
                 krrKlient = KrrklientTest(),
                 axsysKlient = AxsysKlientTest(),

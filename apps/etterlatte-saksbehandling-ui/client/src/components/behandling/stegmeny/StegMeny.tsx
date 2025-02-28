@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
+import { NavLenke } from '~components/behandling/stegmeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { BehandlingRouteContext, BehandlingRouteType } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'

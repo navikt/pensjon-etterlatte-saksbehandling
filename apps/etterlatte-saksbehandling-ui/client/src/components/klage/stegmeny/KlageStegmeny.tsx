@@ -1,4 +1,4 @@
-import { StegMenyBox } from '~components/behandling/StegMeny/stegmeny'
+import { StegMenyBox } from '~components/behandling/stegmeny/StegMeny'
 import React from 'react'
 import { KlageNavLenke } from '~components/klage/stegmeny/KlageNavLenke'
 import { useKlage } from '~components/klage/useKlage'

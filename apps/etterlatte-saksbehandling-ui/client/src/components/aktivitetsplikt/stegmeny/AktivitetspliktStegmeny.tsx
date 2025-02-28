@@ -1,4 +1,4 @@
-import { StegMenyBox } from '~components/behandling/StegMeny/stegmeny'
+import { StegMenyBox } from '~components/behandling/stegmeny/StegMeny'
 import { HStack } from '@navikt/ds-react'
 import React from 'react'
 import { AktivitetNavLenke } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktNavLenke'

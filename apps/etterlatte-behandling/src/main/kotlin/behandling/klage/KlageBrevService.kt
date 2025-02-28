@@ -41,15 +41,14 @@ class KlageBrevService(
             }
         }
 
-    fun vedtaksbrev(
+    suspend fun vedtaksbrev(
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): KlageVedtaksbrev {
         val brev =
-            runBlocking {
-                brevApiKlient.hentVedtaksbrev(klage.id, saksbehandler)
-                    ?: brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler)
-            }
+            brevApiKlient.hentVedtaksbrev(klage.id, saksbehandler)
+                ?: brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler)
+
         return KlageVedtaksbrev(brev.id)
     }
 
@@ -124,54 +123,50 @@ class KlageBrevService(
      * TODO:
      *  Burde sikre at det er INNSENDEREN sin journalpostId og bestillingId som benyttes
      * */
-    private fun ferdigstillOgDistribuerBrev(
+    private suspend fun ferdigstillOgDistribuerBrev(
         sakId: SakId,
         brevId: Long,
         saksbehandler: Saksbehandler,
-    ): Pair<Tidspunkt, String> =
-        runBlocking {
-            val eksisterendeInnstillingsbrev = brevApiKlient.hentBrev(sakId, brevId, saksbehandler)
-            if (eksisterendeInnstillingsbrev.status.ikkeFerdigstilt()) {
-                brevApiKlient.ferdigstillOversendelseBrev(sakId, brevId, saksbehandler)
-            } else {
-                logger.info("Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede ferdigstilt")
-            }
+    ): Pair<Tidspunkt, String> {
+        val eksisterendeInnstillingsbrev = brevApiKlient.hentBrev(sakId, brevId, saksbehandler)
+        if (eksisterendeInnstillingsbrev.status.ikkeFerdigstilt()) {
+            brevApiKlient.ferdigstillOversendelseBrev(sakId, brevId, saksbehandler)
+        } else {
+            logger.info("Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede ferdigstilt")
+        }
 
-            val journalpostIdJournalfoering =
-                if (eksisterendeInnstillingsbrev.status.ikkeJournalfoert()) {
-                    brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId.first()
-                } else {
-                    logger.info(
-                        "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                            "journalført på journalpostId=${eksisterendeInnstillingsbrev.mottakere.first().journalpostId}",
-                    )
-                    krevIkkeNull(eksisterendeInnstillingsbrev.mottakere.first().journalpostId) {
-                        "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
-                    }
-                }
-            val tidspunktJournalfoert = Tidspunkt.now()
-
-            if (eksisterendeInnstillingsbrev.status.ikkeDistribuert()) {
-                val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId.first()
-                logger.info(
-                    "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
-                        "med bestillingsId $bestillingsIdDistribuering",
-                )
+        val journalpostIdJournalfoering =
+            if (eksisterendeInnstillingsbrev.status.ikkeJournalfoert()) {
+                brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId.first()
             } else {
                 logger.info(
                     "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                        "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.mottakere.first().bestillingId}",
+                        "journalført på journalpostId=${eksisterendeInnstillingsbrev.mottakere.first().journalpostId}",
                 )
+                krevIkkeNull(eksisterendeInnstillingsbrev.mottakere.first().journalpostId) {
+                    "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
+                }
             }
-            tidspunktJournalfoert to journalpostIdJournalfoering
-        }
+        val tidspunktJournalfoert = Tidspunkt.now()
 
-    private fun hentBrev(
+        if (eksisterendeInnstillingsbrev.status.ikkeDistribuert()) {
+            val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId.first()
+            logger.info(
+                "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
+                    "med bestillingsId $bestillingsIdDistribuering",
+            )
+        } else {
+            logger.info(
+                "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
+                    "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.mottakere.first().bestillingId}",
+            )
+        }
+        return tidspunktJournalfoert to journalpostIdJournalfoering
+    }
+
+    private suspend fun hentBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Brev =
-        runBlocking {
-            brevApiKlient.hentBrev(sakId, brevId, brukerTokenInfo)
-        }
+    ): Brev = brevApiKlient.hentBrev(sakId, brevId, brukerTokenInfo)
 }

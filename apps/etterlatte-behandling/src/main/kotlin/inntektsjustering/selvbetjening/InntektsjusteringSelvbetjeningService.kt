@@ -1,6 +1,5 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -160,17 +159,15 @@ class InntektsjusteringSelvbetjeningService(
         override fun key() = key
     }
 
-    private fun hentAvkortingSjekk(
+    private suspend fun hentAvkortingSjekk(
         sakId: SakId,
         loependeFom: YearMonth,
         forrigeBehandlingId: UUID,
     ): InntektsjusteringAvkortingInfoResponse =
-        runBlocking {
-            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
-                sakId,
-                loependeFom.year,
-                forrigeBehandlingId,
-                HardkodaSystembruker.omregning,
-            )
-        }
+        beregningKlient.inntektsjusteringAvkortingInfoSjekk(
+            sakId,
+            loependeFom.year,
+            forrigeBehandlingId,
+            HardkodaSystembruker.omregning,
+        )
 }

@@ -75,7 +75,7 @@ class BehandlingFactory(
     /*
      * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
      */
-    suspend fun opprettSakOgBehandlingForOppgave(
+    fun opprettSakOgBehandlingForOppgave(
         request: NyBehandlingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {

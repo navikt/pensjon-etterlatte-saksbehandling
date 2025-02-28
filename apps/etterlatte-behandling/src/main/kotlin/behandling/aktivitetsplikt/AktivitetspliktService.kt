@@ -894,7 +894,7 @@ class AktivitetspliktService(
                 sakId,
                 oppgaveType,
             ).any {
-                it.erUnderBehandling() ||
+                it.erIkkeAvsluttet() ||
                     it.erFerdigstilt()
             }
 
@@ -911,7 +911,7 @@ class AktivitetspliktService(
                 sakId,
                 OppgaveType.AKTIVITETSPLIKT,
             )
-        if (oppfoelging6mnd.any { it.erUnderBehandling() }) {
+        if (oppfoelging6mnd.any { it.erIkkeAvsluttet() }) {
             return false
         }
         val ferdigstilt6mndOppgave = oppfoelging6mnd.filter { it.erFerdigstilt() }

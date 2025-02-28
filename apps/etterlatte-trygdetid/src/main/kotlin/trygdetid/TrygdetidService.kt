@@ -3,6 +3,7 @@ package no.nav.etterlatte.trygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
@@ -121,7 +122,7 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
 
-    suspend fun kopierTrygdetidsgrunnlag(
+    suspend fun kopierOgOverskrivTrygdetid(
         behandlingId: UUID,
         kildeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -192,6 +193,7 @@ class TrygdetidServiceImpl(
     private val pesysKlient: PesysKlient,
     private val avtaleService: AvtaleService,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val featureToggleService: FeatureToggleService,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -617,7 +619,22 @@ class TrygdetidServiceImpl(
         val forrigeTrygdetid = hentTrygdetiderIBehandling(forrigeBehandlingId, brukerTokenInfo)
         val eksisterendeTrygdetider = hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
 
-        return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid, eksisterendeTrygdetider)
+        if (eksisterendeTrygdetider.isNotEmpty()) { // Interessert i om dette forekommer noen gang
+            logger.info(
+                "Det eksisterer trygdetider fra før ved kopiering av trygdetider " +
+                    "fra behandling $forrigeBehandlingId til $behandlingId",
+            )
+        }
+
+        val alleTrygdetider =
+            kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid, eksisterendeTrygdetider)
+
+        if (oppdaterBeregnetTrygdetidVedKopieringEnabled()) {
+            alleTrygdetider.forEach { trygdetid ->
+                oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
+            }
+        }
+        return alleTrygdetider
     }
 
     private fun kopierAvtale(
@@ -662,6 +679,7 @@ class TrygdetidServiceImpl(
                             beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid,
                             ident = forrigeTrygdetid.ident,
                             yrkesskade = forrigeTrygdetid.yrkesskade,
+                            kopiertGrunnlagFraBehandling = forrigeTrygdetid.behandlingId,
                         )
 
                     trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)
@@ -1050,46 +1068,20 @@ class TrygdetidServiceImpl(
         }
     }
 
-    override suspend fun kopierTrygdetidsgrunnlag(
+    override suspend fun kopierOgOverskrivTrygdetid(
         behandlingId: UUID,
         kildeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<TrygdetidDto> =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             logger.info("Kopierer trygdetidsgrunnlag for behandling $behandlingId fra behandling $kildeBehandlingId")
-            val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
             val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+            val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
+            sjekkAtTrygdetideneGjelderSammeAvdoede(trygdetiderMaal, trygdetiderKilde, behandlingId, kildeBehandlingId)
 
-            krev(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
-                logger.error("Trygdetidene gjelder forskjellige avdøde. Se sikkerlogg for detaljer.")
-                sikkerlogger().error(
-                    """
-                    Trygdetidene gjelder forskjellige avdøde ved kopiering av trygdetidsgrunnlag 
-                    fra $kildeBehandlingId til $behandlingId
-                    Mål: ${trygdetiderKilde.joinToString { it.ident }}
-                    Kilde: ${trygdetiderMaal.joinToString { it.ident }}
-                    """,
-                )
-                "Trygdetidene gjelder forskjellige avdøde"
-            }
+            trygdetiderMaal.forEach { trygdetidRepository.slettTrygdetid(it.id) }
 
-            trygdetiderMaal
-                .forEach { trygdetidMaal ->
-                    oppdaterBeregnetTrygdetid(
-                        behandlingId,
-                        trygdetidMaal.copy(
-                            trygdetidGrunnlag =
-                                trygdetiderKilde
-                                    .single { trygdetidKilde -> trygdetidKilde.ident == trygdetidMaal.ident }
-                                    .trygdetidGrunnlag
-                                    .map { it.copy(id = UUID.randomUUID()) },
-                            kopiertGrunnlagFraBehandling = kildeBehandlingId,
-                        ),
-                        brukerTokenInfo,
-                    )
-                }
-
-            kopierAvtale(behandlingId, kildeBehandlingId)
+            kopierSisteTrygdetidberegninger(behandlingId, kildeBehandlingId, brukerTokenInfo)
 
             hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                 .map { it.toDto() }
@@ -1152,6 +1144,27 @@ class TrygdetidServiceImpl(
                 )
         }
 
+    private fun sjekkAtTrygdetideneGjelderSammeAvdoede(
+        trygdetiderMaal: List<Trygdetid>,
+        trygdetiderKilde: List<Trygdetid>,
+        behandlingIdMaal: UUID,
+        behandlingIdKilde: UUID,
+    ) {
+        krev(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
+            val feilmelding = "Trygdetidene gjelder forskjellige avdøde"
+            logger.error("$feilmelding. Se sikkerlogg for detaljer.")
+            sikkerlogger().error(
+                """
+                $feilmelding ved kopiering av trygdetidsgrunnlag 
+                fra $behandlingIdKilde til $behandlingIdMaal
+                Mål: ${trygdetiderKilde.joinToString { it.ident }}
+                Kilde: ${trygdetiderMaal.joinToString { it.ident }}
+                """.trimIndent(),
+            )
+            feilmelding
+        }
+    }
+
     private fun lagredeTrygdetiderHarSammeAvdoede(
         behandlingId: UUID,
         avdoede: List<Folkeregisteridentifikator>,
@@ -1162,6 +1175,12 @@ class TrygdetidServiceImpl(
                 trygdetidIdenter.containsAll(avdoede.map { it.value })
         )
     }
+
+    private fun oppdaterBeregnetTrygdetidVedKopieringEnabled() =
+        featureToggleService.isEnabled(
+            TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING,
+            false,
+        )
 }
 
 class ManglerForrigeTrygdetidMaaReguleresManuelt :

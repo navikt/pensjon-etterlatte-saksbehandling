@@ -1,28 +1,27 @@
 import { ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
-import { BodyLong, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Vilkaartyper } from '~shared/api/vilkaarsvurdering'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending } from '~shared/api/apiUtils'
 import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { slettViderefoertOpphoer } from '~shared/api/behandling'
 import { resetViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { VurderingKilde } from '~components/behandling/soeknadsoversikt/VurderingKilde'
 
 export const ViderefoereOpphoerVisning = ({
-  viderefoertOpphoer,
   behandlingId,
+  viderefoertOpphoer,
   vilkaarTyper,
   setVisSkjema,
 }: {
-  viderefoertOpphoer: ViderefoertOpphoer
   behandlingId: string
+  viderefoertOpphoer: ViderefoertOpphoer
   vilkaarTyper: Vilkaartyper
-  setVisSkjema: (visVurdering: boolean) => void
+  setVisSkjema: (visSkjema: boolean) => void
 }) => {
   const dispatch = useAppDispatch()
   const [slettViderefoertOpphoerResult, slettViderefoertOpphoerRequest] = useApiCall(slettViderefoertOpphoer)
@@ -65,6 +64,9 @@ export const ViderefoereOpphoerVisning = ({
         )}
 
         <HStack gap="3">
+          {isFailure(slettViderefoertOpphoerResult) && (
+            <Alert variant="error">Kunne ikke slette videreført opphør</Alert>
+          )}
           <Button icon={<PencilIcon />} size="small" variant="tertiary" onClick={() => setVisSkjema(true)}>
             Rediger
           </Button>
@@ -78,11 +80,6 @@ export const ViderefoereOpphoerVisning = ({
             Slett
           </Button>
         </HStack>
-
-        {isFailureHandler({
-          apiResult: slettViderefoertOpphoerResult,
-          errorMessage: 'Kunne ikke slette videreført opphør',
-        })}
       </VStack>
     </Box>
   )

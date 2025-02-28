@@ -1,15 +1,14 @@
 import { IBehandlingStatus, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
-import { Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { useAppDispatch } from '~store/Store'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandlingsstatus, oppdaterViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
 import { lagreViderefoertOpphoer } from '~shared/api/behandling'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Vilkaartyper } from '~shared/api/vilkaarsvurdering'
 import { addMonths, isBefore, startOfDay } from 'date-fns'
 import { JaNei } from '~shared/types/ISvar'
-import { isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { useForm } from 'react-hook-form'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -60,7 +59,7 @@ export const ViderefoereOpphoerSkjema = ({
 }: {
   viderefoertOpphoer: ViderefoertOpphoer | null
   virkningstidspunkt: Date
-  setVisSkjema: (visVurdering: boolean) => void
+  setVisSkjema: (visSkjema: boolean) => void
   behandlingId: string
   vilkaarTyper: Vilkaartyper
 }) => {
@@ -142,6 +141,9 @@ export const ViderefoereOpphoerSkjema = ({
         <Textarea label="Begrunnelse" placeholder="Valgfritt" {...register('begrunnelse')} />
 
         <HStack gap="3">
+          {isFailure(lagreViderefoertOpphoerResult) && (
+            <Alert variant="error">Kunne ikke lagre videreført opphør</Alert>
+          )}
           <Button loading={isPending(lagreViderefoertOpphoerResult)} variant="primary" size="small" type="submit">
             Lagre
           </Button>
@@ -155,11 +157,6 @@ export const ViderefoereOpphoerSkjema = ({
             Avbryt
           </Button>
         </HStack>
-
-        {isFailureHandler({
-          apiResult: lagreViderefoertOpphoerResult,
-          errorMessage: 'Kunne ikke lagre videreført opphør',
-        })}
       </VStack>
     </form>
   )

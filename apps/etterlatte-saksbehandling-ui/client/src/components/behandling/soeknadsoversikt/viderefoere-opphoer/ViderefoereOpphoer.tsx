@@ -1,14 +1,12 @@
 import { IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
 import { useEffect, useState } from 'react'
-import { BodyShort, Box, Button, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, VStack } from '@navikt/ds-react'
 import { ViderefoereOpphoerSkjema } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerSkjema'
 import { ViderefoereOpphoerVisning } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerVisning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaartyper } from '~shared/api/vilkaarsvurdering'
-import { isSuccess, mapResult } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 
 const statusIkon = (viderefoertOpphoer: ViderefoertOpphoer | null) =>
@@ -46,12 +44,12 @@ export const ViderefoereOpphoer = ({
         </BodyShort>
       </VStack>
       <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
-        {visSkjema ? (
-          mapResult(hentVilkaartyperResult, {
-            initial: <ApiWarningAlert>Virkningstidspunkt må være satt for å sette opphør fra og med</ApiWarningAlert>,
-            pending: <Spinner label="Henter vilkårstyper" visible />,
-            error: () => <ApiErrorAlert>Kunne ikke hente vilkårstyper</ApiErrorAlert>,
-            success: (vilkaarTyper) =>
+        {mapResult(hentVilkaartyperResult, {
+          initial: <Alert variant="warning">Virkningstidspunkt må være satt for å sette opphør fra og med</Alert>,
+          pending: <Spinner label="Henter vilkårstyper" visible />,
+          error: () => <Alert variant="error">Kunne ikke hente vilkårstyper</Alert>,
+          success: (vilkaarTyper) =>
+            visSkjema ? (
               virkningstidspunkt && (
                 <ViderefoereOpphoerSkjema
                   virkningstidspunkt={virkningstidspunkt}
@@ -60,25 +58,21 @@ export const ViderefoereOpphoer = ({
                   setVisSkjema={(visSkjema) => setVisSkjema(visSkjema)}
                   behandlingId={behandling.id}
                 />
-              ),
-          })
-        ) : viderefoertOpphoer && isSuccess(hentVilkaartyperResult) ? (
-          <ViderefoereOpphoerVisning
-            viderefoertOpphoer={viderefoertOpphoer}
-            behandlingId={behandling.id}
-            vilkaarTyper={hentVilkaartyperResult.data}
-            setVisSkjema={setVisSkjema}
-          />
-        ) : (
-          redigerbar && (
-            <Button variant="secondary" onClick={() => setVisSkjema(true)}>
-              Legg til vurdering
-            </Button>
-          )
-        )}
-        {isFailureHandler({
-          apiResult: hentVilkaartyperResult,
-          errorMessage: 'Kunne ikke hente vilkår',
+              )
+            ) : viderefoertOpphoer ? (
+              <ViderefoereOpphoerVisning
+                viderefoertOpphoer={viderefoertOpphoer}
+                behandlingId={behandling.id}
+                vilkaarTyper={vilkaarTyper}
+                setVisSkjema={setVisSkjema}
+              />
+            ) : (
+              redigerbar && (
+                <Button variant="secondary" onClick={() => setVisSkjema(true)}>
+                  Legg til vurdering
+                </Button>
+              )
+            ),
         })}
       </Box>
     </SoeknadVurdering>

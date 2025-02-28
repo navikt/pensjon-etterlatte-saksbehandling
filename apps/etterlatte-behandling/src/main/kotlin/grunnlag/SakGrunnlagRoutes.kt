@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.sakId
 
@@ -60,10 +59,3 @@ fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
         }
     }
 }
-
-data class PersonMedNavn(
-    val fnr: Folkeregisteridentifikator,
-    val fornavn: String,
-    val etternavn: String,
-    val mellomnavn: String?,
-)

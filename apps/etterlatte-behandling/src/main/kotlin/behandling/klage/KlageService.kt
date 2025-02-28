@@ -583,14 +583,13 @@ class KlageServiceImpl(
         }
     }
 
-    private fun lagreVedtakForAvvisning(
+    private suspend fun lagreVedtakForAvvisning(
         klage: Klage,
         saksbehandler: Saksbehandler,
-    ): KlageVedtak =
-        runBlocking {
-            val vedtak = vedtakKlient.lagreVedtakKlage(klage, saksbehandler)
-            KlageVedtak(vedtak.id)
-        }
+    ): KlageVedtak {
+        val vedtak = vedtakKlient.lagreVedtakKlage(klage, saksbehandler)
+        return KlageVedtak(vedtak.id)
+    }
 
     private fun ferdigstillBrevOgSendTilKabal(
         it: InnstillingTilKabal,

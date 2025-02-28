@@ -376,7 +376,7 @@ class GenerellBehandlingService(
     private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
         generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
 
-    suspend fun hentKravpakkeForSak(sakId: SakId): KravPakkeMedAvdoed {
+    fun hentKravpakkeForSak(sakId: SakId): KravPakkeMedAvdoed {
         val (kravpakke, forstegangsbehandlingMedKravpakke) =
             inTransaction {
                 val behandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)

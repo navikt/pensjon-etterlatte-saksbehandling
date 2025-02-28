@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.grunnlag.OpplysningDao.GrunnlagHendelse
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype

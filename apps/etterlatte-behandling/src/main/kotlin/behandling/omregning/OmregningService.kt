@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -23,12 +22,6 @@ class OmregningService(
     private val omregningDao: OmregningDao,
     private val oppgaveService: OppgaveService,
 ) {
-    fun hentSakerTilOmregning(
-        kjoering: String,
-        antall: Int,
-        ekskluderteSaker: List<SakId>,
-    ): List<Pair<SakId, KjoeringStatus>> = omregningDao.hentSakerTilOmregning(kjoering, antall, ekskluderteSaker)
-
     fun oppdaterKjoering(request: KjoeringRequest) = oppdaterKjoering(request, HardkodaSystembruker.omregning)
 
     fun oppdaterKjoering(

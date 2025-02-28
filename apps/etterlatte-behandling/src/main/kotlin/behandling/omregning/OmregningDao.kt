@@ -10,53 +10,10 @@ import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
-import no.nav.etterlatte.libs.database.toList
 
 class OmregningDao(
     private val connection: ConnectionAutoclosing,
 ) {
-    fun hentSakerTilOmregning(
-        kjoering: String,
-        antall: Int,
-        ekskluderteSaker: List<SakId>,
-    ): List<Pair<SakId, KjoeringStatus>> =
-        connection.hentConnection { connection ->
-            with(connection) {
-                val harEkskluderteSaker = ekskluderteSaker.isNotEmpty()
-
-                val statement =
-                    prepareStatement(
-                        """
-                        WITH siste_kjoeringer AS (
-                            SELECT sak_id, MAX(tidspunkt) as max_tid
-                            FROM omregningskjoering
-                            GROUP BY sak_id
-                        )
-                        SELECT o.sak_id, o.status  
-                        FROM omregningskjoering o
-                        JOIN siste_kjoeringer s
-                        ON o.sak_id = s.sak_id
-                        WHERE kjoering = ? AND status IN ('KLAR', 'FEILA') AND s.max_tid = o.tidspunkt
-                        ${if (harEkskluderteSaker) "AND o.sak_id <> ALL (?)" else ""}
-                        LIMIT ?
-                        """.trimIndent(),
-                    )
-
-                statement.setString(1, kjoering)
-                if (harEkskluderteSaker) {
-                    statement.setArray(2, createArrayOf("bigint", ekskluderteSaker.map { it.sakId }.toTypedArray()))
-                }
-                statement.setInt(if (harEkskluderteSaker) 3 else 2, antall)
-
-                statement.executeQuery().toList {
-                    Pair(
-                        SakId(getLong("sak_id")),
-                        KjoeringStatus.valueOf(getString("status")),
-                    )
-                }
-            }
-        }
-
     fun oppdaterKjoering(request: KjoeringRequest) {
         connection.hentConnection { connection ->
             with(connection) {

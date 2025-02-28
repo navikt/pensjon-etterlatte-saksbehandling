@@ -1,13 +1,15 @@
 import { IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
 import { useEffect, useState } from 'react'
-import { Alert, BodyShort, Box, Button, VStack } from '@navikt/ds-react'
-import { ViderefoereOpphoerVurdering } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerVurdering'
+import { BodyShort, Box, Button, VStack } from '@navikt/ds-react'
+import { ViderefoereOpphoerSkjema } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerSkjema'
 import { ViderefoereOpphoerVisning } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerVisning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaartyper } from '~shared/api/vilkaarsvurdering'
-import { isSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
+import Spinner from '~shared/Spinner'
 
 const statusIkon = (viderefoertOpphoer: ViderefoertOpphoer | null) =>
   viderefoertOpphoer === null ? 'warning' : 'success'
@@ -19,10 +21,10 @@ export const ViderefoereOpphoer = ({
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [visVurdering, setVisVurdering] = useState(false)
-  const [hentVilkaartyperStatus, hentVilkaartyperRequest] = useApiCall(hentVilkaartyper)
+  const [visSkjema, setVisSkjema] = useState(false)
+  const [hentVilkaartyperResult, hentVilkaartyperRequest] = useApiCall(hentVilkaartyper)
   const viderefoertOpphoer = behandling.viderefoertOpphoer
-  const virkningstidspunkt = behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
+  const virkningstidspunkt = !!behandling.virkningstidspunkt && new Date(behandling.virkningstidspunkt.dato)
 
   useEffect(() => {
     if (virkningstidspunkt != null) {
@@ -44,33 +46,38 @@ export const ViderefoereOpphoer = ({
         </BodyShort>
       </VStack>
       <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
-        {visVurdering ? (
-          virkningstidspunkt && isSuccess(hentVilkaartyperStatus) ? (
-            <ViderefoereOpphoerVurdering
-              virkningstidspunkt={virkningstidspunkt}
-              viderefoertOpphoer={viderefoertOpphoer}
-              vilkaarTyper={hentVilkaartyperStatus.data}
-              setVisVurdering={(visVurdering) => setVisVurdering(visVurdering)}
-              behandlingId={behandling.id}
-            />
-          ) : (
-            <Alert variant="warning">Virkningstidspunkt må være satt for å sette opphør fra og med</Alert>
-          )
-        ) : viderefoertOpphoer ? (
+        {visSkjema ? (
+          mapResult(hentVilkaartyperResult, {
+            initial: <ApiWarningAlert>Virkningstidspunkt må være satt for å sette opphør fra og med</ApiWarningAlert>,
+            pending: <Spinner label="Henter vilkårstyper" visible />,
+            error: () => <ApiErrorAlert>Kunne ikke hente vilkårstyper</ApiErrorAlert>,
+            success: (vilkaarTyper) =>
+              virkningstidspunkt && (
+                <ViderefoereOpphoerSkjema
+                  virkningstidspunkt={virkningstidspunkt}
+                  viderefoertOpphoer={viderefoertOpphoer}
+                  vilkaarTyper={vilkaarTyper}
+                  setVisSkjema={(visSkjema) => setVisSkjema(visSkjema)}
+                  behandlingId={behandling.id}
+                />
+              ),
+          })
+        ) : viderefoertOpphoer && isSuccess(hentVilkaartyperResult) ? (
           <ViderefoereOpphoerVisning
             viderefoertOpphoer={viderefoertOpphoer}
             behandlingId={behandling.id}
-            setVisVurdering={setVisVurdering}
+            vilkaarTyper={hentVilkaartyperResult.data}
+            setVisSkjema={setVisSkjema}
           />
         ) : (
           redigerbar && (
-            <Button variant="secondary" onClick={() => setVisVurdering(true)}>
+            <Button variant="secondary" onClick={() => setVisSkjema(true)}>
               Legg til vurdering
             </Button>
           )
         )}
         {isFailureHandler({
-          apiResult: hentVilkaartyperStatus,
+          apiResult: hentVilkaartyperResult,
           errorMessage: 'Kunne ikke hente vilkår',
         })}
       </Box>

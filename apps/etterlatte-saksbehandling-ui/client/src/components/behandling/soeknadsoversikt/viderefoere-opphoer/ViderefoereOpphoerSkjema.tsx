@@ -23,6 +23,26 @@ interface ViderefoertOpphoerVurderingData {
   begrunnelse?: string
 }
 
+const vilkaarIkkeValgt: string = ''
+
+const skjemaDefaultValues: ViderefoertOpphoerVurderingData = {
+  skalViderefoere: undefined,
+  dato: undefined,
+  vilkaar: vilkaarIkkeValgt,
+  begrunnelse: undefined,
+}
+
+const viderefoertOpphoerVurderingData = (viderefoertOpphoer: ViderefoertOpphoer | null, vilkaarTyper: Vilkaartyper) => {
+  return {
+    skalViderefoere: viderefoertOpphoer ? viderefoertOpphoer.skalViderefoere : skjemaDefaultValues.skalViderefoere,
+    dato: viderefoertOpphoer ? viderefoertOpphoer.dato : skjemaDefaultValues.dato,
+    vilkaar: viderefoertOpphoer
+      ? (finnTittelFraVilkaartype(vilkaarTyper, viderefoertOpphoer.vilkaar) ?? skjemaDefaultValues.vilkaar)
+      : skjemaDefaultValues.vilkaar,
+    begrunnelse: viderefoertOpphoer ? viderefoertOpphoer.begrunnelse : skjemaDefaultValues.begrunnelse,
+  }
+}
+
 function finnTittelFraVilkaartype(vilkaarTyper: Vilkaartyper, vilkaar: string) {
   return vilkaarTyper.typer.find((n) => n.name == vilkaar)?.tittel
 }
@@ -31,29 +51,24 @@ function finnVilkaartypeFraTittel(vilkaarTyper: Vilkaartyper, tittel: string) {
   return vilkaarTyper.typer.find((p) => p.tittel === tittel)
 }
 
-export const ViderefoereOpphoerVurdering = ({
+export const ViderefoereOpphoerSkjema = ({
   virkningstidspunkt,
   viderefoertOpphoer,
-  setVisVurdering,
+  setVisSkjema,
   behandlingId,
   vilkaarTyper,
 }: {
   viderefoertOpphoer: ViderefoertOpphoer | null
   virkningstidspunkt: Date
-  setVisVurdering: (visVurdering: boolean) => void
+  setVisSkjema: (visVurdering: boolean) => void
   behandlingId: string
   vilkaarTyper: Vilkaartyper
 }) => {
   const dispatch = useAppDispatch()
-  const [lagreViderefoertOpphoerStatus, lagreViderefoertOpphoerRequest] = useApiCall(lagreViderefoertOpphoer)
+  const [lagreViderefoertOpphoerResult, lagreViderefoertOpphoerRequest] = useApiCall(lagreViderefoertOpphoer)
   const { handleSubmit, control, register, watch } = useForm<ViderefoertOpphoerVurderingData>({
     shouldUnregister: true,
-    defaultValues: {
-      skalViderefoere: viderefoertOpphoer ? viderefoertOpphoer.skalViderefoere : undefined,
-      dato: viderefoertOpphoer ? viderefoertOpphoer.dato : undefined,
-      vilkaar: viderefoertOpphoer ? (finnTittelFraVilkaartype(vilkaarTyper, viderefoertOpphoer.vilkaar) ?? '') : '',
-      begrunnelse: viderefoertOpphoer ? viderefoertOpphoer.begrunnelse : undefined,
-    },
+    defaultValues: viderefoertOpphoerVurderingData(viderefoertOpphoer, vilkaarTyper),
   })
 
   const lagreViderefoerOpphoer = (data: ViderefoertOpphoerVurderingData) => {
@@ -61,21 +76,22 @@ export const ViderefoereOpphoerVurdering = ({
       {
         behandlingId,
         skalViderefoere: data.skalViderefoere,
-        vilkaarType: data.vilkaar != '' ? finnVilkaartypeFraTittel(vilkaarTyper, data.vilkaar)?.name : undefined,
+        vilkaarType:
+          data.vilkaar != vilkaarIkkeValgt ? finnVilkaartypeFraTittel(vilkaarTyper, data.vilkaar)?.name : undefined,
         begrunnelse: data.begrunnelse != '' ? data.begrunnelse : undefined,
         opphoerstidspunkt: data.dato ? new Date(data.dato) : undefined,
       },
       (viderefoertOpphoer) => {
         dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-        setVisVurdering(false)
+        setVisSkjema(false)
       }
     )
   }
 
   const validerFom = (value: Date): string | undefined => {
     if (isBefore(startOfDay(new Date(value)), startOfDay(virkningstidspunkt)))
-      return 'Må være på eller senere enn virkningstidspunkt'
+      return 'Må være på eller senere enn virkningstidspunktet'
   }
 
   return (
@@ -117,7 +133,7 @@ export const ViderefoereOpphoerVurdering = ({
               errorVedTomInput="Må fylles ut"
               options={concat(
                 vilkaarTyper.typer.map((i) => i.tittel),
-                ''
+                vilkaarIkkeValgt
               )}
             />
           </>
@@ -126,14 +142,14 @@ export const ViderefoereOpphoerVurdering = ({
         <Textarea label="Begrunnelse" placeholder="Valgfritt" {...register('begrunnelse')} />
 
         <HStack gap="3">
-          <Button loading={isPending(lagreViderefoertOpphoerStatus)} variant="primary" size="small" type="submit">
+          <Button loading={isPending(lagreViderefoertOpphoerResult)} variant="primary" size="small" type="submit">
             Lagre
           </Button>
           <Button
             variant="secondary"
             size="small"
             onClick={() => {
-              setVisVurdering(false)
+              setVisSkjema(false)
             }}
           >
             Avbryt
@@ -141,7 +157,7 @@ export const ViderefoereOpphoerVurdering = ({
         </HStack>
 
         {isFailureHandler({
-          apiResult: lagreViderefoertOpphoerStatus,
+          apiResult: lagreViderefoertOpphoerResult,
           errorMessage: 'Kunne ikke lagre videreført opphør',
         })}
       </VStack>

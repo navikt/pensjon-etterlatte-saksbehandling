@@ -1,34 +1,31 @@
 import { ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
-import { BodyLong, BodyShort, Box, Button, Detail, Heading, HStack, VStack } from '@navikt/ds-react'
-import React, { useEffect } from 'react'
+import { BodyLong, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentVilkaartyper } from '~shared/api/vilkaarsvurdering'
+import { Vilkaartyper } from '~shared/api/vilkaarsvurdering'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { isPending, isSuccess } from '~shared/api/apiUtils'
-import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
+import { isPending } from '~shared/api/apiUtils'
+import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { slettViderefoertOpphoer } from '~shared/api/behandling'
 import { resetViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { KildeSaksbehandler } from '~shared/types/kilde'
+import { VurderingKilde } from '~components/behandling/soeknadsoversikt/VurderingKilde'
 
 export const ViderefoereOpphoerVisning = ({
   viderefoertOpphoer,
   behandlingId,
-  setVisVurdering,
+  vilkaarTyper,
+  setVisSkjema,
 }: {
   viderefoertOpphoer: ViderefoertOpphoer
   behandlingId: string
-  setVisVurdering: (visVurdering: boolean) => void
+  vilkaarTyper: Vilkaartyper
+  setVisSkjema: (visVurdering: boolean) => void
 }) => {
   const dispatch = useAppDispatch()
-  const [hentVilkaartyperStatus, hentVilkaartyperRequest] = useApiCall(hentVilkaartyper)
-  const [slettViderefoertOpphoerStatus, slettViderefoertOpphoerRequest] = useApiCall(slettViderefoertOpphoer)
-
-  useEffect(() => {
-    hentVilkaartyperRequest(behandlingId)
-  }, [behandlingId])
+  const [slettViderefoertOpphoerResult, slettViderefoertOpphoerRequest] = useApiCall(slettViderefoertOpphoer)
 
   const slett = () =>
     slettViderefoertOpphoerRequest({ behandlingId: behandlingId }, () => {
@@ -56,10 +53,7 @@ export const ViderefoereOpphoerVisning = ({
             </Box>
             <Box>
               <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
-              <BodyShort>
-                {isSuccess(hentVilkaartyperStatus) &&
-                  hentVilkaartyperStatus.data.typer.find((n) => n.name == viderefoertOpphoer.vilkaar)?.tittel}
-              </BodyShort>
+              <BodyShort>{vilkaarTyper.typer.find((n) => n.name == viderefoertOpphoer.vilkaar)?.tittel}</BodyShort>
             </Box>
           </>
         )}
@@ -71,12 +65,12 @@ export const ViderefoereOpphoerVisning = ({
         )}
 
         <HStack gap="3">
-          <Button icon={<PencilIcon />} size="small" variant="tertiary" onClick={() => setVisVurdering(true)}>
+          <Button icon={<PencilIcon />} size="small" variant="tertiary" onClick={() => setVisSkjema(true)}>
             Rediger
           </Button>
           <Button
             icon={<TrashIcon />}
-            loading={isPending(slettViderefoertOpphoerStatus)}
+            loading={isPending(slettViderefoertOpphoerResult)}
             size="small"
             variant="tertiary"
             onClick={slett}
@@ -86,19 +80,10 @@ export const ViderefoereOpphoerVisning = ({
         </HStack>
 
         {isFailureHandler({
-          apiResult: slettViderefoertOpphoerStatus,
+          apiResult: slettViderefoertOpphoerResult,
           errorMessage: 'Kunne ikke slette videreført opphør',
         })}
       </VStack>
     </Box>
-  )
-}
-
-const VurderingKilde = ({ kilde }: { kilde: KildeSaksbehandler }) => {
-  return (
-    <VStack>
-      <Detail>Manuelt av {kilde.ident}</Detail>
-      <Detail>Sist endret {kilde.tidspunkt ? formaterDatoMedTidspunkt(new Date(kilde.tidspunkt)) : '-'}</Detail>
-    </VStack>
   )
 }

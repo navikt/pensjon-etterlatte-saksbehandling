@@ -339,6 +339,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                         applicationContext.pdlTjenesterKlient,
                         applicationContext.brukerService,
                         applicationContext.oppgaveService,
+                        applicationContext.sakSkrivDao,
                     ),
             )
 
@@ -1005,6 +1006,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     applicationContext.pdlTjenesterKlient,
                     applicationContext.brukerService,
                     applicationContext.oppgaveService,
+                    applicationContext.sakSkrivDao,
                 ),
         )
 }

@@ -541,6 +541,7 @@ internal class ApplicationContext(
             pdltjenesterKlient = pdlTjenesterKlient,
             brukerService = brukerService,
             oppgaveService = oppgaveService,
+            sakSkrivDao = sakSkrivDao,
         )
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(

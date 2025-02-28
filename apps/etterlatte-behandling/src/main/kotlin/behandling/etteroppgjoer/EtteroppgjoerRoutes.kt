@@ -22,8 +22,8 @@ import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 enum class EtteroppgjoerToggles(
     private val toggle: String,
 ) : FeatureToggle {
-    ETTEROPPGJOER("etteroppjoer"),
-    ETTEROPPGJOER_STUB_INNTEKT("etteroppjoer_stub_inntekt"),
+    ETTEROPPGJOER("etteroppgjoer"),
+    ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
     ;
 
     override fun key(): String = toggle
@@ -33,7 +33,7 @@ fun Route.etteroppgjoerRoutes(
     service: EtteroppgjoerService,
     featureToggleService: FeatureToggleService,
 ) {
-    route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER") {
+    route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER}") {
         post {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             if (appIsInGCP() && !isDev()) {

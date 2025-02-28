@@ -6,6 +6,7 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.Duration
 import java.util.UUID
 
 interface BrevApiKlient {
@@ -372,6 +374,10 @@ class BrevApiKlientObo(
                     ?: throw InternfeilException("Feil ved generering av pdf vedtaksbrev")
             },
             brukerTokenInfo = brukerTokenInfo,
+            timeoutConfig = {
+                socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+            },
         )
 
     override suspend fun tilbakestillVedtaksbrev(
@@ -416,11 +422,13 @@ class BrevApiKlientObo(
         url: String,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
+        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
     ): T =
         downstreamResourceClient
             .get(
                 resource = Resource(clientId = clientId, url = url),
                 brukerTokenInfo = brukerTokenInfo,
+                timeoutConfig = timeoutConfig,
             ).mapBoth(
                 success = onSuccess,
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },

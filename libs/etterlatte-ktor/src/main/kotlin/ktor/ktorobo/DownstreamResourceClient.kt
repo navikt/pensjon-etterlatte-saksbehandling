@@ -5,6 +5,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
@@ -33,9 +35,16 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
+        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
     ) = medToken(resource, brukerTokenInfo) { token ->
         httpClient.get(resource.url) {
             bearerAuth(token.accessToken)
+            timeoutConfig?.let { config ->
+                timeout {
+                    apply(config)
+                }
+            }
+
             resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
         }
     }

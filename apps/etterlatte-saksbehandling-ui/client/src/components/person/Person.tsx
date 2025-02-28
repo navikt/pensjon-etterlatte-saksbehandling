@@ -23,12 +23,12 @@ import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
-import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { AktivitetspliktSakoversikt } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
+import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',

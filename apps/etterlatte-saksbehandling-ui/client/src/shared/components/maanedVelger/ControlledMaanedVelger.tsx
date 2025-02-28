@@ -45,6 +45,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
     locale: 'nb',
+    inputFormat: 'dd.MM.yyyy',
     onValidate: (val) => {
       if (val.isEmpty) field.onChange(null)
       else setDateError(val)

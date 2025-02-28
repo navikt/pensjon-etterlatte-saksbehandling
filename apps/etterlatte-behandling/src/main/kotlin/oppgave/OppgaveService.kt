@@ -698,9 +698,7 @@ class OppgaveService(
                         OppgaveType.AKTIVITETSPLIKT_12MND,
                         OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                         OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
-                        ->
-                            true
-
+                        -> true
                         OppgaveType.OPPFOELGING,
                         OppgaveType.KLAGE,
                         OppgaveType.KRAVPAKKE_UTLAND,
@@ -710,7 +708,6 @@ class OppgaveService(
                         OppgaveType.INNTEKTSOPPLYSNING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         OppgaveType.MELDT_INN_ENDRING,
-                        OppgaveType.OPPFOELGING,
                         OppgaveType.ETTEROPPGJOER,
                         -> {
                             logger.info(

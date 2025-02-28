@@ -118,9 +118,7 @@ class InntektsjusteringSelvbetjeningService(
 
         // har sanksjon
         val avkortingSjekk = hentAvkortingSjekk(sakId, YearMonth.from(loependeFom), vedtak.behandlingId!!)
-        if (avkortingSjekk.harSanksjon) return false
-
-        return true
+        return !avkortingSjekk.harSanksjon
     }
 
     private fun mottattInntektsjsuteringFullfoert(

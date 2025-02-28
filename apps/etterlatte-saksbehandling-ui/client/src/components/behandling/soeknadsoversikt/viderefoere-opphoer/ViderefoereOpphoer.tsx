@@ -25,7 +25,7 @@ export const ViderefoereOpphoer = ({
   const virkningstidspunkt = !!behandling.virkningstidspunkt && new Date(behandling.virkningstidspunkt.dato)
 
   useEffect(() => {
-    if (virkningstidspunkt != null) {
+    if (virkningstidspunkt) {
       hentVilkaartyperRequest(behandling.id)
     }
   }, [behandling.id, behandling.virkningstidspunkt])

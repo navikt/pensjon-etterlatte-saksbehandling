@@ -42,11 +42,11 @@ export const slettAktivitetHendelseForBehandling = async (args: {
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
   apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse/${args.aktivitetHendelseId}`)
 
-export const slettAktivitet = async (args: {
+export const slettAktivitetPeriodeForBehandling = async (args: {
   behandlingId: string
-  aktivitetId: string
+  aktivitetPeriodeId: string
 }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
-  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
+  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet/${args.aktivitetPeriodeId}`)
 
 export const hentAktiviteterOgHendelser = async (args: {
   sakId: number
@@ -68,11 +68,11 @@ export const opprettHendelseForSak = async (args: {
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
   apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/hendelse`, { ...args.request })
 
-export const slettAktivitetForSak = async (args: {
+export const slettAktivitetPeriodeForSak = async (args: {
   sakId: number
-  aktivitetId: string
+  aktivitetPeriodeId: string
 }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
-  apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
+  apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/aktivitet/${args.aktivitetPeriodeId}`)
 
 export const slettAktivitetHendelseForSak = async (args: {
   sakId: number

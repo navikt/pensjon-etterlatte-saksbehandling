@@ -1,5 +1,5 @@
 import { IAktivitetHendelse } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Button, HStack, Timeline, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, HStack, Timeline, TimelinePinProps, VStack } from '@navikt/ds-react'
 import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { Dispatch, SetStateAction } from 'react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -13,7 +13,7 @@ import {
   AktivitetspliktSkjemaAaVise,
 } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
-interface Props {
+interface Props extends TimelinePinProps {
   behandling?: IDetaljertBehandling
   sakId: number
   aktivitetHendelse: IAktivitetHendelse
@@ -22,6 +22,7 @@ interface Props {
 }
 
 export const AktivitetHendelseTimelinePin = ({
+  date,
   aktivitetHendelse,
   behandling,
   sakId,
@@ -46,7 +47,7 @@ export const AktivitetHendelseTimelinePin = ({
   }
 
   return (
-    <Timeline.Pin date={new Date(aktivitetHendelse.dato)}>
+    <Timeline.Pin date={date}>
       <VStack gap="2">
         <BodyShort>{aktivitetHendelse.beskrivelse}</BodyShort>
         <VStack>

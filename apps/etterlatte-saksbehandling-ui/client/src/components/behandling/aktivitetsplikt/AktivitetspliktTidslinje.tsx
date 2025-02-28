@@ -11,8 +11,8 @@ import {
 import { BodyShort, Button, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import {
   hentAktiviteterOgHendelser,
-  slettAktivitet,
-  slettAktivitetForSak,
+  slettAktivitetPeriodeForBehandling,
+  slettAktivitetPeriodeForSak,
   slettAktivitetHendelseForBehandling,
   slettAktivitetHendelseForSak,
 } from '~shared/api/aktivitetsplikt'
@@ -52,9 +52,9 @@ interface Props {
 
 export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props) => {
   const [hentAktivitetOgHendelserResult, hentAktiviteterOgHendelserRequest] = useApiCall(hentAktiviteterOgHendelser)
-  const [slettAktivitetResult, slettAktivitetRequest] = useApiCall(slettAktivitet)
+  const [slettAktivitetResult, slettAktivitetRequest] = useApiCall(slettAktivitetPeriodeForBehandling)
+  const [slettAktivitetForSakResult, slettAktivitetForSakRequest] = useApiCall(slettAktivitetPeriodeForSak)
   const [slettHendelseResult, slettHendelseRequest] = useApiCall(slettAktivitetHendelseForBehandling)
-  const [slettAktivitetForSakResult, slettAktivitetForSakRequest] = useApiCall(slettAktivitetForSak)
   const [slettHendelseForSakResult, slettHendelseForSakRequest] = useApiCall(slettAktivitetHendelseForSak)
   const seksMndEtterDoedsfall = addMonths(doedsdato, 6)
   const tolvMndEtterDoedsfall = addMonths(doedsdato, 12)
@@ -83,11 +83,11 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
 
   const fjernAktivitet = (aktivitetId: string) => {
     if (behandling) {
-      slettAktivitetRequest({ behandlingId: behandling.id, aktivitetId: aktivitetId }, (aktiviteter) => {
+      slettAktivitetRequest({ behandlingId: behandling.id, aktivitetPeriodeId: aktivitetId }, (aktiviteter) => {
         oppdaterAktiviteter(aktiviteter)
       })
     } else {
-      slettAktivitetForSakRequest({ sakId: sakId, aktivitetId: aktivitetId }, (aktiviteter) => {
+      slettAktivitetForSakRequest({ sakId: sakId, aktivitetPeriodeId: aktivitetId }, (aktiviteter) => {
         oppdaterAktiviteter(aktiviteter)
       })
     }

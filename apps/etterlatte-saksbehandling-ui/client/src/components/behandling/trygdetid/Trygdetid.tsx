@@ -138,14 +138,16 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
-      {kopierTrygdetidsgrunnlagEnabled && behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-        <TrygdetidIAnnenBehandlingMedSammeAvdoede
-          behandlingId={behandling.id}
-          setTrygdetider={setTrygdetider}
-          trygdetider={trygdetider}
-          mapNavn={mapNavn}
-        />
-      )}
+      {kopierTrygdetidsgrunnlagEnabled &&
+        behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+        redigerbar && (
+          <TrygdetidIAnnenBehandlingMedSammeAvdoede
+            behandlingId={behandling.id}
+            setTrygdetider={setTrygdetider}
+            trygdetider={trygdetider}
+            mapNavn={mapNavn}
+          />
+        )}
       <VStack gap="11">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         {landListe && (

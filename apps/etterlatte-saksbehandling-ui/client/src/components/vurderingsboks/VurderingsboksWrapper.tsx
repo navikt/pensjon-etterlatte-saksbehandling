@@ -1,8 +1,7 @@
-import { BodyShort, Button, Detail, Heading } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, HStack } from '@navikt/ds-react'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import React, { ReactElement, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import Spinner from '~shared/Spinner'
 import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 
@@ -86,18 +85,24 @@ export const VurderingsboksWrapper = ({
           </Oppsummering>
 
           {redigerbar && (
-            <>
-              <RedigerWrapper
+            <HStack gap="3">
+              <Button
+                icon={<PencilIcon />}
+                size="small"
+                variant="tertiary"
                 onClick={() => {
                   setRediger(true)
                   if (setOverstyrRediger) setOverstyrRediger(true)
                 }}
               >
-                <PencilIcon aria-hidden="true" />
-                <span className="text"> Rediger</span>
-              </RedigerWrapper>
+                Rediger
+              </Button>
               {slett && (
-                <RedigerWrapper
+                <Button
+                  icon={<TrashIcon />}
+                  loading={lagrer}
+                  size="small"
+                  variant="tertiary"
                   onClick={async () => {
                     new Promise(() => {
                       setLagrer(true)
@@ -105,11 +110,10 @@ export const VurderingsboksWrapper = ({
                     })
                   }}
                 >
-                  {lagrer ? <Spinner label="" margin="0" variant="interaction" /> : <TrashIcon aria-hidden="true" />}
-                  <span className="text"> Slett</span>
-                </RedigerWrapper>
+                  Slett
+                </Button>
               )}
-            </>
+            </HStack>
           )}
         </>
       )}
@@ -143,24 +147,6 @@ export const VurderingsboksWrapper = ({
     </div>
   )
 }
-
-const RedigerWrapper = styled.div`
-  display: inline-flex;
-  float: left;
-  cursor: pointer;
-  color: #0067c5;
-  margin-right: 10px;
-
-  .text {
-    margin-left: 0.3em;
-    font-size: 1rem;
-    font-weight: normal;
-  }
-
-  &:hover {
-    text-decoration-line: underline;
-  }
-`
 
 const Oppsummering = styled.div`
   font-size: 0.7em;

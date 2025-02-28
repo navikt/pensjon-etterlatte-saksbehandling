@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
@@ -98,6 +99,12 @@ object OppdragMapper {
                             sats = it.beloep
                             fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG
                             typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
+
+                            // Vi vil teste om håndteringen for etteroppgjør som oppdrag gjør for uføretrygd i dag også fungerer for OMS
+                            if (isDev() && it.sakId.value in listOf(1004669L, 1004668L) && it.periode.fra.year == 2024) {
+                                typeSoknad = "EO"
+                            }
+
                             brukKjoreplan = it.kjoereplan.toString()
                             saksbehId = utbetaling.saksbehandler.value
                             utbetalesTilId = utbetaling.stoenadsmottaker.value

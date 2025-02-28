@@ -1056,7 +1056,7 @@ internal class OppgaveServiceTest(
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(
                 SakMedEnhet(
-                    oppgaverUtenEndring[0].sakId,
+                    oppgaveUtenEndring.sakId,
                     Enheter.STEINKJER.enhetNr,
                 ),
             ),

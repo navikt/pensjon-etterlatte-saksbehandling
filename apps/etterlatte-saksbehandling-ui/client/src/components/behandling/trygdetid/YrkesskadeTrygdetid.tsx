@@ -1,6 +1,6 @@
 import { Checkbox, CheckboxGroup } from '@navikt/ds-react'
 import { ITrygdetid } from '~shared/api/trygdetid'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface Props {
   redigerbar: boolean
@@ -12,6 +12,11 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
   const [yrkesskade, setYrkesskade] = useState<boolean | undefined>(
     trygdetid.beregnetTrygdetid?.resultat.yrkesskade ?? undefined
   )
+  useEffect(() => {
+    if (trygdetid) {
+      setYrkesskade(trygdetid.beregnetTrygdetid?.resultat.yrkesskade ?? undefined)
+    }
+  }, [trygdetid])
 
   return (
     <CheckboxGroup

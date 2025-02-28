@@ -316,6 +316,8 @@ internal class TrygdetidServiceIntegrationTest(
                                 periode = TrygdetidPeriode(fra = LocalDate.of(2020, 5, 1), til = LocalDate.of(2020, 7, 1)),
                             ),
                         ),
+                    overstyrtNorskPoengaar = 22,
+                    yrkesskade = true,
                 ),
             ).also { it.beregnetTrygdetid shouldBe null }
 
@@ -324,12 +326,15 @@ internal class TrygdetidServiceIntegrationTest(
         val trygdetidList = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
         trygdetidList.size shouldBe 1
 
-        trygdetidList.first().kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
-        with(trygdetidList.first().trygdetidGrunnlag.sortedBy { it.periode.fra }) {
+        val trygdetid = trygdetidList.first()
+        trygdetid.kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
+        with(trygdetid.trygdetidGrunnlag.sortedBy { it.periode.fra }) {
             this[0].periode.fra shouldBe LocalDate.of(2020, 5, 1)
             this[0].periode.til shouldBe LocalDate.of(2020, 7, 1)
         }
-        trygdetidList.first().beregnetTrygdetid shouldNotBe null
+        trygdetid.beregnetTrygdetid shouldNotBe null
+        trygdetid.overstyrtNorskPoengaar shouldBe 22
+        trygdetid.yrkesskade shouldBe true
 
         verify(exactly = 1) {
             avtaleService.hentAvtaleForBehandling(kildeBehandlingId)

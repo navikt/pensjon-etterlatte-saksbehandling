@@ -679,6 +679,7 @@ class TrygdetidServiceImpl(
                             beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid,
                             ident = forrigeTrygdetid.ident,
                             yrkesskade = forrigeTrygdetid.yrkesskade,
+                            overstyrtNorskPoengaar = forrigeTrygdetid.overstyrtNorskPoengaar,
                             kopiertGrunnlagFraBehandling = forrigeTrygdetid.behandlingId,
                         )
 

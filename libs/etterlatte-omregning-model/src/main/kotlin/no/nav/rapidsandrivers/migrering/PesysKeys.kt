@@ -1,4 +1,4 @@
-package no.nav.etterlatte.rapidsandrivers.migrering
+package no.nav.rapidsandrivers.migrering
 
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage

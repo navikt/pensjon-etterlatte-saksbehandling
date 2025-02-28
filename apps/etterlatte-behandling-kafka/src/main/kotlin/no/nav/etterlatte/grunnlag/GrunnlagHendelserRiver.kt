@@ -16,10 +16,10 @@ import no.nav.etterlatte.rapidsandrivers.GRUNNLAG_OPPDATERT
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

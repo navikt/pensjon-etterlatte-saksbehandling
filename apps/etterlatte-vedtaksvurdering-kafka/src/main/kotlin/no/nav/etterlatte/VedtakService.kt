@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
+import no.nav.rapidsandrivers.migrering.MigreringKjoringVariant
 import java.time.LocalDate
 import java.util.UUID
 

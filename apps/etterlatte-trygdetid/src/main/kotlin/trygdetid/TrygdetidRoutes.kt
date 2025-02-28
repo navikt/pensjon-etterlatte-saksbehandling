@@ -299,6 +299,21 @@ fun Route.trygdetid(
                 }
             }
 
+            post("/kopier-grunnlag/{kildeBehandlingId}") {
+                // Alias for kopier-og-overskriv (temp)
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
+                        call.respond(
+                            trygdetidService.kopierOgOverskrivTrygdetid(
+                                behandlingId = behandlingId,
+                                kildeBehandlingId = kildeBehandlingId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            ),
+                        )
+                    }
+                }
+            }
+
             post("/kopier-og-overskriv/{kildeBehandlingId}") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     withUuidParam("kildeBehandlingId") { kildeBehandlingId ->

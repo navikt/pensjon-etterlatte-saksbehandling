@@ -533,6 +533,10 @@ class SakServiceImpl(
         dao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
     }
 
+    /*
+        Bruk denne med omhu, husk at om det oppdateres til en spesialenhet uten å sette ekstra felter blir
+        saken mulig å behandle for feil saksbehandlere og potensielt skjult.
+     */
     override fun oppdaterEnhet(
         sak: SakMedEnhet,
         kommentar: String?,

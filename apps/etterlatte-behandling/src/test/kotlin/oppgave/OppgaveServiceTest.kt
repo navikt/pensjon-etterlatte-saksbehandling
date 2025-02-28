@@ -1017,6 +1017,9 @@ internal class OppgaveServiceTest(
         assertEquals(1, oppgaverUtenEndring.size)
         assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
         oppgaveService.tildelSaksbehandler(oppgaverUtenEndring[0].id, saksbehandlerMedRoller.saksbehandler.ident())
+        val oppdatert = oppgaveService.hentOppgave(oppgaverUtenEndring[0].id)
+        assertEquals(Status.UNDER_BEHANDLING, oppdatert.status)
+
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(
                 SakMedEnhet(

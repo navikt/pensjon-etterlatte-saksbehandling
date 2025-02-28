@@ -1,4 +1,4 @@
-import { StegMenyBox } from '~components/behandling/StegMeny/stegmeny'
+import { StegMenyBox } from '~components/behandling/stegmeny/StegMeny'
 import React from 'react'
 import { TilbakekrevingNavLenke } from '~components/tilbakekreving/stegmeny/TilbakekrevingNavLenke'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'

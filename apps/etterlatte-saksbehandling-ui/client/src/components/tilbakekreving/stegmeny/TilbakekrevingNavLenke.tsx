@@ -1,7 +1,7 @@
 import React from 'react'
 import { Label, Link } from '@navikt/ds-react'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
-import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
+import { DisabledLabel } from '~components/behandling/stegmeny/StegMeny'
 
 export const TILBAKEKREVINGSTEG = ['vurdering', 'utbetalinger', 'oppsummering', 'brev'] as const
 

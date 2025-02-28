@@ -2,7 +2,7 @@ import { Alert, Box, Button, Dropdown, Heading, HStack, Modal } from '@navikt/ds
 import React, { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
-import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
+import { DokumentVisningModal, PdfVisning } from '~shared/brev/PdfVisning'
 import { Journalpost } from '~shared/types/Journalpost'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'

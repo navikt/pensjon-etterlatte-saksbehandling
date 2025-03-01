@@ -132,6 +132,11 @@
   resolved "https://registry.yarnpkg.com/@csstools/css-tokenizer/-/css-tokenizer-3.0.3.tgz#a5502c8539265fecbd873c1e395a890339f119c2"
   integrity sha512-UJnjoFsmxfKUdNYdWgOB0mWUypuLvAfQPH1+pyvRJs6euowbFkFC6P13w1l8mJyi3vxYMxc9kld5jZEGRQs6bw==
 
+"@date-fns/tz@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@date-fns/tz/-/tz-1.2.0.tgz#81cb3211693830babaf3b96aff51607e143030a6"
+  integrity sha512-LBrd7MiJZ9McsOgxqWX7AaxrDjcFVjWH/tIKJd7pnR7McaslGYOP1QmmiBXdJH/H/yLCT+rcQ7FaPBUxRGUtrg==
+
 "@emotion/is-prop-valid@1.2.2":
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@emotion/is-prop-valid/-/is-prop-valid-1.2.2.tgz#d4175076679c6a26faa92b03bb786f9e52612337"
@@ -440,33 +445,33 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^7.10.0":
-  version "7.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.10.0.tgz#746cdb8d2ee771bfffc83f1a7f868967b19254be"
-  integrity sha512-k8mcnkx/kiNd6SacR6lQot+WuIz6/3k3oUc9A+mH91FFJ1DcA4GCstS72/A4otmszvvCxCw0ZkivgBtU1JFq1g==
+"@navikt/aksel-icons@^7.14.3":
+  version "7.14.3"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.14.3.tgz#a40b7802d3233a0ad26aed85ee8bf6ad9e630555"
+  integrity sha512-OAmWUtkUBy+GWY52jzwajxuH1wZwaS0QEPYeQ4s2wUFKDxJTk23GaUhII0ggss2GZZgIePspes/niC5DETqaUw==
 
-"@navikt/ds-css@~7.10.0":
-  version "7.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.10.0.tgz#c2930037490143d3cfa4f676b49bb388eb49959e"
-  integrity sha512-Iayk13Nb9V9NkCWowtzphwVgpsnilSPRcIy3RzwKiSLZl5CSW/S7/Xvdi2jhLEiPZtXlC52rMt6mkwmjvuT9Kw==
+"@navikt/ds-css@~7.14.3":
+  version "7.14.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.14.3.tgz#ea3085cb7f7f98237beff5df3192f7a744c5f685"
+  integrity sha512-CyRtN00UIkokSh7KQFOUwjcrD+6I0TfN7YTS33Hn4n3UblCG3bGaYqP+f2bciNMi23/+Mi5TIr6znWM0BuXr9A==
 
-"@navikt/ds-react@~7.10.0":
-  version "7.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.10.0.tgz#4cd87a1eb3bc93399bd17fbecb3ed35ba156f3fe"
-  integrity sha512-34oQAnn8q4pMVQosw4Rqzntek9yRl01eNR/zGnzNLzg9VvYIYy2xaFVJvS61LJdaigvSo955w+C9VIwXQQ7sUw==
+"@navikt/ds-react@~7.14.3":
+  version "7.14.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.14.3.tgz#91c478486263b23e6d9e150d7ae508d6a2b7683e"
+  integrity sha512-R36UgfRRwoqLvw+IhzjfvLm80v1DB9PBTHOskVUSXmdTH8sXH8veLqvZsitSAENe6nt3DcXUsBhg59ihAmGgkw==
   dependencies:
     "@floating-ui/react" "0.25.4"
     "@floating-ui/react-dom" "^2.0.9"
-    "@navikt/aksel-icons" "^7.10.0"
-    "@navikt/ds-tokens" "^7.10.0"
+    "@navikt/aksel-icons" "^7.14.3"
+    "@navikt/ds-tokens" "^7.14.3"
     clsx "^2.1.0"
-    date-fns "^3.0.0"
-    react-day-picker "8.10.1"
+    date-fns "^4.0.0"
+    react-day-picker "9.5.0"
 
-"@navikt/ds-tokens@^7.10.0", "@navikt/ds-tokens@~7.10.0":
-  version "7.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.10.0.tgz#04ceca43c67cd5bcb0a8524e45c94067fd2b278c"
-  integrity sha512-yozkLGtD5VtK1p/0+cHR4qWvYl6B6YPOV5aY4E1naBppuS5ykKtWvYeu2lxVlM6sWd6hkV3znbanoloyGFmj+Q==
+"@navikt/ds-tokens@^7.14.3", "@navikt/ds-tokens@~7.14.3":
+  version "7.14.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.14.3.tgz#d128b01d9ad7a696f24391a8769d4cfaa6f1d838"
+  integrity sha512-6tZZ/xPoxohkboNzbgJmemGcBt5yl89v4RkuOsOyfO2mTb1aEv8uQw3kZLtlzm7CaZ95F/lTLbF0IpDgalMW0A==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"
@@ -1416,12 +1421,12 @@ data-view-byte-offset@^1.0.1:
     es-errors "^1.3.0"
     is-data-view "^1.0.1"
 
-date-fns@^3.0.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.6.0.tgz#f20ca4fe94f8b754951b24240676e8618c0206bf"
-  integrity sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==
+date-fns-jalali@^4.1.0-0:
+  version "4.1.0-0"
+  resolved "https://registry.yarnpkg.com/date-fns-jalali/-/date-fns-jalali-4.1.0-0.tgz#9c7fb286004fab267a300d3e9f1ada9f10b4b6b0"
+  integrity sha512-hTIP/z+t+qKwBDcmmsnmjWTduxCg+5KfdqWQvb2X/8C9+knYY6epN/pfxdDuyVlSVeFz0sM5eEfwIUQ70U4ckg==
 
-date-fns@^4.1.0:
+date-fns@^4.0.0, date-fns@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-4.1.0.tgz#64b3d83fff5aa80438f5b1a633c2e83b8a1c2d14"
   integrity sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==
@@ -3135,10 +3140,14 @@ react-datepicker@*, react-datepicker@^8.0.0:
     clsx "^2.1.1"
     date-fns "^4.1.0"
 
-react-day-picker@8.10.1:
-  version "8.10.1"
-  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.1.tgz#4762ec298865919b93ec09ba69621580835b8e80"
-  integrity sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==
+react-day-picker@9.5.0:
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-9.5.0.tgz#2ae36e85d6506026d72e350f49b5607d011cfd6f"
+  integrity sha512-WmJnPFVLnKh5Qscm7wavMNg86rqPverSWjx+zgK8/ZmGRSQ8c8OoqW10RI+AzAfT2atIxImpCUU2R9Z7Xb2SUA==
+  dependencies:
+    "@date-fns/tz" "^1.2.0"
+    date-fns "^4.1.0"
+    date-fns-jalali "^4.1.0-0"
 
 react-dom@^19.0.0:
   version "19.0.0"

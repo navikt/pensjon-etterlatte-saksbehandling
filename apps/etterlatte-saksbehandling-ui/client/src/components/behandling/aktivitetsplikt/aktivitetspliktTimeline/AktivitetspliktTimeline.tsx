@@ -1,10 +1,9 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { addMonths, addYears } from 'date-fns'
 import { HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
-import { AktivitetspliktType, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
+import { AktivitetspliktType, IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
 import { AktivitetHendelseTimelinePinContent } from '~components/behandling/aktivitetsplikt/aktivitetspliktTimeline/AktivitetHendelseTimelinePinContent'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { AktivitetspliktRedigeringModus } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { AktivitetspliktPeriodeTimelinePeriodContent } from '~components/behandling/aktivitetsplikt/aktivitetspliktTimeline/AktivitetspliktPeriodeTimelinePeriodContent'
 import {
@@ -16,23 +15,25 @@ import {
   RulerIcon,
   WaitingRoomIcon,
 } from '@navikt/aksel-icons'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAktiviteterOgHendelser } from '~shared/api/aktivitetsplikt'
-import { mapResult } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface Props {
-  behandling?: IDetaljertBehandling
-  sakId: number
   doedsdato: Date
+  aktivitetHendelser: IAktivitetHendelse[]
+  setAktivitetHendelser: (aktivitetHendelser: IAktivitetHendelse[]) => void
+  aktivitetPerioder: IAktivitetPeriode[]
+  setAktivitetPerioder: (aktivitetPerioder: IAktivitetPeriode[]) => void
   setAktivitetspliktRedigeringModus: (aktivitetspliktRedigeringModus: AktivitetspliktRedigeringModus) => void
 }
 
-export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktivitetspliktRedigeringModus }: Props) => {
+export const AktivitetspliktTimeline = ({
+  doedsdato,
+  aktivitetHendelser,
+  setAktivitetHendelser,
+  aktivitetPerioder,
+  setAktivitetPerioder,
+  setAktivitetspliktRedigeringModus,
+}: Props) => {
   const [sluttdato, setSluttdato] = useState<Date>(addYears(doedsdato, 3))
-
-  const [aktivitetOgHendelserResult, aktiviteterOgHendelserFetch] = useApiCall(hentAktiviteterOgHendelser)
 
   const velgVisningAvAktivitetspliktPeriodeTimelineRow = (aktivitetPeriode: IAktivitetPeriode): ReactNode => {
     switch (aktivitetPeriode.type) {
@@ -50,6 +51,7 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
                 behandlingId={aktivitetPeriode.behandlingId}
                 sakId={aktivitetPeriode.sakId}
                 aktivitetPeriode={aktivitetPeriode}
+                setAktivitetPerioder={setAktivitetPerioder}
                 setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
               />
             </Timeline.Period>
@@ -69,6 +71,7 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
                 behandlingId={aktivitetPeriode.behandlingId}
                 sakId={aktivitetPeriode.sakId}
                 aktivitetPeriode={aktivitetPeriode}
+                setAktivitetPerioder={setAktivitetPerioder}
                 setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
               />
             </Timeline.Period>
@@ -88,6 +91,7 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
                 behandlingId={aktivitetPeriode.behandlingId}
                 sakId={aktivitetPeriode.sakId}
                 aktivitetPeriode={aktivitetPeriode}
+                setAktivitetPerioder={setAktivitetPerioder}
                 setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
               />
             </Timeline.Period>
@@ -107,6 +111,7 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
                 behandlingId={aktivitetPeriode.behandlingId}
                 sakId={aktivitetPeriode.sakId}
                 aktivitetPeriode={aktivitetPeriode}
+                setAktivitetPerioder={setAktivitetPerioder}
                 setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
               />
             </Timeline.Period>
@@ -126,6 +131,7 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
                 behandlingId={aktivitetPeriode.behandlingId}
                 sakId={aktivitetPeriode.sakId}
                 aktivitetPeriode={aktivitetPeriode}
+                setAktivitetPerioder={setAktivitetPerioder}
                 setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
               />
             </Timeline.Period>
@@ -145,6 +151,7 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
                 behandlingId={aktivitetPeriode.behandlingId}
                 sakId={aktivitetPeriode.sakId}
                 aktivitetPeriode={aktivitetPeriode}
+                setAktivitetPerioder={setAktivitetPerioder}
                 setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
               />
             </Timeline.Period>
@@ -164,6 +171,7 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
                 behandlingId={aktivitetPeriode.behandlingId}
                 sakId={aktivitetPeriode.sakId}
                 aktivitetPeriode={aktivitetPeriode}
+                setAktivitetPerioder={setAktivitetPerioder}
                 setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
               />
             </Timeline.Period>
@@ -171,10 +179,6 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
         )
     }
   }
-
-  useEffect(() => {
-    aktiviteterOgHendelserFetch({ sakId, behandlingId: behandling?.id })
-  }, [])
 
   return (
     <VStack gap="4">
@@ -190,39 +194,34 @@ export const AktivitetspliktTimeline = ({ behandling, sakId, doedsdato, setAktiv
           <ToggleGroup.Item value="3">3 år</ToggleGroup.Item>
         </ToggleGroup>
       </HStack>
-      {mapResult(aktivitetOgHendelserResult, {
-        pending: <Spinner label="Henter aktivitet og hendelser for aktivitetsplikt" />,
-        error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente aktiviteter og hendelser'}</ApiErrorAlert>,
-        success: ({ perioder: aktivitetPerioder, hendelser: aktivitetHendelser }) => (
-          <Timeline startDate={doedsdato} endDate={sluttdato}>
-            <Timeline.Pin date={doedsdato}>Dødsdato: {formaterDato(doedsdato)}</Timeline.Pin>
-            <Timeline.Pin date={new Date()}>Dagens dato: {formaterDato(new Date())}</Timeline.Pin>
-            <Timeline.Pin date={addMonths(doedsdato, 6)}>
-              6 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 6))}
-            </Timeline.Pin>
-            <Timeline.Pin date={addMonths(doedsdato, 12)}>
-              12 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 12))}
-            </Timeline.Pin>
-            {aktivitetHendelser.map((aktivitetHendelse, index) => (
-              <Timeline.Pin key={index} date={new Date(aktivitetHendelse.dato)}>
-                <AktivitetHendelseTimelinePinContent
-                  sakId={aktivitetHendelse.sakId}
-                  behandlingId={aktivitetHendelse.behandlingId}
-                  aktivitetHendelse={aktivitetHendelse}
-                  setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
-                />
-              </Timeline.Pin>
-            ))}
-            {!!aktivitetPerioder?.length ? (
-              aktivitetPerioder.map(velgVisningAvAktivitetspliktPeriodeTimelineRow)
-            ) : (
-              <Timeline.Row label="Ingen aktiviteter">
-                <Timeline.Period start={addYears(doedsdato, -1)} end={addYears(doedsdato, -1)}></Timeline.Period>
-              </Timeline.Row>
-            )}
-          </Timeline>
-        ),
-      })}
+      <Timeline startDate={doedsdato} endDate={sluttdato}>
+        <Timeline.Pin date={doedsdato}>Dødsdato: {formaterDato(doedsdato)}</Timeline.Pin>
+        <Timeline.Pin date={new Date()}>Dagens dato: {formaterDato(new Date())}</Timeline.Pin>
+        <Timeline.Pin date={addMonths(doedsdato, 6)}>
+          6 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 6))}
+        </Timeline.Pin>
+        <Timeline.Pin date={addMonths(doedsdato, 12)}>
+          12 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 12))}
+        </Timeline.Pin>
+        {aktivitetHendelser.map((aktivitetHendelse, index) => (
+          <Timeline.Pin key={index} date={new Date(aktivitetHendelse.dato)}>
+            <AktivitetHendelseTimelinePinContent
+              sakId={aktivitetHendelse.sakId}
+              behandlingId={aktivitetHendelse.behandlingId}
+              aktivitetHendelse={aktivitetHendelse}
+              setAktivitetHendelser={setAktivitetHendelser}
+              setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
+            />
+          </Timeline.Pin>
+        ))}
+        {!!aktivitetPerioder?.length ? (
+          aktivitetPerioder.map(velgVisningAvAktivitetspliktPeriodeTimelineRow)
+        ) : (
+          <Timeline.Row label="Ingen aktiviteter">
+            <Timeline.Period start={addYears(doedsdato, -1)} end={addYears(doedsdato, -1)}></Timeline.Period>
+          </Timeline.Row>
+        )}
+      </Timeline>
     </VStack>
   )
 }

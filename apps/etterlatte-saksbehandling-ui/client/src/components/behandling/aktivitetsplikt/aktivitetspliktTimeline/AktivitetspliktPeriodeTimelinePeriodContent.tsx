@@ -16,6 +16,7 @@ interface Props {
   behandlingId?: string
   sakId: number
   aktivitetPeriode: IAktivitetPeriode
+  setAktivitetPerioder: (aktivitetPerioder: IAktivitetPeriode[]) => void
   setAktivitetspliktRedigeringModus: (aktivitetspliktRedigeringModus: AktivitetspliktRedigeringModus) => void
 }
 
@@ -23,6 +24,7 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
   behandlingId,
   sakId,
   aktivitetPeriode,
+  setAktivitetPerioder,
   setAktivitetspliktRedigeringModus,
 }: Props) => {
   const [slettAktivitetPeriodeForBehandlingResult, slettAktivitetPeriodeForBehandlingRequest] = useApiCall(
@@ -33,9 +35,9 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
 
   const slettAktivitetPeriode = (aktivitetPeriodeId: string) => {
     if (!!behandlingId) {
-      slettAktivitetPeriodeForBehandlingRequest({ behandlingId, aktivitetPeriodeId })
+      slettAktivitetPeriodeForBehandlingRequest({ behandlingId, aktivitetPeriodeId }, setAktivitetPerioder)
     } else {
-      slettAktivitetPeriodeForSakRequest({ sakId, aktivitetPeriodeId })
+      slettAktivitetPeriodeForSakRequest({ sakId, aktivitetPeriodeId }, setAktivitetPerioder)
     }
   }
 
@@ -72,7 +74,7 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
             setAktivitetspliktRedigeringModus({
               aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_PERIODE,
               aktivitetHendelse: undefined,
-              aktivitetPeriode: aktivitetPeriode,
+              aktivitetPeriode,
             })
           }
         >

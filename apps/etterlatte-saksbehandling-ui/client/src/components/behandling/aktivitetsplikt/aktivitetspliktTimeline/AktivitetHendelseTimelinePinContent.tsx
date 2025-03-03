@@ -16,19 +16,21 @@ interface Props {
   behandlingId?: string
   sakId: number
   aktivitetHendelse: IAktivitetHendelse
+  setAktivitetHendelser: (aktivitetHendelser: IAktivitetHendelse[]) => void
   setAktivitetspliktRedigeringModus: (aktivitetspliktRedigeringModus: AktivitetspliktRedigeringModus) => void
 }
 
 export const AktivitetHendelseTimelinePinContent = ({
-  aktivitetHendelse,
   sakId,
+  aktivitetHendelse,
+  setAktivitetHendelser,
   setAktivitetspliktRedigeringModus,
 }: Props): ReactNode => {
   const [slettAktivitetsHendelseForSakResult, slettAktivitetsHendelseForSakRequest] =
     useApiCall(slettAktivitetHendelseForSak)
 
   const slettAktivitetHendelse = (aktivitetHendelseId: string) => {
-    slettAktivitetsHendelseForSakRequest({ sakId, aktivitetHendelseId })
+    slettAktivitetsHendelseForSakRequest({ sakId, aktivitetHendelseId }, setAktivitetHendelser)
   }
 
   return (
@@ -62,7 +64,7 @@ export const AktivitetHendelseTimelinePinContent = ({
           onClick={() =>
             setAktivitetspliktRedigeringModus({
               aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_HENDELSE,
-              aktivitetHendelse: aktivitetHendelse,
+              aktivitetHendelse,
               aktivitetPeriode: undefined,
             })
           }

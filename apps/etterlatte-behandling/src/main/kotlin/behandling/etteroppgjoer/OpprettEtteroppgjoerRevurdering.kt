@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -29,44 +30,48 @@ class OpprettEtteroppgjoerRevurdering(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val sisteIverksatte =
-            behandlingService.hentSisteIverksatte(sakId)
-                ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+        val (revurdering, sisteIverksatte) =
+            inTransaction {
+                val sisteIverksatte =
+                    behandlingService.hentSisteIverksatte(sakId)
+                        ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
-        val persongalleri =
-            grunnlagService.hentPersongalleri(sakId)
-                ?: throw InternfeilException("Fant ikke iverksatt persongaller")
+                val persongalleri =
+                    grunnlagService.hentPersongalleri(sakId)
+                        ?: throw InternfeilException("Fant ikke iverksatt persongaller")
 
-        val virkningstidspunkt =
-            Virkningstidspunkt(
-                dato = YearMonth.of(2024, 1), // TODO må utledes
-                kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-                begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
-            )
+                val virkningstidspunkt =
+                    Virkningstidspunkt(
+                        dato = YearMonth.of(2024, 1), // TODO må utledes
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
+                    )
 
-        val revurdering =
-            revurderingService.opprettRevurdering(
-                sakId = sakId,
-                forrigeBehandling = sisteIverksatte,
-                persongalleri = persongalleri,
-                prosessType = Prosesstype.MANUELL, // TODO parameter når automatisk implementeres
-                kilde = Vedtaksloesning.GJENNY,
-                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
-                virkningstidspunkt = virkningstidspunkt,
-                begrunnelse = "TODO",
-                saksbehandlerIdent = brukerTokenInfo.ident(),
-                mottattDato = null,
-                relatertBehandlingId = null,
-                frist = null,
-                paaGrunnAvOppgave = null,
-            )
+                val revurdering =
+                    revurderingService.opprettRevurdering(
+                        sakId = sakId,
+                        forrigeBehandling = sisteIverksatte,
+                        persongalleri = persongalleri,
+                        prosessType = Prosesstype.MANUELL, // TODO parameter når automatisk implementeres
+                        kilde = Vedtaksloesning.GJENNY,
+                        revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+                        virkningstidspunkt = virkningstidspunkt,
+                        begrunnelse = "TODO",
+                        saksbehandlerIdent = brukerTokenInfo.ident(),
+                        mottattDato = null,
+                        relatertBehandlingId = null,
+                        frist = null,
+                        paaGrunnAvOppgave = null,
+                    )
 
-        vilkaarsvurderingService.kopierVilkaarsvurdering(
-            behandlingId = revurdering.behandlingId(),
-            kopierFraBehandling = sisteIverksatte.id,
-            brukerTokenInfo = brukerTokenInfo,
-        )
+                vilkaarsvurderingService.kopierVilkaarsvurdering(
+                    behandlingId = revurdering.behandlingId(),
+                    kopierFraBehandling = sisteIverksatte.id,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
 
+                Pair(revurdering, sisteIverksatte)
+            }
         runBlocking {
             trygdetidKlient.kopierTrygdetidFraForrigeBehandling(
                 behandlingId = revurdering.behandlingId(),

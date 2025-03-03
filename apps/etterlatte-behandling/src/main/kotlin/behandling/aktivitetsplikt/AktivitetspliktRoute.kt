@@ -111,6 +111,36 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
+        route("hendelse") {
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter eller oppdaterer hendelser for behandlingId $behandlingId")
+                    val hendelse = call.receive<LagreAktivitetspliktHendelse>()
+                    val hendelser =
+                        inTransaction {
+                            aktivitetspliktService.upsertHendelse(hendelse, brukerTokenInfo, behandlingId = behandlingId)
+                            aktivitetspliktService.hentHendelser(behandlingId = behandlingId)
+                        }
+                    call.respond(hendelser)
+                }
+            }
+
+//            route("/{$HENDELSE_ID_CALL_PARAMETER}") {
+//                delete {
+//                    kunSkrivetilgang {
+//                        logger.info("Sletter hendelse $hendelseId for sakId $sakId")
+//
+//                        val hendelser =
+//                            inTransaction {
+//                                aktivitetspliktService.slettHendelse(hendelseId, sakId = sakId)
+//                                aktivitetspliktService.hentHendelser(sakId = sakId)
+//                            }
+//
+//                        call.respond(hendelser)
+//                    }
+//                }
+//            }
+        }
     }
 
     route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt") {

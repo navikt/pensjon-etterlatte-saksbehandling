@@ -1,6 +1,6 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { formatISO } from 'date-fns'
 import { isFailure, isPending } from '~shared/api/apiUtils'
@@ -8,7 +8,15 @@ import { Alert, Box, Button, Heading, HStack, Select, Textarea, VStack } from '@
 import { AktivitetspliktType, IAktivitetPeriode, OpprettAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
 import { opprettAktivitetPeriodeForBehandling, opprettAktivitetPeriodeForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+import {
+  Buildings2Icon,
+  HatSchoolIcon,
+  PencilIcon,
+  PersonIcon,
+  ReceptionIcon,
+  RulerIcon,
+  WaitingRoomIcon,
+} from '@navikt/aksel-icons'
 
 function dtoTilSkjema(periode: IAktivitetPeriode): NyAktivitetPeriode {
   return {
@@ -172,4 +180,65 @@ export const NyAktivitet = ({
       )}
     </>
   )
+}
+
+interface AktivitetstypeProps {
+  type: AktivitetspliktType
+  beskrivelse: string
+  ikon: ReactNode
+  status: 'success' | 'warning' | 'danger' | 'info' | 'neutral'
+}
+
+export const mapAktivitetstypeProps = (type: AktivitetspliktType): AktivitetstypeProps => {
+  switch (type) {
+    case AktivitetspliktType.ARBEIDSTAKER:
+      return {
+        type: AktivitetspliktType.ARBEIDSTAKER,
+        beskrivelse: 'Arbeidstaker',
+        ikon: <PersonIcon aria-hidden />,
+        status: 'success',
+      }
+    case AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE:
+      return {
+        type: AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE,
+        beskrivelse: 'Selvstendig næringsdrivende',
+        ikon: <RulerIcon aria-hidden />,
+        status: 'info',
+      }
+    case AktivitetspliktType.ETABLERER_VIRKSOMHET:
+      return {
+        type: AktivitetspliktType.ETABLERER_VIRKSOMHET,
+        beskrivelse: 'Etablerer virksomhet',
+        ikon: <Buildings2Icon aria-hidden />,
+        status: 'danger',
+      }
+    case AktivitetspliktType.ARBEIDSSOEKER:
+      return {
+        type: AktivitetspliktType.ARBEIDSSOEKER,
+        beskrivelse: 'Arbeidssøker',
+        ikon: <PencilIcon aria-hidden />,
+        status: 'warning',
+      }
+    case AktivitetspliktType.UTDANNING:
+      return {
+        type: AktivitetspliktType.UTDANNING,
+        beskrivelse: 'Utdanning',
+        ikon: <HatSchoolIcon aria-hidden />,
+        status: 'neutral',
+      }
+    case AktivitetspliktType.INGEN_AKTIVITET:
+      return {
+        type: AktivitetspliktType.INGEN_AKTIVITET,
+        beskrivelse: 'Ingen Aktivitet',
+        ikon: <WaitingRoomIcon aria-hidden />,
+        status: 'neutral',
+      }
+    case AktivitetspliktType.OPPFOELGING_LOKALKONTOR:
+      return {
+        type: AktivitetspliktType.OPPFOELGING_LOKALKONTOR,
+        beskrivelse: 'Oppfølging lokalkontor',
+        ikon: <ReceptionIcon aria-hidden />,
+        status: 'warning',
+      }
+  }
 }

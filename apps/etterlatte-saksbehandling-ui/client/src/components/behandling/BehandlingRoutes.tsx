@@ -58,7 +58,7 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
   },
   etteroppgjoerOversikt: {
     path: 'etteroppgjoeroversikt',
-    description: 'Etteroppgjoeroversikt',
+    description: 'Etteroppgjøroversikt',
     element: (behandling: IBehandlingReducer) => <EtteroppgjoerOversikt behandling={behandling} />,
   },
   vilkaarsvurdering: {

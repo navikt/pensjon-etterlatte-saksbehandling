@@ -34,6 +34,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
@@ -64,6 +65,8 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -271,6 +274,7 @@ internal class ApplicationContext(
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
+    val trygdetidKlient: TrygdetidKlient = TrygdetidKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
@@ -687,6 +691,16 @@ internal class ApplicationContext(
             vilkaarsvurderingService = vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,
             tilgangsService = oppdaterTilgangService,
+        )
+
+    val opprettEtteroppgjoerRevurdering =
+        OpprettEtteroppgjoerRevurdering(
+            behandlingService,
+            grunnlagService,
+            revurderingService,
+            vilkaarsvurderingService,
+            trygdetidKlient,
+            beregningsKlient,
         )
 
     val migreringService =

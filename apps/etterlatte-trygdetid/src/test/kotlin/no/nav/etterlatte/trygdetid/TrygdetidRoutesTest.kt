@@ -109,12 +109,12 @@ internal class TrygdetidRoutesTest {
         val behandlingId = randomUUID()
         val kildeBehandlingId = randomUUID()
         val etterKopiering = listOf(trygdetid(behandlingId = behandlingId)).map(Trygdetid::toDto)
-        coEvery { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, any()) } returns
+        coEvery { trygdetidService.kopierOgOverskrivTrygdetid(behandlingId, kildeBehandlingId, any()) } returns
             etterKopiering
 
         testApplication {
             val response =
-                client.post("/api/trygdetid_v2/$behandlingId/kopier-grunnlag/$kildeBehandlingId") {
+                client.post("/api/trygdetid_v2/$behandlingId/kopier-og-overskriv/$kildeBehandlingId") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -125,7 +125,7 @@ internal class TrygdetidRoutesTest {
         }
         coVerify {
             behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-            trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, any())
+            trygdetidService.kopierOgOverskrivTrygdetid(behandlingId, kildeBehandlingId, any())
         }
     }
 

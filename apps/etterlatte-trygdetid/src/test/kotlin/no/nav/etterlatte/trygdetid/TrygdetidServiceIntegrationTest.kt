@@ -11,6 +11,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.deserialize
@@ -78,6 +79,9 @@ internal class TrygdetidServiceIntegrationTest(
                 mockk<PesysKlient>(),
                 avtaleService,
                 vedtaksvurderingKlient,
+                DummyFeatureToggleService().also {
+                    it.settBryter(TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING, true)
+                },
             )
     }
 
@@ -266,7 +270,7 @@ internal class TrygdetidServiceIntegrationTest(
     }
 
     @Test
-    fun `skal kopiere trygdetidsgrunnlag fra annen behandling`() {
+    fun `skal kopiere trygdetid fra annen behandling`() {
         val behandlingId = UUID.randomUUID()
         val kildeBehandlingId = UUID.randomUUID()
         val grunnlagTestData = GrunnlagTestData()
@@ -280,6 +284,13 @@ internal class TrygdetidServiceIntegrationTest(
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
         every { avtaleService.hentAvtaleForBehandling(any()) } returns opprettTrygdeavtale(kildeBehandlingId)
         justRun { avtaleService.opprettAvtale(any()) }
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns randomSakId()
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { tidligereFamiliepleier } returns null
+            }
 
         repository.opprettTrygdetid(
             trygdetid(
@@ -294,29 +305,36 @@ internal class TrygdetidServiceIntegrationTest(
             ),
         )
 
-        repository.opprettTrygdetid(
-            trygdetid(
-                behandlingId = kildeBehandlingId,
-                sakId = randomSakId(),
-                trygdetidGrunnlag =
-                    listOf(
-                        trygdetidGrunnlag(
-                            periode = TrygdetidPeriode(fra = LocalDate.of(2020, 5, 1), til = LocalDate.of(2020, 7, 1)),
+        repository
+            .opprettTrygdetid(
+                trygdetid(
+                    behandlingId = kildeBehandlingId,
+                    sakId = randomSakId(),
+                    trygdetidGrunnlag =
+                        listOf(
+                            trygdetidGrunnlag(
+                                periode = TrygdetidPeriode(fra = LocalDate.of(2020, 5, 1), til = LocalDate.of(2020, 7, 1)),
+                            ),
                         ),
-                    ),
-            ),
-        )
+                    overstyrtNorskPoengaar = 22,
+                    yrkesskade = true,
+                ),
+            ).also { it.beregnetTrygdetid shouldBe null }
 
-        runBlocking { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, saksbehandler) }
+        runBlocking { trygdetidService.kopierOgOverskrivTrygdetid(behandlingId, kildeBehandlingId, saksbehandler) }
 
         val trygdetidList = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
         trygdetidList.size shouldBe 1
 
-        trygdetidList.first().kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
-        with(trygdetidList.first().trygdetidGrunnlag.sortedBy { it.periode.fra }) {
+        val trygdetid = trygdetidList.first()
+        trygdetid.kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
+        with(trygdetid.trygdetidGrunnlag.sortedBy { it.periode.fra }) {
             this[0].periode.fra shouldBe LocalDate.of(2020, 5, 1)
             this[0].periode.til shouldBe LocalDate.of(2020, 7, 1)
         }
+        trygdetid.beregnetTrygdetid shouldNotBe null
+        trygdetid.overstyrtNorskPoengaar shouldBe 22
+        trygdetid.yrkesskade shouldBe true
 
         verify(exactly = 1) {
             avtaleService.hentAvtaleForBehandling(kildeBehandlingId)

@@ -199,7 +199,8 @@ class TrygdetidRepository(
     ) = queryOf(
         statement =
             """
-            INSERT INTO trygdetid(id, behandling_id, sak_id, ident, yrkesskade) VALUES(:id, :behandlingId, :sakId, :ident, :yrkesskade)
+            INSERT INTO trygdetid(id, behandling_id, sak_id, ident, yrkesskade, poengaar_overstyrt, kopiert_grunnlag_fra_behandling)
+            VALUES(:id, :behandlingId, :sakId, :ident, :yrkesskade, :overstyrtNorskPoengaar, :kopiertGrunnlagFraBehandling)
             """.trimIndent(),
         paramMap =
             mapOf(
@@ -208,6 +209,8 @@ class TrygdetidRepository(
                 "sakId" to trygdetid.sakId.sakId,
                 "ident" to trygdetid.ident,
                 "yrkesskade" to trygdetid.yrkesskade,
+                "overstyrtNorskPoengaar" to trygdetid.overstyrtNorskPoengaar,
+                "kopiertGrunnlagFraBehandling" to trygdetid.kopiertGrunnlagFraBehandling,
             ),
     ).let { query -> tx.update(query) }
 

@@ -3,7 +3,7 @@ import { BodyShort, Button, HStack, VStack } from '@navikt/ds-react'
 import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { ReactNode } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { slettAktivitetHendelseForBehandling, slettAktivitetHendelseForSak } from '~shared/api/aktivitetsplikt'
+import { slettAktivitetHendelseForSak } from '~shared/api/aktivitetsplikt'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -21,22 +21,14 @@ interface Props {
 
 export const AktivitetHendelseTimelinePinContent = ({
   aktivitetHendelse,
-  behandlingId,
   sakId,
   setAktivitetspliktRedigeringModus,
 }: Props): ReactNode => {
-  const [slettAktivitetsHendelseForBehandlingResult, slettAktivitetsHendelseForBehandlingRequest] = useApiCall(
-    slettAktivitetHendelseForBehandling
-  )
   const [slettAktivitetsHendelseForSakResult, slettAktivitetsHendelseForSakRequest] =
     useApiCall(slettAktivitetHendelseForSak)
 
   const slettAktivitetHendelse = (aktivitetHendelseId: string) => {
-    if (!!behandlingId) {
-      slettAktivitetsHendelseForBehandlingRequest({ behandlingId, aktivitetHendelseId })
-    } else {
-      slettAktivitetsHendelseForSakRequest({ sakId, aktivitetHendelseId })
-    }
+    slettAktivitetsHendelseForSakRequest({ sakId, aktivitetHendelseId })
   }
 
   return (
@@ -57,7 +49,7 @@ export const AktivitetHendelseTimelinePinContent = ({
         </BodyShort>
       </VStack>
       {isFailureHandler({
-        apiResult: slettAktivitetsHendelseForBehandlingResult || slettAktivitetsHendelseForSakResult,
+        apiResult: slettAktivitetsHendelseForSakResult,
         errorMessage: 'Kunne ikke slette aktivitet hendelse',
       })}
       <HStack gap="2">
@@ -66,7 +58,7 @@ export const AktivitetHendelseTimelinePinContent = ({
           size="xsmall"
           icon={<PencilIcon aria-hidden />}
           iconPosition="right"
-          loading={isPending(slettAktivitetsHendelseForBehandlingResult || slettAktivitetsHendelseForSakResult)}
+          loading={isPending(slettAktivitetsHendelseForSakResult)}
           onClick={() =>
             setAktivitetspliktRedigeringModus({
               aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_HENDELSE,
@@ -82,7 +74,7 @@ export const AktivitetHendelseTimelinePinContent = ({
           size="xsmall"
           icon={<TrashIcon aria-hidden />}
           iconPosition="right"
-          loading={isPending(slettAktivitetsHendelseForBehandlingResult || slettAktivitetsHendelseForSakResult)}
+          loading={isPending(slettAktivitetsHendelseForSakResult)}
           onClick={() => slettAktivitetHendelse(aktivitetHendelse.id)}
         >
           Slett

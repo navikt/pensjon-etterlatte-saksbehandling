@@ -124,22 +124,6 @@ internal fun Route.aktivitetspliktRoutes(
                     call.respond(hendelser)
                 }
             }
-
-//            route("/{$HENDELSE_ID_CALL_PARAMETER}") {
-//                delete {
-//                    kunSkrivetilgang {
-//                        logger.info("Sletter hendelse $hendelseId for sakId $sakId")
-//
-//                        val hendelser =
-//                            inTransaction {
-//                                aktivitetspliktService.slettHendelse(hendelseId, sakId = sakId)
-//                                aktivitetspliktService.hentHendelser(sakId = sakId)
-//                            }
-//
-//                        call.respond(hendelser)
-//                    }
-//                }
-//            }
         }
     }
 

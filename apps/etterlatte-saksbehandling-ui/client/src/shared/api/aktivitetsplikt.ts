@@ -48,12 +48,6 @@ export const opprettAktivitetHendelseForSak = async (args: {
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
   apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/hendelse`, { ...args.request })
 
-export const slettAktivitetHendelseForBehandling = async (args: {
-  behandlingId: string
-  aktivitetHendelseId: string
-}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
-  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse/${args.aktivitetHendelseId}`)
-
 export const slettAktivitetPeriodeForBehandling = async (args: {
   behandlingId: string
   aktivitetPeriodeId: string

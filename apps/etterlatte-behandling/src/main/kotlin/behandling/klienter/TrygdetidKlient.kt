@@ -29,7 +29,7 @@ class TrygdetidKlientImpl(
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("trygdetid.client.id")
-    private val resourceUrl = config.getString("beregning.resource.url")
+    private val resourceUrl = config.getString("trygdetid.resource.url")
 
     override suspend fun kopierTrygdetidFraForrigeBehandling(
         behandlingId: UUID,

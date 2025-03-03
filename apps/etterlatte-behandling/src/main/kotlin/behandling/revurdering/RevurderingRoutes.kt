@@ -8,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -32,6 +33,7 @@ internal fun Route.revurderingRoutes(
     omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
     automatiskRevurderingService: AutomatiskRevurderingService,
     aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
+    opprettEtteroppgjoer: OpprettEtteroppgjoerRevurdering,
 ) {
     val logger = LoggerFactory.getLogger("RevurderingRoute")
 
@@ -62,6 +64,11 @@ internal fun Route.revurderingRoutes(
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
                         // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
+
+                        if (opprettRevurderingRequest.aarsak == Revurderingaarsak.ETTEROPPGJOER) {
+                            opprettEtteroppgjoer.opprett(sakId, opprettRevurderingRequest)
+                        }
+
                         val revurdering =
                             inTransaction {
                                 manuellRevurderingService.opprettManuellRevurderingWrapper(

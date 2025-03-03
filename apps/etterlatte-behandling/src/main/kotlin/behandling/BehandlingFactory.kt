@@ -283,7 +283,7 @@ class BehandlingFactory(
                     if (omgjoeringRequest.omgjoeringsOppgaveId != null) {
                         val omgjoeringsOppgave =
                             omgjoeringsOppgaver.find {
-                                it.erUnderBehandling() &&
+                                it.erIkkeAvsluttet() &&
                                     it.id == omgjoeringRequest.omgjoeringsOppgaveId &&
                                     it.saksbehandler?.ident == saksbehandler.ident
                             }

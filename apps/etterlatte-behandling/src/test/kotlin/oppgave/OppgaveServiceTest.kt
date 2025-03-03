@@ -1017,12 +1017,9 @@ internal class OppgaveServiceTest(
         assertEquals(1, oppgaverUtenEndring.size)
         assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
         oppgaveService.tildelSaksbehandler(oppgaverUtenEndring[0].id, saksbehandlerMedRoller.saksbehandler.ident())
-        oppgaveService.endrePaaVent(
-            oppgaverUtenEndring[0].id,
-            merknad = "test",
-            paavent = true,
-            aarsak = PaaVentAarsak.ANNET,
-        )
+        val oppdatert = oppgaveService.hentOppgave(oppgaverUtenEndring[0].id)
+        assertEquals(Status.UNDER_BEHANDLING, oppdatert.status)
+
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(
                 SakMedEnhet(
@@ -1036,6 +1033,44 @@ internal class OppgaveServiceTest(
         assertEquals(1, oppgaverMedEndring.size)
         assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
         assertEquals(Status.NY, oppgaverMedEndring[0].status)
+    }
+
+    @Test
+    fun `attesteringsoppgave skal fortsette å være attesteringsoppgave selv om saken flyttes`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        oppgaveService.opprettOppgave(
+            referanse = UUID.randomUUID().toString(),
+            sakId = opprettetSak.id,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null,
+        )
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaverUtenEndring.size)
+        val oppgaveUtenEndring = oppgaverUtenEndring.single()
+
+        assertEquals(Enheter.AALESUND.enhetNr, oppgaveUtenEndring.enhet)
+        oppgaveService.tildelSaksbehandler(oppgaveUtenEndring.id, saksbehandlerMedRoller.saksbehandler.ident())
+        oppgaveService.tilAttestering(oppgaveUtenEndring.referanse, oppgaveUtenEndring.type, null)
+        oppgaveService.oppdaterEnhetForRelaterteOppgaver(
+            listOf(
+                SakMedEnhet(
+                    oppgaveUtenEndring.sakId,
+                    Enheter.STEINKJER.enhetNr,
+                ),
+            ),
+        )
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+
+        assertEquals(1, oppgaverMedEndring.size)
+        val oppgaveMedEndring = oppgaverMedEndring.single()
+        assertEquals(Enheter.STEINKJER.enhetNr, oppgaveMedEndring.enhet)
+        assertEquals(Status.ATTESTERING, oppgaveMedEndring.status)
+        assertEquals(null, oppgaveMedEndring.saksbehandler)
     }
 
     @Test

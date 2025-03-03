@@ -66,7 +66,7 @@ internal fun Route.revurderingRoutes(
                         // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
 
                         if (opprettRevurderingRequest.aarsak == Revurderingaarsak.ETTEROPPGJOER) {
-                            opprettEtteroppgjoer.opprett(sakId, opprettRevurderingRequest)
+                            opprettEtteroppgjoer.opprett(sakId, brukerTokenInfo)
                         }
 
                         val revurdering =

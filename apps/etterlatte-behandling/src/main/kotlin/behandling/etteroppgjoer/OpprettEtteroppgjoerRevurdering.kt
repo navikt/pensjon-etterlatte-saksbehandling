@@ -27,7 +27,7 @@ class OpprettEtteroppgjoerRevurdering(
 ) {
     fun opprett(
         sakId: SakId,
-        bruker: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val sisteIverksatte =
             behandlingService.hentSisteIverksatte(sakId)
@@ -54,7 +54,7 @@ class OpprettEtteroppgjoerRevurdering(
                 revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                 virkningstidspunkt = virkningstidspunkt,
                 begrunnelse = "TODO",
-                saksbehandlerIdent = bruker.ident(),
+                saksbehandlerIdent = brukerTokenInfo.ident(),
                 mottattDato = null,
                 relatertBehandlingId = null,
                 frist = null,
@@ -64,20 +64,20 @@ class OpprettEtteroppgjoerRevurdering(
         vilkaarsvurderingService.kopierVilkaarsvurdering(
             behandlingId = revurdering.behandlingId(),
             kopierFraBehandling = sisteIverksatte.id,
-            brukerTokenInfo = bruker,
+            brukerTokenInfo = brukerTokenInfo,
         )
 
         runBlocking {
             trygdetidKlient.kopierTrygdetidFraForrigeBehandling(
                 behandlingId = revurdering.behandlingId(),
                 forrigeBehandlingId = sisteIverksatte.id,
-                brukerTokenInfo = bruker,
+                brukerTokenInfo = brukerTokenInfo,
             )
 
             beregningKlient.opprettBeregningsgrunnlagFraForrigeBehandling(
                 behandlingId = revurdering.behandlingId(),
                 forrigeBehandlingId = sisteIverksatte.id,
-                brukerTokenInfo = bruker,
+                brukerTokenInfo = brukerTokenInfo,
             )
         }
     }

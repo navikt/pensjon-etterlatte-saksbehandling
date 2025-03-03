@@ -270,7 +270,7 @@ internal class TrygdetidServiceIntegrationTest(
     }
 
     @Test
-    fun `skal kopiere trygdetidsgrunnlag fra annen behandling`() {
+    fun `skal kopiere trygdetid fra annen behandling`() {
         val behandlingId = UUID.randomUUID()
         val kildeBehandlingId = UUID.randomUUID()
         val grunnlagTestData = GrunnlagTestData()

@@ -629,7 +629,7 @@ class TrygdetidServiceImpl(
         val alleTrygdetider =
             kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid, eksisterendeTrygdetider)
 
-        if (oppdaterBeregnetTrygdetidVedKopieringEnabled()) {
+        if (featureToggleService.isEnabled(TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING, false)) {
             alleTrygdetider.forEach { trygdetid ->
                 oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
             }

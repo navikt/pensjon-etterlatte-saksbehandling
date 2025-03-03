@@ -1,4 +1,3 @@
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useEffect, useState } from 'react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -7,6 +6,7 @@ import { PlusIcon } from '@navikt/aksel-icons'
 import { IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
 import { NyHendelse } from '~components/behandling/aktivitetsplikt/NyHendelse'
 import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 enum Skjemavisning {
   INGEN = 'INGEN',
@@ -29,7 +29,7 @@ export const AktivitetOgHendelse = ({
   setHendelser: (aktiviteter: IAktivitetHendelse[]) => void
   avbrytRedigering: () => void
   sakId: number
-  behandling?: IBehandlingReducer
+  behandling?: IDetaljertBehandling
 }) => {
   const [visForm, setVisForm] = useState<Skjemavisning>(Skjemavisning.INGEN)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()

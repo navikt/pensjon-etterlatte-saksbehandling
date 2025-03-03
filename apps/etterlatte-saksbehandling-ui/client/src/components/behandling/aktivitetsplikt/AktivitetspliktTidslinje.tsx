@@ -5,27 +5,17 @@ import {
   PersonIcon,
   ReceptionIcon,
   RulerIcon,
-  TrashIcon,
   WaitingRoomIcon,
 } from '@navikt/aksel-icons'
-import { BodyShort, Button, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
-import {
-  hentAktiviteterOgHendelser,
-  slettAktivitetPeriodeForBehandling,
-  slettAktivitetPeriodeForSak,
-  slettAktivitetHendelseForBehandling,
-  slettAktivitetHendelseForSak,
-} from '~shared/api/aktivitetsplikt'
-import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
+import { HStack, VStack } from '@navikt/ds-react'
+import { hentAktiviteterOgHendelser } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { addMonths, addYears } from 'date-fns'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { AktivitetspliktType, IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { isPending } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
 import { AktivitetOgHendelse } from '~components/behandling/aktivitetsplikt/AktivitetOgHendelse'
+import { AktivitetspliktTimeline } from '~components/behandling/aktivitetsplikt/aktivitetspliktTimeline/AktivitetspliktTimeline'
 
 export enum AktivitetspliktSkjemaAaVise {
   AKTIVITET_HENDELSE,
@@ -52,18 +42,11 @@ interface Props {
 
 export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props) => {
   const [hentAktivitetOgHendelserResult, hentAktiviteterOgHendelserRequest] = useApiCall(hentAktiviteterOgHendelser)
-  const [slettAktivitetResult, slettAktivitetRequest] = useApiCall(slettAktivitetPeriodeForBehandling)
-  const [slettAktivitetForSakResult, slettAktivitetForSakRequest] = useApiCall(slettAktivitetPeriodeForSak)
-  const [slettHendelseResult, slettHendelseRequest] = useApiCall(slettAktivitetHendelseForBehandling)
-  const [slettHendelseForSakResult, slettHendelseForSakRequest] = useApiCall(slettAktivitetHendelseForSak)
-  const seksMndEtterDoedsfall = addMonths(doedsdato, 6)
-  const tolvMndEtterDoedsfall = addMonths(doedsdato, 12)
-  const [aktiviteter, setAktiviteter] = useState<IAktivitetPeriode[]>([])
-  const [hendelser, setHendelser] = useState<IAktivitetHendelse[]>([])
+  const [aktivitetPerioder, setAktivitetPerioder] = useState<IAktivitetPeriode[]>([])
+  const [aktivitetHendelser, setAktivitetHendelser] = useState<IAktivitetHendelse[]>([])
   const [redigerAktivitet, setRedigerAktivitet] = useState<IAktivitetPeriode | undefined>(undefined)
   const [redigerHendelse, setRedigerHendelse] = useState<IAktivitetHendelse | undefined>(undefined)
   const [aktivitetsTypeProps, setAktivitetsTypeProps] = useState<AktivitetstypeProps[]>([])
-  const [sluttdato, setSluttdato] = useState<Date>(addYears(doedsdato, 3))
 
   const [aktivitetspliktRedigeringModus, setAktivitetspliktRedigeringModus] = useState<AktivitetspliktRedigeringModus>(
     defaultAktivitetspliktRedigeringModus
@@ -72,37 +55,13 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
   useEffect(() => {
     hentAktiviteterOgHendelserRequest({ sakId: sakId, behandlingId: behandling?.id }, (aktiviteter) => {
       oppdaterAktiviteter(aktiviteter.perioder)
-      setHendelser(aktiviteter.hendelser)
+      setAktivitetHendelser(aktiviteter.hendelser)
     })
   }, [behandling, sakId])
 
   const oppdaterAktiviteter = (aktiviteter: IAktivitetPeriode[]) => {
     setAktivitetsTypeProps([...new Set(aktiviteter.map((a) => a.type))].map(mapAktivitetstypeProps))
-    setAktiviteter(aktiviteter)
-  }
-
-  const fjernAktivitet = (aktivitetId: string) => {
-    if (behandling) {
-      slettAktivitetRequest({ behandlingId: behandling.id, aktivitetPeriodeId: aktivitetId }, (aktiviteter) => {
-        oppdaterAktiviteter(aktiviteter)
-      })
-    } else {
-      slettAktivitetForSakRequest({ sakId: sakId, aktivitetPeriodeId: aktivitetId }, (aktiviteter) => {
-        oppdaterAktiviteter(aktiviteter)
-      })
-    }
-  }
-
-  const fjernHendelse = (hendelseId: string) => {
-    if (behandling) {
-      slettHendelseRequest({ behandlingId: behandling.id, aktivitetHendelseId: hendelseId }, (hendelser) => {
-        setHendelser(hendelser)
-      })
-    } else {
-      slettHendelseForSakRequest({ sakId: sakId, aktivitetHendelseId: hendelseId }, (hendelser) => {
-        setHendelser(hendelser)
-      })
-    }
+    setAktivitetPerioder(aktiviteter)
   }
 
   function avbrytRedigering() {
@@ -112,132 +71,16 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
 
   return (
     <VStack gap="8" minWidth="50rem">
-      <Timeline startDate={doedsdato} endDate={sluttdato}>
-        <Timeline.Pin date={doedsdato}>
-          <BodyShort>Dødsdato: {formaterDato(doedsdato)}</BodyShort>
-        </Timeline.Pin>
-        <Timeline.Pin date={new Date()}>
-          <BodyShort>Dagens dato: {formaterDato(new Date())}</BodyShort>
-        </Timeline.Pin>
-        <Timeline.Pin date={seksMndEtterDoedsfall}>
-          <BodyShort>6 måneder etter dødsfall: {formaterDato(seksMndEtterDoedsfall)}</BodyShort>
-        </Timeline.Pin>
-        <Timeline.Pin date={tolvMndEtterDoedsfall}>
-          <BodyShort>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</BodyShort>
-        </Timeline.Pin>
-        {hendelser.map((hendelse) => (
-          <Timeline.Pin key={hendelse.id} date={new Date(hendelse.dato)}>
-            <BodyShort>{hendelse.beskrivelse}</BodyShort>
-            <VStack>
-              <BodyShort>
-                <i>
-                  Lagt til {formaterDatoMedTidspunkt(new Date(hendelse.opprettet.tidspunkt))} av{' '}
-                  {hendelse.opprettet.ident}
-                </i>
-              </BodyShort>
-              <BodyShort>
-                <i>
-                  Sist endret {formaterDatoMedTidspunkt(new Date(hendelse.endret.tidspunkt))} av {hendelse.endret.ident}
-                </i>
-              </BodyShort>
-            </VStack>
-            {isPending(slettHendelseResult) || isPending(slettHendelseForSakResult) ? (
-              <Spinner variant="neutral" label="Sletter" margin="4" />
-            ) : (
-              <HStack gap="2">
-                <Button
-                  variant="secondary"
-                  size="xsmall"
-                  icon={<PencilIcon aria-hidden />}
-                  onClick={() => setRedigerHendelse(hendelse)}
-                >
-                  Rediger
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="xsmall"
-                  icon={<TrashIcon aria-hidden />}
-                  onClick={() => fjernHendelse(hendelse.id)}
-                >
-                  Slett
-                </Button>
-              </HStack>
-            )}
-            {isFailureHandler({
-              apiResult: slettHendelseResult,
-              errorMessage: 'En feil har oppstått',
-            })}
-          </Timeline.Pin>
-        ))}
-        {aktiviteter.length === 0 && (
-          <Timeline.Row label="Ingen aktiviteter">
-            <Timeline.Period start={addYears(doedsdato, -1)} end={addYears(doedsdato, -1)}></Timeline.Period>
-          </Timeline.Row>
-        )}
-
-        {aktivitetsTypeProps.map((props) => (
-          <Timeline.Row key={props.type} label={props.beskrivelse}>
-            {aktiviteter
-              .filter((aktivitet) => aktivitet.type === props.type)
-              .map((aktivitet, i) => (
-                <Timeline.Period
-                  key={props.type + i}
-                  start={new Date(aktivitet.fom)}
-                  end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
-                  status={props.status}
-                  icon={props.ikon}
-                  statusLabel={props.beskrivelse}
-                >
-                  <BodyShort weight="semibold">
-                    Fra {formaterDato(new Date(aktivitet.fom))}{' '}
-                    {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
-                  </BodyShort>
-                  <BodyShort>{aktivitet.beskrivelse}</BodyShort>
-                  <VStack>
-                    <BodyShort>
-                      <i>
-                        Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
-                        {aktivitet.opprettet.ident}
-                      </i>
-                    </BodyShort>
-                    <BodyShort>
-                      <i>
-                        Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
-                        {aktivitet.endret.ident}
-                      </i>
-                    </BodyShort>
-                  </VStack>
-                  {isPending(slettAktivitetResult) || isPending(slettAktivitetForSakResult) ? (
-                    <Spinner variant="neutral" label="Sletter" margin="4" />
-                  ) : (
-                    <HStack gap="2">
-                      <Button
-                        variant="secondary"
-                        size="xsmall"
-                        icon={<PencilIcon aria-hidden />}
-                        onClick={() => setRedigerAktivitet(aktivitet)}
-                      >
-                        Rediger
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="xsmall"
-                        icon={<TrashIcon aria-hidden />}
-                        onClick={() => fjernAktivitet(aktivitet.id)}
-                      >
-                        Slett
-                      </Button>
-                    </HStack>
-                  )}
-                  {isFailureHandler({
-                    apiResult: slettAktivitetResult,
-                    errorMessage: 'En feil har oppstått',
-                  })}
-                </Timeline.Period>
-              ))}
-          </Timeline.Row>
-        ))}
-      </Timeline>
+      <AktivitetspliktTimeline
+        behandling={behandling}
+        sakId={sakId}
+        doedsdato={doedsdato}
+        aktivitetHendelser={aktivitetHendelser}
+        setAktivitetHendelser={setAktivitetHendelser}
+        aktivitetPerioder={aktivitetPerioder}
+        setAktivitetPerioder={setAktivitetPerioder}
+        setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
+      />
 
       <HStack align="center" justify="space-between">
         <AktivitetOgHendelse
@@ -246,23 +89,10 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
           oppdaterAktiviteter={oppdaterAktiviteter}
           redigerAktivitet={redigerAktivitet}
           sakId={sakId}
-          setHendelser={setHendelser}
+          setHendelser={setAktivitetHendelser}
           redigerHendelse={redigerHendelse}
           avbrytRedigering={avbrytRedigering}
         />
-
-        {aktiviteter.length > 0 && (
-          <ToggleGroup
-            defaultValue="3"
-            onChange={(value) => setSluttdato(addYears(doedsdato, Number(value)))}
-            size="small"
-            variant="neutral"
-          >
-            <ToggleGroup.Item value="1">1 år</ToggleGroup.Item>
-            <ToggleGroup.Item value="2">2 år</ToggleGroup.Item>
-            <ToggleGroup.Item value="3">3 år</ToggleGroup.Item>
-          </ToggleGroup>
-        )}
       </HStack>
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av tidslinje',

@@ -10,8 +10,8 @@ import {
   IAktivitetspliktVurderingNyDto,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
-  SkrivAktivitet,
-  SkrivHendelse,
+  OpprettAktivitetPeriode,
+  OpprettAktivitetHendelse,
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
@@ -24,17 +24,29 @@ export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<AktivitetspliktOppfolging>> => apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt`)
 
-export const opprettAktivitet = async (args: {
+export const opprettAktivitetPeriodeForBehandling = async (args: {
   behandlingId: string
-  request: SkrivAktivitet
+  request: OpprettAktivitetPeriode
 }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`, { ...args.request })
 
-export const opprettHendelse = async (args: {
+export const opprettAktivitetPeriodeForSak = async (args: {
+  sakId: number
+  request: OpprettAktivitetPeriode
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
+  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`, { ...args.request })
+
+export const opprettAktivitetHendelseForBehandling = async (args: {
   behandlingId: string
-  request: SkrivHendelse
+  request: OpprettAktivitetHendelse
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse`, { ...args.request })
+
+export const opprettAktivitetHendelseForSak = async (args: {
+  sakId: number
+  request: OpprettAktivitetHendelse
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/hendelse`, { ...args.request })
 
 export const slettAktivitetHendelseForBehandling = async (args: {
   behandlingId: string
@@ -55,18 +67,6 @@ export const hentAktiviteterOgHendelser = async (args: {
   const parameter = args.behandlingId ? `?behandlingId=${args.behandlingId}` : ''
   return apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet-og-hendelser${parameter}`)
 }
-
-export const opprettAktivitetForSak = async (args: {
-  sakId: number
-  request: SkrivAktivitet
-}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
-  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`, { ...args.request })
-
-export const opprettHendelseForSak = async (args: {
-  sakId: number
-  request: SkrivHendelse
-}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
-  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/hendelse`, { ...args.request })
 
 export const slettAktivitetPeriodeForSak = async (args: {
   sakId: number

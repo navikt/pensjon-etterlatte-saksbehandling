@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form'
 import { formatISO } from 'date-fns'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Box, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
-import { AktivitetspliktType, IAktivitetPeriode, SkrivAktivitet } from '~shared/types/Aktivitetsplikt'
-import { opprettAktivitet, opprettAktivitetForSak } from '~shared/api/aktivitetsplikt'
+import { AktivitetspliktType, IAktivitetPeriode, OpprettAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
+import { opprettAktivitetPeriodeForBehandling, opprettAktivitetPeriodeForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
@@ -45,8 +45,8 @@ export const NyAktivitet = ({
   aktivitetTilRedigering: IAktivitetPeriode | undefined
   behandling?: IBehandlingReducer
 }) => {
-  const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
-  const [opprettAktivitetForSakResponse, opprettAktivitetForSakRequest] = useApiCall(opprettAktivitetForSak)
+  const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitetPeriodeForBehandling)
+  const [opprettAktivitetForSakResponse, opprettAktivitetForSakRequest] = useApiCall(opprettAktivitetPeriodeForSak)
   const defaultValue: NyAktivitetPeriode = { sakId, behandlingId: behandling?.id }
   const {
     getValues,
@@ -68,7 +68,7 @@ export const NyAktivitet = ({
   const submitAktivitet = (data: NyAktivitetPeriode) => {
     const { id, type, datoFom, datoTom, beskrivelse } = data
 
-    const opprettAktivitet: SkrivAktivitet = {
+    const opprettAktivitet: OpprettAktivitetPeriode = {
       id: id,
       sakId: behandling ? behandling.sakId : sakId!!,
       type: type as AktivitetspliktType,

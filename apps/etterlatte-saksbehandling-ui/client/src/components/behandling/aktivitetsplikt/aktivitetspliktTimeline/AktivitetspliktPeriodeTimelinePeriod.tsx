@@ -1,7 +1,7 @@
 import { IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Button, HStack, Timeline, TimelinePeriodProps, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, HStack, Timeline, VStack } from '@navikt/ds-react'
 import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
-import React, { Dispatch, SetStateAction } from 'react'
+import React, { Dispatch, ReactNode, SetStateAction } from 'react'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import {
   AktivitetspliktRedigeringModus,
@@ -13,7 +13,12 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-interface Props extends TimelinePeriodProps {
+interface Props {
+  start: Date
+  end: Date
+  status: 'success' | 'warning' | 'danger' | 'info' | 'neutral'
+  statusLabel: string
+  icon: ReactNode
   behandling: IDetaljertBehandling | undefined
   sakId: number
   aktivitetPeriode: IAktivitetPeriode

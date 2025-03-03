@@ -37,7 +37,7 @@ export interface IAktivitetHendelse {
   beskrivelse: string
 }
 
-export interface SkrivAktivitet {
+export interface OpprettAktivitetPeriode {
   id: string | undefined
   sakId: number
   type: AktivitetspliktType
@@ -46,7 +46,7 @@ export interface SkrivAktivitet {
   beskrivelse: string
 }
 
-export interface SkrivHendelse {
+export interface OpprettAktivitetHendelse {
   id: string | undefined
   sakId: number
   dato: string

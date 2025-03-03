@@ -3,8 +3,8 @@ import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
-import { IAktivitetHendelse, SkrivHendelse } from '~shared/types/Aktivitetsplikt'
-import { opprettHendelse, opprettHendelseForSak } from '~shared/api/aktivitetsplikt'
+import { IAktivitetHendelse, OpprettAktivitetHendelse } from '~shared/types/Aktivitetsplikt'
+import { opprettAktivitetHendelseForBehandling, opprettAktivitetHendelseForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { formatISO } from 'date-fns'
@@ -40,8 +40,8 @@ export const NyHendelse = ({
   sakId: number
   avbryt: () => void
 }) => {
-  const [opprettHendelseResponse, opprettHendelseRequest] = useApiCall(opprettHendelse)
-  const [opprettHendelseForSakResponse, opprettHendelseForSakRequest] = useApiCall(opprettHendelseForSak)
+  const [opprettHendelseResponse, opprettHendelseRequest] = useApiCall(opprettAktivitetHendelseForBehandling)
+  const [opprettHendelseForSakResponse, opprettHendelseForSakRequest] = useApiCall(opprettAktivitetHendelseForSak)
   const defaultValue: NyAktivitetHendelse = { sakId, behandlingId: behandling?.id }
 
   const {
@@ -62,7 +62,7 @@ export const NyHendelse = ({
   }, [redigerHendelse])
 
   const submitHendelse = (opprettHendelse: NyAktivitetHendelse) => {
-    const request: SkrivHendelse = {
+    const request: OpprettAktivitetHendelse = {
       beskrivelse: opprettHendelse.beskrivelse!,
       dato: formatISO(opprettHendelse.dato!, { representation: 'date' }),
       id: opprettHendelse.id,

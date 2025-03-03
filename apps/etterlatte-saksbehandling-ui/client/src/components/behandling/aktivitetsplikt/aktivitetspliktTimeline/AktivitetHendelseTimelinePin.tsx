@@ -13,7 +13,8 @@ import {
   AktivitetspliktSkjemaAaVise,
 } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
-interface Props extends TimelinePinProps {
+interface Props {
+  date: Date
   behandling?: IDetaljertBehandling
   sakId: number
   aktivitetHendelse: IAktivitetHendelse

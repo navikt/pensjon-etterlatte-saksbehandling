@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction, useState } from 'react'
+import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { addMonths, addYears } from 'date-fns'
-import { Timeline } from '@navikt/ds-react'
+import { HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { AktivitetspliktType, IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
 import { AktivitetHendelseTimelinePin } from '~components/behandling/aktivitetsplikt/aktivitetspliktTimeline/AktivitetHendelseTimelinePin'
@@ -40,7 +40,7 @@ export const AktivitetspliktTimeline = ({
 }: Props) => {
   const [sluttdato, setSluttdato] = useState<Date>(addYears(doedsdato, 3))
 
-  const velgVisningAvAktivitetspliktPeriodeTimelineRow = (aktivitetPeriode: IAktivitetPeriode) => {
+  const velgVisningAvAktivitetspliktPeriodeTimelineRow = (aktivitetPeriode: IAktivitetPeriode): ReactNode => {
     switch (aktivitetPeriode.type) {
       case AktivitetspliktType.ARBEIDSTAKER:
         return (
@@ -165,27 +165,47 @@ export const AktivitetspliktTimeline = ({
   }
 
   return (
-    <Timeline startDate={doedsdato} endDate={sluttdato}>
-      <Timeline.Pin date={doedsdato}>Dødsdato: {formaterDato(doedsdato)}</Timeline.Pin>
-      <Timeline.Pin date={new Date()}>Dagens dato: {formaterDato(new Date())}</Timeline.Pin>
-      <Timeline.Pin date={addMonths(doedsdato, 6)}>
-        6 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 6))}
-      </Timeline.Pin>
-      <Timeline.Pin date={addMonths(doedsdato, 12)}>
-        12 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 12))}
-      </Timeline.Pin>
-      {aktivitetHendelser.map((aktivitetHendelse, index) => (
-        <AktivitetHendelseTimelinePin
-          date={new Date(aktivitetHendelse.dato)}
-          key={index}
-          sakId={sakId}
-          behandling={behandling}
-          aktivitetHendelse={aktivitetHendelse}
-          setAktivitetHendelser={setAktivitetHendelser}
-          setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
-        />
-      ))}
-      {aktivitetPerioder.map((aktivitetPeriode) => velgVisningAvAktivitetspliktPeriodeTimelineRow(aktivitetPeriode))}
-    </Timeline>
+    <VStack gap="4">
+      <HStack justify="end">
+        <ToggleGroup
+          defaultValue="3"
+          onChange={(value) => setSluttdato(addYears(doedsdato, Number(value)))}
+          size="small"
+          variant="neutral"
+        >
+          <ToggleGroup.Item value="1">1 år</ToggleGroup.Item>
+          <ToggleGroup.Item value="2">2 år</ToggleGroup.Item>
+          <ToggleGroup.Item value="3">3 år</ToggleGroup.Item>
+        </ToggleGroup>
+      </HStack>
+      <Timeline startDate={doedsdato} endDate={sluttdato}>
+        <Timeline.Pin date={doedsdato}>Dødsdato: {formaterDato(doedsdato)}</Timeline.Pin>
+        <Timeline.Pin date={new Date()}>Dagens dato: {formaterDato(new Date())}</Timeline.Pin>
+        <Timeline.Pin date={addMonths(doedsdato, 6)}>
+          6 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 6))}
+        </Timeline.Pin>
+        <Timeline.Pin date={addMonths(doedsdato, 12)}>
+          12 måneder etter dødsfall: {formaterDato(addMonths(doedsdato, 12))}
+        </Timeline.Pin>
+        {aktivitetHendelser.map((aktivitetHendelse, index) => (
+          <AktivitetHendelseTimelinePin
+            date={new Date(aktivitetHendelse.dato)}
+            key={index}
+            sakId={sakId}
+            behandling={behandling}
+            aktivitetHendelse={aktivitetHendelse}
+            setAktivitetHendelser={setAktivitetHendelser}
+            setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
+          />
+        ))}
+        {!!aktivitetPerioder?.length ? (
+          aktivitetPerioder.map((aktivitetPeriode) => velgVisningAvAktivitetspliktPeriodeTimelineRow(aktivitetPeriode))
+        ) : (
+          <Timeline.Row label="Ingen aktiviteter">
+            <Timeline.Period start={addYears(doedsdato, -1)} end={addYears(doedsdato, -1)}></Timeline.Period>
+          </Timeline.Row>
+        )}
+      </Timeline>
+    </VStack>
   )
 }

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -11,15 +13,20 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.YearMonth
 
 class OpprettEtteroppgjoerRevurdering(
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
+    private val beregningKlient: BeregningKlient,
 ) {
     fun opprett(
         sakId: SakId,
+        bruker: BrukerTokenInfo,
         request: OpprettRevurderingRequest,
     ) {
         val sisteIverksatte =
@@ -47,17 +54,27 @@ class OpprettEtteroppgjoerRevurdering(
                 revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                 virkningstidspunkt = virkningstidspunkt,
                 begrunnelse = "TODO",
-                saksbehandlerIdent = null, // TODO
+                saksbehandlerIdent = bruker.ident(),
                 mottattDato = null,
                 relatertBehandlingId = null,
                 frist = null,
                 paaGrunnAvOppgave = null,
             )
 
-        // TODO vilkår
+        vilkaarsvurderingService.kopierVilkaarsvurdering(
+            behandlingId = revurdering.behandlingId(),
+            kopierFraBehandling = sisteIverksatte.id,
+            brukerTokenInfo = bruker,
+        )
 
         // TODO trygdetid
 
-        // TODO Beregningsgrunnlag
+        runBlocking {
+            beregningKlient.opprettBeregningsgrunnlagFraForrigeBehandling(
+                behandlingId = revurdering.behandlingId(),
+                forrigeBehandlingId = sisteIverksatte.id,
+                brukerTokenInfo = bruker,
+            )
+        }
     }
 }

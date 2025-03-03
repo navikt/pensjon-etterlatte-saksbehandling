@@ -124,6 +124,13 @@ class BeregningKlientTest :
             avkortingGrunnlag = emptyList(),
             avkortetYtelse = emptyList(),
         )
+
+    override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+    }
 }
 
 class VedtakKlientTest : VedtakKlient {

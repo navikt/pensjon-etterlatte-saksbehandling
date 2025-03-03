@@ -162,6 +162,7 @@ class BeregningKlientImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         try {
+            logger.info("Kopierer beregningsgrunnlag fra=$forrigeBehandlingId til=$behandlingId")
             downstreamResourceClient
                 .post(
                     resource =

@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -22,12 +22,12 @@ class OpprettEtteroppgjoerRevurdering(
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
+    private val trygdetidKlient: TrygdetidKlient,
     private val beregningKlient: BeregningKlient,
 ) {
     fun opprett(
         sakId: SakId,
         bruker: BrukerTokenInfo,
-        request: OpprettRevurderingRequest,
     ) {
         val sisteIverksatte =
             behandlingService.hentSisteIverksatte(sakId)
@@ -67,9 +67,13 @@ class OpprettEtteroppgjoerRevurdering(
             brukerTokenInfo = bruker,
         )
 
-        // TODO trygdetid
-
         runBlocking {
+            trygdetidKlient.kopierTrygdetidFraForrigeBehandling(
+                behandlingId = revurdering.behandlingId(),
+                forrigeBehandlingId = sisteIverksatte.id,
+                brukerTokenInfo = bruker,
+            )
+
             beregningKlient.opprettBeregningsgrunnlagFraForrigeBehandling(
                 behandlingId = revurdering.behandlingId(),
                 forrigeBehandlingId = sisteIverksatte.id,

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.BrevKlient
@@ -131,6 +132,14 @@ class BeregningKlientTest :
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
+}
+
+class TrygdetidKlientTest : TrygdetidKlient {
+    override suspend fun kopierTrygdetidFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
 }
 
 class VedtakKlientTest : VedtakKlient {

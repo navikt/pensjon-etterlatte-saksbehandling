@@ -48,24 +48,25 @@ class OpprettEtteroppgjoerRevurdering(
                     )
 
                 val revurdering =
-                    revurderingService.opprettRevurdering(
-                        sakId = sakId,
-                        forrigeBehandling = sisteIverksatte,
-                        persongalleri = persongalleri,
-                        prosessType = Prosesstype.MANUELL, // TODO parameter når automatisk implementeres
-                        kilde = Vedtaksloesning.GJENNY,
-                        revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
-                        virkningstidspunkt = virkningstidspunkt,
-                        begrunnelse = "TODO",
-                        saksbehandlerIdent = brukerTokenInfo.ident(),
-                        mottattDato = null,
-                        relatertBehandlingId = null,
-                        frist = null,
-                        paaGrunnAvOppgave = null,
-                    )
+                    revurderingService
+                        .opprettRevurdering(
+                            sakId = sakId,
+                            forrigeBehandling = sisteIverksatte,
+                            persongalleri = persongalleri,
+                            prosessType = Prosesstype.MANUELL, // TODO parameter når automatisk implementeres
+                            kilde = Vedtaksloesning.GJENNY,
+                            revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+                            virkningstidspunkt = virkningstidspunkt,
+                            begrunnelse = "TODO",
+                            saksbehandlerIdent = brukerTokenInfo.ident(),
+                            mottattDato = null,
+                            relatertBehandlingId = null,
+                            frist = null,
+                            paaGrunnAvOppgave = null,
+                        ).oppdater()
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
-                    behandlingId = revurdering.behandlingId(),
+                    behandlingId = revurdering.id,
                     kopierFraBehandling = sisteIverksatte.id,
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -74,13 +75,13 @@ class OpprettEtteroppgjoerRevurdering(
             }
         runBlocking {
             trygdetidKlient.kopierTrygdetidFraForrigeBehandling(
-                behandlingId = revurdering.behandlingId(),
+                behandlingId = revurdering.id,
                 forrigeBehandlingId = sisteIverksatte.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
 
             beregningKlient.opprettBeregningsgrunnlagFraForrigeBehandling(
-                behandlingId = revurdering.behandlingId(),
+                behandlingId = revurdering.id,
                 forrigeBehandlingId = sisteIverksatte.id,
                 brukerTokenInfo = brukerTokenInfo,
             )

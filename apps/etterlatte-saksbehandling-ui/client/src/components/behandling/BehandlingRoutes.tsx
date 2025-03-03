@@ -23,10 +23,12 @@ import { Varselbrev } from '~components/behandling/brev/Varselbrev'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { EtteroppgjoerOversikt } from '~components/behandling/etteroppgjoeroversikt/EtteroppgjoerOversikt'
 
 type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
   | 'revurderingsoversikt'
+  | 'etteroppgjoeroversikt'
   | 'vilkaarsvurdering'
   | 'aktivitetsplikt'
   | 'trygdetid'
@@ -53,6 +55,11 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'revurderingsoversikt',
     description: 'Revurderingsoversikt',
     element: (behandling: IBehandlingReducer) => <Revurderingsoversikt behandling={behandling} />,
+  },
+  etteroppgjoerOversikt: {
+    path: 'etteroppgjoeroversikt',
+    description: 'Etteroppgjoeroversikt',
+    element: (behandling: IBehandlingReducer) => <EtteroppgjoerOversikt behandling={behandling} />,
   },
   vilkaarsvurdering: {
     path: 'vilkaarsvurdering',
@@ -270,6 +277,10 @@ function revurderingRoutes(
   ukjentAvdoed: boolean,
   boddEllerArbeidetUtlandet: boolean
 ): Array<BehandlingRouteType> {
+  if (behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER) {
+    return [behandlingroutes.etteroppgjoerOversikt, behandlingroutes.beregning, behandlingroutes.brevOms]
+  }
+
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const avslag = opphoer && behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
 

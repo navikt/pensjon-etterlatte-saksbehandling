@@ -1,4 +1,4 @@
-import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
+import { DisabledLabel } from '~components/behandling/stegmeny/StegMeny'
 import { Label } from '@navikt/ds-react'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
 import React from 'react'

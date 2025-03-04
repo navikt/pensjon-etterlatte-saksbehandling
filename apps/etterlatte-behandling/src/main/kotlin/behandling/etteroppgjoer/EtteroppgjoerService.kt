@@ -3,10 +3,12 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -21,6 +23,7 @@ class EtteroppgjoerService(
     private val sakDao: SakLesDao,
     private val oppgaveService: OppgaveService,
     private val inntektskomponentService: InntektskomponentService,
+    private val sigrunService: SigrunService,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
 ) {
@@ -50,15 +53,15 @@ class EtteroppgjoerService(
             )
 
         return inTransaction {
-            val opplysningerSkatt = dao.hentOpplysningerSkatt(behandlingId)
-            val opplysningerAInntekt = dao.hentOpplysningerAInntekt(behandlingId)
+            val fraSkatt = dao.hentOpplysningerSkatt(behandlingId)
+            val aInntekt = dao.hentOpplysningerAInntekt(behandlingId)
 
             Etteroppgjoer(
                 behandling = etteroppgjoerBehandling,
                 opplysninger =
                     EtteroppgjoerOpplysninger(
-                        skatt = opplysningerSkatt,
-                        ainntekt = opplysningerAInntekt.toView(),
+                        skatt = fraSkatt,
+                        ainntekt = aInntekt,
                         tidligereAvkorting = tidligereAvkorting,
                     ),
             )
@@ -68,7 +71,7 @@ class EtteroppgjoerService(
     suspend fun opprettEtteroppgjoer(
         sakId: SakId,
         aar: Int,
-    ) {
+    ): EtteroppgjoerOgOppgave {
         val sak =
             inTransaction {
                 sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
@@ -76,7 +79,7 @@ class EtteroppgjoerService(
 
         hentOgLagreOpplysninger(sak.ident, aar)
 
-        inTransaction {
+        return inTransaction {
             val nyBehandling =
                 EtteroppgjoerBehandling(
                     id = UUID.randomUUID(),
@@ -88,15 +91,20 @@ class EtteroppgjoerService(
                 )
 
             dao.lagreEtteroppgjoer(nyBehandling)
-            oppgaveService.opprettOppgave(
-                referanse = nyBehandling.id.toString(),
-                sakId = sakId,
-                kilde = OppgaveKilde.BEHANDLING,
-                type = OppgaveType.ETTEROPPGJOER,
-                merknad = null,
-                frist = null,
-                saksbehandler = null,
-                gruppeId = null,
+            val oppgave =
+                oppgaveService.opprettOppgave(
+                    referanse = nyBehandling.id.toString(),
+                    sakId = sakId,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.ETTEROPPGJOER,
+                    merknad = null,
+                    frist = null,
+                    saksbehandler = null,
+                    gruppeId = null,
+                )
+            EtteroppgjoerOgOppgave(
+                etteroppgjoerBehandling = nyBehandling,
+                oppgave = oppgave,
             )
         }
     }
@@ -105,9 +113,9 @@ class EtteroppgjoerService(
         ident: String,
         aar: Int,
     ) {
-        // TODO hent og lagre OpplysnignerSkatt
+        val skatt = sigrunService.hentPensjonsgivendeInntekt(ident)
         inTransaction {
-            dao.lagreOpplysningerSkatt()
+            dao.lagreOpplysningerSkatt(skatt)
         }
 
         val aInntekt = inntektskomponentService.hentInntektFraAInntekt(ident, aar)
@@ -116,3 +124,8 @@ class EtteroppgjoerService(
         }
     }
 }
+
+data class EtteroppgjoerOgOppgave(
+    val etteroppgjoerBehandling: EtteroppgjoerBehandling,
+    val oppgave: OppgaveIntern,
+)

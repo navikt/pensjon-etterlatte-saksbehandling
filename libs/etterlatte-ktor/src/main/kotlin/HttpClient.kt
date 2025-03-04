@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.engine.okhttp.OkHttpConfig
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -59,6 +60,7 @@ fun httpClient(
         ekstraJacksoninnstillinger(objectMapper)
     }
     install(ClientCallLogging)
+    install(HttpTimeout)
 
     auth.invoke(this)
     defaultRequest {

@@ -43,6 +43,12 @@ interface BeregningKlient {
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingDto
+
+    suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BeregningKlientImpl(
@@ -145,6 +151,34 @@ class BeregningKlientImpl(
         } catch (e: Exception) {
             throw InternfeilException(
                 "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        try {
+            logger.info("Kopierer beregningsgrunnlag fra=$forrigeBehandlingId til=$behandlingId")
+            downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId/fra/$forrigeBehandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = {},
+                ).mapBoth(
+                    success = { },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Kopiering av beregningsgurnnlag feilet for behandling=$behandlingId",
                 e,
             )
         }

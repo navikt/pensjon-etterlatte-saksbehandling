@@ -37,7 +37,6 @@ export function TilbakekrevingBrev({
           {
             behandlingId: behandling.id,
             sakId: behandling.sak.id,
-            tilbakekrevingBrev: true,
           },
           (nyttBrev) => {
             setVedtaksbrev(nyttBrev)
@@ -77,7 +76,7 @@ export function TilbakekrevingBrev({
 
               {vedtaksbrev && (
                 <>
-                  <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} tilbakekrevingBrev={true} />
+                  <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
 
                   <BrevMottakerWrapper brev={vedtaksbrev} kanRedigeres={redigerbar} />
                 </>
@@ -91,7 +90,6 @@ export function TilbakekrevingBrev({
             brev={vedtaksbrev}
             kanRedigeres={redigerbar}
             tilbakestillingsaction={() => setTilbakestilt(true)}
-            tilbakekrevingBrev={true}
           />
         )}
       </BrevContent>

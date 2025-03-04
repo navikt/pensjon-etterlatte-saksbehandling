@@ -14,6 +14,7 @@ import { VergemaalTag } from '~shared/tags/VergemaalTag'
 import { Navbar } from '~shared/header/Navbar'
 import { useAppDispatch } from '~store/Store'
 import { settPerson } from '~store/reducers/PersonReducer'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
   const dispatch = useAppDispatch()
@@ -57,6 +58,12 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
 
             <Alder foedselsdato={person.foedselsdato} doedsdato={person.doedsdato} foedselsaar={person.foedselsaar} />
 
+            <BodyShort>|</BodyShort>
+            <Label>
+              <PersonLink fnr={person.foedselsnummer} fane={PersonOversiktFane.PERSONOPPLYSNINGER}>
+                Personopplysninger
+              </PersonLink>
+            </Label>
             <BodyShort>|</BodyShort>
             <KopierbarVerdi value={person.foedselsnummer} />
             {ident !== person.foedselsnummer && person.historiskeFoedselsnummer.includes(ident!!) && (

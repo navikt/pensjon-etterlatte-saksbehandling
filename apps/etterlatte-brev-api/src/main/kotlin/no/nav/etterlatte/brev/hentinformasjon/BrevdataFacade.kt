@@ -209,7 +209,7 @@ class BrevdataFacade(
                     vedtak.type,
                     sak.enhet,
                     saksbehandlerIdent,
-                    null,
+                    attestantIdent,
                     vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                     klage =
                         objectMapper.readValue(

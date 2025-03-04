@@ -73,7 +73,7 @@ class AktivitetspliktOppgaveService(
                 listOf(OppgaveType.AKTIVITETSPLIKT, OppgaveType.AKTIVITETSPLIKT_12MND),
             )
 
-        return oppgaverForSak.map { OppfoelgingsOppgave(!it.erUnderBehandling(), it.erFerdigstilt(), it.type) }
+        return oppgaverForSak.map { OppfoelgingsOppgave(!it.erIkkeAvsluttet(), it.erFerdigstilt(), it.type) }
     }
 
     fun opprettOppfoelgingsoppgave(request: OpprettOppfoelgingsoppgave): UUID {
@@ -132,7 +132,7 @@ class AktivitetspliktOppgaveService(
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId, oppgaveType)
         val harOppfoelgingsOppgaveUnderbehandling =
             oppgaverForSak.filter {
-                it.erUnderBehandling() ||
+                it.erIkkeAvsluttet() ||
                     it.status == no.nav.etterlatte.libs.common.oppgave.Status.AVBRUTT
             }
 
@@ -170,7 +170,7 @@ class AktivitetspliktOppgaveService(
                 sakId,
                 OppgaveType.AKTIVITETSPLIKT,
             )
-        if (oppfoelging6mnd.any { it.erUnderBehandling() }) {
+        if (oppfoelging6mnd.any { it.erIkkeAvsluttet() }) {
             throw KanIkkeopprette12mndOppaveOm6MndErUnderbehandling("Kan ikke opprette 12 mnd mens en 6 mnd er under behandling. ")
         }
         val ferdigstilt6mndOppgave = oppfoelging6mnd.filter { it.erFerdigstilt() }

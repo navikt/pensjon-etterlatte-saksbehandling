@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.BrevKlient
@@ -124,6 +125,21 @@ class BeregningKlientTest :
             avkortingGrunnlag = emptyList(),
             avkortetYtelse = emptyList(),
         )
+
+    override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+    }
+}
+
+class TrygdetidKlientTest : TrygdetidKlient {
+    override suspend fun kopierTrygdetidFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
 }
 
 class VedtakKlientTest : VedtakKlient {
@@ -286,7 +302,6 @@ class BrevApiKlientTest : BrevApiKlient {
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
@@ -342,6 +357,24 @@ class BrevApiKlientTest : BrevApiKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId)
+
+    override suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevPayload {
+        TODO("Not yet implemented")
+    }
 
     private fun opprettetBrevDto(brevId: Long) =
         Brev(

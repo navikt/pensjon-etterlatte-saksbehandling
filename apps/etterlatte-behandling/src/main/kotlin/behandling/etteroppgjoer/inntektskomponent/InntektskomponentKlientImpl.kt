@@ -83,7 +83,7 @@ data class AInntektReponsData(
 )
 
 data class InntektsinformasjonDto(
-    val maaned: String,
+    val maaned: YearMonth,
     val opplysningspliktig: String,
     val underenhet: String,
     val norskident: String,

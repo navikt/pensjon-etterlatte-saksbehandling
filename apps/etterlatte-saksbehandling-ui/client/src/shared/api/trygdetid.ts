@@ -155,7 +155,7 @@ export const kopierTrygdetidFraAnnenBehandling = async (args: {
   behandlingId: string
   kildeBehandlingId: string
 }): Promise<ApiResponse<ITrygdetid[]>> =>
-  apiClient.post<ITrygdetid[]>(`/trygdetid_v2/${args.behandlingId}/kopier-grunnlag/${args.kildeBehandlingId}`, {})
+  apiClient.post<ITrygdetid[]>(`/trygdetid_v2/${args.behandlingId}/kopier-og-overskriv/${args.kildeBehandlingId}`, {})
 
 export const hentKandidatForKopieringAvTrygdetid = async (
   behandlingId: string

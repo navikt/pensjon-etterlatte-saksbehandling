@@ -335,11 +335,8 @@ class SakServiceImpl(
             }
     }
 
-    private fun hentSpraak(fnr: String): Spraak {
-        val kontaktInfo =
-            runBlocking {
-                krrKlient.hentDigitalKontaktinformasjon(fnr)
-            }
+    private suspend fun hentSpraak(fnr: String): Spraak {
+        val kontaktInfo = krrKlient.hentDigitalKontaktinformasjon(fnr)
 
         return kontaktInfo
             ?.spraak

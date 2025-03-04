@@ -15,6 +15,7 @@ import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 
@@ -60,7 +61,7 @@ class SaksbehandlerMedEnheterOgRoller(
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
     val brukerTokenInfo: BrukerTokenInfo,
 ) : ExternalUser(identifiedBy) {
-    val logger = LoggerFactory.getLogger(this::class.java)
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     private fun saksbehandlersEnheter() =
         saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()

@@ -470,7 +470,7 @@ class OppgaveService(
     private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: SakId) {
         for (oppgaveIntern in hentOppgaverForSak(sakId)) {
             if (oppgaveIntern.saksbehandler != null &&
-                oppgaveIntern.erUnderBehandling()
+                oppgaveIntern.erIkkeAvsluttet()
             ) {
                 fjernSaksbehandler(oppgaveIntern.id)
             }
@@ -483,21 +483,16 @@ class OppgaveService(
     ) {
         val oppgaverForSak = oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries)
         oppgaverForSak.forEach {
-            if (it.erUnderBehandling()) {
-                oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
+            if (it.erIkkeAvsluttet()) {
+                if (it.status == Status.UNDER_BEHANDLING) {
+                    // Kun oppgaver som er UNDER_BEHANDLING kan gå til statusen NY
+                    oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
+                }
 
                 // For oppgaver som ikke er ferdige er det relevant for saksbehandlingsstatistikken
                 // å få en oppdatert rad med ny enhet
-                when (it.type) {
-                    OppgaveType.FOERSTEGANGSBEHANDLING,
-                    OppgaveType.REVURDERING,
-                    OppgaveType.TILBAKEKREVING,
-                    OppgaveType.KLAGE,
-                    -> {
-                        hendelser.sendMeldingForEndretEnhet(it.referanse, enhetsID)
-                    }
-
-                    else -> Unit
+                if (it.type.senderStatistikk()) {
+                    hendelser.sendMeldingForEndretEnhet(it.referanse, enhetsID)
                 }
             }
             oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
@@ -575,7 +570,7 @@ class OppgaveService(
     fun hentOppgaveUnderBehandling(referanse: String) =
         oppgaveDao
             .hentOppgaverForReferanse(referanse)
-            .singleOrNull(OppgaveIntern::erUnderBehandling)
+            .singleOrNull(OppgaveIntern::erIkkeAvsluttet)
             .also {
                 if (it == null) {
                     logger.warn("Ingen oppgave under behandling for referanse: $referanse")
@@ -698,9 +693,7 @@ class OppgaveService(
                         OppgaveType.AKTIVITETSPLIKT_12MND,
                         OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                         OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
-                        ->
-                            true
-
+                        -> true
                         OppgaveType.OPPFOELGING,
                         OppgaveType.KLAGE,
                         OppgaveType.KRAVPAKKE_UTLAND,
@@ -710,7 +703,6 @@ class OppgaveService(
                         OppgaveType.INNTEKTSOPPLYSNING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         OppgaveType.MELDT_INN_ENDRING,
-                        OppgaveType.OPPFOELGING,
                         OppgaveType.ETTEROPPGJOER,
                         -> {
                             logger.info(

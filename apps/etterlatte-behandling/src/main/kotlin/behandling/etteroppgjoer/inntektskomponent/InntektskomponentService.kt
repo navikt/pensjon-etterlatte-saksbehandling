@@ -1,15 +1,25 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent
 
-import java.math.BigDecimal
+import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
+import no.nav.etterlatte.behandling.etteroppgjoer.AInntektMaaned
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.etteroppgjoer.Inntekt
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import java.time.YearMonth
 
 class InntektskomponentService(
     val klient: InntektskomponentKlient,
+    val featureToggleService: FeatureToggleService,
 ) {
     suspend fun hentInntektFraAInntekt(
         personident: String,
         aar: Int,
     ): AInntekt {
+        val skalStubbe = featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_INNTEKT, false)
+        if (skalStubbe) {
+            return AInntekt.stub()
+        }
+
         val responsFraInntekt = hentInntekt(personident, aar)
 
         val inntektsmaaneder =
@@ -43,19 +53,3 @@ class InntektskomponentService(
         maanedTom = YearMonth.of(aar, 12),
     )
 }
-
-data class AInntekt(
-    val aar: Int,
-    val inntektsmaaneder: List<AInntektMaaned>,
-)
-
-data class AInntektMaaned(
-    val maaned: String,
-    val inntekter: List<Inntekt>,
-    val summertBeloep: BigDecimal,
-)
-
-data class Inntekt(
-    val beloep: BigDecimal,
-    val beskrivelse: String,
-)

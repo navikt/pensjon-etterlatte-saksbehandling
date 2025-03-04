@@ -456,7 +456,7 @@ class TilbakekrevingService(
             oppdatertTilbakekreving
         }
 
-    suspend fun underkjennVedtak(
+    fun underkjennVedtak(
         tilbakekrevingId: UUID,
         kommentar: String,
         valgtBegrunnelse: String,

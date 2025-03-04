@@ -2,7 +2,7 @@ import { ChevronRightIcon } from '@navikt/aksel-icons'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { BehandlingRouteContext, BehandlingRouteType } from '~components/behandling/BehandlingRoutes'
 import { Label, Link } from '@navikt/ds-react'
-import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
+import { DisabledLabel } from '~components/behandling/stegmeny/StegMeny'
 import { useContext } from 'react'
 
 export const NavLenke = (props: {

@@ -6,8 +6,12 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
+import no.nav.etterlatte.brev.BrevPayload
+import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevStatusResponse
@@ -24,6 +28,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.Duration
 import java.util.UUID
 
 interface BrevApiKlient {
@@ -64,7 +69,6 @@ interface BrevApiKlient {
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -122,6 +126,20 @@ interface BrevApiKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev?
+
+    suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf
+
+    suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevPayload
 }
 
 class BrevApiKlientObo(
@@ -230,7 +248,6 @@ class BrevApiKlientObo(
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
@@ -345,6 +362,46 @@ class BrevApiKlientObo(
             ).mapError { error -> throw error }
     }
 
+    override suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf =
+        get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=$brevID",
+            onSuccess = { resource ->
+                resource.response?.let { deserialize(it.toJson()) }
+                    ?: throw InternfeilException("Feil ved generering av pdf vedtaksbrev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+            timeoutConfig = {
+                socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+            },
+        )
+
+    override suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        sakId: SakId,
+        brevtype: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevPayload =
+        put(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/payload/tilbakestill",
+            onSuccess = { resource ->
+                resource.response?.let { deserialize(it.toJson()) }
+                    ?: throw InternfeilException("Feil ved tilbakestilling av pdf vedtaksbrev")
+            },
+            putBody =
+                ResetPayloadRequest(
+                    brevId = brevID,
+                    sakId = sakId,
+                    brevtype = brevtype,
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
     private suspend fun <T> post(
         url: String,
         postBody: Any = Unit,
@@ -365,14 +422,32 @@ class BrevApiKlientObo(
         url: String,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
+        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
     ): T =
         downstreamResourceClient
             .get(
                 resource = Resource(clientId = clientId, url = url),
                 brukerTokenInfo = brukerTokenInfo,
+                timeoutConfig = timeoutConfig,
             ).mapBoth(
                 success = onSuccess,
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+
+    private suspend fun <T> put(
+        url: String,
+        putBody: Any = Unit,
+        onSuccess: (Resource) -> T,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): T =
+        downstreamResourceClient
+            .put(
+                resource = Resource(clientId = clientId, url = url),
+                brukerTokenInfo = brukerTokenInfo,
+                putBody = putBody,
+            ).mapBoth(
+                success = onSuccess,
+                failure = { errorResponse -> throw errorResponse },
             )
 }
 
@@ -385,4 +460,10 @@ data class KlageNotatRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettJournalpostDto(
     val journalpostId: String,
+)
+
+private data class ResetPayloadRequest(
+    val brevId: Long,
+    val sakId: SakId,
+    val brevtype: Brevtype,
 )

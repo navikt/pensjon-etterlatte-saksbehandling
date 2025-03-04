@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { Notat } from '~shared/api/notat'
 import ForhaandsvisningNotat from '~components/person/notat/ForhaandsvisningNotat'
-import { DokumentVisningModal } from '~shared/brev/pdf-visning'
+import { DokumentVisningModal } from '~shared/brev/PdfVisning'
 
 export const NotatVisningModal = ({ notat }: { notat: Notat }) => {
   const [isOpen, setIsOpen] = useState(false)

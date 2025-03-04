@@ -33,6 +33,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
@@ -159,8 +160,9 @@ internal class VedtaksbrevRouteTest {
                     contentType(ContentType.Application.Json)
                 }
 
+            val responseAsPdf: Pdf = deserialize(response.body())
             assertEquals(HttpStatusCode.OK, response.status)
-            assertArrayEquals(pdf.bytes, response.body())
+            assertArrayEquals(pdf.bytes, responseAsPdf.bytes)
         }
 
         coVerify(exactly = 1) {

@@ -101,6 +101,10 @@ spec:
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
+    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-trygdetid
+    - name: ETTERLATTE_TRYGDETID_URL
+      value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
@@ -141,10 +145,6 @@ spec:
       value: dev-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL
       value: https://oppgave.dev-fss-pub.nais.io
-    - name: ETTERLATTE_MIGRERING_URL
-      value: http://etterlatte-migrering
-    - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-migrering/.default
     - name: PEN_URL
       value: https://pensjon-pen-q2.dev-fss-pub.nais.io/api
     - name: PEN_CLIENT_ID
@@ -170,8 +170,8 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-pdltjenester
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-migrering
         - application: etterlatte-beregning
+        - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom

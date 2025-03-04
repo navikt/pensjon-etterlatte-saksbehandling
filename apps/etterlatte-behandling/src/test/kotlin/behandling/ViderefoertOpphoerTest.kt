@@ -244,9 +244,37 @@ class ViderefoertOpphoerTest(
         }
     }
 
+    @Test
+    fun `feiler ved oppretting hvis det skal viderefoeres og dato mangler`() {
+        val sak =
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
+                SOEKER_FOEDSELSNUMMER.value,
+                SakType.BARNEPENSJON,
+                Enheter.defaultEnhet.enhetNr,
+            )
+        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
+        behandlingDao.opprettBehandling(behandling = opprettBehandling)
+
+        shouldThrow<UgyldigForespoerselException> {
+            runBlocking {
+                service.oppdaterViderefoertOpphoer(
+                    behandlingId = opprettBehandling.id,
+                    viderefoertOpphoer =
+                        viderefoertOpphoer(
+                            opprettBehandling.id,
+                            null,
+                            skalViderefoere = JaNei.JA,
+                            vilkaar = VilkaarType.BP_FORMAAL_2024,
+                        ),
+                    mockk(),
+                )
+            }
+        }
+    }
+
     private fun viderefoertOpphoer(
         behandlingId: UUID,
-        opphoersdato: YearMonth,
+        opphoersdato: YearMonth? = null,
         skalViderefoere: JaNei,
         vilkaar: VilkaarType? = VilkaarType.BP_FORMAAL_2024,
     ): ViderefoertOpphoer =

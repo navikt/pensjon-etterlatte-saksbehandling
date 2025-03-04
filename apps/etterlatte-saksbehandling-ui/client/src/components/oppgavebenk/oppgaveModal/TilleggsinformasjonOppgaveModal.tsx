@@ -1,6 +1,6 @@
 import { Alert, BodyShort, Button, HGrid, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
+import { DokumentVisningModal, PdfVisning } from '~shared/brev/PdfVisning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentDokumentPDF, hentJournalpost } from '~shared/api/dokument'
 import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'

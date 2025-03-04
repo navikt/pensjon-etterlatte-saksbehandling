@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
-import no.nav.etterlatte.EnvKey.ETTERLATTE_MIGRERING_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.NAVANSATT_URL
@@ -35,9 +34,11 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -58,13 +59,14 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
-import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -216,14 +218,6 @@ private fun tilbakekrevingHttpClient(config: Config) =
         azureAppScope = config.getString("tilbakekreving.azure.scope"),
     )
 
-private fun migreringHttpClient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("migrering.outbound.scope"),
-    )
-
 private fun krrHttKlient(config: Config) =
     httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),
@@ -280,6 +274,7 @@ internal class ApplicationContext(
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
+    val trygdetidKlient: TrygdetidKlient = TrygdetidKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
@@ -290,7 +285,6 @@ internal class ApplicationContext(
             tilbakekrevingHttpClient(config),
             url = env.requireEnvValue(ETTERLATTE_TILBAKEKREVING_URL),
         ),
-    val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
@@ -307,6 +301,7 @@ internal class ApplicationContext(
             config.getString("inntektskomponenten.url"),
         ), // TODO interface og stub osv...
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
+    grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -356,7 +351,6 @@ internal class ApplicationContext(
     val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
-    val migreringKlient = MigreringKlient(migreringHttpClient, env.requireEnvValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
     val kodeverkService = KodeverkService(kodeverkKlient)
 
@@ -376,7 +370,7 @@ internal class ApplicationContext(
             .AldersovergangService(aldersovergangDao)
 
     val grunnlagService: GrunnlagService =
-        GrunnlagServiceImpl(
+        grunnlagServiceOverride ?: GrunnlagServiceImpl(
             pdlTjenesterKlient,
             opplysningDao,
             GrunnlagHenter(pdlTjenesterKlient),
@@ -611,11 +605,12 @@ internal class ApplicationContext(
         TilbakekrevingBrevService(
             sakService,
             brevKlient,
+            brevApiKlient,
             vedtakKlient,
             grunnlagService,
         )
     val brevService =
-        BrevService(vedtaksbehandlingService, brevKlient, vedtakKlient, tilbakekrevingBrevService)
+        BrevService(vedtaksbehandlingService, brevApiKlient, vedtakKlient, tilbakekrevingBrevService)
 
     val tilbakekrevingService =
         TilbakekrevingService(
@@ -634,6 +629,12 @@ internal class ApplicationContext(
     val inntektskomponentService =
         InntektskomponentService(
             klient = inntektskomponentKlient,
+            featureToggleService = featureToggleService,
+        )
+
+    val sigrunService =
+        SigrunService(
+            featureToggleService = featureToggleService,
         )
 
     val etteroppgjoerService =
@@ -642,6 +643,7 @@ internal class ApplicationContext(
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
             inntektskomponentService = inntektskomponentService,
+            sigrunService = sigrunService,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
         )
@@ -685,11 +687,20 @@ internal class ApplicationContext(
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
-            migreringKlient = migreringKlient,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,
             tilgangsService = oppdaterTilgangService,
+        )
+
+    val opprettEtteroppgjoerRevurdering =
+        OpprettEtteroppgjoerRevurdering(
+            behandlingService,
+            grunnlagService,
+            revurderingService,
+            vilkaarsvurderingService,
+            trygdetidKlient,
+            beregningsKlient,
         )
 
     val migreringService =

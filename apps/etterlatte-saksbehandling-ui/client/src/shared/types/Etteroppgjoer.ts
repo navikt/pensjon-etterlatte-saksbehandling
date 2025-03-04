@@ -15,13 +15,20 @@ export interface EtteroppgjoerBehandling {
 }
 
 export interface EtteroppgjoerOpplysninger {
-  skatt: OpplysnignerSkatt
+  skatt: PensjonsgivendeInntektFraSkatt
   ainntekt: AInntekt
   tidligereAvkorting: Avkorting
 }
 
-export interface OpplysnignerSkatt {
-  aarsinntekt: number
+export interface PensjonsgivendeInntektFraSkatt {
+  inntekter: PensjonsgivendeInntekt[]
+}
+
+export interface PensjonsgivendeInntekt {
+  skatteordning: string
+  loensinntekt: number
+  naeringsinntekt: number
+  annet: number
 }
 
 export interface AInntekt {

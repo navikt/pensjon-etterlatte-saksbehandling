@@ -40,7 +40,7 @@ import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utla
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { RevurderingKravpakke } from '~components/behandling/revurderingsoversikt/RevurderingKravpakke'
-import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
+import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 

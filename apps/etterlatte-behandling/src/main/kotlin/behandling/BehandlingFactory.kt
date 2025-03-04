@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -8,7 +7,6 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
@@ -67,7 +65,6 @@ class BehandlingFactory(
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
-    private val migreringKlient: MigreringKlient,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingInfoService: BehandlingInfoService,
@@ -78,7 +75,7 @@ class BehandlingFactory(
     /*
      * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
      */
-    suspend fun opprettSakOgBehandlingForOppgave(
+    fun opprettSakOgBehandlingForOppgave(
         request: NyBehandlingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
@@ -155,16 +152,6 @@ class BehandlingFactory(
         }
 
         grunnlagService.lagreNyeSaksopplysninger(sak.id, behandling.id, opplysninger)
-
-        if (request.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
-            coroutineScope {
-                val pesysId =
-                    krevIkkeNull(request.pesysId) {
-                        "Manuell migrering må ha pesysid til sak som migreres"
-                    }
-                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId, sakId = sak.id)
-            }
-        }
 
         return behandling
     }
@@ -296,7 +283,7 @@ class BehandlingFactory(
                     if (omgjoeringRequest.omgjoeringsOppgaveId != null) {
                         val omgjoeringsOppgave =
                             omgjoeringsOppgaver.find {
-                                it.erUnderBehandling() &&
+                                it.erIkkeAvsluttet() &&
                                     it.id == omgjoeringRequest.omgjoeringsOppgaveId &&
                                     it.saksbehandler?.ident == saksbehandler.ident
                             }

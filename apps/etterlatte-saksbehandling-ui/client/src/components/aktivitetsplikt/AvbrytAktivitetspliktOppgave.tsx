@@ -30,7 +30,7 @@ export function AvbrytAktivitetspliktOppgave() {
           Avbryt oppgave
         </Button>
       ) : (
-        <p>Kun saksbehandler kan gjøre handlinger på denne oppgaven</p>
+        <Alert variant="warning">Du må tildele deg oppgaven</Alert>
       )}
     </>
   )

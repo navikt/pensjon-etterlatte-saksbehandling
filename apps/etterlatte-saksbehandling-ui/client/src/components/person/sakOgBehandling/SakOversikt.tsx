@@ -1,5 +1,5 @@
 import Spinner from '~shared/Spinner'
-import { Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
@@ -22,6 +22,7 @@ import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/
 import { OpprettOppfoelgingsoppgaveModal } from '~components/person/sakOgBehandling/OpprettOppfoelgingsoppgaveModal'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
+import { usePerson } from '~shared/statusbar/usePerson'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -36,6 +37,17 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
   const [opprettEtteroppgjoerStatus, apiOpprettEtteroppjoer] = useApiCall(opprettEtteroppgjoerIDev)
+
+  const person = usePerson()
+
+  const harEndretFnr = () => {
+    if (isSuccess(sakResult)) {
+      if (person && person.foedselsnummer !== sakResult.data.sak.ident) {
+        return true
+      }
+    }
+    return false
+  }
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -55,6 +67,17 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
             </Box>
             <VStack gap="8">
+              {harEndretFnr() && (
+                <Box paddingBlock="8 0">
+                  <Alert variant="info">
+                    <Heading size="xsmall">Nytt identnummer på bruker</Heading>
+                    <BodyShort>
+                      Identitetsnummer du søkte på “{sak.ident}” er blitt ersattet med “{person!.foedselsnummer}”. Du må
+                      oppdatere til ny ident.
+                    </BodyShort>
+                  </Alert>
+                </Box>
+              )}
               <VStack gap="4">
                 <Box paddingBlock="8 0">
                   <Heading size="medium">Oppgaver</Heading>

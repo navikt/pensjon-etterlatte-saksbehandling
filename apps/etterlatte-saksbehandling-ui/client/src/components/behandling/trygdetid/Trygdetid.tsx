@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Heading, HStack, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -23,10 +23,10 @@ import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
-import { Tilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
+import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
 import { ClickEvent } from '~utils/amplitude'
-import { SakType } from '~shared/types/sak'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 interface Props {
   redigerbar: boolean
@@ -39,6 +39,30 @@ const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[
   const trygdetidIdenter = trygdetider.map((trygdetid) => trygdetid.ident)
   const avdoedIdenter = (avdoede || []).map((avdoed) => avdoed.opplysning.foedselsnummer)
   return !avdoedIdenter.every((ident) => trygdetidIdenter.includes(ident))
+}
+
+function tilbakemeldingForUtlandsbehandling(behandling: IBehandlingReducer): ClickEvent | undefined {
+  // Hvis vi har en førstegangsbehandling utland
+  if (
+    behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+    !!behandling.utlandstilknytning &&
+    behandling.utlandstilknytning.type !== UtlandstilknytningType.NASJONAL
+  ) {
+    if (behandling.vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT) {
+      // Avslag har høyest prioritert
+      return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_AVSLAG
+    } else if (behandling.erSluttbehandling) {
+      // Hvis ikke avslag -- er dette en sluttbehandling
+      return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING
+    } else {
+      // Det er en utland førstegangsbehandling
+      return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_FOERSTEGANGSBEHANDLING
+    }
+  } else if (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING) {
+    // Revurderinger er sluttbehandlinger hvis det er revurderingsårsak sluttbehandling utland
+    return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING
+  }
+  return undefined
 }
 
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
@@ -84,9 +108,15 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         if (behandlingErIverksatt(behandling.status)) {
           setHarPilotTrygdetid(true)
         } else if (redigerbar) {
-          requestOpprettTrygdetid({ behandlingId: behandling.id, overskriv: false }, (trygdetider: ITrygdetid[]) => {
-            oppdaterTrygdetider(trygdetider)
-          })
+          requestOpprettTrygdetid(
+            {
+              behandlingId: behandling.id,
+              overskriv: false,
+            },
+            (trygdetider: ITrygdetid[]) => {
+              oppdaterTrygdetider(trygdetider)
+            }
+          )
         } else if (vedtaksresultat === 'avslag') {
           setTrygdetidManglerVedAvslag(true)
         } else {
@@ -130,11 +160,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     )
   }
 
-  const erOMSUtlandAvslag = () =>
-    behandling.utlandstilknytning &&
-    behandling.utlandstilknytning.type !== UtlandstilknytningType.NASJONAL &&
-    behandling.sakType === SakType.OMSTILLINGSSTOENAD &&
-    behandling.vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const tilbakemeldingUtland = tilbakemeldingForUtlandsbehandling(behandling)
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
@@ -239,14 +265,14 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
               : 'Finner ikke trygdetid - ID mangler'}
           </ApiErrorAlert>
         )}
-        {erOMSUtlandAvslag() && (
-          <HStack justify="center" paddingBlock="0 8">
-            <Tilbakemelding
-              spoersmaal="Hvordan opplevde du saksbehandlingen av denne utlandssaken i Gjenny?"
-              clickEvent={ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_AVSLAG}
+        {tilbakemeldingUtland && (
+          <Box paddingBlock="0 16">
+            <EnigUenigTilbakemelding
+              spoersmaal="Jeg synes det er lett å behandle utlandssaker i Gjenny"
+              clickEvent={tilbakemeldingUtland}
               behandlingId={behandling.id}
             />
-          </HStack>
+          </Box>
         )}
       </VStack>
     </Box>

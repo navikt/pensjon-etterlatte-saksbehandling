@@ -8,7 +8,7 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Box, Button, HStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingStatus, IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
@@ -25,8 +25,6 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { avkortingSkalHaToInntekter } from '~shared/api/avkorting'
-import { ClickEvent } from '~utils/amplitude'
-import { Tilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
 
 export const BeregneOMS = () => {
   const behandling = useBehandling()
@@ -105,11 +103,6 @@ export const BeregneOMS = () => {
     })
   }
 
-  const erUtlandForstegangsbehandling = () =>
-    behandling.utlandstilknytning &&
-    behandling.utlandstilknytning.type !== UtlandstilknytningType.NASJONAL &&
-    behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-
   return (
     <>
       {erOpphoer ? (
@@ -150,19 +143,6 @@ export const BeregneOMS = () => {
                       ? 'Du må legge til inntektsavkorting for inneværende og neste år, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'
                       : 'Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'}
                   </Alert>
-                )}
-                {erUtlandForstegangsbehandling() && (
-                  <HStack justify="center" paddingBlock="0 8">
-                    <Tilbakemelding
-                      spoersmaal="Hvordan opplevde du saksbehandlingen av denne utlandssaken i Gjenny?"
-                      clickEvent={
-                        behandling.erSluttbehandling
-                          ? ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING
-                          : ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_FOERSTEGANGSBEHANDLING
-                      }
-                      behandlingId={behandling.id}
-                    />
-                  </HStack>
                 )}
               </Box>
             )

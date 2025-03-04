@@ -40,7 +40,14 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
 
   const person = usePerson()
 
-  const harEndretFnr = () => person && person.foedselsnummer !== fnr
+  const harEndretFnr = () => {
+    if (isSuccess(sakResult)) {
+      if (person && person.foedselsnummer !== sakResult.data.sak.ident) {
+        return true
+      }
+    }
+    return false
+  }
 
   useEffect(() => {
     if (isSuccess(sakResult)) {

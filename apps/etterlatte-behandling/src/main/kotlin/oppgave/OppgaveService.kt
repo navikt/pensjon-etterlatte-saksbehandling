@@ -539,6 +539,11 @@ class OppgaveService(
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
         val oppgave = oppgaveDao.hentOppgave(oppgaveId)
+        val oppgaverSomKanAvbrytes = listOf(OppgaveType.AKTIVITETSPLIKT, OppgaveType.AKTIVITETSPLIKT_12MND)
+
+        if (!oppgaverSomKanAvbrytes.contains(oppgave?.type)) {
+            throw InternfeilException("Kan ikke avbryte oppgaveType ${oppgave.type}")
+        }
 
         krevIkkeNull(oppgave) { "Fant ingen oppgave under behandling med id=$oppgaveId" }
 

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -29,9 +30,11 @@ class OpprettEtteroppgjoerRevurdering(
     fun opprett(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Revurdering {
         val (revurdering, sisteIverksatte) =
             inTransaction {
+                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+
                 val sisteIverksatte =
                     behandlingService.hentSisteIverksatte(sakId)
                         ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
@@ -86,5 +89,6 @@ class OpprettEtteroppgjoerRevurdering(
                 brukerTokenInfo = brukerTokenInfo,
             )
         }
+        return revurdering
     }
 }

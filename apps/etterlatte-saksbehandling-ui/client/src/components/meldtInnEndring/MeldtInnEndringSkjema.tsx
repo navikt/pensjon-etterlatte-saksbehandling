@@ -12,7 +12,8 @@ import { SakType } from '~shared/types/sak'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useNavigate } from 'react-router-dom'
+import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
+import { PersonOversiktFane } from '~components/person/Person'
 
 interface Skjema {
   revurderingsaarsak: Revurderingaarsak
@@ -30,8 +31,6 @@ export const MeldtInnEndringSkjema = ({
   meldtInnEndringHandlingValgt,
   setMeldtInnEndringHandlingValgt,
 }: Props) => {
-  const navigate = useNavigate()
-
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
 
@@ -56,12 +55,12 @@ export const MeldtInnEndringSkjema = ({
   const avsluttOppgaveEllerOpprettRevurdering = (data: Skjema) => {
     if (meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.AVSLUTT_OPPGAVE) {
       ferdigstillOppgaveRequest({ id: oppgave.id, merknad: data.begrunnelse }, () => {
-        setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.INGEN)
+        navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)
       })
     } else if (meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.OPPRETT_REVURDERING) {
       opprettRevurderingRequest({ sakId: oppgave.sakId, aarsak: data.revurderingsaarsak }, () => {
         ferdigstillOppgaveRequest({ id: oppgave.id, merknad: data.begrunnelse }, () => {
-          setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.INGEN)
+          navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)
         })
       })
     }

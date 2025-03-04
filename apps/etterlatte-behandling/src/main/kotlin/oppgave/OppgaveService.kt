@@ -541,11 +541,12 @@ class OppgaveService(
         val oppgave = oppgaveDao.hentOppgave(oppgaveId)
         val oppgaverSomKanAvbrytes = listOf(OppgaveType.AKTIVITETSPLIKT, OppgaveType.AKTIVITETSPLIKT_12MND)
 
-        if (!oppgaverSomKanAvbrytes.contains(oppgave?.type)) {
+        krevIkkeNull(oppgave) { "Fant ingen oppgave under behandling med id=$oppgaveId" }
+
+        // TODO: midl løsning for å begrense hvilke oppgaver som kan avbrytes for å unngå uheldige situasjoner
+        if (!oppgaverSomKanAvbrytes.contains(oppgave.type)) {
             throw InternfeilException("Kan ikke avbryte oppgaveType ${oppgave.type}")
         }
-
-        krevIkkeNull(oppgave) { "Fant ingen oppgave under behandling med id=$oppgaveId" }
 
         sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
         oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, merknad, Status.AVBRUTT)

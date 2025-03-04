@@ -102,7 +102,7 @@ const KlageMotattDato = ({ control }: { control: Control<FilledFormData, any> })
     errorVedTomInput="Du må velge når klagen ble mottatt"
   />
 )
-// TODO: knapp secondary, åpne i ny fane etter å ha blitt opprettet
+
 export const NyttBrevModal = ({
   sakId,
   sakType,

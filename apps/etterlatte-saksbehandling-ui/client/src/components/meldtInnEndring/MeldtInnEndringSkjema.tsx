@@ -12,6 +12,7 @@ import { SakType } from '~shared/types/sak'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useNavigate } from 'react-router-dom'
 
 interface Skjema {
   revurderingsaarsak: Revurderingaarsak
@@ -29,6 +30,8 @@ export const MeldtInnEndringSkjema = ({
   meldtInnEndringHandlingValgt,
   setMeldtInnEndringHandlingValgt,
 }: Props) => {
+  const navigate = useNavigate()
+
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
 

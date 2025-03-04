@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { Journalpost } from '~shared/types/Journalpost'
@@ -20,7 +20,7 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
 
   const [open, setOpen] = useState(false)
 
-  const [oppdaterStatus, apiOppdaterJournalpost] = useApiCall(oppdaterJournalpost)
+  const [oppdaterStatus, apiOppdaterJournalpost, resetOppdaterStatus] = useApiCall(oppdaterJournalpost)
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
 
   const oppdater = () => {
@@ -36,6 +36,12 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
       })
     })
   }
+
+  useEffect(() => {
+    if (!open) {
+      resetOppdaterStatus()
+    }
+  }, [open, resetOppdaterStatus])
 
   if (temaTilhoererGjenny(journalpost)) {
     return (

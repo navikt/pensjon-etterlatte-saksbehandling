@@ -7,7 +7,7 @@ import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljert
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
-import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { AktivitetspliktVurdering } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'

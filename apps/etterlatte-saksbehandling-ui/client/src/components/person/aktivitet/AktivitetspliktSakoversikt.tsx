@@ -10,7 +10,7 @@ import {
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
-import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { VurderingAvAktivitetspliktSak } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetspliktSak'

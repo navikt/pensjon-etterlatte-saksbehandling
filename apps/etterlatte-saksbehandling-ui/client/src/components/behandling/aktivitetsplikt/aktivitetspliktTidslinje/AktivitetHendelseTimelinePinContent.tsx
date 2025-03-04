@@ -10,7 +10,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import {
   AktivitetspliktRedigeringModus,
   AktivitetspliktSkjemaAaVise,
-} from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+} from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 
 interface Props {
   behandlingId?: string

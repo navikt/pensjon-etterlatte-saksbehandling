@@ -8,7 +8,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   AktivitetspliktRedigeringModus,
   AktivitetspliktSkjemaAaVise,
-} from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+} from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { useForm } from 'react-hook-form'
 import { Button, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'

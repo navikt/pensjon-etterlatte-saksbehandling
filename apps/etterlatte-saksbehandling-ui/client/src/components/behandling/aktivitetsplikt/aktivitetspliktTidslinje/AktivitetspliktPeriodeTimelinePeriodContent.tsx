@@ -6,7 +6,7 @@ import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import {
   AktivitetspliktRedigeringModus,
   AktivitetspliktSkjemaAaVise,
-} from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+} from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { slettAktivitetPeriodeForBehandling, slettAktivitetPeriodeForSak } from '~shared/api/aktivitetsplikt'
 import { isPending } from '~shared/api/apiUtils'

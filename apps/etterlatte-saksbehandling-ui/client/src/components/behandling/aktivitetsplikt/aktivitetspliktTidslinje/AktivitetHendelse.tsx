@@ -6,7 +6,7 @@ import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 import {
   AktivitetspliktRedigeringModus,
   AktivitetspliktSkjemaAaVise,
-} from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+} from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetHendelseForBehandling, opprettAktivitetHendelseForSak } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'

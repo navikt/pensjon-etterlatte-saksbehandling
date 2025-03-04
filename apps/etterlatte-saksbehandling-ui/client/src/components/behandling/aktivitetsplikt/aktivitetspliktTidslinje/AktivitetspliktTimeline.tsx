@@ -3,9 +3,9 @@ import { addMonths, addYears } from 'date-fns'
 import { HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { AktivitetspliktType, IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
-import { AktivitetHendelseTimelinePinContent } from '~components/behandling/aktivitetsplikt/aktivitetspliktTimeline/AktivitetHendelseTimelinePinContent'
-import { AktivitetspliktRedigeringModus } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
-import { AktivitetspliktPeriodeTimelinePeriodContent } from '~components/behandling/aktivitetsplikt/aktivitetspliktTimeline/AktivitetspliktPeriodeTimelinePeriodContent'
+import { AktivitetHendelseTimelinePinContent } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetHendelseTimelinePinContent'
+import { AktivitetspliktRedigeringModus } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
+import { AktivitetspliktPeriodeTimelinePeriodContent } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktPeriodeTimelinePeriodContent'
 import {
   Buildings2Icon,
   HatSchoolIcon,

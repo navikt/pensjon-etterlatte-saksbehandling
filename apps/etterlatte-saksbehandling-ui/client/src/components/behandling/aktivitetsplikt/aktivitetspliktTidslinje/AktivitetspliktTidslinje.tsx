@@ -2,13 +2,13 @@ import { Button, HStack, VStack } from '@navikt/ds-react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import { IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
-import { AktivitetspliktTimeline } from '~components/behandling/aktivitetsplikt/aktivitetspliktTimeline/AktivitetspliktTimeline'
+import { AktivitetspliktTimeline } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTimeline'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktiviteterOgHendelser } from '~shared/api/aktivitetsplikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { AktivitetHendelse } from '~components/behandling/aktivitetsplikt/AktivitetHendelse'
+import { AktivitetHendelse } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetHendelse'
 import { PlusIcon } from '@navikt/aksel-icons'
-import { AktivitetPeriode } from '~components/behandling/aktivitetsplikt/AktivitetPeriode'
+import { AktivitetPeriode } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetPeriode'
 
 export enum AktivitetspliktSkjemaAaVise {
   AKTIVITET_HENDELSE,

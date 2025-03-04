@@ -70,7 +70,9 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
               {harEndretFnr() && (
                 <Box paddingBlock="8 0">
                   <Alert variant="info">
-                    <Heading size="xsmall">Nytt identnummer på bruker</Heading>
+                    <Heading size="xsmall" spacing={true}>
+                      Nytt identnummer på bruker
+                    </Heading>
                     <BodyShort>
                       Identitetsnummer du søkte på “{sak.ident}” er blitt ersattet med “{person!.foedselsnummer}”. Du må
                       oppdatere til ny ident.

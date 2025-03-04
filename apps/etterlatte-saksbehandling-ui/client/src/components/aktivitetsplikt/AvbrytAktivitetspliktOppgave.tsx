@@ -15,7 +15,7 @@ export function AvbrytAktivitetspliktOppgave() {
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
-  const [avbrytOppgaveStatus, avbrytOppgave] = useApiCall(avbrytOppgaveMedMerknad)
+  const [avbrytOppgaveMedMerknadResult, avbrytOppgaveMedMerknadRequest] = useApiCall(avbrytOppgaveMedMerknad)
 
   const { handleSubmit } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
 

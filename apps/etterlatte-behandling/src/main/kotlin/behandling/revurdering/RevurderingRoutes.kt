@@ -65,23 +65,22 @@ internal fun Route.revurderingRoutes(
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
                         // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
 
-                        if (opprettRevurderingRequest.aarsak == Revurderingaarsak.ETTEROPPGJOER) {
-                            opprettEtteroppgjoer.opprett(sakId, brukerTokenInfo)
-                        }
-
                         val revurdering =
-                            inTransaction {
-                                manuellRevurderingService.opprettManuellRevurderingWrapper(
-                                    sakId = sakId,
-                                    aarsak = opprettRevurderingRequest.aarsak,
-                                    paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
-                                    paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
-                                    begrunnelse = opprettRevurderingRequest.begrunnelse,
-                                    fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
-                                    saksbehandler = saksbehandler,
-                                )
+                            if (opprettRevurderingRequest.aarsak == Revurderingaarsak.ETTEROPPGJOER) {
+                                opprettEtteroppgjoer.opprett(sakId, brukerTokenInfo)
+                            } else {
+                                inTransaction {
+                                    manuellRevurderingService.opprettManuellRevurderingWrapper(
+                                        sakId = sakId,
+                                        aarsak = opprettRevurderingRequest.aarsak,
+                                        paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
+                                        paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
+                                        begrunnelse = opprettRevurderingRequest.begrunnelse,
+                                        fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
+                                        saksbehandler = saksbehandler,
+                                    )
+                                }
                             }
-
                         call.respond(revurdering.id)
                     }
                 }

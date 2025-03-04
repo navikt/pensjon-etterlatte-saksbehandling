@@ -63,6 +63,27 @@ export enum AktivitetspliktType {
   OPPFOELGING_LOKALKONTOR = 'OPPFOELGING_LOKALKONTOR',
 }
 
+export const aktivitetspliktTypeTilLesbarStreng = (aktivitetspliktType: string): string => {
+  switch (aktivitetspliktType) {
+    case AktivitetspliktType.ARBEIDSTAKER:
+      return 'Arbeidstaker'
+    case AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE:
+      return 'Selvstendig næringsdrivende'
+    case AktivitetspliktType.ETABLERER_VIRKSOMHET:
+      return 'Etablerer virksomhet'
+    case AktivitetspliktType.ARBEIDSSOEKER:
+      return 'Arbeidssøker'
+    case AktivitetspliktType.UTDANNING:
+      return 'Utdanning'
+    case AktivitetspliktType.OPPFOELGING_LOKALKONTOR:
+      return 'Oppfølging lokalkontor'
+    case AktivitetspliktType.INGEN_AKTIVITET:
+      return 'Ingen aktivitet'
+    default:
+      return ''
+  }
+}
+
 export enum AktivitetspliktVurderingType {
   AKTIVITET_UNDER_50 = 'AKTIVITET_UNDER_50',
   AKTIVITET_OVER_50 = 'AKTIVITET_OVER_50',

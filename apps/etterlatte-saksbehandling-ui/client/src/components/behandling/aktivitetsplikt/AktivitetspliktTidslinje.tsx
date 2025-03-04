@@ -1,4 +1,4 @@
-import { HStack, VStack } from '@navikt/ds-react'
+import { Button, HStack, VStack } from '@navikt/ds-react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import { IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
@@ -6,6 +6,9 @@ import { AktivitetspliktTimeline } from '~components/behandling/aktivitetsplikt/
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktiviteterOgHendelser } from '~shared/api/aktivitetsplikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { AktivitetHendelse } from '~components/behandling/aktivitetsplikt/AktivitetHendelse'
+import { PlusIcon } from '@navikt/aksel-icons'
+import { AktivitetPeriode } from '~components/behandling/aktivitetsplikt/AktivitetPeriode'
 
 export enum AktivitetspliktSkjemaAaVise {
   AKTIVITET_HENDELSE,
@@ -63,18 +66,60 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
         errorMessage: 'Kunne ikke hente aktivitet hendelser og perioder',
       })}
 
-      <HStack align="center" justify="space-between">
-        {/*<AktivitetOgHendelse*/}
-        {/*  key={redigerAktivitet?.id}*/}
-        {/*  behandling={behandling}*/}
-        {/*  oppdaterAktiviteter={setAktivitetPerioder}*/}
-        {/*  redigerAktivitet={redigerAktivitet}*/}
-        {/*  sakId={sakId}*/}
-        {/*  setHendelser={setAktivitetHendelser}*/}
-        {/*  redigerHendelse={redigerHendelse}*/}
-        {/*  avbrytRedigering={avbrytRedigering}*/}
-        {/*/>*/}
-      </HStack>
+      {aktivitetspliktRedigeringModus.aktivitetspliktSkjemaAaVise === AktivitetspliktSkjemaAaVise.AKTIVITET_PERIODE && (
+        <AktivitetPeriode
+          behandling={behandling}
+          sakId={sakId}
+          aktivitetPeriode={aktivitetspliktRedigeringModus.aktivitetPeriode}
+          setAktivitetPerioder={setAktivitetPerioder}
+          setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
+        />
+      )}
+      {aktivitetspliktRedigeringModus.aktivitetspliktSkjemaAaVise ===
+        AktivitetspliktSkjemaAaVise.AKTIVITET_HENDELSE && (
+        <AktivitetHendelse
+          behandling={behandling}
+          sakId={sakId}
+          aktivitetHendelse={aktivitetspliktRedigeringModus.aktivitetHendelse}
+          setAktivitetHendelser={setAktivitetHendelser}
+          setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
+        />
+      )}
+
+      {aktivitetspliktRedigeringModus.aktivitetspliktSkjemaAaVise === AktivitetspliktSkjemaAaVise.INGEN && (
+        <HStack gap="4">
+          <Button
+            size="small"
+            variant="secondary"
+            icon={<PlusIcon aria-hidden />}
+            iconPosition="right"
+            onClick={() => {
+              setAktivitetspliktRedigeringModus({
+                aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_PERIODE,
+                aktivitetHendelse: undefined,
+                aktivitetPeriode: undefined,
+              })
+            }}
+          >
+            Ny aktivitet
+          </Button>
+          <Button
+            size="small"
+            variant="secondary"
+            icon={<PlusIcon aria-hidden />}
+            iconPosition="right"
+            onClick={() => {
+              setAktivitetspliktRedigeringModus({
+                aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_HENDELSE,
+                aktivitetHendelse: undefined,
+                aktivitetPeriode: undefined,
+              })
+            }}
+          >
+            Ny hendelse
+          </Button>
+        </HStack>
+      )}
     </VStack>
   )
 }

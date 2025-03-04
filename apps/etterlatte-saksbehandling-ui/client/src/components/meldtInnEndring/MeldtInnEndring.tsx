@@ -123,7 +123,11 @@ export const MeldtInnEndring = () => {
                             >
                               Gi beskjed i modia
                             </Button>
-                            <NyttBrevModal sakId={oppgave.sakId} sakType={oppgave.sakType} />
+                            <NyttBrevModal
+                              sakId={oppgave.sakId}
+                              sakType={oppgave.sakType}
+                              modalButtonVariant="secondary"
+                            />
                             <Button
                               onClick={() =>
                                 setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.AVSLUTT_OPPGAVE)

@@ -102,8 +102,16 @@ const KlageMotattDato = ({ control }: { control: Control<FilledFormData, any> })
     errorVedTomInput="Du må velge når klagen ble mottatt"
   />
 )
-
-export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
+// TODO: knapp secondary, åpne i ny fane etter å ha blitt opprettet
+export const NyttBrevModal = ({
+  sakId,
+  sakType,
+  modalButtonVariant = 'primary',
+}: {
+  sakId: number
+  sakType: SakType
+  modalButtonVariant?: 'primary' | 'secondary'
+}) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
@@ -141,7 +149,12 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
   return (
     <>
-      <Button variant="primary" icon={<DocPencilIcon aria-hidden />} iconPosition="right" onClick={() => setOpen(true)}>
+      <Button
+        variant={modalButtonVariant}
+        icon={<DocPencilIcon aria-hidden />}
+        iconPosition="right"
+        onClick={() => setOpen(true)}
+      >
         Nytt brev
       </Button>
 

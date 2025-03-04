@@ -32,7 +32,7 @@ export function AvbrytAktivitetspliktOppgave() {
     watch,
     formState: { errors },
   } = useForm<AvbrytOppgave>({
-    defaultValues: { merknad: 'Oppgave avbrytes av saksbehandler' },
+    defaultValues: { merknad: 'Saksbehandler har avbrutt oppgaven' },
   })
 
   const avbryt = () => {

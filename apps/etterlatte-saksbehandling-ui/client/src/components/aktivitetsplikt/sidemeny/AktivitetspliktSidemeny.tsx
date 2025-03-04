@@ -4,6 +4,8 @@ import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { formaterOppgaveStatus } from '~utils/formatering/formatering'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
+import { Oppgavetype } from '~shared/types/oppgave'
+import { AvbrytAktivitetspliktOppgave } from '~components/aktivitetsplikt/AvbrytAktivitetspliktOppgave'
 
 export function AktivitetspliktSidemeny() {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
@@ -25,6 +27,9 @@ export function AktivitetspliktSidemeny() {
       </SidebarPanel>
 
       {oppgave.fnr && <DokumentlisteLiten fnr={oppgave.fnr} />}
+
+      {oppgave.type == Oppgavetype.AKTIVITETSPLIKT ||
+        (Oppgavetype.AKTIVITETSPLIKT_12MND && <AvbrytAktivitetspliktOppgave />)}
     </Sidebar>
   )
 }

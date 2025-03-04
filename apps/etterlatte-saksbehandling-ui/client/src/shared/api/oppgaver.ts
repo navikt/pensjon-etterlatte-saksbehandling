@@ -68,6 +68,11 @@ export const ferdigstillOppgaveMedMerknad = async (args: {
   merknad?: string | null
 }): Promise<ApiResponse<OppgaveDTO>> => apiClient.put(`/oppgaver/${args.id}/ferdigstill`, { merknad: args.merknad })
 
+export const avbrytOppgaveMedMerknad = async (args: {
+  id: string
+  merknad: string
+}): Promise<ApiResponse<OppgaveDTO>> => apiClient.put(`/oppgaver/${args.id}/avbryt`, { merknad: args.merknad })
+
 export const saksbehandlereIEnhetApi = async (args: {
   enheter: string[]
 }): Promise<ApiResponse<Array<Saksbehandler>>> => {

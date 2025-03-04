@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
@@ -1425,6 +1426,34 @@ internal class OppgaveServiceTest(
             )
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.PAA_VENT)
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.UNDER_BEHANDLING)
+    }
+
+    @Test
+    fun `kan avbryte oppgave med merknad`() {
+        val brukerTokenInfo =
+            mockk<BrukerTokenInfo> {
+                every { ident() } returns "Z999999"
+                every { kanEndreOppgaverFor(any()) } returns true
+            }
+
+        val opprettetSak = sakSkrivDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                referanse = UUID.randomUUID().toString(),
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.AKTIVITETSPLIKT,
+                merknad = null,
+                saksbehandler = brukerTokenInfo.ident(),
+            )
+
+        val merkand = "oppgave avbrutt"
+        oppgaveService.hentOppgave(oppgave.id).status shouldNotBe Status.AVBRUTT
+        oppgaveService.avbrytOppgave(oppgave.id, merkand, brukerTokenInfo)
+
+        val oppdatertOppgave = oppgaveService.hentOppgave(oppgave.id)
+        oppdatertOppgave.status shouldBe Status.AVBRUTT
+        oppdatertOppgave.merknad shouldBe merkand
     }
 
     @Test

@@ -533,6 +533,23 @@ class OppgaveService(
             .oppgaveFoer.status
     }
 
+    fun avbrytOppgave(
+        oppgaveId: UUID,
+        merknad: String,
+        saksbehandler: BrukerTokenInfo,
+    ): OppgaveIntern {
+        val oppgave = oppgaveDao.hentOppgave(oppgaveId)
+
+        krevIkkeNull(oppgave) { "Fant ingen oppgave under behandling med id=$oppgaveId" }
+
+        sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
+        oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, merknad, Status.AVBRUTT)
+
+        return krevIkkeNull(oppgaveDao.hentOppgave(oppgaveId)) {
+            "Oppgaven kunne ikke hentes ut"
+        }
+    }
+
     fun avbrytOppgaveUnderBehandling(
         referanse: String,
         saksbehandler: BrukerTokenInfo,

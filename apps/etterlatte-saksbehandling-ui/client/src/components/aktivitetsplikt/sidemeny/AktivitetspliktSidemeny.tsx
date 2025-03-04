@@ -28,8 +28,9 @@ export function AktivitetspliktSidemeny() {
 
       {oppgave.fnr && <DokumentlisteLiten fnr={oppgave.fnr} />}
 
-      {oppgave.type == Oppgavetype.AKTIVITETSPLIKT ||
-        (Oppgavetype.AKTIVITETSPLIKT_12MND && <AvbrytAktivitetspliktOppgave />)}
+      {(oppgave.type === Oppgavetype.AKTIVITETSPLIKT || oppgave.type === Oppgavetype.AKTIVITETSPLIKT_12MND) && (
+        <AvbrytAktivitetspliktOppgave />
+      )}
     </Sidebar>
   )
 }

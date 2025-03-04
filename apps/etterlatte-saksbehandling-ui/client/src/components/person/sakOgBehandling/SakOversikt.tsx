@@ -74,8 +74,9 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                       Nytt identnummer på bruker
                     </Heading>
                     <BodyShort>
-                      Identitetsnummer du søkte på “{sak.ident}” er blitt ersattet med “{person!.foedselsnummer}”. Du må
-                      oppdatere til ny ident.
+                      {fnr !== person!.foedselsnummer
+                        ? `Identitetsnummer du søkte på “${fnr}” er blitt ersattet med “${person!.foedselsnummer}”. Du må oppdatere til ny ident.`
+                        : `Identitetsnummer er blitt ersattet med “${person!.foedselsnummer}” men sak har fortsatt ident ${sak.ident}. Du må oppdatere til ny ident.`}
                     </BodyShort>
                   </Alert>
                 </Box>

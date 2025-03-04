@@ -68,7 +68,7 @@ export function AvbrytAktivitetspliktOppgave() {
                   return (
                     <Textarea
                       label="Begrunnelse"
-                      description="Utdyp hvorfor oppgaven avsluttes"
+                      description="Utdyp hvorfor oppgaven avbrytes"
                       value={value ?? ''}
                       {...rest}
                       size="medium"

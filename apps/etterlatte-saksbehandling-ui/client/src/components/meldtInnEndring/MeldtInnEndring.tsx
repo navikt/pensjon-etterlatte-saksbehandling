@@ -128,6 +128,7 @@ export const MeldtInnEndring = () => {
                             <NyttBrevModal
                               sakId={oppgave.sakId}
                               sakType={oppgave.sakType}
+                              modalButtonlabel="Send brev"
                               modalButtonVariant="secondary"
                             />
                             <Button

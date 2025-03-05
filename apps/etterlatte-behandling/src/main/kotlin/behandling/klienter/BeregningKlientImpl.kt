@@ -49,6 +49,11 @@ interface BeregningKlient {
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun beregnBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BeregningKlientImpl(
@@ -179,6 +184,33 @@ class BeregningKlientImpl(
         } catch (e: Exception) {
             throw InternfeilException(
                 "Kopiering av beregningsgurnnlag feilet for behandling=$behandlingId",
+                e,
+            )
+        }
+    }
+
+    override suspend fun beregnBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        try {
+            logger.info("Beregner behandling med id=$behandlingId")
+            downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = {},
+                ).mapBoth(
+                    success = { },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Beregning feilet for behandling=$behandlingId",
                 e,
             )
         }

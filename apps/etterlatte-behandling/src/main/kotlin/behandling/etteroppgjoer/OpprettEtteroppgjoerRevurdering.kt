@@ -88,6 +88,12 @@ class OpprettEtteroppgjoerRevurdering(
                 forrigeBehandlingId = sisteIverksatte.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
+            beregningKlient.beregnBehandling(
+                behandlingId = revurdering.id,
+                brukerTokenInfo = brukerTokenInfo,
+            )
+
+            // TODO Avkorting basert på faktisk inntekt fra forbehandling
         }
         return revurdering
     }

@@ -23,6 +23,7 @@ import { OpprettOppfoelgingsoppgaveModal } from '~components/person/sakOgBehandl
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
+import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -78,6 +79,9 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                         ? `Identitetsnummer du søkte på “${fnr}” er blitt ersattet med “${person!.foedselsnummer}”. Du må oppdatere til ny ident.`
                         : `Identitetsnummer er blitt ersattet med “${person!.foedselsnummer}” men sak har fortsatt ident ${sak.ident}. Du må oppdatere til ny ident.`}
                     </BodyShort>
+                    <Box paddingBlock="6 2">
+                      <OppdaterIdentModal sak={sak} hendelse={null} />
+                    </Box>
                   </Alert>
                 </Box>
               )}

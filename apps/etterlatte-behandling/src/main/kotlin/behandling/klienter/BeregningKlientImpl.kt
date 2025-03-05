@@ -50,7 +50,7 @@ interface BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
     )
 
-    suspend fun beregn(
+    suspend fun beregnBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
@@ -189,7 +189,7 @@ class BeregningKlientImpl(
         }
     }
 
-    override suspend fun beregn(
+    override suspend fun beregnBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {

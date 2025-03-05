@@ -88,7 +88,7 @@ class OpprettEtteroppgjoerRevurdering(
                 forrigeBehandlingId = sisteIverksatte.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
-            beregningKlient.beregn(
+            beregningKlient.beregnBehandling(
                 behandlingId = revurdering.id,
                 brukerTokenInfo = brukerTokenInfo,
             )

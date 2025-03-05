@@ -21,7 +21,6 @@ import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/OppfoelgingsOppgaveModal'
-import { MeldtInnEndringOppgaveModal } from '~components/oppgavebenk/oppgaveModal/MeldtInnEndringOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -222,7 +221,9 @@ export const HandlingerForOppgave = ({
       } else {
         return (
           erOppgaveRedigerbar(oppgave.status) && (
-            <MeldtInnEndringOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+            <Button size="small" as="a" href={`/meldt-inn-endring/${oppgave.id}`}>
+              Gå til oppgave
+            </Button>
           )
         )
       }

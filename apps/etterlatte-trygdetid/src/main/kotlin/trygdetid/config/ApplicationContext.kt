@@ -45,6 +45,7 @@ class ApplicationContext {
             pesysKlient = PesysKlientImpl(config, httpClient()),
             avtaleService = avtaleService,
             vedtaksvurderingKlient = vedtaksvurderingKlient,
+            featureToggleService = featureToggleService,
         )
 }
 

@@ -61,6 +61,7 @@ enum class TrygdetidToggles(
     val value: String,
 ) : FeatureToggle {
     TRYGDETID_FRA_PESYS("trygdetid-fra-pesys"),
+    OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING("oppdater-beregnet-trygdetid-ved-kopiering"),
     ;
 
     override fun key(): String = this.value
@@ -299,10 +300,25 @@ fun Route.trygdetid(
             }
 
             post("/kopier-grunnlag/{kildeBehandlingId}") {
+                // Alias for kopier-og-overskriv (temp)
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
                         call.respond(
-                            trygdetidService.kopierTrygdetidsgrunnlag(
+                            trygdetidService.kopierOgOverskrivTrygdetid(
+                                behandlingId = behandlingId,
+                                kildeBehandlingId = kildeBehandlingId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            ),
+                        )
+                    }
+                }
+            }
+
+            post("/kopier-og-overskriv/{kildeBehandlingId}") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
+                        call.respond(
+                            trygdetidService.kopierOgOverskrivTrygdetid(
                                 behandlingId = behandlingId,
                                 kildeBehandlingId = kildeBehandlingId,
                                 brukerTokenInfo = brukerTokenInfo,

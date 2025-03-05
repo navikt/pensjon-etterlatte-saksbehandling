@@ -14,7 +14,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@amplitude/analytics-browser": "^2.11.11",
+    "@amplitude/analytics-browser": "^2.11.13",
     "@navikt/aksel-icons": "^7.10.0",
     "@navikt/ds-css": "~7.10.0",
     "@navikt/ds-react": "~7.10.0",
@@ -36,19 +36,19 @@
     "slate-dom": "^0.112.2",
     "slate-history": "^0.110.3",
     "slate-react": "^0.112.1",
-    "styled-components": "^6.1.14"
+    "styled-components": "^6.1.15"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.19.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/is-hotkey": "^0.1.10",
-    "@types/lodash": "^4.17.15",
     "@types/node": "^22.13.8",
     "@types/react": "^19.0.10",
+    "@types/lodash": "^4.17.16",
     "@types/react-datepicker": "^7.0.0",
     "@types/react-dom": "^19.0.4",
     "@types/react-tabs": "^5.0.5",
@@ -59,7 +59,7 @@
     "eslint": "^9.19.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.4",
-    "globals": "^15.14.0",
+    "globals": "^16.0.0",
     "jsdom": "^26.0.0",
     "license-checker-rseidelsohn": "^4.4.2",
     "prettier": "^3.4.2",

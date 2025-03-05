@@ -151,7 +151,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns true
+                        every { erIkkeAvsluttet() } returns true
                     },
                 )
             val res =
@@ -169,7 +169,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                         every { erFerdigstilt() } returns true
                     },
                 )
@@ -188,7 +188,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                         every { erFerdigstilt() } returns false
                     },
                 )
@@ -212,7 +212,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns true
+                        every { erIkkeAvsluttet() } returns true
                         every { status } returns Status.UNDER_BEHANDLING
                     },
                 )
@@ -244,7 +244,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                         every { erFerdigstilt() } returns true
                     },
                 )
@@ -252,7 +252,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns true
+                        every { erIkkeAvsluttet() } returns true
                     },
                 )
             val res =
@@ -270,7 +270,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                         every { erFerdigstilt() } returns true
                     },
                 )
@@ -278,7 +278,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                         every { erFerdigstilt() } returns true
                     },
                 )
@@ -297,7 +297,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                         every { erFerdigstilt() } returns true
                     },
                 )
@@ -305,7 +305,7 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForSak(sakId2, OppgaveType.AKTIVITETSPLIKT_12MND) } returns
                 listOf(
                     mockk {
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                         every { erFerdigstilt() } returns false
                     },
                 )

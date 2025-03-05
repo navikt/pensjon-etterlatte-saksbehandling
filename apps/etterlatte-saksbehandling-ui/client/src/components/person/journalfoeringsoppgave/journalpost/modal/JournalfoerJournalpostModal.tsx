@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { Journalpost } from '~shared/types/Journalpost'
@@ -20,7 +20,7 @@ interface ModalProps {
 export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalProps) {
   const [open, setOpen] = useState(false)
 
-  const [oppdaterStatus, apiOppdaterJournalpost] = useApiCall(oppdaterJournalpost)
+  const [oppdaterStatus, apiOppdaterJournalpost, resetOppdaterStatus] = useApiCall(oppdaterJournalpost)
   const [kanFerdigstilles, feilmeldinger] = kanFerdigstilleJournalpost(journalpost)
 
   const ferdigstill = () => {
@@ -28,6 +28,12 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
       setTimeout(() => window.location.reload(), 3000)
     })
   }
+
+  useEffect(() => {
+    if (!open) {
+      resetOppdaterStatus()
+    }
+  }, [open, resetOppdaterStatus])
 
   return (
     <>

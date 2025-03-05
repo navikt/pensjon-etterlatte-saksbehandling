@@ -436,25 +436,35 @@
   resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.16.0.tgz#65fbe711a1c243b265ff217f97633223d91b8d59"
   integrity sha512-0n0R9rwePZIeKXZHBSNyBKkf4YaCxqIZ0aaWZBqmiVPiccVTmC+xQ1KCPWToaVHAsXScPCoETChbePfUwlYuLQ==
 
+"@navikt/aksel-icons@^7.16.1":
+  version "7.16.1"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.16.1.tgz#c877217fffd3863e9645189b1e889d73e3a9ccb9"
+  integrity sha512-J8NTA/fujlEljfIs77MeHPwkRlLVyIa2yxmq8OAqtW70gM92n7oCoMW5Ox5e6GAvfudMnmKDt1aWijhEqbE+sw==
+
 "@navikt/ds-css@~7.16.0":
   version "7.16.0"
   resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.16.0.tgz#55f5fce58e48146dec27f391e781d702b79cf320"
   integrity sha512-410ZExVfj6wOWWTSh2YJrpxTiGhTHm198XkIM5b/zwut4+OVfnuHzCq2hxleAOwOmXYi51WVdBdH66vK5OTA7w==
 
-"@navikt/ds-react@~7.16.0":
-  version "7.16.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.16.0.tgz#b791dabadcfbcd4d0033d8a0fde150bd2a4bb0c8"
-  integrity sha512-UO109I1u9GVb95YPBscemMhkQes+TDquv7TiA6Fs6oohxQ8QgnURSp22Nuku6ZLIRWQ+Po+GERY9Wjv8PMU90A==
+"@navikt/ds-react@~7.16.1":
+  version "7.16.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.16.1.tgz#a4ef40f54bfbaa93d97ef7290c3a10f4ca719269"
+  integrity sha512-XqfbfzPn4j0Q+59NzKNRvxIoCC/yNVfCvogqZaoyvqCcT8eey9iN/aYc8pcFJ53k1QW3CFdIOrvnnFHiWsKfBg==
   dependencies:
     "@floating-ui/react" "0.25.4"
     "@floating-ui/react-dom" "^2.0.9"
-    "@navikt/aksel-icons" "^7.16.0"
-    "@navikt/ds-tokens" "^7.16.0"
+    "@navikt/aksel-icons" "^7.16.1"
+    "@navikt/ds-tokens" "^7.16.1"
     clsx "^2.1.0"
     date-fns "^4.0.0"
     react-day-picker "9.5.0"
 
-"@navikt/ds-tokens@^7.16.0", "@navikt/ds-tokens@~7.16.0":
+"@navikt/ds-tokens@^7.16.1":
+  version "7.16.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.16.1.tgz#ac269f4db8df727e470b03a1c365cabe6f04d10c"
+  integrity sha512-QaY0cisZfA6Sv+2VSdDJHAtrpn5HDLwnpAlcH/Yjlq+C2yQ8KnWuZatBxajmY19hJbjn7hD5UYe+LH+5m/wzGA==
+
+"@navikt/ds-tokens@~7.16.0":
   version "7.16.0"
   resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.16.0.tgz#315bbe5b82b6e1713e16315dff34c39b23369663"
   integrity sha512-9+kEWMvRDNGgVoWLUPdnIFdIr8p0XZMmNLRchMzDbAaYR//ZP7DKiF280acBgmk0g9dpC9k5qFDQrhK2OEbn0A==

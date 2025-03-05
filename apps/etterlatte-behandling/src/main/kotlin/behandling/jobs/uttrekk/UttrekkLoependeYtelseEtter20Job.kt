@@ -13,8 +13,8 @@ import java.time.Duration
 import java.util.Timer
 import javax.sql.DataSource
 
-class SjekkerLoependeYtelseEtter20AarJob(
-    private val service: SjekkerLoependeYtelseEtter20AarJobService,
+class UttrekkLoependeYtelseEtter20Job(
+    private val service: UttrekkLoependeYtelseEtter20JobService,
     val sakTilgangDao: SakTilgangDao,
     val dataSource: DataSource,
     private val erLeader: () -> Boolean,

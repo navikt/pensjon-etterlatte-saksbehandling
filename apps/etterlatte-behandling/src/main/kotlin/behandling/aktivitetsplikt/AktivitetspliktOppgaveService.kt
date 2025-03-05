@@ -132,8 +132,7 @@ class AktivitetspliktOppgaveService(
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId, oppgaveType)
         val harOppfoelgingsOppgaveUnderbehandling =
             oppgaverForSak.filter {
-                it.erIkkeAvsluttet() ||
-                    it.status == no.nav.etterlatte.libs.common.oppgave.Status.AVBRUTT
+                it.erIkkeAvsluttet()
             }
 
         if (harOppfoelgingsOppgaveUnderbehandling.isNotEmpty()) {

@@ -23,7 +23,7 @@ import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnla
 import { formaterSakstype } from '~utils/formatering/formatering'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
+import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/EnigUenigTilbakemelding'
 import { ClickEvent } from '~utils/amplitude'
 import { useBehandling } from '~components/behandling/useBehandling'
 

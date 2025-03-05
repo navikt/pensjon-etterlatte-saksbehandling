@@ -132,6 +132,11 @@ class BeregningKlientTest :
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
+
+    override suspend fun beregn(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {
@@ -139,7 +144,8 @@ class TrygdetidKlientTest : TrygdetidKlient {
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {}
+    ) {
+    }
 }
 
 class VedtakKlientTest : VedtakKlient {

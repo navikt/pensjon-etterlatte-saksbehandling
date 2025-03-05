@@ -88,6 +88,10 @@ class OpprettEtteroppgjoerRevurdering(
                 forrigeBehandlingId = sisteIverksatte.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
+            beregningKlient.beregn(
+                behandlingId = revurdering.id,
+                brukerTokenInfo = brukerTokenInfo,
+            )
         }
         return revurdering
     }

@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { MonthPicker, useMonthpicker } from '@navikt/ds-react'
-import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 
 type MaanedVelgerProps = {
   fromDate?: Date
@@ -16,13 +15,15 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
   const { monthpickerProps, inputProps } = useMonthpicker({
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
-    onMonthChange: (date: Date) => {
-      date?.setHours(12)
-      onChange(date)
+    onMonthChange: (date: Date | undefined) => {
+      if (!!date) {
+        date?.setHours(12)
+        onChange(date)
+      }
     },
     defaultSelected: value ?? undefined,
     locale: 'nb',
-  } as UseMonthPickerOptions)
+  })
 
   return (
     <MonthPickerWrapper>

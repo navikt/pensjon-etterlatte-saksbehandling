@@ -111,7 +111,7 @@ export const AktivitetspliktSakoversikt = ({
           mapResult(oppfoelgingsOppgaver, {
             pending: <Spinner label="Henter oppfølgingsoppgave status for sak" />,
             error: (error) => (
-              <ApiErrorAlert>{error.detail || 'Kunne ikke hente ppfølgingsoppgave status for sak'}</ApiErrorAlert>
+              <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppfølgingsoppgave status for sak'}</ApiErrorAlert>
             ),
             success: (oppgaver) => (
               <VStack gap="4">

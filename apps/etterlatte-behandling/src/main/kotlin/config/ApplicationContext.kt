@@ -48,6 +48,8 @@ import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.SjekkerLoependeYtelseEtter20AarJob
+import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.SjekkerLoependeYtelseEtter20AarJobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -650,6 +652,9 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
+    val sjekkerLoependeYtelseEtter20AarJobService =
+        SjekkerLoependeYtelseEtter20AarJobService(vedtakKlient, sakService, nyAldersovergangService, vilkaarsvurderingDao)
+
     val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
             aktivitetspliktDao,
@@ -774,6 +779,17 @@ internal class ApplicationContext(
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val sjekkerLoependeYtelseEtter20AarJob: SjekkerLoependeYtelseEtter20AarJob by lazy {
+        SjekkerLoependeYtelseEtter20AarJob(
+            service = sjekkerLoependeYtelseEtter20AarJobService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.MONTHS),
         )
     }
 

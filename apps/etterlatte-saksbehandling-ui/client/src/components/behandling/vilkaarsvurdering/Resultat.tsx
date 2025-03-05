@@ -120,11 +120,10 @@ export const Resultat = (props: Props) => {
             </HStack>
             {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
               <BodyShort textColor="subtle">
-                {erRevurdering
-                  ? null
-                  : `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterDato(
-                      vilkaarsvurdering.virkningstidspunkt
-                    )}`}
+                {!erRevurdering &&
+                  `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterDato(
+                    vilkaarsvurdering.virkningstidspunkt
+                  )}`}
               </BodyShort>
             )}
           </Box>

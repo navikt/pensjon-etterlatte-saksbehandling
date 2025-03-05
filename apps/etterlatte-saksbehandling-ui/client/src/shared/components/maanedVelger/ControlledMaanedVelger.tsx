@@ -1,7 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { MonthPicker, MonthValidationT, useMonthpicker } from '@navikt/ds-react'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
-import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { isEqual } from 'date-fns'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 
@@ -38,10 +37,10 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
   const [, setDateError] = useState<MonthValidationT | null>(null)
 
   const { monthpickerProps, inputProps, setSelected, selectedMonth } = useMonthpicker({
-    onMonthChange: (date: Date) => {
+    onMonthChange: (date: Date | undefined) => {
       if (date) field.onChange(formatDateToLocaleDateOrEmptyString(date))
     },
-    defaultSelected: field.value ? new Date(field.value) : null,
+    defaultSelected: field.value ? new Date(field.value) : undefined,
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
     locale: 'nb',
@@ -50,7 +49,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
       if (val.isEmpty) field.onChange(null)
       else setDateError(val)
     },
-  } as UseMonthPickerOptions)
+  })
 
   useEffect(() => {
     // Dette tillater å sette value for feltet via setValue utenfor komponenten

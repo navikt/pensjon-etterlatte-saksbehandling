@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
@@ -1425,6 +1426,72 @@ internal class OppgaveServiceTest(
             )
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.PAA_VENT)
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.UNDER_BEHANDLING)
+    }
+
+    @ParameterizedTest
+    @EnumSource(OppgaveType::class, names = ["AKTIVITETSPLIKT", "AKTIVITETSPLIKT_12MND"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke avbryte oppgave som ikke er aktivitetspliktoppgave`(oppgaveType: OppgaveType) {
+        val brukerTokenInfo =
+            mockk<BrukerTokenInfo> {
+                every { ident() } returns "Z999999"
+                every { kanEndreOppgaverFor(any()) } returns true
+            }
+
+        val opprettetSak = sakSkrivDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                referanse = UUID.randomUUID().toString(),
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = oppgaveType,
+                merknad = null,
+                saksbehandler = brukerTokenInfo.ident(),
+            )
+
+        assertThrows<InternfeilException> {
+            oppgaveService.avbrytAktivitetspliktoppgave(oppgave.id, "merkand", brukerTokenInfo)
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(OppgaveType::class, names = ["AKTIVITETSPLIKT", "AKTIVITETSPLIKT_12MND"], mode = EnumSource.Mode.INCLUDE)
+    fun `kan avbryte aktivitetspliktoppgave med merknad `(oppgaveType: OppgaveType) {
+        val brukerTokenInfo =
+            mockk<BrukerTokenInfo> {
+                every { ident() } returns "Z999999"
+                every { kanEndreOppgaverFor(any()) } returns true
+            }
+
+        val opprettetSak = sakSkrivDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                referanse = UUID.randomUUID().toString(),
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = oppgaveType,
+                merknad = null,
+                saksbehandler = brukerTokenInfo.ident(),
+            )
+
+        val merkand = "oppgave avbrutt"
+        oppgaveService.hentOppgave(oppgave.id).status shouldNotBe Status.AVBRUTT
+        oppgaveService.avbrytAktivitetspliktoppgave(oppgave.id, merkand, brukerTokenInfo)
+
+        val oppdatertOppgave = oppgaveService.hentOppgave(oppgave.id)
+        oppdatertOppgave.status shouldBe Status.AVBRUTT
+        oppdatertOppgave.merknad shouldBe merkand
+
+        // negative ikke avbryte oppgave med status avbrutt
+        assertThrows<InternfeilException> {
+            oppgaveService.avbrytAktivitetspliktoppgave(oppgave.id, merkand, brukerTokenInfo)
+        }
+
+        // negative ikke avbryte oppgave med status ferdigstilt
+        assertThrows<InternfeilException> {
+            oppgaveService.ferdigstillOppgave(oppgave.id, brukerTokenInfo)
+            oppgaveService.hentOppgave(oppgave.id).status shouldBe Status.FERDIGSTILT
+            oppgaveService.avbrytAktivitetspliktoppgave(oppgave.id, merkand, brukerTokenInfo)
+        }
     }
 
     @Test

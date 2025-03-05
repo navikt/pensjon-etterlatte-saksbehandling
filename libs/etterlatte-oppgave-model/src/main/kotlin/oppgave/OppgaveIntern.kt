@@ -163,6 +163,10 @@ data class RedigerFristRequest(
     val frist: Tidspunkt,
 )
 
+data class AvbrytAktivitetspliktoppgaveRequest(
+    val merknad: String,
+)
+
 data class FerdigstillRequest(
     val merknad: String?,
 )

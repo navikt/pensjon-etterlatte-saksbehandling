@@ -113,7 +113,7 @@ export const MeldtInnEndringSkjema = ({
           <Button
             variant="secondary"
             type="button"
-            loading={isPending(opprettRevurderingResult || ferdigstillOppgaveResult)}
+            disabled={isPending(opprettRevurderingResult || ferdigstillOppgaveResult)}
             onClick={() => setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.INGEN)}
           >
             Avbryt

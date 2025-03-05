@@ -49,11 +49,13 @@ export const MeldtInnEndring = () => {
     <>
       {mapResult(hentOppgaveResult, {
         pending: <Spinner label="Henter oppgave..." />,
-        error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgave'}</ApiErrorAlert>,
+        error: (error) => <ApiErrorAlert>Kunne ikke hente oppgave, på grunn av feil: {error.detail}</ApiErrorAlert>,
         success: (oppgave) =>
           mapResult(hentJournalpostResult, {
             pending: <Spinner label="Henter journalpost..." />,
-            error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente journalpost'}</ApiErrorAlert>,
+            error: (error) => (
+              <ApiErrorAlert>Kunne ikke hente journalpost, på grunn av feil: {error.detail}</ApiErrorAlert>
+            ),
             success: (journalpost) => (
               <>
                 <StatusBar ident={oppgave.fnr} />
@@ -97,7 +99,7 @@ export const MeldtInnEndring = () => {
                                 setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.OPPRETT_REVURDERING)
                               }
                             >
-                              Oppret revurdering
+                              Opprett revurdering
                             </Button>
                           </div>
 

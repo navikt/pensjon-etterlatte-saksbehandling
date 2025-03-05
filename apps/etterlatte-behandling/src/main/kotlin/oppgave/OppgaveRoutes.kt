@@ -15,7 +15,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.oppgave.AvbrytRequest
+import no.nav.etterlatte.libs.common.oppgave.AvbrytAktivitetspliktoppgaveRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -224,13 +224,13 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 }
             }
 
-            put("avbryt") {
+            put("avbryt-aktivitetspliktoppgave") {
                 kunSkrivetilgang {
-                    val merknad = call.receive<AvbrytRequest>().merknad
+                    val merknad = call.receive<AvbrytAktivitetspliktoppgaveRequest>().merknad
 
                     val oppgave =
                         inTransaction {
-                            service.avbrytOppgave(oppgaveId, merknad, brukerTokenInfo)
+                            service.avbrytAktivitetspliktoppgave(oppgaveId, merknad, brukerTokenInfo)
                         }
 
                     call.respond(oppgave)

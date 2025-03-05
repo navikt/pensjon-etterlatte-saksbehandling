@@ -1,6 +1,6 @@
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { avbrytOppgaveMedMerknad } from '~shared/api/oppgaver'
+import { avbrytAktivitetspliktoppgave } from '~shared/api/oppgaver'
 import { Alert, Box, Button, HStack, Textarea } from '@navikt/ds-react'
 import { isPending } from '~shared/api/apiUtils'
 import React, { useState } from 'react'
@@ -25,7 +25,8 @@ export function AvbrytAktivitetspliktOppgave() {
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
-  const [avbrytOppgaveMedMerknadResult, avbrytOppgaveMedMerknadRequest] = useApiCall(avbrytOppgaveMedMerknad)
+  const [avbrytAktivitetspliktoppgaveResult, avbrytAktivitetspliktoppgaveRequest] =
+    useApiCall(avbrytAktivitetspliktoppgave)
 
   const {
     control,
@@ -37,7 +38,7 @@ export function AvbrytAktivitetspliktOppgave() {
 
   const avbryt = () => {
     const merknad = watch('merknad')
-    avbrytOppgaveMedMerknadRequest({ id: oppgave.id, merknad: merknad })
+    avbrytAktivitetspliktoppgaveRequest({ id: oppgave.id, merknad: merknad })
     navigate('/person', { state: { fnr: oppgave.fnr } })
   }
 
@@ -78,7 +79,7 @@ export function AvbrytAktivitetspliktOppgave() {
                 }}
               />
 
-              <Button variant="danger" onClick={avbryt} loading={isPending(avbrytOppgaveMedMerknadResult)}>
+              <Button variant="danger" onClick={avbryt} loading={isPending(avbrytAktivitetspliktoppgaveResult)}>
                 Avbryt oppgave
               </Button>
             </HStack>

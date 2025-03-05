@@ -533,18 +533,20 @@ class OppgaveService(
             .oppgaveFoer.status
     }
 
-    fun avbrytOppgave(
+    fun avbrytAktivitetspliktoppgave(
         oppgaveId: UUID,
         merknad: String,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
         val oppgave = oppgaveDao.hentOppgave(oppgaveId)
-        val oppgaverSomKanAvbrytes = listOf(OppgaveType.AKTIVITETSPLIKT, OppgaveType.AKTIVITETSPLIKT_12MND)
-
         krevIkkeNull(oppgave) { "Fant ingen oppgave under behandling med id=$oppgaveId" }
 
-        // TODO: midl løsning for å begrense hvilke oppgaver som kan avbrytes for å unngå uheldige situasjoner
-        if (!oppgaverSomKanAvbrytes.contains(oppgave.type)) {
+        if (oppgave.status in listOf(Status.FERDIGSTILT, Status.AVBRUTT)) {
+            throw InternfeilException("Kan ikke avbryte oppgave med status ${oppgave.status}")
+        }
+
+        val oppgaverSomKanAvbrytes = listOf(OppgaveType.AKTIVITETSPLIKT, OppgaveType.AKTIVITETSPLIKT_12MND)
+        if (oppgave.type !in oppgaverSomKanAvbrytes) {
             throw InternfeilException("Kan ikke avbryte oppgaveType ${oppgave.type}")
         }
 

@@ -1,6 +1,6 @@
 import { Box, Button, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
 import { ITrygdetid } from '~shared/api/trygdetid'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { PoengaarReadMore } from '~components/behandling/trygdetid/components/PoengaarReadMore'
 import { useForm } from 'react-hook-form'
@@ -32,6 +32,10 @@ export const OverstyrtTrygdetid = ({
       overstyrtNorskPoengaar: trygdetid.overstyrtNorskPoengaar,
     },
   })
+
+  useEffect(() => {
+    reset({ overstyrtNorskPoengaar: trygdetid.overstyrtNorskPoengaar })
+  }, [trygdetid])
 
   const [redigerNorskPoengaar, setRedigerNorskPoengaar] = useState<boolean>(false)
 

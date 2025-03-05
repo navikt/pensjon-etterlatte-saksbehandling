@@ -105,7 +105,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
             listOf(
                 mockk {
-                    every { erUnderBehandling() } returns true
+                    every { erIkkeAvsluttet() } returns true
                     every { status } returns Status.UNDER_BEHANDLING
                     every { type } returns OppgaveType.AKTIVITETSPLIKT
                 },
@@ -128,7 +128,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgaverForSak(sak.id, OppgaveType.AKTIVITETSPLIKT) } returns
             listOf(
                 mockk {
-                    every { erUnderBehandling() } returns false
+                    every { erIkkeAvsluttet() } returns false
                     every { status } returns Status.FERDIGSTILT
                     every { type } returns OppgaveType.AKTIVITETSPLIKT
                 },
@@ -188,7 +188,7 @@ class AktivitetspliktOppgaveServiceTest {
         } returns
             listOf(
                 mockk {
-                    every { erUnderBehandling() } returns false
+                    every { erIkkeAvsluttet() } returns false
                     every { erFerdigstilt() } returns false
                 },
             )
@@ -216,7 +216,7 @@ class AktivitetspliktOppgaveServiceTest {
             listOf(
                 mockk {
                     every { erFerdigstilt() } returns false
-                    every { erUnderBehandling() } returns true
+                    every { erIkkeAvsluttet() } returns true
                 },
             )
 
@@ -242,7 +242,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgaverForSak(sak.id, oppgaveType) } returns
             listOf(
                 mockk {
-                    every { erUnderBehandling() } returns false
+                    every { erIkkeAvsluttet() } returns false
                     every { status } returns Status.FERDIGSTILT
                     every { type } returns oppgaveType
                 },
@@ -262,7 +262,7 @@ class AktivitetspliktOppgaveServiceTest {
                 listOf(
                     mockk {
                         every { erFerdigstilt() } returns true
-                        every { erUnderBehandling() } returns false
+                        every { erIkkeAvsluttet() } returns false
                     },
                 )
         } else {

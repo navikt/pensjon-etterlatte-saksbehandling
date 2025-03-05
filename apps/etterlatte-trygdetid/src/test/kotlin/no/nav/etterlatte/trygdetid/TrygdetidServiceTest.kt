@@ -15,6 +15,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -86,6 +87,7 @@ internal class TrygdetidServiceTest {
             pesysklient,
             avtaleService,
             vedtaksvurderingKlient,
+            DummyFeatureToggleService(),
         )
 
     @BeforeEach
@@ -2072,7 +2074,7 @@ internal class TrygdetidServiceTest {
                 )
             assertThrows<InternfeilException> {
                 runBlocking {
-                    service.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, saksbehandler)
+                    service.kopierOgOverskrivTrygdetid(behandlingId, kildeBehandlingId, saksbehandler)
                 }
             }
             coVerify(exactly = 1) {

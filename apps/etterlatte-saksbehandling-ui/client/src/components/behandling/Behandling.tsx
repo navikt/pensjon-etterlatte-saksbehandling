@@ -17,7 +17,10 @@ import { mapResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { Box, HStack } from '@navikt/ds-react'
+import { Box, HStack, Modal } from '@navikt/ds-react'
+import { usePerson } from '~shared/statusbar/usePerson'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -29,6 +32,7 @@ export const Behandling = () => {
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
   const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
   const soeker = usePersonopplysninger()?.soeker?.opplysning
+  const person = usePerson()
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -56,6 +60,8 @@ export const Behandling = () => {
     }
   }, [behandlingFraRedux])
 
+  const endretFnr = soeker !== undefined && person !== null && soeker.foedselsnummer !== person.foedselsnummer
+
   return mapResult(fetchBehandlingStatus, {
     pending: <Spinner label="Henter behandling ..." />,
     error: (error) => <ApiErrorAlert>Kunne ikke hente behandling: {error.detail}</ApiErrorAlert>,
@@ -68,6 +74,26 @@ export const Behandling = () => {
               <StatusBar ident={soeker?.foedselsnummer} />
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
+            {soeker && (
+              <Modal
+                header={{
+                  heading: 'Nytt identnummer på bruker',
+                  closeButton: false,
+                }}
+                open={endretFnr}
+                onClose={() => {}}
+              >
+                <Modal.Body>
+                  Nytt identnummer har blitt registrert for brukeren, behandlingen må derfor avbrytes. Når du kobler til
+                  den nye identen, vil behandlingen bli slettet, og du må opprette en ny.
+                </Modal.Body>
+                <Modal.Footer>
+                  <PersonButtonLink fnr={soeker.foedselsnummer} fane={PersonOversiktFane.SAKER}>
+                    Gå til sakoversikt for å koble ny ident
+                  </PersonButtonLink>
+                </Modal.Footer>
+              </Modal>
+            )}
             <HStack height="100%" minHeight="100vh" wrap={false}>
               <Box width="100%">
                 <Routes>

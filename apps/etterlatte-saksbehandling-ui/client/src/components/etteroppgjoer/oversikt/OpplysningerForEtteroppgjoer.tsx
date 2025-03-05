@@ -8,21 +8,21 @@ import { AvkortingInntektTabell } from '~components/behandling/avkorting/Avkorti
 export const OpplysningerForEtteroppgjoer = ({ opplysninger }: { opplysninger: EtteroppgjoerOpplysninger }) => {
   return (
     <>
-      <VStack maxWidth="80rem" paddingBlock="8" paddingInline="16 8">
+      <VStack maxWidth="80rem">
         <Heading size="small">Opplysninger skatt</Heading>
         <SkattTabell skatt={opplysninger.skatt} />
       </VStack>
-      <VStack maxWidth="50rem" paddingBlock="8" paddingInline="16 8">
+      <VStack maxWidth="50rem">
         <Heading size="small">Opplysninger A-Inntekt</Heading>
         <AInntektTabell ainntekt={opplysninger.ainntekt} />
       </VStack>
-      <VStack maxWidth="80rem" paddingBlock="8" paddingInline="16 8">
+      <VStack maxWidth="80rem">
         <AvkortingInntektTabell
           avkortingGrunnlagListe={opplysninger.tidligereAvkorting.avkortingGrunnlag}
           fyller67={false}
         />
       </VStack>
-      <VStack paddingBlock="8" paddingInline="16 8">
+      <VStack>
         <YtelseEtterAvkorting
           avkortetYtelse={opplysninger.tidligereAvkorting.avkortetYtelse}
           tidligereAvkortetYtelse={[]}

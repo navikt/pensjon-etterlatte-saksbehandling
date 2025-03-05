@@ -17,6 +17,7 @@ import { aktivitetspliktOppgaveReducer } from '~store/reducers/AktivitetsplikRed
 import { unleashReducer } from '~store/reducers/UnleashReducer'
 import { personReducer } from '~store/reducers/PersonReducer'
 import { aktivitetspliktBehandlingReducer } from '~store/reducers/AktivitetspliktBehandlingReducer'
+import { etteroppgjoerReducer } from '~store/reducers/EtteroppgjoerReducer'
 
 const reducer = {
   menuReducer: menuReducer,
@@ -35,6 +36,7 @@ const reducer = {
   aktivitetspliktOppgaveReducer: aktivitetspliktOppgaveReducer,
   aktivitetspliktBehandlingReducer: aktivitetspliktBehandlingReducer,
   unleashReducer: unleashReducer,
+  etteroppgjoerReducer: etteroppgjoerReducer,
 }
 export const store = configureStore({
   reducer,

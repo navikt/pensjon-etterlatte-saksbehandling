@@ -32,8 +32,8 @@ export const YtelseEtterAvkorting = ({
 }) => {
   const sanksjonTilgjengelig = useFeaturetoggle(FeatureToggle.sanksjon)
 
-  const ytelser = avkortetYtelse.sort(sorterNyligsteFoerstOgBakover)
-  const tidligereYtelser = tidligereAvkortetYtelse.sort(sorterNyligsteFoerstOgBakover)
+  const ytelser = [...avkortetYtelse].sort(sorterNyligsteFoerstOgBakover)
+  const tidligereYtelser = [...tidligereAvkortetYtelse].sort(sorterNyligsteFoerstOgBakover)
 
   const finnTidligereTidligereYtelseIPeriode = (ytelse: IAvkortetYtelse) => {
     return tidligereYtelser.find(

@@ -21,9 +21,9 @@ class EtteroppgjoerDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT e.id, e.sak_id, e.aar, e.status
+                        SELECT e.sak_id, e.inntektsaar, e.status
                         FROM etteroppgjoer e
-                        WHERE e.sak = ?
+                        WHERE e.sak_id = ?
                         AND e.inntektsaar = ?
                         """.trimIndent(),
                     )
@@ -36,7 +36,7 @@ class EtteroppgjoerDao(
     private fun ResultSet.toEtteroppgjoer() =
         Etteroppgjoer(
             sakId = SakId(getLong("sak_id")),
-            aar = getInt("inntektsaar"),
+            inntektsaar = getInt("inntektsaar"),
             status = EtteroppgjoerStatus.valueOf(getString("status")),
         )
 

@@ -10,7 +10,7 @@ import java.util.UUID
 
 data class Etteroppgjoer(
     val sakId: SakId,
-    val aar: Int,
+    val inntektsaar: Int,
     val status: EtteroppgjoerStatus,
 )
 

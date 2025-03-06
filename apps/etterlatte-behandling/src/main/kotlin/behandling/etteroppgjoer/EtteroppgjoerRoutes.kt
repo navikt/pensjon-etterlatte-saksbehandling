@@ -30,7 +30,7 @@ enum class EtteroppgjoerToggles(
 }
 
 fun Route.etteroppgjoerRoutes(
-    service: EtteroppgjoerService,
+    service: EtteroppgjoerForbehandlingService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER}") {

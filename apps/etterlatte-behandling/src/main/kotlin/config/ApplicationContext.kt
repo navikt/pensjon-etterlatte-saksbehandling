@@ -33,7 +33,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
@@ -640,7 +640,7 @@ internal class ApplicationContext(
         )
 
     val etteroppgjoerService =
-        EtteroppgjoerService(
+        EtteroppgjoerForbehandlingService(
             dao = etteroppgjoerDao,
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,

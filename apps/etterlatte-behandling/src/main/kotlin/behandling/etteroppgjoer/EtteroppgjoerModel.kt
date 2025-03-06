@@ -8,13 +8,31 @@ import java.time.YearMonth
 import java.util.UUID
 
 data class Etteroppgjoer(
-    val behandling: EtteroppgjoerBehandling,
+    val id: UUID,
+    val aar: Int,
+    val status: EtteroppgjoerStatus,
+)
+
+enum class EtteroppgjoerStatus {
+    VENTER_PAA_SKATTEOPPGJOER,
+    MOTTATT_HENDELSE,
+    UNDER_FORBEHANDLING,
+}
+
+data class SkatteoppgjoerHendelse(
+    val id: UUID,
+    val sekvensnummerSkatt: String,
+)
+
+// TODO falte ut behandling..
+data class ForbehandlingDto(
+    val behandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
 )
 
-data class EtteroppgjoerBehandling(
+data class EtteroppgjoerForbehandling(
     val id: UUID,
-    val sekvensnummerSkatt: String,
+    val hendelseId: UUID,
     val status: String, // TODO enum
     val sak: Sak,
     val aar: Int,

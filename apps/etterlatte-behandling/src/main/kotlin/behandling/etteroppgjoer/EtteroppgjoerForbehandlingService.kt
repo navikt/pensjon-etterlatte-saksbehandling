@@ -18,7 +18,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import java.util.UUID
 
-class EtteroppgjoerService(
+class EtteroppgjoerForbehandlingService(
     private val dao: EtteroppgjoerDao,
     private val sakDao: SakLesDao,
     private val oppgaveService: OppgaveService,
@@ -30,10 +30,10 @@ class EtteroppgjoerService(
     suspend fun hentEtteroppgjoer(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
-    ): Etteroppgjoer {
+    ): ForbehandlingDto {
         val etteroppgjoerBehandling =
             inTransaction {
-                dao.hentEtteroppgjoer(behandlingId)
+                dao.hentForbehandling(behandlingId)
             } ?: throw IkkeFunnetException(
                 code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
                 detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
@@ -56,7 +56,7 @@ class EtteroppgjoerService(
             val fraSkatt = dao.hentOpplysningerSkatt(behandlingId)
             val aInntekt = dao.hentOpplysningerAInntekt(behandlingId)
 
-            Etteroppgjoer(
+            ForbehandlingDto(
                 behandling = etteroppgjoerBehandling,
                 opplysninger =
                     EtteroppgjoerOpplysninger(
@@ -81,16 +81,16 @@ class EtteroppgjoerService(
 
         return inTransaction {
             val nyBehandling =
-                EtteroppgjoerBehandling(
+                EtteroppgjoerForbehandling(
                     id = UUID.randomUUID(),
+                    hendelseId = UUID.randomUUID(),
                     sak = sak,
-                    sekvensnummerSkatt = "123",
                     status = "opprettet",
                     aar = 2024,
                     opprettet = Tidspunkt.now(),
                 )
 
-            dao.lagreEtteroppgjoer(nyBehandling)
+            dao.lagreForbehandling(nyBehandling)
             val oppgave =
                 oppgaveService.opprettOppgave(
                     referanse = nyBehandling.id.toString(),
@@ -126,6 +126,6 @@ class EtteroppgjoerService(
 }
 
 data class EtteroppgjoerOgOppgave(
-    val etteroppgjoerBehandling: EtteroppgjoerBehandling,
+    val etteroppgjoerBehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
 )

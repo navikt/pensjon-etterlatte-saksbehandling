@@ -6,8 +6,8 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,7 +25,7 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class EtteroppgjoerDaoTest(
+class ForbehandlingDtoDaoTest(
     val dataSource: DataSource,
 ) {
     private lateinit var sakSkrivDao: SakSkrivDao
@@ -61,7 +61,7 @@ class EtteroppgjoerDaoTest(
     @Test
     fun `lagre og oppdatere etteroppgjoer`() {
         val ny =
-            EtteroppgjoerBehandling(
+            EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 sekvensnummerSkatt = "123",
                 status = "status",
@@ -70,8 +70,8 @@ class EtteroppgjoerDaoTest(
                 sak = sak,
             )
 
-        etteroppgjoerDao.lagreEtteroppgjoer(ny)
-        val lagret = etteroppgjoerDao.hentEtteroppgjoer(ny.id)
+        etteroppgjoerDao.lagreForbehandling(ny)
+        val lagret = etteroppgjoerDao.hentForbehandling(ny.id)
         with(lagret!!) {
             id shouldBe ny.id
             status shouldBe ny.status

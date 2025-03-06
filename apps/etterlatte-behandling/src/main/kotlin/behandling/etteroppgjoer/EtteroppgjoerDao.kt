@@ -15,7 +15,7 @@ import java.util.UUID
 class EtteroppgjoerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentEtteroppgjoer(behandlingId: UUID): EtteroppgjoerBehandling? =
+    fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -31,7 +31,7 @@ class EtteroppgjoerDao(
             }
         }
 
-    fun lagreEtteroppgjoer(etteroppgjoer: EtteroppgjoerBehandling) =
+    fun lagreForbehandling(etteroppgjoer: EtteroppgjoerForbehandling) =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -57,9 +57,10 @@ class EtteroppgjoerDao(
             }
         }
 
-    private fun ResultSet.toEtteroppgjoer(): EtteroppgjoerBehandling =
-        EtteroppgjoerBehandling(
+    private fun ResultSet.toEtteroppgjoer(): EtteroppgjoerForbehandling =
+        EtteroppgjoerForbehandling(
             id = getString("id").let { UUID.fromString(it) },
+            hendelseId = UUID.randomUUID(), // TODO
             sak =
                 Sak(
                     id = SakId(getLong("sak_id")),
@@ -67,7 +68,7 @@ class EtteroppgjoerDao(
                     ident = getString("fnr"),
                     enhet = Enhetsnummer(getString("enhet")),
                 ),
-            sekvensnummerSkatt = "123", // TODO
+            // sekvensnummerSkatt = "123", // TODO
             opprettet = getTidspunkt("opprettet"),
             status = getString("status"),
             aar = 2024,

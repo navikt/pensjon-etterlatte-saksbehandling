@@ -85,4 +85,17 @@ class EtteroppgjoerDao(
     }
 
     fun hentOpplysningerAInntekt(behandlingId: UUID): AInntekt = AInntekt.stub()
+
+    fun hentEtteroppgjoer(ident: String): Etteroppgjoer? {
+        // TODO
+        return null
+    }
+
+    fun oppdaterEtteroppgjoerStatus(
+        sakId: SakId,
+        inntektsaar: Int,
+        status: EtteroppgjoerStatus,
+    ) {
+        TODO("Not yet implemented")
+    }
 }

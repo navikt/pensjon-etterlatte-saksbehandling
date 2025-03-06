@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -9,6 +10,8 @@ import java.util.UUID
 
 data class Etteroppgjoer(
     val id: UUID,
+    val sakId: SakId,
+    val ident: String,
     val aar: Int,
     val status: EtteroppgjoerStatus,
 )

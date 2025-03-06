@@ -8,7 +8,7 @@ import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/Try
 import React, { useEffect, useState } from 'react'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
+import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/manueltoverstyrt/TrygdetidManueltOverstyrt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'

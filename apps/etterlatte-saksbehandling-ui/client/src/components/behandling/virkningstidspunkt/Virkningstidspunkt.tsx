@@ -23,7 +23,6 @@ import { SoeknadVurdering } from '../soeknadsoversikt/SoeknadVurdering'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt, Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
-import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapFailure } from '~shared/api/apiUtils'
@@ -85,14 +84,14 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
   const { monthpickerProps, inputProps } = useMonthpicker({
     fromDate: minimumVirkningstidspunkt,
     toDate: addMonths(new Date(), 4),
-    onMonthChange: (date: Date) => setVirkningstidspunkt(date),
+    onMonthChange: (date: Date | undefined) => !!date && setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',
     onValidate: (val) => {
       if (val.isBefore || val.isAfter) setErrorTekst('Virkningstidspunkt er ikke gyldig')
       else setErrorTekst('')
     },
     defaultSelected: virkningstidspunkt ?? undefined,
-  } as UseMonthPickerOptions)
+  })
 
   const fastsett = (onSuccess?: () => void) => {
     setErrorTekst('')

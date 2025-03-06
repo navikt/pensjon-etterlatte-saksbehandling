@@ -1,7 +1,7 @@
 import { isFailure, isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
-import { Alert, BodyShort, Box, Button, Heading, Label, Tag, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, Label, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentAktivitspliktVurderingForSak,
@@ -22,7 +22,6 @@ import {
   harVurdering,
 } from '~shared/types/Aktivitetsplikt'
 import { Oppgavetype } from '~shared/types/oppgave'
-import { CheckmarkIcon } from '@navikt/aksel-icons'
 
 export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -70,12 +69,12 @@ export const AktivitetspliktSakoversikt = ({
   }
 
   return (
-    <Box padding="8" maxWidth="70rem">
-      {mapResult(hentAktivitetspliktVurderingForSakResult, {
-        pending: <Spinner label="Henter vurderinger..." />,
-        error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
-        success: (aktivitetspliktVurdering) => (
-          <>
+    <VStack gap="4">
+      <Box padding="8" maxWidth="70rem">
+        {mapResult(hentAktivitetspliktVurderingForSakResult, {
+          pending: <Spinner label="Henter vurderinger..." />,
+          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
+          success: (aktivitetspliktVurdering) => (
             <VStack gap="8">
               <VStack gap="4">
                 <Heading size="medium">Aktivitetsplikt</Heading>
@@ -94,69 +93,71 @@ export const AktivitetspliktSakoversikt = ({
                   })
                 )}
               </VStack>
+
               <hr style={{ width: '100%' }} />
-
-              {harVurdering(aktivitetspliktVurdering) ? (
-                <VurderingAvAktivitetspliktSak aktivitetspliktVurdering={aktivitetspliktVurdering} />
-              ) : (
-                <BodyShort>Ingen vurdering</BodyShort>
-              )}
+              <Box>
+                {harVurdering(aktivitetspliktVurdering) ? (
+                  <VurderingAvAktivitetspliktSak aktivitetspliktVurdering={aktivitetspliktVurdering} />
+                ) : (
+                  <BodyShort>Ingen vurdering</BodyShort>
+                )}
+              </Box>
             </VStack>
-          </>
-        ),
-      })}
-
+          ),
+        })}
+      </Box>
       <Box padding="8" maxWidth="70rem">
         {mapSuccess(sakResult, (data) =>
           mapResult(oppfoelgingsOppgaver, {
             pending: <Spinner label="Henter oppfølgingsoppgave status for sak" />,
             error: (error) => (
-              <ApiErrorAlert>{error.detail || 'Kunne ikke oppfølgingsoppgave status for sak'}</ApiErrorAlert>
+              <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppfølgingsoppgave status for sak'}</ApiErrorAlert>
             ),
             success: (oppgaver) => (
-              <>
-                {!oppfoelging12mndErFerdigstilt(oppgaver) &&
-                  kanOppretteOppgaveAvType(oppgaver, Oppgavetype.AKTIVITETSPLIKT) && (
-                    <Button
-                      loading={isPending(svaropprettOppgave)}
-                      onClick={() =>
-                        opprettOppfoelgingsoppgaveReq({
-                          sakId: data.sak.id,
-                          vurderingType: AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER,
-                        })
-                      }
-                    >
-                      Opprett 6 månderers oppfølgingsoppgave
-                    </Button>
-                  )}
-                {kanOppretteOppgaveAvType(oppgaver, Oppgavetype.AKTIVITETSPLIKT_12MND) &&
-                  har6MndVurdering(oppgaver, Oppgavetype.AKTIVITETSPLIKT) && (
-                    <Button
-                      loading={isPending(svaropprettOppgave)}
-                      onClick={() =>
-                        opprettOppfoelgingsoppgaveReq({
-                          sakId: data.sak.id,
-                          vurderingType: AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
-                        })
-                      }
-                    >
-                      Opprett 12 månderers oppfølgingsoppgave
-                    </Button>
-                  )}
-                {isSuccess(svaropprettOppgave) && (
-                  <Tag variant="success">
-                    <CheckmarkIcon aria-hidden /> Oppgaven ble opprettet
-                  </Tag>
-                )}
+              <VStack gap="4">
+                <Box maxWidth="30rem">
+                  {!oppfoelging12mndErFerdigstilt(oppgaver) &&
+                    kanOppretteOppgaveAvType(oppgaver, Oppgavetype.AKTIVITETSPLIKT) && (
+                      <Button
+                        loading={isPending(svaropprettOppgave)}
+                        onClick={() =>
+                          opprettOppfoelgingsoppgaveReq({
+                            sakId: data.sak.id,
+                            vurderingType: AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER,
+                          })
+                        }
+                      >
+                        Opprett 6 månderers oppfølgingsoppgave
+                      </Button>
+                    )}
+                  {kanOppretteOppgaveAvType(oppgaver, Oppgavetype.AKTIVITETSPLIKT_12MND) &&
+                    har6MndVurdering(oppgaver, Oppgavetype.AKTIVITETSPLIKT) && (
+                      <Button
+                        loading={isPending(svaropprettOppgave)}
+                        onClick={() =>
+                          opprettOppfoelgingsoppgaveReq({
+                            sakId: data.sak.id,
+                            vurderingType: AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
+                          })
+                        }
+                      >
+                        Opprett 12 månderers oppfølgingsoppgave
+                      </Button>
+                    )}
+                </Box>
+
+                {isSuccess(svaropprettOppgave) && <Alert variant="success">Oppgaven ble opprettet.</Alert>}
                 {isFailure(svaropprettOppgave) && (
-                  <Alert variant="error">Kunne ikke opprett oppgave person: {svaropprettOppgave.error.detail}</Alert>
+                  <Alert variant="error">
+                    Kunne ikke opprett oppfølgingsoppgave: {svaropprettOppgave.error.detail}
+                  </Alert>
                 )}
-              </>
+              </VStack>
             ),
           })
         )}
       </Box>
-    </Box>
+    </VStack>
   )
 }
 

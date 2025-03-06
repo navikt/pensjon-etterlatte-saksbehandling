@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react'
 import { DatePicker, useDatepicker } from '@navikt/ds-react'
-import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepicker'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 import { isEqual } from 'date-fns'
@@ -51,7 +50,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   })
 
   const { datepickerProps, inputProps, setSelected, selectedDay } = useDatepicker({
-    onDateChange: (date: Date) => {
+    onDateChange: (date: Date | undefined) => {
       if (date) field.onChange(formatDateToLocaleDateOrEmptyString(date))
     },
     locale: 'nb',
@@ -59,7 +58,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     defaultSelected: field.value ? new Date(field.value) : undefined,
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
-  } as UseDatepickerOptions)
+  })
 
   const handleBlur = () => {
     if ((selectedDay && !field.value) || (!selectedDay && !required)) {

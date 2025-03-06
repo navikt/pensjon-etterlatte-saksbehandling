@@ -48,6 +48,8 @@ import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
+import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -650,6 +652,15 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
+    val uttrekkLoependeYtelseEtter20JobService =
+        UttrekkLoependeYtelseEtter20JobService(
+            vedtakKlient,
+            sakService,
+            nyAldersovergangService,
+            vilkaarsvurderingDao,
+            featureToggleService,
+        )
+
     val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
             aktivitetspliktDao,
@@ -774,6 +785,17 @@ internal class ApplicationContext(
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val uttrekkLoependeYtelseEtter20Job: UttrekkLoependeYtelseEtter20Job by lazy {
+        UttrekkLoependeYtelseEtter20Job(
+            service = uttrekkLoependeYtelseEtter20JobService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

@@ -103,7 +103,17 @@ const KlageMotattDato = ({ control }: { control: Control<FilledFormData, any> })
   />
 )
 
-export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
+export const NyttBrevModal = ({
+  sakId,
+  sakType,
+  modalButtonlabel = 'Nytt brev',
+  modalButtonVariant = 'primary',
+}: {
+  sakId: number
+  sakType: SakType
+  modalButtonlabel?: string
+  modalButtonVariant?: 'primary' | 'secondary'
+}) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
@@ -141,8 +151,13 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
   return (
     <>
-      <Button variant="primary" icon={<DocPencilIcon aria-hidden />} iconPosition="right" onClick={() => setOpen(true)}>
-        Nytt brev
+      <Button
+        variant={modalButtonVariant}
+        icon={<DocPencilIcon aria-hidden />}
+        iconPosition="right"
+        onClick={() => setOpen(true)}
+      >
+        {modalButtonlabel}
       </Button>
 
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>

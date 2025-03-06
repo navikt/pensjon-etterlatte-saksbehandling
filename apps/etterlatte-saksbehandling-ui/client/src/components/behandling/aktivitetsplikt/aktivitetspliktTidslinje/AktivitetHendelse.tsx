@@ -12,6 +12,7 @@ import { opprettAktivitetHendelseForBehandling, opprettAktivitetHendelseForSak }
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { formaterTilISOString } from '~utils/formatering/dato'
 import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 interface AktivitetHendelseSkjema {
   dato: string
@@ -104,6 +105,14 @@ export const AktivitetHendelse = ({
           label="Beskrivelse"
           error={errors.beskrivelse?.message}
         />
+        {isFailureHandler({
+          apiResult: opprettAktivitetHendelseForBehandlingResult,
+          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet hendelse',
+        })}
+        {isFailureHandler({
+          apiResult: opprettAktivitetHendelseForSakResult,
+          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet hendelse',
+        })}
         <HStack gap="4">
           <Button
             size="small"
@@ -111,7 +120,9 @@ export const AktivitetHendelse = ({
             type="button"
             icon={<XMarkIcon aria-hidden />}
             iconPosition="right"
-            loading={isPending(opprettAktivitetHendelseForBehandlingResult || opprettAktivitetHendelseForSakResult)}
+            loading={
+              isPending(opprettAktivitetHendelseForBehandlingResult) || isPending(opprettAktivitetHendelseForSakResult)
+            }
             onClick={() =>
               setAktivitetspliktRedigeringModus({
                 aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.INGEN,
@@ -125,7 +136,9 @@ export const AktivitetHendelse = ({
           <Button
             size="small"
             icon={<FloppydiskIcon aria-hidden />}
-            loading={isPending(opprettAktivitetHendelseForBehandlingResult || opprettAktivitetHendelseForSakResult)}
+            loading={
+              isPending(opprettAktivitetHendelseForBehandlingResult) || isPending(opprettAktivitetHendelseForSakResult)
+            }
           >
             Lagre
           </Button>

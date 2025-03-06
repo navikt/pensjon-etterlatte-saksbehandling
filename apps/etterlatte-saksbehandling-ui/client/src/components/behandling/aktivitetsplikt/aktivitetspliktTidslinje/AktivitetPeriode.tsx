@@ -18,6 +18,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetPeriodeForBehandling, opprettAktivitetPeriodeForSak } from '~shared/api/aktivitetsplikt'
 import { formaterTilISOString } from '~utils/formatering/dato'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 interface AktivitetPeriodeSkjema {
   fom: string
@@ -136,6 +137,14 @@ export const AktivitetPeriode = ({
             error={errors.beskrivelse?.message}
           />
         </VStack>
+        {isFailureHandler({
+          apiResult: opprettAktivitetPeriodeForBehandlingResult,
+          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet periode',
+        })}
+        {isFailureHandler({
+          apiResult: opprettAktivitetPeriodeForSakResult,
+          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet periode',
+        })}
         <HStack gap="4">
           <Button
             size="small"
@@ -143,7 +152,9 @@ export const AktivitetPeriode = ({
             type="button"
             icon={<XMarkIcon aria-hidden />}
             iconPosition="right"
-            loading={isPending(opprettAktivitetPeriodeForBehandlingResult || opprettAktivitetPeriodeForSakResult)}
+            loading={
+              isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
+            }
             onClick={() =>
               setAktivitetspliktRedigeringModus({
                 aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.INGEN,
@@ -157,7 +168,9 @@ export const AktivitetPeriode = ({
           <Button
             size="small"
             icon={<FloppydiskIcon aria-hidden />}
-            loading={isPending(opprettAktivitetPeriodeForBehandlingResult || opprettAktivitetPeriodeForSakResult)}
+            loading={
+              isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
+            }
           >
             Lagre
           </Button>

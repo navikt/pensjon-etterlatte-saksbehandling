@@ -49,19 +49,23 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
       </BodyShort>
       <BodyShort>{aktivitetPeriode.beskrivelse}</BodyShort>
       <BodyShort>
-        <i>
+        <em>
           Lagt til {formaterDatoMedTidspunkt(new Date(aktivitetPeriode.opprettet.tidspunkt))} av{' '}
           {aktivitetPeriode.opprettet.ident}
-        </i>
+        </em>
       </BodyShort>
       <BodyShort>
-        <i>
+        <em>
           Sist endret {formaterDatoMedTidspunkt(new Date(aktivitetPeriode.endret.tidspunkt))} av{' '}
           {aktivitetPeriode.endret.ident}
-        </i>
+        </em>
       </BodyShort>
       {isFailureHandler({
-        apiResult: slettAktivitetPeriodeForBehandlingResult || slettAktivitetPeriodeForSakResult,
+        apiResult: slettAktivitetPeriodeForBehandlingResult,
+        errorMessage: 'Kunne ikke slette aktivitet periode',
+      })}
+      {isFailureHandler({
+        apiResult: slettAktivitetPeriodeForSakResult,
         errorMessage: 'Kunne ikke slette aktivitet periode',
       })}
       <HStack gap="2">
@@ -69,7 +73,7 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
           variant="secondary"
           size="xsmall"
           icon={<PencilIcon aria-hidden />}
-          loading={isPending(slettAktivitetPeriodeForBehandlingResult || slettAktivitetPeriodeForSakResult)}
+          loading={isPending(slettAktivitetPeriodeForBehandlingResult) || isPending(slettAktivitetPeriodeForSakResult)}
           onClick={() =>
             setAktivitetspliktRedigeringModus({
               aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_PERIODE,
@@ -84,7 +88,7 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
           variant="secondary"
           size="xsmall"
           icon={<TrashIcon aria-hidden />}
-          loading={isPending(slettAktivitetPeriodeForBehandlingResult || slettAktivitetPeriodeForSakResult)}
+          loading={isPending(slettAktivitetPeriodeForBehandlingResult) || isPending(slettAktivitetPeriodeForSakResult)}
           onClick={() => slettAktivitetPeriode(aktivitetPeriode.id)}
         >
           Slett

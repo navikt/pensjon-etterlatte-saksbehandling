@@ -20,6 +20,7 @@ enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
     MOTTATT_HENDELSE,
     UNDER_FORBEHANDLING,
+    UNDER_REVURDERING,
 }
 
 data class SkatteoppgjoerHendelse(

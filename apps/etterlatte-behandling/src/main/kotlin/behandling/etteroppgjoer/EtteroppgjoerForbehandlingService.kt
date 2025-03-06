@@ -70,14 +70,14 @@ class EtteroppgjoerForbehandlingService(
 
     suspend fun opprettEtteroppgjoer(
         sakId: SakId,
-        aar: Int,
+        inntektsaar: Int,
     ): EtteroppgjoerOgOppgave {
         val sak =
             inTransaction {
                 sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
             }
 
-        hentOgLagreOpplysninger(sak.ident, aar)
+        hentOgLagreOpplysninger(sak.ident, inntektsaar)
 
         return inTransaction {
             val nyBehandling =
@@ -86,7 +86,7 @@ class EtteroppgjoerForbehandlingService(
                     hendelseId = UUID.randomUUID(),
                     sak = sak,
                     status = "opprettet",
-                    aar = 2024,
+                    aar = inntektsaar,
                     opprettet = Tidspunkt.now(),
                 )
 
@@ -102,6 +102,7 @@ class EtteroppgjoerForbehandlingService(
                     saksbehandler = null,
                     gruppeId = null,
                 )
+            dao.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
             EtteroppgjoerOgOppgave(
                 etteroppgjoerBehandling = nyBehandling,
                 oppgave = oppgave,

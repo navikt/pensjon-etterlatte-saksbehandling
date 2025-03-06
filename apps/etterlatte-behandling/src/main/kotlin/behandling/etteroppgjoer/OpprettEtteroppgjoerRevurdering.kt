@@ -21,6 +21,7 @@ import java.time.YearMonth
 
 class OpprettEtteroppgjoerRevurdering(
     private val behandlingService: BehandlingService,
+    private val etteroppgjoerDao: EtteroppgjoerDao,
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
@@ -31,6 +32,8 @@ class OpprettEtteroppgjoerRevurdering(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
+        val inntektsaar = 2024 // TODO utledes fra hvor? forbehandling?
+
         val (revurdering, sisteIverksatte) =
             inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
@@ -45,7 +48,7 @@ class OpprettEtteroppgjoerRevurdering(
 
                 val virkningstidspunkt =
                     Virkningstidspunkt(
-                        dato = YearMonth.of(2024, 1), // TODO må utledes
+                        dato = YearMonth.of(inntektsaar, 1), // TODO må utledes
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                         begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
                     )
@@ -60,7 +63,7 @@ class OpprettEtteroppgjoerRevurdering(
                             kilde = Vedtaksloesning.GJENNY,
                             revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                             virkningstidspunkt = virkningstidspunkt,
-                            begrunnelse = "TODO",
+                            begrunnelse = "TODO", // TODO
                             saksbehandlerIdent = brukerTokenInfo.ident(),
                             mottattDato = null,
                             relatertBehandlingId = null,
@@ -73,6 +76,8 @@ class OpprettEtteroppgjoerRevurdering(
                     kopierFraBehandling = sisteIverksatte.id,
                     brukerTokenInfo = brukerTokenInfo,
                 )
+
+                etteroppgjoerDao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, EtteroppgjoerStatus.UNDER_REVURDERING)
 
                 Pair(revurdering, sisteIverksatte)
             }

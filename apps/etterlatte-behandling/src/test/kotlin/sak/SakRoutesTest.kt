@@ -13,9 +13,7 @@ import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -23,25 +21,17 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
-import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -77,128 +67,6 @@ internal class SakRoutesTest {
     @AfterAll
     fun after() {
         mockOAuth2Server.shutdown()
-    }
-
-    @Test
-    fun `Returnerer ok ved endring av enhet med EnhetsRequest`() {
-        coEvery {
-            sakService.oppdaterEnhet(any())
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
-        } just runs
-        every { sakService.finnSak(any()) } returns
-            Sak(
-                ident = "12345",
-                sakType = SakType.BARNEPENSJON,
-                id = randomSakId(),
-                enhet = Enheter.defaultEnhet.enhetNr,
-            )
-        every { oppgaveService.hentOppgaverForSak(any()) } returns
-            listOf(
-                OppgaveIntern(
-                    id = UUID.randomUUID(),
-                    status = Status.UNDER_BEHANDLING,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                    sakId = sakId1,
-                    kilde = null,
-                    type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                    saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
-                    referanse = "hmm",
-                    gruppeId = null,
-                    merknad = null,
-                    opprettet = Tidspunkt.now(),
-                    sakType = SakType.BARNEPENSJON,
-                    fnr = "123",
-                    frist = null,
-                ),
-                OppgaveIntern(
-                    id = UUID.randomUUID(),
-                    status = Status.UNDER_BEHANDLING,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                    sakId = sakId1,
-                    kilde = null,
-                    type = OppgaveType.KLAGE,
-                    saksbehandler = null,
-                    referanse = "hmm",
-                    gruppeId = null,
-                    merknad = null,
-                    opprettet = Tidspunkt.now(),
-                    sakType = SakType.BARNEPENSJON,
-                    fnr = "123",
-                    frist = null,
-                ),
-                OppgaveIntern(
-                    id = UUID.randomUUID(),
-                    status = Status.FERDIGSTILT,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                    sakId = sakId1,
-                    kilde = null,
-                    type = OppgaveType.KLAGE,
-                    saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
-                    referanse = "hmm",
-                    gruppeId = null,
-                    merknad = null,
-                    opprettet = Tidspunkt.now(),
-                    sakType = SakType.BARNEPENSJON,
-                    fnr = "123",
-                    frist = null,
-                ),
-            )
-
-        val sakMedEnhet = SakMedEnhet(SakId(1), Enheter.PORSGRUNN.enhetNr)
-        val kommentar = "Lorem ipsum"
-
-        withTestApplication { client ->
-            val response =
-                client.post("/api/sak/${sakMedEnhet.id.sakId}/endre-enhet") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = sakMedEnhet.enhet, kommentar = kommentar))
-                }
-            assertEquals(200, response.status.value)
-            verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
-            verify(exactly = 1) { sakService.oppdaterEnhet(sakMedEnhet, kommentar) }
-        }
-    }
-
-    @Test
-    fun `Returnerer badrequest ved endring av enhet med ugyldig enhet`() {
-        coEvery {
-            sakService.oppdaterEnhet(any())
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
-        } just runs
-        every { sakService.finnSak(any()) } returns null
-        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
-
-        withTestApplication { client ->
-            val response =
-                client.post("/api/sak/1/endre-enhet") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enhetsnummer("4805"), kommentar = "Lorem ipsum"))
-                }
-            assertEquals(400, response.status.value)
-            verify(exactly = 0) { sakService.finnSak(any()) }
-            verify(exactly = 0) { oppgaveService.hentOppgaverForSak(any()) }
-            verify(exactly = 0) { oppgaveService.fjernSaksbehandler(any()) }
-        }
-    }
-
-    @Test
-    fun `Returnerer bad request hvis sak ikke finnes ved endring av enhet`() {
-        coEvery {
-            sakService.oppdaterEnhet(any())
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
-        } just runs
-        every { sakService.finnSak(any()) } returns null
-        withTestApplication { client ->
-            val response =
-                client.post("/api/sak/1/endre-enhet") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr, kommentar = "Lorem ipsum"))
-                }
-            assertEquals(400, response.status.value)
-        }
     }
 
     @Test

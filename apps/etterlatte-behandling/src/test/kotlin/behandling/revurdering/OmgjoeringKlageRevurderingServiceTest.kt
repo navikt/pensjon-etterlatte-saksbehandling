@@ -265,6 +265,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
                     applicationContext.pdlTjenesterKlient,
                     applicationContext.brukerService,
                     applicationContext.oppgaveService,
+                    applicationContext.sakSkrivDao,
                 ),
         )
 }

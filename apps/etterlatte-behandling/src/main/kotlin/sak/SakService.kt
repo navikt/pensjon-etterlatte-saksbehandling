@@ -81,11 +81,6 @@ interface SakService {
         skjermet: Boolean,
     )
 
-    fun oppdaterEnhet(
-        sak: SakMedEnhet,
-        kommentar: String? = null,
-    )
-
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
@@ -531,13 +526,6 @@ class SakServiceImpl(
         }
 
         dao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
-    }
-
-    override fun oppdaterEnhet(
-        sak: SakMedEnhet,
-        kommentar: String?,
-    ) {
-        dao.oppdaterEnhet(sak, kommentar)
     }
 
     override fun finnSak(

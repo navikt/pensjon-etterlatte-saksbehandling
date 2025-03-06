@@ -2,11 +2,13 @@ import { NavLink } from 'react-router-dom'
 import { PersonOversiktFane } from '~components/person/Person'
 import { lagrePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { Link, LinkProps } from '@navikt/ds-react'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 interface PersonLinkProps extends Omit<LinkProps, 'href' | 'onClick'> {
   fane?: PersonOversiktFane
   fnr: string
   label?: string
+  clickEvent?: ClickEvent
 }
 
 /**
@@ -14,7 +16,7 @@ interface PersonLinkProps extends Omit<LinkProps, 'href' | 'onClick'> {
  *
  * Helt alminnelig lenke i tilfeller hvor man ønsker det (vanlig lenke med blå skrift)
  **/
-export const PersonLink = ({ fane, fnr, ...rest }: PersonLinkProps) => {
+export const PersonLink = ({ fane, fnr, clickEvent, ...rest }: PersonLinkProps) => {
   const key = window.crypto.randomUUID()
 
   const params = new URLSearchParams({
@@ -27,7 +29,10 @@ export const PersonLink = ({ fane, fnr, ...rest }: PersonLinkProps) => {
       {...rest}
       as={NavLink}
       onContextMenu={() => lagrePersonLocationState(key, fnr)}
-      onClick={() => lagrePersonLocationState(key, fnr)}
+      onClick={() => {
+        lagrePersonLocationState(key, fnr)
+        if (clickEvent) trackClick(clickEvent)
+      }}
       to={`/person?${params}`}
       state={{ fnr }}
     />

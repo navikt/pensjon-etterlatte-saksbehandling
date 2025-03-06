@@ -15,6 +15,7 @@ import { Navbar } from '~shared/header/Navbar'
 import { useAppDispatch } from '~store/Store'
 import { settPerson } from '~store/reducers/PersonReducer'
 import { PersonOversiktFane } from '~components/person/Person'
+import { ClickEvent } from '~utils/amplitude'
 
 export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
   const dispatch = useAppDispatch()
@@ -60,7 +61,12 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
 
             <BodyShort>|</BodyShort>
             <Label>
-              <PersonLink fnr={person.foedselsnummer} fane={PersonOversiktFane.PERSONOPPLYSNINGER} target="_blank">
+              <PersonLink
+                fnr={person.foedselsnummer}
+                fane={PersonOversiktFane.PERSONOPPLYSNINGER}
+                clickEvent={ClickEvent.AAPNE_PERSONOPPLYSNINGER_FRA_STATUS_BAR}
+                target="_blank"
+              >
                 Personopplysninger
               </PersonLink>
             </Label>

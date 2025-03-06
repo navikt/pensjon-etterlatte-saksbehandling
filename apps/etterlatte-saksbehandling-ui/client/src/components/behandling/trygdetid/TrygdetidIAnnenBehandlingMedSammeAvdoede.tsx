@@ -63,7 +63,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
 
   useEffect(() => {
     hentKandidatForKopieringAvTrygdetidReq(behandlingId)
-  }, [])
+  }, [trygdetider])
 
   return (
     <>

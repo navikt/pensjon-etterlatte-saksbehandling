@@ -21,6 +21,8 @@ import { Box, HStack, Modal } from '@navikt/ds-react'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -33,6 +35,7 @@ export const Behandling = () => {
   const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const person = usePerson()
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -68,13 +71,18 @@ export const Behandling = () => {
     success: () => {
       if (behandlingFraRedux) {
         const behandling = behandlingFraRedux as IBehandlingReducer
+        const redigerbar = behandlingErRedigerbar(
+          behandling.status,
+          behandling.sakEnhetId,
+          innloggetSaksbehandler.skriveEnheter
+        )
         return (
           <BehandlingRouteContext.Provider value={routedata}>
             <StickyToppMeny>
               <StatusBar ident={soeker?.foedselsnummer} />
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
-            {soeker && (
+            {redigerbar && soeker && (
               <Modal
                 header={{
                   heading: 'Nytt identnummer på bruker',

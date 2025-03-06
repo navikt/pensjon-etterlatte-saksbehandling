@@ -106,10 +106,12 @@ const KlageMotattDato = ({ control }: { control: Control<FilledFormData, any> })
 export const NyttBrevModal = ({
   sakId,
   sakType,
+  modalButtonlabel = 'Nytt brev',
   modalButtonVariant = 'primary',
 }: {
   sakId: number
   sakType: SakType
+  modalButtonlabel?: string
   modalButtonVariant?: 'primary' | 'secondary'
 }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
@@ -155,7 +157,7 @@ export const NyttBrevModal = ({
         iconPosition="right"
         onClick={() => setOpen(true)}
       >
-        Nytt brev
+        {modalButtonlabel}
       </Button>
 
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>

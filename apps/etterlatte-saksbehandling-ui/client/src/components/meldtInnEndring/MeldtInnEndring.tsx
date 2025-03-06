@@ -63,25 +63,27 @@ export const MeldtInnEndring = () => {
                   <Heading size="large" level="1">
                     Melding om endring
                   </Heading>
-                  <Alert variant="info">
-                    <VStack gap="2">
-                      <BodyShort>
-                        Bruker har meldt inn en endring. Velg mellom å opprette en revurdering eller å avslutte oppgaven
-                        dersom den ikke skal behandles.
-                      </BodyShort>
-                      <div>
-                        <Button
-                          as={Link}
-                          icon={<ExternalLinkIcon aria-hidden />}
-                          size="small"
-                          to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
-                          target="_blank"
-                        >
-                          Åpne dokument (åpnes i ny fane)
-                        </Button>
-                      </div>
-                    </VStack>
-                  </Alert>
+                  {meldtInnEndringHandlingValgt !== MeldtInnEndringHandlingValgt.INGEN && (
+                    <Alert variant="info">
+                      <VStack gap="2">
+                        <BodyShort>
+                          Bruker har meldt inn en endring. Velg mellom å opprette en revurdering eller å avslutte
+                          oppgaven dersom den ikke skal behandles.
+                        </BodyShort>
+                        <div>
+                          <Button
+                            as={Link}
+                            icon={<ExternalLinkIcon aria-hidden />}
+                            size="small"
+                            to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
+                            target="_blank"
+                          >
+                            Åpne dokument (åpnes i ny fane)
+                          </Button>
+                        </div>
+                      </VStack>
+                    </Alert>
+                  )}
                   {erOppgaveRedigerbar(oppgave.status) &&
                   innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident ? (
                     <>
@@ -128,6 +130,7 @@ export const MeldtInnEndring = () => {
                             <NyttBrevModal
                               sakId={oppgave.sakId}
                               sakType={oppgave.sakType}
+                              modalButtonlabel="Send brev"
                               modalButtonVariant="secondary"
                             />
                             <Button

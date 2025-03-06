@@ -9,9 +9,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 data class Etteroppgjoer(
-    val id: UUID,
     val sakId: SakId,
-    val ident: String,
     val aar: Int,
     val status: EtteroppgjoerStatus,
 )

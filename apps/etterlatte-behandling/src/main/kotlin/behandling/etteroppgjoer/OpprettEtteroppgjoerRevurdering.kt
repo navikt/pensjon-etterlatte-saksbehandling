@@ -21,7 +21,7 @@ import java.time.YearMonth
 
 class OpprettEtteroppgjoerRevurdering(
     private val behandlingService: BehandlingService,
-    private val etteroppgjoerDao: EtteroppgjoerDao,
+    private val etteroppgjoerService: EtteroppgjoerService,
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
@@ -77,7 +77,7 @@ class OpprettEtteroppgjoerRevurdering(
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
-                etteroppgjoerDao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, EtteroppgjoerStatus.UNDER_REVURDERING)
+                etteroppgjoerService.oppdaterStatus(sakId, inntektsaar, EtteroppgjoerStatus.UNDER_REVURDERING)
 
                 Pair(revurdering, sisteIverksatte)
             }

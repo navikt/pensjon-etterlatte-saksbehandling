@@ -6,8 +6,8 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,18 +25,18 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class ForbehandlingDtoDaoTest(
+class EtteroppgjoerForbehandlingDaoTest(
     val dataSource: DataSource,
 ) {
     private lateinit var sakSkrivDao: SakSkrivDao
-    private lateinit var etteroppgjoerDao: EtteroppgjoerDao
+    private lateinit var etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao
 
     private lateinit var sak: Sak
 
     @BeforeAll
     fun setup() {
         sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
-        etteroppgjoerDao = EtteroppgjoerDao(ConnectionAutoclosingTest(dataSource))
+        etteroppgjoerForbehandlingDao = EtteroppgjoerForbehandlingDao(ConnectionAutoclosingTest(dataSource))
 
         nyKontekstMedBrukerOgDatabase(
             mockk<User>().also { every { it.name() } returns this::class.java.simpleName },
@@ -63,15 +63,15 @@ class ForbehandlingDtoDaoTest(
         val ny =
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
-                sekvensnummerSkatt = "123",
                 status = "status",
+                hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
             )
 
-        etteroppgjoerDao.lagreForbehandling(ny)
-        val lagret = etteroppgjoerDao.hentForbehandling(ny.id)
+        etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
+        val lagret = etteroppgjoerForbehandlingDao.hentForbehandling(ny.id)
         with(lagret!!) {
             id shouldBe ny.id
             status shouldBe ny.status

@@ -19,8 +19,9 @@ import no.nav.etterlatte.sak.SakLesDao
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingService(
-    private val dao: EtteroppgjoerDao,
+    private val dao: EtteroppgjoerForbehandlingDao,
     private val sakDao: SakLesDao,
+    private val etteroppgjoerService: EtteroppgjoerService,
     private val oppgaveService: OppgaveService,
     private val inntektskomponentService: InntektskomponentService,
     private val sigrunService: SigrunService,
@@ -102,7 +103,7 @@ class EtteroppgjoerForbehandlingService(
                     saksbehandler = null,
                     gruppeId = null,
                 )
-            dao.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+            etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
             EtteroppgjoerOgOppgave(
                 etteroppgjoerBehandling = nyBehandling,
                 oppgave = oppgave,

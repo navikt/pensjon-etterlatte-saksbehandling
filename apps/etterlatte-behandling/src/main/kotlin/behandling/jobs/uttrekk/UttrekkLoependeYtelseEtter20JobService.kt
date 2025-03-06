@@ -15,7 +15,6 @@ import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.Month
 import java.time.YearMonth
 
 enum class UttrekkToggles(
@@ -51,10 +50,7 @@ class UttrekkLoependeYtelseEtter20JobService(
     private fun run() {
         if (featureToggleService.isEnabled(UttrekkToggles.UTTREKK_LOEPENDE_YTELSE_ETTER_20, false)) {
             // Henter ut alle fødselsmåneder fra reformtidspunkt og frem til nå, hvor personer har blitt 20 år
-            // val foedselsmaanederSoekereFylt20 = hentMaanederSoekereFylt20()
-            // Begynner med et par hardkodede måneder før vi sjekker alle aktuelle måneder
-            val foedselsmaanederSoekereFylt20 = listOf(YearMonth.of(2004, Month.JANUARY), YearMonth.of(2004, Month.FEBRUARY))
-
+            val foedselsmaanederSoekereFylt20 = hentMaanederSoekereFylt20()
             val sakerSomSkulleVaertOpphoert = mutableListOf<LoependeSak>()
 
             foedselsmaanederSoekereFylt20

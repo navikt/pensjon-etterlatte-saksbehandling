@@ -38,7 +38,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurderin
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlientImpl
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -236,6 +237,14 @@ private fun axsysKlient(config: Config) =
         azureAppScope = config.getString("axsys.scope"),
     )
 
+private fun sigrunKlient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("sigrun.scope"),
+    )
+
 private fun inntektskomponentKlient(config: Config) =
     httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),
@@ -302,6 +311,12 @@ internal class ApplicationContext(
             inntektskomponentKlient(config),
             config.getString("inntektskomponenten.url"),
         ), // TODO interface og stub osv...
+    val sigrunKlient: SigrunKlient =
+        SigrunKlientImpl(
+            sigrunKlient(config),
+            config.getString("sigrun.url"),
+            featureToggleService,
+        ),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
@@ -634,18 +649,13 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
         )
 
-    val sigrunService =
-        SigrunService(
-            featureToggleService = featureToggleService,
-        )
-
     val etteroppgjoerService =
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
             inntektskomponentService = inntektskomponentService,
-            sigrunService = sigrunService,
+            sigrunKlient = sigrunKlient,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
         )

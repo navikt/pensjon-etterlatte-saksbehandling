@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -23,7 +23,7 @@ class EtteroppgjoerService(
     private val sakDao: SakLesDao,
     private val oppgaveService: OppgaveService,
     private val inntektskomponentService: InntektskomponentService,
-    private val sigrunService: SigrunService,
+    private val sigrunKlient: SigrunKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
 ) {
@@ -113,8 +113,9 @@ class EtteroppgjoerService(
         ident: String,
         aar: Int,
     ) {
-        val skatt = sigrunService.hentPensjonsgivendeInntekt(ident)
+        val skatt = sigrunKlient.hentPensjonsgivendeInntekt(ident, aar)
         inTransaction {
+            // TODO: lagre i ny tabell
             dao.lagreOpplysningerSkatt(skatt)
         }
 

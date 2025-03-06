@@ -168,6 +168,13 @@ spec:
       value: https://team-inntekt-proxy.prod-fss-pub.nais.io/proxy/inntektskomponenten
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.inntektskomponenten/.default
+
+    # TODO: bytte ut med prod config
+    - name: SIGRUN_URL
+      value: https://sigrun-q2.dev.adeo.no
+    - name: SIGRUN_OUTBOUND_SCOPE
+      value: api://dev-fss.team-inntekt.sigrun-q2/.default
+
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

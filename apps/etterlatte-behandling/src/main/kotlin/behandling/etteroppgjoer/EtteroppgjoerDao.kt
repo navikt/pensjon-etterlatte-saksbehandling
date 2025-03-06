@@ -77,6 +77,7 @@ class EtteroppgjoerDao(
         // TODO("Not yet implemented")
     }
 
+    // TODO: hent fra database
     fun hentOpplysningerSkatt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt = PensjonsgivendeInntektFraSkatt.stub()
 
     fun lagreOpplysningerAInntekt(aInntekt: AInntekt) {

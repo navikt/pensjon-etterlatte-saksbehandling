@@ -1,5 +1,8 @@
-package no.nav.etterlatte.behandling.etteroppgjoer
+package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
+import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev

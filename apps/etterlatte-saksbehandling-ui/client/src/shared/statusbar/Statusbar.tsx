@@ -60,7 +60,7 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
 
             <BodyShort>|</BodyShort>
             <Label>
-              <PersonLink fnr={person.foedselsnummer} fane={PersonOversiktFane.PERSONOPPLYSNINGER}>
+              <PersonLink fnr={person.foedselsnummer} fane={PersonOversiktFane.PERSONOPPLYSNINGER} target="_blank">
                 Personopplysninger
               </PersonLink>
             </Label>

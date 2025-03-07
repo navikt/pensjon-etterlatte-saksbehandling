@@ -91,5 +91,3 @@ fun PensjonsgivendeInntektAarResponse.fromResponse() =
                 )
             },
     )
-
-// TODO: opprette database for Sigrun

@@ -47,8 +47,8 @@ import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
+import no.nav.etterlatte.behandling.jobs.FiksTilbakekrevingStatistikkJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.FiksTilbakekrevingStatistikkJob
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService

@@ -1,5 +1,9 @@
 import * as amplitude from '@amplitude/analytics-browser'
 import { JaNei } from '~shared/types/ISvar'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export enum LogEvents {
   CLICK = 'klikk',
@@ -133,4 +137,31 @@ export const trackClickMedSvar = (name: ClickEvent, svar: string) => {
       svar,
     },
   })
+}
+
+export function velgTilbakemeldingClickEventForUtlandsbehandling(
+  behandling: IBehandlingReducer
+): ClickEvent | undefined {
+  // Hvis vi har en førstegangsbehandling utland
+  const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+  const utlandstilknytningErUtland =
+    !!behandling.utlandstilknytning && behandling.utlandstilknytning.type !== UtlandstilknytningType.NASJONAL
+  if (erFoerstegangsbehandling && utlandstilknytningErUtland) {
+    const vilkaarsvurderingGirAvslag =
+      behandling.vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT
+    if (vilkaarsvurderingGirAvslag) {
+      // avslag er et eget event som vi sjekker først
+      return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_AVSLAG
+    } else if (behandling.erSluttbehandling) {
+      // Hvis ikke avslag -- er dette en sluttbehandling
+      return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING
+    } else {
+      // Det er en utland førstegangsbehandling
+      return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_FOERSTEGANGSBEHANDLING
+    }
+  } else if (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING) {
+    // Revurderinger er sluttbehandlinger hvis det er revurderingsårsak sluttbehandling utland
+    return ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING
+  }
+  return undefined
 }

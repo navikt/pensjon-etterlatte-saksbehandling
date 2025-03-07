@@ -25,7 +25,6 @@ import { isFailure, isInitial, isPending, mapFailure } from '~shared/api/apiUtil
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/amplitude'
-import { Tilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
 import { KopierVilkaarAvdoed } from '~components/behandling/vilkaarsvurdering/KopierVilkaarAvdoed'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
@@ -149,16 +148,6 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
             />
           ))}
-
-          {behandling.behandlingType === IBehandlingsType.REVURDERING && (
-            <Box paddingInline="16">
-              <Tilbakemelding
-                spoersmaal="Hvor fornøyd er du med informasjonen som er meldt inn fra bruker?"
-                clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER_REVURDERING}
-                behandlingId={behandling.id}
-              />
-            </Box>
-          )}
 
           <Resultat
             setRedigerTotalvurdering={setRedigerTotalvurdering}

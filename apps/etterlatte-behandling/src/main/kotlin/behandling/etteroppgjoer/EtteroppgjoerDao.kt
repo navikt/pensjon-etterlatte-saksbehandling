@@ -1,88 +1,71 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.ResultSet
-import java.util.UUID
 
 class EtteroppgjoerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentEtteroppgjoer(behandlingId: UUID): EtteroppgjoerBehandling? =
+    fun hentEtteroppgjoer(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Etteroppgjoer? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status
-                        FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
-                        WHERE t.id = ?
+                        SELECT e.sak_id, e.inntektsaar, e.status
+                        FROM etteroppgjoer e
+                        WHERE e.sak_id = ?
+                        AND e.inntektsaar = ?
                         """.trimIndent(),
                     )
-                statement.setObject(1, behandlingId)
+                statement.setLong(1, sakId.sakId)
+                statement.setInt(2, inntektsaar)
                 statement.executeQuery().singleOrNull { toEtteroppgjoer() }
             }
         }
 
-    fun lagreEtteroppgjoer(etteroppgjoer: EtteroppgjoerBehandling) =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet
-                        ) 
-                        VALUES (?, ?, ?, ?) 
-                        ON CONFLICT (id) DO UPDATE SET
-                            status = excluded.status
-                        """.trimIndent(),
-                    )
-                statement.setObject(1, etteroppgjoer.id)
-                statement.setString(2, etteroppgjoer.status)
-                statement.setSakId(3, etteroppgjoer.sak.id)
-                statement.setTidspunkt(4, etteroppgjoer.opprettet)
-                statement.executeUpdate().also {
-                    krev(it == 1) {
-                        "Kunne ikke lagre forbehandling etteroppgjør for sakid ${etteroppgjoer.sak.id}"
-                    }
+    private fun ResultSet.toEtteroppgjoer() =
+        Etteroppgjoer(
+            sakId = SakId(getLong("sak_id")),
+            inntektsaar = getInt("inntektsaar"),
+            status = EtteroppgjoerStatus.valueOf(getString("status")),
+        )
+
+    fun lagerEtteroppgjoer(
+        sakId: SakId,
+        inntektsaar: Int,
+        status: EtteroppgjoerStatus,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    INSERT INTO etteroppgjoer(
+                        sak_id, inntektsaar, opprettet, status
+                    ) 
+                    VALUES (?, ?, ?, ?) 
+                    ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
+                        status = excluded.status
+                    """.trimIndent(),
+                )
+            statement.setSakId(1, sakId)
+            statement.setInt(2, inntektsaar)
+            statement.setTidspunkt(3, Tidspunkt(java.time.Instant.now()))
+            statement.setString(4, status.name)
+            statement.executeUpdate().also {
+                krev(it == 1) {
+                    "Kunne ikke lagre etteroppgjør for sakid $sakId"
                 }
             }
         }
-
-    private fun ResultSet.toEtteroppgjoer(): EtteroppgjoerBehandling =
-        EtteroppgjoerBehandling(
-            id = getString("id").let { UUID.fromString(it) },
-            sak =
-                Sak(
-                    id = SakId(getLong("sak_id")),
-                    sakType = enumValueOf(getString("saktype")),
-                    ident = getString("fnr"),
-                    enhet = Enhetsnummer(getString("enhet")),
-                ),
-            sekvensnummerSkatt = "123", // TODO
-            opprettet = getTidspunkt("opprettet"),
-            status = getString("status"),
-            aar = 2024,
-        )
-
-    fun lagreOpplysningerSkatt(skatt: PensjonsgivendeInntektFraSkatt) {
-        // TODO("Not yet implemented")
     }
-
-    // TODO: hent fra database
-    fun hentOpplysningerSkatt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt = PensjonsgivendeInntektFraSkatt.stub()
-
-    fun lagreOpplysningerAInntekt(aInntekt: AInntekt) {
-        // TODO("Not yet implemented")
-    }
-
-    fun hentOpplysningerAInntekt(behandlingId: UUID): AInntekt = AInntekt.stub()
 }

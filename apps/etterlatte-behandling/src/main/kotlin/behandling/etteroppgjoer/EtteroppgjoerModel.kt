@@ -2,19 +2,39 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
 data class Etteroppgjoer(
-    val behandling: EtteroppgjoerBehandling,
+    val sakId: SakId,
+    val inntektsaar: Int,
+    val status: EtteroppgjoerStatus,
+)
+
+enum class EtteroppgjoerStatus {
+    VENTER_PAA_SKATTEOPPGJOER,
+    MOTTATT_HENDELSE,
+    UNDER_FORBEHANDLING,
+    UNDER_REVURDERING,
+}
+
+data class SkatteoppgjoerHendelse(
+    val id: UUID,
+    val sekvensnummerSkatt: String,
+)
+
+// TODO falte ut behandling..
+data class ForbehandlingDto(
+    val behandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
 )
 
-data class EtteroppgjoerBehandling(
+data class EtteroppgjoerForbehandling(
     val id: UUID,
-    val sekvensnummerSkatt: String,
+    val hendelseId: UUID,
     val status: String, // TODO enum
     val sak: Sak,
     val aar: Int,
@@ -43,7 +63,7 @@ data class PensjonsgivendeInntektFraSkatt(
                         skatteordning = "FASTLAND",
                         loensinntekt = aarsinntekt,
                         naeringsinntekt = 0,
-                        annet = 0,
+                        fiskeFangstFamiliebarnehage = 0,
                     ),
                 ),
         )
@@ -54,7 +74,7 @@ data class PensjonsgivendeInntekt(
     val skatteordning: String,
     val loensinntekt: Int,
     val naeringsinntekt: Int,
-    val annet: Int,
+    val fiskeFangstFamiliebarnehage: Int,
 )
 
 data class AInntekt(

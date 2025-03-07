@@ -8,9 +8,13 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retry
+import org.slf4j.LoggerFactory
 
 interface SigrunKlient {
     suspend fun hentPensjonsgivendeInntekt(
@@ -24,6 +28,9 @@ class SigrunKlientImpl(
     val url: String,
     val featureToggleService: FeatureToggleService,
 ) : SigrunKlient {
+    private val logger = LoggerFactory.getLogger(SigrunKlientImpl::class.java)
+    private val sikkerlogg = sikkerlogger()
+
     override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
@@ -32,8 +39,8 @@ class SigrunKlientImpl(
             return PensjonsgivendeInntektFraSkatt.stub()
         }
 
-        retry {
-            httpClient.get("$url/rest/v2/inntekt") {
+        return retry {
+            httpClient.get("$url/api/v1/pensjonsgivendeinntektforfolketrygden") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(body)
@@ -42,40 +49,46 @@ class SigrunKlientImpl(
                 headers.append("rettighetspakker", "navUfoeretrygd") // TODO: bytte ut med egen for team etterlatte
             }
         }.let {
-            /*
             when (it) {
                 is RetryResult.Success -> {
-                    // TODO: mapping til vårt objekt
-                    it.content.body<AInntektReponsData>()
+                    it.content.body<PensjonsgivendeInntektAarResponse>().fromResponse()
                 }
 
                 is RetryResult.Failure -> {
-                    // TODO: logge feil
-                    logger.error("Kall mot inntektskomponent feilet")
-                    sikkerlogg.error("Kall mot inntektskomponent feilet for $personident")
+                    logger.error("Kall mot Sigrun feilet")
+                    sikkerlogg.error("Kall mot Sigrun feilet for $ident")
                     throw it.samlaExceptions()
                 }
             }
-             */
         }
-
-        return PensjonsgivendeInntektFraSkatt.stub()
     }
 }
 
-/*
-TODO for klient
-data class PensjonsgivendeInntektAar(
+data class PensjonsgivendeInntektAarResponse(
     val inntektsaar: String,
-    val pensjonsgivendeInntekt: List<PensjonsgivendeInntekt>
+    val norskPersonidentifikator: String,
+    val pensjonsgivendeInntekt: List<PensjonsgivendeInntektResponse>,
 )
 
-data class PensjonsgivendeInntekt(
+data class PensjonsgivendeInntektResponse(
     val skatteordning: String,
     val pensjonsgivendeInntektAvLoennsinntekt: String,
     val pensjonsgivendeInntektAvNaeringsinntekt: String,
     val pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage: String,
 )
-*/
+
+fun PensjonsgivendeInntektAarResponse.fromResponse() =
+    PensjonsgivendeInntektFraSkatt(
+        inntektsaar = inntektsaar,
+        inntekter =
+            pensjonsgivendeInntekt.map {
+                PensjonsgivendeInntekt(
+                    skatteordning = it.skatteordning,
+                    loensinntekt = it.pensjonsgivendeInntektAvLoennsinntekt.toInt(),
+                    naeringsinntekt = it.pensjonsgivendeInntektAvNaeringsinntekt.toInt(),
+                    fiskeFangstFamiliebarnehage = it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage.toInt(),
+                )
+            },
+    )
 
 // TODO: opprette database for Sigrun

@@ -15,6 +15,7 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { FerdigstillAktivitetspliktBrevModal } from '~components/aktivitetsplikt/brev/FerdigstillBrevModal'
 import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
   const { oppgave, sistEndret } = useAktivitetspliktOppgaveVurdering()
@@ -83,7 +84,9 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
                   <Box maxHeight="955px" width="100%" height="100%" marginBlock="0 16">
                     <ForhaandsvisningBrev brev={brev} />
                   </Box>
-                  <InfobrevKnapperad />
+                  <InfobrevKnapperad>
+                    {erOppgaveRedigerbar(oppgave.status) ? <FerdigstillAktivitetspliktBrevModal /> : undefined}
+                  </InfobrevKnapperad>
                 </>
               ) : (
                 <>

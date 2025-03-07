@@ -35,6 +35,8 @@ import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
@@ -340,6 +342,7 @@ internal class ApplicationContext(
     val gjenopprettingMetrikkerDao = GjenopprettingMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl(autoClosingDatabase)
     val tilbakekrevingDao = TilbakekrevingDao(autoClosingDatabase)
+    val etteroppgjoerForbehandlingDao = EtteroppgjoerForbehandlingDao(autoClosingDatabase)
     val etteroppgjoerDao = EtteroppgjoerDao(autoClosingDatabase)
     val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
@@ -643,6 +646,13 @@ internal class ApplicationContext(
     val etteroppgjoerService =
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
+            sakLesDao = sakLesDao,
+        )
+
+    val etteroppgjoerForbehandlingService =
+        EtteroppgjoerForbehandlingService(
+            dao = etteroppgjoerForbehandlingDao,
+            etteroppgjoerService = etteroppgjoerService,
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
             inntektskomponentService = inntektskomponentService,
@@ -708,6 +718,7 @@ internal class ApplicationContext(
     val opprettEtteroppgjoerRevurdering =
         OpprettEtteroppgjoerRevurdering(
             behandlingService,
+            etteroppgjoerService,
             grunnlagService,
             revurderingService,
             vilkaarsvurderingService,

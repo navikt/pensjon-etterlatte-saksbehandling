@@ -7,6 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.appIsInGCP
@@ -30,7 +31,7 @@ enum class EtteroppgjoerToggles(
 }
 
 fun Route.etteroppgjoerRoutes(
-    service: EtteroppgjoerService,
+    service: EtteroppgjoerForbehandlingService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER}") {

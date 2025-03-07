@@ -161,8 +161,6 @@ spec:
       value: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://dev-fss.team-inntekt.inntektskomponenten/.default
-
-    # TODO:
     - name: SIGRUN_URL
       value: https://sigrun-q2.dev.adeo.no
     - name: SIGRUN_OUTBOUND_SCOPE

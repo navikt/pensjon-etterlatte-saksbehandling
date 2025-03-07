@@ -59,7 +59,7 @@ class EtteroppgjoerForbehandlingService(
             )
 
         return inTransaction {
-            val fraSkatt = dao.hentOpplysningerSkatt(behandlingId)
+            val fraSkatt = dao.hentPensjonsgivendeInntektFraSkatt(behandlingId)
             val aInntekt = dao.hentOpplysningerAInntekt(behandlingId)
 
             ForbehandlingDto(
@@ -119,10 +119,11 @@ class EtteroppgjoerForbehandlingService(
     private suspend fun hentOgLagreOpplysninger(
         ident: String,
         aar: Int,
+        forbehandlingId: UUID,
     ) {
-        val skatt = sigrunKlient.hentPensjonsgivendeInntekt(ident, aar)
+        val inntekterFraSkatt = sigrunKlient.hentPensjonsgivendeInntekt(ident, aar)
         inTransaction {
-            dao.lagreOpplysningerSkatt(skatt)
+            dao.lagreOpplysningerSkatt(inntekterFraSkatt, forbehandlingId)
         }
 
         val aInntekt = inntektskomponentService.hentInntektFraAInntekt(ident, aar)

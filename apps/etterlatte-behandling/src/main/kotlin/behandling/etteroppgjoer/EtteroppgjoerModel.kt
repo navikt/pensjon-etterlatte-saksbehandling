@@ -48,7 +48,7 @@ data class EtteroppgjoerOpplysninger(
 )
 
 data class PensjonsgivendeInntektFraSkatt(
-    val inntektsaar: String,
+    val inntektsaar: Int,
     val inntekter: List<PensjonsgivendeInntekt>,
 ) {
     companion object {
@@ -56,7 +56,7 @@ data class PensjonsgivendeInntektFraSkatt(
             aar: Int = 2024,
             aarsinntekt: Int = 300000,
         ) = PensjonsgivendeInntektFraSkatt(
-            inntektsaar = "2024",
+            inntektsaar = aar,
             inntekter =
                 listOf(
                     PensjonsgivendeInntekt(
@@ -64,6 +64,7 @@ data class PensjonsgivendeInntektFraSkatt(
                         loensinntekt = aarsinntekt,
                         naeringsinntekt = 0,
                         fiskeFangstFamiliebarnehage = 0,
+                        inntektsaar = aar,
                     ),
                 ),
         )
@@ -71,6 +72,7 @@ data class PensjonsgivendeInntektFraSkatt(
 }
 
 data class PensjonsgivendeInntekt(
+    val inntektsaar: Int,
     val skatteordning: String,
     val loensinntekt: Int,
     val naeringsinntekt: Int,

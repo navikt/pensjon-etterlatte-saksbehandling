@@ -79,7 +79,7 @@ data class PensjonsgivendeInntektResponse(
 
 fun PensjonsgivendeInntektAarResponse.fromResponse() =
     PensjonsgivendeInntektFraSkatt(
-        inntektsaar = inntektsaar,
+        inntektsaar = inntektsaar.toInt(),
         inntekter =
             pensjonsgivendeInntekt.map {
                 PensjonsgivendeInntekt(

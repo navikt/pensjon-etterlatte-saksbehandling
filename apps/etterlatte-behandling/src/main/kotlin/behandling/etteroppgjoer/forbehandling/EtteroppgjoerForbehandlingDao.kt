@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -60,6 +62,72 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
+    fun lagreOpplysningerSkatt(
+        inntektFraSkatt: PensjonsgivendeInntektFraSkatt,
+        forbehandlingsId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    INSERT INTO pensjonsgivendeinntekt_fra_skatt(
+                        id,  forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt,fiske_fangst_familiebarnehage, 
+                    ) 
+                    VALUES (?, ?, ?, ?, ?, ?) 
+                    ON CONFLICT (id) DO UPDATE SET
+                        status = excluded.status
+                    """.trimIndent(),
+                )
+
+            for (inntekt in inntektFraSkatt.inntekter) {
+                statement.setObject(1, UUID.randomUUID())
+                statement.setObject(2, forbehandlingsId)
+                statement.setInt(3, inntekt.inntektsaar)
+                statement.setString(4, inntekt.skatteordning)
+                statement.setInt(5, inntekt.loensinntekt)
+                statement.setInt(6, inntekt.naeringsinntekt)
+                statement.setInt(7, inntekt.fiskeFangstFamiliebarnehage)
+
+                statement.addBatch()
+            }
+
+            val result = statement.executeBatch()
+            krev(result.size == inntektFraSkatt.inntekter.size) {
+                "Kunne ikke lagre alle inntekter for forbehandlingsId $forbehandlingsId"
+            }
+        }
+    }
+
+    fun hentPensjonsgivendeInntektFraSkatt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM pensjonsgivendeinntekt_fra_skatt
+                        WHERE id = ?
+                        """.trimIndent(),
+                    )
+                statement.setObject(1, behandlingId)
+                val pensjonsgivendeInntekter =
+                    statement.executeQuery().toList {
+                        toPensjonsgivendeInntekt()
+                    }
+
+                PensjonsgivendeInntektFraSkatt(
+                    pensjonsgivendeInntekter.first().inntektsaar,
+                    inntekter = pensjonsgivendeInntekter,
+                )
+            }
+        }
+
+    fun lagreOpplysningerAInntekt(aInntekt: AInntekt) {
+        // TODO("Not yet implemented")
+    }
+
+    fun hentOpplysningerAInntekt(behandlingId: UUID): AInntekt = AInntekt.stub()
+
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(
             id = getString("id").let { UUID.fromString(it) },
@@ -77,15 +145,12 @@ class EtteroppgjoerForbehandlingDao(
             aar = 2024,
         )
 
-    fun lagreOpplysningerSkatt(skatt: PensjonsgivendeInntektFraSkatt) {
-        // TODO("Not yet implemented")
-    }
-
-    fun hentOpplysningerSkatt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt = PensjonsgivendeInntektFraSkatt.stub()
-
-    fun lagreOpplysningerAInntekt(aInntekt: AInntekt) {
-        // TODO("Not yet implemented")
-    }
-
-    fun hentOpplysningerAInntekt(behandlingId: UUID): AInntekt = AInntekt.stub()
+    private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =
+        PensjonsgivendeInntekt(
+            skatteordning = getString("skatteordning"),
+            loensinntekt = getInt("loensinntekter"),
+            naeringsinntekt = getInt("naeringsinntekter"),
+            fiskeFangstFamiliebarnehage = getInt("fiskeFangstFamiliebarnehage"),
+            inntektsaar = getInt("inntektsaar"),
+        )
 }

@@ -22,7 +22,7 @@ on:
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
-      - libs/etterlatte-database/*
+      - libs/etterlatte-database/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**

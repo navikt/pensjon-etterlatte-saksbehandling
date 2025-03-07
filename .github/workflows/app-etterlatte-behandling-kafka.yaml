@@ -19,7 +19,6 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**
-      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-omregning-model/**
       - libs/etterlatte-ktor/**
@@ -37,7 +36,6 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**
-      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-omregning-model/**
       - libs/etterlatte-ktor/**

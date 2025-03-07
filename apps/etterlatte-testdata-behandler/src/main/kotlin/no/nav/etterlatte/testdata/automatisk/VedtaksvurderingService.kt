@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
+import no.nav.etterlatte.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.readValue
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.util.UUID

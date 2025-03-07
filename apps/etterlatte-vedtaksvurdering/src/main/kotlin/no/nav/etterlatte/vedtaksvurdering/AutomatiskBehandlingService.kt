@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
+import no.nav.etterlatte.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.util.UUID

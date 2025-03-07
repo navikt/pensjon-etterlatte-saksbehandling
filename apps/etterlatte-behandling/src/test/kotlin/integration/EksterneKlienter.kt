@@ -683,7 +683,10 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
 }
 
 class SigrunKlienTest : SigrunKlient {
-    override suspend fun hentPensjonsgivendeInntekt(ident: String): PensjonsgivendeInntektFraSkatt = PensjonsgivendeInntektFraSkatt.stub()
+    override suspend fun hentPensjonsgivendeInntekt(
+        ident: String,
+        inntektsaar: Int,
+    ): PensjonsgivendeInntektFraSkatt = PensjonsgivendeInntektFraSkatt.stub()
 }
 
 class InntektskomponentKlientTest : InntektskomponentKlient {

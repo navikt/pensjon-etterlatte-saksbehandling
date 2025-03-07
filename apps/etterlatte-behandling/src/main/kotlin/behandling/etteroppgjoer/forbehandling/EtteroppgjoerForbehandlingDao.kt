@@ -62,7 +62,7 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun lagreOpplysningerSkatt(
+    fun lagrePensjonsgivendeInntektFraSkatt(
         inntekterFraSkatt: PensjonsgivendeInntektFraSkatt,
         forbehandlingsId: UUID,
     ) = connectionAutoclosing.hentConnection {
@@ -71,11 +71,9 @@ class EtteroppgjoerForbehandlingDao(
                 prepareStatement(
                     """
                     INSERT INTO pensjonsgivendeinntekt_fra_skatt(
-                        id,  forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt,fiske_fangst_familiebarnehage, 
+                        id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt,fiske_fangst_familiebarnehage
                     ) 
-                    VALUES (?, ?, ?, ?, ?, ?) 
-                    ON CONFLICT (id) DO UPDATE SET
-                        status = excluded.status
+                    VALUES (?, ?, ?, ?, ?, ?, ?) 
                     """.trimIndent(),
                 )
 
@@ -98,7 +96,7 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
-    fun hentPensjonsgivendeInntektFraSkatt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt =
+    fun hentPensjonsgivendeInntektFraSkatt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -106,17 +104,21 @@ class EtteroppgjoerForbehandlingDao(
                         """
                         SELECT *
                         FROM pensjonsgivendeinntekt_fra_skatt
-                        WHERE id = ?
+                        WHERE forbehandling_id = ?
                         """.trimIndent(),
                     )
-                statement.setObject(1, behandlingId)
+                statement.setObject(1, forbehandlingId)
                 val pensjonsgivendeInntekter =
                     statement.executeQuery().toList {
                         toPensjonsgivendeInntekt()
                     }
 
+                if (pensjonsgivendeInntekter.isEmpty()) {
+                    throw NoSuchElementException("Ingen inntekter funnet for forbehadnlingId=$forbehandlingId")
+                }
+
                 PensjonsgivendeInntektFraSkatt(
-                    pensjonsgivendeInntekter.first().inntektsaar,
+                    inntektsaar = pensjonsgivendeInntekter.first().inntektsaar,
                     inntekter = pensjonsgivendeInntekter,
                 )
             }
@@ -148,9 +150,9 @@ class EtteroppgjoerForbehandlingDao(
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =
         PensjonsgivendeInntekt(
             skatteordning = getString("skatteordning"),
-            loensinntekt = getInt("loensinntekter"),
-            naeringsinntekt = getInt("naeringsinntekter"),
-            fiskeFangstFamiliebarnehage = getInt("fiskeFangstFamiliebarnehage"),
+            loensinntekt = getInt("loensinntekt"),
+            naeringsinntekt = getInt("naeringsinntekt"),
+            fiskeFangstFamiliebarnehage = getInt("fiske_fangst_familiebarnehage"),
             inntektsaar = getInt("inntektsaar"),
         )
 }

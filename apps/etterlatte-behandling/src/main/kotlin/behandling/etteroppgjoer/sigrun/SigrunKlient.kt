@@ -87,6 +87,7 @@ fun PensjonsgivendeInntektAarResponse.fromResponse() =
                     loensinntekt = it.pensjonsgivendeInntektAvLoennsinntekt.toInt(),
                     naeringsinntekt = it.pensjonsgivendeInntektAvNaeringsinntekt.toInt(),
                     fiskeFangstFamiliebarnehage = it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage.toInt(),
+                    inntektsaar = inntektsaar.toInt(),
                 )
             },
     )

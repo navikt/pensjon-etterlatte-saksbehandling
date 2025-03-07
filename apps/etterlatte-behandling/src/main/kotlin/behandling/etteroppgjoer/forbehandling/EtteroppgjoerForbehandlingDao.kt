@@ -96,7 +96,7 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
-    fun hentPensjonsgivendeInntektFraSkatt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt =
+    fun hentPensjonsgivendeInntektFraSkatt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -114,13 +114,13 @@ class EtteroppgjoerForbehandlingDao(
                     }
 
                 if (pensjonsgivendeInntekter.isEmpty()) {
-                    throw NoSuchElementException("Ingen inntekter funnet for forbehadnlingId=$forbehandlingId")
+                    null
+                } else {
+                    PensjonsgivendeInntektFraSkatt(
+                        inntektsaar = pensjonsgivendeInntekter.first().inntektsaar,
+                        inntekter = pensjonsgivendeInntekter,
+                    )
                 }
-
-                PensjonsgivendeInntektFraSkatt(
-                    inntektsaar = pensjonsgivendeInntekter.first().inntektsaar,
-                    inntekter = pensjonsgivendeInntekter,
-                )
             }
         }
 

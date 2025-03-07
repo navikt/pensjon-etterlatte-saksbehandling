@@ -62,6 +62,10 @@ class EtteroppgjoerForbehandlingService(
             val fraSkatt = dao.hentPensjonsgivendeInntektFraSkatt(behandlingId)
             val aInntekt = dao.hentOpplysningerAInntekt(behandlingId)
 
+            if (fraSkatt == null) {
+                throw InternfeilException("Fant ingen pensjonsgivendeInntekter for behandling $behandlingId")
+            }
+
             ForbehandlingDto(
                 behandling = etteroppgjoerBehandling,
                 opplysninger =

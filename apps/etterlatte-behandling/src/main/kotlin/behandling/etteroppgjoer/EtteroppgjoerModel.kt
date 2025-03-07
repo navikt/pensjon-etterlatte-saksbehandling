@@ -51,6 +51,12 @@ data class PensjonsgivendeInntektFraSkatt(
     val inntektsaar: Int,
     val inntekter: List<PensjonsgivendeInntekt>,
 ) {
+    init {
+        require(inntekter.all { it.inntektsaar == inntektsaar }) {
+            "Alle inntekter må ha inntektsår = $inntektsaar, men fant: ${inntekter.map { it.inntektsaar }}"
+        }
+    }
+
     companion object {
         fun stub(
             aar: Int = 2024,
@@ -61,6 +67,13 @@ data class PensjonsgivendeInntektFraSkatt(
                 listOf(
                     PensjonsgivendeInntekt(
                         skatteordning = "FASTLAND",
+                        loensinntekt = aarsinntekt,
+                        naeringsinntekt = 0,
+                        fiskeFangstFamiliebarnehage = 0,
+                        inntektsaar = aar,
+                    ),
+                    PensjonsgivendeInntekt(
+                        skatteordning = "SVALBARD",
                         loensinntekt = aarsinntekt,
                         naeringsinntekt = 0,
                         fiskeFangstFamiliebarnehage = 0,

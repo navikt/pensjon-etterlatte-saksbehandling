@@ -110,7 +110,7 @@ class EtteroppgjoerForbehandlingService(
                 )
 
             dao.lagreForbehandling(nyBehandling)
-            dao.lagreOpplysningerSkatt(inntekterFraSkatt, nyBehandling.id)
+            dao.lagrePensjonsgivendeInntektFraSkatt(inntekterFraSkatt, nyBehandling.id)
             dao.lagreOpplysningerAInntekt(aInntekt)
 
             etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)

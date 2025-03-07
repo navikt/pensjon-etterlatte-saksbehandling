@@ -85,12 +85,16 @@ class EtteroppgjoerForbehandlingDaoTest(
     fun `lagre og hente inntekterFraSkatt`() {
         val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
+
+        // negative returnere null hvis tomt
+        etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntektFraSkatt(forbehandlingId) shouldBe null
+
         etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntektFraSkatt(
             PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
             forbehandlingId,
         )
 
-        with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntektFraSkatt(forbehandlingId)) {
+        with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntektFraSkatt(forbehandlingId)!!) {
             inntektsaar shouldBe inntektsaar
             inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
         }

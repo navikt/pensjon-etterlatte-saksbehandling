@@ -63,7 +63,7 @@ class EtteroppgjoerForbehandlingDao(
         }
 
     fun lagreOpplysningerSkatt(
-        inntektFraSkatt: PensjonsgivendeInntektFraSkatt,
+        inntekterFraSkatt: PensjonsgivendeInntektFraSkatt,
         forbehandlingsId: UUID,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
@@ -79,7 +79,7 @@ class EtteroppgjoerForbehandlingDao(
                     """.trimIndent(),
                 )
 
-            for (inntekt in inntektFraSkatt.inntekter) {
+            for (inntekt in inntekterFraSkatt.inntekter) {
                 statement.setObject(1, UUID.randomUUID())
                 statement.setObject(2, forbehandlingsId)
                 statement.setInt(3, inntekt.inntektsaar)
@@ -92,7 +92,7 @@ class EtteroppgjoerForbehandlingDao(
             }
 
             val result = statement.executeBatch()
-            krev(result.size == inntektFraSkatt.inntekter.size) {
+            krev(result.size == inntekterFraSkatt.inntekter.size) {
                 "Kunne ikke lagre alle inntekter for forbehandlingsId $forbehandlingsId"
             }
         }

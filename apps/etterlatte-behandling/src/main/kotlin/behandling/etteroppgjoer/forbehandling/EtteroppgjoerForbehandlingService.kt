@@ -83,7 +83,8 @@ class EtteroppgjoerForbehandlingService(
                 sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
             }
 
-        hentOgLagreOpplysninger(sak.ident, inntektsaar)
+        val inntekterFraSkatt = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar)
+        val aInntekt = inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar)
 
         return inTransaction {
             val nyBehandling =
@@ -96,7 +97,6 @@ class EtteroppgjoerForbehandlingService(
                     opprettet = Tidspunkt.now(),
                 )
 
-            dao.lagreForbehandling(nyBehandling)
             val oppgave =
                 oppgaveService.opprettOppgave(
                     referanse = nyBehandling.id.toString(),
@@ -108,27 +108,17 @@ class EtteroppgjoerForbehandlingService(
                     saksbehandler = null,
                     gruppeId = null,
                 )
+
+            dao.lagreForbehandling(nyBehandling)
+            dao.lagreOpplysningerSkatt(inntekterFraSkatt, nyBehandling.id)
+            dao.lagreOpplysningerAInntekt(aInntekt)
+
             etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+
             EtteroppgjoerOgOppgave(
                 etteroppgjoerBehandling = nyBehandling,
                 oppgave = oppgave,
             )
-        }
-    }
-
-    private suspend fun hentOgLagreOpplysninger(
-        ident: String,
-        aar: Int,
-        forbehandlingId: UUID,
-    ) {
-        val inntekterFraSkatt = sigrunKlient.hentPensjonsgivendeInntekt(ident, aar)
-        inTransaction {
-            dao.lagreOpplysningerSkatt(inntekterFraSkatt, forbehandlingId)
-        }
-
-        val aInntekt = inntektskomponentService.hentInntektFraAInntekt(ident, aar)
-        inTransaction {
-            dao.lagreOpplysningerAInntekt(aInntekt)
         }
     }
 }

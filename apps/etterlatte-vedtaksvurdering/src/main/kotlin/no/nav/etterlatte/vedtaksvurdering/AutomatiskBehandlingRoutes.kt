@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
-import no.nav.rapidsandrivers.migrering.MigreringKjoringVariant
 import org.slf4j.LoggerFactory
 
 fun Route.automatiskBehandlingRoutes(

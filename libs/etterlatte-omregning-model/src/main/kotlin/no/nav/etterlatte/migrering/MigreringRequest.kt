@@ -1,4 +1,4 @@
-package no.nav.rapidsandrivers.migrering
+package no.nav.etterlatte.migrering
 
 enum class MigreringKjoringVariant {
     FULL_KJORING,

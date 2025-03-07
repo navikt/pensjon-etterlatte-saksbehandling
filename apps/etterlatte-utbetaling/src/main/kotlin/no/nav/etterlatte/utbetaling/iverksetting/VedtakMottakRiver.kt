@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
@@ -21,7 +22,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

@@ -16,7 +16,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
+import { useAttesterbarBehandlingOppgave } from '~shared/hooks/useAttesterbarBehandlingOppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { RedigerMottattDato } from '~components/klage/sidemeny/RedigerMottattDato'
@@ -47,7 +47,7 @@ export function KlageSidemeny() {
       </Sidebar>
     )
   }
-  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: klage.id })
+  const [oppgaveResult] = useAttesterbarBehandlingOppgave({ referanse: klage.id })
 
   return (
     <Sidebar>

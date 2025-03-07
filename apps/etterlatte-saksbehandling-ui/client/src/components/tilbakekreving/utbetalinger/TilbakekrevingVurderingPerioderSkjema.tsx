@@ -142,7 +142,10 @@ export function TilbakekrevingVurderingPerioderSkjema({
                   const indexBeloep = beloep.originalIndex
                   if (klasseTypeYtelse(beloep)) {
                     return (
-                      <Table.Row key={`beloepRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
+                      <Table.Row
+                        key={`beloepRad-${indexPeriode}-${indexBeloep}`}
+                        style={{ alignItems: 'start', borderTopWidth: '' }}
+                      >
                         <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
                         <Table.DataCell key="klasseKode">
                           {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}

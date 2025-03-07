@@ -47,6 +47,7 @@ import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
+import no.nav.etterlatte.behandling.jobs.FiksTilbakekrevingStatistikkJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
@@ -796,6 +797,20 @@ internal class ApplicationContext(
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),
+        )
+    }
+
+    val fiksStatistikk: FiksTilbakekrevingStatistikkJob by lazy {
+        FiksTilbakekrevingStatistikkJob(
+            tilbakekrevinghendelser = tilbakekrevingHendelserService,
+            behandlingService = behandlingService,
+            tilbakekrevingService = tilbakekrevingService,
+            featureToggleService = featureToggleService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(20, ChronoUnit.HOURS),
         )
     }
 

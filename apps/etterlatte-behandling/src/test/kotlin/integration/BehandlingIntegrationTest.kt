@@ -124,6 +124,7 @@ abstract class BehandlingIntegrationTest {
                 kodeverkKlient = KodeverkKlientTest(),
                 inntektskomponentKlient = InntektskomponentKlientTest(),
                 grunnlagServiceOverride = grunnlagService,
+                sigrunKlient = SigrunKlienTest(),
             )
     }
 

@@ -7,6 +7,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -77,6 +78,25 @@ class EtteroppgjoerForbehandlingDaoTest(
             status shouldBe ny.status
             aar shouldBe ny.aar
             opprettet shouldBe ny.opprettet
+        }
+    }
+
+    @Test
+    fun `lagre og hente inntekterFraSkatt`() {
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+
+        // negative returnere null hvis tomt
+        etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntektFraSkatt(forbehandlingId) shouldBe null
+
+        etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntektFraSkatt(
+            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
+            forbehandlingId,
+        )
+
+        with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntektFraSkatt(forbehandlingId)!!) {
+            inntektsaar shouldBe inntektsaar
+            inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
         }
     }
 }

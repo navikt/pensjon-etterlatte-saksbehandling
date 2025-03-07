@@ -13,10 +13,6 @@
             <env name="ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vedtaksvurdering"/>
             <env name="ETTERLATTE_VEDTAKSVURDERING_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no"/>
             <env name="NAIS_APP_NAME" value="etterlatte-beregning"/>
-            <env name="INNTEKTSKOMPONENT_URL"
-                 value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2"/>
-            <env name="INNTEKTSKOMPONENT_OUTBOUND_SCOPE"
-                 value="api://dev-fss.team-inntekt.inntektskomponenten/.default"/>
         </envs>
         <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt"/>
         <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-beregning.main"/>

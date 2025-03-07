@@ -1276,7 +1276,7 @@ internal class OppgaveServiceTest(
 
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandlerIdent)
 
-        val saksbehandlerHentet = oppgaveService.hentOppgaveUnderBehandling(behandlingId)?.saksbehandler
+        val saksbehandlerHentet = oppgaveService.hentOppgaveForAttesterbarBehandling(behandlingId)?.saksbehandler
 
         assertEquals(saksbehandlerIdent, saksbehandlerHentet!!.ident)
     }
@@ -1298,7 +1298,7 @@ internal class OppgaveServiceTest(
 
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandlerIdent)
 
-        val saksbehandlerHentet = oppgaveService.hentOppgaveUnderBehandling(revurderingId)?.saksbehandler
+        val saksbehandlerHentet = oppgaveService.hentOppgaveForAttesterbarBehandling(revurderingId)?.saksbehandler
 
         assertEquals(saksbehandlerIdent, saksbehandlerHentet!!.ident)
     }
@@ -1324,7 +1324,7 @@ internal class OppgaveServiceTest(
         oppgaveService.tilAttestering(behandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, null)
         oppgaveService.tildelSaksbehandler(foerstegangsbehandling.id, "attestant")
 
-        val saksbehandlerHentet = oppgaveService.hentOppgaveUnderBehandling(behandlingId)?.saksbehandler
+        val saksbehandlerHentet = oppgaveService.hentOppgaveForAttesterbarBehandling(behandlingId)?.saksbehandler
 
         assertEquals("attestant", saksbehandlerHentet!!.ident)
     }
@@ -1341,7 +1341,7 @@ internal class OppgaveServiceTest(
             null,
         )
 
-        val saksbehandlerHentet = oppgaveService.hentOppgaveUnderBehandling(behandlingId)?.saksbehandler
+        val saksbehandlerHentet = oppgaveService.hentOppgaveForAttesterbarBehandling(behandlingId)?.saksbehandler
 
         assertNull(saksbehandlerHentet?.ident)
     }

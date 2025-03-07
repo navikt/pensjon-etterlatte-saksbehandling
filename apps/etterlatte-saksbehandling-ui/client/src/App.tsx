@@ -27,7 +27,7 @@ import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
 import { initAmplitude } from '~utils/amplitude'
 import { Unleashcontext, useUnleash } from '~useUnleash'
-import { Etteroppgjoersbehandling } from '~components/etteroppgjoer/Etteroppgjoersbehandling'
+import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/EtteroppgjoerForbehandling'
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
 
 initAmplitude()
@@ -72,7 +72,7 @@ function App() {
                     <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                     <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                     <Route path="/aktivitet-vurdering/:oppgaveId/*" element={<VurderAktivitetspliktOppgave />} />
-                    <Route path="/etteroppgjoer/:etteroppgjoerId/*" element={<Etteroppgjoersbehandling />} />
+                    <Route path="/etteroppgjoer/:etteroppgjoerId/*" element={<EtteroppgjoerForbehandling />} />
                     <Route path="/meldt-inn-endring/:oppgaveId/*" element={<MeldtInnEndring />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>

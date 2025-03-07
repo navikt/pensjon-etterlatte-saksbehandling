@@ -29,7 +29,7 @@ const Endringstekst = ({ endring }: { endring: ISaksendring }) => {
   } else if (endring.endringstype === Endringstype.ENDRE_IDENT) {
     return (
       <>
-        Identitetsnummer {ENHETER[endring.foer.ident]} er erstattet med {ENHETER[endring.etter.ident]}
+        Identitetsnummer {endring.foer.ident} er erstattet med {endring.etter.ident}
       </>
     )
   }

@@ -1,6 +1,5 @@
 import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, List, ReadMore, VStack } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { ConfigContext } from '~clientConfig'
@@ -8,7 +7,7 @@ import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljert
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
-import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { AktivitetspliktVurdering } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -29,8 +28,7 @@ const isValidDateOfDeath = (date?: Date) => {
   return false
 }
 
-export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandling } = props
+export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useContext(BehandlingRouteContext)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -90,8 +88,8 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         </BodyShort>
       </Box>
 
-      <AktivitetspliktWrapper gap="10">
-        <TekstWrapper>
+      <VStack gap="10" paddingInline="16" paddingBlock="8">
+        <VStack maxWidth="42.5rem">
           <Heading level="1" spacing size="medium">
             Gjenlevende sin situasjon
           </Heading>
@@ -107,18 +105,14 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               riktig oppfølging og forberede brukeren på kravene som følger.
             </BodyLong>
           </ReadMore>
-        </TekstWrapper>
+        </VStack>
 
-        {isValidDateOfDeath(avdoedesDoedsdato!!) && ( // https://jira.adeo.no/browse/EY-4939 todo denne valideringen burde skje et annet sted vel og si noe om den ikke er gyldig
+        {isValidDateOfDeath(avdoedesDoedsdato!) && ( // https://jira.adeo.no/browse/EY-4939 todo denne valideringen burde skje et annet sted vel og si noe om den ikke er gyldig
           <>
-            <AktivitetspliktTidslinje
-              behandling={behandling}
-              doedsdato={avdoedesDoedsdato!!}
-              sakId={behandling.sakId}
-            />
+            <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!} sakId={behandling.sakId} />
           </>
         )}
-        {isBefore(avdoedesDoedsdato!!, subMonths(Date.now(), 4)) && (
+        {isBefore(avdoedesDoedsdato!, subMonths(Date.now(), 4)) && (
           <Box maxWidth="42.5rem">
             <Alert variant="info">
               Det har gått mer enn 4 måneder siden dødsfallet, det har derfor ikke blitt opprettet oppgave om
@@ -131,7 +125,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         <AktivitetspliktVurdering
           behandling={behandling}
           setManglerAktivitetspliktVurdering={setManglerAktivitetspliktVurdering}
-          doedsdato={avdoedesDoedsdato!!}
+          doedsdato={avdoedesDoedsdato!}
         />
 
         {aktivitetOppfolging && (
@@ -155,16 +149,16 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         )}
 
         {behandling.behandlingType === IBehandlingsType.REVURDERING && (
-          <TekstWrapper>
+          <VStack maxWidth="42.5rem">
             <Heading size="small">Status på informasjonsbrev</Heading>
             <BodyLong>
               Se hvilken dato infobrevet er sendt for å vurdere når du skal sende oppgave til lokalkontor (tre uker
               etter infobrevet er sendt ut), og når du eventuelt skal sende varsel om stans (tre uker før vedtak),
             </BodyLong>
-          </TekstWrapper>
+          </VStack>
         )}
 
-        <TekstWrapper>
+        <VStack maxWidth="42.5rem">
           <Heading size="small" spacing>
             Trengs det oppfølging fra lokalkontor?
           </Heading>
@@ -186,24 +180,26 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               </List>
             </BodyLong>
           )}
-          <Button
-            variant="secondary"
-            size="small"
-            disabled={!redigerbar}
-            as="a"
-            href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
-            target="_blank"
-          >
-            Lag oppgave til lokalkontor <ExternalLinkIcon aria-hidden />
-          </Button>
-        </TekstWrapper>
+          <div>
+            <Button
+              variant="secondary"
+              size="small"
+              disabled={!redigerbar}
+              as="a"
+              href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
+              target="_blank"
+            >
+              Lag oppgave til lokalkontor <ExternalLinkIcon aria-hidden />
+            </Button>
+          </div>
+        </VStack>
 
         {visFeilmelding && (
-          <Alert style={{ maxWidth: '16em' }} variant="error">
-            Du må fylle ut vurdering om aktivitetsplikt
-          </Alert>
+          <Box maxWidth="fit-content">
+            <Alert variant="error">Du må fylle ut vurdering om aktivitetsplikt</Alert>
+          </Box>
         )}
-      </AktivitetspliktWrapper>
+      </VStack>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <BehandlingHandlingKnapper>
@@ -215,12 +211,3 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
     </>
   )
 }
-
-const AktivitetspliktWrapper = styled(VStack)`
-  padding: 0 var(--a-spacing-16) var(--a-spacing-8) var(--a-spacing-16);
-  max-width: var(--a-breakpoint-2xl);
-`
-
-const TekstWrapper = styled.div`
-  max-width: var(--a-breakpoint-md-down);
-`

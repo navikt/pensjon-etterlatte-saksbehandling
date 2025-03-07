@@ -80,6 +80,7 @@ data class HardkodaSystembruker private constructor(
         val opprettGrunnlag = HardkodaSystembruker(Systembrukere.OPPRETT_GRUNNLAG) // skal bort på sikt
         val ryddeBeregning = HardkodaSystembruker(Systembrukere.BEREGNING)
         val omregning = HardkodaSystembruker(Systembrukere.OMREGNING)
+        val uttrekk = HardkodaSystembruker(Systembrukere.UTTREKK)
         val statistikk = HardkodaSystembruker(Systembrukere.STATISTIKK)
         val tilgang = HardkodaSystembruker(Systembrukere.TILGANG)
     }
@@ -97,6 +98,7 @@ data class HardkodaSystembruker private constructor(
         BEREGNING("beregning"),
         OMREGNING("omregning"),
         STATISTIKK("statistikk"),
+        UTTREKK("uttrekk"),
     }
 }
 

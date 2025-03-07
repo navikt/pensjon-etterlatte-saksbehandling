@@ -37,7 +37,7 @@ export interface IAktivitetHendelse {
   beskrivelse: string
 }
 
-export interface SkrivAktivitet {
+export interface OpprettAktivitetPeriode {
   id: string | undefined
   sakId: number
   type: AktivitetspliktType
@@ -46,7 +46,7 @@ export interface SkrivAktivitet {
   beskrivelse: string
 }
 
-export interface SkrivHendelse {
+export interface OpprettAktivitetHendelse {
   id: string | undefined
   sakId: number
   dato: string
@@ -61,6 +61,27 @@ export enum AktivitetspliktType {
   UTDANNING = 'UTDANNING',
   INGEN_AKTIVITET = 'INGEN_AKTIVITET',
   OPPFOELGING_LOKALKONTOR = 'OPPFOELGING_LOKALKONTOR',
+}
+
+export const aktivitetspliktTypeTilLesbarStreng = (aktivitetspliktType: string): string => {
+  switch (aktivitetspliktType) {
+    case AktivitetspliktType.ARBEIDSTAKER:
+      return 'Arbeidstaker'
+    case AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE:
+      return 'Selvstendig næringsdrivende'
+    case AktivitetspliktType.ETABLERER_VIRKSOMHET:
+      return 'Etablerer virksomhet'
+    case AktivitetspliktType.ARBEIDSSOEKER:
+      return 'Arbeidssøker'
+    case AktivitetspliktType.UTDANNING:
+      return 'Utdanning'
+    case AktivitetspliktType.OPPFOELGING_LOKALKONTOR:
+      return 'Oppfølging lokalkontor'
+    case AktivitetspliktType.INGEN_AKTIVITET:
+      return 'Ingen aktivitet'
+    default:
+      return ''
+  }
 }
 
 export enum AktivitetspliktVurderingType {

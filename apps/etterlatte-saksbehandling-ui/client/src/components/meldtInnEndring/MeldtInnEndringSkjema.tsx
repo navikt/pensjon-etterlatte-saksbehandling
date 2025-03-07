@@ -5,7 +5,7 @@ import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurd
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentStoettedeRevurderinger, opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
-import { Button, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { useEffect } from 'react'
 import { SakType } from '~shared/types/sak'
@@ -97,7 +97,15 @@ export const MeldtInnEndringSkjema = ({
             ),
           })}
         {meldtInnEndringHandlingValgt !== MeldtInnEndringHandlingValgt.INGEN && (
-          <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
+          <>
+            {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.AVSLUTT_OPPGAVE && (
+              <BodyShort>
+                Når du avslutter oppgaven, kan du ikke gjøre endringer. Du finner historikken i saksoversikten under
+                ferdigstilte oppgaver. Husk å gi beskjed til bruker før du avslutter.
+              </BodyShort>
+            )}
+            <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
+          </>
         )}
 
         {isFailureHandler({
@@ -119,7 +127,9 @@ export const MeldtInnEndringSkjema = ({
             Avbryt
           </Button>
           {meldtInnEndringHandlingValgt !== MeldtInnEndringHandlingValgt.INGEN && (
-            <Button loading={isPending(opprettRevurderingResult || ferdigstillOppgaveResult)}>Opprett</Button>
+            <Button loading={isPending(opprettRevurderingResult || ferdigstillOppgaveResult)}>
+              {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.AVSLUTT_OPPGAVE ? 'Avslutt' : 'Opprett'}
+            </Button>
           )}
         </HStack>
       </VStack>

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -144,7 +145,7 @@ class EtteroppgjoerForbehandlingDao(
             statement.setObject(1, UUID.randomUUID())
             statement.setObject(2, behandlingId)
             statement.setInt(3, aInntekt.aar)
-            statement.setString(4, objectMapper.writeValueAsString(aInntekt.inntektsmaaneder))
+            statement.setJsonb(4, aInntekt.inntektsmaaneder)
 
             statement.executeUpdate().also {
                 krev(it == 1) {
@@ -154,7 +155,7 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
-    fun hentAInntekt(forbehandlingId: UUID): AInntekt? =
+    fun hentAInntekt(behandlingId: UUID): AInntekt? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -165,11 +166,11 @@ class EtteroppgjoerForbehandlingDao(
                         WHERE forbehandling_id = ?
                         """.trimIndent(),
                     )
-                statement.setObject(1, forbehandlingId)
+                statement.setObject(1, behandlingId)
                 statement.executeQuery().singleOrNull {
                     AInntekt(
                         aar = getInt("aar"),
-                        inntektsmaaneder = objectMapper.readValue(getString("inntektsmaaneder")),
+                        inntektsmaaneder = getString("inntektsmaaneder").let { objectMapper.readValue(it) },
                     )
                 }
             }

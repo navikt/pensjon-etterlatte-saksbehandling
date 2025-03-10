@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
-import no.nav.etterlatte.behandling.etteroppgjoer.AInntektMaaned
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
@@ -18,7 +17,6 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
-import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingDao(
@@ -137,25 +135,21 @@ class EtteroppgjoerForbehandlingDao(
                 prepareStatement(
                     """
                     INSERT INTO inntekt_fra_ainntekt(
-                        id, forbehandling_id, maaned, inntekter, summert_beloep
+                        id, forbehandling_id, aar, inntektsmaaneder
                     ) 
-                    VALUES (?, ?, ?, ?, ?) 
+                    VALUES (?, ?, ?, ?) 
                     """.trimIndent(),
                 )
 
-            for (inntektsmaaned in aInntekt.inntektsmaaneder) {
-                statement.setObject(1, UUID.randomUUID())
-                statement.setObject(2, behandlingId)
-                statement.setString(3, inntektsmaaned.maaned.toString())
-                statement.setString(4, objectMapper.writeValueAsString(inntektsmaaned.inntekter))
-                statement.setBigDecimal(5, inntektsmaaned.summertBeloep)
+            statement.setObject(1, UUID.randomUUID())
+            statement.setObject(2, behandlingId)
+            statement.setInt(3, aInntekt.aar)
+            statement.setString(4, objectMapper.writeValueAsString(aInntekt.inntektsmaaneder))
 
-                statement.addBatch()
-            }
-
-            val result = statement.executeBatch()
-            krev(result.size == aInntekt.inntektsmaaneder.size) {
-                "Kunne ikke lagre alle inntekter fra aInntekt for behandlingId=$behandlingId"
+            statement.executeUpdate().also {
+                krev(it == 1) {
+                    "Kunne ikke lagre aInntekt for behandling=$behandlingId"
+                }
             }
         }
     }
@@ -172,17 +166,10 @@ class EtteroppgjoerForbehandlingDao(
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandlingId)
-                val inntekterFraAInntekt =
-                    statement.executeQuery().toList {
-                        toAInntektMaaned()
-                    }
-
-                if (inntekterFraAInntekt.isEmpty()) {
-                    null
-                } else {
+                statement.executeQuery().singleOrNull {
                     AInntekt(
-                        aar = inntekterFraAInntekt.first().maaned.year,
-                        inntektsmaaneder = inntekterFraAInntekt,
+                        aar = getInt("aar"),
+                        inntektsmaaneder = objectMapper.readValue(getString("inntektsmaaneder")),
                     )
                 }
             }
@@ -212,12 +199,5 @@ class EtteroppgjoerForbehandlingDao(
             naeringsinntekt = getInt("naeringsinntekt"),
             fiskeFangstFamiliebarnehage = getInt("fiske_fangst_familiebarnehage"),
             inntektsaar = getInt("inntektsaar"),
-        )
-
-    private fun ResultSet.toAInntektMaaned(): AInntektMaaned =
-        AInntektMaaned(
-            maaned = YearMonth.parse(getString("maaned")),
-            inntekter = objectMapper.readValue(getString("inntekter")),
-            summertBeloep = getBigDecimal("summert_beloep"),
         )
 }

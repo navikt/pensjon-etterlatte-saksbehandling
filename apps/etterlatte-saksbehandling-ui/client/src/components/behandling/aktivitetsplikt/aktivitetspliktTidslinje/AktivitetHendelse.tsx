@@ -1,6 +1,6 @@
 import { IAktivitetHendelse, OpprettAktivitetHendelse } from '~shared/types/Aktivitetsplikt'
 import { useForm } from 'react-hook-form'
-import { Button, HStack, Textarea, VStack } from '@navikt/ds-react'
+import { Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import {
   AktivitetspliktRedigeringModus,
@@ -12,6 +12,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { formaterTilISOString } from '~utils/formatering/dato'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import React from 'react'
 
 interface AktivitetHendelseSkjema {
   dato: string
@@ -96,6 +97,7 @@ export const AktivitetHendelse = ({
   return (
     <form onSubmit={handleSubmit(lagreAktivitetHendelse)}>
       <VStack gap="4" maxWidth="20rem">
+        <Heading size="small">Legg til hendelse</Heading>
         <ControlledDatoVelger
           name="dato"
           label="Dato for hendelse"

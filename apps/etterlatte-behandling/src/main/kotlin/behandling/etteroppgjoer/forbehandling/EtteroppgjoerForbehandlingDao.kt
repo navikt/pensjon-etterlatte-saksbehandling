@@ -1,12 +1,15 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
+import no.nav.etterlatte.behandling.etteroppgjoer.AInntektMaaned
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -15,6 +18,7 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingDao(
@@ -56,15 +60,15 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setTidspunkt(4, forbehandling.opprettet)
                 statement.executeUpdate().also {
                     krev(it == 1) {
-                        "Kunne ikke lagre forbehandling etteroppgjør for sakid ${forbehandling.sak.id}"
+                        "Kunne ikke lagre forbehandling etteroppgjør for sakId=${forbehandling.sak.id}"
                     }
                 }
             }
         }
 
-    fun lagrePensjonsgivendeInntektFraSkatt(
+    fun lagrePensjonsgivendeInntekt(
         inntekterFraSkatt: PensjonsgivendeInntektFraSkatt,
-        forbehandlingsId: UUID,
+        behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
@@ -79,7 +83,7 @@ class EtteroppgjoerForbehandlingDao(
 
             for (inntekt in inntekterFraSkatt.inntekter) {
                 statement.setObject(1, UUID.randomUUID())
-                statement.setObject(2, forbehandlingsId)
+                statement.setObject(2, behandlingId)
                 statement.setInt(3, inntekt.inntektsaar)
                 statement.setString(4, inntekt.skatteordning)
                 statement.setInt(5, inntekt.loensinntekt)
@@ -91,12 +95,12 @@ class EtteroppgjoerForbehandlingDao(
 
             val result = statement.executeBatch()
             krev(result.size == inntekterFraSkatt.inntekter.size) {
-                "Kunne ikke lagre alle inntekter for forbehandlingsId $forbehandlingsId"
+                "Kunne ikke lagre alle pensjonsgivendeInntekter for behandlingId=$behandlingId"
             }
         }
     }
 
-    fun hentPensjonsgivendeInntektFraSkatt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
+    fun hentPensjonsgivendeInntekt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -124,11 +128,65 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun lagreOpplysningerAInntekt(aInntekt: AInntekt) {
-        // TODO("Not yet implemented")
+    fun lagreAInntekt(
+        aInntekt: AInntekt,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    INSERT INTO inntekt_fra_ainntekt(
+                        id, forbehandling_id, maaned, inntekter, summert_beloep
+                    ) 
+                    VALUES (?, ?, ?, ?, ?) 
+                    """.trimIndent(),
+                )
+
+            for (inntektsmaaned in aInntekt.inntektsmaaneder) {
+                statement.setObject(1, UUID.randomUUID())
+                statement.setObject(2, behandlingId)
+                statement.setString(3, inntektsmaaned.maaned.toString())
+                statement.setString(4, objectMapper.writeValueAsString(inntektsmaaned.inntekter))
+                statement.setBigDecimal(5, inntektsmaaned.summertBeloep)
+
+                statement.addBatch()
+            }
+
+            val result = statement.executeBatch()
+            krev(result.size == aInntekt.inntektsmaaneder.size) {
+                "Kunne ikke lagre alle inntekter fra aInntekt for behandlingId=$behandlingId"
+            }
+        }
     }
 
-    fun hentOpplysningerAInntekt(behandlingId: UUID): AInntekt = AInntekt.stub()
+    fun hentAInntekt(forbehandlingId: UUID): AInntekt? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM inntekt_fra_ainntekt
+                        WHERE forbehandling_id = ?
+                        """.trimIndent(),
+                    )
+                statement.setObject(1, forbehandlingId)
+                val inntekterFraAInntekt =
+                    statement.executeQuery().toList {
+                        toAInntektMaaned()
+                    }
+
+                if (inntekterFraAInntekt.isEmpty()) {
+                    null
+                } else {
+                    AInntekt(
+                        aar = inntekterFraAInntekt.first().maaned.year,
+                        inntektsmaaneder = inntekterFraAInntekt,
+                    )
+                }
+            }
+        }
 
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(
@@ -154,5 +212,12 @@ class EtteroppgjoerForbehandlingDao(
             naeringsinntekt = getInt("naeringsinntekt"),
             fiskeFangstFamiliebarnehage = getInt("fiske_fangst_familiebarnehage"),
             inntektsaar = getInt("inntektsaar"),
+        )
+
+    private fun ResultSet.toAInntektMaaned(): AInntektMaaned =
+        AInntektMaaned(
+            maaned = YearMonth.parse(getString("maaned")),
+            inntekter = objectMapper.readValue(getString("inntekter")),
+            summertBeloep = getBigDecimal("summert_beloep"),
         )
 }

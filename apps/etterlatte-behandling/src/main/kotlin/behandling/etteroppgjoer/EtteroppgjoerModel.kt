@@ -96,6 +96,12 @@ data class AInntekt(
     val aar: Int,
     val inntektsmaaneder: List<AInntektMaaned>,
 ) {
+    init {
+        require(inntektsmaaneder.all { it.maaned.year == aar }) {
+            "Alle inntekter må ha inntektsår = $aar, men fant: ${inntektsmaaneder.map { it.maaned.year }}"
+        }
+    }
+
     companion object {
         fun stub(
             aar: Int = 2024,

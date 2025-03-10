@@ -179,3 +179,15 @@ data class AvkortingEtteropppgjoerRequest(
     val sisteIverksatteBehandling: UUID,
     val aar: Int,
 )
+
+data class EtteroppgjoerBeregnFaktiskInntektRequest(
+    val sakId: SakId,
+    val forbehandlingId: UUID,
+    val sisteIverksatteBehandling: UUID,
+    val fraOgMed: YearMonth,
+    val tilOgMed: YearMonth,
+    val loennsinntekt: Int,
+    val afp: Int,
+    val naeringsinntekt: Int,
+    val utland: Int,
+)

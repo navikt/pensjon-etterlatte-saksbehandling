@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -31,6 +32,7 @@ fun Route.avkorting(
     tidligAlderspensjonService: AvkortingTidligAlderspensjonService,
     aarligInntektsjusteringService: AarligInntektsjusteringService,
     mottattInntektsjusteringService: MottattInntektsjusteringService,
+    etteroppgjoerService: EtteroppgjoerService,
 ) {
     val logger = LoggerFactory.getLogger("AvkortingRoute")
 
@@ -132,18 +134,28 @@ fun Route.avkorting(
         post("mottatt-inntektsjustering") {
             val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
             logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
-            val respons =
-                mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
+            val respons = mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
             call.respond(respons.toDto())
         }
 
-        post("etteroppgjoer") {
-            val request = call.receive<AvkortingEtteropppgjoerRequest>()
-            logger.info(
-                "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
-            )
-            val avkorting = avkortingService.hentSisteAvkortingForEtteroppgjoer(request.sisteIverksatteBehandling, request.aar)
-            call.respond(avkorting)
+        route("etteroppgjoer") {
+            post {
+                val request = call.receive<AvkortingEtteropppgjoerRequest>()
+                logger.info(
+                    "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
+                )
+                val avkorting = avkortingService.hentSisteAvkortingForEtteroppgjoer(request.sisteIverksatteBehandling, request.aar)
+                // TODO returnerer siste iverksatte OG med faktisk inntekt om finnes?
+
+                call.respond(avkorting)
+            }
+
+            post("faktisk_inntekt") {
+                val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
+                logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
+                etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

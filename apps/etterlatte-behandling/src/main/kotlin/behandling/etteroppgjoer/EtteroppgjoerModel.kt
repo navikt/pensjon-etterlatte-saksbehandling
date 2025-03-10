@@ -98,7 +98,7 @@ data class AInntekt(
 ) {
     init {
         require(inntektsmaaneder.all { it.maaned.year == aar }) {
-            "Alle inntekter må ha inntektsår = $aar, men fant: ${inntektsmaaneder.map { it.maaned.year }}"
+            "Alle inntektsmaaneder må ha inntektsår = $aar, men fant: ${inntektsmaaneder.map { it.maaned.year }}"
         }
     }
 

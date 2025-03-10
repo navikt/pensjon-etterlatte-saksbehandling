@@ -2,11 +2,13 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnAvkortingFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -54,6 +56,12 @@ fun Route.etteroppgjoerRoutes(
                 val etteroppgjoer = service.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
                 call.respond(etteroppgjoer)
             }
+        }
+
+        post("beregn_faktisk_inntekt") {
+            val request = call.receive<BeregnAvkortingFaktiskInntektRequest>()
+            service.beregnAvkortingFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+            call.respond(HttpStatusCode.OK)
         }
     }
 

@@ -5,6 +5,7 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
@@ -43,6 +44,11 @@ interface BeregningKlient {
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting
+
+    suspend fun beregnAvkortingFaktiskInntekt(
+        request: EtteroppgjoerBeregnFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 
     suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,
@@ -156,6 +162,33 @@ class BeregningKlientImpl(
         } catch (e: Exception) {
             throw InternfeilException(
                 "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun beregnAvkortingFaktiskInntekt(
+        request: EtteroppgjoerBeregnFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling ${request.forbehandlingId}")
+        try {
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/beregn_faktisk_inntekt",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = request,
+                ).mapBoth(
+                    success = { },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Beregning av avkorting for forbehandling med id=${request.forbehandlingId} feilet",
                 e,
             )
         }

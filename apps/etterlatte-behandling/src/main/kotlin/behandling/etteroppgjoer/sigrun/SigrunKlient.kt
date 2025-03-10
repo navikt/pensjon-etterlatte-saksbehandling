@@ -55,7 +55,7 @@ class SigrunKlientImpl(
                 }
 
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun feilet")
+                    logger.error("Kall mot Sigrun feilet. Se sikkerlogg")
                     sikkerlogg.error("Kall mot Sigrun feilet for $ident")
                     throw it.samlaExceptions()
                 }

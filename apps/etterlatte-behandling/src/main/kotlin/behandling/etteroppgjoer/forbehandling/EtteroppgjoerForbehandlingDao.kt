@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
@@ -7,10 +8,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -56,15 +59,15 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setTidspunkt(4, forbehandling.opprettet)
                 statement.executeUpdate().also {
                     krev(it == 1) {
-                        "Kunne ikke lagre forbehandling etteroppgjør for sakid ${forbehandling.sak.id}"
+                        "Kunne ikke lagre forbehandling etteroppgjør for sakId=${forbehandling.sak.id}"
                     }
                 }
             }
         }
 
-    fun lagrePensjonsgivendeInntektFraSkatt(
+    fun lagrePensjonsgivendeInntekt(
         inntekterFraSkatt: PensjonsgivendeInntektFraSkatt,
-        forbehandlingsId: UUID,
+        behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
@@ -79,7 +82,7 @@ class EtteroppgjoerForbehandlingDao(
 
             for (inntekt in inntekterFraSkatt.inntekter) {
                 statement.setObject(1, UUID.randomUUID())
-                statement.setObject(2, forbehandlingsId)
+                statement.setObject(2, behandlingId)
                 statement.setInt(3, inntekt.inntektsaar)
                 statement.setString(4, inntekt.skatteordning)
                 statement.setInt(5, inntekt.loensinntekt)
@@ -91,12 +94,12 @@ class EtteroppgjoerForbehandlingDao(
 
             val result = statement.executeBatch()
             krev(result.size == inntekterFraSkatt.inntekter.size) {
-                "Kunne ikke lagre alle inntekter for forbehandlingsId $forbehandlingsId"
+                "Kunne ikke lagre alle pensjonsgivendeInntekter for behandlingId=$behandlingId"
             }
         }
     }
 
-    fun hentPensjonsgivendeInntektFraSkatt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
+    fun hentPensjonsgivendeInntekt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -124,11 +127,54 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun lagreOpplysningerAInntekt(aInntekt: AInntekt) {
-        // TODO("Not yet implemented")
+    fun lagreAInntekt(
+        aInntekt: AInntekt,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    INSERT INTO inntekt_fra_ainntekt(
+                        id, forbehandling_id, aar, inntektsmaaneder
+                    ) 
+                    VALUES (?, ?, ?, ?) 
+                    """.trimIndent(),
+                )
+
+            statement.setObject(1, UUID.randomUUID())
+            statement.setObject(2, behandlingId)
+            statement.setInt(3, aInntekt.aar)
+            statement.setJsonb(4, aInntekt.inntektsmaaneder)
+
+            statement.executeUpdate().also {
+                krev(it == 1) {
+                    "Kunne ikke lagre aInntekt for behandling=$behandlingId"
+                }
+            }
+        }
     }
 
-    fun hentOpplysningerAInntekt(behandlingId: UUID): AInntekt = AInntekt.stub()
+    fun hentAInntekt(behandlingId: UUID): AInntekt? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM inntekt_fra_ainntekt
+                        WHERE forbehandling_id = ?
+                        """.trimIndent(),
+                    )
+                statement.setObject(1, behandlingId)
+                statement.executeQuery().singleOrNull {
+                    AInntekt(
+                        aar = getInt("aar"),
+                        inntektsmaaneder = getString("inntektsmaaneder").let { objectMapper.readValue(it) },
+                    )
+                }
+            }
+        }
 
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(

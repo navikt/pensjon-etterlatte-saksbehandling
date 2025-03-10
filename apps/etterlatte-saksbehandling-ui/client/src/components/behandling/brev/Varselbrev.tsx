@@ -19,7 +19,7 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
-import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~shared/api/oppgaver'
+import { hentAttesterbarBehandlingOppgaveForReferanse, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDato } from '~utils/formatering/dato'
@@ -44,7 +44,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVarselbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
 
-  const [, requesthentOppgaveForBehandlingEkte] = useApiCall(hentOppgaveForReferanseUnderBehandling)
+  const [, requesthentOppgaveForBehandlingEkte] = useApiCall(hentAttesterbarBehandlingOppgaveForReferanse)
   const [, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
   const [tilbakestilt, setTilbakestilt] = useState(false)
 

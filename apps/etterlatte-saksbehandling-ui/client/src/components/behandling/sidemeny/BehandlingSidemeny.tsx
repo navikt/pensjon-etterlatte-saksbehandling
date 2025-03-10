@@ -35,7 +35,7 @@ import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
+import { useAttesterbarBehandlingOppgave } from '~shared/hooks/useAttesterbarBehandlingOppgave'
 import { OppgaveEndring } from './OppgaveEndring'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
@@ -77,7 +77,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
 
-  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: behandling.id })
+  const [oppgaveResult] = useAttesterbarBehandlingOppgave({ referanse: behandling.id })
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 

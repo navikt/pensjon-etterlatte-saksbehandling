@@ -49,7 +49,7 @@ class SjekklisteIntegrationTest(
 
         every { user.name() } returns "Sak B. Handlersen"
         every {
-            oppgaveService.hentOppgaveUnderBehandling(any())
+            oppgaveService.hentOppgaveForAttesterbarBehandling(any())
         } returns
             mockk<OppgaveIntern> {
                 every { saksbehandler } returns OppgaveSaksbehandler(user.name(), "Sak B. Handlersen")

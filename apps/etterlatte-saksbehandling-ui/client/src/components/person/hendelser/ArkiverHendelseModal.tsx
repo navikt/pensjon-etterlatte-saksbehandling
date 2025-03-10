@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { arkiverGrunnlagshendelse } from '~shared/api/behandling'
 import { ArchiveIcon } from '@navikt/aksel-icons'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { hentOppgaverMedReferanse } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { VurderInstitusjonsoppholdModalBody } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 
@@ -14,7 +14,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
   const [open, setOpen] = useState(false)
   const [kommentar, setKommentar] = useState<string>('')
   const [arkiverHendelseResult, arkiverHendelseFunc, resetApiCall] = useApiCall(arkiverGrunnlagshendelse)
-  const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaveForReferanseUnderBehandling)
+  const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaverMedReferanse)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -70,7 +70,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
               })}
 
               {mapSuccess(oppgaveResult, (oppgave) => {
-                const tildeltIdent = oppgave?.saksbehandler?.ident
+                const tildeltIdent = oppgave[0]?.saksbehandler?.ident
 
                 if (!tildeltIdent) {
                   return (
@@ -80,7 +80,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
                     </Alert>
                   )
                 } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
-                  return <Alert variant="warning">Oppgaven tilhører {oppgave?.saksbehandler?.navn}</Alert>
+                  return <Alert variant="warning">Oppgaven tilhører {oppgave[0]?.saksbehandler?.navn}</Alert>
                 }
               })}
 

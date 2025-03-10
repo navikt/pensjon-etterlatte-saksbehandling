@@ -692,7 +692,7 @@ class KlageServiceImpl(
         handling: String,
     ) {
         val saksbehandlerForKlageOppgave =
-            oppgaveService.hentOppgaveUnderBehandling(klageId.toString())?.saksbehandler
+            oppgaveService.hentOppgaveForAttesterbarBehandling(klageId.toString())?.saksbehandler
                 ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
 
         if (saksbehandlerForKlageOppgave.ident != saksbehandler.ident) {

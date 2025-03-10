@@ -133,7 +133,7 @@ class SjekklisteService(
     private fun Behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler(): Boolean =
         Kontekst.get().AppUser.name() ==
             oppgaveService
-                .hentOppgaveUnderBehandling(this.id.toString())
+                .hentOppgaveForAttesterbarBehandling(this.id.toString())
                 ?.saksbehandler
                 ?.ident
 }

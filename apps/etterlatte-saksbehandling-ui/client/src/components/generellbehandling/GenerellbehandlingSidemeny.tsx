@@ -10,14 +10,14 @@ import { ReturnertVisning } from '~components/generellbehandling/ReturnertVisnin
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
-import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
+import { useAttesterbarBehandlingOppgave } from '~shared/hooks/useAttesterbarBehandlingOppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
 }) => {
   const { utlandsBehandling } = props
-  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: utlandsBehandling.id })
+  const [oppgaveResult] = useAttesterbarBehandlingOppgave({ referanse: utlandsBehandling.id })
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)

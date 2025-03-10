@@ -5,8 +5,8 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingEtteropppgjoerRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.deserialize
@@ -42,7 +42,7 @@ interface BeregningKlient {
         behandlingId: UUID,
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingDto
+    ): EtteroppgjoerBeregnetAvkorting
 
     suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,
@@ -133,7 +133,7 @@ class BeregningKlientImpl(
         behandlingId: UUID,
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingDto {
+    ): EtteroppgjoerBeregnetAvkorting {
         logger.info("Henter siste avkorting med behandlingId=$behandlingId for etteropgjør ")
         try {
             return downstreamResourceClient
@@ -141,11 +141,11 @@ class BeregningKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer",
+                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/hent",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
-                        AvkortingEtteropppgjoerRequest(
+                        EtteroppgjoerBeregnetAvkortingRequest(
                             sisteIverksatteBehandling = behandlingId,
                             aar = aar,
                         ),

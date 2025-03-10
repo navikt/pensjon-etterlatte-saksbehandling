@@ -72,7 +72,7 @@ class EtteroppgjoerForbehandlingService(
                     EtteroppgjoerOpplysninger(
                         skatt = fraSkatt,
                         ainntekt = aInntekt,
-                        tidligereAvkorting = tidligereAvkorting,
+                        tidligereAvkorting = tidligereAvkorting.avkortingMedForventaInntekt,
                     ),
             )
         }

@@ -175,9 +175,14 @@ data class MottattInntektsjusteringAvkortigRequest(
     val mottattInntektsjustering: MottattInntektsjustering,
 )
 
-data class AvkortingEtteropppgjoerRequest(
+data class EtteroppgjoerBeregnetAvkortingRequest(
     val sisteIverksatteBehandling: UUID,
     val aar: Int,
+)
+
+data class EtteroppgjoerBeregnetAvkorting(
+    val avkortingMedForventaInntekt: AvkortingDto,
+    val avkortingMedFaktiskInntekt: AvkortingDto?,
 )
 
 data class EtteroppgjoerBeregnFaktiskInntektRequest(

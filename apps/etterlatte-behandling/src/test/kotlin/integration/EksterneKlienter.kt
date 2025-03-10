@@ -51,6 +51,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -122,10 +123,13 @@ class BeregningKlientTest :
         behandlingId: UUID,
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingDto =
-        AvkortingDto(
-            avkortingGrunnlag = emptyList(),
-            avkortetYtelse = emptyList(),
+    ): EtteroppgjoerBeregnetAvkorting =
+        EtteroppgjoerBeregnetAvkorting(
+            AvkortingDto(
+                avkortingGrunnlag = emptyList(),
+                avkortetYtelse = emptyList(),
+            ),
+            null,
         )
 
     override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(

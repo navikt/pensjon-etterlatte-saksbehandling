@@ -12,12 +12,12 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingEtteropppgjoerRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -139,15 +139,13 @@ fun Route.avkorting(
         }
 
         route("etteroppgjoer") {
-            post {
-                val request = call.receive<AvkortingEtteropppgjoerRequest>()
+            post("hent") {
+                val request = call.receive<EtteroppgjoerBeregnetAvkortingRequest>()
                 logger.info(
                     "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
                 )
-                val avkorting = avkortingService.hentSisteAvkortingForEtteroppgjoer(request.sisteIverksatteBehandling, request.aar)
-                // TODO returnerer siste iverksatte OG med faktisk inntekt om finnes?
-
-                call.respond(avkorting)
+                val dto = etteroppgjoerService.hentBeregnetAvkorting(request)
+                call.respond(dto)
             }
 
             post("faktisk_inntekt") {

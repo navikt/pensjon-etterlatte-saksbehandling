@@ -10,10 +10,9 @@ import {
   AktivitetspliktSkjemaAaVise,
 } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { useForm } from 'react-hook-form'
-import { Button, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Box, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import React from 'react'
-import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetPeriodeForBehandling, opprettAktivitetPeriodeForSak } from '~shared/api/aktivitetsplikt'
@@ -104,38 +103,52 @@ export const AktivitetPeriode = ({
   return (
     <form onSubmit={handleSubmit(lagreAktivitetPeriode)}>
       <VStack gap="4">
+        <Heading size="small">Legg til aktivitet</Heading>
         <HStack gap="4">
           <ControlledDatoVelger
             name="fom"
-            label="Fra og med"
+            label="Fra dato"
+            description="Fra dato oppgitt"
             control={control}
             errorVedTomInput="Du må sette en fra og med dato"
           />
-          <ControlledDatoVelger name="tom" label="Du må sette en til og med dato" control={control} required={false} />
-        </HStack>
-        <VStack gap="4" maxWidth="20rem">
-          <Select
-            {...register('type', {
-              required: { value: true, message: 'Du må velge en aktivitetstype' },
-            })}
-            label="Aktivitetstype"
-            error={errors.type?.message}
-          >
-            <option value="">Velg aktivitet</option>
-            {Object.keys(AktivitetspliktType).map((type) => (
-              <option key={type} value={type}>
-                {aktivitetspliktTypeTilLesbarStreng(type)}
-              </option>
-            ))}
-          </Select>
-
-          <Textarea
-            {...register('beskrivelse', {
-              required: { value: true, message: 'Beskrivelse må gis' },
-            })}
-            label="Beskrivelse"
-            error={errors.beskrivelse?.message}
+          <ControlledDatoVelger
+            name="tom"
+            label="Dato til og med"
+            description="Hvis det er oppgitt sluttdato"
+            control={control}
+            required={false}
+            errorVedTomInput="Du må sette en til og med dato"
           />
+        </HStack>
+        <VStack gap="4">
+          <Box maxWidth="fit-content">
+            <Select
+              {...register('type', {
+                required: { value: true, message: 'Du må velge en aktivitetstype' },
+              })}
+              label="Aktivitetstype"
+              description="Velg aktivitet"
+              error={errors.type?.message}
+            >
+              <option value="">Velg aktivitet</option>
+              {Object.keys(AktivitetspliktType).map((type) => (
+                <option key={type} value={type}>
+                  {aktivitetspliktTypeTilLesbarStreng(type)}
+                </option>
+              ))}
+            </Select>
+          </Box>
+          <Box maxWidth="fit-content">
+            <Textarea
+              {...register('beskrivelse', {
+                required: { value: true, message: 'Beskrivelse må gis' },
+              })}
+              label="Beskrivelse"
+              description="Gjerne oppgi brukers aktivitetsgrad og annen relevant informasjon"
+              error={errors.beskrivelse?.message}
+            />
+          </Box>
         </VStack>
         {isFailureHandler({
           apiResult: opprettAktivitetPeriodeForBehandlingResult,
@@ -150,8 +163,6 @@ export const AktivitetPeriode = ({
             size="small"
             variant="secondary"
             type="button"
-            icon={<XMarkIcon aria-hidden />}
-            iconPosition="right"
             loading={
               isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
             }
@@ -167,12 +178,11 @@ export const AktivitetPeriode = ({
           </Button>
           <Button
             size="small"
-            icon={<FloppydiskIcon aria-hidden />}
             loading={
               isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
             }
           >
-            Lagre
+            Legg til aktivitet
           </Button>
         </HStack>
       </VStack>

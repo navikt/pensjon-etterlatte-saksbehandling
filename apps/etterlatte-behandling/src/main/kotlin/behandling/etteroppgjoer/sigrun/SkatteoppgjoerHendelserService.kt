@@ -10,7 +10,8 @@ class SkatteoppgjoerHendelserService(
             val sisteKjoering = dao.hentSisteKjoering()
 
             // TODO: gjør rest kall til Sigrun Skatteoppgjør hendelser
-
+            // TODO: sjekke opp mot etteroppgjoer tabell = skal ha etteroppgjoer
+            // TODO: .....
             // TODO: lagre ny kjoering med oppdatert sekvensnummer
         }
     }

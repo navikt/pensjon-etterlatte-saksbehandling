@@ -51,6 +51,9 @@ import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
@@ -681,6 +684,13 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
+    val sjekkAdressebeskyttelseJobService =
+        SjekkAdressebeskyttelseJobService(
+            SjekkAdressebeskyttelseJobDao(autoClosingDatabase),
+            pdlTjenesterKlient,
+            featureToggleService,
+        )
+
     val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
             aktivitetspliktDao,
@@ -812,6 +822,17 @@ internal class ApplicationContext(
     val uttrekkLoependeYtelseEtter20Job: UttrekkLoependeYtelseEtter20Job by lazy {
         UttrekkLoependeYtelseEtter20Job(
             service = uttrekkLoependeYtelseEtter20JobService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
+        )
+    }
+
+    val sjekkAdressebeskyttelseJob: SjekkAdressebeskyttelseJob by lazy {
+        SjekkAdressebeskyttelseJob(
+            service = sjekkAdressebeskyttelseJobService,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
             erLeader = { leaderElectionKlient.isLeader() },

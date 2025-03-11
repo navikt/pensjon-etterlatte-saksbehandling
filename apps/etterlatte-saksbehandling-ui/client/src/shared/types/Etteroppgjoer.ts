@@ -20,6 +20,13 @@ export interface EtteroppgjoerOpplysninger {
   tidligereAvkorting: Avkorting
 }
 
+export interface FaktiskInntekt {
+  loennsinntekt: number
+  afp: number
+  naeringsinntekt: number
+  utland: number
+}
+
 export interface PensjonsgivendeInntektFraSkatt {
   inntekter: PensjonsgivendeInntekt[]
 }

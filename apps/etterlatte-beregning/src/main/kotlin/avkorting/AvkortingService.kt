@@ -193,7 +193,7 @@ class AvkortingService(
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
-        val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
+        val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)

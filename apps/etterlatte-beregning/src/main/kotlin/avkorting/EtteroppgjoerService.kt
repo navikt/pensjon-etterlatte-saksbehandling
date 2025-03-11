@@ -53,7 +53,6 @@ class EtteroppgjoerService(
                 fom = fraOgMed,
             )
 
-        val beregning = beregningService.hentBeregningNonnull(sisteIverksatteBehandling)
         val sanksjoner = sanksjonService.hentSanksjon(sisteIverksatteBehandling) ?: emptyList()
 
         // TODO egen regelkjøring...
@@ -61,7 +60,7 @@ class EtteroppgjoerService(
             Avkorting().beregnAvkortingMedNyttGrunnlag(
                 inntekt,
                 brukerTokenInfo,
-                beregning,
+                null,
                 sanksjoner,
                 null, // TODO endre håndtering av opphør? Alltid sette tom i desember for et år?
                 null,

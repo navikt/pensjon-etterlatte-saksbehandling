@@ -1,15 +1,14 @@
 package no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
-import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.slf4j.LoggerFactory
 
 enum class SjekkAdressebeskyttelseToggles(
@@ -24,6 +23,8 @@ enum class SjekkAdressebeskyttelseToggles(
 class SjekkAdressebeskyttelseJobService(
     private val sjekkAdressebeskyttelseJobDao: SjekkAdressebeskyttelseJobDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val tilgangService: OppdaterTilgangService,
+    private val grunnlagService: GrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -35,13 +36,19 @@ class SjekkAdressebeskyttelseJobService(
 
     private fun run() {
         if (featureToggleService.isEnabled(SjekkAdressebeskyttelseToggles.SJEKK_ADRESSEBESKYTTELSE_JOBB, false)) {
+            val aktuellSak = SakId(16013)
+            val persongalleri = inTransaction { grunnlagService.hentPersongalleri(aktuellSak) }
+            if (persongalleri != null) {
+                logger.info("Oppdaterer gradering på sak ${aktuellSak.sakId}")
+                inTransaction { tilgangService.haandtergraderingOgEgenAnsatt(aktuellSak, persongalleri) }
+            }
+
+            /* Fjerner dette inntil videre da vi må se på alle personer i persongalleriet.
             val diff = mutableListOf<SakId>()
 
             logger.info("Henter saker for å sjekke om adressebeskyttelse er lik på tvers av Gjenny og PDL")
             val saker =
                 inTransaction { sjekkAdressebeskyttelseJobDao.hentSakerMedAdressebeskyttelse() }
-                    // TODO sjekker først et mindre antall, fjern etter verifikasjon
-                    .subList(0, 10)
 
             logger.info("Fant ${saker.size} saker som skal sjekkes")
             saker.forEachIndexed { index, sak ->
@@ -66,6 +73,8 @@ class SjekkAdressebeskyttelseJobService(
                     ", ",
                 )}",
             )
+
+             */
         }
     }
 }

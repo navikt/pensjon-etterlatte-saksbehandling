@@ -688,6 +688,8 @@ internal class ApplicationContext(
         SjekkAdressebeskyttelseJobService(
             SjekkAdressebeskyttelseJobDao(autoClosingDatabase),
             pdlTjenesterKlient,
+            oppdaterTilgangService,
+            grunnlagService,
             featureToggleService,
         )
 

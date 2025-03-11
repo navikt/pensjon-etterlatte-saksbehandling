@@ -73,3 +73,21 @@ spec:
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp
+        - application: dolly-backend
+          namespace: dolly
+          cluster: dev-gcp
+        - application: dolly-backend-dev
+          namespace: dolly
+          cluster: dev-gcp
+        - application: dolly-frontend
+          namespace: dolly
+          cluster: dev-gcp
+        - application: dolly-frontend-dev
+          namespace: dolly
+          cluster: dev-gcp
+        - application: dolly-idporten
+          namespace: dolly
+          cluster: dev-gcp
+        - application: team-dolly-lokal-app
+          namespace: dolly
+          cluster: dev-fss

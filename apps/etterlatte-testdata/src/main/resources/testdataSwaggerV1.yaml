@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Etterlatte Testdata API
+  description:
+    API for generering av testdata til Gjenny <br>
+    Det kreves tilganger for å bruke APIet. Ta kontakt med Team Etterlatte for tilgang.
+  version: 1.0.0
+
+servers:
+  - url: https://etterlatte-testdata.intern.dev.nav.no/
+
+security:
+  - BearerAuth: []
+
+paths:
+  /opprett_ytelse:
+    post:
+      summary: Opprette BP eller OMS for et sett med dollybrukere
+      description: Oppretter ytelsen BARNEPENSJON eller OMSTILLINGSSTOENAD for et sett med dollybrukere
+      requestBody:
+        description: Request objekt med type søknad, avdoed, gjennlenvede og liste med barn.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NySoeknadRequestDTO"
+      responses:
+        "200": # status code
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoeknadResponseDTO'
+
+components:
+  schemas:
+
+    NySoeknadRequestDTO:
+      type: object
+      properties:
+        ytelse:
+          $ref: '#/components/schemas/SoeknadType'
+        avdoed:
+          type: string
+        gjenlevende:
+          type: string
+        barn:
+          type: array
+          items:
+            type: string
+
+    SoeknadResponseDTO:
+      type: object
+      properties:
+        status:
+          type: number
+        noekkel:
+          type: string
+
+    SoeknadType:
+      type: string
+      enum:
+        - BARNEPENSJON
+        - OMSTILLINGSSTOENAD
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: "Legg til token uten Bearer prefiks"
+      name: bearerAuth
+      in: header
+      scheme: bearer
+      bearerFormat: JWT

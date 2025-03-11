@@ -117,6 +117,54 @@ class OpprettFamilie(
                 }
             }
 
+            post("send-soeknad-v2") {
+                try {
+
+                    val params = call.receiveParameters()
+                    val ytelse = SoeknadType.valueOf(params["ytelse"]!!)
+                    val behandlingssteg = Behandlingssteg.IVERKSATT
+                    val gjenlevende = params["gjenlevende"]!!
+                    val avdoed = params["avdoed"]!!
+                    val barnListe = params.getAll("barnListe")!!
+                    val soeker =
+                        when (ytelse) {
+                            SoeknadType.BARNEPENSJON -> params["barn"]!!
+                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                        }
+
+                    val request =
+                        NySoeknadRequest(
+                            ytelse,
+                            avdoed,
+                            gjenlevende,
+                            barnListe,
+                            soeker = soeker,
+                        )
+
+                    val brukerId =
+                        when (dev) {
+                            true -> ""
+                            false -> brukerTokenInfo.ident()
+                        }
+
+                    val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
+
+                    call.respond(
+                        """
+                        <div>
+                        Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}
+                        </div>
+                        """.trimIndent(),
+                    )
+                } catch (e: Exception) {
+                    call.respond(
+                        MustacheContent(
+                            "error.hbs",
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                        ),
+                    )
+                }
+            }
             post("send-soeknad") {
                 try {
 

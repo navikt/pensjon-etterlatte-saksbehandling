@@ -273,11 +273,18 @@ private fun tilbakekrevingsPerioder(tilbakekreving: Tilbakekreving) =
     tilbakekreving.perioder.map { periode ->
         val beloepMedKunYtelse = periode.tilbakekrevingsbeloep.kunYtelse()
 
-        // Identifisere trekk som brukes for å trekke 17% skatt på barnepensjon. Dette legges til for at brev skal bli riktig.
+        // Identifisere trekk som brukes for å trekke 17% skatt på barnepensjon. Dette legges til for at brev skal
+        // bli riktig i tilfeller hvor skatt ikke har blitt overført til skatteetaten.
         val fastSkattetrekkBarnepensjon =
             periode.tilbakekrevingsbeloep
                 .filter { it.klasseType == KlasseType.TREK.name && it.klasseKode == "BPSKSKAT" }
                 .sumOf { beloep -> beloep.bruttoUtbetaling.absoluteValue }
+
+        if (fastSkattetrekkBarnepensjon > 0) {
+            logger.info(
+                "Identifisert skattetrekk på $fastSkattetrekkBarnepensjon i ${tilbakekreving.kravgrunnlag.sakId.value}. Brevet justeres basert på dette.",
+            )
+        }
 
         TilbakekrevingPeriodeDataNy(
             maaned = periode.maaned.atDay(1),

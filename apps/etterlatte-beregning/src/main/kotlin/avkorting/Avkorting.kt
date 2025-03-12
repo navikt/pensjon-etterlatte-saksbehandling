@@ -149,13 +149,13 @@ data class Avkorting(
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
         bruker: BrukerTokenInfo,
-        beregning: Beregning,
+        beregning: Beregning?,
         sanksjoner: List<Sanksjon>,
         opphoerFom: YearMonth?,
         aldersovergang: YearMonth? = null,
     ): Avkorting {
         val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, bruker, opphoerFom, aldersovergang)
-        return oppdatertMedNyInntekt.beregnAvkortingRevurdering(beregning, sanksjoner)
+        return oppdatertMedNyInntekt.beregnAvkortingRevurdering(nyttGrunnlag.fom, beregning, sanksjoner)
     }
 
     private fun finnTom(
@@ -224,19 +224,17 @@ data class Avkorting(
     }
 
     fun beregnAvkortingRevurdering(
-        beregning: Beregning,
+        virkningstidspunkt: YearMonth,
+        beregning: Beregning?, // Kun null for forbehandling eteroppgjør
         sanksjoner: List<Sanksjon>,
     ): Avkorting {
-        val virkningstidspunktAar =
-            beregning.beregningsperioder
-                .first()
-                .datoFOM.year
+        val virkningstidspunktAar = virkningstidspunkt.year
 
         val oppdaterteOppgjoer =
             this.aarsoppgjoer.map { aarsoppgjoer ->
 
                 val ytelseFoerAvkorting =
-                    if (aarsoppgjoer.aar >= virkningstidspunktAar) {
+                    if (beregning != null && aarsoppgjoer.aar >= virkningstidspunktAar) {
                         aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
                     } else {
                         aarsoppgjoer.ytelseFoerAvkorting

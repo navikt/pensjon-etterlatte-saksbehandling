@@ -151,7 +151,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { eksisterendeAvkorting.beregnAvkortingRevurdering(any(), any()) } returns reberegnetAvkorting
+            every { eksisterendeAvkorting.beregnAvkortingRevurdering(any(), any(), any()) } returns reberegnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             every { sanksjonService.hentSanksjon(behandlingId) } returns null
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -165,7 +165,7 @@ internal class AvkortingServiceTest {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
-                eksisterendeAvkorting.beregnAvkortingRevurdering(beregning, any())
+                eksisterendeAvkorting.beregnAvkortingRevurdering(any(), beregning, any())
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, reberegnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
                 lagretAvkorting.toFrontend(YearMonth.of(Year.now().value, 1), null, BehandlingStatus.BEREGNET)
@@ -268,7 +268,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns null
             every { forrigeAvkorting.kopierAvkorting() } returns kopiertAvkorting
-            every { kopiertAvkorting.beregnAvkortingRevurdering(any(), any()) } returns beregnetAvkorting
+            every { kopiertAvkorting.beregnAvkortingRevurdering(any(), any(), any()) } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -291,7 +291,7 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
                 forrigeAvkorting.kopierAvkorting()
-                kopiertAvkorting.beregnAvkortingRevurdering(beregning, any())
+                kopiertAvkorting.beregnAvkortingRevurdering(any(), beregning, any())
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
                 lagretAvkorting.toFrontend(YearMonth.of(2024, 1), forrigeAvkorting, BehandlingStatus.BEREGNET)
                 behandlingKlient.avkort(behandlingId, bruker, true)
@@ -340,7 +340,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns null
-            every { eksisterendeAvkorting.beregnAvkortingRevurdering(any(), any()) } returns reberegnetAvkorting
+            every { eksisterendeAvkorting.beregnAvkortingRevurdering(any(), any(), any()) } returns reberegnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
             every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
@@ -362,7 +362,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
-                eksisterendeAvkorting.beregnAvkortingRevurdering(beregning, any())
+                eksisterendeAvkorting.beregnAvkortingRevurdering(any(), beregning, any())
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, reberegnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
                 lagretAvkorting.toFrontend(YearMonth.of(2024, 1), forrigeAvkorting, BehandlingStatus.BEREGNET)

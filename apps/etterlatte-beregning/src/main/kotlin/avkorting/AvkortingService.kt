@@ -193,7 +193,7 @@ class AvkortingService(
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
-        val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
+        val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
@@ -294,20 +294,6 @@ class AvkortingService(
         if (!kanAvkorte) {
             throw AvkortingBehandlingFeilStatus(behandlingId)
         }
-    }
-
-    fun hentSisteAvkortingForEtteroppgjoer(
-        sisteIverksatteBehandling: UUID,
-        aar: Int,
-    ): AvkortingDto {
-        val avkorting =
-            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)
-                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandling")
-        val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.aar == aar }
-        return AvkortingDto(
-            avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
-            avkortetYtelse = aarsoppgjoer.avkortetYtelseAar.map { it.toDto() },
-        )
     }
 }
 

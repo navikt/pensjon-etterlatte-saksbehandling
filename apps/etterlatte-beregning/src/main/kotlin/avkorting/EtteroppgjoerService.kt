@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
+import java.util.UUID
 
 class EtteroppgjoerService(
     private val avkortingRepository: AvkortingRepository,
@@ -55,9 +56,26 @@ class EtteroppgjoerService(
 
         val sanksjoner = sanksjonService.hentSanksjon(sisteIverksatteBehandling) ?: emptyList()
 
+        val sisteIverksatte =
+            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)
+                ?: throw InternfeilException("Mangler avkorting")
+        val tidligereAarsoppgjoer = sisteIverksatte.aarsoppgjoer.single { it.aar == fraOgMed.year }
+        val ny =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        Aarsoppgjoer(
+                            id = UUID.randomUUID(),
+                            aar = fraOgMed.year,
+                            fom = fraOgMed,
+                            ytelseFoerAvkorting = tidligereAarsoppgjoer.ytelseFoerAvkorting,
+                        ),
+                    ),
+            )
+
         // TODO egen regelkjøring...
         val avkorting =
-            Avkorting().beregnAvkortingMedNyttGrunnlag(
+            ny.beregnAvkortingMedNyttGrunnlag(
                 inntekt,
                 brukerTokenInfo,
                 null,

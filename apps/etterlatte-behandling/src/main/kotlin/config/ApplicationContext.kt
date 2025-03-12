@@ -42,6 +42,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlientImpl
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserDao
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -360,6 +362,7 @@ internal class ApplicationContext(
     val klageDao = KlageDaoImpl(autoClosingDatabase)
     val tilbakekrevingDao = TilbakekrevingDao(autoClosingDatabase)
     val etteroppgjoerForbehandlingDao = EtteroppgjoerForbehandlingDao(autoClosingDatabase)
+    val skatteoppgjoerHendelserDao = SkatteoppgjoerHendelserDao(autoClosingDatabase)
     val etteroppgjoerDao = EtteroppgjoerDao(autoClosingDatabase)
     val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
@@ -671,6 +674,11 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
+        )
+
+    val skatteoppgjoerHendelserService =
+        SkatteoppgjoerHendelserService(
+            dao = skatteoppgjoerHendelserDao,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

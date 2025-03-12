@@ -30,6 +30,10 @@ export function TilbakekrevingUtbetalinger({
                   derfor være lik netto tilbakekreving.
                 </BodyLong>
                 <BodyLong>
+                  Dersom skattetrekk er registrert på egen linje, så betyr det at skattetrekket ikke er overført
+                  Skatteetaten.
+                </BodyLong>
+                <BodyLong>
                   I oppsummeringen vil du få vist hvilken informasjon som sendes til oppdrag og Nav Innkreving, samt hva
                   som informeres til mottaker i vedtaket.
                 </BodyLong>

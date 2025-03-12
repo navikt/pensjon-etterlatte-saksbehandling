@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -48,10 +49,13 @@ class EtteroppgjoerForbehandlingService(
                     ?: throw InternfeilException("Fant ikke siste iverksatte")
             }
 
-        val tidligereAvkorting =
-            beregningKlient.hentSisteAvkortingForEtteroppgjoer(
-                sisteIverksatteBehandling.id,
-                forbehandling.aar,
+        val avkorting =
+            beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                EtteroppgjoerBeregnetAvkortingRequest(
+                    forbehandling = behandlingId,
+                    sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                    aar = forbehandling.aar,
+                ),
                 brukerTokenInfo,
             )
 
@@ -69,8 +73,9 @@ class EtteroppgjoerForbehandlingService(
                     EtteroppgjoerOpplysninger(
                         skatt = fraSkatt,
                         ainntekt = aInntekt,
-                        tidligereAvkorting = tidligereAvkorting.avkortingMedForventaInntekt,
+                        tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                     ),
+                avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
             )
         }
     }

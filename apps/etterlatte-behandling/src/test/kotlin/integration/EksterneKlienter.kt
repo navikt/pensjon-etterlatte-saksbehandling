@@ -53,6 +53,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -120,9 +121,8 @@ class BeregningKlientTest :
         bruker: Saksbehandler,
     ): Boolean = true
 
-    override suspend fun hentSisteAvkortingForEtteroppgjoer(
-        behandlingId: UUID,
-        aar: Int,
+    override suspend fun hentAvkortingForForbehandlingEtteroppgjoer(
+        request: EtteroppgjoerBeregnetAvkortingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting =
         EtteroppgjoerBeregnetAvkorting(
@@ -136,7 +136,8 @@ class BeregningKlientTest :
     override suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {}
+    ) {
+    }
 
     override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,

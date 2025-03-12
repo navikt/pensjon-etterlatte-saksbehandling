@@ -39,9 +39,8 @@ interface BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): InntektsjusteringAvkortingInfoResponse
 
-    suspend fun hentSisteAvkortingForEtteroppgjoer(
-        behandlingId: UUID,
-        aar: Int,
+    suspend fun hentAvkortingForForbehandlingEtteroppgjoer(
+        request: EtteroppgjoerBeregnetAvkortingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting
 
@@ -135,12 +134,11 @@ class BeregningKlientImpl(
         )
     }
 
-    override suspend fun hentSisteAvkortingForEtteroppgjoer(
-        behandlingId: UUID,
-        aar: Int,
+    override suspend fun hentAvkortingForForbehandlingEtteroppgjoer(
+        request: EtteroppgjoerBeregnetAvkortingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting {
-        logger.info("Henter siste avkorting med behandlingId=$behandlingId for etteropgjør ")
+        logger.info("Henter avkorting for forbehandling behandlingId=${request.forbehandling}")
         try {
             return downstreamResourceClient
                 .post(
@@ -150,18 +148,14 @@ class BeregningKlientImpl(
                             url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/hent",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody =
-                        EtteroppgjoerBeregnetAvkortingRequest(
-                            sisteIverksatteBehandling = behandlingId,
-                            aar = aar,
-                        ),
+                    postBody = request,
                 ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw InternfeilException(
-                "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
+                "Henting av avkorting for forbehandling med behandlingId=${request.forbehandling} feilet",
                 e,
             )
         }

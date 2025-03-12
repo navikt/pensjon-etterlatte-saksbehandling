@@ -17,24 +17,32 @@ class EtteroppgjoerService(
     private val sanksjonService: SanksjonService,
 ) {
     fun hentBeregnetAvkorting(request: EtteroppgjoerBeregnetAvkortingRequest): EtteroppgjoerBeregnetAvkorting {
-        val (sisteIverksatteBehandling, aar) = request
+        val (forbehandlingId, sisteIverksatteBehandling, aar) = request
 
-        val avkorting =
-            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)
-                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandling")
-        val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.aar == aar }
         val avkortingMedForventaInntekt =
+            hentAvkorting(sisteIverksatteBehandling, aar)
+                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandling")
+
+        val avkortingFaktiskInntekt = hentAvkorting(forbehandlingId, aar)
+
+        return EtteroppgjoerBeregnetAvkorting(
+            avkortingMedForventaInntekt = avkortingMedForventaInntekt,
+            avkortingMedFaktiskInntekt = avkortingFaktiskInntekt,
+        )
+    }
+
+    private fun hentAvkorting(
+        behandlingId: UUID,
+        aar: Int,
+    ): AvkortingDto? {
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId)
+        val aarsoppgjoer = avkorting?.aarsoppgjoer?.single { it.aar == aar }
+        return aarsoppgjoer?.let { aarsoppgjoer ->
             AvkortingDto(
                 avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                 avkortetYtelse = aarsoppgjoer.avkortetYtelseAar.map { it.toDto() },
             )
-
-        // TODO hent avkorting med faktisk inntekt fra forbehandling (nullable)
-
-        return EtteroppgjoerBeregnetAvkorting(
-            avkortingMedForventaInntekt = avkortingMedForventaInntekt,
-            avkortingMedFaktiskInntekt = null, // TODO
-        )
+        }
     }
 
     fun beregnAvkortingForbehandling(

@@ -64,11 +64,12 @@ class EtteroppgjoerService(
 
         val sanksjoner = sanksjonService.hentSanksjon(sisteIverksatteBehandling) ?: emptyList()
 
-        val sisteIverksatte =
-            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)
-                ?: throw InternfeilException("Mangler avkorting")
-        val tidligereAarsoppgjoer = sisteIverksatte.aarsoppgjoer.single { it.aar == fraOgMed.year }
-        val ny =
+        val tidligereAarsoppgjoer =
+            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)?.let {
+                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == fraOgMed.year }
+            } ?: throw InternfeilException("Mangler avkorting")
+
+        val avkorting =
             Avkorting(
                 aarsoppgjoer =
                     listOf(
@@ -79,11 +80,7 @@ class EtteroppgjoerService(
                             ytelseFoerAvkorting = tidligereAarsoppgjoer.ytelseFoerAvkorting,
                         ),
                     ),
-            )
-
-        // TODO egen regelkjøring...
-        val avkorting =
-            ny.beregnAvkortingMedNyttGrunnlag(
+            ).beregnAvkortingMedNyttGrunnlag(
                 inntekt,
                 brukerTokenInfo,
                 null,

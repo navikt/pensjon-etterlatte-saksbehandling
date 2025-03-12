@@ -11,6 +11,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -21,6 +23,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingService(
@@ -37,24 +40,22 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ): ForbehandlingDto {
-        val etteroppgjoerBehandling =
-            inTransaction {
-                dao.hentForbehandling(behandlingId)
-            } ?: throw IkkeFunnetException(
-                code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
-                detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
-            )
+        val forbehandling =
+            inTransaction { dao.hentForbehandling(behandlingId) } ?: throw FantIkkeForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
             inTransaction {
-                behandlingService.hentSisteIverksatte(etteroppgjoerBehandling.sak.id)
+                behandlingService.hentSisteIverksatte(forbehandling.sak.id)
                     ?: throw InternfeilException("Fant ikke siste iverksatte")
             }
 
-        val tidligereAvkorting =
-            beregningKlient.hentSisteAvkortingForEtteroppgjoer(
-                sisteIverksatteBehandling.id,
-                etteroppgjoerBehandling.aar,
+        val avkorting =
+            beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                EtteroppgjoerBeregnetAvkortingRequest(
+                    forbehandling = behandlingId,
+                    sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                    aar = forbehandling.aar,
+                ),
                 brukerTokenInfo,
             )
 
@@ -69,13 +70,14 @@ class EtteroppgjoerForbehandlingService(
             }
 
             ForbehandlingDto(
-                behandling = etteroppgjoerBehandling,
+                behandling = forbehandling,
                 opplysninger =
                     EtteroppgjoerOpplysninger(
                         skatt = pensjonsgivendeInntekt,
                         ainntekt = aInntekt,
-                        tidligereAvkorting = tidligereAvkorting,
+                        tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                     ),
+                avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
             )
         }
     }
@@ -127,9 +129,51 @@ class EtteroppgjoerForbehandlingService(
             )
         }
     }
+
+    suspend fun beregnAvkortingFaktiskInntekt(
+        behandlingId: UUID,
+        request: BeregnAvkortingFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val request =
+            inTransaction {
+                val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
+                val sisteIverksatteBehandling =
+                    behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                        ?: throw InternfeilException("Fant ikke siste iverksatte")
+
+                EtteroppgjoerBeregnFaktiskInntektRequest(
+                    sakId = forbehandling.sak.id,
+                    forbehandlingId = forbehandling.id,
+                    sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                    fraOgMed = YearMonth.of(2024, 1), // TODO utled rikig fom
+                    tilOgMed = YearMonth.of(2024, 12), // TODO utled rikig tom
+                    loennsinntekt = request.loennsinntekt,
+                    naeringsinntekt = request.naeringsinntekt,
+                    afp = request.afp,
+                    utland = request.utland,
+                )
+            }
+        beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo)
+    }
 }
 
 data class EtteroppgjoerOgOppgave(
     val etteroppgjoerBehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
 )
+
+data class BeregnAvkortingFaktiskInntektRequest(
+    val loennsinntekt: Int,
+    val afp: Int,
+    val naeringsinntekt: Int,
+    val utland: Int,
+)
+
+class FantIkkeForbehandling(
+    val behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
+        detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
+    )

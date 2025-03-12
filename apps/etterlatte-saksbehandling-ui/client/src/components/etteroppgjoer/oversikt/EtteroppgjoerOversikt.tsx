@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { EtteroppgjoerFramTilbakeKnapperad } from '~components/etteroppgjoer/stegmeny/EtteroppgjoerFramTilbakeKnapperad'
 import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
+import { FastsetteInntekt } from '~components/etteroppgjoer/oversikt/FastsetteInntekt'
+import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
+import React from 'react'
 
 export function EtteroppgjoerOversikt() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -16,11 +19,15 @@ export function EtteroppgjoerOversikt() {
       </Heading>
       <BodyShort>Skatteoppgjør mottatt: {formaterDato(etteroppgjoer.behandling.opprettet)}</BodyShort>
       <OpplysningerForEtteroppgjoer opplysninger={etteroppgjoer.opplysninger} />
-
-      <Heading size="medium" level="2">
-        Fastsette inntekt
-      </Heading>
-
+      <FastsetteInntekt forbehandlingId={etteroppgjoer.behandling.id} />
+      {etteroppgjoer.avkortingFaktiskInntekt && (
+        <VStack>
+          <YtelseEtterAvkorting
+            avkortetYtelse={etteroppgjoer.avkortingFaktiskInntekt.avkortetYtelse}
+            tidligereAvkortetYtelse={[]}
+          />
+        </VStack>
+      )}
       <EtteroppgjoerFramTilbakeKnapperad>
         <div>
           <Button

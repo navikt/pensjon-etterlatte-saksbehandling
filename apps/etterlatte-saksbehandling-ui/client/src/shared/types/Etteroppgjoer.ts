@@ -4,6 +4,7 @@ import { IAvkortetYtelse, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
   opplysninger: EtteroppgjoerOpplysninger
+  avkortingFaktiskInntekt: Avkorting | undefined
 }
 
 export interface EtteroppgjoerBehandling {
@@ -18,6 +19,13 @@ export interface EtteroppgjoerOpplysninger {
   skatt: PensjonsgivendeInntektFraSkatt
   ainntekt: AInntekt
   tidligereAvkorting: Avkorting
+}
+
+export interface FaktiskInntekt {
+  loennsinntekt: number
+  afp: number
+  naeringsinntekt: number
+  utland: number
 }
 
 export interface PensjonsgivendeInntektFraSkatt {

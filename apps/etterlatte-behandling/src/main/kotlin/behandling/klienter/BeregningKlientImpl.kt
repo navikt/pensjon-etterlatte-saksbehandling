@@ -5,8 +5,9 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingEtteropppgjoerRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.deserialize
@@ -38,11 +39,15 @@ interface BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): InntektsjusteringAvkortingInfoResponse
 
-    suspend fun hentSisteAvkortingForEtteroppgjoer(
-        behandlingId: UUID,
-        aar: Int,
+    suspend fun hentAvkortingForForbehandlingEtteroppgjoer(
+        request: EtteroppgjoerBeregnetAvkortingRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingDto
+    ): EtteroppgjoerBeregnetAvkorting
+
+    suspend fun beregnAvkortingFaktiskInntekt(
+        request: EtteroppgjoerBeregnFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 
     suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,
@@ -129,33 +134,55 @@ class BeregningKlientImpl(
         )
     }
 
-    override suspend fun hentSisteAvkortingForEtteroppgjoer(
-        behandlingId: UUID,
-        aar: Int,
+    override suspend fun hentAvkortingForForbehandlingEtteroppgjoer(
+        request: EtteroppgjoerBeregnetAvkortingRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingDto {
-        logger.info("Henter siste avkorting med behandlingId=$behandlingId for etteropgjør ")
+    ): EtteroppgjoerBeregnetAvkorting {
+        logger.info("Henter avkorting for forbehandling behandlingId=${request.forbehandling}")
         try {
             return downstreamResourceClient
                 .post(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer",
+                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/hent",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody =
-                        AvkortingEtteropppgjoerRequest(
-                            sisteIverksatteBehandling = behandlingId,
-                            aar = aar,
-                        ),
+                    postBody = request,
                 ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw InternfeilException(
-                "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
+                "Henting av avkorting for forbehandling med behandlingId=${request.forbehandling} feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun beregnAvkortingFaktiskInntekt(
+        request: EtteroppgjoerBeregnFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling ${request.forbehandlingId}")
+        try {
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/beregn_faktisk_inntekt",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = request,
+                ).mapBoth(
+                    success = { },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Beregning av avkorting for forbehandling med id=${request.forbehandlingId} feilet",
                 e,
             )
         }

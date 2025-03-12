@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.hendelse.getLongOrNull
+import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -29,7 +31,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.brev_id
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.id = ?
                         """.trimIndent(),
@@ -40,23 +42,25 @@ class EtteroppgjoerForbehandlingDao(
         }
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) =
-        connectionAutoclosing.hentConnection {
-            with(it) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
                 val statement =
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet
+                            id, status, sak_id, opprettet, brev_id
                         ) 
-                        VALUES (?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
-                            status = excluded.status
+                            status = excluded.status,
+                            brev_id = excluded.brev_id
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
                 statement.setString(2, forbehandling.status)
                 statement.setSakId(3, forbehandling.sak.id)
                 statement.setTidspunkt(4, forbehandling.opprettet)
+                statement.setLong(5, forbehandling.brevId)
                 statement.executeUpdate().also {
                     krev(it == 1) {
                         "Kunne ikke lagre forbehandling etteroppgjør for sakId=${forbehandling.sak.id}"
@@ -191,6 +195,7 @@ class EtteroppgjoerForbehandlingDao(
             opprettet = getTidspunkt("opprettet"),
             status = getString("status"),
             aar = 2024,
+            brevId = getLongOrNull("brev_id"),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -39,7 +40,10 @@ data class EtteroppgjoerForbehandling(
     val sak: Sak,
     val aar: Int,
     val opprettet: Tidspunkt,
-)
+    val brevId: Long?,
+) {
+    fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+}
 
 data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkatt,

@@ -55,6 +55,16 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(etteroppgjoer)
             }
         }
+
+        route("opprett-brev") {
+            post {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    val etteroppgjoerMedBrev = service.opprettBrev(etteroppgjoerId, brukerTokenInfo)
+                    call.respond(etteroppgjoerMedBrev)
+                }
+            }
+        }
     }
 
     route("/etteroppgjoer/{$SAKID_CALL_PARAMETER}") {

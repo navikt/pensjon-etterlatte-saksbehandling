@@ -30,7 +30,7 @@ export function TilbakekrevingUtbetalinger({
                   derfor være lik netto tilbakekreving.
                 </BodyLong>
                 <BodyLong>
-                  I oppsummeringen vil du få vist hvilken informasjon som sendes til oppdrag og nav innkreving, samt hva
+                  I oppsummeringen vil du få vist hvilken informasjon som sendes til oppdrag og Nav Innkreving, samt hva
                   som informeres til mottaker i vedtaket.
                 </BodyLong>
                 <BodyLong>

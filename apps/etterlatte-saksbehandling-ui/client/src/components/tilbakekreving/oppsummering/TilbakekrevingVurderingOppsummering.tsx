@@ -96,7 +96,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
             <Alert variant="info">
               <VStack gap="5">
                 <BodyLong>
-                  Oppsummeringen ovenfor gir en oversikt over beløpene som overføres til oppdrag og Nav innkreving. Vi
+                  Oppsummeringen ovenfor gir en oversikt over beløpene som overføres til oppdrag og Nav Innkreving. Vi
                   sier brutto tilbakebetaling fordi skattebeløpet ikke har blitt sendt videre til Skatteetaten fra Nav.
                 </BodyLong>
                 <BodyLong>

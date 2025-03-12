@@ -7,7 +7,7 @@ class SkatteoppgjoerHendelserService(
     private val sigrunKlient: SigrunKlient,
 ) {
     suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
-        val sisteKjoering = dao.hentSisteKjoering()
+        val sisteKjoering = inTransaction { dao.hentSisteKjoering() }
         val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.sisteSekvensnummer).hendelser
 
         inTransaction {

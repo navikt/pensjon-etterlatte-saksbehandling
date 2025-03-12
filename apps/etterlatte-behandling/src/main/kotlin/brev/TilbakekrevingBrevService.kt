@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.kunYtelse
@@ -45,6 +46,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import java.util.UUID
+import kotlin.math.absoluteValue
 
 class TilbakekrevingBrevService(
     val sakService: SakService,
@@ -271,15 +273,29 @@ private fun tilbakekrevingsPerioder(tilbakekreving: Tilbakekreving) =
     tilbakekreving.perioder.map { periode ->
         val beloepMedKunYtelse = periode.tilbakekrevingsbeloep.kunYtelse()
 
+        // Identifisere trekk som brukes for å trekke 17% skatt på barnepensjon. Dette legges til for at brev skal
+        // bli riktig i tilfeller hvor skatt ikke har blitt overført til skatteetaten.
+        val fastSkattetrekkBarnepensjon =
+            periode.tilbakekrevingsbeloep
+                .filter { it.klasseType == KlasseType.TREK.name && it.klasseKode == "BPSKSKAT" }
+                .sumOf { beloep -> beloep.bruttoUtbetaling.absoluteValue }
+
+        if (fastSkattetrekkBarnepensjon > 0) {
+            logger.info(
+                "Identifisert skattetrekk på $fastSkattetrekkBarnepensjon i ${tilbakekreving.kravgrunnlag.sakId.value}. Brevet justeres basert på dette.",
+            )
+        }
+
         TilbakekrevingPeriodeDataNy(
             maaned = periode.maaned.atDay(1),
             beloeper =
                 periode.let { beloeper ->
                     val beregnetFeilutbetaling =
-                        beloepMedKunYtelse.sumOf { beloep -> beloep.beregnetFeilutbetaling ?: 0 }
+                        beloepMedKunYtelse.sumOf { beloep -> beloep.beregnetFeilutbetaling ?: 0 } + fastSkattetrekkBarnepensjon
                     val bruttoTilbakekreving =
-                        beloepMedKunYtelse.sumOf { beloep -> beloep.bruttoTilbakekreving ?: 0 }
-                    val skatt = beloepMedKunYtelse.sumOf { beloep -> beloep.skatt ?: 0 }
+                        beloepMedKunYtelse.sumOf { beloep -> beloep.bruttoTilbakekreving ?: 0 } + fastSkattetrekkBarnepensjon
+                    val skatt =
+                        beloepMedKunYtelse.sumOf { beloep -> beloep.skatt ?: 0 } + fastSkattetrekkBarnepensjon
                     val netto = beloepMedKunYtelse.sumOf { beloep -> beloep.nettoTilbakekreving ?: 0 }
                     val renteTillegg = beloepMedKunYtelse.sumOf { beloep -> beloep.rentetillegg ?: 0 }
 

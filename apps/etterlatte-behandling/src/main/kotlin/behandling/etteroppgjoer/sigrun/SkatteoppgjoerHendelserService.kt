@@ -4,12 +4,13 @@ import no.nav.etterlatte.inTransaction
 
 class SkatteoppgjoerHendelserService(
     private val dao: SkatteoppgjoerHendelserDao,
+    private val sigrunKlient: SigrunKlient,
 ) {
-    fun hentogBehandleSkatteoppgjoerHendelser() {
-        inTransaction {
-            val sisteKjoering = dao.hentSisteKjoering()
+    suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
+        val sisteKjoering = dao.hentSisteKjoering()
+        val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.sisteSekvensnummer)
 
-            // TODO: gjør rest kall til Sigrun Skatteoppgjør hendelser
+        inTransaction {
             // TODO: sjekke opp mot etteroppgjoer tabell = skal ha etteroppgjoer
             // TODO: .....
             // TODO: lagre ny kjoering med oppdatert sekvensnummer
@@ -17,17 +18,6 @@ class SkatteoppgjoerHendelserService(
     }
 }
 
-data class HendelserKjoering(
-    val sisteSekvensnummer: Int,
-    val antallHendelser: Int, // antall vi har etterspurt
-    val antallBehandlet: Int, // antall vi har sjekket
-    val antallRelevante: Int, // antall vi er interessert i (opprettet forbehandling)
-)
-
-data class SkatteoppgjoerHendelser(
-    val gjelderPeriode: String,
-    val hendelsetype: String,
-    val identifikator: String,
-    val sekvensnummer: Int,
-    val somAktoerid: Boolean,
+data class HendelseKjoeringRequest(
+    val antall: Int,
 )

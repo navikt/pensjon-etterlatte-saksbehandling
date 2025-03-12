@@ -19,7 +19,7 @@ class SkatteoppgjoerHendelserDao(
                         VALUES (?, ?, ?, ?) 
                         """.trimIndent(),
                     )
-                statement.setInt(1, kjoering.sisteSekvensnummer)
+                statement.setLong(1, kjoering.sisteSekvensnummer)
                 statement.setInt(2, kjoering.antallHendelser)
                 statement.setInt(3, kjoering.antallBehandlet)
                 statement.setInt(4, kjoering.antallRelevante)
@@ -46,7 +46,7 @@ class SkatteoppgjoerHendelserDao(
 
                 statement.executeQuery().single {
                     HendelserKjoering(
-                        sisteSekvensnummer = getInt("siste_sekvensnummer"),
+                        sisteSekvensnummer = getLong("siste_sekvensnummer"),
                         antallHendelser = getInt("antall_hendelser"),
                         antallBehandlet = getInt("antall_behandlet"),
                         antallRelevante = getInt("antall_relevante"),
@@ -55,3 +55,10 @@ class SkatteoppgjoerHendelserDao(
             }
         }
 }
+
+data class HendelserKjoering(
+    val sisteSekvensnummer: Long,
+    val antallHendelser: Int, // antall vi har etterspurt
+    val antallBehandlet: Int, // antall vi har sjekket
+    val antallRelevante: Int, // antall vi er interessert i (opprettet forbehandling)
+)

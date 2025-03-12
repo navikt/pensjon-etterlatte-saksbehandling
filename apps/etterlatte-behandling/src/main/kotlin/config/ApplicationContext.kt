@@ -42,6 +42,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlientImpl
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserDao
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -51,6 +53,9 @@ import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
@@ -357,6 +362,7 @@ internal class ApplicationContext(
     val klageDao = KlageDaoImpl(autoClosingDatabase)
     val tilbakekrevingDao = TilbakekrevingDao(autoClosingDatabase)
     val etteroppgjoerForbehandlingDao = EtteroppgjoerForbehandlingDao(autoClosingDatabase)
+    val skatteoppgjoerHendelserDao = SkatteoppgjoerHendelserDao(autoClosingDatabase)
     val etteroppgjoerDao = EtteroppgjoerDao(autoClosingDatabase)
     val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
@@ -670,6 +676,12 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
         )
 
+    val skatteoppgjoerHendelserService =
+        SkatteoppgjoerHendelserService(
+            dao = skatteoppgjoerHendelserDao,
+            sigrunKlient = sigrunKlient,
+        )
+
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
     val uttrekkLoependeYtelseEtter20JobService =
@@ -678,6 +690,15 @@ internal class ApplicationContext(
             sakService,
             nyAldersovergangService,
             vilkaarsvurderingDao,
+            featureToggleService,
+        )
+
+    val sjekkAdressebeskyttelseJobService =
+        SjekkAdressebeskyttelseJobService(
+            SjekkAdressebeskyttelseJobDao(autoClosingDatabase),
+            pdlTjenesterKlient,
+            oppdaterTilgangService,
+            grunnlagService,
             featureToggleService,
         )
 
@@ -812,6 +833,17 @@ internal class ApplicationContext(
     val uttrekkLoependeYtelseEtter20Job: UttrekkLoependeYtelseEtter20Job by lazy {
         UttrekkLoependeYtelseEtter20Job(
             service = uttrekkLoependeYtelseEtter20JobService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
+        )
+    }
+
+    val sjekkAdressebeskyttelseJob: SjekkAdressebeskyttelseJob by lazy {
+        SjekkAdressebeskyttelseJob(
+            service = sjekkAdressebeskyttelseJobService,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
             erLeader = { leaderElectionKlient.isLeader() },

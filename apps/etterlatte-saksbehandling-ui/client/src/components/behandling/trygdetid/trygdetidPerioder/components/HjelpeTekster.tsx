@@ -16,8 +16,9 @@ export const FremtidigTrygdetidHjelpeTekst = () => {
   return (
     <ReadMore header="Mer om fremtidig trygdetid">
       Det registreres maks fremtidig trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år. Denne vil
-      automatisk bli justert i beregningen hvis faktisk trygdetid er mindre enn 4/5 av opptjeningstiden. Hvis det er
-      annen grunn for reduksjon av fremtidig trygdetid må perioden redigeres.
+      automatisk bli justert i beregningen hvis faktisk trygdetid er mindre enn 4/5 av opptjeningstiden{' '}
+      <b>(unntak: hvis nordisk konvensjon artikkel 9 gjelder samtidig. Se info under punktet om artikkel 9)</b>. Hvis
+      det er annen grunn for reduksjon av fremtidig trygdetid må perioden redigeres.
     </ReadMore>
   )
 }

@@ -5,8 +5,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.accept
-import io.ktor.client.request.get
-import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -41,15 +41,16 @@ class KrrKlientImpl(
 
         return try {
             val response =
-                client.get("$url/rest/v1/person") {
-                    header("Nav-Personident", fnr)
+                client.post("$url/rest/v1/personer") {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
+                    setBody(DigitalKontaktinformasjonRequestBody(listOf(fnr)))
                 }
 
             if (response.status.isSuccess()) {
                 response
-                    .body<DigitalKontaktinformasjon?>()
+                    .body<DigitalKontaktinformasjonResponseBody>()
+                    .personer[fnr]
                     ?.also {
                         logger.info("Hentet kontaktinformasjon fra KRR")
                         cache.put(fnr, it)
@@ -63,3 +64,11 @@ class KrrKlientImpl(
         }
     }
 }
+
+data class DigitalKontaktinformasjonRequestBody(
+    val personidenter: List<String>,
+)
+
+data class DigitalKontaktinformasjonResponseBody(
+    val personer: Map<String, DigitalKontaktinformasjon>,
+)

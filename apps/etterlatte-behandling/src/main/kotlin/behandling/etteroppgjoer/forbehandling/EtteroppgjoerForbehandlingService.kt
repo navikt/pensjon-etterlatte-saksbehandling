@@ -60,18 +60,20 @@ class EtteroppgjoerForbehandlingService(
             )
 
         return inTransaction {
-            val fraSkatt = dao.hentPensjonsgivendeInntektFraSkatt(behandlingId)
-            val aInntekt = dao.hentOpplysningerAInntekt(behandlingId)
+            val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
+            val aInntekt = dao.hentAInntekt(behandlingId)
 
-            if (fraSkatt == null) {
-                throw InternfeilException("Fant ingen pensjonsgivendeInntekter for behandling $behandlingId")
+            if (pensjonsgivendeInntekt == null || aInntekt == null) {
+                throw InternfeilException(
+                    "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
+                )
             }
 
             ForbehandlingDto(
                 behandling = forbehandling,
                 opplysninger =
                     EtteroppgjoerOpplysninger(
-                        skatt = fraSkatt,
+                        skatt = pensjonsgivendeInntekt,
                         ainntekt = aInntekt,
                         tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                     ),
@@ -89,11 +91,11 @@ class EtteroppgjoerForbehandlingService(
                 sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
             }
 
-        val inntekterFraSkatt = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar)
+        val pensjonsgivendeInntekt = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar)
         val aInntekt = inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar)
 
         return inTransaction {
-            val nyBehandling =
+            val nyForbehandling =
                 EtteroppgjoerForbehandling(
                     id = UUID.randomUUID(),
                     hendelseId = UUID.randomUUID(),
@@ -105,7 +107,7 @@ class EtteroppgjoerForbehandlingService(
 
             val oppgave =
                 oppgaveService.opprettOppgave(
-                    referanse = nyBehandling.id.toString(),
+                    referanse = nyForbehandling.id.toString(),
                     sakId = sakId,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.ETTEROPPGJOER,
@@ -115,14 +117,14 @@ class EtteroppgjoerForbehandlingService(
                     gruppeId = null,
                 )
 
-            dao.lagreForbehandling(nyBehandling)
-            dao.lagrePensjonsgivendeInntektFraSkatt(inntekterFraSkatt, nyBehandling.id)
-            dao.lagreOpplysningerAInntekt(aInntekt)
+            dao.lagreForbehandling(nyForbehandling)
+            dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
+            dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 
             etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
             EtteroppgjoerOgOppgave(
-                etteroppgjoerBehandling = nyBehandling,
+                etteroppgjoerBehandling = nyForbehandling,
                 oppgave = oppgave,
             )
         }

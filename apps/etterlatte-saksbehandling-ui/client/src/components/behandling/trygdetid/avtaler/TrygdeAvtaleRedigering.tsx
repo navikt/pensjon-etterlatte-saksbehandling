@@ -319,6 +319,12 @@ export function TrygdeAvtaleRedigering(props: {
                       </em>{' '}
                       (maks. 40 år).
                     </BodyLong>
+                    <BodyLong size="small">
+                      Obs! Hvis 4/5-regelen gjelder her, må du manuelt beregne avkortet fremtidig trygdetid som følge av
+                      dette, før du avkorter etter artikkel 9. Vær oppmerksom på at i saker der artikkel 9 gjelder, står
+                      det &quot;Nei&quot; på spørsmålet om faktisk trygdetid er mindre enn 4/5 av opptjeningstiden under
+                      beregnet fremtidig trygdetid – selv om den faktisk er det.
+                    </BodyLong>
                   </VStack>
                 </Alert>
               )}

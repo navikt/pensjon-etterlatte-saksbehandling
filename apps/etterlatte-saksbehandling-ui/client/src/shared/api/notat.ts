@@ -29,10 +29,6 @@ export function hentNotaterForSak(sakId: number): Promise<ApiResponse<Notat[]>> 
   return apiClient.get(`/notat/sak/${sakId}`)
 }
 
-export function hentNotaterForReferanse(referanse: string): Promise<ApiResponse<Notat[]>> {
-  return apiClient.get(`/notat/referanse/${referanse}`)
-}
-
 export function slettNotat(id: number): Promise<ApiResponse<Notat>> {
   return apiClient.delete(`/notat/${id}`)
 }

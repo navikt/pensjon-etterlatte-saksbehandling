@@ -10,6 +10,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnAvkortingFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.appIsInGCP
@@ -27,56 +29,61 @@ enum class EtteroppgjoerToggles(
 ) : FeatureToggle {
     ETTEROPPGJOER("etteroppgjoer"),
     ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
+    ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ;
 
     override fun key(): String = toggle
 }
 
 fun Route.etteroppgjoerRoutes(
-    service: EtteroppgjoerForbehandlingService,
+    forbehandlingService: EtteroppgjoerForbehandlingService,
+    skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     featureToggleService: FeatureToggleService,
 ) {
-    route("/api/etteroppgjoer/kundev/{$SAKID_CALL_PARAMETER}") {
-        post {
+    route("/api/etteroppgjoer") {
+        post("/kundev/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             if (appIsInGCP() && !isDev()) {
                 call.respond(HttpStatusCode.NotFound)
             }
             kunSkrivetilgang {
-                val eo = service.opprettEtteroppgjoer(sakId, 2024)
+                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024)
                 call.respond(eo)
             }
         }
-    }
 
-    route("/api/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
-        get {
+        get("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val etteroppgjoer = service.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
+                val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
                 call.respond(etteroppgjoer)
             }
         }
 
         post("beregn_faktisk_inntekt") {
             val request = call.receive<BeregnAvkortingFaktiskInntektRequest>()
-            service.beregnAvkortingFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+            forbehandlingService.beregnAvkortingFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
             call.respond(HttpStatusCode.OK)
         }
-    }
 
-    route("/etteroppgjoer/{$SAKID_CALL_PARAMETER}") {
-        post {
+        post("/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val eo = service.opprettEtteroppgjoer(sakId, 2024)
+                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024)
                 call.respond(eo)
             }
+        }
+
+        post("/skatteoppgjoerhendelser/start-kjoering") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            val request = call.receive<HendelseKjoeringRequest>()
+            skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+            call.respond(HttpStatusCode.OK)
         }
     }
 }
 
-fun sjekkEtteroppgjoerEnabled(featureToggleService: FeatureToggleService) {
+private fun sjekkEtteroppgjoerEnabled(featureToggleService: FeatureToggleService) {
     if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
         throw IkkeTillattException("ETTEROPPGJOER_NOT_ENABLED", "Etteroppgjør er ikke skrudd på i miljøet.")
     }

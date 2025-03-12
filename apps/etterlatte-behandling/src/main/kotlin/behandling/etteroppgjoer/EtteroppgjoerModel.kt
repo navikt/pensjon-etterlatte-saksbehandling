@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -20,11 +21,6 @@ enum class EtteroppgjoerStatus {
     UNDER_FORBEHANDLING,
     UNDER_REVURDERING,
 }
-
-data class SkatteoppgjoerHendelse(
-    val id: UUID,
-    val sekvensnummerSkatt: String,
-)
 
 // TODO falte ut behandling..
 data class ForbehandlingDto(
@@ -97,6 +93,12 @@ data class AInntekt(
     val aar: Int,
     val inntektsmaaneder: List<AInntektMaaned>,
 ) {
+    init {
+        require(inntektsmaaneder.all { it.maaned.year == aar }) {
+            "Alle inntektsmaaneder må ha inntektsår = $aar, men fant: ${inntektsmaaneder.map { it.maaned.year }}"
+        }
+    }
+
     companion object {
         fun stub(
             aar: Int = 2024,
@@ -132,4 +134,47 @@ data class AInntektMaaned(
 data class Inntekt(
     val beloep: BigDecimal,
     val beskrivelse: String,
+)
+
+data class HendelseslisteFraSkatt(
+    val hendelser: List<SkatteoppgjoerHendelser>,
+) {
+    init {
+        if (hendelser.isNotEmpty()) {
+            var sekvensnummerStart = hendelser.first().sekvensnummer
+            hendelser.forEachIndexed { index, hendelse ->
+                if (hendelse.sekvensnummer != sekvensnummerStart) {
+                    throw InternfeilException("Sekvensnummerene i listen er ikke sekvensielt")
+                }
+                sekvensnummerStart++
+            }
+        }
+    }
+
+    companion object {
+        fun stub(
+            startSekvensnummer: Long = 9007199254740991,
+            antall: Int = 10,
+        ): HendelseslisteFraSkatt {
+            val hendelser =
+                List(antall) { index ->
+                    SkatteoppgjoerHendelser(
+                        gjelderPeriode = "", // TODO
+                        hendelsetype = "", // TODO
+                        identifikator = "", // TODO
+                        sekvensnummer = startSekvensnummer + index,
+                        somAktoerid = false,
+                    )
+                }
+            return HendelseslisteFraSkatt(hendelser)
+        }
+    }
+}
+
+data class SkatteoppgjoerHendelser(
+    val gjelderPeriode: String,
+    val hendelsetype: String,
+    val identifikator: String,
+    val sekvensnummer: Long,
+    val somAktoerid: Boolean,
 )

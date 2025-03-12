@@ -103,6 +103,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.saksbehandlerJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.uttrekkLoependeYtelseEtter20Job,
+        context.sjekkAdressebeskyttelseJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -174,7 +175,8 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
     tilbakekrevingRoutes(service = applicationContext.tilbakekrevingService)
     etteroppgjoerRoutes(
-        service = applicationContext.etteroppgjoerForbehandlingService,
+        forbehandlingService = applicationContext.etteroppgjoerForbehandlingService,
+        skatteoppgjoerHendelserService = applicationContext.skatteoppgjoerHendelserService,
         featureToggleService = applicationContext.featureToggleService,
     )
     behandlingRoutes(

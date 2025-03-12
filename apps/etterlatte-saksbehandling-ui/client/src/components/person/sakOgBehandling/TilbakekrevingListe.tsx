@@ -13,6 +13,7 @@ import {
 import { hentTilbakekrevingerISak } from '~shared/api/tilbakekreving'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
 import { MapApiResult } from '~shared/components/MapApiResult'
+import { lastDayOfMonth } from 'date-fns'
 
 export function lenkeTilTilbakekrevingMedId(id: string): string {
   return `/tilbakekreving/${id}/`
@@ -22,7 +23,7 @@ function formaterPeriode(perioder: TilbakekrevingPeriode[]): string {
   if (perioder.length === 1) {
     return formaterDato(perioder[0].maaned)
   }
-  return formaterDato(perioder[0].maaned) + ' - ' + formaterDato(perioder[perioder.length - 1].maaned)
+  return formaterDato(perioder[0].maaned) + ' - ' + formaterDato(lastDayOfMonth(perioder[perioder.length - 1].maaned))
 }
 
 function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBehandling> }) {

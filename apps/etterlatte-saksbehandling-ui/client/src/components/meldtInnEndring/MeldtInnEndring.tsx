@@ -63,7 +63,7 @@ export const MeldtInnEndring = () => {
                   <Heading size="large" level="1">
                     Melding om endring
                   </Heading>
-                  {meldtInnEndringHandlingValgt !== MeldtInnEndringHandlingValgt.INGEN && (
+                  {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.INGEN && (
                     <Alert variant="info">
                       <VStack gap="2">
                         <BodyShort>

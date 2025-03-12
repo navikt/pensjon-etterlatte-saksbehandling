@@ -1,0 +1,2 @@
+ALTER TABLE skatteoppgjoer_hendelse_kjoringer
+ALTER COLUMN siste_sekvensnummer TYPE BIGINT;

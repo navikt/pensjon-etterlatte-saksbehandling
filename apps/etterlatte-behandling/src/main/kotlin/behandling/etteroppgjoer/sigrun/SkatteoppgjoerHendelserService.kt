@@ -8,12 +8,27 @@ class SkatteoppgjoerHendelserService(
 ) {
     suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
         val sisteKjoering = dao.hentSisteKjoering()
-        val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.sisteSekvensnummer)
+        val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.sisteSekvensnummer).hendelser
 
         inTransaction {
-            // TODO: sjekke opp mot etteroppgjoer tabell = skal ha etteroppgjoer
-            // TODO: .....
-            // TODO: lagre ny kjoering med oppdatert sekvensnummer
+            val nyKjoering =
+                HendelserKjoering(
+                    hendelsesListe.last().sekvensnummer,
+                    hendelsesListe.size,
+                    0,
+                    0,
+                )
+
+            for (hendelse in hendelsesListe) {
+                // TODO: sjekke opp mot etteroppgjoer tabell = skal ha etteroppgjoer
+                // TODO: ..... opprette forbehandling
+                // TODO: ??
+
+                nyKjoering.antallBehandlet++
+                nyKjoering.antallRelevante++
+            }
+
+            dao.lagreKjoering(nyKjoering)
         }
     }
 }

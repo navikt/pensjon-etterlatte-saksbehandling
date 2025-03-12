@@ -59,6 +59,6 @@ class SkatteoppgjoerHendelserDao(
 data class HendelserKjoering(
     val sisteSekvensnummer: Long,
     val antallHendelser: Int, // antall vi har etterspurt
-    val antallBehandlet: Int, // antall vi har sjekket
-    val antallRelevante: Int, // antall vi er interessert i (opprettet forbehandling)
+    var antallBehandlet: Int, // antall vi har sjekket
+    var antallRelevante: Int, // antall vi er interessert i (opprettet forbehandling)
 )

@@ -81,13 +81,17 @@ class SigrunKlientImpl(
         }
 
         return retry {
-            httpClient.get("$url/api/skatteoppgjoer/hendelser") {
+            httpClient.get("$url/api/v1/pensjonsgivendeinntektforfolketrygden/hendelser") {
+                url {
+                    parameters.append("fraSekvensnummer", sekvensnummerStart.toString())
+                    parameters.append("antall", antall.toString())
+                }
+
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(body)
-                headers.append("x-sekvensnummer-fra", sekvensnummerStart.toString())
-                headers.append("x-antall", antall.toString())
-                headers.append("x-bruk-aktoerid", brukAktoerId.toString())
+
+                headers.append("bruk-aktoerid", brukAktoerId.toString())
             }
         }.let {
             when (it) {

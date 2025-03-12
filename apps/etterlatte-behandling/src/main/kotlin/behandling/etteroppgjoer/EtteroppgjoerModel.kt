@@ -48,22 +48,36 @@ data class EtteroppgjoerOpplysninger(
 )
 
 data class PensjonsgivendeInntektFraSkatt(
-    val inntektsaar: String,
+    val inntektsaar: Int,
     val inntekter: List<PensjonsgivendeInntekt>,
 ) {
+    init {
+        require(inntekter.all { it.inntektsaar == inntektsaar }) {
+            "Alle inntekter må ha inntektsår = $inntektsaar, men fant: ${inntekter.map { it.inntektsaar }}"
+        }
+    }
+
     companion object {
         fun stub(
             aar: Int = 2024,
             aarsinntekt: Int = 300000,
         ) = PensjonsgivendeInntektFraSkatt(
-            inntektsaar = "2024",
+            inntektsaar = aar,
             inntekter =
                 listOf(
                     PensjonsgivendeInntekt(
                         skatteordning = "FASTLAND",
                         loensinntekt = aarsinntekt,
                         naeringsinntekt = 0,
-                        annet = 0,
+                        fiskeFangstFamiliebarnehage = 0,
+                        inntektsaar = aar,
+                    ),
+                    PensjonsgivendeInntekt(
+                        skatteordning = "SVALBARD",
+                        loensinntekt = aarsinntekt,
+                        naeringsinntekt = 0,
+                        fiskeFangstFamiliebarnehage = 0,
+                        inntektsaar = aar,
                     ),
                 ),
         )
@@ -71,16 +85,23 @@ data class PensjonsgivendeInntektFraSkatt(
 }
 
 data class PensjonsgivendeInntekt(
+    val inntektsaar: Int,
     val skatteordning: String,
     val loensinntekt: Int,
     val naeringsinntekt: Int,
-    val annet: Int,
+    val fiskeFangstFamiliebarnehage: Int,
 )
 
 data class AInntekt(
     val aar: Int,
     val inntektsmaaneder: List<AInntektMaaned>,
 ) {
+    init {
+        require(inntektsmaaneder.all { it.maaned.year == aar }) {
+            "Alle inntektsmaaneder må ha inntektsår = $aar, men fant: ${inntektsmaaneder.map { it.maaned.year }}"
+        }
+    }
+
     companion object {
         fun stub(
             aar: Int = 2024,

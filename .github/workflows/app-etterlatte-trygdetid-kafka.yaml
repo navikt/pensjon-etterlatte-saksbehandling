@@ -18,7 +18,6 @@ on:
       - apps/etterlatte-trygdetid-kafka/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
-      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-omregning-model/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
@@ -31,7 +30,6 @@ on:
       - "!apps/etterlatte-trygdetid-kafka/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
-      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-omregning-model/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml

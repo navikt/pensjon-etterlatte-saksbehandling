@@ -1,1 +1,0 @@
-alter table pesyssak add column gjenopprettes_automatisk boolean;

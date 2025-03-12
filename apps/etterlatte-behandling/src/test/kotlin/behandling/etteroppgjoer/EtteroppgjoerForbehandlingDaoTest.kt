@@ -6,7 +6,9 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -77,6 +79,44 @@ class EtteroppgjoerForbehandlingDaoTest(
             status shouldBe ny.status
             aar shouldBe ny.aar
             opprettet shouldBe ny.opprettet
+        }
+    }
+
+    @Test
+    fun `lagre og hente pensjonsgivendeInntekt`() {
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+
+        // negative returnere null hvis tomt
+        etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
+
+        etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
+            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
+            forbehandlingId,
+        )
+
+        with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
+            inntektsaar shouldBe inntektsaar
+            inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
+        }
+    }
+
+    @Test
+    fun `lagre og hente aInntekt`() {
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+
+        // negative returnere null hvis tomt
+        etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId) shouldBe null
+
+        etteroppgjoerForbehandlingDao.lagreAInntekt(
+            AInntekt.stub(inntektsaar),
+            forbehandlingId,
+        )
+
+        with(etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId)!!) {
+            inntektsaar shouldBe inntektsaar
+            inntektsmaaneder shouldBe AInntekt.stub(inntektsaar).inntektsmaaneder
         }
     }
 }

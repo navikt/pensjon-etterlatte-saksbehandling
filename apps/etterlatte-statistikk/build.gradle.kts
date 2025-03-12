@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
-    implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
 
     testImplementation(libs.test.kotest.assertionscore)

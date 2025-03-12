@@ -21,7 +21,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
-      - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-omregning-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-tilbakekreving-model/**
@@ -39,7 +39,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
-      - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-omregning-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-tilbakekreving-model/**

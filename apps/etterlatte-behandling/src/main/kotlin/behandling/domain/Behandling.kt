@@ -177,6 +177,9 @@ sealed class Behandling {
         }
     }
 
+    fun erAvslagNySoeknad(): Boolean =
+        this is Revurdering && this.revurderingsaarsak == Revurderingaarsak.NY_SOEKNAD && this.status == AVSLAG
+
     open fun tilOpprettet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
 
     open fun tilVilkaarsvurdert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(VILKAARSVURDERT)

@@ -1,8 +1,7 @@
 import { IAktivitetHendelse, OpprettAktivitetHendelse } from '~shared/types/Aktivitetsplikt'
 import { useForm } from 'react-hook-form'
-import { Button, HStack, Textarea, VStack } from '@navikt/ds-react'
+import { Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 import {
   AktivitetspliktRedigeringModus,
   AktivitetspliktSkjemaAaVise,
@@ -13,6 +12,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { formaterTilISOString } from '~utils/formatering/dato'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import React from 'react'
 
 interface AktivitetHendelseSkjema {
   dato: string
@@ -97,12 +97,19 @@ export const AktivitetHendelse = ({
   return (
     <form onSubmit={handleSubmit(lagreAktivitetHendelse)}>
       <VStack gap="4" maxWidth="20rem">
-        <ControlledDatoVelger name="dato" label="Dato" control={control} errorVedTomInput="Dato må settes" />
+        <Heading size="small">Legg til hendelse</Heading>
+        <ControlledDatoVelger
+          name="dato"
+          label="Dato for hendelse"
+          control={control}
+          errorVedTomInput="Dato må settes"
+        />
         <Textarea
           {...register('beskrivelse', {
             required: { value: true, message: 'Beskrivelse må gis' },
           })}
-          label="Beskrivelse"
+          label="Hva gjelder hendelsen"
+          description="Gi en kort beskrivelse"
           error={errors.beskrivelse?.message}
         />
         {isFailureHandler({
@@ -118,8 +125,6 @@ export const AktivitetHendelse = ({
             size="small"
             variant="secondary"
             type="button"
-            icon={<XMarkIcon aria-hidden />}
-            iconPosition="right"
             loading={
               isPending(opprettAktivitetHendelseForBehandlingResult) || isPending(opprettAktivitetHendelseForSakResult)
             }
@@ -135,12 +140,11 @@ export const AktivitetHendelse = ({
           </Button>
           <Button
             size="small"
-            icon={<FloppydiskIcon aria-hidden />}
             loading={
               isPending(opprettAktivitetHendelseForBehandlingResult) || isPending(opprettAktivitetHendelseForSakResult)
             }
           >
-            Lagre
+            Legg til hendelse
           </Button>
         </HStack>
       </VStack>

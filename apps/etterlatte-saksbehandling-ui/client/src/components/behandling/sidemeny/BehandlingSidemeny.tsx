@@ -186,7 +186,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
           {soeker?.foedselsnummer && (
             <>
-              <NotatPanel sakId={behandling.sakId} behandlingId={behandling.id} fnr={soeker?.foedselsnummer} />
+              <NotatPanel sakId={behandling.sakId} fnr={soeker?.foedselsnummer} />
               <DokumentlisteLiten fnr={soeker.foedselsnummer} />
             </>
           )}

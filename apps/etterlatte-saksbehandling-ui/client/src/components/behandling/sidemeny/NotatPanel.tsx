@@ -1,36 +1,29 @@
-import { NotatRedigeringModal } from '~components/person/notat/NotatRedigeringModal'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentNotaterForReferanse, NotatMal, opprettNotatForSak } from '~shared/api/notat'
+import { hentNotaterForSak } from '~shared/api/notat'
 import { useEffect } from 'react'
-import { isInitial, isPending, mapResult } from '~shared/api/apiUtils'
-import { Alert, BodyShort, Button, Detail, Heading, HStack, VStack } from '@navikt/ds-react'
+import { mapResult } from '~shared/api/apiUtils'
+import { Alert, BodyShort, Detail, Heading, HStack, VStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import styled from 'styled-components'
-import { NotatVisningModal } from '~components/person/notat/NotatVisningModal'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import Spinner from '~shared/Spinner'
 
-export const NotatPanel = ({ sakId, behandlingId, fnr }: { sakId: number; behandlingId: string; fnr: string }) => {
-  const [notatResult, hentNotater] = useApiCall(hentNotaterForReferanse)
-  const [nyttNotatResult, opprettNotat] = useApiCall(opprettNotatForSak)
+export const NotatPanel = ({ sakId, fnr }: { sakId: number; fnr: string }) => {
+  const [notatResult, hentNotater] = useApiCall(hentNotaterForSak)
 
   useEffect(() => {
-    if (isInitial(notatResult)) {
-      hentNotater(behandlingId)
-    }
-  }, [behandlingId])
-
-  const opprettNyttNotat = () => {
-    trackClick(ClickEvent.OPPRETT_NYTT_NOTAT)
-
-    opprettNotat({ sakId, referanse: behandlingId, mal: NotatMal.TOM_MAL }, () => {
-      hentNotater(behandlingId)
-    })
-  }
+    hentNotater(sakId)
+  }, [sakId])
 
   return mapResult(notatResult, {
+    pending: <Spinner label="Henter notater..." />,
+    error: (err) => (
+      <Alert variant="error" size="small">
+        {err.detail}
+      </Alert>
+    ),
     success: (notater) => (
       <SidebarPanel $border>
         <Heading size="small" spacing>
@@ -38,31 +31,20 @@ export const NotatPanel = ({ sakId, behandlingId, fnr }: { sakId: number; behand
         </Heading>
 
         <VStack gap="2">
-          {notater.map(
-            (notat) =>
-              !notat.journalpostId && (
-                <HStack gap="2" justify="space-between" wrap={false} key={`notat-${notat.id}`}>
-                  <TextOverflow size="small">{notat.tittel}</TextOverflow>
-
-                  {!notat.journalpostId ? (
-                    <NotatRedigeringModal notat={notat} minifyRedigerKnapp />
-                  ) : (
-                    <NotatVisningModal notat={notat} />
-                  )}
-                </HStack>
-              )
+          {!!notater?.length ? (
+            notater.map((notat, index) => (
+              <TextOverflow key={index} size="small">
+                {notat.tittel}
+              </TextOverflow>
+            ))
+          ) : (
+            <Detail spacing>Ingen notater funnet</Detail>
           )}
-
-          {!notater.length && <Detail spacing>Ingen notater funnet</Detail>}
         </VStack>
 
         <hr />
 
         <HStack justify="space-between">
-          <Button onClick={opprettNyttNotat} loading={isPending(nyttNotatResult)} size="small" variant="secondary">
-            Opprett nytt notat
-          </Button>
-
           <PersonButtonLink
             fnr={fnr}
             fane={PersonOversiktFane.NOTATER}
@@ -72,15 +54,10 @@ export const NotatPanel = ({ sakId, behandlingId, fnr }: { sakId: number; behand
             rel="noreferrer noopener"
             icon={<ExternalLinkIcon aria-hidden />}
           >
-            Gå til notatoversikten
+            Åpne notatoversikten
           </PersonButtonLink>
         </HStack>
       </SidebarPanel>
-    ),
-    error: (err) => (
-      <Alert variant="error" size="small">
-        {err.detail}
-      </Alert>
     ),
   })
 }

@@ -4,6 +4,7 @@ import { IAvkortetYtelse, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
   opplysninger: EtteroppgjoerOpplysninger
+  avkortingFaktiskInntekt: Avkorting | undefined
 }
 
 export interface EtteroppgjoerBehandling {

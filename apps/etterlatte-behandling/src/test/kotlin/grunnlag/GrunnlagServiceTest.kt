@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -36,6 +35,8 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
@@ -739,17 +740,23 @@ internal class GrunnlagServiceTest {
         coEvery {
             grunnlagHenter.hentGrunnlagsdata(any())
         } returns sampleFetchedGrunnlag(opplysningsperson)
+        coEvery { pdlTjenesterKlientImpl.hentPdlFolkeregisterIdenter(any()) } returns
+            PdlFolkeregisterIdentListe(
+                listOf(
+                    PdlIdentifikator.FolkeregisterIdent(SOEKER_FOEDSELSNUMMER, false),
+                    PdlIdentifikator.FolkeregisterIdent(SOEKER2_FOEDSELSNUMMER, true),
+                ),
+            )
 
         runBlocking { grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType) }
 
         val slot = mutableListOf<Grunnlagsopplysning<JsonNode>>()
         verify {
+            runBlocking { pdlTjenesterKlientImpl.hentPdlFolkeregisterIdenter(SOEKER_FOEDSELSNUMMER.value) }
             opplysningDaoMock.leggOpplysningTilGrunnlag(sakId, capture(slot), opplysningsperson.foedselsnummer.verdi)
             opplysningDaoMock.oppdaterVersjonForBehandling(behandlingId, sakId, 7)
         }
         assertTrue(slot.filter { oppl -> oppl.opplysningType == FOEDSELSNUMMER }.size == 1)
-        verify { pdlTjenesterKlientImpl wasNot called }
-        verify { pdlTjenesterKlientImpl wasNot called }
     }
 
     @Nested

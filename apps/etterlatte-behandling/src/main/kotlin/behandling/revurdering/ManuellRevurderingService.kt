@@ -108,7 +108,7 @@ class ManuellRevurderingService(
         saksbehandler: Saksbehandler,
     ): Revurdering =
         forrigeBehandling.let {
-            val persongalleri = grunnlagService.hentPersongalleri(sakId)
+            val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
             val triggendeOppgave = paaGrunnAvOppgave?.let { oppgaveService.hentOppgave(it) }
 
             revurderingService

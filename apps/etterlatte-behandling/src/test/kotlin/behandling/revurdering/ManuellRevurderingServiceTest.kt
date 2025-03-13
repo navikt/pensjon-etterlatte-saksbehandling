@@ -167,7 +167,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             grunnlagService.opprettGrunnlag(any(), any())
         }
         verify {
-            grunnlagService.hentPersongalleri(sak.id)
+            grunnlagService.hentPersongalleri(behandling!!.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
             grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             oppgaveService.opprettOppgave(
@@ -288,7 +288,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler)
-                grunnlagService.hentPersongalleri(sak.id)
+                grunnlagService.hentPersongalleri(behandling!!.id)
                 grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
                 grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             }
@@ -405,7 +405,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 grunnlagService.opprettGrunnlag(any(), any())
             }
             verify {
-                grunnlagService.hentPersongalleri(sak.id)
+                grunnlagService.hentPersongalleri(behandling!!.id)
                 grunnlagService.lagreNyePersonopplysninger(sak.id, behandling!!.id, any(), any())
                 grunnlagService.lagreNyeSaksopplysninger(sak.id, behandling.id, any())
                 grunnlagService.laasTilVersjonForBehandling(revurdering.id, behandling.id)
@@ -504,7 +504,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             grunnlagService.opprettGrunnlag(any(), any())
         }
         verify {
-            grunnlagService.hentPersongalleri(sak.id)
+            grunnlagService.hentPersongalleri(behandling!!.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
             grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             oppgaveService.opprettOppgave(

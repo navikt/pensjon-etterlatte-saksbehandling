@@ -201,6 +201,7 @@ spec:
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter
+        - application: etterlatte-hendelser-egne-ansatte
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml

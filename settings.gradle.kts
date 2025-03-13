@@ -3,6 +3,7 @@ include(
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",
     "apps:etterlatte-egne-ansatte-lytter",
+    "apps:etterlatte-hendelser-egne-ansatte",
     "apps:etterlatte-institusjonsopphold",
     "apps:etterlatte-testdata",
     "apps:etterlatte-testdata-behandler",

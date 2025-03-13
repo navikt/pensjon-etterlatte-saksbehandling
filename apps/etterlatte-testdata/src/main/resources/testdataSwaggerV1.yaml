@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Etterlatte Testdata API
+  title: Etterlatte opprett ytelse API
   description:
-    API for generering av testdata til Gjenny <br>
+    API for legge til Barnepensjon eller Omstillingsstønad på dollybrukere <br>
     Det kreves tilganger for å bruke APIet. Ta kontakt med Team Etterlatte for tilgang.
   version: 1.0.0
 

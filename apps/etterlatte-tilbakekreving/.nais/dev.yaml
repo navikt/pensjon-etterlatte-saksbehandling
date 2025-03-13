@@ -52,13 +52,13 @@ spec:
     min: 1
   env:
     - name: KRAVGRUNNLAG_MQ_NAME
-      value: QA.Q1_ETTERLATTE.KRAVGRUNNLAG
+      value: QA.Q2_ETTERLATTE.KRAVGRUNNLAG
     - name: MQ_HOSTNAME
       value: b27apvl222.preprod.local
     - name: MQ_PORT
       value: "1413"
     - name: MQ_CHANNEL
-      value: Q1_ETTERLATTE
+      value: Q2_ETTERLATTE
     - name: MQ_MANAGER
       value: MQLS04
     - name: ETTERLATTE_BEHANDLING_URL

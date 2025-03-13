@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.deserialize
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.Duration
 import java.util.UUID
 
 class Pdf(
@@ -81,6 +83,10 @@ class BrevKlientImpl(
             },
             brukerTokenInfo = brukerTokenInfo,
             postBody = brevRequest,
+            timeoutConfig = {
+                socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+            },
         )
 
     override suspend fun ferdigstillVedtaksbrev(
@@ -129,12 +135,14 @@ class BrevKlientImpl(
         postBody: Any = Unit,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
+        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
     ): T =
         downstreamResourceClient
             .post(
                 resource = Resource(clientId = clientId, url = url),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = postBody,
+                timeoutConfig = timeoutConfig,
             ).mapBoth(
                 success = onSuccess,
                 failure = { errorResponse -> throw errorResponse },

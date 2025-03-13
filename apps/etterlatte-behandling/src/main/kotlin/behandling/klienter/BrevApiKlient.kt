@@ -407,12 +407,14 @@ class BrevApiKlientObo(
         postBody: Any = Unit,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
+        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
     ): T =
         downstreamResourceClient
             .post(
                 resource = Resource(clientId = clientId, url = url),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = postBody,
+                timeoutConfig = timeoutConfig,
             ).mapBoth(
                 success = onSuccess,
                 failure = { errorResponse -> throw errorResponse },

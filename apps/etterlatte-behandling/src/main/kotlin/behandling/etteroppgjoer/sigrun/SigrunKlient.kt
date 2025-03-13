@@ -16,6 +16,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.ktor.navConsumerId
 import org.slf4j.LoggerFactory
 
 interface SigrunKlient {
@@ -49,6 +50,7 @@ class SigrunKlientImpl(
 
         return retry {
             httpClient.get("$url/api/v1/pensjonsgivendeinntektforfolketrygden") {
+                navConsumerId("etterlatte-behandling")
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(body)
@@ -86,7 +88,7 @@ class SigrunKlientImpl(
                     parameters.append("fraSekvensnummer", sekvensnummerStart.toString())
                     parameters.append("antall", antall.toString())
                 }
-
+                navConsumerId("etterlatte-behandling")
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(body)

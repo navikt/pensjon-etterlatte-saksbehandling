@@ -149,18 +149,12 @@ class OpprettFamilie(
                         }
 
                     val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
-
-                    call.respond(
-                        """
-                        <div>
-                        Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}
-                        </div>
-                        """.trimIndent(),
-                    )
+                    call.respond(HttpStatusCode.OK, "Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}")
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }
             }
+
             post("send-soeknad") {
                 try {
 

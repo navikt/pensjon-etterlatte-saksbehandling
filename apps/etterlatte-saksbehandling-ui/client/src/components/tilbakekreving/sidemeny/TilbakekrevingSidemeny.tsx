@@ -15,7 +15,7 @@ import { mapApiResult } from '~shared/api/apiUtils'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
-import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
+import { useAttesterbarBehandlingOppgave } from '~shared/hooks/useAttesterbarBehandlingOppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
@@ -53,7 +53,7 @@ export function TilbakekrevingSidemeny() {
     )
   }
 
-  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: tilbakekreving.id })
+  const [oppgaveResult] = useAttesterbarBehandlingOppgave({ referanse: tilbakekreving.id })
 
   return (
     <Sidebar>

@@ -43,8 +43,9 @@ export const hentOppgaverMedGruppeId = async (args: {
   type: Oppgavetype
 }): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get(`/oppgaver/gruppe/${args.gruppeId}?type=${args.type}`)
 
-export const hentOppgaveForReferanseUnderBehandling = async (referanse: string): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.get(`/oppgaver/referanse/${referanse}/underbehandling`)
+export const hentAttesterbarBehandlingOppgaveForReferanse = async (
+  referanse: string
+): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/referanse/${referanse}/attesterbar-behandling`)
 
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 

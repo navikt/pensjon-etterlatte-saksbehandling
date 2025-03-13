@@ -592,13 +592,19 @@ class OppgaveService(
         }
     }
 
-    fun hentOppgaveUnderBehandling(referanse: String) =
+    /**
+     * Henter behandlingsoppgaven til en attesterbar behandling.
+     *
+     * Hvis det fins andre oppgaver med samme refereanse, men med forskjellig type vil denne hente selve
+     * behandlingsoppgaven.
+     */
+    fun hentOppgaveForAttesterbarBehandling(referanse: String): OppgaveIntern? =
         oppgaveDao
             .hentOppgaverForReferanse(referanse)
-            .singleOrNull(OppgaveIntern::erIkkeAvsluttet)
+            .singleOrNull(OppgaveIntern::typeKanAttesteres)
             .also {
                 if (it == null) {
-                    logger.warn("Ingen oppgave under behandling for referanse: $referanse")
+                    logger.warn("Ingen behandlingsoppgave for referanse: $referanse")
                 }
             }
 

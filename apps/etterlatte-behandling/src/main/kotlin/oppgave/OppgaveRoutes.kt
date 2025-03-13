@@ -109,11 +109,11 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
-        get("/referanse/{referanse}/underbehandling") {
+        get("/referanse/{referanse}/attesterbar-behandling") {
             kunSaksbehandler {
                 val oppgave =
                     inTransaction {
-                        service.hentOppgaveUnderBehandling(referanse)
+                        service.hentOppgaveForAttesterbarBehandling(referanse)
                     }
 
                 call.respond(oppgave ?: HttpStatusCode.NoContent)

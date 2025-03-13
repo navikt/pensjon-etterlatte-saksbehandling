@@ -117,7 +117,7 @@ class OpprettFamilie(
                 }
             }
 
-            post("send-soeknad-v2") {
+            post("opprett_ytelse") {
                 try {
 
                     val params = call.receiveParameters()

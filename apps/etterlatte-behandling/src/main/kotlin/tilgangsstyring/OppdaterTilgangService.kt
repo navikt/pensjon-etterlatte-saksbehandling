@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.slf4j.LoggerFactory
 
 fun SakMedGraderingOgSkjermet.erSpesialSak(): Boolean {
@@ -51,6 +52,7 @@ class OppdaterTilgangService(
     private val pdltjenesterKlient: PdlTjenesterKlient,
     private val brukerService: BrukerService,
     private val oppgaveService: OppgaveService,
+    private val sakSkrivDao: SakSkrivDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -83,7 +85,7 @@ class OppdaterTilgangService(
             if (hoyesteGradering == AdressebeskyttelseGradering.FORTROLIG) {
                 val enhet = hentEnhet(fnr = sak.ident, sak = sak)
                 val sakMedEnhet = SakMedEnhet(sakId, enhet)
-                sakService.oppdaterEnhet(sakMedEnhet)
+                sakSkrivDao.oppdaterEnhet(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
             } else {
                 sakService.settEnhetOmAdressebeskyttet(sak, hoyesteGradering)
@@ -101,7 +103,7 @@ class OppdaterTilgangService(
             if (egenAnsattSkjerming.any { it }) {
                 sakService.oppdaterSkjerming(sakId, true)
                 val sakMedEnhet = SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)
-                sakService.oppdaterEnhet(sakMedEnhet)
+                sakSkrivDao.oppdaterEnhet(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
             } else {
                 val tilgangSak = sakService.hentGraderingForSak(sakId, HardkodaSystembruker.tilgang)
@@ -111,7 +113,7 @@ class OppdaterTilgangService(
                 if (tilgangSak.erSpesialSak()) {
                     val enhetsNummer = hentEnhet(fnr = sak.ident, sak = sak)
                     val sakMedEnhet = SakMedEnhet(sakId, enhetsNummer)
-                    sakService.oppdaterEnhet(sakMedEnhet)
+                    sakSkrivDao.oppdaterEnhet(sakMedEnhet)
                     sakService.oppdaterSkjerming(sakId, false)
                     oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                 }
@@ -125,7 +127,7 @@ class OppdaterTilgangService(
     ) {
         val enhet = hentEnhet(fnr = fnr, sak = sak)
         val sakerMedNyEnhet = SakMedEnhet(sak.id, enhet)
-        sakService.oppdaterEnhet(sakerMedNyEnhet)
+        sakSkrivDao.oppdaterEnhet(sakerMedNyEnhet)
         sakService.oppdaterSkjerming(sak.id, false)
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakerMedNyEnhet))
     }

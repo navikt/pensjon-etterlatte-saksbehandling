@@ -33,5 +33,8 @@ enum class Enheter(
         fun saksbehandlendeEnheter() = entries.filter { it.erSaksbehandlendeEnhet }.map { it.enhetNr }.toSet()
 
         fun kjenteEnheter() = entries.map { it.enhetNr }.toSet()
+
+        fun erSpesialTilgangsEnheter(enhetNr: Enhetsnummer): Boolean =
+            listOf<Enhetsnummer>(STRENGT_FORTROLIG.enhetNr, STRENGT_FORTROLIG_UTLAND.enhetNr, EGNE_ANSATTE.enhetNr).contains(enhetNr)
     }
 }

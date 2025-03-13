@@ -35,7 +35,7 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ): Brev =
         klient
-            .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.sakId}"), bruker) {}
+            .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.sakId}"), bruker, {})
             .mapBoth(
                 success = { readValue(it) },
                 failure = { throw it },
@@ -51,6 +51,6 @@ class BrevService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) = klient
-        .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/ferdigstill"), bruker) {
-        }.mapError { throw it }
+        .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/ferdigstill"), bruker, {})
+        .mapError { throw it }
 }

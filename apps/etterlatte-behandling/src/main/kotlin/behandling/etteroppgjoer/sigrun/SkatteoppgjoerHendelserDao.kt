@@ -21,7 +21,7 @@ class SkatteoppgjoerHendelserDao(
                     )
                 statement.setLong(1, kjoering.sisteSekvensnummer)
                 statement.setInt(2, kjoering.antallHendelser)
-                statement.setInt(4, kjoering.antallRelevante)
+                statement.setInt(3, kjoering.antallRelevante)
                 statement.executeUpdate().also {
                     krev(it == 1) {
                         "Kunne ikke lagre kjoering for skatteoppgjoerHendelser=$kjoering"

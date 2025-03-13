@@ -9,8 +9,8 @@ import no.nav.etterlatte.libs.common.behandling.KlageMottaker
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.klage.kodeverk.Fagsystem
-import no.nav.klage.kodeverk.Ytelse
 import no.nav.klage.kodeverk.hjemmel.Hjemmel
+import no.nav.klage.kodeverk.ytelse.Ytelse
 import java.time.LocalDate
 
 enum class KabalSakType {
@@ -50,7 +50,7 @@ data class KabalFagsak(
 fun SakType.tilYtelse(): Ytelse =
     when (this) {
         SakType.BARNEPENSJON -> Ytelse.PEN_BAR
-        SakType.OMSTILLINGSSTOENAD -> Ytelse.PEN_GJE
+        SakType.OMSTILLINGSSTOENAD -> Ytelse.PEN_EYO
     }
 
 fun KabalHjemmel.tilHjemmel(): Hjemmel = enumValueOf(this.name)

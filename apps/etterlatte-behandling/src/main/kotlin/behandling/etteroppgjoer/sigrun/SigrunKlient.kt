@@ -8,8 +8,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelser
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -21,6 +23,12 @@ interface SigrunKlient {
         ident: String,
         inntektsaar: Int,
     ): PensjonsgivendeInntektFraSkatt
+
+    suspend fun hentHendelsesliste(
+        antall: Int,
+        sekvensnummerStart: Long,
+        brukAktoerId: Boolean = false,
+    ): HendelseslisteFraSkatt
 }
 
 class SigrunKlientImpl(
@@ -55,8 +63,46 @@ class SigrunKlientImpl(
                 }
 
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun feilet. Se sikkerlogg")
-                    sikkerlogg.error("Kall mot Sigrun feilet for $ident")
+                    logger.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet. Se sikkerlogg")
+                    sikkerlogg.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet for ident=$ident")
+                    throw it.samlaExceptions()
+                }
+            }
+        }
+    }
+
+    override suspend fun hentHendelsesliste(
+        antall: Int,
+        sekvensnummerStart: Long,
+        brukAktoerId: Boolean,
+    ): HendelseslisteFraSkatt {
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_HENDELSER, false)) {
+            return HendelseslisteFraSkatt.stub(sekvensnummerStart, antall)
+        }
+
+        return retry {
+            httpClient.get("$url/api/v1/pensjonsgivendeinntektforfolketrygden/hendelser") {
+                url {
+                    parameters.append("fraSekvensnummer", sekvensnummerStart.toString())
+                    parameters.append("antall", antall.toString())
+                }
+
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(body)
+
+                headers.append("bruk-aktoerid", brukAktoerId.toString())
+            }
+        }.let {
+            when (it) {
+                is RetryResult.Success -> {
+                    HendelseslisteFraSkatt(
+                        hendelser = it.content.body<List<SkatteoppgjoerHendelser>>(),
+                    )
+                }
+
+                is RetryResult.Failure -> {
+                    logger.error("Kall mot Sigrun for henting av Hendelsesliste feilet")
                     throw it.samlaExceptions()
                 }
             }

@@ -190,7 +190,7 @@ spec:
             roles:
               - les-oms-samordning-vedtak
         - application: azure-token-generator
-          namespace: aura
+          namespace: nais
           cluster: dev-gcp
           permissions:
             roles:
@@ -202,7 +202,7 @@ spec:
               - les-oms-sak
               - les-bp-sak
         - application: tokenx-token-generator
-          namespace: aura
+          namespace: nais
           cluster: dev-gcp
         - application: eessi-pensjon-journalforing-q2
           namespace: eessipensjon

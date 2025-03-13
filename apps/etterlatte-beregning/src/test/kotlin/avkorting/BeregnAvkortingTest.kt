@@ -1978,6 +1978,7 @@ class BeregnAvkortingTest {
         `Avkorting foerstegangsbehandling`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                virkningstidspunkt = YearMonth.of(2024, Month.MAY),
                 beregning =
                     beregning(
                         beregninger =
@@ -1995,6 +1996,7 @@ class BeregnAvkortingTest {
         `Avkorting revurdering med en sanksjon åpen periode`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                virkningstidspunkt = YearMonth.of(2024, Month.JUNE),
                 beregning =
                     beregning(
                         beregninger =
@@ -2035,6 +2037,7 @@ class BeregnAvkortingTest {
         `Avkorting ny inntekt en`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                YearMonth.of(2024, Month.MAY),
                 beregning(
                     beregninger =
                         listOf(
@@ -2059,6 +2062,7 @@ class BeregnAvkortingTest {
         `Avkorting ny inntekt en`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                YearMonth.of(2024, Month.AUGUST),
                 beregning(
                     beregninger =
                         listOf(
@@ -2079,6 +2083,7 @@ class BeregnAvkortingTest {
         `Sanksjon etter inntektsendring legges inn`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                YearMonth.of(2024, Month.SEPTEMBER),
                 beregning =
                     beregning(
                         beregninger =
@@ -2155,6 +2160,7 @@ class BeregnAvkortingTest {
         `Avkorting ny inntekt to`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                YearMonth.of(2024, Month.MARCH),
                 beregning(
                     beregninger =
                         listOf(
@@ -2208,6 +2214,7 @@ class BeregnAvkortingTest {
         `Avkorting korrigere siste inntekt`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                YearMonth.of(2024, Month.APRIL),
                 beregning(
                     beregninger =
                         listOf(
@@ -2255,6 +2262,7 @@ class BeregnAvkortingTest {
         `Revurdering ny inntekt for nytt år`()
             .kopierAvkorting()
             .beregnAvkortingRevurdering(
+                YearMonth.of(2024, Month.NOVEMBER),
                 beregning(
                     beregninger =
                         listOf(

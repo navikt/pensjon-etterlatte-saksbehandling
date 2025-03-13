@@ -47,7 +47,7 @@ class SkatteoppgjoerHendelseDaoTest(
         for (sekvensnummer in 1..5) {
             val kjoering =
                 HendelserKjoering(
-                    sisteSekvensnummer = sekvensnummer,
+                    sisteSekvensnummer = sekvensnummer.toLong(),
                     antallHendelser = 100 + sekvensnummer,
                     antallBehandlet = 100 + sekvensnummer,
                     antallRelevante = 10 + sekvensnummer,

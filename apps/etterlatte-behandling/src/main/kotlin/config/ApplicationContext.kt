@@ -674,11 +674,13 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
+            brevApiKlient = brevApiKlient,
         )
 
     val skatteoppgjoerHendelserService =
         SkatteoppgjoerHendelserService(
             dao = skatteoppgjoerHendelserDao,
+            sigrunKlient = sigrunKlient,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

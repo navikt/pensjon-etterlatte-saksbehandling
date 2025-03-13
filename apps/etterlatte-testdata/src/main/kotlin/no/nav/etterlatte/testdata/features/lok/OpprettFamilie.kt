@@ -79,7 +79,6 @@ class OpprettFamilie(
             post("opprett") {
                 try {
                     val params = call.receiveParameters()
-
                     val gjenlevendeAlder =
                         params["gjenlevendeAlder"]?.toInt() ?: throw Exception("Må ha gjenlevendeAlder")
                     val barnOver18 = params["barnOver18"]?.toBoolean() ?: false
@@ -131,7 +130,9 @@ class OpprettFamilie(
                             SoeknadType.BARNEPENSJON -> params["barn"]!!
                             SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
                         }
-
+                    if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
+                        call.respond(HttpStatusCode.BadRequest, "Påkrevde felter mangler")
+                    }
                     val request =
                         NySoeknadRequest(
                             ytelse,
@@ -157,12 +158,7 @@ class OpprettFamilie(
                         """.trimIndent(),
                     )
                 } catch (e: Exception) {
-                    call.respond(
-                        MustacheContent(
-                            "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
-                        ),
-                    )
+                    call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }
             }
             post("send-soeknad") {

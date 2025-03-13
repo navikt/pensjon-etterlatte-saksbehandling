@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelser
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -97,12 +96,7 @@ class SigrunKlientImpl(
             }
         }.let {
             when (it) {
-                is RetryResult.Success -> {
-                    HendelseslisteFraSkatt(
-                        hendelser = it.content.body<List<SkatteoppgjoerHendelser>>(),
-                    )
-                }
-
+                is RetryResult.Success -> it.content.body<HendelseslisteFraSkatt>()
                 is RetryResult.Failure -> {
                     logger.error("Kall mot Sigrun for henting av Hendelsesliste feilet")
                     throw it.samlaExceptions()

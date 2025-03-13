@@ -49,7 +49,6 @@ class SkatteoppgjoerHendelseDaoTest(
                 HendelserKjoering(
                     sisteSekvensnummer = sekvensnummer.toLong(),
                     antallHendelser = 100 + sekvensnummer,
-                    antallBehandlet = 100 + sekvensnummer,
                     antallRelevante = 10 + sekvensnummer,
                 )
 
@@ -59,7 +58,6 @@ class SkatteoppgjoerHendelseDaoTest(
         with(skatteoppgjoerHendelserDao.hentSisteKjoering()) {
             sisteSekvensnummer shouldBe 5
             antallHendelser shouldBe 105
-            antallBehandlet shouldBe 105
             antallRelevante shouldBe 15
         }
     }

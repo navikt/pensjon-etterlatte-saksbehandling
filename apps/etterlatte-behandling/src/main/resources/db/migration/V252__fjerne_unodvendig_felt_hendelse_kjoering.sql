@@ -1,0 +1,2 @@
+ALTER TABLE skatteoppgjoer_hendelse_kjoringer
+DROP COLUMN antall_behandlet;

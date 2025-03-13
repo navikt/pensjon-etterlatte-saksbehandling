@@ -20,7 +20,7 @@ class BeregningService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) = retryOgPakkUt {
-        klient.post(Resource(clientId, "$url/api/beregning/$behandlingId"), bruker) {}.mapBoth(
+        klient.post(Resource(clientId, "$url/api/beregning/$behandlingId"), bruker, {}).mapBoth(
             success = {},
             failure = { throw it },
         )

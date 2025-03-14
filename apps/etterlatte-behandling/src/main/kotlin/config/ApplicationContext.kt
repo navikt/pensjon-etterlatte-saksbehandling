@@ -662,7 +662,7 @@ internal class ApplicationContext(
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
             sakLesDao = sakLesDao,
-            pdltjenesterKlient = pdlTjenesterKlient,
+            sakService = sakService,
         )
 
     val etteroppgjoerForbehandlingService =

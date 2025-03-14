@@ -1,24 +1,22 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.sak.SakLesDao
+import no.nav.etterlatte.sak.SakService
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
     val sakLesDao: SakLesDao,
+    val sakService: SakService,
 ) {
-    // TODO kan brukes under lytting på skatteoppgjørhendelser
     fun skalHaEtteroppgjoer(
         ident: String,
         inntektsaar: Int,
-    ): Boolean {
-        val sak =
-            sakLesDao.finnSaker(ident, SakType.OMSTILLINGSSTOENAD).singleOrNull()
-                ?: throw InternfeilException("Fant ikke sak med ident") // TODO sikkerlogg
-        val etteroppgjoer = dao.hentEtteroppgjoer(sak.id, inntektsaar)
-        return etteroppgjoer != null
+    ): SkalHaEtteroppgjoerResultat {
+        val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
+        val etteroppgjoer = sak?.let { dao.hentEtteroppgjoer(it.id, inntektsaar) }
+        return SkalHaEtteroppgjoerResultat(etteroppgjoer != null, etteroppgjoer)
     }
 
     fun finnAlleEtteroppgjoerOgLagre(inntektsaar: Int) {
@@ -33,3 +31,8 @@ class EtteroppgjoerService(
         dao.lagerEtteroppgjoer(sakId, inntektsaar, status)
     }
 }
+
+data class SkalHaEtteroppgjoerResultat(
+    val skalHaEtteroppgjoer: Boolean,
+    val etteroppgjoer: Etteroppgjoer?,
+)

@@ -1,33 +1,64 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.logger
 
 class SkatteoppgjoerHendelserService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
+    private val etteroppgjoerService: EtteroppgjoerService,
 ) {
     suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
         val sisteKjoering = inTransaction { dao.hentSisteKjoering() }
         val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer())
+        var antallRelevanteHendelser = 0
+
+        val kjoering =
+            HendelserKjoering(
+                hendelsesListe.hendelser.last().sekvensnummer,
+                hendelsesListe.hendelser.size,
+                antallRelevanteHendelser,
+            )
 
         inTransaction {
-            val nyKjoering =
+            for (hendelse in hendelsesListe.hendelser) {
+                val etteroppgjoerResultat =
+                    etteroppgjoerService.skalHaEtteroppgjoer(
+                        hendelse.identifikator,
+                        hendelse.gjelderPeriode.toInt(),
+                    )
+
+                if (etteroppgjoerResultat.skalHaEtteroppgjoer) {
+                    val etteroppgjoer = etteroppgjoerResultat.etteroppgjoer!!
+
+                    // TODO: opprett forbehandling hvis ingen
+
+                    etteroppgjoerService.oppdaterStatus(
+                        etteroppgjoer.sakId,
+                        etteroppgjoer.inntektsaar,
+                        EtteroppgjoerStatus.MOTTATT_HENDELSE,
+                    )
+                    antallRelevanteHendelser++
+                }
+            }
+
+            // TODO: lagre med status hvis feiler?
+            dao.lagreKjoering(
                 HendelserKjoering(
                     hendelsesListe.hendelser.last().sekvensnummer,
                     hendelsesListe.hendelser.size,
-                    0,
-                )
+                    antallRelevanteHendelser,
+                    true,
+                ),
+            )
+        }
 
-            for (hendelse in hendelsesListe.hendelser) {
-                // TODO: sjekke opp mot etteroppgjoer tabell = skal ha etteroppgjoer
-                // TODO: ..... opprette forbehandling
-                // TODO: ??
-
-                // TODO: bump for hver forbehandling som opprettes
-                nyKjoering.antallRelevante++
-            }
-
-            dao.lagreKjoering(nyKjoering)
+        // TODO: annen håndtering hvis jobben feiler?
+        if (!kjoering.success) {
+            logger.error("Siste kjøring av skatteoppgjoerHendelser feilet")
+            dao.lagreKjoering(kjoering)
         }
     }
 }

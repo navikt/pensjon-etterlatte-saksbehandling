@@ -1,24 +1,36 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.sak.SakLesDao
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
     val sakLesDao: SakLesDao,
+    val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
-    // TODO kan brukes under lytting på skatteoppgjørhendelser
-    fun skalHaEtteroppgjoer(
+    fun skalHaEtteroppgjoerqq(
         ident: String,
         inntektsaar: Int,
-    ): Boolean {
+    ): SkalHaEtteroppgjoerResultat {
+        val sakType = SakType.OMSTILLINGSSTOENAD
         val sak =
-            sakLesDao.finnSaker(ident, SakType.OMSTILLINGSSTOENAD).singleOrNull()
-                ?: throw InternfeilException("Fant ikke sak med ident") // TODO sikkerlogg
-        val etteroppgjoer = dao.hentEtteroppgjoer(sak.id, inntektsaar)
-        return etteroppgjoer != null
+            finnSakerForPerson(ident, sakType).let {
+                if (it.isEmpty()) {
+                    null
+                } else if (it.size == 1) {
+                    it.single()
+                } else {
+                    throw InternfeilException("Flere saker TODO")
+                }
+            }
+
+        val etteroppgjoer = sak?.let { dao.hentEtteroppgjoer(it.id, inntektsaar) }
+        return SkalHaEtteroppgjoerResultat(etteroppgjoer != null, etteroppgjoer)
     }
 
     fun finnAlleEtteroppgjoerOgLagre(inntektsaar: Int) {
@@ -32,4 +44,20 @@ class EtteroppgjoerService(
     ) {
         dao.lagerEtteroppgjoer(sakId, inntektsaar, status)
     }
+
+    private fun finnSakerForPerson(
+        ident: String,
+        sakType: SakType? = null,
+    ): List<Sak> =
+        runBlocking {
+            pdltjenesterKlient
+                .hentPdlFolkeregisterIdenter(ident)
+                .identifikatorer
+                .flatMap { sakLesDao.finnSaker(it.folkeregisterident.value, sakType) }
+        }
 }
+
+data class SkalHaEtteroppgjoerResultat(
+    val skalHaEtteroppgjoer: Boolean,
+    val etteroppgjoer: Etteroppgjoer?,
+)

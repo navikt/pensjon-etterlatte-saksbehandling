@@ -13,7 +13,7 @@ class EtteroppgjoerService(
     val sakLesDao: SakLesDao,
     val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
-    fun skalHaEtteroppgjoerqq(
+    fun skalHaEtteroppgjoer(
         ident: String,
         inntektsaar: Int,
     ): SkalHaEtteroppgjoerResultat {

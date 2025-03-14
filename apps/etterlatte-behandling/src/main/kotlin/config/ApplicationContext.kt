@@ -674,6 +674,7 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
+            brevApiKlient = brevApiKlient,
         )
 
     val skatteoppgjoerHendelserService =

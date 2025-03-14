@@ -5,18 +5,27 @@ import { BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-reac
 import { mapResult } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
 import { EtteroppgjoerFramTilbakeKnapperad } from '~components/etteroppgjoer/stegmeny/EtteroppgjoerFramTilbakeKnapperad'
 import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
+import { opprettEtteroppgjoerBrev } from '~shared/api/etteroppgjoer'
+import { useAppDispatch } from '~store/Store'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
-  const [brevResult] = useApiCall(hentBrev)
+  const dispatch = useAppDispatch()
+  const [brevResult, fetchBrev] = useApiCall(hentBrev)
+  const [opprettBrevResult, opprettBrevApi] = useApiCall(opprettEtteroppgjoerBrev)
+
   useEffect(() => {
-    // TODO: avklar hvordan vi henter brevId for eventuelt etteroppgjørsbrev
-    // fetchBrev({ sakId: etteroppgjoer.behandling.sak.id, brevId: 0 })
-  }, [])
+    if (etteroppgjoer.behandling.brevId) {
+      fetchBrev({ sakId: etteroppgjoer.behandling.sak.id, brevId: etteroppgjoer.behandling.brevId })
+    } else {
+      opprettBrevApi(etteroppgjoer.behandling.id, (etteroppgjoer) => dispatch(addEtteroppgjoer(etteroppgjoer)))
+    }
+  }, [etteroppgjoer.behandling.brevId])
 
   return (
     <HStack height="100%" minHeight="100%" wrap={false}>
@@ -29,9 +38,22 @@ export function EtteroppgjoerBrev() {
         </VStack>
       </Box>
       <VStack width="100%">
+        {mapResult(opprettBrevResult, {
+          pending: <Spinner label="Oppretter brev for etteroppgjør forbehandling" />,
+          error: (error) => (
+            <ApiErrorAlert>
+              Kunne ikke opprette brevet for forbehandlingen for etteroppgjøret, på grunn av feil: {error.detail}
+            </ApiErrorAlert>
+          ),
+        })}
         {mapResult(brevResult, {
           success: (brev) => (
             <RedigerbartBrev brev={brev} kanRedigeres={true} tilbakestillingsaction={() => alert('Not supported')} />
+          ),
+          error: (error) => (
+            <ApiErrorAlert>
+              Kunne ikke hente ut brevet for etteroppgjør-forbehandlingen, på grunn av feil: {error.detail}
+            </ApiErrorAlert>
           ),
           pending: <Spinner label="Laster brev" />,
         })}

@@ -36,7 +36,7 @@ class SjekkAdressebeskyttelseJobService(
 
     private fun run() {
         if (featureToggleService.isEnabled(SjekkAdressebeskyttelseToggles.SJEKK_ADRESSEBESKYTTELSE_JOBB, false)) {
-            val aktuellSak = SakId(16013)
+            val aktuellSak = SakId(17518)
             val persongalleri = inTransaction { grunnlagService.hentPersongalleri(aktuellSak) }
             if (persongalleri != null) {
                 logger.info("Oppdaterer gradering på sak ${aktuellSak.sakId}")

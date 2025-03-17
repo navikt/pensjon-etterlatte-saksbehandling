@@ -58,6 +58,7 @@ data class HendelserKjoering(
     val sisteSekvensnummer: Long,
     val antallHendelser: Int, // antall vi har etterspurt
     var antallRelevante: Int, // antall vi er interessert i (opprettet forbehandling)
+    var success: Boolean = false,
 ) {
     fun nesteSekvensnummer() = sisteSekvensnummer + 1
 }

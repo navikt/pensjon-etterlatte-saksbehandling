@@ -1,6 +1,7 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
@@ -134,6 +135,40 @@ class DollyFeature(
                             mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
                         ),
                     )
+                }
+            }
+
+            post("opprett_ytelse") {
+                try {
+
+                    val params = call.receiveParameters()
+                    val ytelse = SoeknadType.valueOf(params["ytelse"]!!)
+                    val behandlingssteg = Behandlingssteg.IVERKSATT
+                    val gjenlevende = params["gjenlevende"]!!
+                    val avdoed = params["avdoed"]!!
+                    val barnListe = params.getAll("barnListe")!!
+                    val soeker =
+                        when (ytelse) {
+                            SoeknadType.BARNEPENSJON -> params["barn"]!!
+                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                        }
+                    if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
+                        call.respond(HttpStatusCode.BadRequest, "Påkrevde felter mangler")
+                    }
+                    val request =
+                        NySoeknadRequest(
+                            ytelse,
+                            avdoed,
+                            gjenlevende,
+                            barnListe,
+                            soeker = soeker,
+                        )
+
+                    val brukerId = brukerTokenInfo.ident()
+                    val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
+                    call.respond(HttpStatusCode.OK, "Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}")
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }
             }
         }

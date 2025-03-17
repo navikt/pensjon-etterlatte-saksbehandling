@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -261,7 +262,9 @@ class GrunnlagServiceImpl(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
-        val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
+        val oppdatertOpplysningsbehov = oppdaterPersongalleri(opplysningsbehov)
+
+        val grunnlag = grunnlagHenter.hentGrunnlagsdata(oppdatertOpplysningsbehov)
 
         grunnlag.personopplysninger.forEach { (fnr, opplysninger) ->
             lagreNyePersonopplysninger(
@@ -278,6 +281,17 @@ class GrunnlagServiceImpl(
             grunnlag.saksopplysninger,
         )
         logger.info("Oppdatert grunnlag (sakId=${opplysningsbehov.sakId}, behandlingId=$behandlingId)")
+    }
+
+    private fun oppdaterPersongalleri(opplysningsbehov: Opplysningsbehov): Opplysningsbehov {
+        val identerForSoeker = runBlocking { pdltjenesterKlient.hentPdlFolkeregisterIdenter(opplysningsbehov.persongalleri.soeker) }
+        val gjeldendeIdentForSoeker = identerForSoeker.identifikatorer.first { !it.historisk }
+        return opplysningsbehov.copy(
+            persongalleri =
+                opplysningsbehov.persongalleri.copy(
+                    soeker = gjeldendeIdentForSoeker.folkeregisterident.value,
+                ),
+        )
     }
 
     override suspend fun oppdaterGrunnlag(

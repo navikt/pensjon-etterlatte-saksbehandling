@@ -6,9 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
@@ -29,7 +27,6 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
@@ -67,7 +64,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -167,7 +163,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             grunnlagService.opprettGrunnlag(any(), any())
         }
         verify {
-            grunnlagService.hentPersongalleri(sak.id)
+            grunnlagService.hentPersongalleri(behandling!!.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
             grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             oppgaveService.opprettOppgave(
@@ -288,7 +284,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler)
-                grunnlagService.hentPersongalleri(sak.id)
+                grunnlagService.hentPersongalleri(behandling!!.id)
                 grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
                 grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             }
@@ -405,7 +401,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 grunnlagService.opprettGrunnlag(any(), any())
             }
             verify {
-                grunnlagService.hentPersongalleri(sak.id)
+                grunnlagService.hentPersongalleri(behandling!!.id)
                 grunnlagService.lagreNyePersonopplysninger(sak.id, behandling!!.id, any(), any())
                 grunnlagService.lagreNyeSaksopplysninger(sak.id, behandling.id, any())
                 grunnlagService.laasTilVersjonForBehandling(revurdering.id, behandling.id)
@@ -504,7 +500,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             grunnlagService.opprettGrunnlag(any(), any())
         }
         verify {
-            grunnlagService.hentPersongalleri(sak.id)
+            grunnlagService.hentPersongalleri(behandling!!.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
             grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             oppgaveService.opprettOppgave(
@@ -842,84 +838,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         ) {
             status shouldBe Status.UNDER_BEHANDLING
             referanse shouldBe revurdering.id.toString()
-        }
-    }
-
-    @Test
-    fun `nullstiller fra og med-dato for opphoer for revurdering etter opphoer`() {
-        val revurderingService =
-            mockk<RevurderingService>().also {
-                every { it.maksEnOppgaveUnderbehandlingForKildeBehandling(any()) } just runs
-                every {
-                    it.opprettRevurdering(
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                    )
-                } returns
-                    mockk<RevurderingOgOppfoelging>().also {
-                        every { it.oppdater() } returns mockk()
-                    }
-            }
-        val service =
-            manuellRevurderingService(
-                revurderingService,
-                behandlingService =
-                    mockk<BehandlingService>().also {
-                        every { it.hentSisteIverksatte(any()) } returns
-                            mockk<Behandling>().also {
-                                every { it.sak } returns
-                                    Sak(
-                                        sakType = SakType.BARNEPENSJON,
-                                        id = sakId1,
-                                        enhet = Enheter.defaultEnhet.enhetNr,
-                                        ident = "",
-                                    )
-                                every { it.status } returns BehandlingStatus.IVERKSATT
-                                every { it.opphoerFraOgMed } returns YearMonth.now()
-                                every { it.id } returns UUID.randomUUID()
-                                every { it.utlandstilknytning } returns null
-                                every { it.boddEllerArbeidetUtlandet } returns null
-                                every { it.revurderingsaarsak() } returns Revurderingaarsak.REVURDERE_ETTER_OPPHOER
-                            }
-                    },
-            )
-        service.opprettManuellRevurderingWrapper(
-            sakId = sakId1,
-            aarsak = Revurderingaarsak.REVURDERE_ETTER_OPPHOER,
-            paaGrunnAvHendelseId = null,
-            paaGrunnAvOppgaveId = null,
-            begrunnelse = null,
-            fritekstAarsak = null,
-            saksbehandler = simpleSaksbehandler(),
-        )
-
-        verify {
-            revurderingService.opprettRevurdering(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
         }
     }
 

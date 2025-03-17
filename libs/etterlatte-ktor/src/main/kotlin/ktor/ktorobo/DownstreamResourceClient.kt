@@ -61,10 +61,16 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
+        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
     ) = medToken(resource, brukerTokenInfo) { token ->
         httpClient.post(resource.url) {
             bearerAuth(token.accessToken)
             contentType(ContentType.Application.Json)
+            timeoutConfig?.let { config ->
+                timeout {
+                    apply(config)
+                }
+            }
             resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             setBody(postBody)
         }

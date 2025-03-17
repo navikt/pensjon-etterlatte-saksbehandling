@@ -16,9 +16,9 @@ class TrygdetidService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) = retryOgPakkUt {
-        klient.post(Resource(clientId, "$url/api/trygdetid_v2/$behandlingId"), bruker) {}
-    }.mapBoth(
-        success = {},
-        failure = { throw it },
-    )
+        klient.post(Resource(clientId, "$url/api/trygdetid_v2/$behandlingId"), bruker, {}).mapBoth(
+            success = {},
+            failure = { throw it },
+        )
+    }
 }

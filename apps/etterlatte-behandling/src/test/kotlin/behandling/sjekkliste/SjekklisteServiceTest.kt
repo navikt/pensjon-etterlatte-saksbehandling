@@ -78,7 +78,7 @@ class SjekklisteServiceTest {
             foerstegangsbehandling(id = behandlingId, sakId = randomSakId(), status = BehandlingStatus.FATTET_VEDTAK)
         every { user.name() } returns "Sak B. Handlersen"
         every {
-            oppgaveService.hentOppgaveUnderBehandling(behandlingId.toString())
+            oppgaveService.hentOppgaveForAttesterbarBehandling(behandlingId.toString())
         } returns
             mockk<OppgaveIntern> {
                 every { saksbehandler } returns OppgaveSaksbehandler("Noe helt annet")

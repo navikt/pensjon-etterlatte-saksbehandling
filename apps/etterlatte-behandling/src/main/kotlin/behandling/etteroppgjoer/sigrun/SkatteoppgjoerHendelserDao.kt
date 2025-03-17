@@ -14,15 +14,14 @@ class SkatteoppgjoerHendelserDao(
                     prepareStatement(
                         """
                         INSERT INTO skatteoppgjoer_hendelse_kjoringer(
-                            siste_sekvensnummer, antall_hendelser, antall_behandlet, antall_relevante
+                            siste_sekvensnummer, antall_hendelser, antall_relevante
                         ) 
-                        VALUES (?, ?, ?, ?) 
+                        VALUES (?, ?, ?) 
                         """.trimIndent(),
                     )
                 statement.setLong(1, kjoering.sisteSekvensnummer)
                 statement.setInt(2, kjoering.antallHendelser)
-                statement.setInt(3, kjoering.antallBehandlet)
-                statement.setInt(4, kjoering.antallRelevante)
+                statement.setInt(3, kjoering.antallRelevante)
                 statement.executeUpdate().also {
                     krev(it == 1) {
                         "Kunne ikke lagre kjoering for skatteoppgjoerHendelser=$kjoering"
@@ -48,7 +47,6 @@ class SkatteoppgjoerHendelserDao(
                     HendelserKjoering(
                         sisteSekvensnummer = getLong("siste_sekvensnummer"),
                         antallHendelser = getInt("antall_hendelser"),
-                        antallBehandlet = getInt("antall_behandlet"),
                         antallRelevante = getInt("antall_relevante"),
                     )
                 }
@@ -59,6 +57,8 @@ class SkatteoppgjoerHendelserDao(
 data class HendelserKjoering(
     val sisteSekvensnummer: Long,
     val antallHendelser: Int, // antall vi har etterspurt
-    var antallBehandlet: Int, // antall vi har sjekket
     var antallRelevante: Int, // antall vi er interessert i (opprettet forbehandling)
-)
+    var success: Boolean = false,
+) {
+    fun nesteSekvensnummer() = sisteSekvensnummer + 1
+}

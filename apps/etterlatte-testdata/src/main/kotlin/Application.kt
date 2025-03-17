@@ -26,6 +26,7 @@ import io.ktor.server.mustache.Mustache
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
@@ -153,17 +154,17 @@ fun main() {
                 if (localDevelopment) {
                     routing {
                         staticResources("/static", "static")
+                        swaggerUI(path = "opprett-ytelse/swagger", swaggerFile = "testdataSwaggerV1.yaml")
                         api()
                     }
                 } else {
                     install(Authentication) {
                         tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
                     }
-
                     routing {
                         get("/health/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/health/isready") { call.respondText("READY", ContentType.Text.Plain) }
-
+                        swaggerUI(path = "opprett-ytelse/swagger", swaggerFile = "testdataSwaggerV1.yaml")
                         staticResources("/static", "static")
 
                         authenticate {

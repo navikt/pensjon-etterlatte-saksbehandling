@@ -1,34 +1,64 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.logger
 
 class SkatteoppgjoerHendelserService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
+    private val etteroppgjoerService: EtteroppgjoerService,
 ) {
     suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
         val sisteKjoering = inTransaction { dao.hentSisteKjoering() }
-        val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.sisteSekvensnummer).hendelser
+        val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer())
+        var antallRelevanteHendelser = 0
+
+        val kjoering =
+            HendelserKjoering(
+                hendelsesListe.hendelser.last().sekvensnummer,
+                hendelsesListe.hendelser.size,
+                antallRelevanteHendelser,
+            )
 
         inTransaction {
-            val nyKjoering =
-                HendelserKjoering(
-                    hendelsesListe.last().sekvensnummer,
-                    hendelsesListe.size,
-                    0,
-                    0,
-                )
+            for (hendelse in hendelsesListe.hendelser) {
+                val etteroppgjoerResultat =
+                    etteroppgjoerService.skalHaEtteroppgjoer(
+                        hendelse.identifikator,
+                        hendelse.gjelderPeriode.toInt(),
+                    )
 
-            for (hendelse in hendelsesListe) {
-                // TODO: sjekke opp mot etteroppgjoer tabell = skal ha etteroppgjoer
-                // TODO: ..... opprette forbehandling
-                // TODO: ??
+                if (etteroppgjoerResultat.skalHaEtteroppgjoer) {
+                    val etteroppgjoer = etteroppgjoerResultat.etteroppgjoer!!
 
-                nyKjoering.antallBehandlet++
-                nyKjoering.antallRelevante++
+                    // TODO: opprett forbehandling hvis ingen
+
+                    etteroppgjoerService.oppdaterStatus(
+                        etteroppgjoer.sakId,
+                        etteroppgjoer.inntektsaar,
+                        EtteroppgjoerStatus.MOTTATT_HENDELSE,
+                    )
+                    antallRelevanteHendelser++
+                }
             }
 
-            dao.lagreKjoering(nyKjoering)
+            // TODO: lagre med status hvis feiler?
+            dao.lagreKjoering(
+                HendelserKjoering(
+                    hendelsesListe.hendelser.last().sekvensnummer,
+                    hendelsesListe.hendelser.size,
+                    antallRelevanteHendelser,
+                    true,
+                ),
+            )
+        }
+
+        // TODO: annen håndtering hvis jobben feiler?
+        if (!kjoering.success) {
+            logger.error("Siste kjøring av skatteoppgjoerHendelser feilet")
+            dao.lagreKjoering(kjoering)
         }
     }
 }

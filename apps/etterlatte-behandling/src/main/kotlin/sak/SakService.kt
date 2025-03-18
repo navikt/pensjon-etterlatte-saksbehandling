@@ -499,7 +499,7 @@ class SakServiceImpl(
     }
 
     /**
-     * Denne skal aldri brukes uten og også endre enhet. Tor dette bør gjøres i sammenheng.
+     * Denne skal aldri brukes uten å også endre enhet. Tror dette egentlig bør gjøres i sammenheng.
      */
     override fun oppdaterAdressebeskyttelse(
         sakId: SakId,

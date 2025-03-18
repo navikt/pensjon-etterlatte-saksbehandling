@@ -16,7 +16,7 @@ export interface ISakMedUtlandstilknytning {
 }
 
 export interface IKomplettSak extends ISak {
-  adressebeskyttelse?: string
+  adressebeskyttelse?: AdressebeskyttelseGradering
   erSkjermet?: boolean
 }
 
@@ -60,4 +60,18 @@ export const tekstEndringstype: Record<Endringstype, string> = {
   ENDRE_ENHET: 'Bytte av enhet',
   ENDRE_ADRESSEBESKYTTELSE: 'Endret adressebeskyttelse',
   ENDRE_SKJERMING: 'Endret skjerming',
+}
+
+export enum AdressebeskyttelseGradering {
+  STRENGT_FORTROLIG_UTLAND = 'STRENGT_FORTROLIG_UTLAND',
+  STRENGT_FORTROLIG = 'STRENGT_FORTROLIG',
+  FORTROLIG = 'FORTROLIG',
+  UGRADERT = 'UGRADERT',
+}
+
+export const tekstAdressebeskyttelseGradering: Record<AdressebeskyttelseGradering, string> = {
+  STRENGT_FORTROLIG_UTLAND: 'Strengt fortrolig (utland)',
+  STRENGT_FORTROLIG: 'Strengt fortrolig',
+  FORTROLIG: 'Fortrolig',
+  UGRADERT: 'Ugradert',
 }

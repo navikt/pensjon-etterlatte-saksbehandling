@@ -5,7 +5,14 @@ import { hentSaksendringer } from '~shared/api/sak'
 import Spinner from '~shared/Spinner'
 import { BodyShort, Box, Detail, List } from '@navikt/ds-react'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
-import { Endringstype, Identtype, ISaksendring, tekstEndringstype } from '~shared/types/sak'
+import {
+  AdressebeskyttelseGradering,
+  Endringstype,
+  Identtype,
+  ISaksendring,
+  tekstAdressebeskyttelseGradering,
+  tekstEndringstype,
+} from '~shared/types/sak'
 import { BagdeIcon, Buildings3Icon, FolderIcon, PadlockLockedIcon } from '@navikt/aksel-icons'
 import { ENHETER } from '~shared/types/Enhet'
 
@@ -37,16 +44,20 @@ const Endringstekst = ({ endring }: { endring: ISaksendring }) => {
       </>
     )
   } else if (endring.endringstype === Endringstype.ENDRE_ADRESSEBESKYTTELSE) {
-    const adressebeskyttelseFoer = endring.foer.adressebeskyttelse ?? 'UGRADERT'
-    const adressebeskyttelseEtter = endring.etter.adressebeskyttelse ?? 'UGRADERT'
+    const adressebeskyttelseFoer = endring.foer.adressebeskyttelse
+      ? tekstAdressebeskyttelseGradering[endring.foer.adressebeskyttelse]
+      : tekstAdressebeskyttelseGradering[AdressebeskyttelseGradering.UGRADERT]
+    const adressebeskyttelseEtter = endring.etter.adressebeskyttelse
+      ? tekstAdressebeskyttelseGradering[endring.etter.adressebeskyttelse]
+      : tekstAdressebeskyttelseGradering[AdressebeskyttelseGradering.UGRADERT]
     return (
       <>
         Fra {adressebeskyttelseFoer} til {adressebeskyttelseEtter}
       </>
     )
   } else if (endring.endringstype === Endringstype.ENDRE_SKJERMING) {
-    const skjermingFoer = endring.foer.erSkjermet === true ? 'SKJERMET' : 'IKKE_SKJERMET'
-    const skjermingEtter = endring.etter.erSkjermet === true ? 'SKJERMET' : 'IKKE_SKJERMET'
+    const skjermingFoer = endring.foer.erSkjermet === true ? 'Skjermet' : 'Ikke skjermet'
+    const skjermingEtter = endring.etter.erSkjermet === true ? 'Skjermet' : 'Ikke skjermet'
     return (
       <>
         Fra {skjermingFoer} til {skjermingEtter}

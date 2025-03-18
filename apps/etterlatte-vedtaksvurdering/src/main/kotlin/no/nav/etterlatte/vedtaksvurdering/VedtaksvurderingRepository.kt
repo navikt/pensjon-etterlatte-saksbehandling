@@ -234,6 +234,35 @@ class VedtaksvurderingRepository(
         }
     }
 
+    fun hentVedtakMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        sakType: SakType? = null,
+        tx: TransactionalSession? = null,
+    ): List<Vedtak> {
+        val hentVedtak =
+            """
+            SELECT * FROM vedtak v
+            JOIN utbetalingsperiode u ON v.id = u.vedtakid
+            WHERE EXTRACT(YEAR FROM u.datofom) = :aar
+            ${if (sakType == null) "" else "AND saktype = :saktype"}
+            """.trimIndent()
+
+        return tx.session {
+            hentListe(
+                queryString = hentVedtak,
+                params = {
+                    mapOf(
+                        "aar" to inntektsaar,
+                        "saktype" to sakType?.name,
+                    )
+                },
+            ) {
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                it.toVedtak(utbetalingsperioder)
+            }
+        }
+    }
+
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
         sakType: SakType? = null,
@@ -494,6 +523,8 @@ class VedtaksvurderingRepository(
             ytelseFoerAvkorting = int("ytelseFoer"),
             ytelseEtterAvkorting = int("ytelseEtter"),
         )
+
+    private fun Row.toSakId() = SakId(int("sakid").toLong())
 
     private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) =
         Vedtak(

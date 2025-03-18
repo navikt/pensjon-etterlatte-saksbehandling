@@ -90,7 +90,7 @@ class BehandlingFactory(
             } else {
                 logger.warn("Enheten fra requesten ble ulik enn opprett/finn sak sa, ba ikke om spesialenhet. Ba om enhet ${request.enhet}")
                 if (Enheter.erSpesialTilgangsEnheter(sak.enhet)) {
-                    sikkerLogg.info("Satt spesisalenhet ${sak.enhet}")
+                    sikkerLogg.info("Satt spesisalenhet: ${sak.enhet} for sakid: ${sak.id} ")
                 }
             }
         }

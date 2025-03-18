@@ -83,7 +83,7 @@ fun Route.etteroppgjoerRoutes(
             call.respond(HttpStatusCode.OK)
         }
 
-        post("/start-etteroppgjoer/{inntektsaar}") {
+        post("/{inntektsaar}/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             val inntektsaar =
                 krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {

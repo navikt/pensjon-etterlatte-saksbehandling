@@ -16,10 +16,12 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -38,6 +40,7 @@ enum class EtteroppgjoerToggles(
 fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
     skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
+    etteroppgjoerService: EtteroppgjoerService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer") {
@@ -76,9 +79,22 @@ fun Route.etteroppgjoerRoutes(
 
         post("/skatteoppgjoerhendelser/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
-            val request = call.receive<HendelseKjoeringRequest>()
-            skatteoppgjoerHendelserService.startHendelsesKjoering(request)
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val request = call.receive<HendelseKjoeringRequest>()
+                skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("/{inntektsaar}/start-kjoering") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            kunSystembruker {
+                val inntektsaar =
+                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                        "Inntektsaar mangler"
+                    }
+                etteroppgjoerService.finnSakerForEtteroppgjoer(inntektsaar)
+            }
         }
     }
 }

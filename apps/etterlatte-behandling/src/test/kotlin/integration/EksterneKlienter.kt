@@ -247,6 +247,13 @@ class VedtakKlientTest : VedtakKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto? = null
+
+    override suspend fun hentSakerMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<SakId> {
+        TODO("Not yet implemented")
+    }
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {

@@ -171,84 +171,6 @@ class VedtaksvurderingRepository(
                 ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
         }
 
-    private fun slettUtbetalingsperioder(
-        vedtakId: Long,
-        tx: TransactionalSession,
-    ) = queryOf(
-        statement = """
-                DELETE FROM utbetalingsperiode
-                WHERE vedtakid = :vedtakid
-                """,
-        paramMap =
-            mapOf(
-                "vedtakid" to vedtakId,
-            ),
-    ).let { query -> tx.run(query.asUpdate) }
-
-    private fun opprettUtbetalingsperioder(
-        vedtakId: Long,
-        utbetalingsperioder: List<Utbetalingsperiode>,
-        tx: TransactionalSession,
-    ) = utbetalingsperioder.forEach {
-        queryOf(
-            statement = """
-                    INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep, regelverk) 
-                    VALUES (:vedtakid, :datofom, :datotom, :type, :beloep, :regelverk)
-                    """,
-            paramMap =
-                mapOf(
-                    "vedtakid" to vedtakId,
-                    "datofom" to
-                        it.periode.fom
-                            .atDay(1)
-                            .let(Date::valueOf),
-                    "datotom" to
-                        it.periode.tom
-                            ?.atEndOfMonth()
-                            ?.let(Date::valueOf),
-                    "type" to it.type.name,
-                    "beloep" to it.beloep,
-                    "regelverk" to it.regelverk.name,
-                ),
-        ).let { query -> tx.run(query.asUpdate) }
-    }
-
-    private fun slettAvkortetYtelsePerioder(
-        vedtakId: Long,
-        tx: TransactionalSession,
-    ) = queryOf(
-        statement = """
-                DELETE FROM avkortet_ytelse_periode
-                WHERE vedtakid = :vedtakid
-                """,
-        paramMap =
-            mapOf(
-                "vedtakid" to vedtakId,
-            ),
-    ).let { query -> tx.run(query.asUpdate) }
-
-    private fun opprettAvkortetYtelsePerioder(
-        vedtakId: Long,
-        avkortetYtelse: List<AvkortetYtelseDto>,
-        tx: TransactionalSession,
-    ) = tx.batchPreparedNamedStatement(
-        statement = """
-                    INSERT INTO avkortet_ytelse_periode(vedtakid, datofom, datotom, type, ytelseFoer, ytelseEtter) 
-                    VALUES (:vedtakid, :datofom, :datotom, :type, :ytelseFoer, :ytelseEtter)
-                    """,
-        params =
-            avkortetYtelse.map {
-                mapOf(
-                    "vedtakid" to vedtakId,
-                    "datofom" to it.fom.atDay(1).let(Date::valueOf),
-                    "datotom" to it.tom?.atEndOfMonth()?.let(Date::valueOf),
-                    "type" to it.type,
-                    "ytelseFoer" to it.ytelseFoerAvkorting,
-                    "ytelseEtter" to it.ytelseEtterAvkorting,
-                )
-            },
-    )
-
     fun hentVedtak(
         vedtakId: Long,
         tx: TransactionalSession? = null,
@@ -290,11 +212,6 @@ class VedtaksvurderingRepository(
             }
         }
 
-    private fun hentVedtakNonNull(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak = krevIkkeNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
-
     fun hentVedtakForSak(
         sakId: SakId,
         tx: TransactionalSession? = null,
@@ -313,6 +230,35 @@ class VedtaksvurderingRepository(
                 params = { mapOf("sakId" to sakId.sakId) },
             ) {
                 it.toVedtak(emptyList())
+            }
+        }
+    }
+
+    fun hentVedtakMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        sakType: SakType? = null,
+        tx: TransactionalSession? = null,
+    ): List<Vedtak> {
+        val hentVedtak =
+            """
+            SELECT * FROM vedtak v
+            JOIN utbetalingsperiode u ON v.id = u.vedtakid
+            WHERE EXTRACT(YEAR FROM u.datofom) = :aar
+            ${if (sakType == null) "" else "AND saktype = :saktype"}
+            """.trimIndent()
+
+        return tx.session {
+            hentListe(
+                queryString = hentVedtak,
+                params = {
+                    mapOf(
+                        "aar" to inntektsaar,
+                        "saktype" to sakType?.name,
+                    )
+                },
+            ) {
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                it.toVedtak(utbetalingsperioder)
             }
         }
     }
@@ -346,17 +292,6 @@ class VedtaksvurderingRepository(
             }
         }
     }
-
-    private fun hentUtbetalingsPerioder(
-        vedtakId: Long,
-        tx: TransactionalSession? = null,
-    ): List<Utbetalingsperiode> =
-        tx.session {
-            hentListe(
-                queryString = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
-                params = { mapOf("vedtakid" to vedtakId) },
-            ) { it.toUtbetalingsperiode() }
-        }
 
     fun hentAvkortetYtelsePerioder(
         vedtakIds: Set<Long>,
@@ -499,86 +434,6 @@ class VedtaksvurderingRepository(
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
-    private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) =
-        Vedtak(
-            id = long("id"),
-            sakId = SakId(long("sakid")),
-            sakType = SakType.valueOf(string("saktype")),
-            behandlingId = uuid("behandlingid"),
-            soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
-            status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
-            type = string("type").let { VedtakType.valueOf(it) },
-            vedtakFattet =
-                stringOrNull("saksbehandlerid")?.let {
-                    VedtakFattet(
-                        ansvarligSaksbehandler = string("saksbehandlerid"),
-                        ansvarligEnhet = Enhetsnummer(string("fattetVedtakEnhet")),
-                        tidspunkt = sqlTimestamp("datofattet").toTidspunkt(),
-                    )
-                },
-            attestasjon =
-                stringOrNull("attestant")?.let {
-                    Attestasjon(
-                        attestant = string("attestant"),
-                        attesterendeEnhet = Enhetsnummer(string("attestertVedtakEnhet")),
-                        tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
-                    )
-                },
-            innhold =
-                when (string("type").let { VedtakType.valueOf(it) }) {
-                    VedtakType.OPPHOER,
-                    VedtakType.AVSLAG,
-                    VedtakType.ENDRING,
-                    VedtakType.INNVILGELSE,
-                    ->
-                        VedtakInnhold.Behandling(
-                            behandlingType = BehandlingType.valueOf(string("behandlingtype")),
-                            virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
-                            vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
-                            beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
-                            avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
-                            utbetalingsperioder = utbetalingsperioder,
-                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { Revurderingaarsak.valueOf(it) },
-                            revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
-                            opphoerFraOgMed = sqlDateOrNull("opphoer_fom")?.toLocalDate()?.let { YearMonth.from(it) },
-                        )
-
-                    VedtakType.TILBAKEKREVING ->
-                        VedtakInnhold.Tilbakekreving(
-                            tilbakekreving = string("tilbakekreving").let { objectMapper.readValue(it) },
-                        )
-
-                    VedtakType.AVVIST_KLAGE ->
-                        VedtakInnhold.Klage(
-                            klage = string("klage").let { objectMapper.readValue(it) },
-                        )
-                },
-        )
-
-    private fun Row.toUtbetalingsperiode() =
-        Utbetalingsperiode(
-            id = long("id"),
-            periode =
-                Periode(
-                    fom = YearMonth.from(localDate("datoFom")),
-                    tom = localDateOrNull("datoTom")?.let(YearMonth::from),
-                ),
-            beloep = bigDecimalOrNull("beloep"),
-            type = UtbetalingsperiodeType.valueOf(string("type")),
-            regelverk = string("regelverk").let { Regelverk.valueOf(it) },
-        )
-
-    private fun Row.toAvkortetYtelsePeriode() =
-        AvkortetYtelsePeriode(
-            id = uuid("id"),
-            vedtakId = long("vedtakid"),
-            fom = YearMonth.from(localDate("datofom")),
-            tom = localDateOrNull("datotom")?.let(YearMonth::from),
-            type = string("type"),
-            ytelseFoerAvkorting = int("ytelseFoer"),
-            ytelseEtterAvkorting = int("ytelseEtter"),
-        )
-
     fun tilbakestillIkkeIverksatteVedtak(
         behandlingId: UUID,
         tx: TransactionalSession? = null,
@@ -638,5 +493,181 @@ class VedtaksvurderingRepository(
             params = mapOf("samId" to samId),
             loggtekst = "Sletter innslag for manuell samordning pga feil ved ekstern oppdatering",
         )
+    }
+
+    private fun hentVedtakNonNull(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): Vedtak = krevIkkeNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
+
+    private fun Row.toUtbetalingsperiode() =
+        Utbetalingsperiode(
+            id = long("id"),
+            periode =
+                Periode(
+                    fom = YearMonth.from(localDate("datoFom")),
+                    tom = localDateOrNull("datoTom")?.let(YearMonth::from),
+                ),
+            beloep = bigDecimalOrNull("beloep"),
+            type = UtbetalingsperiodeType.valueOf(string("type")),
+            regelverk = string("regelverk").let { Regelverk.valueOf(it) },
+        )
+
+    private fun Row.toAvkortetYtelsePeriode() =
+        AvkortetYtelsePeriode(
+            id = uuid("id"),
+            vedtakId = long("vedtakid"),
+            fom = YearMonth.from(localDate("datofom")),
+            tom = localDateOrNull("datotom")?.let(YearMonth::from),
+            type = string("type"),
+            ytelseFoerAvkorting = int("ytelseFoer"),
+            ytelseEtterAvkorting = int("ytelseEtter"),
+        )
+
+    private fun Row.toSakId() = SakId(int("sakid").toLong())
+
+    private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) =
+        Vedtak(
+            id = long("id"),
+            sakId = SakId(long("sakid")),
+            sakType = SakType.valueOf(string("saktype")),
+            behandlingId = uuid("behandlingid"),
+            soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
+            status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
+            type = string("type").let { VedtakType.valueOf(it) },
+            vedtakFattet =
+                stringOrNull("saksbehandlerid")?.let {
+                    VedtakFattet(
+                        ansvarligSaksbehandler = string("saksbehandlerid"),
+                        ansvarligEnhet = Enhetsnummer(string("fattetVedtakEnhet")),
+                        tidspunkt = sqlTimestamp("datofattet").toTidspunkt(),
+                    )
+                },
+            attestasjon =
+                stringOrNull("attestant")?.let {
+                    Attestasjon(
+                        attestant = string("attestant"),
+                        attesterendeEnhet = Enhetsnummer(string("attestertVedtakEnhet")),
+                        tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
+                    )
+                },
+            innhold =
+                when (string("type").let { VedtakType.valueOf(it) }) {
+                    VedtakType.OPPHOER,
+                    VedtakType.AVSLAG,
+                    VedtakType.ENDRING,
+                    VedtakType.INNVILGELSE,
+                    ->
+                        VedtakInnhold.Behandling(
+                            behandlingType = BehandlingType.valueOf(string("behandlingtype")),
+                            virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
+                            vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
+                            beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
+                            avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
+                            utbetalingsperioder = utbetalingsperioder,
+                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { Revurderingaarsak.valueOf(it) },
+                            revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
+                            opphoerFraOgMed = sqlDateOrNull("opphoer_fom")?.toLocalDate()?.let { YearMonth.from(it) },
+                        )
+
+                    VedtakType.TILBAKEKREVING ->
+                        VedtakInnhold.Tilbakekreving(
+                            tilbakekreving = string("tilbakekreving").let { objectMapper.readValue(it) },
+                        )
+
+                    VedtakType.AVVIST_KLAGE ->
+                        VedtakInnhold.Klage(
+                            klage = string("klage").let { objectMapper.readValue(it) },
+                        )
+                },
+        )
+
+    private fun hentUtbetalingsPerioder(
+        vedtakId: Long,
+        tx: TransactionalSession? = null,
+    ): List<Utbetalingsperiode> =
+        tx.session {
+            hentListe(
+                queryString = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
+                params = { mapOf("vedtakid" to vedtakId) },
+            ) { it.toUtbetalingsperiode() }
+        }
+
+    private fun slettAvkortetYtelsePerioder(
+        vedtakId: Long,
+        tx: TransactionalSession,
+    ) = queryOf(
+        statement = """
+                DELETE FROM avkortet_ytelse_periode
+                WHERE vedtakid = :vedtakid
+                """,
+        paramMap =
+            mapOf(
+                "vedtakid" to vedtakId,
+            ),
+    ).let { query -> tx.run(query.asUpdate) }
+
+    private fun opprettAvkortetYtelsePerioder(
+        vedtakId: Long,
+        avkortetYtelse: List<AvkortetYtelseDto>,
+        tx: TransactionalSession,
+    ) = tx.batchPreparedNamedStatement(
+        statement = """
+                    INSERT INTO avkortet_ytelse_periode(vedtakid, datofom, datotom, type, ytelseFoer, ytelseEtter) 
+                    VALUES (:vedtakid, :datofom, :datotom, :type, :ytelseFoer, :ytelseEtter)
+                    """,
+        params =
+            avkortetYtelse.map {
+                mapOf(
+                    "vedtakid" to vedtakId,
+                    "datofom" to it.fom.atDay(1).let(Date::valueOf),
+                    "datotom" to it.tom?.atEndOfMonth()?.let(Date::valueOf),
+                    "type" to it.type,
+                    "ytelseFoer" to it.ytelseFoerAvkorting,
+                    "ytelseEtter" to it.ytelseEtterAvkorting,
+                )
+            },
+    )
+
+    private fun slettUtbetalingsperioder(
+        vedtakId: Long,
+        tx: TransactionalSession,
+    ) = queryOf(
+        statement = """
+                DELETE FROM utbetalingsperiode
+                WHERE vedtakid = :vedtakid
+                """,
+        paramMap =
+            mapOf(
+                "vedtakid" to vedtakId,
+            ),
+    ).let { query -> tx.run(query.asUpdate) }
+
+    private fun opprettUtbetalingsperioder(
+        vedtakId: Long,
+        utbetalingsperioder: List<Utbetalingsperiode>,
+        tx: TransactionalSession,
+    ) = utbetalingsperioder.forEach {
+        queryOf(
+            statement = """
+                    INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep, regelverk) 
+                    VALUES (:vedtakid, :datofom, :datotom, :type, :beloep, :regelverk)
+                    """,
+            paramMap =
+                mapOf(
+                    "vedtakid" to vedtakId,
+                    "datofom" to
+                        it.periode.fom
+                            .atDay(1)
+                            .let(Date::valueOf),
+                    "datotom" to
+                        it.periode.tom
+                            ?.atEndOfMonth()
+                            ?.let(Date::valueOf),
+                    "type" to it.type.name,
+                    "beloep" to it.beloep,
+                    "regelverk" to it.regelverk.name,
+                ),
+        ).let { query -> tx.run(query.asUpdate) }
     }
 }

@@ -82,6 +82,11 @@ interface VedtakKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto?
+
+    suspend fun hentSakerMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<SakId>
 }
 
 class VedtakKlientException(
@@ -392,6 +397,32 @@ class VedtakKlientImpl(
                     meta = mapOf("behandlingId" to behandlingId),
                 )
             }
+        }
+    }
+
+    override suspend fun hentSakerMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<SakId> {
+        try {
+            logger.info("Henter sakIder med utbetaling for inntektsaar")
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vedtak/sak/med-utbetaling/{$inntektsaar}",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Kunne ikke hente saker med utbetaling for inntektsaar $inntektsaar",
+                e,
+            )
         }
     }
 }

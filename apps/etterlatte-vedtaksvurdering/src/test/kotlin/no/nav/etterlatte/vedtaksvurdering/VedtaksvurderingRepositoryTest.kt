@@ -467,21 +467,56 @@ internal class VedtaksvurderingRepositoryTest(
     }
 
     @Test
-    fun `skal hente vedtak for fnr selv om ikke saktype er spesifisert`() {
+    fun `hent vedtak med utbetalingsperiode for aar`() {
         val soeker1 = Folkeregisteridentifikator.of(FNR_1)
+        val sakid = SakId(10)
 
-        val vedtak =
+        listOf(
             opprettVedtak(
-                sakId = SakId(10),
+                sakId = sakid,
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2023, Month.DECEMBER),
+                status = VedtakStatus.IVERKSATT,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            ),
+            opprettVedtak(
+                sakId = sakid,
                 soeker = soeker1,
                 virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
                 status = VedtakStatus.IVERKSATT,
-            )
-        repository.opprettVedtak(vedtak)
-        repository.iverksattVedtak(vedtak.behandlingId)
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            ),
+        ).map { repository.opprettVedtak(it) }
+            .forEach { repository.iverksattVedtak(it.behandlingId) }
 
-        val results = repository.hentFerdigstilteVedtak(soeker1)
+        val results = repository.hentVedtakMedUtbetalingForInntektsaar(2023, SakType.OMSTILLINGSSTOENAD)
 
-        results.size shouldBe 1
+        with(results.get(0)) {
+            (innhold as VedtakInnhold.Behandling).let {
+                it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.DECEMBER)
+                it.utbetalingsperioder.first().let { utbetalingsperiode ->
+                    utbetalingsperiode.periode shouldBe Periode(YearMonth.of(2023, Month.DECEMBER), null)
+                }
+            }
+        }
+
+        @Test
+        fun `skal hente vedtak for fnr selv om ikke saktype er spesifisert`() {
+            val soeker1 = Folkeregisteridentifikator.of(FNR_1)
+
+            val vedtak =
+                opprettVedtak(
+                    sakId = SakId(10),
+                    soeker = soeker1,
+                    virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                    status = VedtakStatus.IVERKSATT,
+                )
+            repository.opprettVedtak(vedtak)
+            repository.iverksattVedtak(vedtak.behandlingId)
+
+            val results = repository.hentFerdigstilteVedtak(soeker1)
+
+            results.size shouldBe 1
+        }
     }
 }

@@ -664,6 +664,7 @@ internal class ApplicationContext(
             dao = etteroppgjoerDao,
             sakLesDao = sakLesDao,
             sakService = sakService,
+            vedtakKlient = vedtakKlient,
         )
 
     val etteroppgjoerForbehandlingService =

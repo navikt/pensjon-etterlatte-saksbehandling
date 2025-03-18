@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
+import no.nav.etterlatte.logger
 
 fun Route.barnepensjonVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -32,6 +33,7 @@ fun Route.barnepensjonVedtakRoute(
         get {
             val paaDato = call.dato("paaDato") ?: throw ManglerFomDatoException()
             val fnr = call.fnr
+            logger.info("GETTILPOST: sjekker om løpende barnepensjon på gammel løsning")
 
             val harLoependeBarnepensjonYtelsePaaDato =
                 try {

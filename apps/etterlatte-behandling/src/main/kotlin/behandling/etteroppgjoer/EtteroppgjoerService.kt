@@ -24,7 +24,8 @@ class EtteroppgjoerService(
     }
 
     suspend fun finnSakerForEtteroppgjoer(inntektsaar: Int) {
-        val sakerMedUtbetaling = vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
+        val sakerMedUtbetaling =
+            vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
 
         sakerMedUtbetaling
             .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
@@ -34,7 +35,10 @@ class EtteroppgjoerService(
                     inntektsaar,
                     EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
                 )
-                logger.info("Oppretter etteroppgjør for sakId=$sakId, inntektsaar=$inntektsaar")
+                logger.info(
+                    "Oppretter etteroppgjør for inntektsaar=$inntektsaar med " +
+                        "status ${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER} for sakId=$sakId",
+                )
             }
     }
 

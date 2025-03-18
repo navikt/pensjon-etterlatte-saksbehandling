@@ -19,8 +19,14 @@ class EtteroppgjoerService(
         return SkalHaEtteroppgjoerResultat(etteroppgjoer != null, etteroppgjoer)
     }
 
-    fun finnAlleEtteroppgjoerOgLagre(inntektsaar: Int) {
+    fun finnSakerForEtteroppgjoer(inntektsaar: Int) {
         // TODO finn alle som har hatt utbetaling i inntektsår og lagre med status EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+
+        // TODO finn alle saker som har hatt utbetaling i inntektsår
+
+        // TODO opprett etteroppgjoer med status VENTER_PAA_SKATTEOPPGJOER
+
+        // TODO lagre
     }
 
     fun oppdaterStatus(

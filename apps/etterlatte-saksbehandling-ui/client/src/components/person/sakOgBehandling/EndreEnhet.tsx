@@ -42,6 +42,8 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
     resetApiCall()
   }
 
+  const enhetErVikafossenEllerEgneAnsatte = (enhet: string) => enhet === '2103' || enhet === '4883'
+
   return (
     <div>
       <Button
@@ -82,6 +84,18 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                   </Button>
                 )}
               </HStack>
+            </VStack>
+          ) : enhetErVikafossenEllerEgneAnsatte(gjeldendeEnhet) ? (
+            <VStack gap="4">
+              <Alert variant="warning">
+                Saken tilhører {ENHETER[gjeldendeEnhet]} og kan ikke flyttes til en annen enhet i Gjenny på grunn av
+                adressebeskyttelse eller skjerming. Dersom saken skal flyttes, må dette endres i Pdl eller
+                skjermingsløsningen. Dette vil føre til at saken oppdateres og enhet setter riktig i Gjenny.
+              </Alert>
+
+              <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+                Lukk
+              </Button>
             </VStack>
           ) : (
             <VStack gap="4">

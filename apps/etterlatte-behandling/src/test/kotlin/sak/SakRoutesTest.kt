@@ -1,6 +1,8 @@
 package no.nav.etterlatte.sak
 
+import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -34,6 +36,7 @@ import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -42,6 +45,7 @@ import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -50,6 +54,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
 import kotlin.random.Random
 
@@ -180,6 +186,38 @@ internal class SakRoutesTest {
             verify(exactly = 0) { sakService.finnSak(any()) }
             verify(exactly = 0) { oppgaveService.hentOppgaverForSak(any()) }
             verify(exactly = 0) { oppgaveService.fjernSaksbehandler(any()) }
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Enheter::class, names = ["STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND", "EGNE_ANSATTE"], mode = EnumSource.Mode.INCLUDE)
+    fun `Returnerer badrequest ved endring av enhet med vikafossen eller egne ansatte`(enhet: Enheter) {
+        coEvery {
+            sakService.oppdaterEnhet(any())
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
+        } just runs
+        every { sakService.finnSak(any()) } returns
+            Sak(
+                ident = SOEKER_FOEDSELSNUMMER.value,
+                sakType = SakType.BARNEPENSJON,
+                id = randomSakId(),
+                enhet = enhet.enhetNr,
+            )
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/1/endre-enhet") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr, kommentar = "Lorem ipsum"))
+                }
+            val exceptionResponse: ExceptionResponse = response.body()
+
+            exceptionResponse.status shouldBe 400
+            exceptionResponse.code shouldBe "ENDRE_ENHET_UGYLDIG"
+
+            verify(exactly = 1) { sakService.finnSak(any()) }
         }
     }
 

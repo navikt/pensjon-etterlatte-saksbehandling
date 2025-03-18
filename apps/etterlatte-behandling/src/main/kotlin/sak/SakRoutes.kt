@@ -312,8 +312,17 @@ internal fun Route.sakWebRoutes(
                 kunSaksbehandlerMedSkrivetilgang { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>().validate()
                     try {
-                        inTransaction { sakService.finnSak(sakId) }
-                            ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
+                        val sak =
+                            inTransaction { sakService.finnSak(sakId) }
+                                ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
+
+                        // Tillater kun endring fra vikafossen og egne ansatte via pdl-hendelser eller egne-ansatte-lytter
+                        if (sak.enhet !in Enheter.enheterForVanligSaksbehandlere()) {
+                            throw UgyldigForespoerselException(
+                                "ENDRE_ENHET_UGYLDIG",
+                                "Kan ikke endre enhet da dette ikke er en vanlig saksbehandlingsenhet",
+                            )
+                        }
 
                         val sakMedEnhet =
                             SakMedEnhet(

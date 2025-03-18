@@ -116,45 +116,6 @@ class OpprettFamilie(
                 }
             }
 
-            post("opprett_ytelse") {
-                try {
-
-                    val params = call.receiveParameters()
-                    val ytelse = SoeknadType.valueOf(params["ytelse"]!!)
-                    val behandlingssteg = Behandlingssteg.IVERKSATT
-                    val gjenlevende = params["gjenlevende"]!!
-                    val avdoed = params["avdoed"]!!
-                    val barnListe = params.getAll("barnListe")!!
-                    val soeker =
-                        when (ytelse) {
-                            SoeknadType.BARNEPENSJON -> params["barn"]!!
-                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
-                        }
-                    if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
-                        call.respond(HttpStatusCode.BadRequest, "Påkrevde felter mangler")
-                    }
-                    val request =
-                        NySoeknadRequest(
-                            ytelse,
-                            avdoed,
-                            gjenlevende,
-                            barnListe,
-                            soeker = soeker,
-                        )
-
-                    val brukerId =
-                        when (dev) {
-                            true -> ""
-                            false -> brukerTokenInfo.ident()
-                        }
-
-                    val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
-                    call.respond(HttpStatusCode.OK, "Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}")
-                } catch (e: Exception) {
-                    call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
-                }
-            }
-
             post("send-soeknad") {
                 try {
 

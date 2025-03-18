@@ -65,16 +65,20 @@ class VedtaksvurderingSamordningKlient(
         callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
         logger.info("Henter vedtaksliste, fomDato=$fomDato")
+        val erMaskinPorten = callerContext is MaskinportenTpContext
+        if (erMaskinPorten) {
+            logger.info("Henter vedtaksliste med orgnr ${callerContext.organisasjonsnr}")
+        }
         return try {
             httpClient
                 .post(vedtaksvurderingUrl) {
                     parameter("sakstype", sakType)
                     parameter("fomDato", fomDato)
-                    if (callerContext is MaskinportenTpContext) {
+                    if (erMaskinPorten) {
                         header(
                             "orgnr",
                             callerContext.organisasjonsnr,
-                        ).also { logger.info("Henter vedtaksliste med orgnr $it") }
+                        )
                     }
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))

@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
+import no.nav.etterlatte.logger
 
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -70,7 +71,9 @@ fun Route.samordningVedtakRoute(
             val tpnummer =
                 call.request.headers["tpnr"]
                     ?: throw ManglerTpNrException()
-
+            val tpnr = Tjenestepensjonnummer(tpnummer)
+            val organisasjonsnr = call.orgNummer
+            logger.info("GETTILPOST: Henter vedtak på gammel løsning for orgnr $organisasjonsnr")
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
@@ -78,8 +81,8 @@ fun Route.samordningVedtakRoute(
                         fnr = Folkeregisteridentifikator.of(fnr),
                         context =
                             MaskinportenTpContext(
-                                tpnr = Tjenestepensjonnummer(tpnummer),
-                                organisasjonsnr = call.orgNummer,
+                                tpnr = tpnr,
+                                organisasjonsnr = organisasjonsnr,
                             ),
                     )
                 } catch (e: IllegalArgumentException) {
@@ -136,7 +139,7 @@ fun Route.samordningVedtakRoute(
                     ?: throw ManglerFomDatoException()
 
             val fnr = call.fnr
-
+            logger.info("GETTILPOST: Henter vedtak på gammel løsning")
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(

@@ -44,23 +44,19 @@ const Endringstekst = ({ endring }: { endring: ISaksendring }) => {
       </>
     )
   } else if (endring.endringstype === Endringstype.ENDRE_ADRESSEBESKYTTELSE) {
-    const adressebeskyttelseFoer = endring.foer.adressebeskyttelse
-      ? tekstAdressebeskyttelseGradering[endring.foer.adressebeskyttelse]
-      : tekstAdressebeskyttelseGradering[AdressebeskyttelseGradering.UGRADERT]
-    const adressebeskyttelseEtter = endring.etter.adressebeskyttelse
-      ? tekstAdressebeskyttelseGradering[endring.etter.adressebeskyttelse]
-      : tekstAdressebeskyttelseGradering[AdressebeskyttelseGradering.UGRADERT]
+    const adressebeskyttelseFoer = endring.foer.adressebeskyttelse ?? AdressebeskyttelseGradering.UGRADERT
+    const adressebeskyttelseEtter = endring.etter.adressebeskyttelse ?? AdressebeskyttelseGradering.UGRADERT
     return (
       <>
-        Fra {adressebeskyttelseFoer} til {adressebeskyttelseEtter}
+        Fra {tekstAdressebeskyttelseGradering[adressebeskyttelseFoer]} til{' '}
+        {tekstAdressebeskyttelseGradering[adressebeskyttelseEtter]}
       </>
     )
   } else if (endring.endringstype === Endringstype.ENDRE_SKJERMING) {
-    const skjermingFoer = endring.foer.erSkjermet === true ? 'Skjermet' : 'Ikke skjermet'
-    const skjermingEtter = endring.etter.erSkjermet === true ? 'Skjermet' : 'Ikke skjermet'
+    const skjermetVerdi = (skjermet?: boolean) => (skjermet === true ? 'Skjermet' : 'Ikke skjermet')
     return (
       <>
-        Fra {skjermingFoer} til {skjermingEtter}
+        Fra {skjermetVerdi(endring.foer.erSkjermet)} til {skjermetVerdi(endring.etter.erSkjermet)}
       </>
     )
   }

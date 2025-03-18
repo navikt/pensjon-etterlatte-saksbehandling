@@ -89,7 +89,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/sak/har-utbetaling/{inntektsaar}") {
+        get("/sak/med-utbetaling/{inntektsaar}") {
             val inntektsaar =
                 krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
                     "Inntektsaar mangler"

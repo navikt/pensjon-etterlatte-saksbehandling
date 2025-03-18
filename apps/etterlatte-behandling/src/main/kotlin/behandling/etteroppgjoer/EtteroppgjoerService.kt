@@ -1,7 +1,10 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.logger
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 
@@ -9,6 +12,7 @@ class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
     val sakLesDao: SakLesDao,
     val sakService: SakService,
+    val vedtakKlient: VedtakKlient,
 ) {
     fun skalHaEtteroppgjoer(
         ident: String,
@@ -19,14 +23,19 @@ class EtteroppgjoerService(
         return SkalHaEtteroppgjoerResultat(etteroppgjoer != null, etteroppgjoer)
     }
 
-    fun finnSakerForEtteroppgjoer(inntektsaar: Int) {
-        // TODO finn alle som har hatt utbetaling i inntektsår og lagre med status EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+    suspend fun finnSakerForEtteroppgjoer(inntektsaar: Int) {
+        val sakerMedUtbetaling = vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
 
-        // TODO finn alle saker som har hatt utbetaling i inntektsår
-
-        // TODO opprett etteroppgjoer med status VENTER_PAA_SKATTEOPPGJOER
-
-        // TODO lagre
+        sakerMedUtbetaling
+            .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
+            .forEach { sakId ->
+                dao.lagerEtteroppgjoer(
+                    sakId,
+                    inntektsaar,
+                    EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                )
+                logger.info("Oppretter etteroppgjør for sakId=$sakId, inntektsaar=$inntektsaar")
+            }
     }
 
     fun oppdaterStatus(

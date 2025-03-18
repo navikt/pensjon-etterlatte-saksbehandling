@@ -16,6 +16,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -38,6 +39,7 @@ enum class EtteroppgjoerToggles(
 fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
     skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
+    etteroppgjoerService: EtteroppgjoerService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer") {
@@ -79,6 +81,15 @@ fun Route.etteroppgjoerRoutes(
             val request = call.receive<HendelseKjoeringRequest>()
             skatteoppgjoerHendelserService.startHendelsesKjoering(request)
             call.respond(HttpStatusCode.OK)
+        }
+
+        post("/etteroppgjoer/{inntektsaar}") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            val inntektsaar =
+                krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                    "Inntektsaar mangler"
+                }
+            etteroppgjoerService.finnSakerForEtteroppgjoer(inntektsaar)
         }
     }
 }

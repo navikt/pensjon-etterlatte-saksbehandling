@@ -138,7 +138,7 @@ class DollyFeature(
                 }
             }
 
-            post("opprett_ytelse") {
+            post("opprett-ytelse") {
                 try {
 
                     val params = call.receiveParameters()

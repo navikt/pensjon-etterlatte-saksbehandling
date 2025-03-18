@@ -312,14 +312,13 @@ class TilbakekrevingService(
         }
 
     /**
-     * Vi har ikke fått noen tydelig avklaring på hvordan vi skal forholde oss til andre klassetyper enn YTEL og FEIL inntil
-     * videre. Logger derfor ut en feil for å varsle dersom det dukker opp noen nye.
+     * Logger dersom vi får andre klassetyper enn YTEL, FEIL og TREK
      */
     private fun varsleOmUkjenteKlasseTyper(
         oppdatertKravgrunnlag: Kravgrunnlag,
         tilbakekrevingId: UUID,
     ) {
-        val kjenteKlasseTyper = listOf(KlasseType.YTEL, KlasseType.FEIL)
+        val kjenteKlasseTyper = listOf(KlasseType.YTEL, KlasseType.FEIL, KlasseType.TREK)
         oppdatertKravgrunnlag.perioder.forEach { periode ->
             periode.grunnlagsbeloep.forEach { grunnlagsbeloep ->
                 if (grunnlagsbeloep.klasseType !in (kjenteKlasseTyper)) {

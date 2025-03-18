@@ -6,7 +6,7 @@ import Spinner from '~shared/Spinner'
 import { BodyShort, Box, Detail, List } from '@navikt/ds-react'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { Endringstype, Identtype, ISaksendring, tekstEndringstype } from '~shared/types/sak'
-import { BagdeIcon, Buildings3Icon, FolderIcon } from '@navikt/aksel-icons'
+import { BagdeIcon, Buildings3Icon, FolderIcon, PadlockLockedIcon } from '@navikt/aksel-icons'
 import { ENHETER } from '~shared/types/Enhet'
 
 const Ikon = ({ endringstype }: { endringstype: Endringstype }) => {
@@ -16,6 +16,10 @@ const Ikon = ({ endringstype }: { endringstype: Endringstype }) => {
     return <BagdeIcon aria-hidden width="1rem" height="1rem" />
   } else if (endringstype === Endringstype.OPPRETT_SAK) {
     return <FolderIcon aria-hidden width="1rem" height="1rem" />
+  } else if (endringstype === Endringstype.ENDRE_ADRESSEBESKYTTELSE) {
+    return <PadlockLockedIcon aria-hidden width="1rem" height="1rem" />
+  } else if (endringstype === Endringstype.ENDRE_SKJERMING) {
+    return <PadlockLockedIcon aria-hidden width="1rem" height="1rem" />
   }
 }
 
@@ -30,6 +34,22 @@ const Endringstekst = ({ endring }: { endring: ISaksendring }) => {
     return (
       <>
         Identitetsnummer {endring.foer.ident} er erstattet med {endring.etter.ident}
+      </>
+    )
+  } else if (endring.endringstype === Endringstype.ENDRE_ADRESSEBESKYTTELSE) {
+    const adressebeskyttelseFoer = endring.foer.adressebeskyttelse ?? 'UGRADERT'
+    const adressebeskyttelseEtter = endring.etter.adressebeskyttelse ?? 'UGRADERT'
+    return (
+      <>
+        Fra {adressebeskyttelseFoer} til {adressebeskyttelseEtter}
+      </>
+    )
+  } else if (endring.endringstype === Endringstype.ENDRE_SKJERMING) {
+    const skjermingFoer = endring.foer.erSkjermet === true ? 'SKJERMET' : 'IKKE_SKJERMET'
+    const skjermingEtter = endring.etter.erSkjermet === true ? 'SKJERMET' : 'IKKE_SKJERMET'
+    return (
+      <>
+        Fra {skjermingFoer} til {skjermingEtter}
       </>
     )
   }

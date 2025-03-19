@@ -213,8 +213,8 @@ export const Resultat = (props: Props) => {
       <Box paddingBlock="4 8" paddingInline="16 4">
         {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
           <OppdatertGrunnlagAlert variant="warning">
-            Virkningstidspunktet er endret og vilkårene må da vurderes på nytt. For å starte ny vurdering må du slette
-            nåværende vilkårsvurdering
+            Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de
+            fortsatt er riktige. Velg &quot;Rediger vurdering&quot; for å gjøre dette.
           </OppdatertGrunnlagAlert>
         )}
       </Box>

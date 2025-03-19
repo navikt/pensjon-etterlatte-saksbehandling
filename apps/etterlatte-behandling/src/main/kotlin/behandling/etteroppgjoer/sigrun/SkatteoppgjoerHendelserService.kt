@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.logger
 
 class SkatteoppgjoerHendelserService(
     private val dao: SkatteoppgjoerHendelserDao,
@@ -44,21 +43,8 @@ class SkatteoppgjoerHendelserService(
                 }
             }
 
-            // TODO: lagre med status hvis feiler?
-            dao.lagreKjoering(
-                HendelserKjoering(
-                    hendelsesListe.hendelser.last().sekvensnummer,
-                    hendelsesListe.hendelser.size,
-                    antallRelevanteHendelser,
-                    true,
-                ),
-            )
-
-            // TODO: annen håndtering hvis jobben feiler?
-            if (!kjoering.success) {
-                logger.error("Siste kjøring av skatteoppgjoerHendelser feilet")
-                dao.lagreKjoering(kjoering)
-            }
+            // TODO legge til success status
+            dao.lagreKjoering(kjoering)
         }
     }
 }

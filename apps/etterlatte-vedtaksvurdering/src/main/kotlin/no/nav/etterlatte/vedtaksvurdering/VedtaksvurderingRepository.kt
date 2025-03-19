@@ -234,14 +234,14 @@ class VedtaksvurderingRepository(
         }
     }
 
-    fun hentVedtakMedUtbetalingForInntektsaar(
+    fun hentSakIdMedUtbetalingForInntektsaar(
         inntektsaar: Int,
         sakType: SakType? = null,
         tx: TransactionalSession? = null,
-    ): List<Vedtak> {
+    ): List<SakId> {
         val hentVedtak =
             """
-            SELECT * FROM vedtak v
+            SELECT DISTINCT v.sakid FROM vedtak v
             JOIN utbetalingsperiode u ON v.id = u.vedtakid
             WHERE EXTRACT(YEAR FROM u.datofom) = :aar
             ${if (sakType == null) "" else "AND saktype = :saktype"}
@@ -257,8 +257,7 @@ class VedtaksvurderingRepository(
                     )
                 },
             ) {
-                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
-                it.toVedtak(utbetalingsperioder)
+                it.toSakId()
             }
         }
     }
@@ -524,7 +523,7 @@ class VedtaksvurderingRepository(
             ytelseEtterAvkorting = int("ytelseEtter"),
         )
 
-    private fun Row.toSakId() = SakId(int("sakid").toLong())
+    private fun Row.toSakId() = SakId(long("sakid"))
 
     private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) =
         Vedtak(

@@ -21,7 +21,13 @@ class EtteroppgjoerService(
     ): SkalHaEtteroppgjoerResultat {
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
         val etteroppgjoer = sak?.let { dao.hentEtteroppgjoer(it.id, inntektsaar) }
-        return SkalHaEtteroppgjoerResultat(etteroppgjoer != null, etteroppgjoer)
+
+        val venterPaSkatteoppgjoer = etteroppgjoer?.status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+
+        return SkalHaEtteroppgjoerResultat(
+            venterPaSkatteoppgjoer,
+            etteroppgjoer,
+        )
     }
 
     suspend fun finnSakerForEtteroppgjoer(inntektsaar: Int) {

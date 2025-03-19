@@ -53,12 +53,12 @@ class SkatteoppgjoerHendelserService(
                     true,
                 ),
             )
-        }
 
-        // TODO: annen håndtering hvis jobben feiler?
-        if (!kjoering.success) {
-            logger.error("Siste kjøring av skatteoppgjoerHendelser feilet")
-            dao.lagreKjoering(kjoering)
+            // TODO: annen håndtering hvis jobben feiler?
+            if (!kjoering.success) {
+                logger.error("Siste kjøring av skatteoppgjoerHendelser feilet")
+                dao.lagreKjoering(kjoering)
+            }
         }
     }
 }

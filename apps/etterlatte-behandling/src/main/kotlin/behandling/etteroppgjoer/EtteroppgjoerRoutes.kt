@@ -94,6 +94,7 @@ fun Route.etteroppgjoerRoutes(
                         "Inntektsaar mangler"
                     }
                 etteroppgjoerService.finnSakerForEtteroppgjoer(inntektsaar)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

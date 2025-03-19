@@ -25,6 +25,8 @@ class EtteroppgjoerService(
     }
 
     suspend fun finnSakerForEtteroppgjoer(inntektsaar: Int) {
+        logger.info("Starter kjøring for å finne saker som skal ha etteroppgjør for inntektsår=$inntektsaar")
+
         val sakerMedUtbetaling =
             vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
 
@@ -38,8 +40,7 @@ class EtteroppgjoerService(
                         EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
                     )
                     logger.info(
-                        "Oppretter etteroppgjør for inntektsaar=$inntektsaar med " +
-                            "status ${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER} for sakId=$sakId",
+                        "Oppretter etteroppgjør for sakId=$sakId for inntektsaar=$inntektsaar med status=${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}",
                     )
                 }
         }

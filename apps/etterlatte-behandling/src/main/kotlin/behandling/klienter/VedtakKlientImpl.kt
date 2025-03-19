@@ -411,7 +411,7 @@ class VedtakKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/vedtak/sak/med-utbetaling/{$inntektsaar}",
+                            url = "$resourceUrl/api/vedtak/sak/med-utbetaling/$inntektsaar",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

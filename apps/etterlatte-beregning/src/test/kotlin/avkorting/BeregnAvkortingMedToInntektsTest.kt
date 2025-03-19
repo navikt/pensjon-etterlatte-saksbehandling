@@ -23,7 +23,7 @@ class BeregnAvkortingMedToInntektsTest {
         val foerstegangsbehandlingInnevaerendeInnekt = `Avkorting førstegangsbehandling inneværende år`()
         val foerstegangsbehandlingNesteInntekt =
             `Avkorting førstegangsbehandling neste år`(foerstegangsbehandlingInnevaerendeInnekt)
-        with(foerstegangsbehandlingNesteInntekt.aarsoppgjoer.first().avkortetYtelseAar) {
+        with(foerstegangsbehandlingNesteInntekt.aarsoppgjoer.first().avkortetYtelse) {
             size shouldBe 1
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
@@ -42,7 +42,7 @@ class BeregnAvkortingMedToInntektsTest {
                 AvkortetYtelse::kilde,
             )
         }
-        with(foerstegangsbehandlingNesteInntekt.aarsoppgjoer[1].avkortetYtelseAar) {
+        with(foerstegangsbehandlingNesteInntekt.aarsoppgjoer[1].avkortetYtelse) {
             size shouldBe 1
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
@@ -153,7 +153,7 @@ class BeregnAvkortingMedToInntektsTest {
                         id =
                             eksisterende.aarsoppgjoer
                                 .last()
-                                .inntektsavkorting
+                                .inntektsavkorting()
                                 .first()
                                 .grunnlag.id,
                         aarsinntekt = 375000,

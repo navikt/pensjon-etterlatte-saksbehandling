@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning.regler
 
-import no.nav.etterlatte.avkorting.Aarsoppgjoer
+import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -114,7 +114,7 @@ val bruker = simpleSaksbehandler()
 fun avkorting(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
-    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
+    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
     aar: Int = 2024,
 ) = Avkorting(
     aarsoppgjoer =
@@ -123,7 +123,7 @@ fun avkorting(
                 aar = aar,
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 inntektsavkorting = inntektsavkorting,
-                avkortetYtelseAar = avkortetYtelseAar,
+                avkortetYtelse = avkortetYtelse,
             ),
         ),
 )
@@ -196,14 +196,14 @@ fun aarsoppgjoer(
     fom: YearMonth = YearMonth.of(aar, 1),
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
-    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
-) = Aarsoppgjoer(
+    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
+) = AarsoppgjoerLoepende(
     id = UUID.randomUUID(),
     aar = aar,
     fom = fom,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     inntektsavkorting = inntektsavkorting,
-    avkortetYtelseAar = avkortetYtelseAar,
+    avkortetYtelse = avkortetYtelse,
 )
 
 fun ytelseFoerAvkorting(

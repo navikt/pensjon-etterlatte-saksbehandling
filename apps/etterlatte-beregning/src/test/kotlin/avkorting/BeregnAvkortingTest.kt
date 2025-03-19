@@ -26,7 +26,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Beregner avkortet ytelse for foerstegangsbehandling`() {
         val avkorting = `Avkorting foerstegangsbehandling`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 2
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
@@ -66,7 +66,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Førstegangsbehandling med sanksjon beregner riktig ytelse`() {
         val avkorting = `Avkorting foerstegangsbehandling med sanksjon`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 4
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
@@ -140,7 +140,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering legger inn sanksjon beregner 0 i sanksjonsperioden`() {
         val avkorting = `Avkorting revurdering med en sanksjon åpen periode`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 2
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
@@ -186,7 +186,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering åpen sanksjonsperiode lukkes`() {
         val avkorting = `Avkorting revurdering av sanksjon åpen periode lukker sanksjonsperioden`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 3
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
@@ -249,7 +249,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring - foerste inntektsendring`() {
         val avkorting = `Avkorting ny inntekt en`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 3
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -331,7 +331,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering legger inn sanksjon etter inntektsendring`() {
         val avkorting = `Sanksjon etter inntektsendring legges inn`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 4
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -447,7 +447,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering legger til sanksjon tilbake i tid etter inntektsendring`() {
         val avkorting = `Sanksjon tilbake i tid mellom inntektsgrunnlag`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 3
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -540,7 +540,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering lukker sanksjon etter inntektsendring`() {
         val avkorting = `Sanksjon etter inntektsendring lukkes`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 5
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -690,7 +690,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring - andre inntektsendring etter sanksjon`() {
         val avkorting = `Avkorting ny lavere inntekt to etter sanksjon`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 5
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -840,7 +840,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring - andre inntektsendring`() {
         val avkorting = `Avkorting ny inntekt to`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 4
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -954,7 +954,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering hevet beregning`() {
         val avkorting = `Avkorting revurdert beregning`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 4
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1068,7 +1068,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring - korrigere siste inntekt`() {
         val avkorting = `Avkorting korrigere siste inntekt`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 4
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1182,7 +1182,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Skal kunne reberegne avkorting uten endring for en revurdering med virk i mellom inntektsperioder`() {
         val avkorting = `Revurdering med virk mellom inntektsperioder`()
-        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelse) {
             size shouldBe 5
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1319,7 +1319,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring nytt år`() {
         val avkorting = `Revurdering ny inntekt for nytt år`()
-        with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[0].avkortetYtelse) {
             size shouldBe 5
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1455,7 +1455,7 @@ class BeregnAvkortingTest {
                 )
             }
         }
-        with(avkorting.aarsoppgjoer[1].avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[1].avkortetYtelse) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1486,7 +1486,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering på tvers av år`() {
         val avkorting = `Revurdering med virk tilbake i tidligere år`()
-        with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[0].avkortetYtelse) {
             size shouldBe 6
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1654,7 +1654,7 @@ class BeregnAvkortingTest {
                 )
             }
         }
-        with(avkorting.aarsoppgjoer[1].avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[1].avkortetYtelse) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1685,7 +1685,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring nytt år med opphør`() {
         val avkorting = `Revurdering ny inntekt nytt år med opphør`()
-        with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[0].avkortetYtelse) {
             size shouldBe 6
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1853,7 +1853,7 @@ class BeregnAvkortingTest {
                 )
             }
         }
-        with(avkorting.aarsoppgjoer[1].avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[1].avkortetYtelse) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1879,7 +1879,7 @@ class BeregnAvkortingTest {
                 it.restanse shouldBe null
             }
         }
-        with(avkorting.aarsoppgjoer[2].avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[2].avkortetYtelse) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -2188,7 +2188,7 @@ class BeregnAvkortingTest {
                             id =
                                 it.aarsoppgjoer
                                     .single()
-                                    .inntektsavkorting
+                                    .inntektsavkorting()
                                     .last()
                                     .grunnlag.id,
                             aarsinntekt = 425000,

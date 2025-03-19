@@ -29,6 +29,7 @@ class AvkortingTidligAlderspensjonService(
         val (overstyrtInntektsavkorting, aarsoppgjoer) =
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    avkorting.aarsoppgjoer as List<AarsoppgjoerLoepende>
                     val overstyrtFoersteAar =
                         avkorting.aarsoppgjoer.first().inntektsavkorting.find {
                             it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
@@ -45,7 +46,10 @@ class AvkortingTidligAlderspensjonService(
                 }
 
                 BehandlingType.REVURDERING -> {
-                    val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.aar == behandling.virkningstidspunkt?.dato?.year }
+                    val aarsoppgjoer =
+                        avkorting.aarsoppgjoer.single {
+                            it.aar == behandling.virkningstidspunkt?.dato?.year
+                        } as AarsoppgjoerLoepende
                     val overstyrt =
                         aarsoppgjoer.inntektsavkorting
                             .find {

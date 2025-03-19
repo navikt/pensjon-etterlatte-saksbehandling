@@ -48,7 +48,7 @@ class AvkortingRepository(
                     tx.run(
                         query
                             .map { row ->
-                                Aarsoppgjoer(
+                                AarsoppgjoerLoepende(
                                     id = row.uuid("id"),
                                     aar = row.int("aar"),
                                     fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
@@ -148,7 +148,7 @@ class AvkortingRepository(
                         aarsoppgjoer.copy(
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             inntektsavkorting = inntektsavkorting,
-                            avkortetYtelseAar = avkortetYtelseAar,
+                            avkortetYtelse = avkortetYtelseAar,
                         )
                     }
 
@@ -165,14 +165,22 @@ class AvkortingRepository(
             slettAvkorting(behandlingId, tx)
             avkorting.aarsoppgjoer.forEach { aarsoppgjoer ->
                 with(aarsoppgjoer) {
-                    lagreAarsoppgjoer(behandlingId, sakId, aarsoppgjoer, tx)
-                    lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
-                    inntektsavkorting.forEach {
-                        lagreAvkortingGrunnlag(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
-                        lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, it.avkortingsperioder, tx)
-                        lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, it.avkortetYtelseForventetInntekt, tx)
+                    when (this) {
+                        is AarsoppgjoerLoepende -> {
+                            lagreAarsoppgjoer(behandlingId, sakId, this, tx)
+                            lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
+                            inntektsavkorting.forEach {
+                                lagreAvkortingGrunnlag(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
+                                lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, it.avkortingsperioder, tx)
+                                lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, it.avkortetYtelseForventetInntekt, tx)
+                            }
+                            lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, avkortetYtelse, tx)
+                        }
+
+                        is Etteroppgjoer -> {
+                            TODO()
+                        }
                     }
-                    lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, avkortetYtelseAar, tx)
                 }
             }
         }
@@ -229,7 +237,7 @@ class AvkortingRepository(
     private fun lagreAarsoppgjoer(
         behandlingId: UUID,
         sakId: SakId,
-        aarsoppgjoer: Aarsoppgjoer,
+        aarsoppgjoer: AarsoppgjoerLoepende,
         tx: TransactionalSession,
     ) = queryOf(
         statement =
@@ -502,7 +510,7 @@ class AvkortingRepository(
             sanksjonType = enumValueOf(string("sanksjon_type")),
         )
 
-    fun hentAlleAarsoppgjoer(sakId: SakId): List<Aarsoppgjoer> =
+    fun hentAlleAarsoppgjoer(sakId: SakId): List<AarsoppgjoerLoepende> =
         dataSource.transaction { tx ->
             queryOf(
                 "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar ASC",
@@ -511,7 +519,7 @@ class AvkortingRepository(
                 tx.run(
                     query
                         .map { row ->
-                            Aarsoppgjoer(
+                            AarsoppgjoerLoepende(
                                 id = row.uuid("id"),
                                 aar = row.int("aar"),
                                 fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },

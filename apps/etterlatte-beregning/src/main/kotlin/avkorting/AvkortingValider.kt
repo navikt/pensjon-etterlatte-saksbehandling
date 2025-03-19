@@ -39,8 +39,7 @@ object AvkortingValider {
     ) {
         if (!erFoerstegangsbehandling && nyInntektFom.year < naa.year) {
             val sisteInntekt =
-                avkorting.aarsoppgjoer
-                    .single { it.aar == nyInntektFom.year }
+                (avkorting.aarsoppgjoer.single { it.aar == nyInntektFom.year } as AarsoppgjoerLoepende)
                     .inntektsavkorting
                     .maxBy { it.grunnlag.periode.fom }
                     .grunnlag
@@ -76,8 +75,7 @@ object AvkortingValider {
         avkorting: Avkorting,
     ) {
         val nyligsteInntekt =
-            avkorting.aarsoppgjoer
-                .singleOrNull { it.aar == fom.year }
+            (avkorting.aarsoppgjoer.singleOrNull { it.aar == fom.year } as AarsoppgjoerLoepende?)
                 ?.inntektsavkorting
                 ?.lastOrNull()
         if (nyligsteInntekt != null && nyligsteInntekt.grunnlag.periode.fom > fom) {

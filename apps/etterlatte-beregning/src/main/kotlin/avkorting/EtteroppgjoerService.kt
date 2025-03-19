@@ -38,10 +38,15 @@ class EtteroppgjoerService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId)
         val aarsoppgjoer = avkorting?.aarsoppgjoer?.single { it.aar == aar }
         return aarsoppgjoer?.let { aarsoppgjoer ->
-            AvkortingDto(
-                avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
-                avkortetYtelse = aarsoppgjoer.avkortetYtelseAar.map { it.toDto() },
-            )
+            when (aarsoppgjoer) {
+                is AarsoppgjoerLoepende ->
+                    AvkortingDto(
+                        avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
+                        avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
+                    )
+
+                is Etteroppgjoer -> TODO()
+            }
         }
     }
 
@@ -73,7 +78,7 @@ class EtteroppgjoerService(
             Avkorting(
                 aarsoppgjoer =
                     listOf(
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             id = UUID.randomUUID(),
                             aar = fraOgMed.year,
                             fom = fraOgMed,

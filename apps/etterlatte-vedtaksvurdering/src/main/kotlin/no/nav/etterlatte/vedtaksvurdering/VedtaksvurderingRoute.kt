@@ -95,7 +95,7 @@ fun Route.vedtaksvurderingRoute(
                     "Inntektsaar mangler"
                 }
 
-            call.respond(vedtakService.hentSakerMedUtbetalingForInntektsaar(inntektsaar))
+            call.respond(vedtakService.hentSakIdMedUtbetalingForInntektsaar(inntektsaar))
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {

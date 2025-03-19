@@ -489,34 +489,27 @@ internal class VedtaksvurderingRepositoryTest(
         ).map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 
-        val results = repository.hentVedtakMedUtbetalingForInntektsaar(2023, SakType.OMSTILLINGSSTOENAD)
+        val results = repository.hentSakIdMedUtbetalingForInntektsaar(2023, SakType.OMSTILLINGSSTOENAD)
+        results.size shouldBeExactly 1
+        results.first().sakId shouldBe sakid.sakId
+    }
 
-        with(results.get(0)) {
-            (innhold as VedtakInnhold.Behandling).let {
-                it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.DECEMBER)
-                it.utbetalingsperioder.first().let { utbetalingsperiode ->
-                    utbetalingsperiode.periode shouldBe Periode(YearMonth.of(2023, Month.DECEMBER), null)
-                }
-            }
-        }
+    @Test
+    fun `skal hente vedtak for fnr selv om ikke saktype er spesifisert`() {
+        val soeker1 = Folkeregisteridentifikator.of(FNR_1)
 
-        @Test
-        fun `skal hente vedtak for fnr selv om ikke saktype er spesifisert`() {
-            val soeker1 = Folkeregisteridentifikator.of(FNR_1)
+        val vedtak =
+            opprettVedtak(
+                sakId = SakId(10),
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.IVERKSATT,
+            )
+        repository.opprettVedtak(vedtak)
+        repository.iverksattVedtak(vedtak.behandlingId)
 
-            val vedtak =
-                opprettVedtak(
-                    sakId = SakId(10),
-                    soeker = soeker1,
-                    virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
-                    status = VedtakStatus.IVERKSATT,
-                )
-            repository.opprettVedtak(vedtak)
-            repository.iverksattVedtak(vedtak.behandlingId)
+        val results = repository.hentFerdigstilteVedtak(soeker1)
 
-            val results = repository.hentFerdigstilteVedtak(soeker1)
-
-            results.size shouldBe 1
-        }
+        results.size shouldBe 1
     }
 }

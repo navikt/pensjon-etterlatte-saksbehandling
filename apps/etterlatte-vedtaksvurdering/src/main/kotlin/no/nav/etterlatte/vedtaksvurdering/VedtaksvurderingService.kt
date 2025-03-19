@@ -26,8 +26,6 @@ class VedtaksvurderingService(
     fun hentVedtak(fnr: Folkeregisteridentifikator): List<Vedtak> = repository.hentFerdigstilteVedtak(fnr)
 
     // TODO: bedre plassering for denne?
-    fun hentSakerMedUtbetalingForInntektsaar(aar: Int): List<SakId> =
-        repository
-            .hentVedtakMedUtbetalingForInntektsaar(aar, SakType.OMSTILLINGSSTOENAD)
-            .map { it.sakId }
+    fun hentSakIdMedUtbetalingForInntektsaar(aar: Int): List<SakId> =
+        repository.hentSakIdMedUtbetalingForInntektsaar(aar, SakType.OMSTILLINGSSTOENAD)
 }

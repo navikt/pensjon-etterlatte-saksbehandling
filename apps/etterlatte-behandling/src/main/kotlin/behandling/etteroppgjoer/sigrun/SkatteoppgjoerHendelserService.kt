@@ -37,7 +37,7 @@ class SkatteoppgjoerHendelserService(
                 if (etteroppgjoerResultat.skalHaEtteroppgjoer) {
                     val etteroppgjoer = etteroppgjoerResultat.etteroppgjoer!!
 
-                    // TODO: opprett forbehandling hvis ingen
+                    // TODO: opprett forbehandling
 
                     etteroppgjoerService.oppdaterStatus(
                         etteroppgjoer.sakId,

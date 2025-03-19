@@ -39,16 +39,7 @@ class EtteroppgjoerService(
         inTransaction {
             sakerMedUtbetaling
                 .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
-                .forEach { sakId ->
-                    dao.lagerEtteroppgjoer(
-                        sakId,
-                        inntektsaar,
-                        EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                    )
-                    logger.info(
-                        "Oppretter etteroppgjør for sakId=$sakId for inntektsaar=$inntektsaar med status=${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}",
-                    )
-                }
+                .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
         }
     }
 
@@ -58,6 +49,22 @@ class EtteroppgjoerService(
         status: EtteroppgjoerStatus,
     ) {
         dao.lagerEtteroppgjoer(sakId, inntektsaar, status)
+    }
+
+    private fun opprettEtteroppgjoer(
+        sakId: SakId,
+        inntektsaar: Int,
+    ) {
+        // TODO ytterlige sjekker på sak før vi oppretter etteroppgjoer
+
+        dao.lagerEtteroppgjoer(
+            sakId,
+            inntektsaar,
+            EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+        )
+        logger.info(
+            "Oppretter etteroppgjør for sakId=$sakId for inntektsaar=$inntektsaar med status=${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}",
+        )
     }
 }
 

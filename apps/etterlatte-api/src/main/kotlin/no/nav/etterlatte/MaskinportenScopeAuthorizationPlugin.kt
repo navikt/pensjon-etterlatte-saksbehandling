@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
@@ -8,6 +9,9 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
+import no.nav.etterlatte.samordning.X_ORGNR
+import no.nav.etterlatte.samordning.vedtak.orgNummer
+import org.slf4j.MDC
 
 val MaskinportenScopeAuthorizationPlugin =
     createRouteScopedPlugin(
@@ -36,6 +40,8 @@ val MaskinportenScopeAuthorizationPlugin =
                                     "tidspunkt" to Tidspunkt.now(),
                                 ),
                         )
+                    } else {
+                        MDC.put(X_ORGNR, call.orgNummer)
                     }
                 }
             }

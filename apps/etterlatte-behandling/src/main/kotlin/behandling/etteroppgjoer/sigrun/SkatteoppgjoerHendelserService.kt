@@ -3,13 +3,18 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.inTransaction
+import org.slf4j.LoggerFactory
 
 class SkatteoppgjoerHendelserService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
     private val etteroppgjoerService: EtteroppgjoerService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
+        logger.info("Starter HendelsesKjoering for skatteoppgjoer, sjekker ${request.antall} hendelser")
+
         val sisteKjoering = inTransaction { dao.hentSisteKjoering() }
         val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer())
         var antallRelevanteHendelser = 0
@@ -42,7 +47,7 @@ class SkatteoppgjoerHendelserService(
                     antallRelevanteHendelser++
                 }
 
-                // TODO legge til success status
+                // TODO legge til success status?
                 dao.lagreKjoering(kjoering)
             }
         }

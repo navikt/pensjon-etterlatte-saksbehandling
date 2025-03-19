@@ -41,10 +41,10 @@ class SkatteoppgjoerHendelserService(
                     )
                     antallRelevanteHendelser++
                 }
-            }
 
-            // TODO legge til success status
-            dao.lagreKjoering(kjoering)
+                // TODO legge til success status
+                dao.lagreKjoering(kjoering)
+            }
         }
     }
 }

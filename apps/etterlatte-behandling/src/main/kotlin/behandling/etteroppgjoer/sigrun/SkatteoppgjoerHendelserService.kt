@@ -13,7 +13,7 @@ class SkatteoppgjoerHendelserService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
-        logger.info("Starter HendelsesKjoering for skatteoppgjoer, sjekker ${request.antall} hendelser")
+        logger.info("Starter kjøring for behandle hendelser fra skatt, sjekker ${request.antall} hendelser")
 
         val sisteKjoering = inTransaction { dao.hentSisteKjoering() }
         val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer())
@@ -47,7 +47,7 @@ class SkatteoppgjoerHendelserService(
                     antallRelevanteHendelser++
                 }
 
-                // TODO legge til success status?
+                // TODO legge til status evnt feil?
                 dao.lagreKjoering(kjoering)
             }
         }

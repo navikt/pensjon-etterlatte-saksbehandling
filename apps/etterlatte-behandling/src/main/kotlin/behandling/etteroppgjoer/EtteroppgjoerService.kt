@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -27,19 +28,21 @@ class EtteroppgjoerService(
         val sakerMedUtbetaling =
             vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
 
-        sakerMedUtbetaling
-            .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
-            .forEach { sakId ->
-                dao.lagerEtteroppgjoer(
-                    sakId,
-                    inntektsaar,
-                    EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                )
-                logger.info(
-                    "Oppretter etteroppgjør for inntektsaar=$inntektsaar med " +
-                        "status ${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER} for sakId=$sakId",
-                )
-            }
+        inTransaction {
+            sakerMedUtbetaling
+                .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
+                .forEach { sakId ->
+                    dao.lagerEtteroppgjoer(
+                        sakId,
+                        inntektsaar,
+                        EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                    )
+                    logger.info(
+                        "Oppretter etteroppgjør for inntektsaar=$inntektsaar med " +
+                            "status ${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER} for sakId=$sakId",
+                    )
+                }
+        }
     }
 
     fun oppdaterStatus(

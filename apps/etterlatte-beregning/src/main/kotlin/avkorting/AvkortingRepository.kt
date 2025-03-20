@@ -261,7 +261,7 @@ class AvkortingRepository(
     private fun lagreAvkortingGrunnlag(
         behandlingId: UUID,
         aarsoppgjoerId: UUID,
-        avkortingsgrunnlag: AvkortingGrunnlag,
+        avkortingsgrunnlag: ForventetInntekt,
         tx: TransactionalSession,
     ) = queryOf(
         statement =
@@ -424,7 +424,7 @@ class AvkortingRepository(
     }
 
     private fun Row.toAvkortingsgrunnlag() =
-        AvkortingGrunnlag(
+        ForventetInntekt(
             id = uuid("id"),
             periode =
                 Periode(

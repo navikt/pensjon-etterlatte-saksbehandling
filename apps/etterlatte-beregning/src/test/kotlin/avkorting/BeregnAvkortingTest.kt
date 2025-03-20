@@ -1977,7 +1977,7 @@ class BeregnAvkortingTest {
     private fun `Avkorting revurdering med en sanksjon åpen periode`() =
         `Avkorting foerstegangsbehandling`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 virkningstidspunkt = YearMonth.of(2024, Month.MAY),
                 beregning =
                     beregning(
@@ -1995,7 +1995,7 @@ class BeregnAvkortingTest {
     private fun `Avkorting revurdering av sanksjon åpen periode lukker sanksjonsperioden`() =
         `Avkorting revurdering med en sanksjon åpen periode`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 virkningstidspunkt = YearMonth.of(2024, Month.JUNE),
                 beregning =
                     beregning(
@@ -2036,7 +2036,7 @@ class BeregnAvkortingTest {
     private fun `Sanksjon tilbake i tid mellom inntektsgrunnlag`() =
         `Avkorting ny inntekt en`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 YearMonth.of(2024, Month.MAY),
                 beregning(
                     beregninger =
@@ -2061,7 +2061,7 @@ class BeregnAvkortingTest {
     private fun `Sanksjon etter inntektsendring legges inn`() =
         `Avkorting ny inntekt en`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 YearMonth.of(2024, Month.AUGUST),
                 beregning(
                     beregninger =
@@ -2082,7 +2082,7 @@ class BeregnAvkortingTest {
     private fun `Sanksjon etter inntektsendring lukkes`() =
         `Sanksjon etter inntektsendring legges inn`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 YearMonth.of(2024, Month.SEPTEMBER),
                 beregning =
                     beregning(
@@ -2159,7 +2159,7 @@ class BeregnAvkortingTest {
     private fun `Avkorting revurdert beregning`() =
         `Avkorting ny inntekt to`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 YearMonth.of(2024, Month.MARCH),
                 beregning(
                     beregninger =
@@ -2213,7 +2213,7 @@ class BeregnAvkortingTest {
     private fun `Revurdering med virk mellom inntektsperioder`() =
         `Avkorting korrigere siste inntekt`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 YearMonth.of(2024, Month.APRIL),
                 beregning(
                     beregninger =
@@ -2261,7 +2261,7 @@ class BeregnAvkortingTest {
     private fun `Revurdering med virk tilbake i tidligere år`() =
         `Revurdering ny inntekt for nytt år`()
             .kopierAvkorting()
-            .beregnAvkortingRevurdering(
+            .beregnAvkorting(
                 YearMonth.of(2024, Month.NOVEMBER),
                 beregning(
                     beregninger =

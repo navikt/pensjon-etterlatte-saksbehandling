@@ -4,8 +4,8 @@ import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
-import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
+import no.nav.etterlatte.avkorting.ForventetInntekt
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
 import no.nav.etterlatte.avkorting.Restanse
@@ -138,7 +138,7 @@ fun avkortinggrunnlag(
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
     overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     overstyrtInnvilgaMaanederBegrunnelse: String? = null,
-) = AvkortingGrunnlag(
+) = ForventetInntekt(
     id = id,
     periode = periode,
     inntektTom = aarsinntekt,

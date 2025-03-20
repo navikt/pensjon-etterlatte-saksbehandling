@@ -803,7 +803,7 @@ internal class AvkortingTest {
                 with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting()) {
                     size shouldBe 3
                     get(0).grunnlag shouldBe foersteInntekt
-                    get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
+                    get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, ForventetInntekt::periode)
                     get(1).grunnlag.periode shouldBe
                         Periode(
                             fom = YearMonth.of(2024, Month.APRIL),
@@ -843,7 +843,7 @@ internal class AvkortingTest {
                     with(inntektsavkorting()) {
                         size shouldBe 2
                         get(0).grunnlag shouldBe foersteInntekt
-                        get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
+                        get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, ForventetInntekt::periode)
                         get(1).grunnlag.periode shouldBe
                             Periode(
                                 fom = YearMonth.of(2024, Month.APRIL),

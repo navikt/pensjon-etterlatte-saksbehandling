@@ -173,7 +173,7 @@ data class Avkorting(
         aldersovergang: YearMonth? = null,
     ): Avkorting {
         val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, bruker, opphoerFom, aldersovergang)
-        return oppdatertMedNyInntekt.beregnAvkortingRevurdering(nyttGrunnlag.fom, beregning, sanksjoner)
+        return oppdatertMedNyInntekt.beregnAvkorting(nyttGrunnlag.fom, beregning, sanksjoner)
     }
 
     private fun finnTom(
@@ -209,7 +209,7 @@ data class Avkorting(
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
-                            AvkortingGrunnlag(
+                            ForventetInntekt(
                                 id = nyttGrunnlag.id,
                                 periode = Periode(fom = nyttGrunnlag.fom, tom = tom),
                                 inntektTom = nyttGrunnlag.inntektTom,
@@ -241,7 +241,7 @@ data class Avkorting(
         )
     }
 
-    fun beregnAvkortingRevurdering(
+    fun beregnAvkorting(
         virkningstidspunkt: YearMonth,
         beregning: Beregning?, // Kun null for forbehandling eteroppgjør
         sanksjoner: List<Sanksjon>,
@@ -493,7 +493,7 @@ class OpphoerErTilbakeITid(
 /**
  * Kan være forventet årsinntekt oppgitt av bruker eller faktisk årsinntekt etter skatteoppgjør.
  */
-data class AvkortingGrunnlag(
+data class ForventetInntekt(
     val id: UUID,
     val periode: Periode,
     val inntektTom: Int,
@@ -505,6 +505,16 @@ data class AvkortingGrunnlag(
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
+)
+
+data class FaktiskInntekt(
+    val id: UUID,
+    val innvilgaMaaneder: Int,
+    val loennsinntekt: Int,
+    val naeringsinntekt: Int,
+    val afp: Int,
+    val utlandsinntekt: Int,
+    val kilde: Grunnlagsopplysning.Saksbehandler,
 )
 
 enum class OverstyrtInnvilgaMaanederAarsak {
@@ -591,7 +601,7 @@ data class Etteroppgjoer(
     override val aar: Int,
     override val fom: YearMonth,
     override val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
-    val inntekt: Int,
+    val inntekt: FaktiskInntekt,
     val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     override val avkortetYtelse: List<AvkortetYtelse> = emptyList(),
 ) : Aarsoppgjoer()
@@ -604,7 +614,7 @@ data class Etteroppgjoer(
  * den ville vært med denne årsinntekten.
  */
 data class Inntektsavkorting(
-    val grunnlag: AvkortingGrunnlag,
+    val grunnlag: ForventetInntekt,
     val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     val avkortetYtelseForventetInntekt: List<AvkortetYtelse> = emptyList(),
 ) {

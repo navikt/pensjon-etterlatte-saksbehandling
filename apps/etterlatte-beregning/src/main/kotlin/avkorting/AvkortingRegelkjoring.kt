@@ -36,7 +36,7 @@ object AvkortingRegelkjoring {
 
     fun beregnInntektsavkorting(
         periode: Periode,
-        avkortingGrunnlag: AvkortingGrunnlag,
+        avkortingGrunnlag: ForventetInntekt,
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
 

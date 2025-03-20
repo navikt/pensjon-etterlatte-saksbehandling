@@ -162,7 +162,7 @@ data class AvkortingSkalHaInntektNesteAarDTO(
     val skalHaInntektNesteAar: Boolean,
 )
 
-fun AvkortingGrunnlag.toDto() =
+fun ForventetInntekt.toDto() =
     AvkortingGrunnlagDto(
         id = id,
         fom = periode.fom,

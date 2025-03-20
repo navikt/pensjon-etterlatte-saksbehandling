@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
+import io.ktor.server.request.receive
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -37,7 +38,6 @@ class DollyFeature(
         get() = {
             get {
                 val accessToken = getDollyAccessToken()
-
                 val gruppeId = dollyService.hentTestGruppeId(brukerIdFraToken()!!, accessToken)
 
                 call.respond(
@@ -141,31 +141,31 @@ class DollyFeature(
             post("opprett-ytelse") {
                 try {
 
-                    val params = call.receiveParameters()
-                    val ytelse = SoeknadType.valueOf(params["ytelse"]!!)
+                    val request = call.receive<OpprettYtelseDTO>()
+                    val ytelse = SoeknadType.valueOf(request.type.toString())
                     val behandlingssteg = Behandlingssteg.IVERKSATT
-                    val gjenlevende = params["gjenlevende"]!!
-                    val avdoed = params["avdoed"]!!
-                    val barnListe = params.getAll("barnListe")!!
+                    val gjenlevende = request.gjenlevende
+                    val avdoed = request.avdoed
+                    val barnListe = request.barn
                     val soeker =
                         when (ytelse) {
-                            SoeknadType.BARNEPENSJON -> params["barn"]!!
+                            SoeknadType.BARNEPENSJON -> request.barn
                             SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
                         }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
                         call.respond(HttpStatusCode.BadRequest, "Påkrevde felter mangler")
                     }
-                    val request =
+                    val soeknad =
                         NySoeknadRequest(
                             ytelse,
                             avdoed,
                             gjenlevende,
                             barnListe,
-                            soeker = soeker,
+                            soeker = soeker.toString(),
                         )
 
                     val brukerId = brukerTokenInfo.ident()
-                    val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
+                    val noekkel = dollyService.sendSoeknad(soeknad, brukerId, behandlingssteg)
                     call.respond(HttpStatusCode.OK, "Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}")
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
@@ -173,6 +173,13 @@ class DollyFeature(
             }
         }
 }
+
+data class OpprettYtelseDTO(
+    val type: SoeknadType,
+    val avdoed: String,
+    val gjenlevende: String,
+    val barn: List<String>,
+)
 
 data class NySoeknadRequest(
     val type: SoeknadType,

@@ -48,16 +48,12 @@ class OppgaveService(
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern> =
-        if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
-            oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
-        } else {
-            oppgaveDao
-                .hentOppgaver(
-                    bruker.enheter(),
-                    oppgaveStatuser,
-                    minOppgavelisteIdentFilter,
-                ).sortedByDescending { it.opprettet }
-        }
+        oppgaveDao
+            .hentOppgaver(
+                bruker.enheter(),
+                oppgaveStatuser,
+                minOppgavelisteIdentFilter,
+            ).sortedByDescending { it.opprettet }
 
     fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
         oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)

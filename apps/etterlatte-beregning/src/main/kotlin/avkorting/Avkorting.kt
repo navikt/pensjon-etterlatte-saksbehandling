@@ -502,6 +502,7 @@ data class ForventetInntekt(
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
+    val inntektInnvilgaPeriode: InntektInnvilgaPeriode? = null,
 )
 
 data class FaktiskInntekt(
@@ -512,6 +513,14 @@ data class FaktiskInntekt(
     val afp: Int,
     val utlandsinntekt: Int,
     val kilde: Grunnlagsopplysning.Saksbehandler,
+    val inntektInnvilgaPeriode: InntektInnvilgaPeriode? = null,
+)
+
+data class InntektInnvilgaPeriode(
+    val verdi: Int,
+    val tidspunkt: Tidspunkt,
+    val regelResultat: JsonNode,
+    val kilde: Grunnlagsopplysning.RegelKilde,
 )
 
 enum class OverstyrtInnvilgaMaanederAarsak {

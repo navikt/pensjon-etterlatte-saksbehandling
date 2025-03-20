@@ -119,6 +119,11 @@ interface SakService {
     )
 
     fun hentSaksendringer(sakId: SakId): List<Saksendring>
+
+    fun oppdaterEnhet(
+        sak: SakMedEnhet,
+        kommentar: String? = null,
+    )
 }
 
 class ManglerTilgangTilEnhet(
@@ -126,6 +131,13 @@ class ManglerTilgangTilEnhet(
 ) : UgyldigForespoerselException(
         code = "MANGLER_TILGANG_TIL_ENHET",
         detail = "Mangler tilgang til enhet $enheter",
+    )
+
+class KanIkkEndreSpesialenhet(
+    detail: String,
+) : UgyldigForespoerselException(
+        code = "KAN_IKK_ENDRE_SPESIAL_ENHET",
+        detail = detail,
     )
 
 class SakServiceImpl(
@@ -140,6 +152,16 @@ class SakServiceImpl(
     private val featureToggle: FeatureToggleService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun oppdaterEnhet(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    ) {
+        if (Enheter.erSpesialTilgangsEnheter(sak.enhet)) {
+            throw KanIkkEndreSpesialenhet("Kan ike endre til spesial enhet")
+        }
+        dao.oppdaterEnhet(sak, kommentar)
+    }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
         val saker = finnSakerForPerson(fnr)

@@ -38,8 +38,7 @@ class AarligInntektsjusteringService(
         val forrigeAvkorting = avkortingService.hentForrigeAvkorting(forrigeBehandlingId)
 
         val siseInntekt =
-            forrigeAvkorting.aarsoppgjoer
-                .last()
+            (forrigeAvkorting.aarsoppgjoer.last() as AarsoppgjoerLoepende)
                 .inntektsavkorting
                 .last()
                 .grunnlag

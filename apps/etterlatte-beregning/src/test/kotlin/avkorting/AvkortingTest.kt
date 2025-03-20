@@ -12,6 +12,7 @@ import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -32,7 +33,7 @@ internal class AvkortingTest {
             Avkorting(
                 aarsoppgjoer =
                     listOf(
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             id = UUID.randomUUID(),
                             aar = 2024,
                             fom = YearMonth.of(2024, Month.MARCH),
@@ -61,7 +62,7 @@ internal class AvkortingTest {
                                             ),
                                     ),
                                 ),
-                            avkortetYtelseAar =
+                            avkortetYtelse =
                                 listOf(
                                     avkortetYtelse(
                                         periode =
@@ -82,7 +83,7 @@ internal class AvkortingTest {
                                     ),
                                 ),
                         ),
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             id = UUID.randomUUID(),
                             aar = 2025,
                             fom = YearMonth.of(2025, Month.JANUARY),
@@ -100,7 +101,7 @@ internal class AvkortingTest {
                                             ),
                                     ),
                                 ),
-                            avkortetYtelseAar =
+                            avkortetYtelse =
                                 listOf(
                                     avkortetYtelse(
                                         periode =
@@ -121,17 +122,17 @@ internal class AvkortingTest {
 
                 it.avkortingGrunnlag[0] shouldBe
                     avkorting.aarsoppgjoer[0]
-                        .inntektsavkorting[0]
+                        .inntektsavkorting()[0]
                         .grunnlag
                         .toDto()
                 it.avkortingGrunnlag[1] shouldBe
                     avkorting.aarsoppgjoer[0]
-                        .inntektsavkorting[1]
+                        .inntektsavkorting()[1]
                         .grunnlag
                         .toDto()
                 it.avkortingGrunnlag[2] shouldBe
                     avkorting.aarsoppgjoer[1]
-                        .inntektsavkorting[0]
+                        .inntektsavkorting()[0]
                         .grunnlag
                         .toDto()
             }
@@ -142,10 +143,10 @@ internal class AvkortingTest {
             avkorting.toDto(fraVirkningstidspunkt = YearMonth.of(2024, Month.MAY)).asClue {
                 it.avkortetYtelse.size shouldBe 3
 
-                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
 
-                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelse[0].toDto()
             }
         }
 
@@ -155,29 +156,29 @@ internal class AvkortingTest {
                 it.avkortetYtelse.size shouldBe 4
                 with(it.avkortetYtelse[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[0].toDto(),
+                        avkorting.aarsoppgjoer[0].avkortetYtelse[0].toDto(),
                         AvkortetYtelseDto::fom,
                         AvkortetYtelseDto::tom,
                     )
                     fom shouldBe YearMonth.of(2024, Month.APRIL)
                     tom shouldBe YearMonth.of(2024, Month.APRIL)
                 }
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
-                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
             }
 
             avkorting.toDto(fraVirkningstidspunkt = YearMonth.of(2024, Month.JUNE)).asClue {
                 it.avkortetYtelse.size shouldBe 3
                 with(it.avkortetYtelse[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto(),
+                        avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto(),
                         AvkortetYtelseDto::fom,
                         AvkortetYtelseDto::tom,
                     )
                     fom shouldBe YearMonth.of(2024, Month.JUNE)
                     tom shouldBe YearMonth.of(2024, Month.JULY)
                 }
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
             }
 
             avkorting
@@ -186,7 +187,7 @@ internal class AvkortingTest {
                     it.avkortetYtelse.size shouldBe 2
                     with(it.avkortetYtelse[0]) {
                         shouldBeEqualToIgnoringFields(
-                            avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto(),
+                            avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto(),
                             AvkortetYtelseDto::fom,
                             AvkortetYtelseDto::tom,
                         )
@@ -201,7 +202,7 @@ internal class AvkortingTest {
                     it.avkortetYtelse.size shouldBe 1
                     with(it.avkortetYtelse[0]) {
                         shouldBeEqualToIgnoringFields(
-                            avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto(),
+                            avkorting.aarsoppgjoer[1].avkortetYtelse[0].toDto(),
                             AvkortetYtelseDto::fom,
                             AvkortetYtelseDto::tom,
                         )
@@ -216,10 +217,10 @@ internal class AvkortingTest {
             avkorting.toDto(fraVirkningstidspunkt = null).asClue {
                 it.avkortetYtelse.size shouldBe 4
 
-                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[0].toDto()
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
-                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
-                it.avkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
+                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[0].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
+                it.avkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelse[0].toDto()
             }
         }
     }
@@ -260,7 +261,7 @@ internal class AvkortingTest {
             Avkorting(
                 aarsoppgjoer =
                     listOf(
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             id = UUID.randomUUID(),
                             aar = 2024,
                             fom = YearMonth.of(2024, Month.MARCH),
@@ -269,7 +270,7 @@ internal class AvkortingTest {
                                     Inntektsavkorting(grunnlag = inntektFraMars24),
                                     Inntektsavkorting(grunnlag = inntektFraAug24),
                                 ),
-                            avkortetYtelseAar =
+                            avkortetYtelse =
                                 listOf(
                                     avkortetYtelse(
                                         periode =
@@ -290,7 +291,7 @@ internal class AvkortingTest {
                                     ),
                                 ),
                         ),
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             id = UUID.randomUUID(),
                             aar = 2025,
                             fom = YearMonth.of(2025, Month.JANUARY),
@@ -300,7 +301,7 @@ internal class AvkortingTest {
                                         grunnlag = inntektFraJan25,
                                     ),
                                 ),
-                            avkortetYtelseAar =
+                            avkortetYtelse =
                                 listOf(
                                     avkortetYtelse(
                                         periode =
@@ -374,10 +375,10 @@ internal class AvkortingTest {
             avkorting.toFrontend(fraVirkningstidspunkt = YearMonth.of(2024, Month.MAY)).asClue {
                 it.avkortetYtelse.size shouldBe 3
 
-                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
 
-                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelse[0].toDto()
             }
         }
 
@@ -387,29 +388,29 @@ internal class AvkortingTest {
                 it.avkortetYtelse.size shouldBe 4
                 with(it.avkortetYtelse[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[0].toDto(),
+                        avkorting.aarsoppgjoer[0].avkortetYtelse[0].toDto(),
                         AvkortetYtelseDto::fom,
                         AvkortetYtelseDto::tom,
                     )
                     fom shouldBe YearMonth.of(2024, Month.APRIL)
                     tom shouldBe YearMonth.of(2024, Month.APRIL)
                 }
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
-                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
             }
 
             avkorting.toFrontend(fraVirkningstidspunkt = YearMonth.of(2024, Month.JUNE)).asClue {
                 it.avkortetYtelse.size shouldBe 3
                 with(it.avkortetYtelse[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto(),
+                        avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto(),
                         AvkortetYtelseDto::fom,
                         AvkortetYtelseDto::tom,
                     )
                     fom shouldBe YearMonth.of(2024, Month.JUNE)
                     tom shouldBe YearMonth.of(2024, Month.JULY)
                 }
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
             }
 
             avkorting
@@ -418,7 +419,7 @@ internal class AvkortingTest {
                     it.avkortetYtelse.size shouldBe 2
                     with(it.avkortetYtelse[0]) {
                         shouldBeEqualToIgnoringFields(
-                            avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto(),
+                            avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto(),
                             AvkortetYtelseDto::fom,
                             AvkortetYtelseDto::tom,
                         )
@@ -433,7 +434,7 @@ internal class AvkortingTest {
                     it.avkortetYtelse.size shouldBe 1
                     with(it.avkortetYtelse[0]) {
                         shouldBeEqualToIgnoringFields(
-                            avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto(),
+                            avkorting.aarsoppgjoer[1].avkortetYtelse[0].toDto(),
                             AvkortetYtelseDto::fom,
                             AvkortetYtelseDto::tom,
                         )
@@ -448,10 +449,10 @@ internal class AvkortingTest {
             avkorting.toFrontend(fraVirkningstidspunkt = null).asClue {
                 it.avkortetYtelse.size shouldBe 4
 
-                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[0].toDto()
-                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
-                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
-                it.avkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
+                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[0].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
+                it.avkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelse[0].toDto()
             }
         }
 
@@ -465,11 +466,11 @@ internal class AvkortingTest {
                 ).asClue {
                     it.tidligereAvkortetYtelse.size shouldBe 4
 
-                    it.tidligereAvkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[0].toDto()
-                    it.tidligereAvkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
-                    it.tidligereAvkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                    it.tidligereAvkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[0].toDto()
+                    it.tidligereAvkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
+                    it.tidligereAvkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[2].toDto()
 
-                    it.tidligereAvkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
+                    it.tidligereAvkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelse[0].toDto()
                 }
         }
 
@@ -495,7 +496,7 @@ internal class AvkortingTest {
             Avkorting(
                 aarsoppgjoer =
                     listOf(
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             id = UUID.randomUUID(),
                             aar = 2024,
                             fom = YearMonth.of(2024, 1),
@@ -539,17 +540,17 @@ internal class AvkortingTest {
             with(nyAvkorting) {
                 val aarsoppgjoer = aarsoppgjoer.single()
                 aarsoppgjoer.id shouldNotBe eksisterendeAvkorting.aarsoppgjoer.single().id
-                aarsoppgjoer.inntektsavkorting.asClue {
+                aarsoppgjoer.inntektsavkorting().asClue {
                     it.size shouldBe 2
                     it[0].grunnlag.id shouldNotBe
                         eksisterendeAvkorting.aarsoppgjoer
                             .single()
-                            .inntektsavkorting[0]
+                            .inntektsavkorting()[0]
                             .grunnlag.id
                     it[1].grunnlag.id shouldNotBe
                         eksisterendeAvkorting.aarsoppgjoer
                             .single()
-                            .inntektsavkorting[1]
+                            .inntektsavkorting()[1]
                             .grunnlag.id
                 }
             }
@@ -592,10 +593,10 @@ internal class AvkortingTest {
                         aar = 2024,
                         fom = YearMonth.of(2024, 3),
                     ),
-                    Aarsoppgjoer::id,
-                    Aarsoppgjoer::inntektsavkorting,
+                    AarsoppgjoerLoepende::id,
+                    AarsoppgjoerLoepende::inntektsavkorting,
                 )
-                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting()) {
                     size shouldBe 1
                     with(get(0).grunnlag) {
                         inntektTom shouldBe forventetInntekt.inntektTom
@@ -628,10 +629,10 @@ internal class AvkortingTest {
                         aar = 2024,
                         fom = YearMonth.of(2024, 3),
                     ),
-                    Aarsoppgjoer::id,
-                    Aarsoppgjoer::inntektsavkorting,
+                    AarsoppgjoerLoepende::id,
+                    AarsoppgjoerLoepende::inntektsavkorting,
                 )
-                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting()) {
                     size shouldBe 1
                     with(get(0).grunnlag) {
                         inntektTom shouldBe forventetInntekt.inntektTom
@@ -687,10 +688,10 @@ internal class AvkortingTest {
                     aar = fomAar,
                     fom = fomYearMonth,
                 ),
-                Aarsoppgjoer::id,
-                Aarsoppgjoer::inntektsavkorting,
+                AarsoppgjoerLoepende::id,
+                AarsoppgjoerLoepende::inntektsavkorting,
             )
-            with(opprettaAvkortingForstegangsbehandling.aarsoppgjoer.single().inntektsavkorting) {
+            with(opprettaAvkortingForstegangsbehandling.aarsoppgjoer.single().inntektsavkorting()) {
                 size shouldBe 1
                 with(get(0).grunnlag) {
                     inntektTom shouldBe forventetInntekt.inntektTom
@@ -715,13 +716,15 @@ internal class AvkortingTest {
             revurdert.aarsoppgjoer.size shouldBe 2
             val foerstegangsbehandlingen = revurdert.aarsoppgjoer.first()
             foerstegangsbehandlingen.aar shouldBe fomAar
-            foerstegangsbehandlingen.inntektsavkorting
+            foerstegangsbehandlingen
+                .inntektsavkorting()
                 .first()
                 .grunnlag.periode shouldBe
                 Periode(fomYearMonth, YearMonth.of(fomAar, Month.DECEMBER))
             val revurderingen = revurdert.aarsoppgjoer[1]
             revurderingen.aar shouldBe tomAar
-            revurderingen.inntektsavkorting
+            revurderingen
+                .inntektsavkorting()
                 .first()
                 .grunnlag.periode shouldBe
                 Periode(YearMonth.of(tomAar, Month.JANUARY), YearMonth.of(tomAar, Month.FEBRUARY))
@@ -765,9 +768,9 @@ internal class AvkortingTest {
                 oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
                 oppdatertAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
                     avkorting.aarsoppgjoer.single(),
-                    Aarsoppgjoer::inntektsavkorting,
+                    AarsoppgjoerLoepende::inntektsavkorting,
                 )
-                with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting()) {
                     size shouldBe 2
                     get(0).grunnlag shouldBe foersteInntekt
                     with(get(1).grunnlag) {
@@ -796,12 +799,12 @@ internal class AvkortingTest {
                 oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
                 oppdatertAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
                     avkorting.aarsoppgjoer.single(),
-                    Aarsoppgjoer::inntektsavkorting,
+                    AarsoppgjoerLoepende::inntektsavkorting,
                 )
-                with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting()) {
                     size shouldBe 3
                     get(0).grunnlag shouldBe foersteInntekt
-                    get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
+                    get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, ForventetInntekt::periode)
                     get(1).grunnlag.periode shouldBe
                         Periode(
                             fom = YearMonth.of(2024, Month.APRIL),
@@ -835,13 +838,13 @@ internal class AvkortingTest {
                 with(oppdatertAvkorting.aarsoppgjoer[0]) {
                     shouldBeEqualToIgnoringFields(
                         avkorting.aarsoppgjoer[0],
-                        Aarsoppgjoer::inntektsavkorting,
-                        Aarsoppgjoer::id,
+                        AarsoppgjoerLoepende::inntektsavkorting,
+                        AarsoppgjoerLoepende::id,
                     )
-                    with(inntektsavkorting) {
+                    with(inntektsavkorting()) {
                         size shouldBe 2
                         get(0).grunnlag shouldBe foersteInntekt
-                        get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
+                        get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, ForventetInntekt::periode)
                         get(1).grunnlag.periode shouldBe
                             Periode(
                                 fom = YearMonth.of(2024, Month.APRIL),
@@ -856,10 +859,10 @@ internal class AvkortingTest {
                             aar = 2025,
                             fom = YearMonth.of(2025, 1),
                         ),
-                        Aarsoppgjoer::inntektsavkorting,
-                        Aarsoppgjoer::id,
+                        AarsoppgjoerLoepende::inntektsavkorting,
+                        AarsoppgjoerLoepende::id,
                     )
-                    with(inntektsavkorting) {
+                    with(inntektsavkorting()) {
                         size shouldBe 1
                         with(get(0).grunnlag) {
                             inntektTom shouldBe nyttGrunnlag.inntektTom
@@ -881,8 +884,8 @@ internal class AvkortingTest {
             assertThrows<InternfeilException> {
                 Avkorting(
                     listOf(
-                        Aarsoppgjoer(aar = 2025, id = UUID.randomUUID(), fom = YearMonth.of(2025, 1)),
-                        Aarsoppgjoer(aar = 2024, id = UUID.randomUUID(), fom = YearMonth.of(2024, 1)),
+                        AarsoppgjoerLoepende(aar = 2025, id = UUID.randomUUID(), fom = YearMonth.of(2025, 1)),
+                        AarsoppgjoerLoepende(aar = 2024, id = UUID.randomUUID(), fom = YearMonth.of(2024, 1)),
                     ),
                 )
             }
@@ -898,7 +901,7 @@ internal class AvkortingTest {
                     )
                 Avkorting(
                     listOf(
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             aar = 2024,
                             id = UUID.randomUUID(),
@@ -935,7 +938,7 @@ internal class AvkortingTest {
                     )
                 Avkorting(
                     listOf(
-                        Aarsoppgjoer(
+                        AarsoppgjoerLoepende(
                             inntektsavkorting = inntektsavkorting,
                             aar = 2024,
                             id = UUID.randomUUID(),
@@ -947,17 +950,17 @@ internal class AvkortingTest {
         }
 
         @Test
-        fun `Aarsoppgjoer skal alltid sortere avkortetYtelseAar ascending på fom`() {
+        fun `Aarsoppgjoer skal alltid sortere avkortetYtelse ascending på fom`() {
             assertThrows<InternfeilException> {
-                val avkortetYtelseAar =
+                val avkortetYtelse =
                     listOf(
                         avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
                         avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 1), tom = null)),
                     )
                 Avkorting(
                     listOf(
-                        Aarsoppgjoer(
-                            avkortetYtelseAar = avkortetYtelseAar,
+                        AarsoppgjoerLoepende(
+                            avkortetYtelse = avkortetYtelse,
                             aar = 2024,
                             id = UUID.randomUUID(),
                             fom = YearMonth.of(2024, 1),
@@ -1014,7 +1017,7 @@ internal class AvkortingTest {
             with(
                 opprettaAvkorting.aarsoppgjoer
                     .single()
-                    .inntektsavkorting
+                    .inntektsavkorting()
                     .single()
                     .grunnlag,
             ) {
@@ -1039,7 +1042,7 @@ internal class AvkortingTest {
             with(
                 opprettaAvkorting.aarsoppgjoer
                     .single()
-                    .inntektsavkorting
+                    .inntektsavkorting()
                     .single()
                     .grunnlag,
             ) {
@@ -1065,7 +1068,7 @@ internal class AvkortingTest {
             with(
                 opprettaAvkorting.aarsoppgjoer
                     .single()
-                    .inntektsavkorting
+                    .inntektsavkorting()
                     .single()
                     .grunnlag,
             ) {
@@ -1095,7 +1098,7 @@ internal class AvkortingTest {
             with(
                 opprettaAvkorting.aarsoppgjoer
                     .single()
-                    .inntektsavkorting
+                    .inntektsavkorting()
                     .single()
                     .grunnlag,
             ) {

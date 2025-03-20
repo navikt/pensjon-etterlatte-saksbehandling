@@ -24,8 +24,6 @@ class InntektAvkortingTest {
             maanedsinntekt.anvend(
                 inntektAvkortingGrunnlag(
                     inntekt = 400999,
-                    fratrekkInnAar = 50000,
-                    inntektUtland = 100000,
                     relevanteMaaneder = 10,
                 ),
                 RegelPeriode(LocalDate.of(2024, 1, 1)),
@@ -57,7 +55,7 @@ class InntektAvkortingTest {
     fun `avkortingsbeloep er oversteget inntekt ganget med avkortingsfaktor`() {
         val avkortingsbeloep =
             kroneavrundetInntektAvkorting.anvend(
-                inntektAvkortingGrunnlag(inntekt = 500000, fratrekkInnAar = 0, relevanteMaaneder = 12),
+                inntektAvkortingGrunnlag(inntekt = 500000, relevanteMaaneder = 12),
                 RegelPeriode(LocalDate.of(2024, 1, 1)),
             )
         avkortingsbeloep.verdi shouldBe 16526

@@ -174,8 +174,6 @@ fun avkortinggrunnlagLagreDto(
 
 fun inntektAvkortingGrunnlag(
     inntekt: Int = 500000,
-    fratrekkInnAar: Int = 0,
-    inntektUtland: Int = 0,
     relevanteMaaneder: Int = 12,
 ) = InntektAvkortingGrunnlagWrapper(
     inntektAvkortingGrunnlag =
@@ -183,9 +181,6 @@ fun inntektAvkortingGrunnlag(
             verdi =
                 InntektAvkortingGrunnlag(
                     inntekt = Beregningstall(inntekt),
-                    fratrekkInnAar = Beregningstall(fratrekkInnAar),
-                    inntektUtland = Beregningstall(inntektUtland),
-                    fratrekkInnAarUtland = Beregningstall(0),
                     relevanteMaaneder = Beregningstall(relevanteMaaneder),
                     grunnlagId = UUID.randomUUID(),
                 ),

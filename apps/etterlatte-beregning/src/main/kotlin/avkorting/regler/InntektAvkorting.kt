@@ -14,17 +14,12 @@ import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
-import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
 import no.nav.etterlatte.regler.Beregningstall
-import no.nav.etterlatte.regler.roundingModeInntekt
 import java.time.LocalDate
 import java.util.UUID
 
 data class InntektAvkortingGrunnlag(
     val inntekt: Beregningstall,
-    val fratrekkInnAar: Beregningstall,
-    val inntektUtland: Beregningstall,
-    val fratrekkInnAarUtland: Beregningstall,
     val relevanteMaaneder: Beregningstall,
     val grunnlagId: UUID,
 )
@@ -74,15 +69,10 @@ val maanedsinntekt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Inntekt for relevant periode nedrundet til nærmeste tusen oppdelt i relevante måneder",
-        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.2"),
+        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.2"), // TODO!
     ) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
-        val (inntekt, fratrekkInnAar, inntektutland, fratrekkInnAarUtland, relevanteMaaneder) = inntektavkortingsgrunnlag
-        inntekt
-            .minus(fratrekkInnAar)
-            .plus(inntektutland)
-            .minus(fratrekkInnAarUtland)
-            .round(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt)
-            .divide(relevanteMaaneder)
+        val (inntekt, relevanteMaaneder) = inntektavkortingsgrunnlag
+        inntekt.divide(relevanteMaaneder)
     }
 
 val overstegetInntektPerMaaned =

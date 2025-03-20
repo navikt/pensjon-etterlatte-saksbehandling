@@ -274,7 +274,12 @@ data class Avkorting(
                                 val avkortinger =
                                     AvkortingRegelkjoring.beregnInntektsavkorting(
                                         periode = periode,
-                                        avkortingGrunnlag = inntektsavkorting.grunnlag.copy(periode = periode),
+                                        // avkortingGrunnlag = inntektsavkorting.grunnlag.copy(periode = periode),
+                                        inntektsgrunnlagId = inntektsavkorting.grunnlag.id,
+                                        innvilgaMaaneder = inntektsavkorting.grunnlag.innvilgaMaaneder,
+                                        inntektInnvilgaPeriode =
+                                            inntektsavkorting.grunnlag.inntektInnvilgaPeriode
+                                                ?: throw InternfeilException("Kan ikke beregne avkorting uten inntekt innvilget periode"),
                                     )
 
                                 val avkortetYtelseForventetInntekt =
@@ -498,6 +503,13 @@ data class Avkorting(
 class OpphoerErTilbakeITid(
     msg: String,
 ) : InternfeilException(msg)
+
+sealed class AvkortingGrunnlag {
+    abstract val id: UUID
+    abstract val periode: Periode
+    abstract val innvilgaMaaneder: Int
+    abstract val inntektInnvilgaPeriode: InntektInnvilgaPeriode
+}
 
 data class ForventetInntekt(
     val id: UUID,

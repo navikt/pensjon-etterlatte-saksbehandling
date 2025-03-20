@@ -36,7 +36,10 @@ object AvkortingRegelkjoring {
 
     fun beregnInntektsavkorting(
         periode: Periode,
-        avkortingGrunnlag: ForventetInntekt,
+        // avkortingGrunnlag: ForventetInntekt
+        inntektsgrunnlagId: UUID,
+        innvilgaMaaneder: Int,
+        inntektInnvilgaPeriode: InntektInnvilgaPeriode,
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
 
@@ -44,23 +47,20 @@ object AvkortingRegelkjoring {
             PeriodisertInntektAvkortingGrunnlag(
                 periodisertInntektAvkortingGrunnlag =
                     PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                        listOf(avkortingGrunnlag)
+                        listOf(inntektInnvilgaPeriode)
                             .map {
                                 GrunnlagMedPeriode(
                                     data = it,
-                                    fom = it.periode.fom.atDay(1),
-                                    tom = it.periode.tom?.atEndOfMonth(),
+                                    fom = periode.fom.atDay(1),
+                                    tom = periode.tom?.atEndOfMonth(),
                                 )
                             }.mapVerdier {
                                 FaktumNode(
                                     verdi =
                                         InntektAvkortingGrunnlag(
-                                            inntekt = Beregningstall(it.inntektTom),
-                                            fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
-                                            inntektUtland = Beregningstall(it.inntektUtlandTom),
-                                            fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
-                                            relevanteMaaneder = Beregningstall(it.innvilgaMaaneder),
-                                            it.id,
+                                            inntekt = Beregningstall(it.verdi),
+                                            relevanteMaaneder = Beregningstall(innvilgaMaaneder),
+                                            grunnlagId = inntektsgrunnlagId,
                                         ),
                                     kilde = it.kilde,
                                     beskrivelse = "Forventet årsinntekt",

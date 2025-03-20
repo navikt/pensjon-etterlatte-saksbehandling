@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
+import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -204,33 +205,41 @@ data class Avkorting(
                 ?: throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
 
         val tom = finnTom(opphoerFom, nyttGrunnlag)
+
+        val forventetInntekt =
+            ForventetInntekt(
+                id = nyttGrunnlag.id,
+                periode = Periode(fom = nyttGrunnlag.fom, tom = tom),
+                inntektTom = nyttGrunnlag.inntektTom,
+                fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
+                inntektUtlandTom = nyttGrunnlag.inntektUtlandTom,
+                fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
+                innvilgaMaaneder =
+                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
+                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, tom, aldersovergang),
+                overstyrtInnvilgaMaanederAarsak =
+                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
+                        OverstyrtInnvilgaMaanederAarsak.valueOf(it)
+                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
+                overstyrtInnvilgaMaanederBegrunnelse =
+                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
+                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
+                spesifikasjon = nyttGrunnlag.spesifikasjon,
+                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
+            )
+
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom) } +
+                .map {
+                    it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom)
+                } +
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
-                            ForventetInntekt(
-                                id = nyttGrunnlag.id,
-                                periode = Periode(fom = nyttGrunnlag.fom, tom = tom),
-                                inntektTom = nyttGrunnlag.inntektTom,
-                                fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
-                                inntektUtlandTom = nyttGrunnlag.inntektUtlandTom,
-                                fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
-                                innvilgaMaaneder =
-                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, tom, aldersovergang),
-                                overstyrtInnvilgaMaanederAarsak =
-                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
-                                        OverstyrtInnvilgaMaanederAarsak.valueOf(it)
-                                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
-                                overstyrtInnvilgaMaanederBegrunnelse =
-                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
-                                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
-                                spesifikasjon = nyttGrunnlag.spesifikasjon,
-                                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
+                            forventetInntekt.copy(
+                                inntektInnvilgetPeriode = beregnInntektInnvilgetPeriodeForventetInntekt(forventetInntekt),
                             ),
                     ),
                 )
@@ -274,11 +283,10 @@ data class Avkorting(
                                 val avkortinger =
                                     AvkortingRegelkjoring.beregnInntektsavkorting(
                                         periode = periode,
-                                        // avkortingGrunnlag = inntektsavkorting.grunnlag.copy(periode = periode),
                                         inntektsgrunnlagId = inntektsavkorting.grunnlag.id,
                                         innvilgaMaaneder = inntektsavkorting.grunnlag.innvilgaMaaneder,
-                                        inntektInnvilgaPeriode =
-                                            inntektsavkorting.grunnlag.inntektInnvilgaPeriode
+                                        inntektInnvilgetPeriode =
+                                            inntektsavkorting.grunnlag.inntektInnvilgetPeriode
                                                 ?: throw InternfeilException("Kan ikke beregne avkorting uten inntekt innvilget periode"),
                                     )
 
@@ -508,7 +516,7 @@ sealed class AvkortingGrunnlag {
     abstract val id: UUID
     abstract val periode: Periode
     abstract val innvilgaMaaneder: Int
-    abstract val inntektInnvilgaPeriode: InntektInnvilgaPeriode
+    abstract val inntektInnvilgetPeriode: InntektInnvilgetPeriode
 }
 
 data class ForventetInntekt(
@@ -523,7 +531,7 @@ data class ForventetInntekt(
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
-    val inntektInnvilgaPeriode: InntektInnvilgaPeriode? = null,
+    val inntektInnvilgetPeriode: InntektInnvilgetPeriode? = null,
 )
 
 data class FaktiskInntekt(
@@ -534,10 +542,10 @@ data class FaktiskInntekt(
     val afp: Int,
     val utlandsinntekt: Int,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-    val inntektInnvilgaPeriode: InntektInnvilgaPeriode? = null,
+    val inntektInnvilgetPeriode: InntektInnvilgetPeriode? = null,
 )
 
-data class InntektInnvilgaPeriode(
+data class InntektInnvilgetPeriode(
     val verdi: Int,
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode,

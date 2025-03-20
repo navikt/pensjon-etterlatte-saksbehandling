@@ -3,7 +3,6 @@ package no.nav.etterlatte.beregning.regler.avkorting.regler
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.avkorting.regler.avkortingFaktor
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
-import no.nav.etterlatte.avkorting.regler.maanedsinntekt
 import no.nav.etterlatte.avkorting.regler.overstegetInntektPerMaaned
 import no.nav.etterlatte.beregning.regler.inntektAvkortingGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -18,6 +17,8 @@ class InntektAvkortingTest {
         faktor.verdi shouldBe Beregningstall(0.45)
     }
 
+    /*
+    TODO nedrunding flyttes til INntektInnvilgetPeriode.kt
     @Test
     fun `inntekt rundes opp til naermeste tusen, fratrekkes opptjent utenfor periode og justeres til maanedsinntekt`() {
         val inntekt =
@@ -30,6 +31,7 @@ class InntektAvkortingTest {
             )
         inntekt.verdi.toInteger() shouldBe 45000
     }
+     */
 
     @Test
     fun `oversteget inntekt er alt over et halvt maanedlig grunnbeloep`() {

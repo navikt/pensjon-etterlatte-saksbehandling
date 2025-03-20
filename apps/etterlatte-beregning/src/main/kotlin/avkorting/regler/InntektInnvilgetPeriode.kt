@@ -8,7 +8,9 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
+import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
 import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.regler.roundingModeInntekt
 
 data class ForventetInntektGrunnlag(
     val inntektTom: Beregningstall,
@@ -16,12 +18,6 @@ data class ForventetInntektGrunnlag(
     val inntektUtlandTom: Beregningstall,
     val fratrekkInnAarUtland: Beregningstall,
 )
-
-/*
-data class ForventetInntektGrunnlagWrapper(
-    val inntektAvkortingGrunnlag: FaktumNode<ForventetInntektGrunnlag>,
-)
-*/
 
 val forventetInntektGrunnlag: Regel<ForventetInntektGrunnlag, ForventetInntektGrunnlag> =
     finnFaktumIGrunnlag(
@@ -42,5 +38,5 @@ val forventetInntektInnvilgetPeriode =
             .minus(fratrekkInnAar)
             .plus(inntektutlandTom)
             .minus(fratrekkInnAarUtland)
-        // .round(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt) TODO skal nedrunding skje her?
+            .round(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt)
     }

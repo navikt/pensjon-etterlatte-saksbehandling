@@ -67,7 +67,6 @@ class OppdaterTilgangService(
     ) {
         logger.info("Håndterer tilganger for sakid $sakId")
         val sak = sakService.finnSak(sakId) ?: throw PersonManglerSak()
-        // TODO: må hente ut om saken er egen ansatt eller gradering for hvis ingen og ingen ny har vil vi ikke ooppdatere enhet
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
         val identerMedGradering =

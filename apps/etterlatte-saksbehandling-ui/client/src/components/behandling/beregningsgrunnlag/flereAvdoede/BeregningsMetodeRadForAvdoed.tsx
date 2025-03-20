@@ -28,7 +28,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import {
@@ -46,6 +46,7 @@ import { ControlledMaanedVelger } from '~shared/components/maanedVelger/Controll
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { mapNavn, tagTekstForKunEnJuridiskForelder } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 import { AnnenForelderVurdering } from '~shared/types/grunnlag'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface Props {
   behandling: IBehandlingReducer
@@ -345,6 +346,9 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
             Slett
           </Button>
         )}
+        {mapFailure(lagreBeregningsgrunnlagResult, (error) => (
+          <ApiErrorAlert>{error.detail || 'Kunne ikke lagre beregningsgrunnlag'}</ApiErrorAlert>
+        ))}
       </Table.DataCell>
     </Table.ExpandableRow>
   )

@@ -490,9 +490,6 @@ class OpphoerErTilbakeITid(
     msg: String,
 ) : InternfeilException(msg)
 
-/**
- * Kan være forventet årsinntekt oppgitt av bruker eller faktisk årsinntekt etter skatteoppgjør.
- */
 data class ForventetInntekt(
     val id: UUID,
     val periode: Periode,

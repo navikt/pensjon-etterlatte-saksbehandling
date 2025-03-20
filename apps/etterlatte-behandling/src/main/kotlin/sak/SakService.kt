@@ -502,6 +502,9 @@ class SakServiceImpl(
         return enhet ?: enhetFraNorg
     }
 
+    /**
+     * Denne skal aldri brukes uten å også endre enhet. Tror dette egentlig bør gjøres i sammenheng.
+     */
     override fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,

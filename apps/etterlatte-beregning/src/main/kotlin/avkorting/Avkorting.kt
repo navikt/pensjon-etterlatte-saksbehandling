@@ -199,7 +199,10 @@ data class Avkorting(
         opphoerFom: YearMonth? = null,
         aldersovergang: YearMonth? = null,
     ): Avkorting {
-        val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom) as AarsoppgjoerLoepende
+        val aarsoppgjoer =
+            hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom) as? AarsoppgjoerLoepende
+                ?: throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
+
         val tom = finnTom(opphoerFom, nyttGrunnlag)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
@@ -249,7 +252,7 @@ data class Avkorting(
         val virkningstidspunktAar = virkningstidspunkt.year
 
         val oppdaterteOppgjoer =
-            (this.aarsoppgjoer as List<AarsoppgjoerLoepende>).map { aarsoppgjoer ->
+            (this.aarsoppgjoer).map { aarsoppgjoer ->
 
                 val ytelseFoerAvkorting =
                     if (beregning != null && aarsoppgjoer.aar >= virkningstidspunktAar) {
@@ -258,75 +261,81 @@ data class Avkorting(
                         aarsoppgjoer.ytelseFoerAvkorting
                     }
 
-                val reberegnetInntektsavkorting =
-                    aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
-                        val periode =
-                            Periode(
-                                fom = aarsoppgjoer.fom,
-                                tom = inntektsavkorting.grunnlag.periode.tom,
-                            )
+                when (aarsoppgjoer) {
+                    is AarsoppgjoerLoepende -> {
+                        val reberegnetInntektsavkorting =
+                            aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
+                                val periode =
+                                    Periode(
+                                        fom = aarsoppgjoer.fom,
+                                        tom = inntektsavkorting.grunnlag.periode.tom,
+                                    )
 
-                        val avkortinger =
-                            AvkortingRegelkjoring.beregnInntektsavkorting(
-                                periode = periode,
-                                avkortingGrunnlag = inntektsavkorting.grunnlag.copy(periode = periode),
-                            )
+                                val avkortinger =
+                                    AvkortingRegelkjoring.beregnInntektsavkorting(
+                                        periode = periode,
+                                        avkortingGrunnlag = inntektsavkorting.grunnlag.copy(periode = periode),
+                                    )
 
-                        val avkortetYtelseForventetInntekt =
-                            if (aarsoppgjoer.inntektsavkorting.size > 1) {
-                                AvkortingRegelkjoring.beregnAvkortetYtelse(
-                                    periode = periode,
-                                    ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                val avkortetYtelseForventetInntekt =
+                                    if (aarsoppgjoer.inntektsavkorting.size > 1) {
+                                        AvkortingRegelkjoring.beregnAvkortetYtelse(
+                                            periode = periode,
+                                            ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                            avkortingsperioder = avkortinger,
+                                            type = FORVENTET_INNTEKT,
+                                            restanse = null,
+                                            sanksjoner = emptyList(),
+                                        )
+                                    } else {
+                                        emptyList()
+                                    }
+
+                                inntektsavkorting.copy(
                                     avkortingsperioder = avkortinger,
-                                    type = FORVENTET_INNTEKT,
-                                    restanse = null,
-                                    sanksjoner = emptyList(),
+                                    avkortetYtelseForventetInntekt =
+                                        avkortetYtelseForventetInntekt.map {
+                                            it.copy(inntektsgrunnlag = inntektsavkorting.grunnlag.id)
+                                        },
                                 )
-                            } else {
-                                emptyList()
                             }
 
-                        inntektsavkorting.copy(
-                            avkortingsperioder = avkortinger,
-                            avkortetYtelseForventetInntekt =
-                                avkortetYtelseForventetInntekt.map {
-                                    it.copy(inntektsgrunnlag = inntektsavkorting.grunnlag.id)
-                                },
-                        )
-                    }
-
-                val avkortetYtelse =
-                    if (aarsoppgjoer.inntektsavkorting.size > 1) {
-                        beregnAvkortetYtelseMedRestanse(
-                            aarsoppgjoer,
-                            ytelseFoerAvkorting,
-                            reberegnetInntektsavkorting,
-                            sanksjoner,
-                        )
-                    } else {
-                        reberegnetInntektsavkorting.first().let {
-                            val tomDesember = tomHvisInntektNesteAar(aarsoppgjoer)
-                            val sistePeriode =
-                                when (it.grunnlag.periode.tom) {
-                                    null -> Periode(fom = it.grunnlag.periode.fom, tom = tomDesember)
-                                    else -> it.grunnlag.periode
+                        val avkortetYtelse =
+                            if (aarsoppgjoer.inntektsavkorting.size > 1) {
+                                beregnAvkortetYtelseMedRestanse(
+                                    aarsoppgjoer,
+                                    ytelseFoerAvkorting,
+                                    reberegnetInntektsavkorting,
+                                    sanksjoner,
+                                )
+                            } else {
+                                reberegnetInntektsavkorting.first().let {
+                                    val tomDesember = tomHvisInntektNesteAar(aarsoppgjoer)
+                                    val sistePeriode =
+                                        when (it.grunnlag.periode.tom) {
+                                            null -> Periode(fom = it.grunnlag.periode.fom, tom = tomDesember)
+                                            else -> it.grunnlag.periode
+                                        }
+                                    AvkortingRegelkjoring.beregnAvkortetYtelse(
+                                        periode = sistePeriode,
+                                        ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                        avkortingsperioder = it.avkortingsperioder,
+                                        type = AARSOPPGJOER,
+                                        restanse = null,
+                                        sanksjoner = sanksjoner,
+                                    )
                                 }
-                            AvkortingRegelkjoring.beregnAvkortetYtelse(
-                                periode = sistePeriode,
-                                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                                avkortingsperioder = it.avkortingsperioder,
-                                type = AARSOPPGJOER,
-                                restanse = null,
-                                sanksjoner = sanksjoner,
-                            )
-                        }
+                            }
+
+                        aarsoppgjoer.copy(
+                            ytelseFoerAvkorting = ytelseFoerAvkorting,
+                            inntektsavkorting = reberegnetInntektsavkorting,
+                            avkortetYtelse = avkortetYtelse,
+                        )
                     }
 
-                aarsoppgjoer.copy(
-                    ytelseFoerAvkorting = ytelseFoerAvkorting,
-                    inntektsavkorting = reberegnetInntektsavkorting,
-                    avkortetYtelse = avkortetYtelse,
-                )
+                    is Etteroppgjoer -> TODO()
+                }
             }
 
         return this.copy(aarsoppgjoer = oppdaterteOppgjoer)
@@ -535,12 +544,6 @@ sealed class Aarsoppgjoer {
     abstract val fom: YearMonth
     abstract val ytelseFoerAvkorting: List<YtelseFoerAvkorting>
     abstract val avkortetYtelse: List<AvkortetYtelse>
-
-    fun inntektsavkorting(): List<Inntektsavkorting> =
-        when (this) {
-            is AarsoppgjoerLoepende -> this.inntektsavkorting
-            is Etteroppgjoer -> throw InternfeilException("Etteroppgjør har ikke ${Inntektsavkorting::class.simpleName}")
-        }
 }
 
 data class AarsoppgjoerLoepende(

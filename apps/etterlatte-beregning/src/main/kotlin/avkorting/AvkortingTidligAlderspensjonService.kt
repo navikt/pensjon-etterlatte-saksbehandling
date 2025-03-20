@@ -2,6 +2,7 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -29,14 +30,19 @@ class AvkortingTidligAlderspensjonService(
         val (overstyrtInntektsavkorting, aarsoppgjoer) =
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    avkorting.aarsoppgjoer as List<AarsoppgjoerLoepende>
+                    val foersteAar =
+                        avkorting.aarsoppgjoer.first() as? AarsoppgjoerLoepende
+                            ?: throw InternfeilException("Førstegangsbehandling inneholder etteroppgjør")
                     val overstyrtFoersteAar =
-                        avkorting.aarsoppgjoer.first().inntektsavkorting.find {
+                        foersteAar.inntektsavkorting.find {
                             it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
                         }
                     if (overstyrtFoersteAar == null && avkorting.aarsoppgjoer.size == 2) {
+                        val andreAar =
+                            avkorting.aarsoppgjoer.last() as? AarsoppgjoerLoepende
+                                ?: throw InternfeilException("Førstegangsbehandling inneholder etteroppgjør")
                         val overstyrtAndreAar =
-                            avkorting.aarsoppgjoer.last().inntektsavkorting.find {
+                            andreAar.inntektsavkorting.find {
                                 it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
                             }
                         Pair(overstyrtAndreAar, avkorting.aarsoppgjoer.last())
@@ -49,7 +55,8 @@ class AvkortingTidligAlderspensjonService(
                     val aarsoppgjoer =
                         avkorting.aarsoppgjoer.single {
                             it.aar == behandling.virkningstidspunkt?.dato?.year
-                        } as AarsoppgjoerLoepende
+                        } as? AarsoppgjoerLoepende
+                            ?: throw InternfeilException("Første revurdering i nytt år inneholder etteroppgjør")
                     val overstyrt =
                         aarsoppgjoer.inntektsavkorting
                             .find {

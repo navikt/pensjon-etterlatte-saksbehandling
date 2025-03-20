@@ -1,10 +1,12 @@
 package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Avkortingsperiode
+import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.ForventetInntekt
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
@@ -37,6 +39,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -205,6 +208,12 @@ fun aarsoppgjoer(
     inntektsavkorting = inntektsavkorting,
     avkortetYtelse = avkortetYtelse,
 )
+
+fun Aarsoppgjoer.inntektsavkorting(): List<Inntektsavkorting> =
+    when (this) {
+        is AarsoppgjoerLoepende -> this.inntektsavkorting
+        is Etteroppgjoer -> throw InternfeilException("Etteroppgjør har ikke ${Inntektsavkorting::class.simpleName}")
+    }
 
 fun ytelseFoerAvkorting(
     beregning: Int = 100,

@@ -10,6 +10,7 @@ import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test

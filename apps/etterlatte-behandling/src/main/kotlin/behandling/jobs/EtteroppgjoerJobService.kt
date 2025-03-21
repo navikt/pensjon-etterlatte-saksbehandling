@@ -37,11 +37,12 @@ internal suspend fun finnOgOpprettEtteroppgjoer(
     etteroppgjoerService: EtteroppgjoerService,
 ) {
     val yearNow = YearMonth.now().year
-    // TODO: hvor lang tilbake i tid skal vi sjekke?
-    val aarMellom2020OgNaa = (2020..yearNow).toList()
 
-    logger.info("Starter jobb for å opprette etteroppgjoer for inntektsaar=$aarMellom2020OgNaa")
-    for (inntektsaar in aarMellom2020OgNaa) {
+    // for å få med saker innvilget tilbake i tid
+    val aarMellom2024OgNaa = (2024..yearNow).toList()
+
+    logger.info("Starter jobb for å opprette etteroppgjoer for inntektsaar=$aarMellom2024OgNaa")
+    for (inntektsaar in aarMellom2024OgNaa) {
         etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar, "Automatisk")
     }
 }

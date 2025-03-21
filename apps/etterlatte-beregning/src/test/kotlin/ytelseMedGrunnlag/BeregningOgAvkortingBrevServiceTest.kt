@@ -103,7 +103,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
                                 ),
                         ),
                     ),
-                avkortetYtelseAar =
+                avkortetYtelse =
                     listOf(
                         avkortetYtelse(
                             periode = Periode(fom = YearMonth.of(2024, 2), tom = YearMonth.of(2024, 3)),

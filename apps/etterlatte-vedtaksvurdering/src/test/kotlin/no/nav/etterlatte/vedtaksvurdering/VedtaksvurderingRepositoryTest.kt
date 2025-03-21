@@ -467,6 +467,34 @@ internal class VedtaksvurderingRepositoryTest(
     }
 
     @Test
+    fun `hent vedtak med utbetalingsperiode for aar`() {
+        val soeker1 = Folkeregisteridentifikator.of(FNR_1)
+        val sakid = SakId(10)
+
+        listOf(
+            opprettVedtak(
+                sakId = sakid,
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2023, Month.DECEMBER),
+                status = VedtakStatus.IVERKSATT,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            ),
+            opprettVedtak(
+                sakId = sakid,
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.IVERKSATT,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            ),
+        ).map { repository.opprettVedtak(it) }
+            .forEach { repository.iverksattVedtak(it.behandlingId) }
+
+        val results = repository.hentSakIdMedUtbetalingForInntektsaar(2023, SakType.OMSTILLINGSSTOENAD)
+        results.size shouldBeExactly 1
+        results.first().sakId shouldBe sakid.sakId
+    }
+
+    @Test
     fun `skal hente vedtak for fnr selv om ikke saktype er spesifisert`() {
         val soeker1 = Folkeregisteridentifikator.of(FNR_1)
 

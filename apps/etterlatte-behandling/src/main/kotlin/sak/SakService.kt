@@ -81,11 +81,6 @@ interface SakService {
         skjermet: Boolean,
     )
 
-    fun oppdaterEnhet(
-        sak: SakMedEnhet,
-        kommentar: String? = null,
-    )
-
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
@@ -123,7 +118,12 @@ interface SakService {
         gradering: AdressebeskyttelseGradering,
     )
 
-    fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset>
+    fun hentSaksendringer(sakId: SakId): List<Saksendring>
+
+    fun oppdaterEnhet(
+        sak: SakMedEnhet,
+        kommentar: String? = null,
+    )
 }
 
 class ManglerTilgangTilEnhet(
@@ -131,6 +131,13 @@ class ManglerTilgangTilEnhet(
 ) : UgyldigForespoerselException(
         code = "MANGLER_TILGANG_TIL_ENHET",
         detail = "Mangler tilgang til enhet $enheter",
+    )
+
+class KanIkkEndreSpesialenhet(
+    detail: String,
+) : UgyldigForespoerselException(
+        code = "KAN_IKK_ENDRE_SPESIAL_ENHET",
+        detail = detail,
     )
 
 class SakServiceImpl(
@@ -145,6 +152,16 @@ class SakServiceImpl(
     private val featureToggle: FeatureToggleService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun oppdaterEnhet(
+        sak: SakMedEnhet,
+        kommentar: String?,
+    ) {
+        if (Enheter.erSpesialTilgangsEnheter(sak.enhet)) {
+            throw KanIkkEndreSpesialenhet("Kan ike endre til spesial enhet")
+        }
+        dao.oppdaterEnhet(sak, kommentar)
+    }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
         val saker = finnSakerForPerson(fnr)
@@ -403,23 +420,10 @@ class SakServiceImpl(
         }
     }
 
-    override fun hentSaksendringer(sakId: SakId): List<SaksendringBegrenset> {
-        val saksendringer = endringerDao.hentEndringerForSak(sakId)
-
-        // Inntil vi har gått opp om det er greit å vise adressebeskyttelse og skjerming, så ønsker vi ikke å eksponere
-        // dette. Verken som egne endringstyper eller som en del av andre endringstyper.
-        val saksendringerUtenSensitiveEndringer =
-            saksendringer
-                .filter {
-                    it.endringstype in
-                        listOf(
-                            Endringstype.OPPRETT_SAK,
-                            Endringstype.ENDRE_ENHET,
-                            Endringstype.ENDRE_IDENT,
-                        )
-                }.map(Saksendring::toSaksendringBegrenset)
-
-        return saksendringerUtenSensitiveEndringer
+    override fun hentSaksendringer(sakId: SakId): List<Saksendring> {
+        // Sjekk om saksbehandler kan hente historikk for sak
+        val sak = lesDao.hentSak(sakId).sjekkEnhet()
+        return sak?.let { endringerDao.hentEndringerForSak(it.id) } ?: emptyList()
     }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
@@ -531,13 +535,6 @@ class SakServiceImpl(
         }
 
         dao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
-    }
-
-    override fun oppdaterEnhet(
-        sak: SakMedEnhet,
-        kommentar: String?,
-    ) {
-        dao.oppdaterEnhet(sak, kommentar)
     }
 
     override fun finnSak(

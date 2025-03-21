@@ -572,6 +572,7 @@ internal class ApplicationContext(
             pdltjenesterKlient = pdlTjenesterKlient,
             brukerService = brukerService,
             oppgaveService = oppgaveService,
+            sakSkrivDao = sakSkrivDao,
         )
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
@@ -642,6 +643,7 @@ internal class ApplicationContext(
             dao = etteroppgjoerDao,
             sakLesDao = sakLesDao,
             sakService = sakService,
+            vedtakKlient = vedtakKlient,
         )
 
     private val inntektskomponentService =

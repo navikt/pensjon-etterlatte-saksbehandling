@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
@@ -43,8 +42,6 @@ data class Saksendring(
     val identtype: Identtype,
     val kommentar: String? = null,
 ) {
-    fun toSaksendringBegrenset(): SaksendringBegrenset = SaksendringBegrenset.from(this)
-
     companion object {
         fun create(
             user: User,
@@ -69,31 +66,3 @@ data class Saksendring(
             )
     }
 }
-
-data class SaksendringBegrenset(
-    val id: UUID,
-    val endringstype: Endringstype,
-    val foer: Sak?,
-    val etter: Sak,
-    val tidspunkt: Tidspunkt,
-    val ident: String,
-    val identtype: Identtype,
-    val kommentar: String?,
-) {
-    companion object {
-        fun from(saksendring: Saksendring): SaksendringBegrenset =
-            SaksendringBegrenset(
-                id = saksendring.id,
-                endringstype = saksendring.endringstype,
-                foer = saksendring.foer?.toSak(),
-                etter = saksendring.etter.toSak(),
-                tidspunkt = saksendring.tidspunkt,
-                ident = saksendring.ident,
-                identtype = saksendring.identtype,
-                kommentar = saksendring.kommentar,
-            )
-    }
-}
-
-// KomplettSak inneholder sensitive felter adressebeskyttelse og erSkjermet - fjerner disse med denne konverteringen
-private fun KomplettSak.toSak() = Sak(ident, sakType, id, enhet)

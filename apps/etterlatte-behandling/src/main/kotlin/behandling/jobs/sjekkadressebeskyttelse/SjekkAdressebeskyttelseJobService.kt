@@ -36,11 +36,15 @@ class SjekkAdressebeskyttelseJobService(
 
     private fun run() {
         if (featureToggleService.isEnabled(SjekkAdressebeskyttelseToggles.SJEKK_ADRESSEBESKYTTELSE_JOBB, false)) {
-            val aktuellSak = SakId(17518)
-            val persongalleri = inTransaction { grunnlagService.hentPersongalleri(aktuellSak) }
-            if (persongalleri != null) {
-                logger.info("Oppdaterer gradering på sak ${aktuellSak.sakId}")
-                inTransaction { tilgangService.haandtergraderingOgEgenAnsatt(aktuellSak, persongalleri) }
+            val aktuelleSaker = listOf(SakId(5286), SakId(22597), SakId(17474), SakId(11517), SakId(11652), SakId(15436))
+            aktuelleSaker.forEach { aktuellSak ->
+                val persongalleri = inTransaction { grunnlagService.hentPersongalleri(aktuellSak) }
+                if (persongalleri != null) {
+                    logger.info("Oppdaterer gradering på sak ${aktuellSak.sakId}")
+                    inTransaction { tilgangService.haandtergraderingOgEgenAnsatt(aktuellSak, persongalleri) }
+                } else {
+                    logger.info("Fant ikke persongalleri på sak ${aktuellSak.sakId}")
+                }
             }
 
             /* Fjerner dette inntil videre da vi må se på alle personer i persongalleriet.

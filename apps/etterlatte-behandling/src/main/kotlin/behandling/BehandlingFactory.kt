@@ -12,7 +12,6 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
-import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -84,22 +83,14 @@ class BehandlingFactory(
 
         val sak = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(soeker, request.sakType) }
 
-        if (
-            sak.enhet != request.enhet &&
-            sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr &&
-            sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
-        ) {
-            request.enhet?.let {
-                if (Enheter.entries.none { enhet -> enhet.enhetNr == it }) {
-                    throw UgyldigEnhetException()
-                }
-                inTransaction {
-                    sakService.oppdaterEnhet(
-                        SakMedEnhet(
-                            enhet = it,
-                            id = sak.id,
-                        ),
-                    )
+        if (request.enhet != null && sak.enhet != request.enhet) {
+            val baOmSpesialEnhet = Enheter.erSpesialTilgangsEnheter(request.enhet!!)
+            if (baOmSpesialEnhet) {
+                throw BaOmSpesialEnhet()
+            } else {
+                logger.warn("Enheten fra requesten ble ulik enn opprett/finn sak sa, ba ikke om spesialenhet. Ba om enhet ${request.enhet}")
+                if (Enheter.erSpesialTilgangsEnheter(sak.enhet)) {
+                    sikkerLogg.info("Satt spesisalenhet: ${sak.enhet} for sakid: ${sak.id} ")
                 }
             }
         }
@@ -539,10 +530,12 @@ class ManuellMigreringHarEksisterendeIverksattBehandling :
         detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
     )
 
-class UgyldigEnhetException :
+class BaOmSpesialEnhet :
     UgyldigForespoerselException(
-        code = "UGYLDIG-ENHET",
-        detail = "Enhet brukt i form er matcher ingen gyldig enhet",
+        code = "BA_OM_SPESIAL_ENHET_MAA_GJORES_MANUELT",
+        detail =
+            "Den forespurte enheten kan ikke settes, opprett sak i porten. " +
+                "Det må gjøres en manuel avgjørelse her da systemene ikke er enig.",
     )
 
 sealed class AvslagOmgjoering {

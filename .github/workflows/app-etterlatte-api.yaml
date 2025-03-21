@@ -54,7 +54,7 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build-and-deploy.yaml
     secrets: inherit
-
+# deploy-api-dev og deploy-api-prod kan fjernes når samordning ingressen er borte, husk å rename nais filene til kun dev/prod.yaml
   deploy-api-dev:
     if: github.event_name != 'pull_request'
     name: deploy-api-dev
@@ -87,7 +87,7 @@ jobs:
       - uses: andstor/file-existence-action@v3
         id: check_files
         with:
-          files: "apps/${{ github.workflow }}/.nais/prod.yaml"
+          files: "apps/${{ github.workflow }}/.nais/prod-api.yaml"
       - uses: nais/deploy/actions/deploy@v2
         if: steps.check_files.outputs.files_exists == 'true'
         env:

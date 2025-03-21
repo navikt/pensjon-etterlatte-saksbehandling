@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
@@ -23,4 +24,8 @@ class VedtaksvurderingService(
     fun hentVedtakISak(sakId: SakId): List<Vedtak> = repository.hentVedtakForSak(sakId)
 
     fun hentVedtak(fnr: Folkeregisteridentifikator): List<Vedtak> = repository.hentFerdigstilteVedtak(fnr)
+
+    // TODO: bedre plassering for denne?
+    fun hentSakIdMedUtbetalingForInntektsaar(aar: Int): List<SakId> =
+        repository.hentSakIdMedUtbetalingForInntektsaar(aar, SakType.OMSTILLINGSSTOENAD)
 }

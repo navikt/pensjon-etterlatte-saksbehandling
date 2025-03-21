@@ -12,6 +12,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -21,6 +22,8 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
+import no.nav.etterlatte.logger
+import no.nav.etterlatte.samordning.X_ORGNR
 
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -70,7 +73,9 @@ fun Route.samordningVedtakRoute(
             val tpnummer =
                 call.request.headers["tpnr"]
                     ?: throw ManglerTpNrException()
-
+            val tpnr = Tjenestepensjonnummer(tpnummer)
+            val organisasjonsnr = call.orgNummer
+            logger.info("GETTILPOST: Henter vedtak på gammel løsning for {}", kv(X_ORGNR, organisasjonsnr))
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
@@ -78,8 +83,8 @@ fun Route.samordningVedtakRoute(
                         fnr = Folkeregisteridentifikator.of(fnr),
                         context =
                             MaskinportenTpContext(
-                                tpnr = Tjenestepensjonnummer(tpnummer),
-                                organisasjonsnr = call.orgNummer,
+                                tpnr = tpnr,
+                                organisasjonsnr = organisasjonsnr,
                             ),
                     )
                 } catch (e: IllegalArgumentException) {
@@ -137,6 +142,7 @@ fun Route.samordningVedtakRoute(
 
             val fnr = call.fnr
 
+            logger.info("GETTILPOST: Henter vedtak på gammel løsning med fnr i header.")
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(

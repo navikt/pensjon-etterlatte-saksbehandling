@@ -28,6 +28,7 @@ fun selvbetjeningAuthorizationPlugin(appname: String) =
 
                 if (principal.context.issuers.contains(issuer)) {
                     val subject = principal.context.getClaims(pluginConfig.issuer).subject
+                    // TODO: kan fjernes når etterlatte-samordning-vedtak er borte
                     val fnr =
                         when (appname.lowercase()) {
                             "etterlatte-samordning-vedtak" -> call.fnr

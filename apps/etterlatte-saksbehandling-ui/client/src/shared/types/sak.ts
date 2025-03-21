@@ -15,6 +15,11 @@ export interface ISakMedUtlandstilknytning {
   utlandstilknytning?: IUtlandstilknytning
 }
 
+export interface IKomplettSak extends ISak {
+  adressebeskyttelse?: AdressebeskyttelseGradering
+  erSkjermet?: boolean
+}
+
 export enum SakType {
   BARNEPENSJON = 'BARNEPENSJON',
   OMSTILLINGSSTOENAD = 'OMSTILLINGSSTOENAD',
@@ -28,8 +33,8 @@ export interface FoersteVirk {
 export interface ISaksendring {
   id: string
   endringstype: Endringstype
-  foer: ISak
-  etter: ISak
+  foer: IKomplettSak
+  etter: IKomplettSak
   ident: string
   identtype: Identtype
   kommentar: string
@@ -45,10 +50,28 @@ export enum Endringstype {
   OPPRETT_SAK = 'OPPRETT_SAK',
   ENDRE_IDENT = 'ENDRE_IDENT',
   ENDRE_ENHET = 'ENDRE_ENHET',
+  ENDRE_ADRESSEBESKYTTELSE = 'ENDRE_ADRESSEBESKYTTELSE',
+  ENDRE_SKJERMING = 'ENDRE_SKJERMING',
 }
 
 export const tekstEndringstype: Record<Endringstype, string> = {
   OPPRETT_SAK: 'Opprettet sak',
   ENDRE_IDENT: 'Nytt identnummer',
   ENDRE_ENHET: 'Bytte av enhet',
+  ENDRE_ADRESSEBESKYTTELSE: 'Endret adressebeskyttelse',
+  ENDRE_SKJERMING: 'Endret skjerming',
+}
+
+export enum AdressebeskyttelseGradering {
+  STRENGT_FORTROLIG_UTLAND = 'STRENGT_FORTROLIG_UTLAND',
+  STRENGT_FORTROLIG = 'STRENGT_FORTROLIG',
+  FORTROLIG = 'FORTROLIG',
+  UGRADERT = 'UGRADERT',
+}
+
+export const tekstAdressebeskyttelseGradering: Record<AdressebeskyttelseGradering, string> = {
+  STRENGT_FORTROLIG_UTLAND: 'Strengt fortrolig (utland)',
+  STRENGT_FORTROLIG: 'Strengt fortrolig',
+  FORTROLIG: 'Fortrolig',
+  UGRADERT: 'Ugradert',
 }

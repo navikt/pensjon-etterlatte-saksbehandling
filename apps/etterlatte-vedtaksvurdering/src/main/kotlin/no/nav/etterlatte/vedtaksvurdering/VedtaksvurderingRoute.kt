@@ -89,6 +89,15 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        get("/sak/med-utbetaling/{inntektsaar}") {
+            val inntektsaar =
+                krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                    "Inntektsaar mangler"
+                }
+
+            call.respond(vedtakService.hentSakIdMedUtbetalingForInntektsaar(inntektsaar))
+        }
+
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")

@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -34,11 +35,12 @@ class OppdatererTilgangServiceTest {
     private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val sakService = mockk<SakService>()
+    private val sakSkrivDao = mockk<SakSkrivDao>()
     private val oppgaveService = mockk<OppgaveService>()
     private val brukerService = mockk<BrukerService>()
 
     private val oppdaterTilgangService =
-        OppdaterTilgangService(sakService, skjermingKlient, pdltjenesterKlient, brukerService, oppgaveService)
+        OppdaterTilgangService(sakService, skjermingKlient, pdltjenesterKlient, brukerService, oppgaveService, sakSkrivDao)
     private val soeker = "11057523044"
     private val persongalleri = persongalleri()
 
@@ -84,7 +86,7 @@ class OppdatererTilgangServiceTest {
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
         every { sakService.finnSak(sakId) } returns sak
         every { sakService.oppdaterSkjerming(any(), any()) } just Runs
-        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
         every { sakService.oppdaterAdressebeskyttelse(any(), any()) } just Runs
 
@@ -92,7 +94,7 @@ class OppdatererTilgangServiceTest {
 
         verify(exactly = 1) {
             sakService.oppdaterSkjerming(sakId, true)
-            sakService.oppdaterEnhet(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
         }
@@ -122,7 +124,7 @@ class OppdatererTilgangServiceTest {
                 Enheter.PORSGRUNN.enhetNr,
             )
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
-        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
         every { sakService.oppdaterSkjerming(match { it == sak.id }, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
@@ -131,7 +133,7 @@ class OppdatererTilgangServiceTest {
         verify(exactly = 0) {
             sakService.settEnhetOmAdressebeskyttet(any(), any())
             sakService.oppdaterSkjerming(any(), any())
-            sakService.oppdaterEnhet(any())
+            sakSkrivDao.oppdaterEnhet(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         }
         verify(exactly = 1) {
@@ -163,7 +165,7 @@ class OppdatererTilgangServiceTest {
                 Enheter.EGNE_ANSATTE.enhetNr,
             )
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
-        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
         every { sakService.oppdaterSkjerming(sak.id, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
@@ -175,7 +177,7 @@ class OppdatererTilgangServiceTest {
         verify(exactly = 1) {
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
             sakService.oppdaterSkjerming(sak.id, false)
-            sakService.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
     }
@@ -224,7 +226,7 @@ class OppdatererTilgangServiceTest {
                 graderingOgEnhet.second,
             )
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
-        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
         every { sakService.oppdaterSkjerming(sak.id, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
@@ -236,7 +238,7 @@ class OppdatererTilgangServiceTest {
         verify(exactly = 1) {
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
             sakService.oppdaterSkjerming(sak.id, false)
-            sakService.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
     }
@@ -253,14 +255,14 @@ class OppdatererTilgangServiceTest {
                 enhet.navn,
                 enhet.enhetNr,
             )
-        every { sakService.oppdaterEnhet(any()) } just Runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
         every { sakService.oppdaterSkjerming(any(), false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
 
         oppdaterTilgangService.fjernSkjermingFraSak(sak, soeker)
 
         verify(exactly = 1) {
-            sakService.oppdaterEnhet(SakMedEnhet(sakId, enhet.enhetNr))
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(sakId, enhet.enhetNr))
             sakService.oppdaterSkjerming(sakId, false)
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(
                 match {

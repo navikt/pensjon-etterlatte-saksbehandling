@@ -3,14 +3,18 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.logger
+import org.slf4j.LoggerFactory
 
 class SkatteoppgjoerHendelserService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
     private val etteroppgjoerService: EtteroppgjoerService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
+        logger.info("Starter kjøring for behandle hendelser fra skatt, sjekker ${request.antall} hendelser")
+
         val sisteKjoering = inTransaction { dao.hentSisteKjoering() }
         val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer())
         var antallRelevanteHendelser = 0
@@ -33,7 +37,7 @@ class SkatteoppgjoerHendelserService(
                 if (etteroppgjoerResultat.skalHaEtteroppgjoer) {
                     val etteroppgjoer = etteroppgjoerResultat.etteroppgjoer!!
 
-                    // TODO: opprett forbehandling hvis ingen
+                    // TODO: opprett forbehandling
 
                     etteroppgjoerService.oppdaterStatus(
                         etteroppgjoer.sakId,
@@ -42,23 +46,10 @@ class SkatteoppgjoerHendelserService(
                     )
                     antallRelevanteHendelser++
                 }
+
+                // TODO legge til status evnt feil?
+                dao.lagreKjoering(kjoering)
             }
-
-            // TODO: lagre med status hvis feiler?
-            dao.lagreKjoering(
-                HendelserKjoering(
-                    hendelsesListe.hendelser.last().sekvensnummer,
-                    hendelsesListe.hendelser.size,
-                    antallRelevanteHendelser,
-                    true,
-                ),
-            )
-        }
-
-        // TODO: annen håndtering hvis jobben feiler?
-        if (!kjoering.success) {
-            logger.error("Siste kjøring av skatteoppgjoerHendelser feilet")
-            dao.lagreKjoering(kjoering)
         }
     }
 }

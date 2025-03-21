@@ -54,6 +54,8 @@ private object UserIdMdcHook : Hook<suspend (ApplicationCall) -> Unit> {
     }
 }
 
+const val X_ORGNR = "X_ORGNR"
+
 private val X_NAV_CALL_ID = "x_Nav-Call-Id"
 val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
     createRouteScopedPlugin(

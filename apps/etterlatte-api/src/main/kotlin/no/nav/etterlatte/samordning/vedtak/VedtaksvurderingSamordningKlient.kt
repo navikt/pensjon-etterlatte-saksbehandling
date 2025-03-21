@@ -13,12 +13,14 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.samordning.X_ORGNR
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -65,16 +67,20 @@ class VedtaksvurderingSamordningKlient(
         callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
         logger.info("Henter vedtaksliste, fomDato=$fomDato")
+        val erMaskinPorten = callerContext is MaskinportenTpContext
+        if (erMaskinPorten) {
+            logger.info("Henter vedtaksliste med orgnr {}", kv(X_ORGNR, callerContext.organisasjonsnr))
+        }
         return try {
             httpClient
                 .post(vedtaksvurderingUrl) {
                     parameter("sakstype", sakType)
                     parameter("fomDato", fomDato)
-                    if (callerContext is MaskinportenTpContext) {
+                    if (erMaskinPorten) {
                         header(
                             "orgnr",
                             callerContext.organisasjonsnr,
-                        ).also { logger.info("Henter vedtaksliste med orgnr $it") }
+                        )
                     }
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))

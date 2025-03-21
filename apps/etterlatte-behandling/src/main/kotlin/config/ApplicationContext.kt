@@ -638,7 +638,7 @@ internal class ApplicationContext(
             grunnlagService,
         )
 
-    private val etteroppgjoerService =
+    val etteroppgjoerService =
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
             sakLesDao = sakLesDao,

@@ -7,7 +7,6 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { EtteroppgjoerOversikt } from '~components/etteroppgjoer/oversikt/EtteroppgjoerOversikt'
 import { EtteroppgjoerBrev } from '~components/etteroppgjoer/brev/EtteroppgjoerBrev'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
@@ -48,7 +47,6 @@ export function EtteroppgjoerForbehandling() {
         <HStack height="100%" minHeight="100vh" wrap={false}>
           <Box width="100%">
             <Routes>
-              {/*<Route path={EtteroppjoerSteg.OVERSIKT} element={<EtteroppgjoerOversikt />} />*/}
               <Route path={EtteroppjoerSteg.OVERSIKT} element={<OversiktOverEtteroppgjoer />} />
               <Route path={EtteroppjoerSteg.OPPSUMMERING_OG_BREV} element={<EtteroppgjoerBrev />} />
               <Route

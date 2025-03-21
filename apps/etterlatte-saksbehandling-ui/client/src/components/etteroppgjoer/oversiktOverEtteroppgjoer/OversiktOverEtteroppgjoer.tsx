@@ -2,6 +2,7 @@ import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Heading, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/Inntektsopplysninger'
+import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 
 export const OversiktOverEtteroppgjoer = () => {
   const etteroppgjoer = useEtteroppgjoer()
@@ -15,6 +16,7 @@ export const OversiktOverEtteroppgjoer = () => {
         <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
       </BodyShort>
       <Inntektsopplysninger />
+      <FastsettFaktiskInntekt />
     </VStack>
   )
 }

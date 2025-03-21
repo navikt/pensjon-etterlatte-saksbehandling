@@ -1,6 +1,6 @@
 import { Heading, Table, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { AInntekt, EtteroppgjoerOpplysninger, PensjonsgivendeInntektFraSkatt } from '~shared/types/Etteroppgjoer'
+import { AInntekt, EtteroppgjoerOpplysninger, PensjonsgivendeInntektFraSkatteetaten } from '~shared/types/Etteroppgjoer'
 import { NOK } from '~utils/formatering/formatering'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
 import { AvkortingInntektTabell } from '~components/behandling/avkorting/AvkortingInntektTabell'
@@ -32,7 +32,7 @@ export const OpplysningerForEtteroppgjoer = ({ opplysninger }: { opplysninger: E
   )
 }
 
-const SkattTabell = ({ skatt }: { skatt: PensjonsgivendeInntektFraSkatt }) => {
+const SkattTabell = ({ skatt }: { skatt: PensjonsgivendeInntektFraSkatteetaten }) => {
   return (
     <Table>
       <Table.Header>

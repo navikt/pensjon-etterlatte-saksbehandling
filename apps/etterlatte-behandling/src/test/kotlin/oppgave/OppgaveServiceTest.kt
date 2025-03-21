@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgave
 
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
@@ -41,8 +40,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.sak.SakLesDao
@@ -901,21 +898,17 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal kun få saker som ikke er adressebeskyttet tilbake hvis saksbehandler ikke har spesialroller`() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
-        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
-
-        val ikkeAdressebeskyttetSak = sakSkrivDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val ikkeAdressebeskyttetOppgave =
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse1",
-                ikkeAdressebeskyttetSak.id,
+                "referanse",
+                opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
 
-        val adressebeskyttetSak = sakSkrivDao.opprettSak(SOEKER2_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val adressebeskyttetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(
             "referanse",
             adressebeskyttetSak.id,
@@ -924,56 +917,17 @@ internal class OppgaveServiceTest(
             null,
         )
 
-        val sakMedEnhet = SakMedEnhet(adressebeskyttetSak.id, Enheter.STRENGT_FORTROLIG.enhetNr)
         sakSkrivDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        sakSkrivDao.oppdaterEnhet(sakMedEnhet)
-        oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
-
-        oppgaver shouldHaveSize 1
-        ikkeAdressebeskyttetOppgave.id shouldBe oppgaver.first().id
-        ikkeAdressebeskyttetOppgave.sakId shouldBe ikkeAdressebeskyttetSak.id
-    }
-
-    @Test
-    fun `Skal få alle saker tilbake for enhet hvis saksbehandler har spesialroller`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        val ikkeAdressebeskyttetSak =
-            sakSkrivDao.opprettSak(
-                SOEKER_FOEDSELSNUMMER.value,
-                SakType.BARNEPENSJON,
-                Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr,
-            )
-        oppgaveService.opprettOppgave(
-            "referanse1",
-            ikkeAdressebeskyttetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
-        )
-
-        val adressebeskyttetSak = sakSkrivDao.opprettSak(SOEKER2_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        oppgaveService.opprettOppgave(
-            "referanse",
-            adressebeskyttetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
-        )
-
-        val sakMedEnhet = SakMedEnhet(adressebeskyttetSak.id, Enheter.STRENGT_FORTROLIG.enhetNr)
-        sakSkrivDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        sakSkrivDao.oppdaterEnhet(sakMedEnhet)
-        oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
-
-        // Returnerer begge oppgavene, selv om den ene saken ikke har markert adressegradering
         val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
-
-        oppgaver shouldHaveSize 2
+        assertEquals(1, oppgaver.size)
+        val oppgaveUtenbeskyttelse = oppgaver[0]
+        assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
+        assertEquals(nyOppgave.sakId, opprettetSak.id)
     }
 
     @Test
@@ -1118,6 +1072,39 @@ internal class OppgaveServiceTest(
         assertEquals(Enheter.STEINKJER.enhetNr, oppgaveMedEndring.enhet)
         assertEquals(Status.ATTESTERING, oppgaveMedEndring.status)
         assertEquals(null, oppgaveMedEndring.saksbehandler)
+    }
+
+    @Test
+    fun `Skal kun få saker som  er strengt fotrolig tilbake hvis saksbehandler har rolle strengt fortrolig`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        oppgaveService.opprettOppgave(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val adressebeskyttetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val adressebeskyttetOppgave =
+            oppgaveService.opprettOppgave(
+                "referanse",
+                adressebeskyttetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        sakSkrivDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
+        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerStrengtFortrolig
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaver.size)
+        val strengtFortroligOppgave = oppgaver[0]
+        assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
+        assertEquals(adressebeskyttetOppgave.sakId, adressebeskyttetSak.id)
     }
 
     @Test

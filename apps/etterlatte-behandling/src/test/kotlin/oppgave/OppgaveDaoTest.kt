@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockedSakTilgangDao
@@ -273,6 +274,40 @@ internal class OppgaveDaoTest(
         oppgaveDao.endreEnhetPaaOppgave(oppgaveNy.id, Enheter.PORSGRUNN.enhetNr)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
         assertEquals(Enheter.PORSGRUNN.enhetNr, hentetOppgave?.enhet)
+    }
+
+    @Test
+    fun `Skal ikke kunne hente adressebeskyttede oppgaver fra vanlig hentoppgaver`() {
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        sakSkrivDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        val sakutenbeskyttelse = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveUtenbeskyttelse = lagNyOppgave(sakutenbeskyttelse)
+        oppgaveDao.opprettOppgave(oppgaveUtenbeskyttelse)
+
+        val hentetOppgave =
+            oppgaveDao.hentOppgaver(
+                listOf(Enheter.AALESUND.enhetNr),
+                Status.entries.map { it.name },
+            )
+        assertEquals(1, hentetOppgave.size)
+    }
+
+    @Test
+    fun `Skal kunne hente adressebeskyttede oppgaver fra finnOppgaverForStrengtFortroligOgStrengtFortroligUtland`() {
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        sakSkrivDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        val ikkeGradertSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val ikkeGradertOppgave = lagNyOppgave(ikkeGradertSak)
+        oppgaveDao.opprettOppgave(ikkeGradertOppgave)
+
+        val hentetOppgave = oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
+        assertEquals(1, hentetOppgave.size)
     }
 
     @Test

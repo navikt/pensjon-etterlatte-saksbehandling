@@ -141,6 +141,9 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
         oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
 
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> =
+        oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
+
     override fun settNySaksbehandler(
         oppgaveId: UUID,
         saksbehandler: String,

@@ -206,28 +206,6 @@ data class Avkorting(
 
         val tom = finnTom(opphoerFom, nyttGrunnlag)
 
-        val forventetInntekt =
-            ForventetInntekt(
-                id = nyttGrunnlag.id,
-                periode = Periode(fom = nyttGrunnlag.fom, tom = tom),
-                inntektTom = nyttGrunnlag.inntektTom,
-                fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
-                inntektUtlandTom = nyttGrunnlag.inntektUtlandTom,
-                fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
-                innvilgaMaaneder =
-                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, tom, aldersovergang),
-                overstyrtInnvilgaMaanederAarsak =
-                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
-                        OverstyrtInnvilgaMaanederAarsak.valueOf(it)
-                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
-                overstyrtInnvilgaMaanederBegrunnelse =
-                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
-                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
-                spesifikasjon = nyttGrunnlag.spesifikasjon,
-                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
-            )
-
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
@@ -238,8 +216,25 @@ data class Avkorting(
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
-                            forventetInntekt.copy(
-                                inntektInnvilgetPeriode = beregnInntektInnvilgetPeriodeForventetInntekt(forventetInntekt),
+                            ForventetInntekt(
+                                id = nyttGrunnlag.id,
+                                periode = Periode(fom = nyttGrunnlag.fom, tom = tom),
+                                inntektTom = nyttGrunnlag.inntektTom,
+                                fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
+                                inntektUtlandTom = nyttGrunnlag.inntektUtlandTom,
+                                fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
+                                innvilgaMaaneder =
+                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
+                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, tom, aldersovergang),
+                                overstyrtInnvilgaMaanederAarsak =
+                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
+                                        OverstyrtInnvilgaMaanederAarsak.valueOf(it)
+                                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
+                                overstyrtInnvilgaMaanederBegrunnelse =
+                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
+                                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
+                                spesifikasjon = nyttGrunnlag.spesifikasjon,
+                                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
                             ),
                     ),
                 )
@@ -260,8 +255,10 @@ data class Avkorting(
     ): Avkorting {
         val virkningstidspunktAar = virkningstidspunkt.year
 
+        val avkorting = utregnInnvilgetPeriode() // TODO gjør på nytt alltid?
+
         val oppdaterteOppgjoer =
-            (this.aarsoppgjoer).map { aarsoppgjoer ->
+            (avkorting.aarsoppgjoer).map { aarsoppgjoer ->
 
                 val ytelseFoerAvkorting =
                     if (beregning != null && aarsoppgjoer.aar >= virkningstidspunktAar) {
@@ -351,8 +348,36 @@ data class Avkorting(
                 }
             }
 
-        return this.copy(aarsoppgjoer = oppdaterteOppgjoer)
+        return avkorting.copy(aarsoppgjoer = oppdaterteOppgjoer)
     }
+
+    private fun utregnInnvilgetPeriode(): Avkorting =
+        copy(
+            aarsoppgjoer =
+                aarsoppgjoer.map { aarsoppgjoer ->
+                    when (aarsoppgjoer) {
+                        is AarsoppgjoerLoepende -> {
+                            val inntektsavkorting =
+                                aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
+                                    inntektsavkorting.copy(
+                                        grunnlag =
+                                            inntektsavkorting.grunnlag.copy(
+                                                inntektInnvilgetPeriode =
+                                                    beregnInntektInnvilgetPeriodeForventetInntekt(
+                                                        inntektsavkorting.grunnlag,
+                                                    ),
+                                            ),
+                                    )
+                                }
+                            aarsoppgjoer.copy(
+                                inntektsavkorting = inntektsavkorting,
+                            )
+                        }
+
+                        is Etteroppgjoer -> aarsoppgjoer
+                    }
+                },
+        )
 
     /**
      * Finner avkortet ytelse med opparbeidet [Restanse]

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.avkorting
 
-import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -194,46 +193,12 @@ class AvkortingService(
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
-        val beregnetAvkorting =
-            utregnInnvilgetPeriodeOmMangler(avkorting)
-                .beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
+        val beregnetAvkorting = avkorting.beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
         return lagretAvkorting
     }
-
-    private fun utregnInnvilgetPeriodeOmMangler(avkorting: Avkorting): Avkorting =
-        avkorting.copy(
-            aarsoppgjoer =
-                avkorting.aarsoppgjoer.map { aarsoppgjoer ->
-                    when (aarsoppgjoer) {
-                        is AarsoppgjoerLoepende -> {
-                            val inntektsavkorting =
-                                aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
-                                    if (inntektsavkorting.grunnlag.inntektInnvilgetPeriode == null) {
-                                        inntektsavkorting.copy(
-                                            grunnlag =
-                                                inntektsavkorting.grunnlag.copy(
-                                                    inntektInnvilgetPeriode =
-                                                        beregnInntektInnvilgetPeriodeForventetInntekt(
-                                                            inntektsavkorting.grunnlag,
-                                                        ),
-                                                ),
-                                        )
-                                    } else {
-                                        inntektsavkorting
-                                    }
-                                }
-                            aarsoppgjoer.copy(
-                                inntektsavkorting = inntektsavkorting,
-                            )
-                        }
-
-                        is Etteroppgjoer -> aarsoppgjoer
-                    }
-                },
-        )
 
     private suspend fun settBehandlingStatusAvkortet(
         brukerTokenInfo: BrukerTokenInfo,

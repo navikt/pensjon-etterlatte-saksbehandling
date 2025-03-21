@@ -239,6 +239,14 @@ enum class Brevkoder(
         "Ubrukt tittel",
         Brevtype.OPPLASTET_PDF,
     ),
+
+    // TODO: avklare hvilke forskjellige brev vi faktisk har i etteroppgjøret
+    OMS_EO_VARSEL_TILBAKEKREVING(
+        EtterlatteBrevKode.OMS_EO_VARSEL_TILBAKEKREVING_REDIGERBAR,
+        EtterlatteBrevKode.OMS_EO_VARSEL_TILBAKEKREVING,
+        "Varsel om etteroppgjør med tilbakekreving",
+        Brevtype.VARSEL,
+    ),
     ;
 
     init {

@@ -66,16 +66,6 @@ fun Route.etteroppgjoerRoutes(
             call.respond(HttpStatusCode.OK)
         }
 
-        route("opprett-brev") {
-            post {
-                sjekkEtteroppgjoerEnabled(featureToggleService)
-                kunSkrivetilgang {
-                    val etteroppgjoerMedBrev = forbehandlingService.opprettBrev(etteroppgjoerId, brukerTokenInfo)
-                    call.respond(etteroppgjoerMedBrev)
-                }
-            }
-        }
-
         post("/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {

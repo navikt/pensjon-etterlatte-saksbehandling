@@ -51,7 +51,7 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
+class BehandlingMedBrevRoutesIntegrationTest : BehandlingIntegrationTest() {
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
 
     @BeforeAll

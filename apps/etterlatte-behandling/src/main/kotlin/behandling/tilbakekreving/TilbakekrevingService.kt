@@ -403,7 +403,7 @@ class TilbakekrevingService(
 
             if (sendeBrev) {
                 logger.info("Ferdigstiller vedtaksbrev for tilbakekreving=$tilbakekrevingId")
-                runBlocking { brevService.ferdigstillVedtaksbrev(tilbakekrevingId, saksbehandler) }
+                runBlocking { brevService.ferdigstillStrukturertBrev(tilbakekrevingId, saksbehandler) }
             } else {
                 logger.info("Skal ikke sende vedtaksbrev for tilbakekreving=$tilbakekrevingId")
             }

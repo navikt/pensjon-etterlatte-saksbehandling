@@ -10,15 +10,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.brev.BrevParametre
-import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -39,7 +36,6 @@ class EtteroppgjoerForbehandlingService(
     private val sigrunKlient: SigrunKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
-    private val brevApiKlient: BrevApiKlient,
 ) {
     suspend fun hentEtteroppgjoer(
         brukerTokenInfo: BrukerTokenInfo,
@@ -87,46 +83,12 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    suspend fun opprettBrev(
+    fun lagreBrevreferanse(
         forbehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerForbehandling {
-        val forbehandling =
-            inTransaction {
-                dao.hentForbehandling(forbehandlingId) ?: throw IkkeFunnetException(
-                    "FANT_IKKE_BEHANDLING",
-                    "Fant ikke forbehandling med id=$forbehandlingId",
-                )
-            }
-        // TODO: kun hvis redigerbar
-        if (forbehandling.brevId != null) {
-            throw UgyldigForespoerselException(
-                "BREV_ALLEREDE_OPPRETTET",
-                "Forbehandlingen med id=$forbehandlingId har allerede opprettet et brev",
-            )
-        }
-
-        /* Jeg tenker at vi sikkert vil gjøre noe mer custom her -- litt inspirert av TilbakekrevingBrevService
-         * Det er en mulighet for å tilpasse VedtakBrevServiceNy til å støtte alle strukturerte brev kanskje,
-         * og så bruke den men med parameter brevtype = INFORMASJON eller noe i den dur.
-         *
-         * Et annet alternativ er å gjøre det med opprettSpesifiktBrev -- men jeg tror ikke det går når vi nok
-         * vil vise tabeller etc. i brevet, og kontrollere hva som er redigerbart etc.
-         *
-         * Enn så lenge bare gjør jeg den enkleste varianten for å få testet flyten med lagring og kontroll
-         * av brevet
-         */
-        val opprettetBrev =
-            brevApiKlient.opprettSpesifiktBrev(
-                forbehandling.sak.id,
-                BrevParametre.TomtBrev(spraak = Spraak.NB),
-                brukerTokenInfo,
-            )
-        return inTransaction {
-            dao.lagreForbehandling(forbehandling.medBrev(opprettetBrev))
-            dao.hentForbehandling(forbehandlingId)
-                ?: throw InternfeilException("Kunne ikke hente ut oppdatert forbehandling med id=$forbehandlingId")
-        }
+        brev: Brev,
+    ) {
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
 
     suspend fun opprettEtteroppgjoer(

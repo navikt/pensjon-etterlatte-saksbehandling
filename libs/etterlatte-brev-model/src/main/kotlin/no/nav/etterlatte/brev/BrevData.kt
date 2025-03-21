@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -54,7 +55,7 @@ data class BrevRequest(
     val avdoede: List<Avdoed>,
     val verge: Verge?,
     val saksbehandlerIdent: String,
-    val attestantIdent: String,
+    val attestantIdent: String?,
     val skalLagre: Boolean,
     val brevInnholdData: BrevInnholdData,
 )
@@ -62,9 +63,9 @@ data class BrevRequest(
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData::class, name = "ETTEROPPGJOER"),
 )
-abstract class BrevInnholdData(
-    open val type: String,
-) {
+abstract class BrevInnholdData {
     abstract val brevKode: Brevkoder
+    abstract val type: String
 }

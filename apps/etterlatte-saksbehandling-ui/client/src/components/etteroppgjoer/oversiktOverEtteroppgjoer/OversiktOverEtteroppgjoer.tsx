@@ -16,7 +16,7 @@ export const OversiktOverEtteroppgjoer = () => {
         <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
       </BodyShort>
       <Inntektsopplysninger />
-      <FastsettFaktiskInntekt />
+      <FastsettFaktiskInntekt forbehandlingId={etteroppgjoer.behandling.id} />
     </VStack>
   )
 }

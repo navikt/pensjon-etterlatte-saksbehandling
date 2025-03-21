@@ -1,10 +1,12 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.avkorting.regler.ForventetInntektGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.RestanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanseOgSanksjon
+import no.nav.etterlatte.avkorting.regler.forventetInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -34,9 +36,51 @@ import java.util.UUID
 object AvkortingRegelkjoring {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    fun beregnInntektInnvilgetPeriodeForventetInntekt(forventetInntekt: ForventetInntekt): InntektInnvilgetPeriode {
+        logger.info("Beregner inntekt innvilget periode")
+
+        val resultat =
+            forventetInntektInnvilgetPeriode.eksekver(
+                grunnlag =
+                    with(forventetInntekt) {
+                        KonstantGrunnlag(
+                            ForventetInntektGrunnlag(
+                                inntektTom = Beregningstall(inntektTom),
+                                fratrekkInnAar = Beregningstall(fratrekkInnAar),
+                                inntektUtlandTom = Beregningstall(inntektUtlandTom),
+                                fratrekkInnAarUtland = Beregningstall(fratrekkInnAarUtland),
+                            ),
+                        )
+                    },
+                periode = forventetInntekt.periode.tilRegelPeriode(),
+            )
+        return when (resultat) {
+            is RegelkjoeringResultat.Suksess -> {
+                val tidspunkt = Tidspunkt.now()
+                resultat.periodiserteResultater
+                    .map { periodisertResultat ->
+                        InntektInnvilgetPeriode(
+                            verdi = periodisertResultat.resultat.verdi.toInteger(),
+                            tidspunkt = tidspunkt,
+                            regelResultat = periodisertResultat.toJsonNode(),
+                            kilde =
+                                Grunnlagsopplysning.RegelKilde(
+                                    navn = forventetInntektInnvilgetPeriode.regelReferanse.id,
+                                    ts = tidspunkt,
+                                    versjon = periodisertResultat.reglerVersjon,
+                                ),
+                        )
+                    }.single()
+            }
+
+            is RegelkjoeringResultat.UgyldigPeriode ->
+                throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+        }
+    }
+
     fun beregnInntektsavkorting(
         periode: Periode,
-        avkortingGrunnlag: ForventetInntekt,
+        avkortingGrunnlag: AvkortingGrunnlag,
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
 
@@ -48,21 +92,24 @@ object AvkortingRegelkjoring {
                             .map {
                                 GrunnlagMedPeriode(
                                     data = it,
-                                    fom = it.periode.fom.atDay(1),
-                                    tom = it.periode.tom?.atEndOfMonth(),
+                                    fom = periode.fom.atDay(1),
+                                    tom = periode.tom?.atEndOfMonth(),
                                 )
                             }.mapVerdier {
                                 FaktumNode(
                                     verdi =
                                         InntektAvkortingGrunnlag(
-                                            inntekt = Beregningstall(it.inntektTom),
-                                            fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
-                                            inntektUtland = Beregningstall(it.inntektUtlandTom),
-                                            fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
-                                            relevanteMaaneder = Beregningstall(it.innvilgaMaaneder),
-                                            it.id,
+                                            inntekt =
+                                                Beregningstall(
+                                                    avkortingGrunnlag.inntektInnvilgetPeriode?.verdi
+                                                        ?: throw InternfeilException(
+                                                            "Kan ikke beregne avkorting uten inntekt innvilget periode",
+                                                        ),
+                                                ),
+                                            relevanteMaaneder = Beregningstall(avkortingGrunnlag.innvilgaMaaneder),
+                                            grunnlagId = avkortingGrunnlag.id,
                                         ),
-                                    kilde = it.kilde,
+                                    kilde = avkortingGrunnlag.kilde,
                                     beskrivelse = "Forventet årsinntekt",
                                 )
                             },

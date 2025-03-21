@@ -90,7 +90,7 @@ internal class AvkortingRepositoryTest(
                                 },
                         )
                     },
-                avkortetYtelseAar = aarsoppgjoer.avkortetYtelseAar.map { it.copy(avkortingsbeloep = 444) },
+                avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.copy(avkortingsbeloep = 444) },
             )
 
         val nyttArsoppgjoer = nyAvkorting(2025)
@@ -108,7 +108,7 @@ internal class AvkortingRepositoryTest(
         )
         val avkorting = avkortingRepository.hentAvkorting(behandlingId)
 
-        with(avkorting!!.aarsoppgjoer[0]) {
+        with(avkorting!!.aarsoppgjoer[0] as AarsoppgjoerLoepende) {
             aar shouldBe 2024
             ytelseFoerAvkorting.asClue {
                 it.size shouldBe 1
@@ -123,13 +123,13 @@ internal class AvkortingRepositoryTest(
                         endretAarsoppgjoer.inntektsavkorting.first().avkortetYtelseForventetInntekt
                 }
             }
-            avkortetYtelseAar.asClue {
+            avkortetYtelse.asClue {
                 it.size shouldBe 2
-                it shouldBe endretAarsoppgjoer.avkortetYtelseAar
+                it shouldBe endretAarsoppgjoer.avkortetYtelse
             }
         }
 
-        with(avkorting.aarsoppgjoer[1]) {
+        with(avkorting.aarsoppgjoer[1] as AarsoppgjoerLoepende) {
             aar shouldBe 2025
             ytelseFoerAvkorting.asClue {
                 it.size shouldBe 1
@@ -144,9 +144,9 @@ internal class AvkortingRepositoryTest(
                         nyttArsoppgjoer.inntektsavkorting.first().avkortetYtelseForventetInntekt
                 }
             }
-            avkortetYtelseAar.asClue {
+            avkortetYtelse.asClue {
                 it.size shouldBe 2
-                it shouldBe nyttArsoppgjoer.avkortetYtelseAar
+                it shouldBe nyttArsoppgjoer.avkortetYtelse
             }
         }
     }
@@ -172,7 +172,7 @@ internal class AvkortingRepositoryTest(
     private fun nyAvkorting(
         aar: Int,
         forventaInnvilgaMaaneder: Int = 12,
-    ): Aarsoppgjoer {
+    ): AarsoppgjoerLoepende {
         val inntektEn =
             avkortinggrunnlag(
                 innvilgaMaaneder = forventaInnvilgaMaaneder,
@@ -225,7 +225,7 @@ internal class AvkortingRepositoryTest(
                     ),
             )
 
-        return Aarsoppgjoer(
+        return AarsoppgjoerLoepende(
             id = UUID.randomUUID(),
             aar = aar,
             fom = YearMonth.of(aar, 12),
@@ -244,7 +244,7 @@ internal class AvkortingRepositoryTest(
                     inntektsavkortingEn,
                     inntektsavkortingTo,
                 ),
-            avkortetYtelseAar =
+            avkortetYtelse =
                 listOf(
                     avkortetYtelse(
                         type = AvkortetYtelseType.AARSOPPGJOER,

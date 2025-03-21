@@ -23,7 +23,7 @@ import { isFailure, isPending, isSuccess, mapFailure, mapResult } from '~shared/
 import Spinner from '~shared/Spinner'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
@@ -57,14 +57,18 @@ export const TrygdetidPerioder = ({
     slettTrygdetidsgrunnlagKildePesys
   )
 
+  const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+
   useEffect(() => {
-    if (kanHenteTrygdetidFraPesys) {
+    if (kanHenteTrygdetidFraPesys && erFoerstegangsbehandling) {
       sjekkOmAvdoedHarTTIPesysHent(behandling.id)
     }
   }, [kanHenteTrygdetidFraPesys])
+
   const [hentTTPesysStatus, hentOgOppdaterDataFraPesys] = useApiCall(
     hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon
   )
+
   const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
     setTrygdetider(trygdetid)
     dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
@@ -155,9 +159,11 @@ export const TrygdetidPerioder = ({
           </Button>
         </div>
       )}
+
       {kanLeggeTilNyPeriode &&
         faktiskTrygdetid &&
         kanHenteTrygdetidFraPesys &&
+        erFoerstegangsbehandling &&
         mapResult(sjekkOmAvodedHarTTIPesysStatus, {
           initial: null,
           pending: <Spinner label="Sjekker om avdøde har trygdetidsgrunnlag i Pesys" />,

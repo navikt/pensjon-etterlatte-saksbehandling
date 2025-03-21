@@ -30,9 +30,13 @@ class EtteroppgjoerService(
         )
     }
 
-    suspend fun finnSakerForEtteroppgjoer(inntektsaar: Int) {
-        logger.info("Starter kjøring for å finne saker som skal ha etteroppgjør for inntektsår=$inntektsaar")
+    suspend fun finnOgOpprettEtteroppgjoer(
+        inntektsaar: Int,
+        trigger: String = "Manuell",
+    ) {
+        logger.info("$trigger: Søker etter og opprett etteroppgjoer for inntektsaar=$inntektsaar")
 
+        // TODO: er det flere ting vi må sjekke på en kun utbetaling i inntektsaar
         val sakerMedUtbetaling =
             vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
 
@@ -40,6 +44,8 @@ class EtteroppgjoerService(
             sakerMedUtbetaling
                 .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
                 .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
+
+            logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
         }
     }
 
@@ -56,7 +62,6 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ) {
         // TODO ytterlige sjekker på sak før vi oppretter etteroppgjoer
-
         dao.lagerEtteroppgjoer(
             sakId,
             inntektsaar,

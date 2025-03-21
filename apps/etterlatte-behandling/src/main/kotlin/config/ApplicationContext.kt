@@ -47,11 +47,13 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelser
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
 import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
+import no.nav.etterlatte.behandling.jobs.EtteropppgjoerJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
@@ -688,6 +690,8 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
+    val etteroppgjoerJobService = EtteroppgjoerJobService(etteroppgjoerService, featureToggleService)
+
     val uttrekkLoependeYtelseEtter20JobService =
         UttrekkLoependeYtelseEtter20JobService(
             vedtakKlient,
@@ -831,6 +835,15 @@ internal class ApplicationContext(
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val etteroppgjoerJob: EtteropppgjoerJob by lazy {
+        EtteropppgjoerJob(
+            etteroppgjoerJobService = etteroppgjoerJobService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.DAYS),
         )
     }
 

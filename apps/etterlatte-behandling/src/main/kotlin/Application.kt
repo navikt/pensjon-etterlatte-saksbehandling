@@ -101,6 +101,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
+        context.etteroppgjoerJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.uttrekkLoependeYtelseEtter20Job,
         context.sjekkAdressebeskyttelseJob,

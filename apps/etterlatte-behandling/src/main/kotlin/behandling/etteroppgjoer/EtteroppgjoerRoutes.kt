@@ -32,6 +32,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER("etteroppgjoer"),
     ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
+    ETTEROPPGJOER_PERIODISK_JOBB("ettteroppgjoer_periodisk_jobb"),
     ;
 
     override fun key(): String = toggle
@@ -93,7 +94,7 @@ fun Route.etteroppgjoerRoutes(
                     krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
                         "Inntektsaar mangler"
                     }
-                etteroppgjoerService.finnSakerForEtteroppgjoer(inntektsaar)
+                etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
                 call.respond(HttpStatusCode.OK)
             }
         }

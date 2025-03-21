@@ -11,8 +11,6 @@ import java.time.LocalDate
 
 @JsonTypeName("TILBAKEKREVING")
 data class TilbakekrevingBrevInnholdDataNy(
-    override val brevKode: Brevkoder = Brevkoder.TILBAKEKREVING,
-    override val type: String = "TILBAKEKREVING",
     val sakType: SakType,
     val bosattUtland: Boolean,
     val brukerNavn: String,
@@ -21,7 +19,10 @@ data class TilbakekrevingBrevInnholdDataNy(
     val datoVarselEllerVedtak: LocalDate,
     val datoTilsvarBruker: LocalDate?,
     val tilbakekreving: TilbakekrevingDataNy,
-) : BrevInnholdData(type)
+) : BrevInnholdData() {
+    override val type: String = "TILBAKEKREVING"
+    override val brevKode: Brevkoder = Brevkoder.TILBAKEKREVING
+}
 
 data class TilbakekrevingDataNy(
     val fraOgMed: LocalDate,

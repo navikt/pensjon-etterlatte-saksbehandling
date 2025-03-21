@@ -199,7 +199,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         generellBehandlingService = applicationContext.generellBehandlingService,
         sakService = applicationContext.sakService,
     )
-    vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
+    vedtaksbehandlingRoutes(behandlingMedBrevService = applicationContext.behandlingMedBrevService)
     revurderingRoutes(
         revurderingService = applicationContext.revurderingService,
         manuellRevurderingService = applicationContext.manuellRevurderingService,

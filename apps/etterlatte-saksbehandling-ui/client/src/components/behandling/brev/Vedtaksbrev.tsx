@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Alert, Box, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
+import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/SendTilAttesteringModal'
@@ -59,8 +59,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
   const [visAdvarselIngenAvdoede, setVisAdvarselIngenAvdoede] = useState(false)
 
-  const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
-  const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
+  const [hentBrevStatus, hentBrev] = useApiCall(hentBrevTilBehandling)
+  const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettBrevTilBehandling)
   const [, fetchBehandling] = useApiCall(hentBehandling)
 
   const [visBrevutfall, setVisBrevutfall] = useState(true)

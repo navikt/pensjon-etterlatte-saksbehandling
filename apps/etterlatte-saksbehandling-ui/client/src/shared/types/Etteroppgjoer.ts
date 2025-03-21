@@ -13,6 +13,7 @@ export interface EtteroppgjoerBehandling {
   sak: ISak
   aar: number
   opprettet: string // Mottatt?
+  brevId?: number
 }
 
 export interface EtteroppgjoerOpplysninger {

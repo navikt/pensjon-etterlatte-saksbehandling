@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -35,7 +37,10 @@ data class EtteroppgjoerForbehandling(
     val sak: Sak,
     val aar: Int,
     val opprettet: Tidspunkt,
-)
+    val brevId: Long?,
+) {
+    fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+}
 
 data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkatt,
@@ -165,3 +170,10 @@ data class SkatteoppgjoerHendelser(
     val sekvensnummer: Long,
     val somAktoerid: Boolean,
 )
+
+object EtteroppgjoerBrevMapper {
+    // TODO: mappe til riktige brevvarianter avhengig av data i forbehandlingen
+    //  Kanskje også vurdere å ikke sende inn dto etc.
+    fun fra(forbehandlingDto: ForbehandlingDto): EtteroppgjoerBrevData =
+        EtteroppgjoerBrevData.VarselTilbakekreving(forbehandlingDto.behandling.sak)
+}

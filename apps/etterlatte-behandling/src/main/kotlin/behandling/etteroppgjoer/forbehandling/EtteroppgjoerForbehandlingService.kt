@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -82,6 +83,14 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
+    fun lagreBrevreferanse(
+        forbehandlingId: UUID,
+        brev: Brev,
+    ) {
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        dao.lagreForbehandling(forbehandling.medBrev(brev))
+    }
+
     suspend fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
@@ -103,6 +112,7 @@ class EtteroppgjoerForbehandlingService(
                     status = "opprettet",
                     aar = inntektsaar,
                     opprettet = Tidspunkt.now(),
+                    brevId = null,
                 )
 
             val oppgave =

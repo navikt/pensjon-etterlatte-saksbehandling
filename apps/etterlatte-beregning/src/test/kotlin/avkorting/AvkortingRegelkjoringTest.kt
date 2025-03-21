@@ -39,9 +39,7 @@ class AvkortingRegelkjoringTest {
         val avkortingsperioder =
             AvkortingRegelkjoring.beregnInntektsavkorting(
                 Periode(fom = virkningstidspunkt.dato, tom = null),
-                inntektsgrunnlagId = avkortingGrunnlag.id,
-                innvilgaMaaneder = avkortingGrunnlag.innvilgaMaaneder,
-                inntektInnvilgetPeriode = avkortingGrunnlag.inntektInnvilgetPeriode!!,
+                avkortingGrunnlag = avkortingGrunnlag,
             )
 
         with(avkortingsperioder[0]) {

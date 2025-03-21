@@ -80,10 +80,7 @@ object AvkortingRegelkjoring {
 
     fun beregnInntektsavkorting(
         periode: Periode,
-        // avkortingGrunnlag: ForventetInntekt
-        inntektsgrunnlagId: UUID,
-        innvilgaMaaneder: Int,
-        inntektInnvilgetPeriode: InntektInnvilgetPeriode,
+        avkortingGrunnlag: AvkortingGrunnlag,
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
 
@@ -91,7 +88,7 @@ object AvkortingRegelkjoring {
             PeriodisertInntektAvkortingGrunnlag(
                 periodisertInntektAvkortingGrunnlag =
                     PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                        listOf(inntektInnvilgetPeriode)
+                        listOf(avkortingGrunnlag)
                             .map {
                                 GrunnlagMedPeriode(
                                     data = it,
@@ -102,11 +99,17 @@ object AvkortingRegelkjoring {
                                 FaktumNode(
                                     verdi =
                                         InntektAvkortingGrunnlag(
-                                            inntekt = Beregningstall(it.verdi),
-                                            relevanteMaaneder = Beregningstall(innvilgaMaaneder),
-                                            grunnlagId = inntektsgrunnlagId,
+                                            inntekt =
+                                                Beregningstall(
+                                                    avkortingGrunnlag.inntektInnvilgetPeriode?.verdi
+                                                        ?: throw InternfeilException(
+                                                            "Kan ikke beregne avkorting uten inntekt innvilget periode",
+                                                        ),
+                                                ),
+                                            relevanteMaaneder = Beregningstall(avkortingGrunnlag.innvilgaMaaneder),
+                                            grunnlagId = avkortingGrunnlag.id,
                                         ),
-                                    kilde = it.kilde,
+                                    kilde = avkortingGrunnlag.kilde,
                                     beskrivelse = "Forventet årsinntekt",
                                 )
                             },

@@ -280,11 +280,7 @@ data class Avkorting(
                                 val avkortinger =
                                     AvkortingRegelkjoring.beregnInntektsavkorting(
                                         periode = periode,
-                                        inntektsgrunnlagId = inntektsavkorting.grunnlag.id,
-                                        innvilgaMaaneder = inntektsavkorting.grunnlag.innvilgaMaaneder,
-                                        inntektInnvilgetPeriode =
-                                            inntektsavkorting.grunnlag.inntektInnvilgetPeriode
-                                                ?: throw InternfeilException("Kan ikke beregne avkorting uten inntekt innvilget periode"),
+                                        avkortingGrunnlag = inntektsavkorting.grunnlag,
                                     )
 
                                 val avkortetYtelseForventetInntekt =
@@ -539,36 +535,36 @@ class OpphoerErTilbakeITid(
 
 sealed class AvkortingGrunnlag {
     abstract val id: UUID
-    abstract val periode: Periode
     abstract val innvilgaMaaneder: Int
-    abstract val inntektInnvilgetPeriode: InntektInnvilgetPeriode
+    abstract val inntektInnvilgetPeriode: InntektInnvilgetPeriode?
+    abstract val kilde: Grunnlagsopplysning.Saksbehandler
 }
 
 data class ForventetInntekt(
-    val id: UUID,
+    override val id: UUID,
     val periode: Periode,
     val inntektTom: Int,
     val fratrekkInnAar: Int,
     val inntektUtlandTom: Int,
     val fratrekkInnAarUtland: Int,
-    val innvilgaMaaneder: Int,
+    override val innvilgaMaaneder: Int,
     val spesifikasjon: String,
-    val kilde: Grunnlagsopplysning.Saksbehandler,
+    override val kilde: Grunnlagsopplysning.Saksbehandler,
     val overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
-    val inntektInnvilgetPeriode: InntektInnvilgetPeriode? = null,
-)
+    override val inntektInnvilgetPeriode: InntektInnvilgetPeriode? = null,
+) : AvkortingGrunnlag()
 
 data class FaktiskInntekt(
-    val id: UUID,
-    val innvilgaMaaneder: Int,
+    override val id: UUID,
+    override val innvilgaMaaneder: Int,
     val loennsinntekt: Int,
     val naeringsinntekt: Int,
     val afp: Int,
     val utlandsinntekt: Int,
-    val kilde: Grunnlagsopplysning.Saksbehandler,
-    val inntektInnvilgetPeriode: InntektInnvilgetPeriode? = null,
-)
+    override val kilde: Grunnlagsopplysning.Saksbehandler,
+    override val inntektInnvilgetPeriode: InntektInnvilgetPeriode? = null,
+) : AvkortingGrunnlag()
 
 data class InntektInnvilgetPeriode(
     val verdi: Int,

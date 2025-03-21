@@ -44,7 +44,8 @@ class EtteroppgjoerService(
             sakerMedUtbetaling
                 .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
                 .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
-            logger.info("Opprettet ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
+
+            logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
         }
     }
 

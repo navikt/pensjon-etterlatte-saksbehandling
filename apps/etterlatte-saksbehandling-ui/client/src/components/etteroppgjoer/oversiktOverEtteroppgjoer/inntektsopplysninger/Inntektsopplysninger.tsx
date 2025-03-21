@@ -2,6 +2,7 @@ import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/OpplysningerFraSkatteetaten'
 import { OpplysningerFraAInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/OpplysningerFraAInntekt'
+import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
 
 export const Inntektsopplysninger = () => {
   const etteroppgjoer = useEtteroppgjoer()
@@ -26,6 +27,9 @@ export const Inntektsopplysninger = () => {
         </VStack>
         <OpplysningerFraSkatteetaten pensjonsgivendeInntektFraSkatteetaten={etteroppgjoer.opplysninger.skatt} />
         <OpplysningerFraAInntekt ainntekt={etteroppgjoer.opplysninger.ainntekt} />
+        <BrukeroppgittInntektForInnvilgedePerioder
+          avkortingGrunnlag={etteroppgjoer.opplysninger.tidligereAvkorting.avkortingGrunnlag}
+        />
       </VStack>
     </Box>
   )

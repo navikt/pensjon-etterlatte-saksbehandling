@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgave
 
-import io.ktor.server.plugins.BadRequestException
 import no.nav.etterlatte.ExternalUser
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -327,7 +326,7 @@ class OppgaveService(
     ): OppgaveIntern {
         val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(referanse)
         if (behandlingsoppgaver.isEmpty()) {
-            throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
+            throw IkkeFunnetException("INGEN_OPPGAVE_MED_REFERANSE", "Fant ingen oppgaver med referanse=$referanse.")
         }
         try {
             val oppgaveUnderbehandling =
@@ -341,14 +340,15 @@ class OppgaveService(
                 "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
             }
         } catch (e: NoSuchElementException) {
-            throw BadRequestException(
-                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID: $referanse",
-                e,
+            throw UgyldigForespoerselException(
+                "INGEN_UAVSLUTTET_OPPGAVE",
+                "Fant ikke en åpen oppgave med type $type og referanse=$referanse",
             )
         } catch (e: IllegalArgumentException) {
-            throw BadRequestException(
-                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID: $referanse",
-                e,
+            throw InternfeilException(
+                "Fant mer enn en oppgave under behandling med type=$type og referanse=$referanse," +
+                    " kan ikke avslutte oppgaven riktig.",
+                cause = e,
             )
         }
     }

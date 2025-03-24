@@ -32,7 +32,7 @@ class EtteroppgjoerBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val forbehandling = etteroppgjoerForbehandlingService.hentEtteroppgjoer(brukerTokenInfo, forbehandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, forbehandlingId)
 
         val brevRequest =
             retryOgPakkUt {
@@ -59,7 +59,7 @@ class EtteroppgjoerBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        val forbehandling = etteroppgjoerForbehandlingService.hentEtteroppgjoer(brukerTokenInfo, forbehandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, forbehandlingId)
 
         val brevRequest =
             retryOgPakkUt {
@@ -112,7 +112,7 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val forbehandling = etteroppgjoerForbehandlingService.hentEtteroppgjoer(brukerTokenInfo, behandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, behandlingId)
         val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
 
         brevKlient.ferdigstillStrukturertBrev(behandlingId, brevData.brevKode.brevtype, brukerTokenInfo)
@@ -123,7 +123,7 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): Pdf {
-        val forbehandling = etteroppgjoerForbehandlingService.hentEtteroppgjoer(bruker, behandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(bruker, behandlingId)
         val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
         val request =
             retryOgPakkUt {
@@ -142,7 +142,7 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): Brev? {
-        val forbehandling = etteroppgjoerForbehandlingService.hentEtteroppgjoer(bruker, behandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(bruker, behandlingId)
         if (forbehandling.behandling.brevId == null) {
             return null
         }

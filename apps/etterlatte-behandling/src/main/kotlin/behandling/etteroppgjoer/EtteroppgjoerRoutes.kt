@@ -58,7 +58,7 @@ fun Route.etteroppgjoerRoutes(
         get("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
+                val etteroppgjoer = forbehandlingService.hentForbehandling(brukerTokenInfo, etteroppgjoerId)
                 call.respond(etteroppgjoer)
             }
         }

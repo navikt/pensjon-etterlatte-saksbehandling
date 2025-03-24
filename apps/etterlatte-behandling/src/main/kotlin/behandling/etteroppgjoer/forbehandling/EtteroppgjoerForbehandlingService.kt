@@ -37,7 +37,7 @@ class EtteroppgjoerForbehandlingService(
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
 ) {
-    suspend fun hentEtteroppgjoer(
+    suspend fun hentForbehandling(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ): ForbehandlingDto {

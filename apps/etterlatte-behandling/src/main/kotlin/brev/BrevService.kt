@@ -38,8 +38,8 @@ class BrevService(
             }
         }
 
-        val vedtaksbehandlingType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
-        return when (vedtaksbehandlingType) {
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
+        return when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
 
@@ -58,10 +58,10 @@ class BrevService(
         sakId: SakId,
         bruker: BrukerTokenInfo,
     ): Pdf {
-        val vedtaksbehandlingType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
 
         val skalLagrePdf =
-            if (vedtaksbehandlingType.harVedtaksbrev) {
+            if (behandlingMedBrevType.harVedtaksbrev) {
                 val vedtak =
                     vedtakKlient.hentVedtak(behandlingId, bruker)
                         ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
@@ -84,7 +84,7 @@ class BrevService(
                 false
             }
 
-        return when (vedtaksbehandlingType) {
+        return when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
@@ -101,8 +101,8 @@ class BrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val vedtaksbehandlingType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
-        if (vedtaksbehandlingType.harVedtaksbrev) {
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
+        if (behandlingMedBrevType.harVedtaksbrev) {
             val vedtakDto =
                 krevIkkeNull(vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)) {
                     "Fant ikke vedtak for behandling (id=$behandlingId)"
@@ -119,7 +119,7 @@ class BrevService(
             }
         }
 
-        when (vedtaksbehandlingType) {
+        when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
@@ -145,8 +145,8 @@ class BrevService(
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }
         }
-        val vedtaksbehandlingType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
-        return when (vedtaksbehandlingType) {
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
+        return when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
 

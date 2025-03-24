@@ -137,6 +137,7 @@ fun lagSak(
     relatertId: String? = null,
     resultat: String? = null,
     tekniskTidspunkt: Tidspunkt = Tidspunkt.now(),
+    sakUtlandEnhet: SakUtland = SakUtland.NASJONAL,
 ) = SakRad(
     id = -2,
     referanseId = referanseId,
@@ -170,4 +171,5 @@ fun lagSak(
     kilde = Vedtaksloesning.GJENNY,
     pesysId = 123L,
     relatertTil = relatertId,
+    sakUtlandEnhet = sakUtlandEnhet,
 )

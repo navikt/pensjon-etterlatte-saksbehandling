@@ -219,6 +219,7 @@ class StatistikkService(
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
             ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet ?: statistikkBehandling.enhet,
             sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
+            sakUtlandEnhet = SakUtland.fraEnhetsnummer(statistikkBehandling.sak.enhet),
             beregning = beregning,
             avkorting = avkorting,
             sakYtelsesgruppe =
@@ -335,6 +336,7 @@ class StatistikkService(
         pesysId = null,
         resultatBegrunnelse = null,
         sakUtland = statistikkTilbakekreving.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
+        sakUtlandEnhet = SakUtland.fraEnhetsnummer(statistikkTilbakekreving.tilbakekreving.sak.enhet),
         soeknadFormat = null,
         vedtakLoependeTom = null,
         aktorId = statistikkTilbakekreving.tilbakekreving.sak.ident,
@@ -409,6 +411,7 @@ class StatistikkService(
                 ?.name
                 ?.takeIf { statistikkKlage.klage.status == KlageStatus.AVBRUTT },
         sakUtland = statistikkKlage.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
+        sakUtlandEnhet = SakUtland.fraEnhetsnummer(statistikkKlage.klage.sak.enhet),
         soeknadFormat = null,
         vedtakLoependeTom = null,
         relatertTil =
@@ -479,7 +482,8 @@ class StatistikkService(
                 saksbehandler = null,
                 ansvarligEnhet = statistikkBehandling.enhet,
                 soeknadFormat = SoeknadFormat.DIGITAL,
-                sakUtland = SakUtland.NASJONAL,
+                sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
+                sakUtlandEnhet = SakUtland.fraEnhetsnummer(statistikkBehandling.sak.enhet),
                 beregning = null,
                 avkorting = null,
                 sakYtelsesgruppe =

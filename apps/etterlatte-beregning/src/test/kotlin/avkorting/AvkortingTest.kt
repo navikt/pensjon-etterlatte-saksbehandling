@@ -47,7 +47,7 @@ internal class AvkortingTest {
                                                         fom = YearMonth.of(2024, Month.MARCH),
                                                         tom = YearMonth.of(2024, Month.JULY),
                                                     ),
-                                                aarsinntekt = 300000,
+                                                inntektTom = 300000,
                                             ),
                                     ),
                                     Inntektsavkorting(
@@ -58,7 +58,7 @@ internal class AvkortingTest {
                                                         fom = YearMonth.of(2024, Month.AUGUST),
                                                         tom = null,
                                                     ),
-                                                aarsinntekt = 350000,
+                                                inntektTom = 350000,
                                             ),
                                     ),
                                 ),
@@ -97,7 +97,7 @@ internal class AvkortingTest {
                                                         fom = YearMonth.of(2025, Month.JANUARY),
                                                         tom = null,
                                                     ),
-                                                aarsinntekt = 400000,
+                                                inntektTom = 400000,
                                             ),
                                     ),
                                 ),
@@ -235,7 +235,7 @@ internal class AvkortingTest {
                         fom = YearMonth.of(2024, Month.MARCH),
                         tom = YearMonth.of(2024, Month.JULY),
                     ),
-                aarsinntekt = 300000,
+                inntektTom = 300000,
             )
         val inntektFraAug24 =
             avkortinggrunnlag(
@@ -245,7 +245,7 @@ internal class AvkortingTest {
                         fom = YearMonth.of(2024, Month.AUGUST),
                         tom = null,
                     ),
-                aarsinntekt = 350000,
+                inntektTom = 350000,
             )
         val inntektFraJan25 =
             avkortinggrunnlag(
@@ -255,7 +255,7 @@ internal class AvkortingTest {
                         fom = YearMonth.of(2025, Month.JANUARY),
                         tom = null,
                     ),
-                aarsinntekt = 400000,
+                inntektTom = 400000,
             )
         val avkorting =
             Avkorting(
@@ -738,7 +738,7 @@ internal class AvkortingTest {
                 )
             private val andreInntekt =
                 avkortinggrunnlag(
-                    aarsinntekt = 1000000,
+                    inntektTom = 1000000,
                     periode = Periode(fom = YearMonth.of(2024, Month.APRIL), tom = null),
                 )
             private val avkorting =

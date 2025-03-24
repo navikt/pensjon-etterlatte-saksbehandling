@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import java.util.UUID
@@ -66,6 +67,19 @@ class EtteroppgjoerService(
                 utlandsinntekt = utland,
                 afp = afp,
                 kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
+                // TODO
+                inntektInnvilgetPeriode =
+                    BeregnetInntektInnvilgetPeriode(
+                        verdi = 0,
+                        tidspunkt = Tidspunkt.now(),
+                        regelResultat = "".toJsonNode(),
+                        kilde =
+                            Grunnlagsopplysning.RegelKilde(
+                                navn = "",
+                                ts = Tidspunkt.now(),
+                                versjon = "",
+                            ),
+                    ),
             )
 
         val sanksjoner = sanksjonService.hentSanksjon(sisteIverksatteBehandling) ?: emptyList()

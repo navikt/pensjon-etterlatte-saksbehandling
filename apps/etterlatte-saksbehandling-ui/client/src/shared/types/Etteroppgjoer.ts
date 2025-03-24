@@ -16,7 +16,7 @@ export interface EtteroppgjoerBehandling {
 }
 
 export interface EtteroppgjoerOpplysninger {
-  skatt: PensjonsgivendeInntektFraSkatt
+  skatt: PensjonsgivendeInntektFraSkatteetaten
   ainntekt: AInntekt
   tidligereAvkorting: Avkorting
 }
@@ -28,7 +28,7 @@ export interface FaktiskInntekt {
   utland: number
 }
 
-export interface PensjonsgivendeInntektFraSkatt {
+export interface PensjonsgivendeInntektFraSkatteetaten {
   inntekter: PensjonsgivendeInntekt[]
 }
 

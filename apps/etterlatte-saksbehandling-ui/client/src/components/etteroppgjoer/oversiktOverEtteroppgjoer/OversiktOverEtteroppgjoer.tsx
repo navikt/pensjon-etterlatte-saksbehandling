@@ -5,12 +5,14 @@ import { Inntektsopplysninger } from '~components/etteroppgjoer/oversiktOverEtte
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { Link } from 'react-router-dom'
 import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
+import { ResultatAvForbehandling } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/resultatAvForbehandling/ResultatAvForbehandling'
+import { UtfallAvForbehandling } from '~shared/types/Etteroppgjoer'
 
 export const OversiktOverEtteroppgjoer = () => {
   const etteroppgjoer = useEtteroppgjoer()
 
   return (
-    <VStack gap="8" paddingInline="16" paddingBlock="16 4">
+    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
       <Heading size="xlarge" level="1">
         Etteroppgjør for {etteroppgjoer.behandling.aar}
       </Heading>
@@ -19,6 +21,7 @@ export const OversiktOverEtteroppgjoer = () => {
       </BodyShort>
       <Inntektsopplysninger />
       <FastsettFaktiskInntekt forbehandlingId={etteroppgjoer.behandling.id} />
+      <ResultatAvForbehandling utfallAvForbehandling={UtfallAvForbehandling.SEND_VARSELBREV} />
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">

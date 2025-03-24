@@ -21,7 +21,7 @@ export default function LandRad({
       <Select
         readOnly={lesevisning}
         style={{ marginRight: '2rem', minWidth: '10rem', maxWidth: '12rem' }}
-        label={lesevisning ? 'Valgt lang' : 'Velg land'}
+        label={lesevisning ? 'Valgt land' : 'Velg land'}
         value={landMedDokumenter.landIsoKode || ''}
         onChange={(e) => {
           const landMedDokumenterMedLandKode = { ...landMedDokumenter, landIsoKode: e.target.value }

@@ -358,36 +358,6 @@ data class Avkorting(
         return copy(aarsoppgjoer = oppdaterteOppgjoer)
     }
 
-    /*
-    private fun utregnInnvilgetPeriode(): Avkorting =
-        copy(
-            aarsoppgjoer =
-                aarsoppgjoer.map { aarsoppgjoer ->
-                    when (aarsoppgjoer) {
-                        is AarsoppgjoerLoepende -> {
-                            val inntektsavkorting =
-                                aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
-                                    inntektsavkorting.copy(
-                                        grunnlag =
-                                            inntektsavkorting.grunnlag.copy(
-                                                inntektInnvilgetPeriode =
-                                                    beregnInntektInnvilgetPeriodeForventetInntekt(
-                                                        inntektsavkorting.grunnlag,
-                                                    ),
-                                            ),
-                                    )
-                                }
-                            aarsoppgjoer.copy(
-                                inntektsavkorting = inntektsavkorting,
-                            )
-                        }
-
-                        is Etteroppgjoer -> aarsoppgjoer
-                    }
-                },
-        )
-     */
-
     /**
      * Finner avkortet ytelse med opparbeidet [Restanse]
      * Opparbeidet restanse beregnes ved å sammenligne samtlige forventa inntektsavkortinger med alle måneder frem til
@@ -589,7 +559,7 @@ data class BeregnetInntektInnvilgetPeriode(
 ) : InntektInnvilgetPeriode()
 
 // Benyttes der avkortingsgrunnlag ble lagret og anvendt til avkorting før egen regel for inntekt innvilget periode fantes
-class IngenInntektInnvilgetPeriode : InntektInnvilgetPeriode()
+data object IngenInntektInnvilgetPeriode : InntektInnvilgetPeriode()
 
 enum class OverstyrtInnvilgaMaanederAarsak {
     TAR_UT_PENSJON_TIDLIG,

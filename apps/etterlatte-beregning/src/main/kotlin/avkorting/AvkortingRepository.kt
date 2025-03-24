@@ -78,7 +78,7 @@ class AvkortingRepository(
                                                     "SELECT * FROM inntekt_innvilget WHERE grunnlag_id = ?",
                                                     avkortingGrunnlagId,
                                                 ).let { query -> tx.run(query.map { row -> row.toInntektInnvilgetPeriode() }.asSingle) }
-                                                    ?: IngenInntektInnvilgetPeriode()
+                                                    ?: IngenInntektInnvilgetPeriode
 
                                             row.toAvkortingsgrunnlag(avkortingGrunnlagId, inntektInnvilgetPeriode)
                                         }.asList,

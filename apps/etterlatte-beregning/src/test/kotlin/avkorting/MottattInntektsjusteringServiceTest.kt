@@ -57,7 +57,7 @@ class MottattInntektsjusteringServiceTest {
         val eksisterendeInntekt =
             avkortinggrunnlag(
                 periode = Periode(fom = request.virkningstidspunkt, tom = null),
-                aarsinntekt = 300,
+                inntektTom = 300,
             )
 
         val inntektSomLagres = slot<AvkortingGrunnlagLagreDto>()
@@ -121,7 +121,7 @@ class MottattInntektsjusteringServiceTest {
         val eksisterendeInntekt =
             avkortinggrunnlag(
                 periode = Periode(fom = request.virkningstidspunkt, tom = null),
-                aarsinntekt = 300,
+                inntektTom = 300,
                 innvilgaMaaneder = 12,
             )
 

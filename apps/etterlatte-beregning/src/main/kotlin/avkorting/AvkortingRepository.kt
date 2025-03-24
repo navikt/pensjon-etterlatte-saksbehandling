@@ -6,7 +6,7 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
-import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -64,13 +64,26 @@ class AvkortingRepository(
                 val aarsoppgjoerUtfylt =
                     alleAarsoppgjoer.map { aarsoppgjoer ->
 
-                        val inntektInnvilgetPeriode = deserialize<InntektInnvilgetPeriode>("") // TODO
-
                         val avkortingGrunnlag =
                             queryOf(
                                 "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
                                 aarsoppgjoer.id,
-                            ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag(inntektInnvilgetPeriode) }.asList) }
+                            ).let { query ->
+                                tx.run(
+                                    query
+                                        .map { row ->
+                                            val avkortingGrunnlagId = row.uuid("id")
+                                            val inntektInnvilgetPeriode =
+                                                queryOf(
+                                                    "SELECT * FROM inntekt_innvilget WHERE grunnlag_id = ?",
+                                                    avkortingGrunnlagId,
+                                                ).let { query -> tx.run(query.map { row -> row.toInntektInnvilgetPeriode() }.asSingle) }
+                                                    ?: IngenInntektInnvilgetPeriode()
+
+                                            row.toAvkortingsgrunnlag(avkortingGrunnlagId, inntektInnvilgetPeriode)
+                                        }.asList,
+                                )
+                            }
 
                         val ytelseFoerAvkorting =
                             queryOf(
@@ -173,6 +186,13 @@ class AvkortingRepository(
                             lagreAarsoppgjoer(behandlingId, sakId, this, tx)
                             lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
                             inntektsavkorting.forEach {
+                                val inntektInnvilgetPeriode =
+                                    it.grunnlag.inntektInnvilgetPeriode as? BeregnetInntektInnvilgetPeriode
+                                        ?: throw InternfeilException(
+                                            "Kan ikke lagre avkortingsgrunnlag når inntekt innvilget periode mangler",
+                                        )
+
+                                lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
                                 lagreAvkortingGrunnlag(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
                                 lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, it.avkortingsperioder, tx)
                                 lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, it.avkortetYtelseForventetInntekt, tx)
@@ -235,6 +255,12 @@ class AvkortingRepository(
         ).let { query ->
             tx.run(query.asUpdate)
         }
+        queryOf(
+            "DELETE FROM inntekt_innvilget WHERE behandling_id = ?",
+            behandlingId,
+        ).let { query ->
+            tx.run(query.asUpdate)
+        }
     }
 
     private fun lagreAarsoppgjoer(
@@ -272,11 +298,11 @@ class AvkortingRepository(
             INSERT INTO avkortingsgrunnlag(
                 id, behandling_id, fom, tom, inntekt_tom, fratrekk_inn_ut, inntekt_utland_tom, fratrekk_inn_aar_utland,
                 spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder,
-                overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse, inntekt_innvilget_periode
+                overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :inntektTom, :fratrekkInnAar, :inntektUtlandTom, :fratrekkInnAarUtland,
                 :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder,
-                :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse, :inntekt_innvilget_periode
+                :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse
             )
             """.trimIndent(),
         paramMap =
@@ -295,9 +321,35 @@ class AvkortingRepository(
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
                 "overstyrtInnvilgaMaanederAarsak" to avkortingsgrunnlag.overstyrtInnvilgaMaanederAarsak?.name,
                 "overstyrtInnvilgaMaanederBegrunnelse" to avkortingsgrunnlag.overstyrtInnvilgaMaanederBegrunnelse,
-                "inntekt_innvilget_periode" to avkortingsgrunnlag.inntektInnvilgetPeriode?.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
+
+    private fun lagreInntektInnvilgetPeriode(
+        behandlingId: UUID,
+        avkortingsgrunnlagId: UUID,
+        inntektInnvilgetPeriode: BeregnetInntektInnvilgetPeriode,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                INSERT INTO inntekt_innvilget(
+                    grunnlag_id, behandling_id, inntekt, regel_resultat, kilde, tidspunkt
+                ) VALUES (
+                    :grunnlagId, :behandlingId, :inntekt, :regelResultat, :kilde, :tidspunkt
+                )
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "grunnlagId" to avkortingsgrunnlagId,
+                    "behandlingId" to behandlingId,
+                    "inntekt" to inntektInnvilgetPeriode.verdi,
+                    "regelResultat" to inntektInnvilgetPeriode.regelResultat.toJson(),
+                    "kilde" to inntektInnvilgetPeriode.kilde.toJson(),
+                    "tidspunkt" to inntektInnvilgetPeriode.tidspunkt.toTimestamp(),
+                ),
+        ).let { query -> tx.run(query.asUpdate) }
+    }
 
     private fun lagreYtelseFoerAvkorting(
         behandlingId: UUID,
@@ -427,28 +479,38 @@ class AvkortingRepository(
         ).let { query -> tx.run(query.asUpdate) }
     }
 
-    private fun Row.toAvkortingsgrunnlag(inntektInnvilgetPeriode: InntektInnvilgetPeriode) =
-        ForventetInntekt(
-            id = uuid("id"),
-            periode =
-                Periode(
-                    fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
-                    tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
-                ),
-            inntektTom = int("inntekt_tom"),
-            fratrekkInnAar = int("fratrekk_inn_ut"),
-            inntektUtlandTom = int("inntekt_utland_tom"),
-            fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
-            innvilgaMaaneder = int("relevante_maaneder"),
-            spesifikasjon = string("spesifikasjon"),
+    private fun Row.toInntektInnvilgetPeriode() =
+        BeregnetInntektInnvilgetPeriode(
+            verdi = int("inntekt"),
+            regelResultat = objectMapper.readTree(string("regel_resultat")),
             kilde = string("kilde").let { objectMapper.readValue(it) },
-            overstyrtInnvilgaMaanederAarsak =
-                stringOrNull("overstyrt_innvilga_maaneder_aarsak")?.let {
-                    OverstyrtInnvilgaMaanederAarsak.valueOf(it)
-                },
-            overstyrtInnvilgaMaanederBegrunnelse = stringOrNull("overstyrt_innvilga_maaneder_begrunnelse"),
-            inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+            tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         )
+
+    private fun Row.toAvkortingsgrunnlag(
+        id: UUID,
+        inntektInnvilgetPeriode: InntektInnvilgetPeriode,
+    ) = ForventetInntekt(
+        id = id,
+        periode =
+            Periode(
+                fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
+            ),
+        inntektTom = int("inntekt_tom"),
+        fratrekkInnAar = int("fratrekk_inn_ut"),
+        inntektUtlandTom = int("inntekt_utland_tom"),
+        fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
+        innvilgaMaaneder = int("relevante_maaneder"),
+        spesifikasjon = string("spesifikasjon"),
+        kilde = string("kilde").let { objectMapper.readValue(it) },
+        overstyrtInnvilgaMaanederAarsak =
+            stringOrNull("overstyrt_innvilga_maaneder_aarsak")?.let {
+                OverstyrtInnvilgaMaanederAarsak.valueOf(it)
+            },
+        overstyrtInnvilgaMaanederBegrunnelse = stringOrNull("overstyrt_innvilga_maaneder_begrunnelse"),
+        inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+    )
 
     private fun Row.toYtelseFoerAvkorting() =
         YtelseFoerAvkorting(

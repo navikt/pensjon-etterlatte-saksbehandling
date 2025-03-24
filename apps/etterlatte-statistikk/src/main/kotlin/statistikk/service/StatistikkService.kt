@@ -482,7 +482,9 @@ class StatistikkService(
                 saksbehandler = null,
                 ansvarligEnhet = statistikkBehandling.enhet,
                 soeknadFormat = SoeknadFormat.DIGITAL,
-                sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
+                sakUtland =
+                    SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning)
+                        ?: SakUtland.fraEnhetsnummer(statistikkBehandling.sak.enhet),
                 sakUtlandEnhet = SakUtland.fraEnhetsnummer(statistikkBehandling.sak.enhet),
                 beregning = null,
                 avkorting = null,

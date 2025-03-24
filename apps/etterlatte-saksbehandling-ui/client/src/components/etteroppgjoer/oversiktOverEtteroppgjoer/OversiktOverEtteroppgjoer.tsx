@@ -11,6 +11,8 @@ import { UtfallAvForbehandling } from '~shared/types/Etteroppgjoer'
 export const OversiktOverEtteroppgjoer = () => {
   const etteroppgjoer = useEtteroppgjoer()
 
+  const utfallAvForbehandling = UtfallAvForbehandling.SEND_VARSELBREV
+
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
       <Heading size="xlarge" level="1">
@@ -21,18 +23,21 @@ export const OversiktOverEtteroppgjoer = () => {
       </BodyShort>
       <Inntektsopplysninger />
       <FastsettFaktiskInntekt forbehandlingId={etteroppgjoer.behandling.id} />
-      <ResultatAvForbehandling utfallAvForbehandling={UtfallAvForbehandling.SEND_VARSELBREV} />
+      <ResultatAvForbehandling utfallAvForbehandling={utfallAvForbehandling} />
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">
           <div>
-            {/* TODO: Denne vil endre seg ut ifra resultatet av forbehandlingen blir */}
-            <Button
-              as={Link}
-              to={`/etteroppgjoer/${etteroppgjoer.behandling.id}/${EtteroppjoerSteg.OPPSUMMERING_OG_BREV}`}
-            >
-              Gå til brev
-            </Button>
+            {utfallAvForbehandling !== UtfallAvForbehandling.FERDIGSTILL_UTEN_ENDRING ? (
+              <Button
+                as={Link}
+                to={`/etteroppgjoer/${etteroppgjoer.behandling.id}/${EtteroppjoerSteg.OPPSUMMERING_OG_BREV}`}
+              >
+                Gå til brev
+              </Button>
+            ) : (
+              <Button>Ferdigstill</Button>
+            )}
           </div>
         </HStack>
       </Box>

@@ -8,6 +8,7 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.ForventetInntekt
+import no.nav.etterlatte.avkorting.IngenInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
 import no.nav.etterlatte.avkorting.Restanse
@@ -153,6 +154,7 @@ fun avkortinggrunnlag(
     kilde = kilde,
     overstyrtInnvilgaMaanederAarsak = overstyrtInnvilgaMaanederAarsak,
     overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
+    inntektInnvilgetPeriode = IngenInntektInnvilgetPeriode(),
 )
 
 fun avkortinggrunnlagLagreDto(

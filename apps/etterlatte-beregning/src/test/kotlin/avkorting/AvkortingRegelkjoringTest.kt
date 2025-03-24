@@ -23,7 +23,7 @@ class AvkortingRegelkjoringTest {
                 periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = null),
             ).copy(
                 inntektInnvilgetPeriode =
-                    InntektInnvilgetPeriode(
+                    BeregnetInntektInnvilgetPeriode(
                         verdi = 250000,
                         tidspunkt = Tidspunkt.now(),
                         regelResultat = "".toJsonNode(),

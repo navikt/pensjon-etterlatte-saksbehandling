@@ -6,6 +6,7 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -63,11 +64,13 @@ class AvkortingRepository(
                 val aarsoppgjoerUtfylt =
                     alleAarsoppgjoer.map { aarsoppgjoer ->
 
+                        val inntektInnvilgetPeriode = deserialize<InntektInnvilgetPeriode>("") // TODO
+
                         val avkortingGrunnlag =
                             queryOf(
                                 "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
                                 aarsoppgjoer.id,
-                            ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag() }.asList) }
+                            ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag(inntektInnvilgetPeriode) }.asList) }
 
                         val ytelseFoerAvkorting =
                             queryOf(
@@ -424,7 +427,7 @@ class AvkortingRepository(
         ).let { query -> tx.run(query.asUpdate) }
     }
 
-    private fun Row.toAvkortingsgrunnlag() =
+    private fun Row.toAvkortingsgrunnlag(inntektInnvilgetPeriode: InntektInnvilgetPeriode) =
         ForventetInntekt(
             id = uuid("id"),
             periode =
@@ -444,6 +447,7 @@ class AvkortingRepository(
                     OverstyrtInnvilgaMaanederAarsak.valueOf(it)
                 },
             overstyrtInnvilgaMaanederBegrunnelse = stringOrNull("overstyrt_innvilga_maaneder_begrunnelse"),
+            inntektInnvilgetPeriode = inntektInnvilgetPeriode,
         )
 
     private fun Row.toYtelseFoerAvkorting() =

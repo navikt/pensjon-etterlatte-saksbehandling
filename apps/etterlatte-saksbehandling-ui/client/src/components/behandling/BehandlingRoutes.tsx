@@ -23,7 +23,6 @@ import { Varselbrev } from '~components/behandling/brev/Varselbrev'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { EtteroppgjoerOversikt } from '~components/behandling/etteroppgjoeroversikt/EtteroppgjoerOversikt'
 
 type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
@@ -55,11 +54,6 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'revurderingsoversikt',
     description: 'Revurderingsoversikt',
     element: (behandling: IBehandlingReducer) => <Revurderingsoversikt behandling={behandling} />,
-  },
-  etteroppgjoerOversikt: {
-    path: 'etteroppgjoeroversikt',
-    description: 'Etteroppgjøroversikt',
-    element: (behandling: IBehandlingReducer) => <EtteroppgjoerOversikt behandling={behandling} />,
   },
   vilkaarsvurdering: {
     path: 'vilkaarsvurdering',

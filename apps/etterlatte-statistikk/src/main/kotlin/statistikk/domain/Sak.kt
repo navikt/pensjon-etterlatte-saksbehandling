@@ -65,9 +65,6 @@ enum class SakYtelsesgruppe {
     FORELDRELOES,
 }
 
-// Vi skal ha nytt element: sak_utland_enhet
-// Vi må legge til elmentet i database
-
 data class SakRad(
     val id: Long,
     val referanseId: UUID,

@@ -28,6 +28,7 @@ export const OversiktOverEtteroppgjoer = () => {
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">
           <div>
+            {/* @ts-expect-error ignorerer denne til ekte data flyt er på plass, dette er kun for test */}
             {utfallAvForbehandling !== UtfallAvForbehandling.FERDIGSTILL_UTEN_ENDRING ? (
               <Button
                 as={Link}

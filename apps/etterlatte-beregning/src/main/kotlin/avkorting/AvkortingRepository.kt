@@ -269,11 +269,11 @@ class AvkortingRepository(
             INSERT INTO avkortingsgrunnlag(
                 id, behandling_id, fom, tom, inntekt_tom, fratrekk_inn_ut, inntekt_utland_tom, fratrekk_inn_aar_utland,
                 spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder,
-                overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse
+                overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse, inntekt_innvilget_periode
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :inntektTom, :fratrekkInnAar, :inntektUtlandTom, :fratrekkInnAarUtland,
                 :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder,
-                :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse
+                :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse, :inntekt_innvilget_periode
             )
             """.trimIndent(),
         paramMap =
@@ -292,6 +292,7 @@ class AvkortingRepository(
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
                 "overstyrtInnvilgaMaanederAarsak" to avkortingsgrunnlag.overstyrtInnvilgaMaanederAarsak?.name,
                 "overstyrtInnvilgaMaanederBegrunnelse" to avkortingsgrunnlag.overstyrtInnvilgaMaanederBegrunnelse,
+                "inntekt_innvilget_periode" to avkortingsgrunnlag.inntektInnvilgetPeriode?.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 

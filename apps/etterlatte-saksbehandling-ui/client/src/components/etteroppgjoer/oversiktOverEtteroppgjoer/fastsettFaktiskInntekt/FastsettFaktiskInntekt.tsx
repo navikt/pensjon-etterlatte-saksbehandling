@@ -6,6 +6,7 @@ import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtter
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -75,6 +76,11 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         <div>
           <Button loading={isPending(lagreFaktiskInntektResult)}>Fastsett inntekt</Button>
         </div>
+
+        {isFailureHandler({
+          apiResult: lagreFaktiskInntektResult,
+          errorMessage: 'Kunne ikke fastsette faktisk inntekt',
+        })}
       </VStack>
     </form>
   )

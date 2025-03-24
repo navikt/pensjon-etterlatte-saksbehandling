@@ -8,7 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnAvkortingFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
@@ -56,18 +56,20 @@ fun Route.etteroppgjoerRoutes(
             }
         }
 
-        get("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            kunSkrivetilgang {
-                val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
-                call.respond(etteroppgjoer)
+        route("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
+            get {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
+                    call.respond(etteroppgjoer)
+                }
             }
-        }
 
-        post("beregn_faktisk_inntekt") {
-            val request = call.receive<BeregnAvkortingFaktiskInntektRequest>()
-            forbehandlingService.beregnAvkortingFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
-            call.respond(HttpStatusCode.OK)
+            post("beregn_faktisk_inntekt") {
+                val request = call.receive<BeregnFaktiskInntektRequest>()
+                forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/{$SAKID_CALL_PARAMETER}") {

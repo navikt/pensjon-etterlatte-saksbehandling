@@ -52,3 +52,9 @@ export interface Avkorting {
   avkortingGrunnlag: IAvkortingGrunnlag[]
   avkortetYtelse: IAvkortetYtelse[]
 }
+
+export enum UtfallAvForbehandling {
+  SEND_VARSELBREV,
+  SEND_INFORMASJONSBREV,
+  FERDIGSTILL_UTEN_ENDRING,
+}

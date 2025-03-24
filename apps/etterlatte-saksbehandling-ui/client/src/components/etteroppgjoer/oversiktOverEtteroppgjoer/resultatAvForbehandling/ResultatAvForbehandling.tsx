@@ -11,28 +11,38 @@ export const ResultatAvForbehandling = ({
   return (
     <VStack gap="4">
       <Heading size="large">Resultat</Heading>
-      <Box maxWidth="30rem">
+      <Box maxWidth="25rem">
         <Table>
           <Table.Header>
             <Table.HeaderCell scope="col">Utregning</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Beløp</Table.HeaderCell>
+            <Table.HeaderCell scope="col">
+              <HStack justify="center">Beløp</HStack>
+            </Table.HeaderCell>
           </Table.Header>
           <Table.Body>
             <Table.Row>
               <Table.HeaderCell scope="row">Brutto utbetalt stønad</Table.HeaderCell>
-              <Table.DataCell>{NOK(2)}</Table.DataCell>
+              <Table.DataCell>
+                <HStack justify="end">{NOK(2)}</HStack>
+              </Table.DataCell>
             </Table.Row>
             <Table.Row>
               <Table.HeaderCell scope="row">Ny brutto stønad</Table.HeaderCell>
-              <Table.DataCell>{NOK(5)}</Table.DataCell>
+              <Table.DataCell>
+                <HStack justify="end">{NOK(5)}</HStack>
+              </Table.DataCell>
             </Table.Row>
             <Table.Row>
               <Table.HeaderCell scope="row">Differanse</Table.HeaderCell>
-              <Table.DataCell>{NOK(2000)}</Table.DataCell>
+              <Table.DataCell>
+                <HStack justify="end">{NOK(2000)}</HStack>
+              </Table.DataCell>
             </Table.Row>
             <Table.Row>
               <Table.HeaderCell scope="row">Grense</Table.HeaderCell>
-              <Table.DataCell>{NOK(2000)}</Table.DataCell>
+              <Table.DataCell>
+                <HStack justify="end">{NOK(2000)}</HStack>
+              </Table.DataCell>
             </Table.Row>
           </Table.Body>
         </Table>

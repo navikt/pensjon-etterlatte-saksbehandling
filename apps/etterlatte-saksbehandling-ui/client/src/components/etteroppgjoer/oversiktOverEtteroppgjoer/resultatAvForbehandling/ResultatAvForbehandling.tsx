@@ -33,9 +33,9 @@ export const ResultatAvForbehandling = ({
               </Table.DataCell>
             </Table.Row>
             <Table.Row>
-              <Table.HeaderCell scope="row">Differanse</Table.HeaderCell>
+              <Table.HeaderCell scope="row">Differanse +/-</Table.HeaderCell>
               <Table.DataCell>
-                <HStack justify="end">{NOK(2000)}</HStack>
+                <HStack justify="end">+ {NOK(2000)}</HStack>
               </Table.DataCell>
             </Table.Row>
             <Table.Row>

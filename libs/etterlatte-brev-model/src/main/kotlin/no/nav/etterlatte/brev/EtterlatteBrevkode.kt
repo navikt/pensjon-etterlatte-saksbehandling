@@ -68,7 +68,7 @@ enum class EtterlatteBrevKode : Brevbakerkode {
     INGEN_REDIGERBAR_DEL,
 
     OMS_EO_VARSEL_TILBAKEKREVING,
-    OMS_EO_VARSEL_TILBAKEKREVING_REDIGERBAR,
+    OMS_EO_VARSEL_TILBAKEKREVING_INNHOLD,
 }
 
 enum class Brevtype {

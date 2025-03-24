@@ -180,7 +180,7 @@ fun inntektAvkortingGrunnlag(
         FaktumNode(
             verdi =
                 InntektAvkortingGrunnlag(
-                    inntekt = Beregningstall(inntekt),
+                    inntektInnvilgetNedrundet = Beregningstall(inntekt),
                     relevanteMaaneder = Beregningstall(relevanteMaaneder),
                     grunnlagId = UUID.randomUUID(),
                 ),

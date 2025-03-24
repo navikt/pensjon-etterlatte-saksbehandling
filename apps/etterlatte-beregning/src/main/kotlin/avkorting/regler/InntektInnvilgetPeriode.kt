@@ -19,19 +19,19 @@ data class ForventetInntektGrunnlag(
     val fratrekkInnAarUtland: Beregningstall,
 )
 
-val forventetInntektGrunnlag: Regel<ForventetInntektGrunnlag, ForventetInntektGrunnlag> =
+val forventetInntektGrunnlag: Regel<FaktumNode<ForventetInntektGrunnlag>, ForventetInntektGrunnlag> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = { FaktumNode(it, kilde = "", beskrivelse = "") },
+        beskrivelse = "Finner grunnlag for inntekt innvilget periode",
+        finnFaktum = { it },
         finnFelt = { it },
     )
 
 val forventetInntektInnvilgetPeriode =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = "1.1"), // TODO
+        beskrivelse = "Beregner forventet inntekt i innvilget periode og runder ned til nærmeste tusen",
+        regelReferanse = RegelReferanse(id = "REGEL-INNTEKT-INNVILGET-NEDRUNDET", versjon = "1.1"),
     ) benytter forventetInntektGrunnlag med { inntektavkortingsgrunnlag ->
         val (inntektTom, fratrekkInnAar, inntektutlandTom, fratrekkInnAarUtland) = inntektavkortingsgrunnlag
         inntektTom

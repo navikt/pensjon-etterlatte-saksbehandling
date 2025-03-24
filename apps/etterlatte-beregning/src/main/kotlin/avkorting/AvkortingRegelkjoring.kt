@@ -44,11 +44,15 @@ object AvkortingRegelkjoring {
                 grunnlag =
                     with(forventetInntekt) {
                         KonstantGrunnlag(
-                            ForventetInntektGrunnlag(
-                                inntektTom = Beregningstall(inntektTom),
-                                fratrekkInnAar = Beregningstall(fratrekkInnAar),
-                                inntektUtlandTom = Beregningstall(inntektUtlandTom),
-                                fratrekkInnAarUtland = Beregningstall(fratrekkInnAarUtland),
+                            FaktumNode(
+                                ForventetInntektGrunnlag(
+                                    inntektTom = Beregningstall(inntektTom),
+                                    fratrekkInnAar = Beregningstall(fratrekkInnAar),
+                                    inntektUtlandTom = Beregningstall(inntektUtlandTom),
+                                    fratrekkInnAarUtland = Beregningstall(fratrekkInnAarUtland),
+                                ),
+                                kilde = kilde,
+                                beskrivelse = "Forventet inntekt frem til opphør og før innvilgelse",
                             ),
                         )
                     },
@@ -99,7 +103,7 @@ object AvkortingRegelkjoring {
                                 FaktumNode(
                                     verdi =
                                         InntektAvkortingGrunnlag(
-                                            inntekt =
+                                            inntektInnvilgetNedrundet =
                                                 Beregningstall(
                                                     avkortingGrunnlag.inntektInnvilgetPeriode?.verdi
                                                         ?: throw InternfeilException(

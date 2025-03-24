@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class InntektAvkortingGrunnlag(
-    val inntekt: Beregningstall,
+    val inntektInnvilgetNedrundet: Beregningstall,
     val relevanteMaaneder: Beregningstall,
     val grunnlagId: UUID,
 )
@@ -69,10 +69,10 @@ val maanedsinntekt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Inntekt for relevant periode nedrundet til nærmeste tusen oppdelt i relevante måneder",
-        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.2"), // TODO!
+        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.3"),
     ) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
-        val (inntekt, relevanteMaaneder) = inntektavkortingsgrunnlag
-        inntekt.divide(relevanteMaaneder)
+        val (nedrundetInntekt, relevanteMaaneder) = inntektavkortingsgrunnlag
+        nedrundetInntekt.divide(relevanteMaaneder)
     }
 
 val overstegetInntektPerMaaned =

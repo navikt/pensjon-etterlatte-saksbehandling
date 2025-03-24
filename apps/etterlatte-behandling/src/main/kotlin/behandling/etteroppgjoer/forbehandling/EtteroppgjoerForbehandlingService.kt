@@ -130,9 +130,9 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    suspend fun beregnAvkortingFaktiskInntekt(
+    suspend fun fastsettFaktiskInntekt(
         behandlingId: UUID,
-        request: BeregnAvkortingFaktiskInntektRequest,
+        request: FastsettFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val request =
@@ -164,7 +164,7 @@ data class EtteroppgjoerOgOppgave(
     val oppgave: OppgaveIntern,
 )
 
-data class BeregnAvkortingFaktiskInntektRequest(
+data class FastsettFaktiskInntektRequest(
     val loennsinntekt: Int,
     val afp: Int,
     val naeringsinntekt: Int,

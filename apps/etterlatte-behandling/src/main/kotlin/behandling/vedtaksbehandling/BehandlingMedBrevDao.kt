@@ -46,14 +46,14 @@ class BehandlingMedBrevDao(
         statement.setObject(3, behandlingId)
         statement.setObject(4, behandlingId)
 
-        val vedtaksbehandling =
+        val behandlingMedBrev =
             statement
                 .executeQuery()
-                .single { toVedtaksbehandling() }
-        return vedtaksbehandling
+                .single { toBehandlingMedBrev() }
+        return behandlingMedBrev
     }
 
-    private fun ResultSet.toVedtaksbehandling(): BehandlingMedBrev {
+    private fun ResultSet.toBehandlingMedBrev(): BehandlingMedBrev {
         val type = BehandlingMedBrevType.valueOf(getString(1))
         val id = UUID.fromString(getString(2))
         val status = getString(3)

@@ -48,11 +48,121 @@ class AvkortingRepository(
                     tx.run(
                         query
                             .map { row ->
-                                AarsoppgjoerLoepende(
-                                    id = row.uuid("id"),
-                                    aar = row.int("aar"),
-                                    fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
-                                )
+
+                                val aarsoppgjoerId = row.uuid("id")
+                                val erEtteroppgjoer = false // TODO blir nytt felt fordi EO vil kreve andre spørringer
+
+                                if (erEtteroppgjoer) {
+                                    TODO()
+                                } else {
+                                    val avkortingGrunnlag =
+                                        queryOf(
+                                            "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
+                                            aarsoppgjoerId,
+                                        ).let { query ->
+                                            tx.run(
+                                                query
+                                                    .map { row ->
+                                                        val avkortingGrunnlagId = row.uuid("id")
+                                                        val inntektInnvilgetPeriode =
+                                                            queryOf(
+                                                                "SELECT * FROM inntekt_innvilget WHERE grunnlag_id = ?",
+                                                                avkortingGrunnlagId,
+                                                            ).let { query ->
+                                                                tx.run(query.map { row -> row.toInntektInnvilgetPeriode() }.asSingle)
+                                                            }
+                                                                ?: IngenInntektInnvilgetPeriode
+
+                                                        row.toAvkortingsgrunnlag(avkortingGrunnlagId, inntektInnvilgetPeriode)
+                                                    }.asList,
+                                            )
+                                        }
+
+                                    val ytelseFoerAvkorting =
+                                        queryOf(
+                                            "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
+                                            aarsoppgjoerId,
+                                        ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
+
+                                    val restanse =
+                                        queryOf(
+                                            "SELECT * FROM avkorting_aarsoppgjoer_restanse WHERE aarsoppgjoer_id = ?",
+                                            aarsoppgjoerId,
+                                        ).let { query -> tx.run(query.map { row -> row.toRestanse() }.asList) }
+
+                                    val inntektsavkorting =
+                                        avkortingGrunnlag.map {
+                                            val avkortingsperioder =
+                                                queryOf(
+                                                    "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
+                                                    it.id,
+                                                ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
+                                            val sanksjoner =
+                                                queryOf(
+                                                    "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.inntektsgrunnlag = ? ORDER BY y.fom ASC",
+                                                    it.id,
+                                                ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
+                                            val avkortetYtelse =
+                                                queryOf(
+                                                    "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
+                                                    it.id,
+                                                ).let { query ->
+                                                    tx.run(
+                                                        query
+                                                            .map { row ->
+                                                                row.toAvkortetYtelse(
+                                                                    restanse,
+                                                                    sanksjoner,
+                                                                )
+                                                            }.asList,
+                                                    )
+                                                }
+                                            Inntektsavkorting(
+                                                grunnlag = it,
+                                                avkortingsperioder = avkortingsperioder,
+                                                avkortetYtelseForventetInntekt = avkortetYtelse,
+                                            )
+                                        }
+                                    val sanksjonerAvkortetYtelseAar =
+                                        queryOf(
+                                            """
+                                            SELECT y.sanksjon_id, s.sanksjon_type 
+                                            FROM avkortet_ytelse y 
+                                            INNER JOIN sanksjon s 
+                                            ON y.sanksjon_id = s.id 
+                                            WHERE y.aarsoppgjoer_id = ? 
+                                            AND y.type = ?
+                                            ORDER BY y.fom ASC
+                                            """.trimIndent(),
+                                            aarsoppgjoerId,
+                                            AvkortetYtelseType.AARSOPPGJOER.name,
+                                        ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
+                                    val avkortetYtelseAar =
+                                        queryOf(
+                                            "SELECT * FROM avkortet_ytelse WHERE aarsoppgjoer_id = ? AND type = ? ORDER BY fom ASC",
+                                            aarsoppgjoerId,
+                                            AvkortetYtelseType.AARSOPPGJOER.name,
+                                        ).let { query ->
+                                            tx.run(
+                                                query
+                                                    .map { row ->
+                                                        row.toAvkortetYtelse(
+                                                            restanse,
+                                                            sanksjonerAvkortetYtelseAar,
+                                                        )
+                                                    }.asList,
+                                            )
+                                        }
+
+                                    AarsoppgjoerLoepende(
+                                        id = aarsoppgjoerId,
+                                        aar = row.int("aar"),
+                                        fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                                        ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                        inntektsavkorting = inntektsavkorting,
+                                        avkortetYtelse = avkortetYtelseAar,
+                                    )
+                                }
                             }.asList,
                     )
                 }
@@ -60,114 +170,7 @@ class AvkortingRepository(
             if (alleAarsoppgjoer.isEmpty()) {
                 null
             } else {
-                val aarsoppgjoerUtfylt =
-                    alleAarsoppgjoer.map { aarsoppgjoer ->
-
-                        val avkortingGrunnlag =
-                            queryOf(
-                                "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
-                                aarsoppgjoer.id,
-                            ).let { query ->
-                                tx.run(
-                                    query
-                                        .map { row ->
-                                            val avkortingGrunnlagId = row.uuid("id")
-                                            val inntektInnvilgetPeriode =
-                                                queryOf(
-                                                    "SELECT * FROM inntekt_innvilget WHERE grunnlag_id = ?",
-                                                    avkortingGrunnlagId,
-                                                ).let { query -> tx.run(query.map { row -> row.toInntektInnvilgetPeriode() }.asSingle) }
-                                                    ?: IngenInntektInnvilgetPeriode
-
-                                            row.toAvkortingsgrunnlag(avkortingGrunnlagId, inntektInnvilgetPeriode)
-                                        }.asList,
-                                )
-                            }
-
-                        val ytelseFoerAvkorting =
-                            queryOf(
-                                "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
-                                aarsoppgjoer.id,
-                            ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
-
-                        val restanse =
-                            queryOf(
-                                "SELECT * FROM avkorting_aarsoppgjoer_restanse WHERE aarsoppgjoer_id = ?",
-                                aarsoppgjoer.id,
-                            ).let { query -> tx.run(query.map { row -> row.toRestanse() }.asList) }
-
-                        val inntektsavkorting =
-                            avkortingGrunnlag.map {
-                                val avkortingsperioder =
-                                    queryOf(
-                                        "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
-                                        it.id,
-                                    ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
-                                val sanksjoner =
-                                    queryOf(
-                                        "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.inntektsgrunnlag = ? ORDER BY y.fom ASC",
-                                        it.id,
-                                    ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
-                                val avkortetYtelse =
-                                    queryOf(
-                                        "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
-                                        it.id,
-                                    ).let { query ->
-                                        tx.run(
-                                            query
-                                                .map { row ->
-                                                    row.toAvkortetYtelse(
-                                                        restanse,
-                                                        sanksjoner,
-                                                    )
-                                                }.asList,
-                                        )
-                                    }
-                                Inntektsavkorting(
-                                    grunnlag = it,
-                                    avkortingsperioder = avkortingsperioder,
-                                    avkortetYtelseForventetInntekt = avkortetYtelse,
-                                )
-                            }
-                        val sanksjonerAvkortetYtelseAar =
-                            queryOf(
-                                """
-                                SELECT y.sanksjon_id, s.sanksjon_type 
-                                FROM avkortet_ytelse y 
-                                INNER JOIN sanksjon s 
-                                ON y.sanksjon_id = s.id 
-                                WHERE y.aarsoppgjoer_id = ? 
-                                AND y.type = ?
-                                ORDER BY y.fom ASC
-                                """.trimIndent(),
-                                aarsoppgjoer.id,
-                                AvkortetYtelseType.AARSOPPGJOER.name,
-                            ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
-                        val avkortetYtelseAar =
-                            queryOf(
-                                "SELECT * FROM avkortet_ytelse WHERE aarsoppgjoer_id = ? AND type = ? ORDER BY fom ASC",
-                                aarsoppgjoer.id,
-                                AvkortetYtelseType.AARSOPPGJOER.name,
-                            ).let { query ->
-                                tx.run(
-                                    query
-                                        .map { row ->
-                                            row.toAvkortetYtelse(
-                                                restanse,
-                                                sanksjonerAvkortetYtelseAar,
-                                            )
-                                        }.asList,
-                                )
-                            }
-
-                        aarsoppgjoer.copy(
-                            ytelseFoerAvkorting = ytelseFoerAvkorting,
-                            inntektsavkorting = inntektsavkorting,
-                            avkortetYtelse = avkortetYtelseAar,
-                        )
-                    }
-
-                Avkorting(aarsoppgjoer = aarsoppgjoerUtfylt)
+                Avkorting(aarsoppgjoer = alleAarsoppgjoer)
             }
         }
 

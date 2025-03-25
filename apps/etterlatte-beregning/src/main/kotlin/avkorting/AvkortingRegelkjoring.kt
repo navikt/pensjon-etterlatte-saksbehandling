@@ -87,6 +87,28 @@ object AvkortingRegelkjoring {
         }
     }
 
+    fun beregnInntektInnvilgetPeriodeFaktiskInntekt(
+        loennsinntekt: Int,
+        afp: Int,
+        naeringsinntekt: Int,
+        utland: Int,
+        kilde: Grunnlagsopplysning.Saksbehandler,
+    ): BeregnetInntektInnvilgetPeriode {
+        logger.info("Beregner inntekt innvilget periode")
+
+        return BeregnetInntektInnvilgetPeriode(
+            verdi = loennsinntekt + naeringsinntekt + utland + afp,
+            tidspunkt = Tidspunkt.now(),
+            regelResultat = "".toJsonNode(),
+            kilde =
+                Grunnlagsopplysning.RegelKilde(
+                    navn = "",
+                    ts = Tidspunkt.now(),
+                    versjon = "",
+                ),
+        )
+    }
+
     fun beregnInntektsavkorting(
         periode: Periode,
         avkortingGrunnlag: AvkortingGrunnlag,

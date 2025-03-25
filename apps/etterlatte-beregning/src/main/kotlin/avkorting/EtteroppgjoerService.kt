@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -8,7 +9,6 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import java.util.UUID
@@ -47,7 +47,7 @@ class EtteroppgjoerService(
                         avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                     )
 
-                is Etteroppgjoer -> TODO()
+                is Etteroppgjoer -> TODO() // Kan skje hvis et skatteoppgjør endrer seg...
             }
         }
     }
@@ -56,38 +56,35 @@ class EtteroppgjoerService(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val (sakId, forbehandlingId, sisteIverksatteBehandling, fraOgMed, _, loennsinntekt, afp, naeringsinntekt, utland) = request
-
-        val inntekt =
-            FaktiskInntekt(
-                id = UUID.randomUUID(),
-                innvilgaMaaneder = 12,
-                loennsinntekt = loennsinntekt,
-                naeringsinntekt = naeringsinntekt,
-                utlandsinntekt = utland,
-                afp = afp,
-                kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
-                // TODO
-                inntektInnvilgetPeriode =
-                    BeregnetInntektInnvilgetPeriode(
-                        verdi = 0,
-                        tidspunkt = Tidspunkt.now(),
-                        regelResultat = "".toJsonNode(),
-                        kilde =
-                            Grunnlagsopplysning.RegelKilde(
-                                navn = "",
-                                ts = Tidspunkt.now(),
-                                versjon = "",
-                            ),
-                    ),
-            )
+        val (sakId, forbehandlingId, sisteIverksatteBehandling, aar, loennsinntekt, afp, naeringsinntekt, utland) = request
 
         val sanksjoner = sanksjonService.hentSanksjon(sisteIverksatteBehandling) ?: emptyList()
 
         val tidligereAarsoppgjoer =
             avkortingRepository.hentAvkorting(sisteIverksatteBehandling)?.let {
-                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == fraOgMed.year }
+                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
             } ?: throw InternfeilException("Mangler avkorting")
+
+        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+        val inntekt =
+            FaktiskInntekt(
+                id = UUID.randomUUID(),
+                periode = tidligereAarsoppgjoer.periode(),
+                innvilgaMaaneder = tidligereAarsoppgjoer.innvilgaMaaneder(),
+                loennsinntekt = loennsinntekt,
+                naeringsinntekt = naeringsinntekt,
+                utlandsinntekt = utland,
+                afp = afp,
+                kilde = kilde,
+                inntektInnvilgetPeriode =
+                    beregnInntektInnvilgetPeriodeFaktiskInntekt(
+                        loennsinntekt = loennsinntekt,
+                        afp = afp,
+                        naeringsinntekt = naeringsinntekt,
+                        utland = utland,
+                        kilde = kilde,
+                    ),
+            )
 
         val avkorting =
             Avkorting(
@@ -95,15 +92,14 @@ class EtteroppgjoerService(
                     listOf(
                         Etteroppgjoer(
                             id = UUID.randomUUID(),
-                            aar = fraOgMed.year,
-                            fom = fraOgMed,
+                            aar = tidligereAarsoppgjoer.aar,
+                            fom = tidligereAarsoppgjoer.fom,
                             ytelseFoerAvkorting = tidligereAarsoppgjoer.ytelseFoerAvkorting,
                             inntekt = inntekt,
                         ),
                     ),
-                // TODO vil ikke fungere før regler er endret
             ).beregnAvkorting(
-                fraOgMed,
+                tidligereAarsoppgjoer.fom,
                 null,
                 sanksjoner,
             )

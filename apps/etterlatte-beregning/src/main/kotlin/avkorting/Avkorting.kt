@@ -160,7 +160,14 @@ data class Avkorting(
                                     },
                             )
 
-                        is Etteroppgjoer -> TODO()
+                        is Etteroppgjoer ->
+                            it.copy(
+                                id = UUID.randomUUID(),
+                                inntekt =
+                                    it.inntekt.copy(
+                                        id = UUID.randomUUID(),
+                                    ),
+                            )
                     }
                 },
         )
@@ -263,7 +270,7 @@ data class Avkorting(
 
     fun beregnAvkorting(
         virkningstidspunkt: YearMonth,
-        beregning: Beregning?, // Kun null for forbehandling eteroppgjør
+        beregning: Beregning?, // Kun null for forbehandling etteroppgjør
         sanksjoner: List<Sanksjon>,
     ): Avkorting {
         val virkningstidspunktAar = virkningstidspunkt.year
@@ -351,7 +358,29 @@ data class Avkorting(
                         )
                     }
 
-                    is Etteroppgjoer -> TODO()
+                    is Etteroppgjoer -> {
+                        val avkortinger =
+                            AvkortingRegelkjoring.beregnInntektsavkorting(
+                                periode = aarsoppgjoer.inntekt.periode,
+                                avkortingGrunnlag = aarsoppgjoer.inntekt,
+                            )
+
+                        val avkortetYtelseFaktiskInntekt =
+                            AvkortingRegelkjoring.beregnAvkortetYtelse(
+                                periode = aarsoppgjoer.inntekt.periode,
+                                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                avkortingsperioder = avkortinger,
+                                type = ETTEROPPJOER,
+                                restanse = null,
+                                sanksjoner = sanksjoner,
+                            )
+
+                        aarsoppgjoer.copy(
+                            ytelseFoerAvkorting = ytelseFoerAvkorting,
+                            avkortingsperioder = avkortinger,
+                            avkortetYtelse = avkortetYtelseFaktiskInntekt,
+                        )
+                    }
                 }
             }
 
@@ -518,6 +547,7 @@ class OpphoerErTilbakeITid(
 
 sealed class AvkortingGrunnlag {
     abstract val id: UUID
+    abstract val periode: Periode
     abstract val innvilgaMaaneder: Int
     abstract val inntektInnvilgetPeriode: InntektInnvilgetPeriode
     abstract val kilde: Grunnlagsopplysning.Saksbehandler
@@ -525,7 +555,7 @@ sealed class AvkortingGrunnlag {
 
 data class ForventetInntekt(
     override val id: UUID,
-    val periode: Periode,
+    override val periode: Periode,
     val inntektTom: Int,
     val fratrekkInnAar: Int,
     val inntektUtlandTom: Int,
@@ -540,6 +570,7 @@ data class ForventetInntekt(
 
 data class FaktiskInntekt(
     override val id: UUID,
+    override val periode: Periode,
     override val innvilgaMaaneder: Int,
     val loennsinntekt: Int,
     val naeringsinntekt: Int,
@@ -573,6 +604,29 @@ sealed class Aarsoppgjoer {
     abstract val fom: YearMonth
     abstract val ytelseFoerAvkorting: List<YtelseFoerAvkorting>
     abstract val avkortetYtelse: List<AvkortetYtelse>
+
+    fun innvilgaMaaneder() =
+        when (this) {
+            is AarsoppgjoerLoepende ->
+                this.inntektsavkorting
+                    .last()
+                    .grunnlag.innvilgaMaaneder
+            is Etteroppgjoer -> this.inntekt.innvilgaMaaneder
+        }
+
+    fun periode() =
+        when (this) {
+            is AarsoppgjoerLoepende ->
+                Periode(
+                    fom = fom,
+                    tom =
+                        inntektsavkorting
+                            .last()
+                            .grunnlag.periode.tom ?: YearMonth.of(aar, 12),
+                )
+
+            is Etteroppgjoer -> this.inntekt.periode
+        }
 }
 
 data class AarsoppgjoerLoepende(

@@ -4,15 +4,20 @@ import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.EtteroppgjoerResultatType
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
-import no.nav.etterlatte.libs.regler.KonstantRegel
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
+import no.nav.etterlatte.libs.regler.definerKonstant
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.libs.regler.velgNyesteGyldige
+import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.rettsgebyr.RettsgebyrRepository
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 data class EtteroppgjoerDifferanseGrunnlag(
@@ -60,37 +65,92 @@ val sumUtbetaltStoenad =
         }
     }
 
-val differanse =
+val etteroppgjoerDifferanse =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         regelReferanse = RegelReferanse(id = "", versjon = ""),
     ) benytter sumUtbetaltStoenad og sumNyBruttoStoenad med { sumUtbetalt, sumNyBrutto ->
-        sumUtbetalt - sumNyBrutto
+        val differanse = sumUtbetalt - sumNyBrutto
+        EtteroppgjoerDifferanse(differanse, sumUtbetalt, sumNyBrutto)
     }
 
-val grense =
-    KonstantRegel<EtteroppgjoerDifferanseGrunnlag, GrenseForEtteroppgjoer>(
+val finnHistoriskeRettsgebyr =
+    RettsgebyrRepository.historiskeRettsgebyr.map { rettsgebyr ->
+        val rettsgebyrGyldigFra = rettsgebyr.gyldigFra
+        definerKonstant<EtteroppgjoerDifferanseGrunnlag, EtteroppgjoerRettsgebyr>(
+            gjelderFra = rettsgebyrGyldigFra,
+            beskrivelse = "Rettsgebyr gyldig fra $rettsgebyrGyldigFra",
+            regelReferanse = RegelReferanse(id = "REGEL-HISTORISKE-RETTSGEBYR"),
+            verdi = rettsgebyr,
+        )
+    }
+
+val etteroppgjoerRettsgebyr: Regel<EtteroppgjoerDifferanseGrunnlag, EtteroppgjoerRettsgebyr> =
+    RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
+        beskrivelse = "Finner rettsgebyr",
+        regelReferanse = RegelReferanse(id = "REGEL-RETTSGEBYR"),
+    ) velgNyesteGyldige finnHistoriskeRettsgebyr
+
+val etteroppgjoerGrense =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Sette rettsgebyr",
         regelReferanse = RegelReferanse(id = "", versjon = ""),
-        verdi = GrenseForEtteroppgjoer(1000, 1000),
-    )
+    ) benytter etteroppgjoerRettsgebyr med { rettsgebyr ->
 
-data class GrenseForEtteroppgjoer(
-    val tilbakekreving: Int,
-    val etterbetaling: Int,
-)
+        val etterbetaling = rettsgebyr.rettsgebyr.divide(4)
+        val tilbakekreving = rettsgebyr.rettsgebyr
 
-val etteroppgjoerRegel =
+        EtteroppgjoerGrense(
+            etterbetaling,
+            tilbakekreving,
+            rettsgebyr,
+        )
+    }
+
+val beregneEtteroppgjoerRegel =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         regelReferanse = RegelReferanse(id = "", versjon = ""),
-    ) benytter differanse og grense med { differanse, grenser ->
-        when {
-            differanse > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKREVING
-            differanse * -1 > grenser.etterbetaling -> EtteroppgjoerResultatType.ETTERBETALING
-            else -> EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER
-        }
+    ) benytter etteroppgjoerDifferanse og etteroppgjoerGrense med { differanse, grenser ->
+
+        val status =
+            when {
+                Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKREVING
+                Beregningstall(differanse.differanse * -1) > grenser.etterbetaling -> EtteroppgjoerResultatType.ETTERBETALING
+                else -> EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER
+            }
+
+        EtteroppgjoerRegelResultat(
+            status,
+            grenser,
+            differanse,
+        )
     }
+
+data class EtteroppgjoerDifferanse(
+    val differanse: Long,
+    val utbetaltStoenad: Long,
+    val nyBruttoStoenad: Long,
+)
+
+data class EtteroppgjoerRegelResultat(
+    val resultatType: EtteroppgjoerResultatType,
+    val grense: EtteroppgjoerGrense,
+    val differanse: EtteroppgjoerDifferanse,
+    val tidspunkt: Tidspunkt = Tidspunkt.now(),
+)
+
+data class EtteroppgjoerGrense(
+    val tilbakekreving: Beregningstall,
+    val etterbetaling: Beregningstall,
+    val rettsgebyr: EtteroppgjoerRettsgebyr,
+)
+
+data class EtteroppgjoerRettsgebyr(
+    val gyldigFra: LocalDate,
+    val rettsgebyr: Beregningstall,
+)

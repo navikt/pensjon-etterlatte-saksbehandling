@@ -20,6 +20,10 @@ class Beregningstall : Comparable<Beregningstall> {
         value = number.toBigDecimal()
     }
 
+    constructor(number: Long) {
+        value = number.toBigDecimal()
+    }
+
     constructor(number: Double) {
         value = number.toBigDecimal()
     }

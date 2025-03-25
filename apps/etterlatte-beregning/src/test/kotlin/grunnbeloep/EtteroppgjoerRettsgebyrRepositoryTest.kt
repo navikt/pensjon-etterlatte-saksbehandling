@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-internal class GrunnbeloepRepositoryTest {
+internal class EtteroppgjoerRettsgebyrRepositoryTest {
     @Test
     fun `skal hente alle historiske grunnbeloep`() {
         GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveAtLeastSize 70

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
@@ -11,99 +10,9 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.regler.FaktumNode
-import no.nav.etterlatte.libs.regler.KonstantRegel
-import no.nav.etterlatte.libs.regler.Regel
-import no.nav.etterlatte.libs.regler.RegelMeta
-import no.nav.etterlatte.libs.regler.RegelReferanse
-import no.nav.etterlatte.libs.regler.benytter
-import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
-import no.nav.etterlatte.libs.regler.med
-import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.sanksjon.SanksjonService
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-
-data class EtteroppgjoerDifferanseGrunnlag(
-    val utbetaltStoenad: FaktumNode<Aarsoppgjoer>,
-    val nyBruttoStoenad: FaktumNode<Aarsoppgjoer>,
-)
-
-val nyBruttoStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>> =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = EtteroppgjoerDifferanseGrunnlag::nyBruttoStoenad,
-        finnFelt = { it.avkortetYtelse },
-    )
-
-val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>> =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = EtteroppgjoerDifferanseGrunnlag::utbetaltStoenad,
-        finnFelt = { it.avkortetYtelse },
-    )
-
-val sumUtbetaltStoenad =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
-    ) benytter utbetaltStoenad med { avkortetYtelse ->
-        // TODO egen regel?
-        avkortetYtelse.sumOf {
-            (it.periode.fom.until(it.periode.tom, ChronoUnit.MONTHS) + 1) * it.ytelseEtterAvkorting
-        }
-    }
-
-val sumNyBruttoStoenad =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
-    ) benytter nyBruttoStoenad med { avkortetYtelse ->
-        // TODO egen regel?
-        avkortetYtelse.sumOf {
-            (it.periode.fom.until(it.periode.tom, ChronoUnit.MONTHS) + 1) * it.ytelseEtterAvkorting
-        }
-    }
-
-val differanse =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
-    ) benytter sumUtbetaltStoenad og sumNyBruttoStoenad med { sumUtbetalt, sumNyBrutto ->
-        sumUtbetalt - sumNyBrutto
-    }
-
-val grenser =
-    KonstantRegel<EtteroppgjoerDifferanseGrunnlag, EtteroppgjoerGrenser>(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
-        verdi = EtteroppgjoerGrenser(1000, 1000),
-    )
-
-data class EtteroppgjoerGrenser(
-    val tilbakekreving: Int,
-    val etterbetaling: Int,
-)
-
-val etteroppgjoerRegel =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
-    ) benytter differanse og grenser med { differanse, grenser ->
-
-        when {
-            differanse > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKREVING
-            differanse * -1 > grenser.etterbetaling -> EtteroppgjoerResultatType.ETTERBETALING
-            else -> EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER
-        }
-    }
 
 class EtteroppgjoerService(
     private val avkortingRepository: AvkortingRepository,
@@ -243,9 +152,9 @@ class EtteroppgjoerService(
 
     private fun finnAarsoppgjoerForEtteroppgjoer(
         aar: Int,
-        id: UUID,
+        behandlingId: UUID,
     ): Aarsoppgjoer {
-        val avkorting = avkortingRepository.hentAvkorting(id) ?: throw GenerellIkkeFunnetException()
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw GenerellIkkeFunnetException()
         return avkorting.aarsoppgjoer.single { it.aar == aar }
     }
 }

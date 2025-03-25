@@ -6,6 +6,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Avkortingsperiode
+import no.nav.etterlatte.avkorting.BeregnetInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.ForventetInntekt
 import no.nav.etterlatte.avkorting.Inntektsavkorting
@@ -133,8 +134,9 @@ fun avkorting(
 
 fun avkortinggrunnlag(
     id: UUID = UUID.randomUUID(),
-    aarsinntekt: Int = 100000,
+    inntektTom: Int = 100000,
     fratrekkInnAar: Int = 10000,
+    inntektUtlandTom: Int = 0,
     fratrekkInnAarUtland: Int = 0,
     innvilgaMaaneder: Int = 12,
     periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
@@ -144,15 +146,27 @@ fun avkortinggrunnlag(
 ) = ForventetInntekt(
     id = id,
     periode = periode,
-    inntektTom = aarsinntekt,
+    inntektTom = inntektTom,
     fratrekkInnAar = fratrekkInnAar,
-    inntektUtlandTom = 0,
+    inntektUtlandTom = inntektUtlandTom,
     fratrekkInnAarUtland = fratrekkInnAarUtland,
     innvilgaMaaneder = innvilgaMaaneder,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
     overstyrtInnvilgaMaanederAarsak = overstyrtInnvilgaMaanederAarsak,
     overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
+    inntektInnvilgetPeriode =
+        BeregnetInntektInnvilgetPeriode(
+            verdi = inntektTom - fratrekkInnAar + inntektUtlandTom - fratrekkInnAarUtland,
+            tidspunkt = Tidspunkt.now(),
+            regelResultat = "".toJsonNode(),
+            kilde =
+                Grunnlagsopplysning.RegelKilde(
+                    navn = "",
+                    ts = Tidspunkt.now(),
+                    versjon = "",
+                ),
+        ),
 )
 
 fun avkortinggrunnlagLagreDto(
@@ -174,18 +188,13 @@ fun avkortinggrunnlagLagreDto(
 
 fun inntektAvkortingGrunnlag(
     inntekt: Int = 500000,
-    fratrekkInnAar: Int = 0,
-    inntektUtland: Int = 0,
     relevanteMaaneder: Int = 12,
 ) = InntektAvkortingGrunnlagWrapper(
     inntektAvkortingGrunnlag =
         FaktumNode(
             verdi =
                 InntektAvkortingGrunnlag(
-                    inntekt = Beregningstall(inntekt),
-                    fratrekkInnAar = Beregningstall(fratrekkInnAar),
-                    inntektUtland = Beregningstall(inntektUtland),
-                    fratrekkInnAarUtland = Beregningstall(0),
+                    inntektInnvilgetNedrundet = Beregningstall(inntekt),
                     relevanteMaaneder = Beregningstall(relevanteMaaneder),
                     grunnlagId = UUID.randomUUID(),
                 ),

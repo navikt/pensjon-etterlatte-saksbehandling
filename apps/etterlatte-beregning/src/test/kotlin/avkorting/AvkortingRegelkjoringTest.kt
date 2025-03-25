@@ -4,7 +4,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
 import java.time.Month
@@ -17,15 +20,26 @@ class AvkortingRegelkjoringTest {
         val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.JANUARY))
         val avkortingGrunnlag =
             avkortinggrunnlag(
-                aarsinntekt = 300000,
-                fratrekkInnAar = 50000,
                 periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = null),
+            ).copy(
+                inntektInnvilgetPeriode =
+                    BeregnetInntektInnvilgetPeriode(
+                        verdi = 250000,
+                        tidspunkt = Tidspunkt.now(),
+                        regelResultat = "".toJsonNode(),
+                        kilde =
+                            Grunnlagsopplysning.RegelKilde(
+                                navn = "",
+                                ts = Tidspunkt.now(),
+                                versjon = "",
+                            ),
+                    ),
             )
 
         val avkortingsperioder =
             AvkortingRegelkjoring.beregnInntektsavkorting(
                 Periode(fom = virkningstidspunkt.dato, tom = null),
-                avkortingGrunnlag,
+                avkortingGrunnlag = avkortingGrunnlag,
             )
 
         with(avkortingsperioder[0]) {

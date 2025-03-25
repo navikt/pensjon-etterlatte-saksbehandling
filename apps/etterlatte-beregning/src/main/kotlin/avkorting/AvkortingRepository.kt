@@ -6,7 +6,6 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -186,13 +185,9 @@ class AvkortingRepository(
                             lagreAarsoppgjoer(behandlingId, sakId, this, tx)
                             lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
                             inntektsavkorting.forEach {
-                                val inntektInnvilgetPeriode =
-                                    it.grunnlag.inntektInnvilgetPeriode as? BeregnetInntektInnvilgetPeriode
-                                        ?: throw InternfeilException(
-                                            "Kan ikke lagre avkortingsgrunnlag når inntekt innvilget periode mangler",
-                                        )
-
-                                lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
+                                (it.grunnlag.inntektInnvilgetPeriode as? BeregnetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
+                                    lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
+                                }
                                 lagreAvkortingGrunnlag(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
                                 lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, it.avkortingsperioder, tx)
                                 lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, it.avkortetYtelseForventetInntekt, tx)

@@ -64,6 +64,7 @@ class EtteroppgjoerService(
 
         val avkorting =
             Avkorting(
+                // Trenger bare gjeldende år i en forbehandling
                 aarsoppgjoer = listOf(tidligereAarsoppgjoer),
             ).beregnEtteroppgjoer(
                 brukerTokenInfo = brukerTokenInfo,

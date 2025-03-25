@@ -185,7 +185,7 @@ class AvkortingRepository(
                             lagreAarsoppgjoer(behandlingId, sakId, this, tx)
                             lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
                             inntektsavkorting.forEach {
-                                (it.grunnlag.inntektInnvilgetPeriode as? BeregnetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
+                                (it.grunnlag.inntektInnvilgetPeriode as? BenyttetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
                                     lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
                                 }
                                 lagreAvkortingGrunnlag(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)

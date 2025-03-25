@@ -2,7 +2,7 @@ package no.nav.etterlatte.avkorting
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
-import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
+import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
@@ -348,7 +348,7 @@ data class Avkorting(
 
                                 val inntekt =
                                     when (inntektsavkorting.grunnlag.inntektInnvilgetPeriode) {
-                                        is BeregnetInntektInnvilgetPeriode -> inntektsavkorting.grunnlag
+                                        is BenyttetInntektInnvilgetPeriode -> inntektsavkorting.grunnlag
                                         is IngenInntektInnvilgetPeriode ->
                                             inntektsavkorting.grunnlag.copy(
                                                 inntektInnvilgetPeriode =
@@ -439,7 +439,7 @@ data class Avkorting(
                                 periode = aarsoppgjoer.inntekt.periode,
                                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                                 avkortingsperioder = avkortinger,
-                                type = ETTEROPPJOER,
+                                type = ETTEROPPGJOER,
                                 restanse = null,
                                 sanksjoner = sanksjoner,
                             )
@@ -873,9 +873,9 @@ data class AvkortetYtelse(
  *
  * [AARSOPPGJOER] - Iverksatte perioder. Inneholder restanse hvis forventet inntekt endrer seg i løpet av året
  *
- * [ETTEROPPJOER] - TODO ikke enda implementert
+ * [ETTEROPPGJOER] - TODO ikke enda implementert
  */
-enum class AvkortetYtelseType { FORVENTET_INNTEKT, AARSOPPGJOER, ETTEROPPJOER }
+enum class AvkortetYtelseType { FORVENTET_INNTEKT, AARSOPPGJOER, ETTEROPPGJOER }
 
 fun Beregning.mapTilYtelseFoerAvkorting() =
     beregningsperioder.map {

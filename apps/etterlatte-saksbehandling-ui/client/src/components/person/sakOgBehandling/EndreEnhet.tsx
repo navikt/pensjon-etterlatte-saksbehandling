@@ -15,6 +15,8 @@ interface EndreEnhetSkjema {
   kommentar?: string
 }
 
+const enhetErVikafossenEllerEgneAnsatte = (enhet: string) => enhet === '2103' || enhet === '4883'
+
 export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldendeEnhet: string }) => {
   const [open, setOpen] = useState(false)
   const [endreEnhetStatus, endreEnhetKall, resetApiCall] = useApiCall(byttEnhetPaaSak)
@@ -62,86 +64,104 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
         </Modal.Header>
 
         <Modal.Body>
-          {isSuccess(endreEnhetStatus) ? (
+          {enhetErVikafossenEllerEgneAnsatte(gjeldendeEnhet) ? (
             <VStack gap="4">
-              <Alert variant="success">Saken er flyttet til enhet &quot;{valgtEnhetNavn}&quot;.</Alert>
+              <Alert variant="warning">
+                Saken tilhører {ENHETER[gjeldendeEnhet]} og kan ikke flyttes til en annen enhet i Gjenny på grunn av
+                adressebeskyttelse eller skjerming. Dersom saken skal flyttes, må dette endres i Pdl eller
+                skjermingsløsningen. Dette vil føre til at saken oppdateres og enhet setter riktig i Gjenny. Mener du at
+                dette er feil, meld sak i porten.
+              </Alert>
 
-              {!harTilgangPaaNyEnhet && (
-                <Alert variant="warning">
-                  Du har ikke lenger tilgang til saken, siden du ikke har tilgang til enheten saken er byttet til.
-                </Alert>
-              )}
-
-              <HStack gap="2" justify="end">
-                <Button variant={harTilgangPaaNyEnhet ? 'secondary' : 'primary'} as="a" href="/">
-                  Gå til oppgavelisten
-                </Button>
-                {harTilgangPaaNyEnhet && (
-                  <Button variant="primary" onClick={() => window.location.reload()}>
-                    Last saken på nytt
-                  </Button>
-                )}
-              </HStack>
+              <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+                Lukk
+              </Button>
             </VStack>
           ) : (
-            <VStack gap="4">
-              <form onSubmit={handleSubmit(endreEnhet)}>
-                <VStack gap="5">
-                  <Select
-                    {...register('enhet', {
-                      required: {
-                        value: true,
-                        message: 'Du må velge en enhet',
-                      },
-                    })}
-                    label="Enhet"
-                    error={errors.enhet?.message}
-                  >
-                    {Object.entries(ENHETER)
-                      .filter(([id]) => id != '2103')
-                      .filter(([id]) => id != '4883')
-                      .map(([id, navn]) => (
-                        <option key={id} value={id}>
-                          {navn}
-                        </option>
-                      ))}
-                  </Select>
+            <>
+              {isSuccess(endreEnhetStatus) ? (
+                <VStack gap="4">
+                  <Alert variant="success">Saken er flyttet til enhet &quot;{valgtEnhetNavn}&quot;.</Alert>
 
-                  {valgtEnhet !== gjeldendeEnhet && !innloggetSaksbehandler.enheter.includes(valgtEnhet) && (
+                  {!harTilgangPaaNyEnhet && (
                     <Alert variant="warning">
-                      Du har ikke tilgang til &quot;{valgtEnhetNavn}&quot;, og vil ikke kunne se saken etter flytting.
+                      Du har ikke lenger tilgang til saken, siden du ikke har tilgang til enheten saken er byttet til.
                     </Alert>
                   )}
 
-                  <Textarea
-                    {...register('kommentar', {
-                      required: {
-                        value: true,
-                        message: 'Du må begrunne hvorfor enhet endres',
-                      },
-                    })}
-                    error={errors.kommentar?.message}
-                    label="Kommentar"
-                  />
-
                   <HStack gap="2" justify="end">
-                    {isFailure(endreEnhetStatus) && (
-                      <ApiErrorAlert>
-                        Kunne ikke endre sakens enhet til &quot;{valgtEnhetNavn}&quot; på grunn av feil:{' '}
-                        {endreEnhetStatus.error.detail}
-                      </ApiErrorAlert>
+                    <Button variant={harTilgangPaaNyEnhet ? 'secondary' : 'primary'} as="a" href="/">
+                      Gå til oppgavelisten
+                    </Button>
+                    {harTilgangPaaNyEnhet && (
+                      <Button variant="primary" onClick={() => window.location.reload()}>
+                        Last saken på nytt
+                      </Button>
                     )}
-
-                    <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
-                      Avbryt
-                    </Button>
-                    <Button type="submit" loading={isPending(endreEnhetStatus)}>
-                      Endre
-                    </Button>
                   </HStack>
                 </VStack>
-              </form>
-            </VStack>
+              ) : (
+                <VStack gap="4">
+                  <form onSubmit={handleSubmit(endreEnhet)}>
+                    <VStack gap="5">
+                      <Select
+                        {...register('enhet', {
+                          required: {
+                            value: true,
+                            message: 'Du må velge en enhet',
+                          },
+                        })}
+                        label="Enhet"
+                        error={errors.enhet?.message}
+                      >
+                        {Object.entries(ENHETER)
+                          .filter(([id]) => id != '2103')
+                          .filter(([id]) => id != '4883')
+                          .map(([id, navn]) => (
+                            <option key={id} value={id}>
+                              {navn}
+                            </option>
+                          ))}
+                      </Select>
+
+                      {valgtEnhet !== gjeldendeEnhet && !innloggetSaksbehandler.enheter.includes(valgtEnhet) && (
+                        <Alert variant="warning">
+                          Du har ikke tilgang til &quot;{valgtEnhetNavn}&quot;, og vil ikke kunne se saken etter
+                          flytting.
+                        </Alert>
+                      )}
+
+                      <Textarea
+                        {...register('kommentar', {
+                          required: {
+                            value: true,
+                            message: 'Du må begrunne hvorfor enhet endres',
+                          },
+                        })}
+                        error={errors.kommentar?.message}
+                        label="Kommentar"
+                      />
+
+                      <HStack gap="2" justify="end">
+                        {isFailure(endreEnhetStatus) && (
+                          <ApiErrorAlert>
+                            Kunne ikke endre sakens enhet til &quot;{valgtEnhetNavn}&quot; på grunn av feil:{' '}
+                            {endreEnhetStatus.error.detail}
+                          </ApiErrorAlert>
+                        )}
+
+                        <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+                          Avbryt
+                        </Button>
+                        <Button type="submit" loading={isPending(endreEnhetStatus)}>
+                          Endre
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  </form>
+                </VStack>
+              )}
+            </>
           )}
         </Modal.Body>
       </Modal>

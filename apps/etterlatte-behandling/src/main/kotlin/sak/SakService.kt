@@ -158,7 +158,7 @@ class SakServiceImpl(
         kommentar: String?,
     ) {
         if (Enheter.erSpesialTilgangsEnheter(sak.enhet)) {
-            throw KanIkkEndreSpesialenhet("Kan ike endre til spesial enhet")
+            throw KanIkkEndreSpesialenhet("Kan ikke endre til spesial enhet")
         }
         dao.oppdaterEnhet(sak, kommentar)
     }

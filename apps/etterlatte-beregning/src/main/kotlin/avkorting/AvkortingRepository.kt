@@ -185,7 +185,7 @@ class AvkortingRepository(
                             lagreAarsoppgjoer(behandlingId, sakId, this, tx)
                             lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
                             inntektsavkorting.forEach {
-                                (it.grunnlag.inntektInnvilgetPeriode as? BeregnetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
+                                (it.grunnlag.inntektInnvilgetPeriode as? BenyttetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
                                     lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
                                 }
                                 lagreAvkortingGrunnlag(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
@@ -322,7 +322,7 @@ class AvkortingRepository(
     private fun lagreInntektInnvilgetPeriode(
         behandlingId: UUID,
         avkortingsgrunnlagId: UUID,
-        inntektInnvilgetPeriode: BeregnetInntektInnvilgetPeriode,
+        inntektInnvilgetPeriode: BenyttetInntektInnvilgetPeriode,
         tx: TransactionalSession,
     ) {
         queryOf(
@@ -475,7 +475,7 @@ class AvkortingRepository(
     }
 
     private fun Row.toInntektInnvilgetPeriode() =
-        BeregnetInntektInnvilgetPeriode(
+        BenyttetInntektInnvilgetPeriode(
             verdi = int("inntekt"),
             regelResultat = objectMapper.readTree(string("regel_resultat")),
             kilde = string("kilde").let { objectMapper.readValue(it) },

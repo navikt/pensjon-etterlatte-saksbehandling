@@ -346,10 +346,28 @@ data class Avkorting(
                                         tom = inntektsavkorting.grunnlag.periode.tom,
                                     )
 
+                                val inntekt =
+                                    when (inntektsavkorting.grunnlag.inntektInnvilgetPeriode) {
+                                        is BeregnetInntektInnvilgetPeriode -> inntektsavkorting.grunnlag
+                                        is IngenInntektInnvilgetPeriode ->
+                                            inntektsavkorting.grunnlag.copy(
+                                                inntektInnvilgetPeriode =
+                                                    with(inntektsavkorting.grunnlag) {
+                                                        beregnInntektInnvilgetPeriodeForventetInntekt(
+                                                            inntektTom,
+                                                            fratrekkInnAar,
+                                                            inntektUtlandTom,
+                                                            fratrekkInnAarUtland,
+                                                            kilde,
+                                                            periode,
+                                                        )
+                                                    },
+                                            )
+                                    }
                                 val avkortinger =
                                     AvkortingRegelkjoring.beregnInntektsavkorting(
                                         periode = periode,
-                                        avkortingGrunnlag = inntektsavkorting.grunnlag,
+                                        avkortingGrunnlag = inntekt,
                                     )
 
                                 val avkortetYtelseForventetInntekt =

@@ -6,6 +6,7 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -52,10 +53,86 @@ class AvkortingRepository(
                                 val aarsoppgjoerId = row.uuid("id")
                                 val erEtteroppgjoer = false // TODO blir nytt felt fordi EO vil kreve andre spørringer
 
+                                val ytelseFoerAvkorting =
+                                    queryOf(
+                                        "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
+                                        aarsoppgjoerId,
+                                    ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
+
                                 if (erEtteroppgjoer) {
-                                    TODO()
+                                    // TODO egen tabell for avkortinggrunnlag_faktsik (og rename eksisterende...)
+                                    val faktiskInntekt =
+                                        queryOf(
+                                            "SELECT * FROM avkortingsgrunnlag_faktisk WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
+                                            aarsoppgjoerId,
+                                        ).let { query ->
+                                            tx.run(
+                                                query
+                                                    .map { row ->
+                                                        val avkortingGrunnlagId = row.uuid("id")
+                                                        val inntektInnvilgetPeriode =
+                                                            queryOf(
+                                                                "SELECT * FROM inntekt_innvilget WHERE grunnlag_id = ?",
+                                                                avkortingGrunnlagId,
+                                                            ).let { query ->
+                                                                tx.run(query.map { row -> row.toInntektInnvilgetPeriode() }.asSingle)
+                                                            }
+                                                                ?: throw InternfeilException(
+                                                                    "Grunnlag for etteroppgjør mangler inntekt innvilgede måneder",
+                                                                )
+
+                                                        row.toFaktiskInntekt(avkortingGrunnlagId, inntektInnvilgetPeriode)
+                                                    }.asSingle,
+                                            )
+                                        } ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt")
+
+                                    val avkortingsperioder =
+                                        queryOf(
+                                            "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
+                                            faktiskInntekt.id,
+                                        ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
+                                    // TODO sanksjon skal ut av avkorting
+                                    val sanksjonerAvkortetYtelseAar =
+                                        queryOf(
+                                            """
+                                            SELECT y.sanksjon_id, s.sanksjon_type 
+                                            FROM avkortet_ytelse y 
+                                            INNER JOIN sanksjon s 
+                                            ON y.sanksjon_id = s.id 
+                                            WHERE y.aarsoppgjoer_id = ? 
+                                            ORDER BY y.fom ASC
+                                            """.trimIndent(),
+                                            aarsoppgjoerId,
+                                        ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
+
+                                    val avkortetYtelse =
+                                        queryOf(
+                                            "SELECT * FROM avkortet_ytelse WHERE aarsoppgjoer_id = ? AND type = ? ORDER BY fom ASC",
+                                            aarsoppgjoerId,
+                                            AvkortetYtelseType.ETTEROPPGJOER.name,
+                                        ).let { query ->
+                                            tx.run(
+                                                query
+                                                    .map { row ->
+                                                        row.toAvkortetYtelse(
+                                                            emptyList(),
+                                                            sanksjonerAvkortetYtelseAar,
+                                                        )
+                                                    }.asList,
+                                            )
+                                        }
+
+                                    Etteroppgjoer(
+                                        id = aarsoppgjoerId,
+                                        aar = row.int("aar"),
+                                        fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                                        ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                        inntekt = faktiskInntekt,
+                                        avkortingsperioder = avkortingsperioder,
+                                        avkortetYtelse = avkortetYtelse,
+                                    )
                                 } else {
-                                    val avkortingGrunnlag =
+                                    val forventetInntekt =
                                         queryOf(
                                             "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
                                             aarsoppgjoerId,
@@ -73,16 +150,10 @@ class AvkortingRepository(
                                                             }
                                                                 ?: IngenInntektInnvilgetPeriode
 
-                                                        row.toAvkortingsgrunnlag(avkortingGrunnlagId, inntektInnvilgetPeriode)
+                                                        row.toForventetInntekt(avkortingGrunnlagId, inntektInnvilgetPeriode)
                                                     }.asList,
                                             )
                                         }
-
-                                    val ytelseFoerAvkorting =
-                                        queryOf(
-                                            "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
-                                            aarsoppgjoerId,
-                                        ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
 
                                     val restanse =
                                         queryOf(
@@ -91,7 +162,7 @@ class AvkortingRepository(
                                         ).let { query -> tx.run(query.map { row -> row.toRestanse() }.asList) }
 
                                     val inntektsavkorting =
-                                        avkortingGrunnlag.map {
+                                        forventetInntekt.map {
                                             val avkortingsperioder =
                                                 queryOf(
                                                     "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
@@ -137,7 +208,7 @@ class AvkortingRepository(
                                             aarsoppgjoerId,
                                             AvkortetYtelseType.AARSOPPGJOER.name,
                                         ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
-                                    val avkortetYtelseAar =
+                                    val avkortetYtelse =
                                         queryOf(
                                             "SELECT * FROM avkortet_ytelse WHERE aarsoppgjoer_id = ? AND type = ? ORDER BY fom ASC",
                                             aarsoppgjoerId,
@@ -160,7 +231,7 @@ class AvkortingRepository(
                                         fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
                                         ytelseFoerAvkorting = ytelseFoerAvkorting,
                                         inntektsavkorting = inntektsavkorting,
-                                        avkortetYtelse = avkortetYtelseAar,
+                                        avkortetYtelse = avkortetYtelse,
                                     )
                                 }
                             }.asList,
@@ -485,7 +556,7 @@ class AvkortingRepository(
             tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         )
 
-    private fun Row.toAvkortingsgrunnlag(
+    private fun Row.toForventetInntekt(
         id: UUID,
         inntektInnvilgetPeriode: InntektInnvilgetPeriode,
     ) = ForventetInntekt(
@@ -509,6 +580,13 @@ class AvkortingRepository(
         overstyrtInnvilgaMaanederBegrunnelse = stringOrNull("overstyrt_innvilga_maaneder_begrunnelse"),
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
     )
+
+    private fun Row.toFaktiskInntekt(
+        id: UUID,
+        inntektInnvilgetPeriode: InntektInnvilgetPeriode,
+    ): FaktiskInntekt {
+        TODO()
+    }
 
     private fun Row.toYtelseFoerAvkorting() =
         YtelseFoerAvkorting(

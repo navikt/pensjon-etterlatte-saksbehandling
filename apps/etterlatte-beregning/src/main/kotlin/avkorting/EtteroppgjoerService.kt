@@ -1,14 +1,11 @@
 package no.nav.etterlatte.avkorting
 
-import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import java.util.UUID
@@ -65,43 +62,17 @@ class EtteroppgjoerService(
                 it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
             } ?: throw InternfeilException("Mangler avkorting")
 
-        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
-        val inntekt =
-            FaktiskInntekt(
-                id = UUID.randomUUID(),
-                periode = tidligereAarsoppgjoer.periode(),
-                innvilgaMaaneder = tidligereAarsoppgjoer.innvilgaMaaneder(),
-                loennsinntekt = loennsinntekt,
-                naeringsinntekt = naeringsinntekt,
-                utlandsinntekt = utland,
-                afp = afp,
-                kilde = kilde,
-                inntektInnvilgetPeriode =
-                    beregnInntektInnvilgetPeriodeFaktiskInntekt(
-                        loennsinntekt = loennsinntekt,
-                        afp = afp,
-                        naeringsinntekt = naeringsinntekt,
-                        utland = utland,
-                        kilde = kilde,
-                    ),
-            )
-
         val avkorting =
             Avkorting(
-                aarsoppgjoer =
-                    listOf(
-                        Etteroppgjoer(
-                            id = UUID.randomUUID(),
-                            aar = tidligereAarsoppgjoer.aar,
-                            fom = tidligereAarsoppgjoer.fom,
-                            ytelseFoerAvkorting = tidligereAarsoppgjoer.ytelseFoerAvkorting,
-                            inntekt = inntekt,
-                        ),
-                    ),
-            ).beregnAvkorting(
-                tidligereAarsoppgjoer.fom,
-                null,
-                sanksjoner,
+                aarsoppgjoer = listOf(tidligereAarsoppgjoer),
+            ).beregnEtteroppgjoer(
+                brukerTokenInfo = brukerTokenInfo,
+                aar = aar,
+                loennsinntekt = loennsinntekt,
+                afp = afp,
+                naeringsinntekt = naeringsinntekt,
+                utland = utland,
+                sanksjoner = sanksjoner,
             )
 
         avkortingRepository.lagreAvkorting(forbehandlingId, sakId, avkorting) // TODO lagre med flagg forbehandling?

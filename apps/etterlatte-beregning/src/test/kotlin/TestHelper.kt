@@ -6,7 +6,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Avkortingsperiode
-import no.nav.etterlatte.avkorting.BeregnetInntektInnvilgetPeriode
+import no.nav.etterlatte.avkorting.BenyttetInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.ForventetInntekt
 import no.nav.etterlatte.avkorting.Inntektsavkorting
@@ -156,7 +156,7 @@ fun avkortinggrunnlag(
     overstyrtInnvilgaMaanederAarsak = overstyrtInnvilgaMaanederAarsak,
     overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
     inntektInnvilgetPeriode =
-        BeregnetInntektInnvilgetPeriode(
+        BenyttetInntektInnvilgetPeriode(
             verdi = inntektTom - fratrekkInnAar + inntektUtlandTom - fratrekkInnAarUtland,
             tidspunkt = Tidspunkt.now(),
             regelResultat = "".toJsonNode(),

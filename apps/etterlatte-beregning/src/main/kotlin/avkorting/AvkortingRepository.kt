@@ -187,7 +187,7 @@ class AvkortingRepository(
                             lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
                             inntektsavkorting.forEach {
                                 val inntektInnvilgetPeriode =
-                                    it.grunnlag.inntektInnvilgetPeriode as? BeregnetInntektInnvilgetPeriode
+                                    it.grunnlag.inntektInnvilgetPeriode as? BenyttetInntektInnvilgetPeriode
                                         ?: throw InternfeilException(
                                             "Kan ikke lagre avkortingsgrunnlag når inntekt innvilget periode mangler",
                                         )
@@ -327,7 +327,7 @@ class AvkortingRepository(
     private fun lagreInntektInnvilgetPeriode(
         behandlingId: UUID,
         avkortingsgrunnlagId: UUID,
-        inntektInnvilgetPeriode: BeregnetInntektInnvilgetPeriode,
+        inntektInnvilgetPeriode: BenyttetInntektInnvilgetPeriode,
         tx: TransactionalSession,
     ) {
         queryOf(
@@ -480,7 +480,7 @@ class AvkortingRepository(
     }
 
     private fun Row.toInntektInnvilgetPeriode() =
-        BeregnetInntektInnvilgetPeriode(
+        BenyttetInntektInnvilgetPeriode(
             verdi = int("inntekt"),
             regelResultat = objectMapper.readTree(string("regel_resultat")),
             kilde = string("kilde").let { objectMapper.readValue(it) },

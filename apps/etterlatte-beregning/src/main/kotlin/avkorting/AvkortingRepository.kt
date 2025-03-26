@@ -134,7 +134,7 @@ class AvkortingRepository(
                                 } else {
                                     val forventetInntekt =
                                         queryOf(
-                                            "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
+                                            "SELECT * FROM avkortingsgrunnlag_forventet WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
                                             aarsoppgjoerId,
                                         ).let { query ->
                                             tx.run(
@@ -319,7 +319,7 @@ class AvkortingRepository(
             tx.run(query.asUpdate)
         }
         queryOf(
-            "DELETE FROM avkortingsgrunnlag WHERE behandling_id = ?",
+            "DELETE FROM avkortingsgrunnlag_forventet WHERE behandling_id = ?",
             behandlingId,
         ).let { query ->
             tx.run(query.asUpdate)
@@ -364,7 +364,7 @@ class AvkortingRepository(
     ) = queryOf(
         statement =
             """
-            INSERT INTO avkortingsgrunnlag(
+            INSERT INTO avkortingsgrunnlag_forventet(
                 id, behandling_id, fom, tom, inntekt_tom, fratrekk_inn_ut, inntekt_utland_tom, fratrekk_inn_aar_utland,
                 spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder,
                 overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse

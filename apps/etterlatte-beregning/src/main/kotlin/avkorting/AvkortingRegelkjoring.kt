@@ -43,7 +43,7 @@ object AvkortingRegelkjoring {
         fratrekkInnAarUtland: Int,
         kilde: Grunnlagsopplysning.Saksbehandler,
         periode: Periode,
-    ): BeregnetInntektInnvilgetPeriode {
+    ): BenyttetInntektInnvilgetPeriode {
         logger.info("Beregner inntekt innvilget periode")
 
         val resultat =
@@ -68,7 +68,7 @@ object AvkortingRegelkjoring {
                 val tidspunkt = Tidspunkt.now()
                 resultat.periodiserteResultater
                     .map { periodisertResultat ->
-                        BeregnetInntektInnvilgetPeriode(
+                        BenyttetInntektInnvilgetPeriode(
                             verdi = periodisertResultat.resultat.verdi.toInteger(),
                             tidspunkt = tidspunkt,
                             regelResultat = periodisertResultat.toJsonNode(),
@@ -87,6 +87,28 @@ object AvkortingRegelkjoring {
         }
     }
 
+    fun beregnInntektInnvilgetPeriodeFaktiskInntekt(
+        loennsinntekt: Int,
+        afp: Int,
+        naeringsinntekt: Int,
+        utland: Int,
+        kilde: Grunnlagsopplysning.Saksbehandler,
+    ): BenyttetInntektInnvilgetPeriode {
+        logger.info("Beregner inntekt innvilget periode")
+
+        return BenyttetInntektInnvilgetPeriode(
+            verdi = loennsinntekt + naeringsinntekt + utland + afp,
+            tidspunkt = Tidspunkt.now(),
+            regelResultat = "".toJsonNode(),
+            kilde =
+                Grunnlagsopplysning.RegelKilde(
+                    navn = "",
+                    ts = Tidspunkt.now(),
+                    versjon = "",
+                ),
+        )
+    }
+
     fun beregnInntektsavkorting(
         periode: Periode,
         avkortingGrunnlag: AvkortingGrunnlag,
@@ -96,7 +118,7 @@ object AvkortingRegelkjoring {
         val inntektInnvilgetPeriode =
             avkortingGrunnlag.inntektInnvilgetPeriode.let {
                 when (it) {
-                    is BeregnetInntektInnvilgetPeriode -> it.verdi
+                    is BenyttetInntektInnvilgetPeriode -> it.verdi
                     is IngenInntektInnvilgetPeriode -> throw InternfeilException(
                         "Kan ikke beregne avkorting uten inntekt innvilget periode",
                     )

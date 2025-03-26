@@ -42,8 +42,8 @@ class SakRepository(
                             opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
                             vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
                             sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting,
-                            kilde, pesysid, relatert_til, paa_vent_aarsak
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            kilde, pesysid, relatert_til, paa_vent_aarsak, sak_utland_enhet
+                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                         Statement.RETURN_GENERATED_KEYS,
                     ).apply {
@@ -98,6 +98,7 @@ class SakRepository(
             pesysId = getLong("pesysid"),
             relatertTil = getString("relatert_til"),
             paaVentAarsak = getString("paa_vent_aarsak")?.let { enumValueOf<PaaVentAarsak>(it) },
+            sakUtlandEnhet = enumValueOf<SakUtland>(getString("sak_utland_enhet")),
         )
 
     fun hentRader(): List<SakRad> =
@@ -110,7 +111,7 @@ class SakRepository(
                         opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
                         vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
                         beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
-                        relatert_til, paa_vent_aarsak
+                        relatert_til, paa_vent_aarsak, sak_utland_enhet
                     FROM sak
                     """.trimIndent(),
                 )
@@ -130,7 +131,7 @@ class SakRepository(
                             opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
                             vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
                             beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
-                            relatert_til, paa_vent_aarsak
+                            relatert_til, paa_vent_aarsak, sak_utland_enhet
                         FROM sak where behandling_id = ? order by id desc 
                         """.trimIndent(),
                     ).apply {
@@ -187,4 +188,5 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
         sakRad.pesysId?.let { setLong(30, it) } ?: setNull(30, Types.BIGINT)
         sakRad.relatertTil?.let { setString(31, it) } ?: setNull(31, Types.CHAR)
         sakRad.paaVentAarsak?.let { setString(32, it.name) } ?: setString(32, null)
+        setString(33, sakRad.sakUtlandEnhet.name)
     }

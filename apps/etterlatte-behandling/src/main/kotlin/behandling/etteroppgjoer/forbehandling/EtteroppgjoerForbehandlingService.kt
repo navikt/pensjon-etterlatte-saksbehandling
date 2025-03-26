@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
-import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingService(
@@ -148,8 +147,7 @@ class EtteroppgjoerForbehandlingService(
                 sakId = forbehandling.sak.id,
                 forbehandlingId = forbehandling.id,
                 sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                fraOgMed = YearMonth.of(2024, 1), // TODO utled rikig fom
-                tilOgMed = YearMonth.of(2024, 12), // TODO utled rikig tom
+                aar = forbehandling.aar,
                 loennsinntekt = request.loennsinntekt,
                 naeringsinntekt = request.naeringsinntekt,
                 afp = request.afp,

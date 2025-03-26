@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -34,6 +35,7 @@ data class EtteroppgjoerForbehandling(
     val status: String, // TODO enum
     val sak: Sak,
     val aar: Int,
+    val innvilgetPeriode: Periode,
     val opprettet: Tidspunkt,
 )
 

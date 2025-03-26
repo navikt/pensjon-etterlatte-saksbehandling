@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -70,6 +72,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -79,6 +82,7 @@ class EtteroppgjoerForbehandlingDaoTest(
             status shouldBe ny.status
             aar shouldBe ny.aar
             opprettet shouldBe ny.opprettet
+            innvilgetPeriode shouldBe ny.innvilgetPeriode
         }
     }
 

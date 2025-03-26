@@ -18,11 +18,13 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingService(
@@ -93,6 +95,13 @@ class EtteroppgjoerForbehandlingService(
         val pensjonsgivendeInntekt = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar)
         val aInntekt = inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar)
 
+        // TODO hent fra vedtak
+        val virkOgOpphoer =
+            FoersteVirkOgOppoerTilSak(
+                foersteVirk = YearMonth.of(2024, 1),
+                opphoer = YearMonth.of(2024, 12),
+            )
+
         return inTransaction {
             val nyForbehandling =
                 EtteroppgjoerForbehandling(
@@ -101,6 +110,21 @@ class EtteroppgjoerForbehandlingService(
                     sak = sak,
                     status = "opprettet",
                     aar = inntektsaar,
+                    innvilgetPeriode =
+                        Periode(
+                            fom =
+                                if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
+                                    virkOgOpphoer.foersteVirk
+                                } else {
+                                    YearMonth.of(inntektsaar, 1)
+                                },
+                            tom =
+                                if (virkOgOpphoer.opphoer != null && virkOgOpphoer.opphoer.year == inntektsaar) {
+                                    virkOgOpphoer.opphoer
+                                } else {
+                                    YearMonth.of(inntektsaar, 12)
+                                },
+                        ),
                     opprettet = Tidspunkt.now(),
                 )
 
@@ -175,3 +199,8 @@ class FantIkkeForbehandling(
         code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
     )
+
+data class FoersteVirkOgOppoerTilSak(
+    val foersteVirk: YearMonth,
+    val opphoer: YearMonth?,
+)

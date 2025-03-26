@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -36,6 +37,7 @@ class EtteroppgjoerForbehandlingService(
     private val sigrunKlient: SigrunKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
+    private val vedtakKlient: VedtakKlient,
 ) {
     suspend fun hentEtteroppgjoer(
         brukerTokenInfo: BrukerTokenInfo,
@@ -86,6 +88,7 @@ class EtteroppgjoerForbehandlingService(
     suspend fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerOgOppgave {
         val sak =
             inTransaction {
@@ -95,12 +98,7 @@ class EtteroppgjoerForbehandlingService(
         val pensjonsgivendeInntekt = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar)
         val aInntekt = inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar)
 
-        // TODO hent fra vedtak
-        val virkOgOpphoer =
-            FoersteVirkOgOppoerTilSak(
-                foersteVirk = YearMonth.of(2024, 1),
-                opphoer = YearMonth.of(2024, 12),
-            )
+        val virkOgOpphoer = vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo)
 
         return inTransaction {
             val nyForbehandling =
@@ -119,7 +117,7 @@ class EtteroppgjoerForbehandlingService(
                                     YearMonth.of(inntektsaar, 1)
                                 },
                             tom =
-                                if (virkOgOpphoer.opphoer != null && virkOgOpphoer.opphoer.year == inntektsaar) {
+                                if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
                                     virkOgOpphoer.opphoer
                                 } else {
                                     YearMonth.of(inntektsaar, 12)
@@ -199,8 +197,3 @@ class FantIkkeForbehandling(
         code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
     )
-
-data class FoersteVirkOgOppoerTilSak(
-    val foersteVirk: YearMonth,
-    val opphoer: YearMonth?,
-)

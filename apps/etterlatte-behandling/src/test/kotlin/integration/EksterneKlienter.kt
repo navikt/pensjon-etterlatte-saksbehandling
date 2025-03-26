@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
@@ -254,6 +255,15 @@ class VedtakKlientTest : VedtakKlient {
     ): List<SakId> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun hentFoersteVirkOgOppoerTilSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FoersteVirkOgOppoerTilSak =
+        FoersteVirkOgOppoerTilSak(
+            foersteVirk = YearMonth.of(2024, 1),
+            opphoer = YearMonth.of(2024, 12),
+        )
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {

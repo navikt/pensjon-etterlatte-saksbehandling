@@ -30,9 +30,7 @@ class AvkortingRepository(
                     harInntektForAarDto.aar,
                 ).let { query ->
                     tx.run(
-                        query
-                            .map { row -> row.uuid("id") }
-                            .asList,
+                        query.map { row -> row.uuid("id") }.asList,
                     )
                 }
 
@@ -51,7 +49,7 @@ class AvkortingRepository(
                             .map { row ->
 
                                 val aarsoppgjoerId = row.uuid("id")
-                                val erEtteroppgjoer = false // TODO blir nytt felt fordi EO vil kreve andre spørringer
+                                val erEtteroppgjoer = row.boolean("er_etteroppgjoer")
 
                                 val ytelseFoerAvkorting =
                                     queryOf(
@@ -76,10 +74,9 @@ class AvkortingRepository(
                                                                 avkortingGrunnlagId,
                                                             ).let { query ->
                                                                 tx.run(query.map { row -> row.toInntektInnvilgetPeriode() }.asSingle)
-                                                            }
-                                                                ?: throw InternfeilException(
-                                                                    "Grunnlag for etteroppgjør mangler inntekt innvilgede måneder",
-                                                                )
+                                                            } ?: throw InternfeilException(
+                                                                "Grunnlag for etteroppgjør mangler inntekt innvilgede måneder",
+                                                            )
 
                                                         row.toFaktiskInntekt(avkortingGrunnlagId, inntektInnvilgetPeriode)
                                                     }.asSingle,
@@ -147,8 +144,7 @@ class AvkortingRepository(
                                                                 avkortingGrunnlagId,
                                                             ).let { query ->
                                                                 tx.run(query.map { row -> row.toInntektInnvilgetPeriode() }.asSingle)
-                                                            }
-                                                                ?: IngenInntektInnvilgetPeriode
+                                                            } ?: IngenInntektInnvilgetPeriode
 
                                                         row.toForventetInntekt(avkortingGrunnlagId, inntektInnvilgetPeriode)
                                                     }.asList,
@@ -256,13 +252,13 @@ class AvkortingRepository(
                 with(aarsoppgjoer) {
                     when (this) {
                         is AarsoppgjoerLoepende -> {
-                            lagreAarsoppgjoer(behandlingId, sakId, this, tx)
+                            lagreAarsoppgjoer(behandlingId, sakId, this, false, tx)
                             lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
                             inntektsavkorting.forEach {
                                 (it.grunnlag.inntektInnvilgetPeriode as? BenyttetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
                                     lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
                                 }
-                                lagreAvkortingGrunnlag(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
+                                lagreAvkortingGrunnlagForventet(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
                                 lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, it.avkortingsperioder, tx)
                                 lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, it.avkortetYtelseForventetInntekt, tx)
                             }
@@ -270,7 +266,12 @@ class AvkortingRepository(
                         }
 
                         is Etteroppgjoer -> {
-                            TODO()
+                            lagreAarsoppgjoer(behandlingId, sakId, this, true, tx)
+                            lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
+                            lagreInntektInnvilgetPeriode(behandlingId, inntekt.id, inntekt.inntektInnvilgetPeriode, tx)
+                            lagreAvkortingGrunnlagFaktisk(behandlingId, aarsoppgjoer.id, inntekt, tx)
+                            lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, avkortingsperioder, tx)
+                            lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, avkortetYtelse, tx)
                         }
                     }
                 }
@@ -325,6 +326,12 @@ class AvkortingRepository(
             tx.run(query.asUpdate)
         }
         queryOf(
+            "DELETE FROM avkortingsgrunnlag_faktisk WHERE behandling_id = ?",
+            behandlingId,
+        ).let { query ->
+            tx.run(query.asUpdate)
+        }
+        queryOf(
             "DELETE FROM inntekt_innvilget WHERE behandling_id = ?",
             behandlingId,
         ).let { query ->
@@ -335,15 +342,16 @@ class AvkortingRepository(
     private fun lagreAarsoppgjoer(
         behandlingId: UUID,
         sakId: SakId,
-        aarsoppgjoer: AarsoppgjoerLoepende,
+        aarsoppgjoer: Aarsoppgjoer,
+        erEtteroppgjoer: Boolean,
         tx: TransactionalSession,
     ) = queryOf(
         statement =
             """
             INSERT INTO avkorting_aarsoppgjoer(
-            	id, behandling_id, sak_id, aar, fom
+            	id, behandling_id, sak_id, aar, fom, er_etteroppgjoer
             ) VALUES (
-            	:id, :behandling_id, :sak_id, :aar, :fom
+            	:id, :behandling_id, :sak_id, :aar, :fom, :erEtteroppgjoer
             )
             """.trimIndent(),
         paramMap =
@@ -353,10 +361,11 @@ class AvkortingRepository(
                 "sak_id" to sakId.sakId,
                 "aar" to aarsoppgjoer.aar,
                 "fom" to aarsoppgjoer.fom.atDay(1),
+                "erEtteroppgjoer" to erEtteroppgjoer,
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
-    private fun lagreAvkortingGrunnlag(
+    private fun lagreAvkortingGrunnlagForventet(
         behandlingId: UUID,
         aarsoppgjoerId: UUID,
         avkortingsgrunnlag: ForventetInntekt,
@@ -380,7 +389,7 @@ class AvkortingRepository(
                 "behandlingId" to behandlingId,
                 "aarsoppgjoerId" to aarsoppgjoerId,
                 "fom" to avkortingsgrunnlag.periode.fom.atDay(1),
-                "tom" to avkortingsgrunnlag.periode.tom?.atDay(1),
+                "tom" to avkortingsgrunnlag.periode.tom?.atEndOfMonth(),
                 "inntektTom" to avkortingsgrunnlag.inntektTom,
                 "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
                 "inntektUtlandTom" to avkortingsgrunnlag.inntektUtlandTom,
@@ -390,6 +399,36 @@ class AvkortingRepository(
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
                 "overstyrtInnvilgaMaanederAarsak" to avkortingsgrunnlag.overstyrtInnvilgaMaanederAarsak?.name,
                 "overstyrtInnvilgaMaanederBegrunnelse" to avkortingsgrunnlag.overstyrtInnvilgaMaanederBegrunnelse,
+            ),
+    ).let { query -> tx.run(query.asUpdate) }
+
+    private fun lagreAvkortingGrunnlagFaktisk(
+        behandlingId: UUID,
+        aarsoppgjoerId: UUID,
+        faktisk: FaktiskInntekt,
+        tx: TransactionalSession,
+    ) = queryOf(
+        statement =
+            """
+            INSERT INTO avkortingsgrunnlag_faktisk(
+                id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, kilde
+            ) VALUES (
+                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :kilde
+            )
+            """.trimIndent(),
+        paramMap =
+            mapOf(
+                "id" to faktisk.id,
+                "behandlingId" to behandlingId,
+                "aarsoppgjoerId" to aarsoppgjoerId,
+                "fom" to faktisk.periode.fom.atDay(1),
+                "tom" to faktisk.periode.tom?.atEndOfMonth(),
+                "innvilgedeMaaneder" to faktisk.innvilgaMaaneder,
+                "loennsinntekt" to faktisk.loennsinntekt,
+                "naeringsinntekt" to faktisk.naeringsinntekt,
+                "afp" to faktisk.afp,
+                "utlandsinntekt" to faktisk.utlandsinntekt,
+                "kilde" to faktisk.kilde.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -583,10 +622,25 @@ class AvkortingRepository(
 
     private fun Row.toFaktiskInntekt(
         id: UUID,
-        inntektInnvilgetPeriode: InntektInnvilgetPeriode,
-    ): FaktiskInntekt {
-        TODO()
-    }
+        inntektInnvilgetPeriode: BenyttetInntektInnvilgetPeriode,
+    ) = FaktiskInntekt(
+        id = id,
+        periode =
+            Periode(
+                fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
+            ),
+        innvilgaMaaneder = int("innvilgede_maaneder"),
+        loennsinntekt = int("loennsinntekt"),
+        naeringsinntekt = int("naeringsinntekt"),
+        afp = int("afp"),
+        utlandsinntekt = int("utlandsinntekt"),
+        kilde =
+            string("kilde").let {
+                objectMapper.readValue(it)
+            },
+        inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+    )
 
     private fun Row.toYtelseFoerAvkorting() =
         YtelseFoerAvkorting(

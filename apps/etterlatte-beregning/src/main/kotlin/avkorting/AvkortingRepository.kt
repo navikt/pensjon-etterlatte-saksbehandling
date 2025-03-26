@@ -58,7 +58,6 @@ class AvkortingRepository(
                                     ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
 
                                 if (erEtteroppgjoer) {
-                                    // TODO egen tabell for avkortinggrunnlag_faktsik (og rename eksisterende...)
                                     val faktiskInntekt =
                                         queryOf(
                                             "SELECT * FROM avkortingsgrunnlag_faktisk WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
-import { ferdigstillVedtaksbrev } from '~shared/api/brev'
+import { ferdigstillBrevTilBehandling } from '~shared/api/brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { attesterVedtak } from '~shared/api/vedtaksvurdering'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -16,7 +16,7 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
   const [modalisOpen, setModalisOpen] = useState(false)
   const skalSendeBrev = behandling.sendeBrev
   const [error, setError] = useState<string>()
-  const [ferdigstillVedtaksbrevStatus, apiFerdigstillVedtaksbrev] = useApiCall(ferdigstillVedtaksbrev)
+  const [ferdigstillVedtaksbrevStatus, apiFerdigstillVedtaksbrev] = useApiCall(ferdigstillBrevTilBehandling)
   const [attesterVedtakStatus, apiAttesterVedtak] = useApiCall(attesterVedtak)
 
   const settVedtakTilAttestert = () => {

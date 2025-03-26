@@ -93,14 +93,14 @@ class BehandlingKlient(
             brukerTokenInfo = brukerTokenInfo,
         )
 
-    internal suspend fun hentVedtaksbehandlingKanRedigeres(
+    internal suspend fun hentBehandlingMedBrevKanRedigeres(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
         get(
-            url = "$resourceUrl/vedtaksbehandling/$behandlingId/redigerbar",
+            url = "$resourceUrl/behandling-med-brev/$behandlingId/redigerbar",
             onSuccess = { deserialize(it.response!!.toString()) },
-            errorMessage = { "Klarte ikke hente svar på om vedtaksbehandling med id=$behandlingId kan redigeres" },
+            errorMessage = { "Klarte ikke hente svar på om behandling med brev med id=$behandlingId kan redigeres" },
             brukerTokenInfo = brukerTokenInfo,
         )
 

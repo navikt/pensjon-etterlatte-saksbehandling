@@ -21,20 +21,21 @@ import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 /**
- * Behandling i denne konteksten er vedtaksbehandling, altså tilbakekreving, klage eller behandling
+ * Behandling i denne konteksten er en behandling med et strukturert brev, altså tilbakekreving, klage,
+ * forbehandling etteroppgjør, eller behandling
  */
 fun Route.brevRoute(service: BrevService) {
     val logger = LoggerFactory.getLogger("BrevRoute")
 
-    route("api/behandling/brev/{$BEHANDLINGID_CALL_PARAMETER}/vedtak") {
+    route("api/behandling/brev/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
-            logger.info("Henter vedtaksbrev for behandling (behandlingId=$behandlingId)")
+            logger.info("Henter strukturert brev for behandling (behandlingId=$behandlingId)")
 
             val brev =
                 measureTimedValue {
                     inTransaction {
                         runBlocking {
-                            service.hentVedtaksbrev(behandlingId, brukerTokenInfo)
+                            service.hentStrukturertBrev(behandlingId, brukerTokenInfo)
                         }
                     }
                 }.let { (brev, varighet) ->
@@ -51,11 +52,11 @@ fun Route.brevRoute(service: BrevService) {
             kunSkrivetilgang {
                 val brev =
                     inTransaction {
-                        logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
+                        logger.info("Oppretter strukturert brev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
 
                         measureTimedValue {
                             runBlocking {
-                                service.opprettVedtaksbrev(behandlingId, sakId, brukerTokenInfo)
+                                service.opprettStrukturertBrev(behandlingId, sakId, brukerTokenInfo)
                             }
                         }.let { (brev, varighet) ->
                             logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
@@ -74,7 +75,7 @@ fun Route.brevRoute(service: BrevService) {
                             krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
                                 "Kan ikke generere PDF uten brevId"
                             }
-                        logger.info("Genererer PDF for vedtaksbrev (id=$brevId)")
+                        logger.info("Genererer PDF for strukturert brev (id=$brevId)")
 
                         measureTimedValue {
                             runBlocking {
@@ -92,13 +93,13 @@ fun Route.brevRoute(service: BrevService) {
         post("ferdigstill") {
             kunSkrivetilgang {
                 inTransaction {
-                    logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
+                    logger.info("Ferdigstiller strukturert brev for behandling (id=$behandlingId)")
                     measureTimedValue {
                         runBlocking {
-                            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                            service.ferdigstillStrukturertBrev(behandlingId, brukerTokenInfo)
                         }
                     }.also { (_, varighet) ->
-                        logger.info("Ferdigstilling av vedtaksbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                        logger.info("Ferdigstilling av strukturert brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     }
                 }
                 call.respond(HttpStatusCode.OK)
@@ -118,11 +119,11 @@ fun Route.brevRoute(service: BrevService) {
                                 "Kan ikke tilbakestille PDF uten brevType"
                             }.let { Brevtype.valueOf(it) }
 
-                        logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
+                        logger.info("Tilbakestiller payload for strukturert brev (id=$brevId)")
 
                         measureTimedValue {
                             runBlocking {
-                                service.tilbakestillVedtaksbrev(brevId, behandlingId, sakId, brevType, brukerTokenInfo)
+                                service.tilbakestillStrukturertBrev(brevId, behandlingId, sakId, brevType, brukerTokenInfo)
                             }
                         }.let { (brevPayload, varighet) ->
                             logger.info(

@@ -28,7 +28,7 @@ import no.nav.etterlatte.behandling.sjekkliste.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
-import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
+import no.nav.etterlatte.behandling.vedtaksbehandling.behandlingMedBrevRoutes
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
@@ -200,7 +200,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         generellBehandlingService = applicationContext.generellBehandlingService,
         sakService = applicationContext.sakService,
     )
-    vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
+    behandlingMedBrevRoutes(behandlingMedBrevService = applicationContext.behandlingMedBrevService)
     revurderingRoutes(
         revurderingService = applicationContext.revurderingService,
         manuellRevurderingService = applicationContext.manuellRevurderingService,

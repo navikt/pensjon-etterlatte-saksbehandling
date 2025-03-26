@@ -16,7 +16,7 @@ class BehandlingService(
     suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+    ) = behandlingKlient.hentBehandlingMedBrevKanRedigeres(behandlingId, brukerTokenInfo)
 
     suspend fun hentBrevutfall(
         behandlingId: UUID,

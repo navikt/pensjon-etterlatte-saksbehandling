@@ -40,11 +40,13 @@ class SakTilgangDao(
                     "select id as sak_id, adressebeskyttelse, erSkjermet, enhet from sak where id =" +
                         " (select sak_id from behandling where id = ?::uuid" +
                         " union select sak_id from tilbakekreving where id = ?::uuid" +
-                        " union select sak_id from klage where id = ?::uuid)",
+                        " union select sak_id from klage where id = ?::uuid" +
+                        " union select sak_id from etteroppgjoer_behandling where id = ?::uuid)",
                 )
             statement.setString(1, behandlingId)
             statement.setString(2, behandlingId)
             statement.setString(3, behandlingId)
+            statement.setString(4, behandlingId)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }

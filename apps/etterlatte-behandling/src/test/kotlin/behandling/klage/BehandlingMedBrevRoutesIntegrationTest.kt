@@ -51,7 +51,7 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
+class BehandlingMedBrevRoutesIntegrationTest : BehandlingIntegrationTest() {
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
 
     @BeforeAll
@@ -91,7 +91,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             assertEquals(klage, hentetKlage)
 
             val response =
-                client.get("/vedtaksbehandling/${klage.id}/redigerbar") {
+                client.get("/behandling-med-brev/${klage.id}/redigerbar") {
                     addAuthToken(systemBruker)
                     contentType(ContentType.Application.Json)
                 }
@@ -114,7 +114,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
 
             val response =
-                client.get("/vedtaksbehandling/${behandling!!.id}/redigerbar") {
+                client.get("/behandling-med-brev/${behandling!!.id}/redigerbar") {
                     addAuthToken(systemBruker)
                     contentType(ContentType.Application.Json)
                 }
@@ -141,7 +141,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             )
         withTestApplication { client ->
             val response =
-                client.get("/vedtaksbehandling/${tilbakekreving.id}/redigerbar") {
+                client.get("/behandling-med-brev/${tilbakekreving.id}/redigerbar") {
                     addAuthToken(systemBruker)
                     contentType(ContentType.Application.Json)
                 }
@@ -160,7 +160,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
         withTestApplication { client ->
             val response =
-                client.get("/vedtaksbehandling/${UUID.randomUUID()}/redigerbar") {
+                client.get("/behandling-med-brev/${UUID.randomUUID()}/redigerbar") {
                     addAuthToken(tokenSaksbehandler)
                     contentType(ContentType.Application.Json)
                 }

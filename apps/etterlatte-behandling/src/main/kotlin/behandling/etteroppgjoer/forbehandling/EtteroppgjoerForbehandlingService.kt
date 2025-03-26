@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import io.ktor.server.plugins.NotFoundException
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
@@ -11,7 +12,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -37,50 +37,47 @@ class EtteroppgjoerForbehandlingService(
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
 ) {
-    suspend fun hentForbehandling(
+    fun hentForbehandling(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ): ForbehandlingDto {
-        val forbehandling =
-            inTransaction { dao.hentForbehandling(behandlingId) } ?: throw FantIkkeForbehandling(behandlingId)
+        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
-            inTransaction {
-                behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                    ?: throw InternfeilException("Fant ikke siste iverksatte")
-            }
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatte")
 
         val avkorting =
-            beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                EtteroppgjoerBeregnetAvkortingRequest(
-                    forbehandling = behandlingId,
-                    sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                    aar = forbehandling.aar,
-                ),
-                brukerTokenInfo,
-            )
-
-        return inTransaction {
-            val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
-            val aInntekt = dao.hentAInntekt(behandlingId)
-
-            if (pensjonsgivendeInntekt == null || aInntekt == null) {
-                throw InternfeilException(
-                    "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
+            runBlocking {
+                beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                    EtteroppgjoerBeregnetAvkortingRequest(
+                        forbehandling = behandlingId,
+                        sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                        aar = forbehandling.aar,
+                    ),
+                    brukerTokenInfo,
                 )
             }
 
-            ForbehandlingDto(
-                behandling = forbehandling,
-                opplysninger =
-                    EtteroppgjoerOpplysninger(
-                        skatt = pensjonsgivendeInntekt,
-                        ainntekt = aInntekt,
-                        tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
-                    ),
-                avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
+        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
+        val aInntekt = dao.hentAInntekt(behandlingId)
+
+        if (pensjonsgivendeInntekt == null || aInntekt == null) {
+            throw InternfeilException(
+                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
             )
         }
+
+        return ForbehandlingDto(
+            behandling = forbehandling,
+            opplysninger =
+                EtteroppgjoerOpplysninger(
+                    skatt = pensjonsgivendeInntekt,
+                    ainntekt = aInntekt,
+                    tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
+                ),
+            avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
+        )
     }
 
     fun lagreBrevreferanse(
@@ -91,81 +88,75 @@ class EtteroppgjoerForbehandlingService(
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
 
-    suspend fun opprettEtteroppgjoer(
+    fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
     ): EtteroppgjoerOgOppgave {
-        val sak =
-            inTransaction {
-                sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
-            }
+        val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
 
-        val pensjonsgivendeInntekt = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar)
-        val aInntekt = inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar)
+        val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
+        val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
 
-        return inTransaction {
-            val nyForbehandling =
-                EtteroppgjoerForbehandling(
-                    id = UUID.randomUUID(),
-                    hendelseId = UUID.randomUUID(),
-                    sak = sak,
-                    status = "opprettet",
-                    aar = inntektsaar,
-                    opprettet = Tidspunkt.now(),
-                    brevId = null,
-                )
-
-            val oppgave =
-                oppgaveService.opprettOppgave(
-                    referanse = nyForbehandling.id.toString(),
-                    sakId = sakId,
-                    kilde = OppgaveKilde.BEHANDLING,
-                    type = OppgaveType.ETTEROPPGJOER,
-                    merknad = null,
-                    frist = null,
-                    saksbehandler = null,
-                    gruppeId = null,
-                )
-
-            dao.lagreForbehandling(nyForbehandling)
-            dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
-            dao.lagreAInntekt(aInntekt, nyForbehandling.id)
-
-            etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
-
-            EtteroppgjoerOgOppgave(
-                etteroppgjoerBehandling = nyForbehandling,
-                oppgave = oppgave,
+        val nyForbehandling =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                sak = sak,
+                status = "opprettet",
+                aar = inntektsaar,
+                opprettet = Tidspunkt.now(),
+                brevId = null,
             )
-        }
+
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                referanse = nyForbehandling.id.toString(),
+                sakId = sakId,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = null,
+                frist = null,
+                saksbehandler = null,
+                gruppeId = null,
+            )
+
+        dao.lagreForbehandling(nyForbehandling)
+        dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
+        dao.lagreAInntekt(aInntekt, nyForbehandling.id)
+
+        etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+
+        return EtteroppgjoerOgOppgave(
+            etteroppgjoerBehandling = nyForbehandling,
+            oppgave = oppgave,
+        )
     }
 
-    suspend fun beregnFaktiskInntekt(
+    fun beregnFaktiskInntekt(
         behandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatte")
+
         val request =
-            inTransaction {
-                val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+            EtteroppgjoerBeregnFaktiskInntektRequest(
+                sakId = forbehandling.sak.id,
+                forbehandlingId = forbehandling.id,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                fraOgMed = YearMonth.of(2024, 1), // TODO utled rikig fom
+                tilOgMed = YearMonth.of(2024, 12), // TODO utled rikig tom
+                loennsinntekt = request.loennsinntekt,
+                naeringsinntekt = request.naeringsinntekt,
+                afp = request.afp,
+                utland = request.utland,
+            )
 
-                val sisteIverksatteBehandling =
-                    behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                        ?: throw InternfeilException("Fant ikke siste iverksatte")
-
-                EtteroppgjoerBeregnFaktiskInntektRequest(
-                    sakId = forbehandling.sak.id,
-                    forbehandlingId = forbehandling.id,
-                    sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                    fraOgMed = YearMonth.of(2024, 1), // TODO utled rikig fom
-                    tilOgMed = YearMonth.of(2024, 12), // TODO utled rikig tom
-                    loennsinntekt = request.loennsinntekt,
-                    naeringsinntekt = request.naeringsinntekt,
-                    afp = request.afp,
-                    utland = request.utland,
-                )
-            }
-        beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo)
+        runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 }
 

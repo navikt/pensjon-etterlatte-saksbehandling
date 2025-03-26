@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 
-class EtteroppgjoerBeregningTest {
+class EtteroppgjoerBeregningResultatTest {
     private val regelPeriode = RegelPeriode(LocalDate.of(2024, 1, 1))
 
 //    @Test

@@ -28,13 +28,15 @@ class EtteroppgjoerService(
     private val avkortingRepository: AvkortingRepository,
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
+    private val etteroppgjoerRepository: EtteroppgjoerRepository,
 ) {
     fun beregnOgLagreEtteroppgjoerResultat(request: EtteroppgjoerBeregnetAvkortingRequest): BeregnetEtteroppgjoerResultat {
-        val resultat = beregnEtteroppgjoerResultat(request.aar, request.forbehandling, request.sisteIverksatteBehandling)
+        val (forbehandlingId, sisteIverksatteBehandling, aar) = request
+        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandling)
 
-        // TODO: lagre resultat
+        etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
 
-        return resultat
+        return etteroppgjoerResultat
     }
 
     fun hentBeregnetAvkorting(request: EtteroppgjoerBeregnetAvkortingRequest): EtteroppgjoerBeregnetAvkorting {
@@ -112,22 +114,24 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
     ): BeregnetEtteroppgjoerResultat {
-        // Etteroppgjøret kjøres året etter det året vi utfører etteroppgjøret for.
         // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer,
         // setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
-        val kjoeringAar = aar + 1
+        val kjoeringAar = aar + 1 // Etteroppgjøret kjøres året etter det året vi utfører etteroppgjøret for.
         val regelPeriode = RegelPeriode(LocalDate.of(kjoeringAar, 1, 1), LocalDate.of(kjoeringAar, 12, 31))
 
-        val sisteAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, sisteIverksatteBehandlingId)
-        val nyAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, forbehandlingId)
+        val sisteIverksatteAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, sisteIverksatteBehandlingId)
+        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, forbehandlingId)
 
-        val grunnlag =
+        val differanseGrunnlag =
             EtteroppgjoerDifferanseGrunnlag(
-                FaktumNode(sisteAvkorting, sisteIverksatteBehandlingId, ""),
-                FaktumNode(nyAvkorting, forbehandlingId, ""),
+                FaktumNode(sisteIverksatteAvkorting, sisteIverksatteBehandlingId, ""),
+                FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
             )
 
-        return when (val beregningResultat = beregneEtteroppgjoerRegel.eksekver(KonstantGrunnlag(grunnlag), regelPeriode)) {
+        return when (
+            val beregningResultat =
+                beregneEtteroppgjoerRegel.eksekver(KonstantGrunnlag(differanseGrunnlag), regelPeriode)
+        ) {
             is RegelkjoeringResultat.Suksess -> {
                 val data =
                     beregningResultat.periodiserteResultater
@@ -135,11 +139,14 @@ class EtteroppgjoerService(
                         .resultat.verdi
 
                 BeregnetEtteroppgjoerResultat(
+                    id = UUID.randomUUID(),
+                    forbehandlingId = forbehandlingId,
+                    sisteIverksatteBehandlingId = sisteIverksatteBehandlingId,
                     utbetaltStoenad = data.differanse.utbetaltStoenad,
                     nyBruttoStoenad = data.differanse.nyBruttoStoenad,
                     differanse = data.differanse.differanse,
                     grense = data.grense,
-                    resultat = data.resultatType,
+                    resultatType = data.resultatType,
                     tidspunkt = data.tidspunkt,
                     regelResultat = beregningResultat.toJsonNode(),
                     kilde =
@@ -150,9 +157,10 @@ class EtteroppgjoerService(
                         ),
                     referanseAvkorting =
                         ReferanseEtteroppgjoer(
-                            avkortingForbehandling = nyAvkorting.id,
-                            avkortingSisteIverksatte = sisteAvkorting.id,
+                            avkortingForbehandling = nyForbehandlingAvkorting.id,
+                            avkortingSisteIverksatte = sisteIverksatteAvkorting.id,
                         ),
+                    aar = aar,
                 )
             }
 
@@ -189,11 +197,15 @@ class EtteroppgjoerService(
 }
 
 data class BeregnetEtteroppgjoerResultat(
+    val id: UUID,
+    val aar: Int,
+    val forbehandlingId: UUID,
+    val sisteIverksatteBehandlingId: UUID,
     val utbetaltStoenad: Long,
     val nyBruttoStoenad: Long,
     val differanse: Long,
     val grense: EtteroppgjoerGrense,
-    val resultat: EtteroppgjoerResultatType,
+    val resultatType: EtteroppgjoerResultatType,
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode?,
     val kilde: Grunnlagsopplysning.Kilde,

@@ -10,7 +10,10 @@ import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -169,6 +172,82 @@ internal class AvkortingRepositoryTest(
         alle[1].aar shouldBe 2025
     }
 
+    @Test
+    fun `Skal lagre og oppdatere avkorting med etteroppgjoer`() {
+        val behandlingId: UUID = UUID.randomUUID()
+        val etteroppgjoer = nyAvkortingEtteroppgjoer(2024)
+        val sakId = randomSakId()
+
+        avkortingRepository.lagreAvkorting(
+            behandlingId,
+            sakId,
+            Avkorting(
+                aarsoppgjoer = listOf(etteroppgjoer),
+            ),
+        )
+
+        val endretEtteroppgjoer =
+            etteroppgjoer.copy(
+                ytelseFoerAvkorting = etteroppgjoer.ytelseFoerAvkorting.map { it.copy(beregning = 333) },
+                inntekt =
+                    etteroppgjoer.inntekt.copy(
+                        loennsinntekt = 170000,
+                    ),
+                avkortingsperioder = etteroppgjoer.avkortingsperioder.map { it.copy(avkorting = 333) },
+                avkortetYtelse = etteroppgjoer.avkortetYtelse.map { it.copy(avkortingsbeloep = 444) },
+            )
+
+        val nyttArsoppgjoer = nyAvkorting(2025)
+
+        avkortingRepository.lagreAvkorting(
+            behandlingId,
+            sakId,
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        endretEtteroppgjoer,
+                        nyttArsoppgjoer,
+                    ),
+            ),
+        )
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId)
+
+        with(avkorting!!.aarsoppgjoer[0] as Etteroppgjoer) {
+            aar shouldBe 2024
+            ytelseFoerAvkorting.asClue {
+                it.size shouldBe 1
+                it shouldBe endretEtteroppgjoer.ytelseFoerAvkorting
+            }
+            inntekt shouldBe endretEtteroppgjoer.inntekt
+            avkortingsperioder shouldBe endretEtteroppgjoer.avkortingsperioder
+            avkortetYtelse.asClue {
+                it.size shouldBe 2
+                it shouldBe endretEtteroppgjoer.avkortetYtelse
+            }
+        }
+
+        with(avkorting.aarsoppgjoer[1] as AarsoppgjoerLoepende) {
+            aar shouldBe 2025
+            ytelseFoerAvkorting.asClue {
+                it.size shouldBe 1
+                it shouldBe nyttArsoppgjoer.ytelseFoerAvkorting
+            }
+            inntektsavkorting.asClue {
+                it.size shouldBe 2
+                it[0].asClue { avkorting ->
+                    avkorting.grunnlag shouldBe nyttArsoppgjoer.inntektsavkorting.first().grunnlag
+                    avkorting.avkortingsperioder shouldBe nyttArsoppgjoer.inntektsavkorting.first().avkortingsperioder
+                    avkorting.avkortetYtelseForventetInntekt shouldBe
+                        nyttArsoppgjoer.inntektsavkorting.first().avkortetYtelseForventetInntekt
+                }
+            }
+            avkortetYtelse.asClue {
+                it.size shouldBe 2
+                it shouldBe nyttArsoppgjoer.avkortetYtelse
+            }
+        }
+    }
+
     private fun nyAvkorting(
         aar: Int,
         forventaInnvilgaMaaneder: Int = 12,
@@ -253,6 +332,72 @@ internal class AvkortingRepositoryTest(
                     avkortetYtelse(
                         type = AvkortetYtelseType.AARSOPPGJOER,
                         periode = Periode(fom = YearMonth.of(aar, 4), tom = null),
+                    ),
+                ),
+        )
+    }
+
+    private fun nyAvkortingEtteroppgjoer(
+        aar: Int,
+        forventaInnvilgaMaaneder: Int = 12,
+    ): Etteroppgjoer {
+        val inntekt =
+            FaktiskInntekt(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = YearMonth.of(aar, 1), tom = YearMonth.of(aar, 12)),
+                innvilgaMaaneder = forventaInnvilgaMaaneder,
+                loennsinntekt = 100000,
+                naeringsinntekt = 30000,
+                afp = 10000,
+                utlandsinntekt = 10000,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("lok"),
+                inntektInnvilgetPeriode =
+                    BenyttetInntektInnvilgetPeriode(
+                        verdi = 150000,
+                        tidspunkt = Tidspunkt.now(),
+                        regelResultat = "".toJsonNode(),
+                        kilde =
+                            Grunnlagsopplysning.RegelKilde(
+                                navn = "",
+                                ts = Tidspunkt.now(),
+                                versjon = "",
+                            ),
+                    ),
+            )
+
+        return Etteroppgjoer(
+            id = UUID.randomUUID(),
+            aar = aar,
+            fom = YearMonth.of(aar, 12),
+            ytelseFoerAvkorting =
+                listOf(
+                    ytelseFoerAvkorting(
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(aar, 1),
+                                tom = null,
+                            ),
+                    ),
+                ),
+            inntekt = inntekt,
+            avkortingsperioder =
+                listOf(
+                    avkortingsperiode(
+                        inntektsgrunnlag = inntekt.id,
+                        fom = YearMonth.of(aar, 1),
+                    ),
+                ),
+            avkortetYtelse =
+                listOf(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.ETTEROPPGJOER,
+                        periode = Periode(fom = YearMonth.of(aar, 1), tom = YearMonth.of(aar, 3)),
+                        restanse = null,
+                    ),
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.ETTEROPPGJOER,
+                        periode = Periode(fom = YearMonth.of(aar, 4), tom = null),
+                        restanse = null,
                     ),
                 ),
         )

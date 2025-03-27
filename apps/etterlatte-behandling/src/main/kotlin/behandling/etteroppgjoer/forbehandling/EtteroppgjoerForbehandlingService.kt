@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -114,13 +115,13 @@ class EtteroppgjoerForbehandlingService(
                                 if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
                                     virkOgOpphoer.foersteVirk
                                 } else {
-                                    YearMonth.of(inntektsaar, 1)
+                                    YearMonth.of(inntektsaar, Month.JANUARY)
                                 },
                             tom =
                                 if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
                                     virkOgOpphoer.opphoer
                                 } else {
-                                    YearMonth.of(inntektsaar, 12)
+                                    YearMonth.of(inntektsaar, Month.DECEMBER)
                                 },
                         ),
                     opprettet = Tidspunkt.now(),

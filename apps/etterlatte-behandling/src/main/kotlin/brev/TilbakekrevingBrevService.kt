@@ -146,12 +146,13 @@ class TilbakekrevingBrevService(
                 attestantIdent = attestantIdent,
                 skalLagre = skalLagres,
                 // TODO kun nødvendig ved foråhdsvisning/ferdigstilling?
-                brevInnholdData =
+                brevFastInnholdData =
                     utledBrevInnholdData(
                         sakType = sak.sakType,
                         soeker = soeker,
                         vedtak = vedtak,
                     ),
+                brevRedigerbarInnholdData = null,
             )
         }
 }

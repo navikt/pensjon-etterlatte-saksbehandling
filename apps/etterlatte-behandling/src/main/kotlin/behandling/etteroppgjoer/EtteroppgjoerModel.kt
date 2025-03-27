@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -171,9 +172,17 @@ data class SkatteoppgjoerHendelser(
     val somAktoerid: Boolean,
 )
 
+data class EtteroppgjoerBrevRequestData(
+    val redigerbar: BrevDataRedigerbar,
+    val innhold: EtteroppgjoerBrevData,
+)
+
 object EtteroppgjoerBrevMapper {
     // TODO: mappe til riktige brevvarianter avhengig av data i forbehandlingen
     //  Kanskje også vurdere å ikke sende inn dto etc.
-    fun fra(forbehandlingDto: ForbehandlingDto): EtteroppgjoerBrevData =
-        EtteroppgjoerBrevData.VarselTilbakekreving(forbehandlingDto.behandling.sak)
+    fun fra(forbehandlingDto: ForbehandlingDto): EtteroppgjoerBrevRequestData =
+        EtteroppgjoerBrevRequestData(
+            redigerbar = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold(forbehandlingDto.behandling.sak),
+            innhold = EtteroppgjoerBrevData.VarselTilbakekreving(forbehandlingDto.behandling.sak),
+        )
 }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevMapper
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
@@ -33,14 +34,16 @@ class EtteroppgjoerBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
         val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, forbehandlingId)
+        val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    forbehandling.behandling.sak,
-                    EtteroppgjoerBrevMapper.fra(forbehandling),
-                    false,
-                    brukerTokenInfo,
+                    sak = forbehandling.behandling.sak,
+                    brevInnholdData = brevData.innhold,
+                    brevRedigerbarInnholdData = brevData.redigerbar,
+                    skalLagres = false,
+                    brukerTokenInfo = brukerTokenInfo,
                 )
             }
 
@@ -60,14 +63,16 @@ class EtteroppgjoerBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, forbehandlingId)
+        val (redigerbartInnhold, brevInnhold) = EtteroppgjoerBrevMapper.fra(forbehandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
                     sak = forbehandling.behandling.sak,
-                    brevInnholdData = EtteroppgjoerBrevMapper.fra(forbehandling),
+                    brevInnholdData = brevInnhold,
                     skalLagres = false,
                     brukerTokenInfo = brukerTokenInfo,
+                    brevRedigerbarInnholdData = redigerbartInnhold,
                 )
             }
         return brevKlient.tilbakestillStrukturertBrev(
@@ -81,6 +86,7 @@ class EtteroppgjoerBrevService(
     private suspend fun utledBrevRequest(
         sak: Sak,
         brevInnholdData: EtteroppgjoerBrevData,
+        brevRedigerbarInnholdData: BrevDataRedigerbar,
         skalLagres: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevRequest =
@@ -104,7 +110,8 @@ class EtteroppgjoerBrevService(
                 saksbehandlerIdent = innloggetSaksbehandlerIdent,
                 attestantIdent = null,
                 skalLagre = skalLagres,
-                brevInnholdData = brevInnholdData,
+                brevFastInnholdData = brevInnholdData,
+                brevRedigerbarInnholdData = brevRedigerbarInnholdData,
             )
         }
 
@@ -115,7 +122,7 @@ class EtteroppgjoerBrevService(
         val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, behandlingId)
         val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
 
-        brevKlient.ferdigstillStrukturertBrev(behandlingId, brevData.brevKode.brevtype, brukerTokenInfo)
+        brevKlient.ferdigstillStrukturertBrev(behandlingId, brevData.innhold.brevKode.brevtype, brukerTokenInfo)
     }
 
     suspend fun genererPdf(
@@ -129,7 +136,8 @@ class EtteroppgjoerBrevService(
             retryOgPakkUt {
                 utledBrevRequest(
                     sak = forbehandling.behandling.sak,
-                    brevInnholdData = brevData,
+                    brevInnholdData = brevData.innhold,
+                    brevRedigerbarInnholdData = brevData.redigerbar,
                     skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
                     brukerTokenInfo = bruker,
                 )

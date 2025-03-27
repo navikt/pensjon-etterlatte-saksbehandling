@@ -40,12 +40,8 @@ data class ManueltBrevMedTittelData(
 
 data class BrevDataFerdigstillingNy(
     override val innhold: List<Slate.Element>,
-    val data: BrevInnholdData,
+    val data: BrevFastInnholdData,
 ) : BrevDataFerdigstilling
-
-data class BrevDataRedigerbarNy(
-    val brevInnholdData: BrevInnholdData,
-) : BrevData
 
 data class BrevRequest(
     val spraak: Spraak, // TODO ?
@@ -57,15 +53,25 @@ data class BrevRequest(
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val skalLagre: Boolean,
-    val brevInnholdData: BrevInnholdData,
+    val brevFastInnholdData: BrevFastInnholdData,
+    val brevRedigerbarInnholdData: BrevDataRedigerbar?,
 )
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
-    JsonSubTypes.Type(value = EtteroppgjoerBrevData::class, name = "ETTEROPPGJOER"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VarselTilbakekreving::class, name = "EO_VARSEL_TILBAKEKREVING"),
 )
-abstract class BrevInnholdData {
+abstract class BrevFastInnholdData {
+    abstract val brevKode: Brevkoder
+    abstract val type: String
+}
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold::class, name = "EO_VARSEL_TILBAKEKREVING_REDIGERBAR"),
+)
+abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder
     abstract val type: String
 }

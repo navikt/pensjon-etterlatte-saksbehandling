@@ -55,7 +55,7 @@ class StrukturertBrevService(
         bruker: BrukerTokenInfo,
         brevRequest: BrevRequest,
     ): Brev {
-        val typeForBrev = brevRequest.brevInnholdData.brevKode.brevtype
+        val typeForBrev = brevRequest.brevFastInnholdData.brevKode.brevtype
         krev(hentBrevAvTypeForBehandling(behandlingId, typeForBrev) == null) {
             "Strukturert brev av type $typeForBrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
@@ -64,13 +64,13 @@ class StrukturertBrevService(
 
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
 
-        val brevKode = brevRequest.brevInnholdData.brevKode
+        val brevKode = brevRequest.brevFastInnholdData.brevKode
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
                 BrevbakerRequest.fra(
                     brevKode = brevKode.redigering,
-                    brevData = ManueltBrevData(),
+                    brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
                     avsender = avsender,
                     soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
                     sakId = sak.id,
@@ -195,7 +195,7 @@ class StrukturertBrevService(
                 brevbaker.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(
                         brevKode = brevKode.redigering,
-                        brevData = ManueltBrevData(),
+                        brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
                         avsender = avsender,
                         soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
                         sakId = sak.id,
@@ -247,7 +247,7 @@ class StrukturertBrevService(
 
         return BrevDataFerdigstillingNy(
             innhold = innholdMedVedlegg.innhold(),
-            data = brevRequest.brevInnholdData,
+            data = brevRequest.brevFastInnholdData,
         )
     }
 
@@ -278,7 +278,7 @@ class StrukturertBrevService(
     ): Pdf {
         val brevbakerRequest =
             BrevbakerRequest.fra(
-                brevKode = brevRequest.brevInnholdData.brevKode.ferdigstilling,
+                brevKode = brevRequest.brevFastInnholdData.brevKode.ferdigstilling,
                 brevData = brevInnholdData,
                 avsender = avsender,
                 soekerOgEventuellVerge = SoekerOgEventuellVerge(brevRequest.soeker, brevRequest.verge),

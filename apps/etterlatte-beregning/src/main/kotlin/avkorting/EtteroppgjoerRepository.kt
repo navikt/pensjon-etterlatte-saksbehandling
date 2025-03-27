@@ -5,6 +5,7 @@ import kotliquery.Row
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
@@ -47,7 +48,7 @@ class EtteroppgjoerRepository(
                         "grense" to resultat.grense.toJson(),
                         "resultat_type" to resultat.resultatType.name,
                         "tidspunkt" to resultat.tidspunkt.toTimestamp(),
-                        "regel_resultat" to resultat.regelResultat,
+                        "regel_resultat" to resultat.regelResultat.toJson(),
                         "kilde" to resultat.kilde.toJson(),
                         "referanse_avkorting_sist_iverksatte" to resultat.referanseAvkorting.avkortingSisteIverksatte,
                         "referanse_avkorting_forbehandling" to resultat.referanseAvkorting.avkortingForbehandling,
@@ -95,11 +96,11 @@ class EtteroppgjoerRepository(
             utbetaltStoenad = long("utbetalt_stoenad"),
             nyBruttoStoenad = long("ny_brutto_stoenad"),
             differanse = long("differanse"),
-            grense = objectMapper.readValue(string("grense")),
+            grense = objectMapper.readValue(this.string("grense")),
             resultatType = EtteroppgjoerResultatType.valueOf(string("resultat_type")),
-            tidspunkt = objectMapper.readValue(string("tidspunkt")),
-            regelResultat = objectMapper.readValue(string("regel_resultat")),
-            kilde = objectMapper.readValue(string("kilde")),
+            tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
+            regelResultat = objectMapper.readValue(this.string("regel_resultat")),
+            kilde = objectMapper.readValue(this.string("kilde")),
             referanseAvkorting =
                 ReferanseEtteroppgjoer(
                     avkortingForbehandling = uuid("referanse_avkorting_forbehandling"),

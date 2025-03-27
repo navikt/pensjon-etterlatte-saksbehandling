@@ -207,7 +207,7 @@ data class BeregnetEtteroppgjoerResultat(
     val grense: EtteroppgjoerGrense,
     val resultatType: EtteroppgjoerResultatType,
     val tidspunkt: Tidspunkt,
-    val regelResultat: JsonNode?,
+    val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.Kilde,
     val referanseAvkorting: ReferanseEtteroppgjoer,
 )

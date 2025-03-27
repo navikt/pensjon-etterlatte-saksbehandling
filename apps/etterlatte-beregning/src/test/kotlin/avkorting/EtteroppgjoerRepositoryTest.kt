@@ -11,6 +11,7 @@ import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -65,7 +66,7 @@ internal class EtteroppgjoerRepositoryTest(
                 ),
             resultatType = EtteroppgjoerResultatType.TILBAKREVING,
             tidspunkt = Tidspunkt.now(),
-            regelResultat = null,
+            regelResultat = mapOf("regel" to "resultat").toObjectNode(),
             kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
             referanseAvkorting =
                 ReferanseEtteroppgjoer(

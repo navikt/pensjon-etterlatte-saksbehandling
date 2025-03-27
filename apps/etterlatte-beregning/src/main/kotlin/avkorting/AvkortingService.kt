@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -8,6 +9,7 @@ import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
@@ -15,6 +17,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -63,6 +66,7 @@ class AvkortingService(
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
                 kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
+
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
             val reberegnetAvkorting =
@@ -178,11 +182,48 @@ class AvkortingService(
     ): Avkorting {
         val opphoerFraOgMed = behandling.opphoerFraOgMed
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
-        return reberegnOgLagreAvkorting(
-            behandling,
-            kopiertAvkorting,
-            brukerTokenInfo,
-        )
+
+        return if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+            reberegnOgLagreAvkorting(
+                behandling = behandling,
+                avkorting =
+                    avkortingMedOppdatertAarsoppgjoerFraForbehandling(
+                        behandling.sak,
+                        behandling.virkningstidspunkt().dato,
+                        kopiertAvkorting,
+                        brukerTokenInfo,
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            )
+        } else {
+            reberegnOgLagreAvkorting(
+                behandling = behandling,
+                avkorting = kopiertAvkorting,
+                brukerTokenInfo = brukerTokenInfo,
+            )
+        }
+    }
+
+    private fun avkortingMedOppdatertAarsoppgjoerFraForbehandling(
+        sakId: SakId,
+        virkningstidspunkt: YearMonth,
+        kopiertAvkorting: Avkorting,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Avkorting {
+        val aarHvorAvkortingSkalErstattes = virkningstidspunkt.year // TODO er dette greit for å hente år?
+        val forbehandling =
+            runBlocking { behandlingKlient.hentSisteFerdigstiltForbehandlingForAar(sakId, aarHvorAvkortingSkalErstattes, brukerTokenInfo) }
+        val avkortingFraForbehandling =
+            avkortingRepository.hentAvkorting(forbehandling.id)
+                ?: throw InternfeilException("Mangler avkorting fra etteroppgjør forbehandling")
+        val kopiertAarsoppgjoerFraForbehandling = avkortingFraForbehandling.kopierAvkorting().aarsoppgjoer.single()
+        val avkortingMedErstattetAarsoppgjoer = kopiertAvkorting.erstattAarsoppgjoer(kopiertAarsoppgjoerFraForbehandling)
+
+        if (kopiertAvkorting.aarsoppgjoer == avkortingMedErstattetAarsoppgjoer.aarsoppgjoer) {
+            throw InternfeilException("Årsoppgjør ble ikke oppdatert med årsoppgjør fra etteroppgjør forbehandling")
+        }
+
+        return avkortingMedErstattetAarsoppgjoer
     }
 
     private suspend fun reberegnOgLagreAvkorting(

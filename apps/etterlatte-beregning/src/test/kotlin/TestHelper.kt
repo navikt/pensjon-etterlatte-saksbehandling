@@ -8,6 +8,7 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.BenyttetInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.Etteroppgjoer
+import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.ForventetInntekt
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
@@ -218,6 +220,41 @@ fun aarsoppgjoer(
     avkortetYtelse = avkortetYtelse,
 )
 
+fun etteroppgjoer(
+    aar: Int = 2024,
+    fom: YearMonth = YearMonth.of(aar, 1),
+    faktiskInntekt: FaktiskInntekt =
+        FaktiskInntekt(
+            id = UUID.randomUUID(),
+            periode =
+                Periode(
+                    fom = fom,
+                    tom = fom.plusMonths(11),
+                ),
+            innvilgaMaaneder = 12,
+            loennsinntekt = 100000,
+            naeringsinntekt = 10000,
+            afp = 10000,
+            utlandsinntekt = 10000,
+            kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+            inntektInnvilgetPeriode =
+                BenyttetInntektInnvilgetPeriode(
+                    verdi = 130000,
+                    tidspunkt = Tidspunkt.now(),
+                    regelResultat = "".toJsonNode(),
+                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
+                ),
+        ),
+    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
+) = Etteroppgjoer(
+    id = UUID.randomUUID(),
+    aar = aar,
+    fom = fom,
+    inntekt = faktiskInntekt,
+    avkortetYtelse = avkortetYtelse,
+    avkortingsperioder = emptyList(),
+)
+
 fun Aarsoppgjoer.inntektsavkorting(): List<Inntektsavkorting> =
     when (this) {
         is AarsoppgjoerLoepende -> this.inntektsavkorting
@@ -349,6 +386,7 @@ fun behandling(
     sak: SakId = STANDARDSAK,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    revurderingaarsak: Revurderingaarsak? = null,
     virkningstidspunkt: Virkningstidspunkt? = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
     opphoerFraOgMed: YearMonth? = null,
@@ -360,7 +398,7 @@ fun behandling(
     status = status,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
-    revurderingsaarsak = null,
+    revurderingsaarsak = revurderingaarsak,
     prosesstype = Prosesstype.MANUELL,
     boddEllerArbeidetUtlandet = null,
     utlandstilknytning = null,

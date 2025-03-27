@@ -70,7 +70,7 @@ class EtteroppgjoerBeregningResultatTest {
             restanse = null,
             avkortingsbeloep = 0,
             ytelseFoerAvkorting = 0,
-            type = AvkortetYtelseType.ETTEROPPJOER,
+            type = AvkortetYtelseType.ETTEROPPGJOER,
             inntektsgrunnlag = null,
         )
 }

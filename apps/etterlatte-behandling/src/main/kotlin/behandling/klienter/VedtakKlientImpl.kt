@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 interface VedtakKlient {
@@ -87,6 +89,11 @@ interface VedtakKlient {
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<SakId>
+
+    suspend fun hentFoersteVirkOgOppoerTilSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FoersteVirkOgOppoerTilSak
 }
 
 class VedtakKlientException(
@@ -424,5 +431,16 @@ class VedtakKlientImpl(
                 e,
             )
         }
+    }
+
+    override suspend fun hentFoersteVirkOgOppoerTilSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FoersteVirkOgOppoerTilSak {
+        // TODO
+        return FoersteVirkOgOppoerTilSak(
+            foersteVirk = YearMonth.of(2024, 1),
+            opphoer = YearMonth.of(2024, 12),
+        )
     }
 }

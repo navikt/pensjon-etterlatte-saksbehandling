@@ -38,6 +38,13 @@ enum class SakUtland {
                 UtlandstilknytningType.BOSATT_UTLAND -> BOSATT_UTLAND
                 UtlandstilknytningType.UTLANDSTILSNITT -> UTLANDSTILSNITT
             }
+
+        fun fraEnhetsnummer(enhetsnummer: Enhetsnummer): SakUtland =
+            when (enhetsnummer.enhetNr) {
+                "0001" -> BOSATT_UTLAND
+                "4862" -> UTLANDSTILSNITT
+                else -> NASJONAL
+            }
     }
 }
 
@@ -74,6 +81,7 @@ data class SakRad(
     val ansvarligEnhet: Enhetsnummer?,
     val soeknadFormat: SoeknadFormat?,
     val sakUtland: SakUtland?,
+    val sakUtlandEnhet: SakUtland,
     val behandlingMetode: BehandlingMetode?,
     val opprettetAv: String?,
     val ansvarligBeslutter: String?,

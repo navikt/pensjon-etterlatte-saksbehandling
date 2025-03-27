@@ -12,6 +12,10 @@ export interface EtteroppgjoerBehandling {
   status: string
   sak: ISak
   aar: number
+  innvilgetPeriode: {
+    fom: string
+    tom: string
+  }
   opprettet: string // Mottatt?
 }
 

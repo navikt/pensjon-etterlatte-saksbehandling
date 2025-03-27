@@ -7,6 +7,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { maanedNavn } from '~utils/formatering/dato'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -31,6 +33,7 @@ interface FastsettFaktiskInntektSkjema {
 
 export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: string }) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
+  const behandling = useEtteroppgjoer().behandling
 
   const { control, watch, handleSubmit } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: {
@@ -56,7 +59,9 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
           {/* TODO: skal denne være dynamisk? Eller er den alltid "april - desember"? */}
-          <Tag variant="neutral">April - Desember</Tag>
+          <Tag variant="neutral">
+            {maanedNavn(behandling.innvilgetPeriode.fom)} - {maanedNavn(behandling.innvilgetPeriode.tom)}
+          </Tag>
         </HStack>
 
         <VStack gap="4" width="fit-content">

@@ -90,7 +90,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
                             grunnlag =
                                 avkortinggrunnlag(
                                     periode = Periode(fom = YearMonth.of(2024, 2), tom = YearMonth.of(2024, 3)),
-                                    aarsinntekt = 300000,
+                                    inntektTom = 300000,
                                     fratrekkInnAar = 25000,
                                 ),
                         ),
@@ -98,7 +98,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
                             grunnlag =
                                 avkortinggrunnlag(
                                     periode = Periode(fom = YearMonth.of(2024, 4), tom = null),
-                                    aarsinntekt = 350000,
+                                    inntektTom = 350000,
                                     fratrekkInnAar = 25000,
                                 ),
                         ),

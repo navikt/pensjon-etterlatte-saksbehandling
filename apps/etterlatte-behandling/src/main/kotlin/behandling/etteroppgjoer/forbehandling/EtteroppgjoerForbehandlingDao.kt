@@ -7,8 +7,10 @@ import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -17,7 +19,9 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import java.sql.Date
 import java.sql.ResultSet
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingDao(
@@ -29,7 +33,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.id = ?
                         """.trimIndent(),
@@ -46,9 +50,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet
+                            id, status, sak_id, opprettet, aar, fom, tom
                         ) 
-                        VALUES (?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status
                         """.trimIndent(),
@@ -57,6 +61,15 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(2, forbehandling.status)
                 statement.setSakId(3, forbehandling.sak.id)
                 statement.setTidspunkt(4, forbehandling.opprettet)
+                statement.setInt(5, forbehandling.aar)
+                statement.setDate(6, Date.valueOf(forbehandling.innvilgetPeriode.fom.atDay(1)))
+                statement.setDate(
+                    7,
+                    Date.valueOf(
+                        forbehandling.innvilgetPeriode.tom?.atEndOfMonth()
+                            ?: throw InternfeilException("Etteroppgjoer forbehandling mangler periode"),
+                    ),
+                )
                 statement.executeUpdate().also {
                     krev(it == 1) {
                         "Kunne ikke lagre forbehandling etteroppgjør for sakId=${forbehandling.sak.id}"
@@ -190,7 +203,12 @@ class EtteroppgjoerForbehandlingDao(
             // sekvensnummerSkatt = "123", // TODO
             opprettet = getTidspunkt("opprettet"),
             status = getString("status"),
-            aar = 2024,
+            aar = getInt("aar"),
+            innvilgetPeriode =
+                Periode(
+                    fom = getDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                    tom = getDate("tom").let { YearMonth.from(it.toLocalDate()) },
+                ),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

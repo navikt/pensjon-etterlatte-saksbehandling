@@ -14,5 +14,5 @@ CREATE TABLE etteroppgjoer_beregnet_resultat
     kilde                               TEXT,
     referanse_avkorting_sist_iverksatte UUID,
     referanse_avkorting_forbehandling   UUID,
-    UNIQUE (aar, referanse_avkorting_forbehandling, referanse_avkorting_sist_iverksatte)
+    UNIQUE (aar, siste_iverksatte_behandling_id, forbehandling_id)
 );

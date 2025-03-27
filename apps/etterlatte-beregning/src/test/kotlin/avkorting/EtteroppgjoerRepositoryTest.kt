@@ -28,6 +28,28 @@ internal class EtteroppgjoerRepositoryTest(
     private val etteroppgjoerRepository = EtteroppgjoerRepository(ds)
 
     @Test
+    fun `skal oppdatere BeregnetEtteroppgjoerResultat hvis aar og forbehandlingId og sisteIverksattteBehandlingId eksisterer`() {
+        val (forbehandlingId, sisteIverksatteBehandlingId, aar) =
+            EtteroppgjoerBeregnetAvkortingRequest(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                2024,
+            )
+
+        val etteroppgjoerBeregnetResultat = beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, 1000, 1000)
+        etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerBeregnetResultat)
+        with(etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)!!) {
+            utbetaltStoenad shouldBe 1000
+        }
+
+        val nyEtteroppgjoerBeregnetResultat = beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, 2000, 2000)
+        etteroppgjoerRepository.lagreEtteroppgjoerResultat(nyEtteroppgjoerBeregnetResultat)
+        with(etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)!!) {
+            utbetaltStoenad shouldBe 2000
+        }
+    }
+
+    @Test
     fun `skal lagre og hente BeregnetEtteroppgjoerResultat`() {
         val (forbehandlingId, sisteIverksatteBehandlingId, aar) =
             EtteroppgjoerBeregnetAvkortingRequest(
@@ -35,7 +57,7 @@ internal class EtteroppgjoerRepositoryTest(
                 UUID.randomUUID(),
                 2024,
             )
-        val etteroppgjoerBeregnetResultat = beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+        val etteroppgjoerBeregnetResultat = beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, 1000, 1000)
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerBeregnetResultat)
         etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId) shouldBe
             etteroppgjoerBeregnetResultat
@@ -45,14 +67,16 @@ internal class EtteroppgjoerRepositoryTest(
         aar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
+        utbetaltStoenad: Long,
+        nyBruttoStoenad: Long,
     ): BeregnetEtteroppgjoerResultat =
         BeregnetEtteroppgjoerResultat(
             id = UUID.randomUUID(),
             aar = aar,
             forbehandlingId = forbehandlingId,
             sisteIverksatteBehandlingId = sisteIverksatteBehandlingId,
-            utbetaltStoenad = 7103,
-            nyBruttoStoenad = 6493,
+            utbetaltStoenad = utbetaltStoenad,
+            nyBruttoStoenad = nyBruttoStoenad,
             differanse = 7572,
             grense =
                 EtteroppgjoerGrense(

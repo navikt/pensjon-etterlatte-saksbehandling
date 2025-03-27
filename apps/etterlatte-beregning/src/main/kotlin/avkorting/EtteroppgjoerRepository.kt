@@ -26,7 +26,7 @@ class EtteroppgjoerRepository(
                     VALUES (:id, :aar, :siste_iverksatte_behandling_id, :forbehandling_id, :utbetalt_stoenad, :ny_brutto_stoenad, :differanse, :grense, :resultat_type, :tidspunkt, :regel_resultat,
                             :kilde, :referanse_avkorting_sist_iverksatte, :referanse_avkorting_forbehandling)
                     ON CONFLICT (
-                        aar, referanse_avkorting_forbehandling, referanse_avkorting_sist_iverksatte
+                        aar, siste_iverksatte_behandling_id, forbehandling_id
                         ) DO UPDATE SET utbetalt_stoenad = excluded.utbetalt_stoenad,
                                 ny_brutto_stoenad = excluded.ny_brutto_stoenad,
                                 differanse = excluded.differanse,
@@ -83,7 +83,12 @@ class EtteroppgjoerRepository(
                         "forbehandling_id" to forbehandlingId,
                     ),
             ).let { query ->
-                tx.run(query.map { row -> row.toBeregnetEtteroppgjoerResultat() }.asSingle)
+                val results = tx.run(query.map { row -> row.toBeregnetEtteroppgjoerResultat() }.asList)
+                when {
+                    results.isEmpty() -> null
+                    results.size == 1 -> results.first()
+                    else -> throw IllegalStateException("Forventet maks én rad, men fikk ${results.size}")
+                }
             }
         }
 

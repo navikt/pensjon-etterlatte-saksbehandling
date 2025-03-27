@@ -35,7 +35,6 @@ class EtteroppgjoerService(
         val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandling)
 
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
-
         return etteroppgjoerResultat
     }
 

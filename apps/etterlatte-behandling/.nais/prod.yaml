@@ -206,6 +206,7 @@ spec:
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter
+        - application: etterlatte-hendelser-egne-ansatte
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling-kafka

@@ -1,4 +1,5 @@
 import { add, format } from 'date-fns'
+import { nb } from 'date-fns/locale'
 
 export enum DatoFormat {
   AAR_MAANED_DAG = 'yyyy-MM-dd',
@@ -7,6 +8,8 @@ export enum DatoFormat {
 }
 
 export const formaterDato = (dato: string | Date) => format(dato, DatoFormat.DAG_MAANED_AAR).toString()
+
+export const maanedNavn = (dato: string | Date) => format(dato, 'LLLL', { locale: nb }).toString()
 
 export const formaterDatoMedFallback = (dato?: string | Date, fallback?: string) =>
   dato ? format(dato, DatoFormat.DAG_MAANED_AAR).toString() : fallback

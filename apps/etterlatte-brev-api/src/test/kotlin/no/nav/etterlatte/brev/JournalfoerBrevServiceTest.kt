@@ -34,6 +34,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -194,7 +195,7 @@ internal class JournalfoerBrevServiceTest {
     }
 
     @Test
-    fun `Brev er allerede journalfoert`() {
+    fun `Brev er allerede journalfoert svarer med journalføringen`() {
         val brev =
             Brev(
                 1,
@@ -207,7 +208,12 @@ internal class JournalfoerBrevServiceTest {
                 Status.JOURNALFOERT,
                 Tidspunkt.now(),
                 Tidspunkt.now(),
-                mottakere = mockk(),
+                mottakere =
+                    listOf(
+                        mockk {
+                            every { journalpostId } returns "1"
+                        },
+                    ),
                 brevtype = Brevtype.MANUELT,
                 brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
@@ -217,6 +223,42 @@ internal class JournalfoerBrevServiceTest {
         val vedtak = opprettVedtak()
 
         runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
+
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
+        coVerify(exactly = 0) { dokarkivService.journalfoer(any(), any()) }
+    }
+
+    @Test
+    fun `Brev har status journalført men har ikke journalpostId på mottaker gir internfeil`() {
+        val brev =
+            Brev(
+                1,
+                randomSakId(),
+                BEHANDLING_ID,
+                "tittel",
+                spraak = Spraak.NB,
+                BrevProsessType.AUTOMATISK,
+                "fnr",
+                Status.JOURNALFOERT,
+                Tidspunkt.now(),
+                Tidspunkt.now(),
+                mottakere =
+                    listOf(
+                        mockk {
+                            every { journalpostId } returns null
+                        },
+                    ),
+                brevtype = Brevtype.MANUELT,
+                brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
+            )
+
+        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
+
+        val vedtak = opprettVedtak()
+
+        assertThrows<InternfeilException> {
+            runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
+        }
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
         coVerify(exactly = 0) { dokarkivService.journalfoer(any(), any()) }

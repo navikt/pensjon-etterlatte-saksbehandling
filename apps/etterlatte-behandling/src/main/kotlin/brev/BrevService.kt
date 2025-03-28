@@ -146,7 +146,7 @@ class BrevService(
     }
 
     /**
-     * Videresender internefeil fra endepunkt som kalles -- hvis vi ser at feilen kan leses som en exceptionResponse.
+     * Videresender interne feil fra endepunkt som kalles -- hvis vi ser at feilen kan leses som en exceptionResponse.
      * Burde brukes med omhu, siden det at en app responderer med 404 f.eks. på at noe ikke fins kan fremdeles
      * være en internfeil i appen som kaller det.
      *
@@ -157,42 +157,48 @@ class BrevService(
         try {
             return eksterntKall()
         } catch (responseException: ResponseException) {
-            try {
-                val exceptionResponse = responseException.response.body<ExceptionResponse>()
-                when (exceptionResponse.status) {
-                    in 400..499 -> {
-                        val videresendtForespoerselException =
-                            ForespoerselException(
-                                status = exceptionResponse.status,
-                                code = exceptionResponse.code ?: "UKJENT_FEIL",
-                                detail = exceptionResponse.detail,
-                                cause = responseException,
-                            )
-                        logger.warn(
-                            "Mottok forespørselexception, som propageres videre",
-                            videresendtForespoerselException,
-                        )
-                        throw videresendtForespoerselException
-                    }
-
-                    in 500..599 -> {
-                        val videresendtInternfeilException =
-                            InternfeilException(
-                                detail = exceptionResponse.detail,
-                                cause = responseException,
-                            )
-                        logger.warn("Mottok internfeil, som propageres videre", videresendtInternfeilException)
-                        throw videresendtInternfeilException
-                    }
+            val exceptionResponse =
+                try {
+                    responseException.response.body<ExceptionResponse>()
+                } catch (internException: Exception) {
+                    logger.info(
+                        "Kunne ikke parse ut feil som en ExceptionResponse, så vi fikk ikke feilmelding i body. " +
+                            "Kaster opprinnelig exception videre",
+                        internException,
+                    )
+                    throw internException
                 }
-            } catch (internException: Exception) {
-                logger.info(
-                    "Kunne ikke parse ut feil som en ExceptionResponse, så vi fikk ikke feilmelding i body. " +
-                        "Kaster opprinnelig exception videre",
-                    internException,
-                )
+            when (exceptionResponse.status) {
+                // ForespoerselException
+                in 400..499 -> {
+                    val videresendtForespoerselException =
+                        ForespoerselException(
+                            status = exceptionResponse.status,
+                            code = exceptionResponse.code ?: "UKJENT_FEIL",
+                            detail = exceptionResponse.detail,
+                            cause = responseException,
+                        )
+                    logger.warn(
+                        "Mottok forespørselexception, som propageres videre",
+                        videresendtForespoerselException,
+                    )
+                    throw videresendtForespoerselException
+                }
+
+                // InternfeilException
+                in 500..599 -> {
+                    val videresendtInternfeilException =
+                        InternfeilException(
+                            detail = exceptionResponse.detail,
+                            cause = responseException,
+                        )
+                    logger.warn("Mottok internfeil, som propageres videre", videresendtInternfeilException)
+                    throw videresendtInternfeilException
+                }
+
+                // Ukjent feilmelding, bare kast original feilmelding videre
+                else -> throw responseException
             }
-            throw responseException
         }
     }
 

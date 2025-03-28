@@ -7,6 +7,7 @@ import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.AvkortingTidligAlderspensjonService
+import no.nav.etterlatte.avkorting.EtteroppgjoerRepository
 import no.nav.etterlatte.avkorting.EtteroppgjoerService
 import no.nav.etterlatte.avkorting.MottattInntektsjusteringService
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
@@ -109,6 +110,8 @@ class ApplicationContext {
         )
     val avkortingRepository = AvkortingRepository(dataSource)
 
+    val etteroppgjoerRepository = EtteroppgjoerRepository(dataSource)
+
     val avkortingReparerAarsoppgjoeret = AvkortingReparerAarsoppgjoeret(avkortingRepository)
 
     val avkortingService =
@@ -138,6 +141,7 @@ class ApplicationContext {
             avkortingRepository = avkortingRepository,
             beregningService = beregningService,
             sanksjonService = sanksjonService,
+            etteroppgjoerRepository = etteroppgjoerRepository,
         )
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(

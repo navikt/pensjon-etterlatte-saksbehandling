@@ -1,7 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect } from 'react'
-import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInntekt'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
@@ -19,10 +18,11 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-import { IAvkorting } from '~shared/types/IAvkorting'
+import { IAvkorting, IAvkortingNy } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { hentBehandlingstatus } from '~shared/api/behandling'
+import { AvkortingInntektNy } from '~components/behandling/avkorting/AvkortingInntektNy'
 
 export const Avkorting = ({
   behandling,
@@ -98,18 +98,11 @@ export const Avkorting = ({
                   fordeles på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
                 </BodyShort>
               </VStack>
-              <AvkortingInntekt
-                behandling={behandling}
-                avkortingGrunnlagFrontend={avkortingGrunnlagInnevaerendeAar()}
-                erInnevaerendeAar={true}
-                redigerbar={redigerbar}
-                resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-              />{' '}
-              {skalHaInntektNesteAar && !!avkorting?.avkortingGrunnlag?.length && (
-                <AvkortingInntekt
+              {avkorting && (
+                <AvkortingInntektNy
                   behandling={behandling}
-                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                  erInnevaerendeAar={false}
+                  avkorting={avkorting as IAvkortingNy}
+                  skalHaInntektNesteAar={skalHaInntektNesteAar}
                   redigerbar={redigerbar}
                   resetInntektsavkortingValidering={resetInntektsavkortingValidering}
                 />

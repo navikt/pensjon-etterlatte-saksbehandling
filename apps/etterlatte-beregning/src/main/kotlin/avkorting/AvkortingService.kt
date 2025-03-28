@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendNy
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -37,7 +38,7 @@ class AvkortingService(
     suspend fun hentOpprettEllerReberegnAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingFrontend? {
+    ): AvkortingFrontendNy? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val eksisterendeAvkorting = hentAvkorting(behandlingId)
@@ -51,30 +52,35 @@ class AvkortingService(
                             eksisterendeAvkorting,
                             brukerTokenInfo,
                         )
-                    avkortingMedTillegg(reberegnetAvkorting, behandling)
+                    // avkortingForFrontend(reberegnetAvkorting, behandling)
+                    avkortingForFrontendNy(reberegnetAvkorting, behandling)
                 } else {
-                    avkortingMedTillegg(eksisterendeAvkorting, behandling)
+                    // avkortingForFrontend(eksisterendeAvkorting, behandling)
+                    avkortingForFrontendNy(eksisterendeAvkorting, behandling)
                 }
             }
-        }
-
-        val forrigeAvkorting =
-            hentAvkortingForrigeBehandling(behandling, brukerTokenInfo, behandling.virkningstidspunkt().dato)
-        return if (eksisterendeAvkorting == null) {
-            val nyAvkorting =
-                kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
-            avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
-        } else if (behandling.status == BehandlingStatus.BEREGNET) {
-            val reberegnetAvkorting =
-                reberegnOgLagreAvkorting(
-                    behandling,
-                    eksisterendeAvkorting,
-                    brukerTokenInfo,
-                )
-            avkortingMedTillegg(reberegnetAvkorting, behandling, forrigeAvkorting)
         } else {
-            avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
+            return null // TODO!
         }
+        /*
+                val forrigeAvkorting =
+                    hentAvkortingForrigeBehandling(behandling, brukerTokenInfo, behandling.virkningstidspunkt().dato)
+                return if (eksisterendeAvkorting == null) {
+                    val nyAvkorting =
+                        kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
+                    avkortingForFrontend(nyAvkorting, behandling, forrigeAvkorting)
+                } else if (behandling.status == BehandlingStatus.BEREGNET) {
+                    val reberegnetAvkorting =
+                        reberegnOgLagreAvkorting(
+                            behandling,
+                            eksisterendeAvkorting,
+                            brukerTokenInfo,
+                        )
+                    avkortingForFrontend(reberegnetAvkorting, behandling, forrigeAvkorting)
+                } else {
+                    avkortingForFrontend(eksisterendeAvkorting, behandling, forrigeAvkorting)
+                }
+         */
     }
 
     fun hentAvkorting(behandlingId: UUID) = avkortingRepository.hentAvkorting(behandlingId)
@@ -135,7 +141,7 @@ class AvkortingService(
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         val avkortingFrontend =
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                avkortingMedTillegg(lagretAvkorting, behandling)
+                avkortingForFrontend(lagretAvkorting, behandling)
             } else {
                 val forrigeAvkorting =
                     hentAvkortingForrigeBehandling(
@@ -143,7 +149,7 @@ class AvkortingService(
                         brukerTokenInfo,
                         behandling.virkningstidspunkt().dato,
                     )
-                avkortingMedTillegg(
+                avkortingForFrontend(
                     lagretAvkorting,
                     behandling,
                     forrigeAvkorting,
@@ -250,11 +256,59 @@ class AvkortingService(
         avkortingRepository.hentAvkorting(behandlingId)
             ?: throw AvkortingFinnesIkkeException(behandlingId)
 
-    private fun avkortingMedTillegg(
+    private fun avkortingForFrontend(
         avkorting: Avkorting,
         behandling: DetaljertBehandling,
         forrigeAvkorting: Avkorting? = null,
     ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting, behandling.status)
+
+    private fun avkortingForFrontendNy(
+        avkorting: Avkorting,
+        behandling: DetaljertBehandling,
+        forrigeAvkorting: Avkorting? = null,
+    ): AvkortingFrontendNy {
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
+
+        val redigerbarForventetInntekt =
+            (
+                avkorting.aarsoppgjoer.singleOrNull {
+                    it.aar == virkningstidspunkt.year
+                } as AarsoppgjoerLoepende?
+            )?.inntektsavkorting
+                ?.singleOrNull {
+                    it.grunnlag.periode.fom == virkningstidspunkt
+                }?.grunnlag
+                ?.toDto()
+
+        val redigerbarForventetInntektNesteAar =
+            if (skalHaInntektInnevaerendeOgNesteAar(behandling)) {
+                val nesteAar =
+                    (
+                        avkorting.aarsoppgjoer.singleOrNull {
+                            it.aar == virkningstidspunkt.year + 1
+                        } as AarsoppgjoerLoepende?
+                    )?.inntektsavkorting?.singleOrNull()?.grunnlag?.toDto()
+                nesteAar
+            } else {
+                null
+            }
+
+        val dto = avkorting.toDto(virkningstidspunkt)
+        return AvkortingFrontendNy(
+            redigerbarForventetInntekt = redigerbarForventetInntekt,
+            redigerbarForventetInntektNesteAar = redigerbarForventetInntektNesteAar,
+            avkortingGrunnlag = dto.avkortingGrunnlag,
+            avkortetYtelse = dto.avkortetYtelse,
+            tidligereAvkortetYtelse =
+                if (forrigeAvkorting != null && behandling.status != BehandlingStatus.IVERKSATT) {
+                    forrigeAvkorting.aarsoppgjoer
+                        .flatMap { it.avkortetYtelse }
+                        .map { it.toDto() }
+                } else {
+                    emptyList()
+                },
+        )
+    }
 
     suspend fun hentAvkortingForrigeBehandling(
         behandling: DetaljertBehandling,

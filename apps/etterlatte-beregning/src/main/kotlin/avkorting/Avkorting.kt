@@ -61,6 +61,7 @@ data class Avkorting(
             avkortetYtelse = utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt),
         )
 
+    // TODO trekke ut i eget sted?
     fun toFrontend(
         fraVirkningstidspunkt: YearMonth? = null,
         forrigeAvkorting: Avkorting? = null,
@@ -102,7 +103,7 @@ data class Avkorting(
                 } ?: emptyList(),
         )
 
-    private fun utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt: YearMonth? = null): List<AvkortetYtelseDto> =
+    fun utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt: YearMonth? = null): List<AvkortetYtelseDto> =
         if (fraVirkningstidspunkt !=
             null
         ) {
@@ -255,7 +256,7 @@ data class Avkorting(
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
-                .filter { it.grunnlag.id != nyttGrunnlag.id }
+                .filter { it.grunnlag.id != nyttGrunnlag.id } // TODO kan baseres på fom istedenfor?
                 .map {
                     it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom)
                 }.plus(Inntektsavkorting(grunnlag = forventetInntekt))

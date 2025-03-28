@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -61,8 +60,6 @@ interface OppgaveDao {
     ): List<OppgaveIntern>
 
     fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats
-
-    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern>
 
     fun settNySaksbehandler(
         oppgaveId: UUID,
@@ -353,10 +350,6 @@ class OppgaveDaoImpl(
                             LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE (? OR o.status = ANY(?))
                         AND o.enhet = ANY(?)
-                        AND (
-                            s.adressebeskyttelse is null OR 
-                            (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
-                        )
                         AND (? OR o.saksbehandler = ?)
                         """.trimIndent(),
                     )
@@ -364,10 +357,8 @@ class OppgaveDaoImpl(
                 statement.setBoolean(1, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
                 statement.setArray(2, createArrayOf("text", oppgaveStatuser.toTypedArray()))
                 statement.setArray(3, createArrayOf("text", enheter.map { it.enhetNr }.toTypedArray()))
-                statement.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
-                statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
-                statement.setBoolean(6, minOppgavelisteIdentFilter == null)
-                statement.setString(7, minOppgavelisteIdentFilter)
+                statement.setBoolean(4, minOppgavelisteIdentFilter == null)
+                statement.setString(5, minOppgavelisteIdentFilter)
 
                 statement
                     .executeQuery()
@@ -437,33 +428,6 @@ class OppgaveDaoImpl(
                     }!!
                     .also {
                         logger.info("Henter antall oppgaver")
-                    }
-            }
-        }
-
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
-                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o 
-                            INNER JOIN sak s ON o.sak_id = s.id 
-                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
-                        WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
-                        """.trimIndent(),
-                    )
-                statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
-                statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
-
-                statement
-                    .executeQuery()
-                    .toList {
-                        asOppgave()
-                    }.also { oppgaveliste ->
-                        logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
                     }
             }
         }

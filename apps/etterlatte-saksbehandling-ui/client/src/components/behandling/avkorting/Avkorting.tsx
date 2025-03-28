@@ -18,7 +18,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-import { IAvkorting, IAvkortingNy } from '~shared/types/IAvkorting'
+import { IAvkorting } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { hentBehandlingstatus } from '~shared/api/behandling'
@@ -62,7 +62,7 @@ export const Avkorting = ({
 
   const avkortingGrunnlagInnevaerendeAar = () => {
     return avkorting?.avkortingGrunnlag.find(
-      (grunnlag) => grunnlag.aar == aarFraDatoString(virkningstidspunkt(behandling).dato)
+      (grunnlag) => aarFraDatoString(grunnlag.fom) == aarFraDatoString(virkningstidspunkt(behandling).dato)
     )
   }
 
@@ -101,7 +101,7 @@ export const Avkorting = ({
               {avkorting && (
                 <AvkortingInntektNy
                   behandling={behandling}
-                  avkorting={avkorting as IAvkortingNy}
+                  avkorting={avkorting}
                   skalHaInntektNesteAar={skalHaInntektNesteAar}
                   redigerbar={redigerbar}
                   resetInntektsavkortingValidering={resetInntektsavkortingValidering}

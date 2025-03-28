@@ -53,23 +53,11 @@ data class OverstyrBeregningDTO(
 )
 
 data class AvkortingFrontend(
-    val avkortingGrunnlag: List<AvkortingGrunnlagFrontend>,
-    val avkortetYtelse: List<AvkortetYtelseDto>,
-    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
-)
-
-data class AvkortingFrontendNy(
     val redigerbarForventetInntekt: AvkortingGrunnlagDto?,
     val redigerbarForventetInntektNesteAar: AvkortingGrunnlagDto?,
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
     val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
-)
-
-data class AvkortingGrunnlagFrontend(
-    val aar: Int,
-    val fraVirk: AvkortingGrunnlagDto?, // Kan utledes om finnes fra før ved lagring?
-    val historikk: List<AvkortingGrunnlagDto>,
 )
 
 // Inneholder alle perioder med beregnet ytelse etter avkorting på tvers av alle år

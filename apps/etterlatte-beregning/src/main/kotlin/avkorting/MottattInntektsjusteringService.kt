@@ -22,7 +22,6 @@ class MottattInntektsjusteringService(
         val eksisterende =
             avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, brukerTokenInfo)
                 ?: throw InternfeilException("Fant ikke og klarte opprette avkorting under inntektsjustering")
-        // val eksisterendeInntekt = eksisterende.avkortingGrunnlag.find { it.aar == virkningstidspunkt.year }?.fraVirk
         val eksisterendeInntekt = eksisterende.redigerbarForventetInntekt
 
         val nyttGrunnlag =

@@ -1,35 +1,76 @@
 package no.nav.etterlatte.beregning.regler.avkorting.regler
 
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
+import no.nav.etterlatte.avkorting.EtteroppgjoerResultatType
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.regler.FaktumNode
-import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
-import no.nav.etterlatte.libs.regler.eksekver
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 
 class EtteroppgjoerBeregningResultatTest {
-    private val regelPeriode = RegelPeriode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
+    val aar = 2025
+    private val regelPeriode = RegelPeriode(LocalDate.of(aar, 1, 1), LocalDate.of(aar, 12, 31))
 
     @Test
-    fun `returnere beregnet etteroppgjoer resultat`() {
-        val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), listOfBruttoStoenad())
+    fun `skal etterbetale hvis differanse er mer en grense for etterbetaling`() {
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 2000),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 9), ytelse = 2000),
+                avkortetYtelse(fom = YearMonth.of(2024, 10), YearMonth.of(2024, 12), ytelse = 2000),
+            )
 
+        val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), nyBruttoStoenad)
         val resultat =
-            beregneEtteroppgjoerRegel.eksekver(
-                KonstantGrunnlag(differanseGrunnlag),
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
                 regelPeriode,
             )
 
-        // TODO
+        resultat.verdi.differanse.differanse shouldBe -12000
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.ETTERBETALING.name
+    }
+
+    @Test
+    fun `skal tilbakekreve hvis differanse er mer en grense for tilbakekreving`() {
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 800),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 9), ytelse = 800),
+                avkortetYtelse(fom = YearMonth.of(2024, 10), YearMonth.of(2024, 12), ytelse = 800),
+            )
+
+        val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), nyBruttoStoenad)
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.differanse.differanse shouldBe 2400
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKREVING.name
+    }
+
+    @Test
+    fun `skal ikke ha etteroppgjoer hvis differanse er null`() {
+        val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), listOfUtbetaltStoenad())
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.differanse.differanse shouldBe 0
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER.name
     }
 
     private fun grunnlag(
@@ -49,13 +90,6 @@ class EtteroppgjoerBeregningResultatTest {
         listOf(
             avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 6), ytelse = 1000),
             avkortetYtelse(fom = YearMonth.of(2024, 7), YearMonth.of(2024, 12), ytelse = 1000),
-        )
-
-    private fun listOfBruttoStoenad(): List<AvkortetYtelse> =
-        listOf(
-            avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 1000),
-            avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 9), ytelse = 1100),
-            avkortetYtelse(fom = YearMonth.of(2024, 10), YearMonth.of(2024, 12), ytelse = 1200),
         )
 
     private fun avkortetYtelse(

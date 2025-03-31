@@ -20,7 +20,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.ManglerTilgang
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.tilSakId
@@ -49,7 +49,10 @@ class PluginConfiguration {
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
 
-private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
+/*
+    Denne sjekker på både adressebeskyttelse og egen ansatt og returnerer http statuscode 401 hvis man mangler tilgang.
+ */
+private object SpesialtilgangsHook : Hook<suspend (ApplicationCall) -> Unit> {
     private val AdressebeskyttelseHook: PipelinePhase = PipelinePhase("Adressebeskyttelse")
     private val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
 
@@ -67,12 +70,12 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
 
 const val TILGANG_ROUTE_PATH = "tilgang"
 
-val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
+val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
     createRouteScopedPlugin(
         name = "Adressebeskyttelsesplugin",
         createConfiguration = ::PluginConfiguration,
     ) {
-        on(AdressebeskyttelseHook) { call ->
+        on(SpesialtilgangsHook) { call ->
             val bruker = call.brukerTokenInfo
 
             if (bruker is Systembruker) {
@@ -97,7 +100,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                throw GenerellIkkeFunnetException()
+                                throw ManglerTilgang()
                             }
                             return@on
                         }
@@ -108,7 +111,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                throw GenerellIkkeFunnetException()
+                                throw ManglerTilgang()
                             }
                             return@on
                         }
@@ -119,7 +122,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                throw GenerellIkkeFunnetException()
+                                throw ManglerTilgang()
                             }
                             return@on
                         }
@@ -130,7 +133,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                throw GenerellIkkeFunnetException()
+                                throw ManglerTilgang()
                             }
                             return@on
                         }
@@ -141,7 +144,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                throw GenerellIkkeFunnetException()
+                                throw ManglerTilgang()
                             }
                             return@on
                         }
@@ -152,7 +155,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                throw GenerellIkkeFunnetException()
+                                throw ManglerTilgang()
                             }
                             return@on
                         }
@@ -163,7 +166,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                throw GenerellIkkeFunnetException()
+                                throw ManglerTilgang()
                             }
                             return@on
                         }
@@ -192,7 +195,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
             if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
-                throw GenerellIkkeFunnetException()
+                throw ManglerTilgang()
             }
         }
 

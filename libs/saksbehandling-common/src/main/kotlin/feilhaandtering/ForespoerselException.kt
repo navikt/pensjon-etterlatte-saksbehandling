@@ -30,10 +30,6 @@ open class IkkeFunnetException(
     override val cause: Throwable? = null,
 ) : ForespoerselException(status = 404, code = code, detail = detail, meta = meta, cause = cause)
 
-/**
- * Brukes felles alle steder der vi ikke vil lekke noe informasjon om vi faktisk har funnet noe eller ikke ref.
- * informasjonssikring
- */
 class GenerellIkkeFunnetException : IkkeFunnetException(code = "NOT_FOUND", detail = "Kunne ikke finne ønsket ressurs")
 
 open class TimeoutForespoerselException(
@@ -42,6 +38,8 @@ open class TimeoutForespoerselException(
     override val meta: Map<String, Any>? = null,
     override val cause: Throwable? = null,
 ) : ForespoerselException(status = 408, code = code, detail = detail, meta = meta, cause = cause)
+
+class ManglerTilgang : IkkeTillattException(code = "MANGLER_TILGANG", detail = "Mangler tilgang")
 
 open class IkkeTillattException(
     override val code: String,

@@ -107,7 +107,7 @@ internal class AvkortingMapperTest {
         )
 
     @Test
-    fun `fyller ut alle felter til avkortingsgrunnlag`() {
+    fun `fyller ut alle felter til avkortingsgrunnlag med `() {
         val behandling =
             behandling(
                 status = BehandlingStatus.AVKORTET,
@@ -116,7 +116,7 @@ internal class AvkortingMapperTest {
 
         AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).avkortingGrunnlag.first().asClue {
             it.fom shouldBe inntektFraJan25.periode.fom
-            it.tom shouldBe inntektFraJan25.periode.tom
+            it.tom shouldBe YearMonth.of(2025, Month.DECEMBER)
             it.inntektTom shouldBe inntektFraJan25.inntektTom
             it.fratrekkInnAar shouldBe inntektFraJan25.fratrekkInnAar
             it.inntektUtlandTom shouldBe inntektFraJan25.inntektUtlandTom
@@ -127,7 +127,7 @@ internal class AvkortingMapperTest {
     }
 
     @Test
-    fun `fyller ut alle avkortingsgrunnlag i rekkefølge nyligste først`() {
+    fun `fyller ut alle avkortingsgrunnlag i rekkefølge nyligste flørst og legger til tom ved årskifte`() {
         val behandling =
             behandling(
                 status = BehandlingStatus.AVKORTET,
@@ -136,10 +136,13 @@ internal class AvkortingMapperTest {
         AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).asClue {
             it.avkortingGrunnlag.size shouldBe 3
             it.avkortingGrunnlag[0].fom shouldBe inntektFraJan25.periode.fom
+            it.avkortingGrunnlag[0].tom shouldBe YearMonth.of(2025, 12)
             it.avkortingGrunnlag[0].inntektTom shouldBe inntektFraJan25.inntektTom
             it.avkortingGrunnlag[1].fom shouldBe inntektFraAug24.periode.fom
+            it.avkortingGrunnlag[1].tom shouldBe YearMonth.of(2024, 12)
             it.avkortingGrunnlag[1].inntektTom shouldBe inntektFraAug24.inntektTom
             it.avkortingGrunnlag[2].fom shouldBe inntektFraMars24.periode.fom
+            it.avkortingGrunnlag[2].tom shouldBe inntektFraMars24.periode.tom
             it.avkortingGrunnlag[2].inntektTom shouldBe inntektFraMars24.inntektTom
         }
     }

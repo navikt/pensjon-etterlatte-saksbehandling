@@ -348,11 +348,20 @@ object AvkortingMapper {
 
         val dto = avkorting.toDto(virkningstidspunkt)
 
-        // TODO sette tom desember ???
         return AvkortingFrontend(
             redigerbarForventetInntekt = redigerbarForventetInntekt,
             redigerbarForventetInntektNesteAar = redigerbarForventetInntektNesteAar,
-            avkortingGrunnlag = dto.avkortingGrunnlag.sortedByDescending { it.fom },
+            avkortingGrunnlag =
+                dto.avkortingGrunnlag
+                    .map {
+                        if (it.tom == null) {
+                            it.copy(
+                                tom = YearMonth.of(it.fom.year, Month.DECEMBER),
+                            )
+                        } else {
+                            it
+                        }
+                    }.sortedByDescending { it.fom },
             avkortetYtelse = dto.avkortetYtelse,
             tidligereAvkortetYtelse =
                 if (forrigeAvkorting != null && behandling.status != BehandlingStatus.IVERKSATT) {

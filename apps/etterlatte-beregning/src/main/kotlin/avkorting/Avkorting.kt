@@ -211,7 +211,7 @@ data class Avkorting(
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
-                .filter { it.grunnlag.id != nyttGrunnlag.id } // TODO kan baseres på fom istedenfor?
+                .filter { it.grunnlag.id != nyttGrunnlag.id }
                 .map {
                     it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom)
                 }.plus(Inntektsavkorting(grunnlag = forventetInntekt))

@@ -45,7 +45,7 @@ val sumNyBruttoStoenad =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-NY-BRUTTO-STOENAD"),
     ) benytter nyBruttoStoenad med { avkortetYtelse ->
         avkortetYtelse.sumOf {
             // TODO egen regel?
@@ -57,7 +57,7 @@ val sumUtbetaltStoenad =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-UTBETALT-STOENAD"),
     ) benytter utbetaltStoenad med { avkortetYtelse ->
         avkortetYtelse.sumOf {
             // TODO egen regel?
@@ -69,7 +69,7 @@ val etteroppgjoerDifferanse =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-DIFFERANSE"),
     ) benytter sumUtbetaltStoenad og sumNyBruttoStoenad med { sumUtbetalt, sumNyBrutto ->
         val differanse = sumUtbetalt - sumNyBrutto
         EtteroppgjoerDifferanse(differanse, sumUtbetalt, sumNyBrutto)
@@ -97,7 +97,7 @@ val etteroppgjoerGrense =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Sette rettsgebyr",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-GRENSE"),
     ) benytter etteroppgjoerRettsgebyr med { rettsgebyr ->
 
         val etterbetaling = rettsgebyr.rettsgebyr.divide(4)
@@ -114,7 +114,7 @@ val beregneEtteroppgjoerRegel =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "", versjon = ""),
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-RESULTAT"),
     ) benytter etteroppgjoerDifferanse og etteroppgjoerGrense med { differanse, grenser ->
 
         val status =

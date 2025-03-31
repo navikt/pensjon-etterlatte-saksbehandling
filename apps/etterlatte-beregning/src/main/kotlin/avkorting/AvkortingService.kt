@@ -181,23 +181,22 @@ class AvkortingService(
         val opphoerFraOgMed = behandling.opphoerFraOgMed
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
 
-        return if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
-            val forbehandlingId =
-                behandling.relatertBehandlingId.let { UUID.fromString(it) }
-                    ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
+        val avkorting =
+            if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+                val forbehandlingId =
+                    behandling.relatertBehandlingId.let { UUID.fromString(it) }
+                        ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
 
-            reberegnOgLagreAvkorting(
-                behandling = behandling,
-                avkorting = avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, kopiertAvkorting),
-                brukerTokenInfo = brukerTokenInfo,
-            )
-        } else {
-            reberegnOgLagreAvkorting(
-                behandling = behandling,
-                avkorting = kopiertAvkorting,
-                brukerTokenInfo = brukerTokenInfo,
-            )
-        }
+                avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, kopiertAvkorting)
+            } else {
+                kopiertAvkorting
+            }
+
+        return reberegnOgLagreAvkorting(
+            behandling = behandling,
+            avkorting = avkorting,
+            brukerTokenInfo = brukerTokenInfo,
+        )
     }
 
     private fun avkortingMedOppdatertAarsoppgjoerFraForbehandling(

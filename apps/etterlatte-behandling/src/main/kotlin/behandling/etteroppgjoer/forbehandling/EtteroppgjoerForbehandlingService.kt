@@ -86,6 +86,8 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
+    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }
+
     suspend fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,

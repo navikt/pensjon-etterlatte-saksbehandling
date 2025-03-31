@@ -24,6 +24,7 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
+import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -155,14 +156,20 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
               </VStack>
 
               {etteroppgjoerEnabled && (
-                <div>
+                <Box paddingBlock="8 0">
+                  <VStack marginBlock="10 4" gap="4">
+                    <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
+                    <EtteroppgjoerForbehandlingListe sakId={sak.id} />
+                  </VStack>
+
                   <Button
                     loading={isPending(opprettEtteroppgjoerStatus)}
+                    variant="secondary"
                     onClick={() => apiOpprettEtteroppjoer(sak.id)}
                   >
                     Opprett etteroppgjør
                   </Button>
-                </div>
+                </Box>
               )}
             </VStack>
           </HStack>

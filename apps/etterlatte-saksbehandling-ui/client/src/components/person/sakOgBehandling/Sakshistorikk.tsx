@@ -16,6 +16,47 @@ import {
 import { BagdeIcon, Buildings3Icon, FolderIcon, PadlockLockedIcon } from '@navikt/aksel-icons'
 import { ENHETER } from '~shared/types/Enhet'
 
+export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
+  const [hentSaksendringerStatus, hentSaksendringerKall] = useApiCall(hentSaksendringer)
+
+  useEffect(() => {
+    hentSaksendringerKall(sakId)
+  }, [])
+
+  const sorterNyligsteFoerstOgBakover = (a: ISaksendring, b: ISaksendring) =>
+    new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime()
+
+  return mapResult(hentSaksendringerStatus, {
+    pending: <Spinner label="Henter historikk..." />,
+    success: (sakshistorikk) => (
+      <List as="ul" size="small">
+        {sakshistorikk.sort(sorterNyligsteFoerstOgBakover).map((endring) => (
+          <List.Item
+            title={tekstEndringstype[endring.endringstype]}
+            icon={<Ikon endringstype={endring.endringstype} />}
+            key={endring.id}
+          >
+            <Box maxWidth="18rem" borderWidth="0 0 1 0" paddingBlock="0 2" borderColor="border-subtle">
+              <BodyShort size="small">
+                <Endringstekst endring={endring} />
+              </BodyShort>
+              {endring.kommentar && (
+                <Box marginBlock="3 3">
+                  <BodyShort size="small">{endring.kommentar}</BodyShort>
+                </Box>
+              )}
+              <Detail textColor="subtle">{formaterDatoMedKlokkeslett(endring.tidspunkt)}</Detail>
+              <Detail textColor="subtle">
+                {endring.identtype == Identtype.SAKSBEHANDLER ? endring.ident : 'Gjenny (automatisk)'}
+              </Detail>
+            </Box>
+          </List.Item>
+        ))}
+      </List>
+    ),
+  })
+}
+
 const Ikon = ({ endringstype }: { endringstype: Endringstype }) => {
   if (endringstype === Endringstype.ENDRE_ENHET) {
     return <Buildings3Icon aria-hidden width="1rem" height="1rem" />
@@ -60,45 +101,4 @@ const Endringstekst = ({ endring }: { endring: ISaksendring }) => {
       </>
     )
   }
-}
-
-export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
-  const [hentSaksendringerStatus, hentSaksendringerKall] = useApiCall(hentSaksendringer)
-
-  useEffect(() => {
-    hentSaksendringerKall(sakId)
-  }, [])
-
-  const sorterNyligsteFoerstOgBakover = (a: ISaksendring, b: ISaksendring) =>
-    new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime()
-
-  return mapResult(hentSaksendringerStatus, {
-    pending: <Spinner label="Henter historikk..." />,
-    success: (sakshistorikk) => (
-      <List as="ul" size="small">
-        {sakshistorikk.sort(sorterNyligsteFoerstOgBakover).map((endring) => (
-          <List.Item
-            title={tekstEndringstype[endring.endringstype]}
-            icon={<Ikon endringstype={endring.endringstype} />}
-            key={endring.id}
-          >
-            <Box maxWidth="18rem" borderWidth="0 0 1 0" paddingBlock="0 2" borderColor="border-subtle">
-              <BodyShort size="small">
-                <Endringstekst endring={endring} />
-              </BodyShort>
-              {endring.kommentar && (
-                <Box marginBlock="3 3">
-                  <BodyShort size="small">{endring.kommentar}</BodyShort>
-                </Box>
-              )}
-              <Detail textColor="subtle">{formaterDatoMedKlokkeslett(endring.tidspunkt)}</Detail>
-              <Detail textColor="subtle">
-                {endring.identtype == Identtype.SAKSBEHANDLER ? endring.ident : 'Gjenny (automatisk)'}
-              </Detail>
-            </Box>
-          </List.Item>
-        ))}
-      </List>
-    ),
-  })
 }

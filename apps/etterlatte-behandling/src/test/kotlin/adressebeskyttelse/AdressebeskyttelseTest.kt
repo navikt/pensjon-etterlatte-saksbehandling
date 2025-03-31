@@ -128,7 +128,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 )
             }
 
-            // TODO: noe rart skjer her
             client
                 .get("/behandlinger/$behandlingId") {
                     addAuthToken(tokenSaksbehandler)

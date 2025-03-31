@@ -83,15 +83,6 @@ class EtteroppgjoerService(
         avkortingRepository.lagreAvkorting(forbehandlingId, sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
 
-    fun beregnAvkortingRevurdering() {
-        // TODO henter faktisk inntekt brukt i forbehandling
-        sjekkIngenDiffForbehandlingOgRevurdering()
-    }
-
-    fun sjekkIngenDiffForbehandlingOgRevurdering() {
-        // TODO
-    }
-
     private fun beregnEtteroppgjoerResultat(
         aar: Int,
         forbehandlingId: UUID,

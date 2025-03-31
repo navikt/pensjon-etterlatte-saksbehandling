@@ -9,6 +9,7 @@ import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
@@ -179,11 +180,40 @@ class AvkortingService(
     ): Avkorting {
         val opphoerFraOgMed = behandling.opphoerFraOgMed
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
+
+        val avkorting =
+            if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+                val forbehandlingId =
+                    behandling.relatertBehandlingId.let { UUID.fromString(it) }
+                        ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
+
+                avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, kopiertAvkorting)
+            } else {
+                kopiertAvkorting
+            }
+
         return reberegnOgLagreAvkorting(
-            behandling,
-            kopiertAvkorting,
-            brukerTokenInfo,
+            behandling = behandling,
+            avkorting = avkorting,
+            brukerTokenInfo = brukerTokenInfo,
         )
+    }
+
+    private fun avkortingMedOppdatertAarsoppgjoerFraForbehandling(
+        forbehandlingId: UUID,
+        kopiertAvkorting: Avkorting,
+    ): Avkorting {
+        val avkortingFraForbehandling =
+            avkortingRepository.hentAvkorting(forbehandlingId)
+                ?: throw InternfeilException("Mangler avkorting fra etteroppgjør forbehandling")
+        val kopiertAarsoppgjoerFraForbehandling = avkortingFraForbehandling.kopierAvkorting().aarsoppgjoer.single()
+        val avkortingMedErstattetAarsoppgjoer = kopiertAvkorting.erstattAarsoppgjoer(kopiertAarsoppgjoerFraForbehandling)
+
+        if (kopiertAvkorting.aarsoppgjoer == avkortingMedErstattetAarsoppgjoer.aarsoppgjoer) {
+            throw InternfeilException("Årsoppgjør ble ikke oppdatert med årsoppgjør fra etteroppgjør forbehandling")
+        }
+
+        return avkortingMedErstattetAarsoppgjoer
     }
 
     private suspend fun reberegnOgLagreAvkorting(

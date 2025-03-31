@@ -220,9 +220,7 @@ data class Avkorting(
             aarsoppgjoer.copy(
                 inntektsavkorting = oppdatert,
             )
-        return this.copy(
-            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppjoer),
-        )
+        return erstattAarsoppgjoer(oppdatertAarsoppjoer)
     }
 
     fun beregnEtteroppgjoer(
@@ -268,10 +266,7 @@ data class Avkorting(
                 ytelseFoerAvkorting = tidligereAarsoppgjoer.ytelseFoerAvkorting,
                 inntekt = inntekt,
             )
-        val nyAvkorting =
-            copy(
-                aarsoppgjoer = erstattAarsoppgjoer(etteroppgjoer),
-            )
+        val nyAvkorting = erstattAarsoppgjoer(etteroppgjoer)
         return nyAvkorting.beregnAvkorting(tidligereAarsoppgjoer.fom, null, sanksjoner)
     }
 
@@ -558,11 +553,11 @@ data class Avkorting(
         )
     }
 
-    private fun erstattAarsoppgjoer(nytt: Aarsoppgjoer): List<Aarsoppgjoer> {
+    fun erstattAarsoppgjoer(nytt: Aarsoppgjoer): Avkorting {
         if (aarsoppgjoer.any { it.aar == nytt.aar }) {
-            return aarsoppgjoer.map { if (it.aar == nytt.aar) nytt else it }
+            return this.copy(aarsoppgjoer = aarsoppgjoer.map { if (it.aar == nytt.aar) nytt else it })
         }
-        return (aarsoppgjoer + listOf(nytt)).sortedBy { it.aar }
+        return this.copy(aarsoppgjoer = (aarsoppgjoer + listOf(nytt)).sortedBy { it.aar })
     }
 }
 

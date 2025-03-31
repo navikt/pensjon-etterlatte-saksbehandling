@@ -12,6 +12,7 @@ import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -845,6 +846,28 @@ internal class AvkortingTest {
                 overstyrtInnvilgaMaanederAarsak shouldBe OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
                 overstyrtInnvilgaMaanederBegrunnelse shouldBe "Begrunnelse"
             }
+        }
+    }
+
+    @Nested
+    inner class ErstattAarsoppgjoer {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(aar = 2024),
+                        aarsoppgjoer(aar = 2025),
+                    ),
+            )
+
+        @Test
+        fun `skal erstatte riktig aarsoppgjoer`() {
+            val etteroppgjoer = etteroppgjoer(aar = 2025)
+
+            val avkortingMedNyttEtteroppgjoer = avkorting.erstattAarsoppgjoer(etteroppgjoer)
+
+            avkortingMedNyttEtteroppgjoer.aarsoppgjoer[0].id shouldBe avkorting.aarsoppgjoer[0].id
+            avkortingMedNyttEtteroppgjoer.aarsoppgjoer[1].id shouldBe etteroppgjoer.id
         }
     }
 }

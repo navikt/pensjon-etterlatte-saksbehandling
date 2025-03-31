@@ -51,7 +51,7 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(HttpStatusCode.NotFound)
             }
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024)
+                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
                 call.respond(eo)
             }
         }
@@ -75,7 +75,7 @@ fun Route.etteroppgjoerRoutes(
         post("/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024)
+                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
                 call.respond(eo)
             }
         }

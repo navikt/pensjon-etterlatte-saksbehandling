@@ -22,7 +22,7 @@ import { IAvkorting } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { hentBehandlingstatus } from '~shared/api/behandling'
-import { AvkortingInntektNy } from '~components/behandling/avkorting/AvkortingInntektNy'
+import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInntekt'
 
 export const Avkorting = ({
   behandling,
@@ -98,15 +98,13 @@ export const Avkorting = ({
                   fordeles på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
                 </BodyShort>
               </VStack>
-              {avkorting && (
-                <AvkortingInntektNy
-                  behandling={behandling}
-                  avkorting={avkorting}
-                  skalHaInntektNesteAar={skalHaInntektNesteAar}
-                  redigerbar={redigerbar}
-                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                />
-              )}
+              <AvkortingInntekt
+                behandling={behandling}
+                avkorting={avkorting}
+                skalHaInntektNesteAar={skalHaInntektNesteAar}
+                redigerbar={redigerbar}
+                resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+              />
             </>
           ),
         })}

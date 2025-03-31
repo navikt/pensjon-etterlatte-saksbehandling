@@ -44,9 +44,9 @@ export const OppgaverTableRow = ({
       </Table.DataCell>
       <Table.DataCell>
         {kanSeDetaljertInfo ? (
-          ''
-        ) : (
           <>{oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : 'Mangler'}</>
+        ) : (
+          ''
         )}
       </Table.DataCell>
       <Table.DataCell>

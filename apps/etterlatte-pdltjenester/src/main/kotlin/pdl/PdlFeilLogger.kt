@@ -40,7 +40,8 @@ fun loggDelvisReturnerteData(
 
 /*
     Statuskoden her tolkes rett i frontend.
-    401 vil si at man er utlogget så 403 er i compliance med nye etterlevelseskrav om at informasjonsflyt
+    401 vil si at man er utlogget(fra frontends perspektiv)
+    Derfor vil vi returnere  403 er i compliance med nye etterlevelseskrav om at informasjonsflyt
     er lov for beskyttede personer.
  */
 class ManglerTilgangTilPerson :

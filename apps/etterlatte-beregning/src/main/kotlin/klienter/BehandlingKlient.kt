@@ -75,12 +75,6 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         oppgaveKilde: OppgaveKilde,
         referanse: String,
     )
-
-    suspend fun hentSisteFerdigstiltForbehandlingForAar(
-        sakId: SakId,
-        aar: Int,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerForbehandlingDto
 }
 
 class BehandlingKlientException(
@@ -301,38 +295,9 @@ class BehandlingKlientImpl(
         )
     }
 
-    override suspend fun hentSisteFerdigstiltForbehandlingForAar(
-        sakId: SakId,
-        aar: Int,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerForbehandlingDto {
-        logger.info("Henter forbehandling for sakId=$sakId og aar=$aar")
-        return downstreamResourceClient
-            .get(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        // TODO sette opp et slikt endepunkt
-                        url = "$resourceUrl/api/etteroppgjoer/forbehandling/${sakId.sakId}/$aar",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage },
-            )
-    }
-
     override suspend fun harTilgangTilBehandling(
         behandlingId: UUID,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
 }
-
-// TODO burde dette ut lib
-data class EtteroppgjoerForbehandlingDto(
-    val id: UUID,
-    val status: String, // TODO enum
-    val sakId: SakId,
-    val aar: Int,
-)

@@ -101,8 +101,7 @@ class EtteroppgjoerForbehandlingService(
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
-
-        val virkOgOpphoer = vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo)
+        val virkOgOpphoer = runBlocking { vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo) }
 
         val nyForbehandling =
             EtteroppgjoerForbehandling(

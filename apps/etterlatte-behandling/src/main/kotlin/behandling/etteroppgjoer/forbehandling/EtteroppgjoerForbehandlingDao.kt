@@ -213,7 +213,6 @@ class EtteroppgjoerForbehandlingDao(
                     fom = getDate("fom").let { YearMonth.from(it.toLocalDate()) },
                     tom = getDate("tom").let { YearMonth.from(it.toLocalDate()) },
                 ),
-            aar = 2024,
             brevId = getLongOrNull("brev_id"),
         )
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevMapper
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
@@ -15,7 +16,6 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -85,7 +85,7 @@ class EtteroppgjoerBrevService(
 
     private suspend fun utledBrevRequest(
         sak: Sak,
-        brevInnholdData: EtteroppgjoerBrevData,
+        brevInnholdData: BrevFastInnholdData,
         brevRedigerbarInnholdData: BrevDataRedigerbar,
         skalLagres: Boolean,
         brukerTokenInfo: BrukerTokenInfo,

@@ -8,7 +8,7 @@ import { MapApiResult } from '~shared/components/MapApiResult'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
 import { EtteroppgjoerBehandling } from '~shared/types/Etteroppgjoer'
 
-export function lenkeTilForbehandlingMedId(id: string): string {
+function lenkeTilForbehandlingMedId(id: string): string {
   return `/etteroppgjoer/${id}/`
 }
 

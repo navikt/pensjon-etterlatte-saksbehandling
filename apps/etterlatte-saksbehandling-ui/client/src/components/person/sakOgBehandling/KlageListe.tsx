@@ -46,7 +46,7 @@ function formaterKabalstatus(kabalStatus: KabalStatus | undefined) {
   return teksterKabalstatus[kabalStatus]
 }
 
-export function lenkeTilKlageMedId(id: string): string {
+function lenkeTilKlageMedId(id: string): string {
   return `/klage/${id}/`
 }
 

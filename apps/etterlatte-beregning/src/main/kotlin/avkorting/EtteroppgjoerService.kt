@@ -157,7 +157,7 @@ class EtteroppgjoerService(
         aar: Int,
     ): AvkortingDto? {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId)
-        val aarsoppgjoer = avkorting?.aarsoppgjoer?.firstOrNull { it.aar == aar }
+        val aarsoppgjoer = avkorting?.aarsoppgjoer?.single { it.aar == aar }
 
         return when (aarsoppgjoer) {
             is AarsoppgjoerLoepende ->
@@ -165,27 +165,8 @@ class EtteroppgjoerService(
                     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
-            is Etteroppgjoer -> TODO()
+            is Etteroppgjoer -> TODO() // Kan skje hvis et skatteoppgjør endrer seg...
             else -> null
-        }
-    }
-    
-    private fun hentAvkorting(
-        behandlingId: UUID,
-        aar: Int,
-    ): AvkortingDto? {
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId)
-        val aarsoppgjoer = avkorting?.aarsoppgjoer?.single { it.aar == aar }
-        return aarsoppgjoer?.let { aarsoppgjoer ->
-            when (aarsoppgjoer) {
-                is AarsoppgjoerLoepende ->
-                    AvkortingDto(
-                        avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
-                        avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
-                    )
-
-                is Etteroppgjoer -> TODO() // Kan skje hvis et skatteoppgjør endrer seg...
-            }
         }
     }
 

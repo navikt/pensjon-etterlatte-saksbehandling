@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -38,6 +39,7 @@ data class EtteroppgjoerForbehandling(
     val status: String, // TODO enum
     val sak: Sak,
     val aar: Int,
+    val innvilgetPeriode: Periode,
     val opprettet: Tidspunkt,
     val brevId: Long?,
 ) {

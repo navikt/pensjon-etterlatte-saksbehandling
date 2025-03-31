@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -19,11 +20,14 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
+import java.time.Month
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingService(
@@ -35,6 +39,7 @@ class EtteroppgjoerForbehandlingService(
     private val sigrunKlient: SigrunKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
+    private val vedtakKlient: VedtakKlient,
 ) {
     fun hentForbehandling(
         brukerTokenInfo: BrukerTokenInfo,
@@ -90,11 +95,14 @@ class EtteroppgjoerForbehandlingService(
     fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerOgOppgave {
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+
+        val virkOgOpphoer = vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo)
 
         val nyForbehandling =
             EtteroppgjoerForbehandling(
@@ -103,6 +111,21 @@ class EtteroppgjoerForbehandlingService(
                 sak = sak,
                 status = "opprettet",
                 aar = inntektsaar,
+                innvilgetPeriode =
+                    Periode(
+                        fom =
+                            if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
+                                virkOgOpphoer.foersteVirk
+                            } else {
+                                YearMonth.of(inntektsaar, Month.JANUARY)
+                            },
+                        tom =
+                            if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
+                                virkOgOpphoer.opphoer
+                            } else {
+                                YearMonth.of(inntektsaar, Month.DECEMBER)
+                            },
+                    ),
                 opprettet = Tidspunkt.now(),
                 brevId = null,
             )

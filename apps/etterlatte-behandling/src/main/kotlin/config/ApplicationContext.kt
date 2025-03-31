@@ -670,6 +670,7 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
+            vedtakKlient = vedtakKlient,
         )
     private val etteroppgjoerBrevService =
         EtteroppgjoerBrevService(

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev
 
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerBrevService
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -7,6 +9,8 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -46,9 +50,10 @@ class BrevService(
             BehandlingMedBrevType.ETTEROPPGJOER ->
                 etteroppgjoerBrevService.opprettEtteroppgjoerBrev(behandlingId, bruker)
 
-            else -> {
-                brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
-            }
+            else ->
+                videresendInterneFeil {
+                    brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                }
         }
     }
 
@@ -91,9 +96,10 @@ class BrevService(
             BehandlingMedBrevType.ETTEROPPGJOER ->
                 etteroppgjoerBrevService.genererPdf(brevID, behandlingId, bruker)
 
-            else -> {
-                brevApiKlient.genererPdf(brevID, behandlingId, bruker)
-            }
+            else ->
+                videresendInterneFeil {
+                    brevApiKlient.genererPdf(brevID, behandlingId, bruker)
+                }
         }
     }
 
@@ -126,9 +132,10 @@ class BrevService(
             BehandlingMedBrevType.ETTEROPPGJOER ->
                 etteroppgjoerBrevService.ferdigstillBrev(behandlingId, brukerTokenInfo)
 
-            else -> {
-                brevApiKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
-            }
+            else ->
+                videresendInterneFeil {
+                    brevApiKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                }
         }
     }
 
@@ -158,7 +165,66 @@ class BrevService(
                 )
 
             else ->
-                brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
+                videresendInterneFeil {
+                    brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
+                }
+        }
+    }
+
+    /**
+     * Videresender interne feil fra endepunkt som kalles -- hvis vi ser at feilen kan leses som en exceptionResponse.
+     * Burde brukes med omhu, siden det at en app responderer med 404 f.eks. på at noe ikke fins kan fremdeles
+     * være en internfeil i appen som kaller det.
+     *
+     * Men for de kallene som blir "proxyet" rett til brev-api er det bedre å få med riktig feilmelding ut til
+     * saksbehandler, siden logikken og feilmeldingene kommer fra brev-api.
+     */
+    private suspend fun <T> videresendInterneFeil(eksterntKall: suspend () -> T): T {
+        try {
+            return eksterntKall()
+        } catch (responseException: ResponseException) {
+            val exceptionResponse =
+                try {
+                    responseException.response.body<ExceptionResponse>()
+                } catch (internException: Exception) {
+                    logger.info(
+                        "Kunne ikke parse ut feil som en ExceptionResponse, så vi fikk ikke feilmelding i body. " +
+                            "Kaster opprinnelig exception videre",
+                        internException,
+                    )
+                    throw internException
+                }
+            when (exceptionResponse.status) {
+                // ForespoerselException
+                in 400..499 -> {
+                    val videresendtForespoerselException =
+                        ForespoerselException(
+                            status = exceptionResponse.status,
+                            code = exceptionResponse.code ?: "UKJENT_FEIL",
+                            detail = exceptionResponse.detail,
+                            cause = responseException,
+                        )
+                    logger.warn(
+                        "Mottok forespørselexception, som propageres videre",
+                        videresendtForespoerselException,
+                    )
+                    throw videresendtForespoerselException
+                }
+
+                // InternfeilException
+                in 500..599 -> {
+                    val videresendtInternfeilException =
+                        InternfeilException(
+                            detail = exceptionResponse.detail,
+                            cause = responseException,
+                        )
+                    logger.warn("Mottok internfeil, som propageres videre", videresendtInternfeilException)
+                    throw videresendtInternfeilException
+                }
+
+                // Ukjent feilmelding, bare kast original feilmelding videre
+                else -> throw responseException
+            }
         }
     }
 
@@ -175,7 +241,9 @@ class BrevService(
                 etteroppgjoerBrevService.hentEtteroppgjoersbrev(behandlingId, bruker)
 
             else ->
-                brevApiKlient.hentVedtaksbrev(behandlingId, bruker)
+                videresendInterneFeil {
+                    brevApiKlient.hentVedtaksbrev(behandlingId, bruker)
+                }
         }
     }
 }

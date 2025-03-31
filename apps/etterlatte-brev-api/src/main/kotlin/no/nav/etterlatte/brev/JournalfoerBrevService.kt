@@ -62,7 +62,31 @@ class JournalfoerBrevService(
             service.hentVedtaksbrev(behandlingId)
                 ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
-        if (brev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
+        if (brev.status == Status.JOURNALFOERT) {
+            // vi har allerede ønsket status
+            logger.warn(
+                "Forespurt vedtaksbrev med id=${brev.id} til behandling med id=${vedtak.behandlingId} " +
+                    "er allerede journalført. Returnerer respons med journalpostId'er fra mottakere.",
+            )
+            return JournalfoerVedtaksbrevResponseOgBrevid(
+                brevId = brev.id,
+                opprettetJournalpost =
+                    brev.mottakere.map {
+                        OpprettJournalpostResponse(
+                            journalpostId =
+                                krevIkkeNull(it.journalpostId) {
+                                    "Mottaker i brev med id=${brev.id} med status journalført har ikke journalpostId. " +
+                                        "Dette betyr sannsynligvis at brevet ikke er ferdig journalført, og må håndteres " +
+                                        "med en målrettet fiks."
+                                },
+                            journalpostferdigstilt = false,
+                            dokumenter = emptyList(),
+                        )
+                    },
+            )
+        }
+
+        if (brev.status in listOf(Status.DISTRIBUERT, Status.SLETTET)) {
             logger.warn("Vedtaksbrev (id=${brev.id}) er allerede ${brev.status}.")
             return null
         }

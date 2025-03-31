@@ -1,5 +1,5 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Button, HStack, Table, Tag } from '@navikt/ds-react'
 import { CheckmarkIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
@@ -12,6 +12,7 @@ import { NotatRedigeringModal } from '~components/person/notat/NotatRedigeringMo
 import { NyttNotatModal } from '~components/person/notat/NyttNotatModal'
 import { NotatVisningModal } from '~components/person/notat/NotatVisningModal'
 import { SlettNotatModal } from '~components/person/notat/SlettNotatModal'
+import { ApiError } from '~shared/api/apiClient'
 
 export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) {
   const [notater, setNotater] = useState<Array<Notat>>([])
@@ -26,16 +27,19 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
     }
   }, [sakResult])
 
+  const feilkodehaandtering = (error: ApiError) => {
+    switch (error.status) {
+      case 404:
+        return <ApiWarningAlert>Kan ikke hente notater: {error.detail}</ApiWarningAlert>
+      case 403:
+        return <ApiErrorAlert>Du mangler tilgang til saken: {error.detail}</ApiErrorAlert>
+      default:
+        return <ApiErrorAlert>{error.detail || 'Feil ved henting av sak'}</ApiErrorAlert>
+    }
+  }
+
   if (isFailure(sakResult)) {
-    return (
-      <Box padding="8">
-        {sakResult.error.status === 404 ? (
-          <ApiWarningAlert>Kan ikke hente notater: {sakResult.error.detail}</ApiWarningAlert>
-        ) : (
-          <ApiErrorAlert>{sakResult.error.detail || 'Feil ved henting av notater'}</ApiErrorAlert>
-        )}
-      </Box>
-    )
+    return <Box padding="8">{feilkodehaandtering(sakResult.error)}</Box>
   }
 
   return (

@@ -115,6 +115,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             assertTrue(applicationContext.featureToggleService.isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 
+            // Verifiserer at saken ikke finnes og da skal man få HttpStatusCode.NotFound
             client
                 .get("/saker/1") {
                     addAuthToken(tokenSaksbehandler)
@@ -631,7 +632,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 .get("/behandlinger/$behandlingId") {
                     addAuthToken(tokenSaksbehandler)
                 }.also {
-                    assertEquals(HttpStatusCode.NotFound, it.status) // 404 pga adressebeskyttelse
+                    assertEquals(HttpStatusCode.Forbidden, it.status) // 403 pga adressebeskyttelse
                 }
         }
 

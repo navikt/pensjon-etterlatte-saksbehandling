@@ -50,7 +50,7 @@ class PluginConfiguration {
 }
 
 /*
-    Denne sjekker på både adressebeskyttelse og egen ansatt og returnerer http statuscode 401 hvis man mangler tilgang.
+    Denne sjekker på både adressebeskyttelse og egen ansatt og returnerer http statuscode 403 hvis man mangler tilgang.
  */
 private object SpesialtilgangsHook : Hook<suspend (ApplicationCall) -> Unit> {
     private val AdressebeskyttelseHook: PipelinePhase = PipelinePhase("Adressebeskyttelse")

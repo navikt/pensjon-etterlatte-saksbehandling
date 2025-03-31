@@ -21,7 +21,7 @@ export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
 
   useEffect(() => {
     hentSaksendringerKall(sakId)
-  }, [])
+  }, [sakId])
 
   const sorterNyligsteFoerstOgBakover = (a: ISaksendring, b: ISaksendring) =>
     new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime()

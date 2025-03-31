@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { BodyShort, Search as SearchField } from '@navikt/ds-react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
@@ -10,6 +10,7 @@ import { hentSak } from '~shared/api/behandling'
 
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
+import { ApiError } from '~shared/api/apiClient'
 
 export const Search = () => {
   const navigate = useNavigate()
@@ -20,6 +21,13 @@ export const Search = () => {
   const gyldigInputFnr = fnrErGyldig(searchInput)
   const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
 
+  /*
+    TODO: EY-5128
+    Denne kan potensielt gjøre et kall for å sjekke om person er skjermet
+    slik at man ikke får navigert til saken.
+    Potensielt viser man ting man ikke skal om man får navigert til saksoversikten.
+    navn-foedsel i pdltjenester kan verifisere dette.
+   */
   const avgjoerSoek = () => {
     if (gyldigInputFnr) {
       navigate('/person', { state: { fnr: searchInput } })
@@ -43,6 +51,17 @@ export const Search = () => {
     resetSakSoek()
     setFeilInput(!!searchInput.length && !(gyldigInputFnr || gyldigInputSakId))
   }, [searchInput])
+
+  const feilkodehaandtering = (error: ApiError) => {
+    switch (error.status) {
+      case 404:
+        return `Fant ingen sak med id ${searchInput}`
+      case 403:
+        return `Du mangler tilgang til saken: ${error.detail}`
+      default:
+        return 'En feil har skjedd'
+    }
+  }
 
   return (
     <SearchWrapper>
@@ -80,9 +99,7 @@ export const Search = () => {
             <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
           </span>
           <SearchResult>
-            <BodyShort className="text">
-              {error.status === 404 ? `Fant ingen sak med id ${searchInput}` : 'En feil har skjedd'}
-            </BodyShort>
+            <BodyShort className="text">{feilkodehaandtering(error)}</BodyShort>
           </SearchResult>
         </Dropdown>
       ))}

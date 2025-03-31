@@ -132,8 +132,9 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 .get("/behandlinger/$behandlingId") {
                     addAuthToken(tokenSaksbehandler)
                 }.let {
-                    Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
+                    Assertions.assertEquals(HttpStatusCode.Forbidden, it.status)
                 }
+
             // smoketest
             client
                 .get("/fakeurlwithbehandlingsid/$behandlingId") {
@@ -141,6 +142,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
                 }
+
             // systemBruker skal alltid ha tilgang
             client
                 .get("/behandlinger/$behandlingId") {
@@ -344,7 +346,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))
                 }.apply {
-                    Assertions.assertEquals(HttpStatusCode.NotFound, status)
+                    Assertions.assertEquals(HttpStatusCode.Forbidden, status)
                 }
         }
         coVerify(exactly = 2) {

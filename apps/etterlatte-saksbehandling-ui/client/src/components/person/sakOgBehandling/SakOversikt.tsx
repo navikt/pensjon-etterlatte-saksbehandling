@@ -1,6 +1,6 @@
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
-import { SakMedBehandlinger } from '~components/person/typer'
+import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -30,10 +30,32 @@ export enum OppgaveValg {
   FERDIGSTILTE = 'FERDIGSTILTE',
 }
 
-export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
+function ByttTilAnnenSak(props: { byttSak: () => void }) {
+  return (
+    <Box>
+      <Alert variant="info">
+        Bruker har en annen sak.
+        <div>
+          <Button onClick={props.byttSak}>Se annen sak</Button>
+        </div>
+      </Alert>
+    </Box>
+  )
+}
+
+export const SakOversikt = ({
+  sakResult,
+  fnr,
+  setForetrukketSak,
+}: {
+  sakResult: Result<SakMedBehandlingerOgKanskjeAnnenSak>
+  fnr: string
+  setForetrukketSak: (sakId: number) => void
+}) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const etteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer)
+  const byttTilAnnenSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
@@ -62,10 +84,13 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
       {mapResult(sakResult, {
         pending: <Spinner label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
-        success: ({ sak, behandlinger }) => (
+        success: ({ sak, behandlinger, annenSak }) => (
           <HStack gap="4" wrap={false}>
             <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
+              {byttTilAnnenSakEnabled && annenSak && (
+                <ByttTilAnnenSak byttSak={() => setForetrukketSak(annenSak.sak.id)} />
+              )}
             </Box>
             <VStack gap="8">
               {harEndretFnr() && (

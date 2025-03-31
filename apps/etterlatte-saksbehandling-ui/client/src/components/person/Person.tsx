@@ -18,7 +18,7 @@ import {
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isSuccess, Result } from '~shared/api/apiUtils'
+import { isSuccess, Result, transformResult } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -47,7 +47,9 @@ export const Person = () => {
   const [search, setSearch] = useSearchParams()
   const fnr = usePersonLocationState(search.get('key'))?.fnr
 
-  const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
+  const [foretrukketSak, setForetrukketSak] = useState<number | undefined>()
+
+  const [_sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
   const velgFane = (value: string) => {
@@ -56,6 +58,12 @@ export const Person = () => {
     setSearch({ fane: valgtFane }, { state: { fnr } })
     setFane(valgtFane)
   }
+
+  const sakResult = transformResult(_sakResult, (sakData) =>
+    foretrukketSak && foretrukketSak === sakData.annenSak?.sak.id
+      ? { ...sakData.annenSak, annenSak: { ...sakData } }
+      : sakData
+  )
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
@@ -103,7 +111,7 @@ export const Person = () => {
         </Tabs.List>
 
         <Tabs.Panel value={PersonOversiktFane.SAKER}>
-          <SakOversikt sakResult={sakResult} fnr={fnr} />
+          <SakOversikt sakResult={sakResult} setForetrukketSak={setForetrukketSak} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
           <Personopplysninger sakResult={sakResult} fnr={fnr} />

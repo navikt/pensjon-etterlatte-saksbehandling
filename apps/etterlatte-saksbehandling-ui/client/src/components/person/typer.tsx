@@ -22,6 +22,10 @@ export interface SakMedBehandlinger {
   behandlinger: IBehandlingsammendrag[]
 }
 
+export interface SakMedBehandlingerOgKanskjeAnnenSak extends SakMedBehandlinger {
+  annenSak?: SakMedBehandlinger
+}
+
 export interface IBehandlingsammendrag {
   id: string
   sak: number

@@ -59,7 +59,7 @@ import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
-import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
+import no.nav.etterlatte.tilgangsstyring.SpesialTilgangPlugin
 import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import org.slf4j.Logger
@@ -120,7 +120,7 @@ internal fun Application.module(context: ApplicationContext) {
 internal fun Route.settOppApplikasjonen(context: ApplicationContext) {
     attachContekst(context.dataSource, context)
     settOppRoutes(context)
-    settOppTilganger(context, adressebeskyttelsePlugin)
+    settOppTilganger(context, SpesialTilgangPlugin)
 }
 
 private fun Route.attachContekst(

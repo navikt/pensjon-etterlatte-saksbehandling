@@ -38,9 +38,15 @@ fun loggDelvisReturnerteData(
     }
 }
 
+/*
+    Statuskoden her tolkes rett i frontend.
+    401 vil si at man er utlogget(fra frontends perspektiv)
+    Derfor vil vi returnere  403 er i compliance med nye etterlevelseskrav om at informasjonsflyt
+    er lov for beskyttede personer.
+ */
 class ManglerTilgangTilPerson :
     ForespoerselException(
-        status = HttpStatusCode.Unauthorized.value,
+        status = HttpStatusCode.Forbidden.value,
         code = "MANGLER_TILGANG_TIL_PERSON",
         detail = "Mangler tilgang til person",
     )

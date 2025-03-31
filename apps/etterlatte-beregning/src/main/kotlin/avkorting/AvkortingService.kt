@@ -1,6 +1,5 @@
 package no.nav.etterlatte.avkorting
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -17,7 +16,6 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -184,15 +182,13 @@ class AvkortingService(
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
 
         return if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+            val forbehandlingId =
+                behandling.relatertBehandlingId.let { UUID.fromString(it) }
+                    ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
+
             reberegnOgLagreAvkorting(
                 behandling = behandling,
-                avkorting =
-                    avkortingMedOppdatertAarsoppgjoerFraForbehandling(
-                        behandling.sak,
-                        behandling.virkningstidspunkt().dato,
-                        kopiertAvkorting,
-                        brukerTokenInfo,
-                    ),
+                avkorting = avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, kopiertAvkorting),
                 brukerTokenInfo = brukerTokenInfo,
             )
         } else {
@@ -205,16 +201,11 @@ class AvkortingService(
     }
 
     private fun avkortingMedOppdatertAarsoppgjoerFraForbehandling(
-        sakId: SakId,
-        virkningstidspunkt: YearMonth,
+        forbehandlingId: UUID,
         kopiertAvkorting: Avkorting,
-        brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
-        val aarHvorAvkortingSkalErstattes = virkningstidspunkt.year // TODO er dette greit for å hente år?
-        val forbehandling =
-            runBlocking { behandlingKlient.hentSisteFerdigstiltForbehandlingForAar(sakId, aarHvorAvkortingSkalErstattes, brukerTokenInfo) }
         val avkortingFraForbehandling =
-            avkortingRepository.hentAvkorting(forbehandling.id)
+            avkortingRepository.hentAvkorting(forbehandlingId)
                 ?: throw InternfeilException("Mangler avkorting fra etteroppgjør forbehandling")
         val kopiertAarsoppgjoerFraForbehandling = avkortingFraForbehandling.kopierAvkorting().aarsoppgjoer.single()
         val avkortingMedErstattetAarsoppgjoer = kopiertAvkorting.erstattAarsoppgjoer(kopiertAarsoppgjoerFraForbehandling)

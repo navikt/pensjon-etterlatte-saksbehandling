@@ -120,7 +120,7 @@ val beregneEtteroppgjoerRegel =
 
         val status =
             when {
-                Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKREVING
+                Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKEKREVING
                 Beregningstall(differanse.differanse * -1) > grenser.etterbetaling -> EtteroppgjoerResultatType.ETTERBETALING
                 else -> EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER
             }

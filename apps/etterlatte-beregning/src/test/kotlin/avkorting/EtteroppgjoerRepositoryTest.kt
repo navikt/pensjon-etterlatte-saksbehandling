@@ -88,7 +88,7 @@ internal class EtteroppgjoerRepositoryTest(
                             rettsgebyr = Beregningstall(2758.0),
                         ),
                 ),
-            resultatType = EtteroppgjoerResultatType.TILBAKREVING,
+            resultatType = EtteroppgjoerResultatType.TILBAKEKREVING,
             tidspunkt = Tidspunkt.now(),
             regelResultat = mapOf("regel" to "resultat").toObjectNode(),
             kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),

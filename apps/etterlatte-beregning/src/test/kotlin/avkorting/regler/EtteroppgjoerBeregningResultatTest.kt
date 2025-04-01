@@ -57,7 +57,7 @@ class EtteroppgjoerBeregningResultatTest {
             )
 
         resultat.verdi.differanse.differanse shouldBe 2400
-        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKREVING.name
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKEKREVING.name
     }
 
     @Test

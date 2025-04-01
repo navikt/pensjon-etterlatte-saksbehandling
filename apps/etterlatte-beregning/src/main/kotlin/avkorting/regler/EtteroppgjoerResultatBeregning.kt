@@ -2,9 +2,9 @@ package no.nav.etterlatte.avkorting.regler
 
 import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
-import no.nav.etterlatte.avkorting.EtteroppgjoerGrenseDto
-import no.nav.etterlatte.avkorting.EtteroppgjoerResultatType
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel

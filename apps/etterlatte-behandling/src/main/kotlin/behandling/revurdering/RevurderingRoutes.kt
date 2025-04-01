@@ -16,8 +16,10 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -64,25 +66,31 @@ internal fun Route.revurderingRoutes(
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
                         // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
-
                         val revurdering =
-                            if (opprettRevurderingRequest.aarsak == Revurderingaarsak.ETTEROPPGJOER) {
-                                opprettEtteroppgjoer.opprett(sakId, brukerTokenInfo)
-                            } else {
-                                inTransaction {
-                                    manuellRevurderingService.opprettManuellRevurderingWrapper(
-                                        sakId = sakId,
-                                        aarsak = opprettRevurderingRequest.aarsak,
-                                        paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
-                                        paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
-                                        begrunnelse = opprettRevurderingRequest.begrunnelse,
-                                        fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
-                                        saksbehandler = saksbehandler,
-                                    )
-                                }
+                            inTransaction {
+                                manuellRevurderingService.opprettManuellRevurderingWrapper(
+                                    sakId = sakId,
+                                    aarsak = opprettRevurderingRequest.aarsak,
+                                    paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
+                                    paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
+                                    begrunnelse = opprettRevurderingRequest.begrunnelse,
+                                    fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
+                                    saksbehandler = saksbehandler,
+                                )
                             }
                         call.respond(revurdering.id)
                     }
+                }
+            }
+
+            post("/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    logger.info("Oppretter ny revurdering på sak $sakId")
+                    val revurdering =
+                        inTransaction {
+                            opprettEtteroppgjoer.opprett(sakId, etteroppgjoerId, brukerTokenInfo)
+                        }
+                    call.respond(revurdering.id)
                 }
             }
 

@@ -758,6 +758,7 @@ internal class ApplicationContext(
         OpprettEtteroppgjoerRevurdering(
             behandlingService,
             etteroppgjoerService,
+            etteroppgjoerForbehandlingService,
             grunnlagService,
             revurderingService,
             vilkaarsvurderingService,

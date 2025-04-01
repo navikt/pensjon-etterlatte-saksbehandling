@@ -42,7 +42,6 @@ data class EtteroppgjoerForbehandling(
 data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkatt,
     val ainntekt: AInntekt,
-    val tidligereAvkorting: AvkortingDto,
 )
 
 data class PensjonsgivendeInntektFraSkatt(

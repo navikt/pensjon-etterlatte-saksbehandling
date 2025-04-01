@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -156,7 +157,7 @@ class EtteroppgjoerForbehandlingService(
         behandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): BeregnetEtteroppgjoerResultatDto {
         val request =
             inTransaction {
                 val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
@@ -176,7 +177,7 @@ class EtteroppgjoerForbehandlingService(
                     utland = request.utland,
                 )
             }
-        beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo)
+        return beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo)
     }
 }
 

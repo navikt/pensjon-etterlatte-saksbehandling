@@ -6,9 +6,11 @@ import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -177,29 +179,6 @@ class EtteroppgjoerService(
     }
 }
 
-data class BeregnetEtteroppgjoerResultatDto(
-    val id: UUID,
-    val aar: Int,
-    val forbehandlingId: UUID,
-    val sisteIverksatteBehandlingId: UUID,
-    val utbetaltStoenad: Long,
-    val nyBruttoStoenad: Long,
-    val differanse: Long,
-    val grense: EtteroppgjoerGrenseDto,
-    val resultatType: EtteroppgjoerResultatType,
-    val tidspunkt: Tidspunkt,
-    val kilde: Grunnlagsopplysning.Kilde,
-    val avkortingForbehandlingId: UUID,
-    val avkortingSisteIverksatteId: UUID,
-)
-
-data class EtteroppgjoerGrenseDto(
-    val tilbakekreving: Double,
-    val etterbetaling: Double,
-    val rettsgebyr: Double,
-    val rettsgebyrGyldigFra: LocalDate,
-)
-
 data class BeregnetEtteroppgjoerResultat(
     val id: UUID,
     val aar: Int,
@@ -231,12 +210,6 @@ data class BeregnetEtteroppgjoerResultat(
             avkortingForbehandlingId = this.referanseAvkorting.avkortingForbehandling,
             avkortingSisteIverksatteId = this.referanseAvkorting.avkortingSisteIverksatte,
         )
-}
-
-enum class EtteroppgjoerResultatType {
-    TILBAKREVING,
-    ETTERBETALING,
-    IKKE_ETTEROPPGJOER,
 }
 
 data class ReferanseEtteroppgjoer(

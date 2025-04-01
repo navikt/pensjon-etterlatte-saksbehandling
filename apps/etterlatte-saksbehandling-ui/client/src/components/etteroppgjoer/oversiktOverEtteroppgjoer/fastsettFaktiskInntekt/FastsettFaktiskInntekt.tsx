@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, Tag, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
 import { useForm } from 'react-hook-form'
 import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
@@ -30,6 +30,7 @@ interface FastsettFaktiskInntektSkjema {
   afp: string
   naeringsinntekt: string
   utland: string
+  spesifikasjonAvInntekt: string
 }
 
 export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: string }) => {
@@ -37,7 +38,13 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
   const behandling = useEtteroppgjoer().behandling
   const dispatch = useAppDispatch()
 
-  const { control, watch, handleSubmit } = useForm<FastsettFaktiskInntektSkjema>({
+  const {
+    register,
+    control,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: {
       loennsinntekt: '0',
       afp: '0',
@@ -61,10 +68,12 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
           {/* TODO: skal denne være dynamisk? Eller er den alltid "april - desember"? */}
+        </HStack>
+        <div>
           <Tag variant="neutral">
             {maanedNavn(behandling.innvilgetPeriode.fom)} - {maanedNavn(behandling.innvilgetPeriode.tom)}
           </Tag>
-        </HStack>
+        </div>
 
         <VStack gap="4" width="fit-content">
           <ControlledInntektTextField
@@ -79,9 +88,21 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         </VStack>
 
         <SumAvFaktiskInntekt faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch())} />
+        <Box maxWidth="fit-content">
+          <Textarea
+            {...register('spesifikasjonAvInntekt', {
+              required: { value: true, message: 'Du må spesifisere inntekten' },
+            })}
+            label="Spesifikasjon av inntekt"
+            description="Beskriv inntekt lagt til grunn og eventuelle beløp som er trukket fra."
+            error={errors.spesifikasjonAvInntekt?.message}
+          />
+        </Box>
 
         <div>
-          <Button loading={isPending(lagreFaktiskInntektResult)}>Fastsett inntekt</Button>
+          <Button size="small" loading={isPending(lagreFaktiskInntektResult)}>
+            Fastsett inntekt
+          </Button>
         </div>
 
         {isFailureHandler({

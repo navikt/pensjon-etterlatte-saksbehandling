@@ -21,7 +21,6 @@ import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -88,28 +87,41 @@ class AvkortingRoutesTest {
         val avkortetYtelseId = UUID.randomUUID()
         val avkorting =
             AvkortingFrontend(
+                redigerbarForventetInntekt =
+                    AvkortingGrunnlagDto(
+                        id = avkortingsgrunnlagId,
+                        fom = dato,
+                        tom = dato,
+                        inntektTom = 100000,
+                        fratrekkInnAar = 10000,
+                        spesifikasjon = "Spesifikasjon",
+                        inntektUtlandTom = 0,
+                        fratrekkInnAarUtland = 0,
+                        innvilgaMaaneder = 12,
+                        kilde =
+                            AvkortingGrunnlagKildeDto(
+                                tidspunkt = tidspunkt.toString(),
+                                ident = "Saksbehandler01",
+                            ),
+                    ),
+                redigerbarForventetInntektNesteAar = null,
                 avkortingGrunnlag =
                     listOf(
-                        AvkortingGrunnlagFrontend(
-                            aar = 2024,
-                            fraVirk =
-                                AvkortingGrunnlagDto(
-                                    id = avkortingsgrunnlagId,
-                                    fom = dato,
-                                    tom = dato,
-                                    inntektTom = 100000,
-                                    fratrekkInnAar = 10000,
-                                    spesifikasjon = "Spesifikasjon",
-                                    inntektUtlandTom = 0,
-                                    fratrekkInnAarUtland = 0,
-                                    innvilgaMaaneder = 12,
-                                    kilde =
-                                        AvkortingGrunnlagKildeDto(
-                                            tidspunkt = tidspunkt.toString(),
-                                            ident = "Saksbehandler01",
-                                        ),
+                        AvkortingGrunnlagDto(
+                            id = avkortingsgrunnlagId,
+                            fom = dato,
+                            tom = dato,
+                            inntektTom = 100000,
+                            fratrekkInnAar = 10000,
+                            spesifikasjon = "Spesifikasjon",
+                            inntektUtlandTom = 0,
+                            fratrekkInnAarUtland = 0,
+                            innvilgaMaaneder = 12,
+                            kilde =
+                                AvkortingGrunnlagKildeDto(
+                                    tidspunkt = tidspunkt.toString(),
+                                    ident = "Saksbehandler01",
                                 ),
-                            historikk = emptyList(),
                         ),
                     ),
                 avkortetYtelse =
@@ -147,14 +159,14 @@ class AvkortingRoutesTest {
             val response =
                 client.post("/api/beregning/avkorting/$behandlingsId") {
                     val request =
-                        avkorting.avkortingGrunnlag[0].let {
+                        with(avkorting.redigerbarForventetInntekt!!) {
                             AvkortingGrunnlagLagreDto(
-                                id = it.fraVirk!!.id,
-                                inntektTom = it.fraVirk!!.inntektTom,
-                                fratrekkInnAar = it.fraVirk!!.fratrekkInnAar,
-                                inntektUtlandTom = it.fraVirk!!.inntektUtlandTom,
-                                fratrekkInnAarUtland = it.fraVirk!!.fratrekkInnAarUtland,
-                                spesifikasjon = it.fraVirk!!.spesifikasjon,
+                                id = id,
+                                inntektTom = inntektTom,
+                                fratrekkInnAar = fratrekkInnAar,
+                                inntektUtlandTom = inntektUtlandTom,
+                                fratrekkInnAarUtland = fratrekkInnAarUtland,
+                                spesifikasjon = spesifikasjon,
                                 fom = dato,
                             )
                         }

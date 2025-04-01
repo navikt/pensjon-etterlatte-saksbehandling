@@ -7,11 +7,8 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
 import no.nav.etterlatte.beregning.Beregning
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -61,48 +58,7 @@ data class Avkorting(
             avkortetYtelse = utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt),
         )
 
-    fun toFrontend(
-        fraVirkningstidspunkt: YearMonth? = null,
-        forrigeAvkorting: Avkorting? = null,
-        behandlinStatus: BehandlingStatus? = null,
-    ): AvkortingFrontend =
-        AvkortingFrontend(
-            avkortingGrunnlag =
-                aarsoppgjoer.map { etAarsoppgjoer ->
-                    when (etAarsoppgjoer) {
-                        is AarsoppgjoerLoepende -> {
-                            val avkortingGrunnlag =
-                                etAarsoppgjoer.inntektsavkorting
-                                    .map { inntektsavkorting -> inntektsavkorting.grunnlag.toDto() }
-                                    .sortedByDescending { inntektsavkorting -> inntektsavkorting.fom }
-
-                            val fraVirk = avkortingGrunnlag.singleOrNull { it.fom == fraVirkningstidspunkt }
-                            AvkortingGrunnlagFrontend(
-                                aar = etAarsoppgjoer.aar,
-                                fraVirk = fraVirk,
-                                historikk =
-                                    avkortingGrunnlag.filter { it.id != fraVirk?.id },
-                            )
-                        }
-
-                        is Etteroppgjoer -> TODO()
-                    }
-                },
-            avkortetYtelse = utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt),
-            tidligereAvkortetYtelse =
-                forrigeAvkorting?.let { forrige ->
-                    when (behandlinStatus) {
-                        BehandlingStatus.IVERKSATT, null -> null
-                        else -> {
-                            forrige.aarsoppgjoer
-                                .flatMap { it.avkortetYtelse }
-                                .map { it.toDto() }
-                        }
-                    }
-                } ?: emptyList(),
-        )
-
-    private fun utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt: YearMonth? = null): List<AvkortetYtelseDto> =
+    fun utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt: YearMonth? = null): List<AvkortetYtelseDto> =
         if (fraVirkningstidspunkt !=
             null
         ) {

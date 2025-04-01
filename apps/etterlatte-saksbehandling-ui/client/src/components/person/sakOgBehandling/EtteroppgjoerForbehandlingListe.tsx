@@ -7,18 +7,32 @@ import { formaterDato } from '~utils/formatering/dato'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
 import { EtteroppgjoerBehandling } from '~shared/types/Etteroppgjoer'
 import { mapResult } from '~shared/api/apiUtils'
+import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
 
 function lenkeTilForbehandlingMedId(id: string): string {
   return `/etteroppgjoer/${id}/`
 }
 
-function EtteroppgjoerForbehandlingTabell({ forbehandlinger }: { forbehandlinger: Array<EtteroppgjoerBehandling> }) {
+function EtteroppgjoerForbehandlingTabell({
+  sakId,
+  forbehandlinger,
+}: {
+  sakId: number
+  forbehandlinger: Array<EtteroppgjoerBehandling>
+}) {
+  const [, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
+
   if (!forbehandlinger?.length) {
     return (
       <Alert variant="info" inline>
         Ingen forbehandlinger på sak
       </Alert>
     )
+  }
+
+  const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
+    console.log('Opprett revurdering for forbehandling ' + forbehandlingId)
+    opprettRevurderingRequest({ sakId: sakId, forbehandlingId: forbehandlingId }, () => {})
   }
 
   return (
@@ -30,6 +44,7 @@ function EtteroppgjoerForbehandlingTabell({ forbehandlinger }: { forbehandlinger
           <Table.HeaderCell>År</Table.HeaderCell>
           <Table.HeaderCell>Periode</Table.HeaderCell>
           <Table.HeaderCell>Handling</Table.HeaderCell>
+          <Table.HeaderCell>Revurdering</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -44,6 +59,9 @@ function EtteroppgjoerForbehandlingTabell({ forbehandlinger }: { forbehandlinger
             </Table.DataCell>
             <Table.DataCell>
               <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Gå til behandling</Link>
+            </Table.DataCell>
+            <Table.DataCell>
+              <Link onClick={() => opprettRevurderingEtteroppgjoer(forbehandling.id)}>Opprett revurdering</Link>
             </Table.DataCell>
           </Table.Row>
         ))}
@@ -65,7 +83,7 @@ export function EtteroppgjoerForbehandlingListe(props: { sakId: number }) {
   return mapResult(hentEtteroppgjoerForbehandlingerResult, {
     pending: <Spinner label="Henter forbehandlinger til saken"></Spinner>,
     success: (forbehandlinger: EtteroppgjoerBehandling[]) => {
-      return <EtteroppgjoerForbehandlingTabell forbehandlinger={forbehandlinger} />
+      return <EtteroppgjoerForbehandlingTabell sakId={sakId} forbehandlinger={forbehandlinger} />
     },
     error: () => {
       return <ApiErrorAlert>Kunne ikke hente forbehandlinger</ApiErrorAlert>

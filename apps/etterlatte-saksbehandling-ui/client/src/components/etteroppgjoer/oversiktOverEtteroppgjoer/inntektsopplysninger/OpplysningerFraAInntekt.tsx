@@ -9,7 +9,7 @@ export const OpplysningerFraAInntekt = ({ ainntekt }: { ainntekt: AInntekt }) =>
 
   return (
     <VStack gap="4">
-      <Heading size="medium">Opplysninger fra A-Inntekt</Heading>
+      <Heading size="small">Opplysninger fra A-Inntekt</Heading>
       {!!ainntekt.inntektsmaaneder?.length ? (
         <Table>
           <Table.Header>

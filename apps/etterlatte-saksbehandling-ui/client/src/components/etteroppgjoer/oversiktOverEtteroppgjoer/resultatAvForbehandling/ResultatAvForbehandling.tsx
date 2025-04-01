@@ -1,4 +1,4 @@
-import { BodyShort, Box, Heading, HStack, Label, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, HelpText, HStack, Label, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import { EtteroppgjoerResultatType } from '~shared/types/Etteroppgjoer'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
@@ -44,7 +44,15 @@ export const ResultatAvForbehandling = () => {
               </Table.DataCell>
             </Table.Row>
             <Table.Row>
-              <Table.HeaderCell scope="row">Toleransebeløp</Table.HeaderCell>
+              <Table.HeaderCell scope="row">
+                <HStack gap="2">
+                  Toleransegrense
+                  <HelpText>
+                    Etteroppgjør skal unnlates hvis for lite utbetalt er mindre enn 25 prosent av rettsgebyret, eller
+                    hvis for mye utbetalt er mindre enn ett rettsgebyr. Jf. forskriftens § 9.
+                  </HelpText>
+                </HStack>
+              </Table.HeaderCell>
               <Table.DataCell>
                 <HStack justify="end">
                   {resultat.differanse > 0 ? NOK(resultat.grense.etterbetaling) : NOK(resultat.grense.tilbakekreving)}

@@ -156,7 +156,11 @@ class EtteroppgjoerService(
                     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
-            is Etteroppgjoer -> TODO() // Kan skje hvis et skatteoppgjør endrer seg...
+            is Etteroppgjoer ->
+                AvkortingDto(
+                    avkortingGrunnlag = emptyList(),
+                    avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
+                )
             else -> null
         }
     }

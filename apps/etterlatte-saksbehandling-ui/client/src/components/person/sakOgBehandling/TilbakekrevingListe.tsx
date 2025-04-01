@@ -15,7 +15,7 @@ import { VedtakKolonner } from '~components/person/VedtakKoloner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 import { lastDayOfMonth } from 'date-fns'
 
-export function lenkeTilTilbakekrevingMedId(id: string): string {
+function lenkeTilTilbakekrevingMedId(id: string): string {
   return `/tilbakekreving/${id}/`
 }
 

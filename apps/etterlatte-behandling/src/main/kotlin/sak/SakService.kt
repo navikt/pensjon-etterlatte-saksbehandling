@@ -518,11 +518,12 @@ class SakServiceImpl(
                 skjermingKlient.personErSkjermet(fnr)
             }
         if (erSkjermet) {
-            logger.info("Oppdater egen ansatt for sak $sakId")
+            logger.info("Oppdater egen ansatt for sak: $sakId")
             dao.oppdaterEnhet(
                 SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr),
             )
         } else {
+            logger.info("Oppdater egen ansatt for sak, ikke skjermet. Setter ny enhet for sak: $sakId")
             val sakMedSkjerming = lesDao.hentSak(sakId)!!
             if (sakMedSkjerming.enhet == Enheter.EGNE_ANSATTE.enhetNr) {
                 val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)

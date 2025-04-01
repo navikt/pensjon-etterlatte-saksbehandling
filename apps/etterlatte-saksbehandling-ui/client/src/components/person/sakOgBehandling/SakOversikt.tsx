@@ -150,26 +150,25 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <KlageListe sakId={sak.id} />
               </VStack>
 
-              <VStack marginBlock="10" gap="4">
+              <VStack marginBlock="0" gap="4">
                 <Heading size="medium">Tilbakekrevinger</Heading>
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>
 
               {etteroppgjoerEnabled && (
-                <Box paddingBlock="8 0">
-                  <VStack marginBlock="10 4" gap="4">
-                    <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
-                    <EtteroppgjoerForbehandlingListe sakId={sak.id} />
-                  </VStack>
-
-                  <Button
-                    loading={isPending(opprettEtteroppgjoerStatus)}
-                    variant="secondary"
-                    onClick={() => apiOpprettEtteroppjoer(sak.id)}
-                  >
-                    Opprett etteroppgjør
-                  </Button>
-                </Box>
+                <VStack marginBlock="0" gap="4">
+                  <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
+                  <EtteroppgjoerForbehandlingListe sakId={sak.id} />
+                  <Box>
+                    <Button
+                      loading={isPending(opprettEtteroppgjoerStatus)}
+                      variant="secondary"
+                      onClick={() => apiOpprettEtteroppjoer(sak.id)}
+                    >
+                      Opprett etteroppgjør
+                    </Button>
+                  </Box>
+                </VStack>
               )}
             </VStack>
           </HStack>

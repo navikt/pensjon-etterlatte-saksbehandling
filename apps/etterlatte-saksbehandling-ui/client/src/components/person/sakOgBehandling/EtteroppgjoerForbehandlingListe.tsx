@@ -4,17 +4,15 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Alert, Link, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
-import { MapApiResult } from '~shared/components/MapApiResult'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
 import { EtteroppgjoerBehandling } from '~shared/types/Etteroppgjoer'
+import { mapResult } from '~shared/api/apiUtils'
 
 function lenkeTilForbehandlingMedId(id: string): string {
   return `/etteroppgjoer/${id}/`
 }
 
-function EtteroppgjoerForbehandlingTabell(props: { forbehandlinger: Array<EtteroppgjoerBehandling> }) {
-  const { forbehandlinger } = props
-
+function EtteroppgjoerForbehandlingTabell({ forbehandlinger }: { forbehandlinger: Array<EtteroppgjoerBehandling> }) {
   if (!forbehandlinger?.length) {
     return (
       <Alert variant="info" inline>
@@ -56,18 +54,21 @@ function EtteroppgjoerForbehandlingTabell(props: { forbehandlinger: Array<Ettero
 
 export function EtteroppgjoerForbehandlingListe(props: { sakId: number }) {
   const { sakId } = props
-  const [etteroppgjoerForbehandlinger, hentForbehandlinger] = useApiCall(hentEtteroppgjoerForbehandlinger)
+  const [hentEtteroppgjoerForbehandlingerResult, hentEtteroppgjoerForbehandlingerFetch] = useApiCall(
+    hentEtteroppgjoerForbehandlinger
+  )
 
   useEffect(() => {
-    void hentForbehandlinger(sakId)
+    void hentEtteroppgjoerForbehandlingerFetch(sakId)
   }, [sakId])
 
-  return (
-    <MapApiResult
-      result={etteroppgjoerForbehandlinger}
-      mapInitialOrPending={<Spinner label="Henter forbehandlinger til saken" />}
-      mapError={() => <ApiErrorAlert>Kunne ikke hente forbehandlinger</ApiErrorAlert>}
-      mapSuccess={(forbehandlinger) => <EtteroppgjoerForbehandlingTabell forbehandlinger={forbehandlinger} />}
-    />
-  )
+  return mapResult(hentEtteroppgjoerForbehandlingerResult, {
+    pending: <Spinner label="Henter forbehandlinger til saken"></Spinner>,
+    success: (forbehandlinger: EtteroppgjoerBehandling[]) => {
+      return <EtteroppgjoerForbehandlingTabell forbehandlinger={forbehandlinger} />
+    },
+    error: () => {
+      return <ApiErrorAlert>Kunne ikke hente forbehandlinger</ApiErrorAlert>
+    },
+  })
 }

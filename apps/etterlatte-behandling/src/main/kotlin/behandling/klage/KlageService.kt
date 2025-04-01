@@ -724,6 +724,13 @@ class KlageServiceImpl(
                 detail = "Klagen med id=${klage.id} kan ikke ferdigstilles siden den har feil status / tilstand",
             )
         }
+        val hjemmel = klage.utfall?.innstilling()?.lovhjemmel
+        if (hjemmel != null && !hjemmel.kanBrukesForSaktype(klage.sak.sakType)) {
+            throw UgyldigForespoerselException(
+                code = "UGYLDIG_HJEMMEL_FOR_KLAGE",
+                detail = "Klagen har en hjemmel (${hjemmel.lesbarTekst()}) som ikke kan brukes for sakstype ${klage.sak.sakType}.",
+            )
+        }
     }
 
     private fun lagOppgaveForOmgjoering(klage: Klage): OppgaveIntern {

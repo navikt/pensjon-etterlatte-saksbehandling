@@ -31,7 +31,6 @@ function EtteroppgjoerForbehandlingTabell({
   }
 
   const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
-    console.log('Opprett revurdering for forbehandling ' + forbehandlingId)
     opprettRevurderingRequest({ sakId: sakId, forbehandlingId: forbehandlingId }, () => {})
   }
 

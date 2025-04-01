@@ -2,6 +2,7 @@ package no.nav.etterlatte.avkorting.regler
 
 import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
+import no.nav.etterlatte.avkorting.EtteroppgjoerGrenseDto
 import no.nav.etterlatte.avkorting.EtteroppgjoerResultatType
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -148,7 +149,15 @@ data class EtteroppgjoerGrense(
     val tilbakekreving: Beregningstall,
     val etterbetaling: Beregningstall,
     val rettsgebyr: EtteroppgjoerRettsgebyr,
-)
+) {
+    fun toDto(): EtteroppgjoerGrenseDto =
+        EtteroppgjoerGrenseDto(
+            tilbakekreving = this.tilbakekreving.toDouble(),
+            etterbetaling = this.etterbetaling.toDouble(),
+            rettsgebyr = this.rettsgebyr.rettsgebyr.toDouble(),
+            rettsgebyrGyldigFra = this.rettsgebyr.gyldigFra,
+        )
+}
 
 data class EtteroppgjoerRettsgebyr(
     val gyldigFra: LocalDate,

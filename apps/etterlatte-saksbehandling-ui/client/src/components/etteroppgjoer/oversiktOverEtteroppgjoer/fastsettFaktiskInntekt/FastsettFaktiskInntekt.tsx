@@ -7,8 +7,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
+import { useAppDispatch } from '~store/Store'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -34,6 +35,7 @@ interface FastsettFaktiskInntektSkjema {
 export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: string }) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const behandling = useEtteroppgjoer().behandling
+  const dispatch = useAppDispatch()
 
   const { control, watch, handleSubmit } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: {
@@ -45,8 +47,8 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    lagreFaktiskInntektRequest({ forbehandlingId, faktiskInntekt }, () => {
-      //  TODO: her må det gjøre noe snacks for å indikere om at det er lagret, og oppdatere Redux state for videre visning av resultat på forbehandling
+    lagreFaktiskInntektRequest({ forbehandlingId, faktiskInntekt }, (resultat) => {
+      dispatch(addResultatEtteroppgjoer(resultat))
     })
   }
 

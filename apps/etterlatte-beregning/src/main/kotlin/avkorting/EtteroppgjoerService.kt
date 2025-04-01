@@ -30,9 +30,12 @@ class EtteroppgjoerService(
     private val sanksjonService: SanksjonService,
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
 ) {
-    fun beregnOgLagreEtteroppgjoerResultat(request: EtteroppgjoerBeregnetAvkortingRequest): BeregnetEtteroppgjoerResultat {
-        val (forbehandlingId, sisteIverksatteBehandling, aar) = request
-        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandling)
+    fun beregnOgLagreEtteroppgjoerResultat(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        aar: Int,
+    ): BeregnetEtteroppgjoerResultat {
+        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
 
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
         return etteroppgjoerResultat
@@ -170,6 +173,29 @@ class EtteroppgjoerService(
     }
 }
 
+data class BeregnetEtteroppgjoerResultatDto(
+    val id: UUID,
+    val aar: Int,
+    val forbehandlingId: UUID,
+    val sisteIverksatteBehandlingId: UUID,
+    val utbetaltStoenad: Long,
+    val nyBruttoStoenad: Long,
+    val differanse: Long,
+    val grense: EtteroppgjoerGrenseDto,
+    val resultatType: EtteroppgjoerResultatType,
+    val tidspunkt: Tidspunkt,
+    val kilde: Grunnlagsopplysning.Kilde,
+    val avkortingForbehandlingId: UUID,
+    val avkortingSisteIverksatteId: UUID,
+)
+
+data class EtteroppgjoerGrenseDto(
+    val tilbakekreving: Double,
+    val etterbetaling: Double,
+    val rettsgebyr: Double,
+    val rettsgebyrGyldigFra: LocalDate,
+)
+
 data class BeregnetEtteroppgjoerResultat(
     val id: UUID,
     val aar: Int,
@@ -184,7 +210,24 @@ data class BeregnetEtteroppgjoerResultat(
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.Kilde,
     val referanseAvkorting: ReferanseEtteroppgjoer,
-)
+) {
+    fun toDto(): BeregnetEtteroppgjoerResultatDto =
+        BeregnetEtteroppgjoerResultatDto(
+            id = this.id,
+            aar = this.aar,
+            forbehandlingId = this.forbehandlingId,
+            sisteIverksatteBehandlingId = this.sisteIverksatteBehandlingId,
+            utbetaltStoenad = this.utbetaltStoenad,
+            nyBruttoStoenad = this.nyBruttoStoenad,
+            differanse = this.differanse,
+            grense = this.grense.toDto(),
+            resultatType = this.resultatType,
+            tidspunkt = this.tidspunkt,
+            kilde = this.kilde,
+            avkortingForbehandlingId = this.referanseAvkorting.avkortingForbehandling,
+            avkortingSisteIverksatteId = this.referanseAvkorting.avkortingSisteIverksatte,
+        )
+}
 
 enum class EtteroppgjoerResultatType {
     TILBAKREVING,

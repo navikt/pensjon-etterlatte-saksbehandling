@@ -55,7 +55,6 @@ class EtteroppgjoerForbehandlingService(
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
                 ?: throw InternfeilException("Fant ikke siste iverksatte")
 
-        // TODO er vel kun forventet inntekt som er interessant å hente
         val avkorting =
             runBlocking {
                 beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
@@ -83,6 +82,7 @@ class EtteroppgjoerForbehandlingService(
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntekt,
                     ainntekt = aInntekt,
+                    tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
             avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
         )

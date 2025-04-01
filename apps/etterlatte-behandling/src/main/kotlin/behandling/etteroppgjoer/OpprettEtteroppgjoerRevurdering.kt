@@ -36,7 +36,7 @@ class OpprettEtteroppgjoerRevurdering(
     ): Revurdering {
         val forbehandling = etteroppgjoerForbehandlingService.hentForbehadling(forbehandlingId)
 
-        revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+        // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId) TODO ønskelig?
 
         val sisteIverksatte =
             behandlingService.hentSisteIverksatte(sakId)

@@ -525,6 +525,17 @@ internal class ApplicationContext(
         )
     val selfTestService = SelfTestService(externalServices)
 
+    val oppdaterTilgangService: OppdaterTilgangService by lazy {
+        OppdaterTilgangService(
+            sakService = sakService,
+            skjermingKlient = skjermingKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
+            brukerService = brukerService,
+            oppgaveService = oppgaveService,
+            sakSkrivDao = sakSkrivDao,
+        )
+    }
+
     val sakService =
         SakServiceImpl(
             sakSkrivDao,
@@ -536,6 +547,7 @@ internal class ApplicationContext(
             krrKlient,
             pdlTjenesterKlient,
             featureToggleService,
+            oppdaterTilgangService,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
 
@@ -566,15 +578,6 @@ internal class ApplicationContext(
         )
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
-    val oppdaterTilgangService =
-        OppdaterTilgangService(
-            sakService = sakService,
-            skjermingKlient = skjermingKlient,
-            pdltjenesterKlient = pdlTjenesterKlient,
-            brukerService = brukerService,
-            oppgaveService = oppgaveService,
-            sakSkrivDao = sakSkrivDao,
-        )
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,

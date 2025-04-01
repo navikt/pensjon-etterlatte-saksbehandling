@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
@@ -150,6 +151,7 @@ class SakServiceImpl(
     private val krrKlient: KrrKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
     private val featureToggle: FeatureToggleService,
+    private val tilgangsService: OppdaterTilgangService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -274,7 +276,18 @@ class SakServiceImpl(
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
         leggTilGrunnlag(sak)
-
+        /*
+        haandtergraderingOgEgenAnsatt kalles her slik at 3-parts graderinger for egen ansatt
+        eller adressebeskyttelse ikke blir overskredet deresom man kaller finnEllerOpprettSakMedGrunnlag.
+        Dette vil kun ha effekt for de som har persongallerier, dersom denne metoden blir kalt
+        for en sak med persongalleri uten haandtergraderingOgEgenAnsatt forsvinner potensielt
+        3-parts beskyttelser slik som DoedshendelseJobService.opprettSakOgLagGrunnlag potensielt gjør.
+        Se https://jira.adeo.no/browse/FAGSYSTEM-376040?atlLinkOrigin=c2xhY2staW50ZWdyYXRpb258aXNzdWU%3D for konrekt case.
+         */
+        val persongalleri = grunnlagService.hentPersongalleri(sak.id)
+        if (persongalleri != null) {
+            tilgangsService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        }
         return sak
     }
 
@@ -368,6 +381,13 @@ class SakServiceImpl(
             } ?: Spraak.NB
     }
 
+    /*
+        Hvis man mot formodning gjør denne public må man huske på at
+        sjekkene for enhet og gradering/adressebeskyttelse i denne kun er gyldig dersom
+        en sak ikke har persongalleri.
+        For at ting ikke skal overskride viktige beskyttelser for 3-part så
+        må haandtergraderingOgEgenAnsatt() kalles på tilsvarende måte som i finnEllerOpprettSakMedGrunnlag().
+     */
     private fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,

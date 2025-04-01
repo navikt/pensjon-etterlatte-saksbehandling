@@ -43,6 +43,7 @@ import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.sak.TilgangServiceSjekker
 import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -72,6 +73,7 @@ internal class TilgangServiceTest(
     private val krrKlient = mockk<KrrKlient>()
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val featureToggle = mockk<FeatureToggleService>()
+    private val oppdaterTilgangService = mockk<OppdaterTilgangService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -91,6 +93,7 @@ internal class TilgangServiceTest(
                 krrKlient,
                 pdlTjenesterKlient,
                 featureToggle,
+                oppdaterTilgangService,
             )
         behandlingRepo =
             BehandlingDao(

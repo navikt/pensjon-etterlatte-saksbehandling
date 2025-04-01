@@ -58,7 +58,7 @@ import javax.sql.DataSource
 internal class EgenAnsattServiceTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakSkrivDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
     private lateinit var sakendringerDao: SakendringerDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
@@ -99,15 +99,16 @@ internal class EgenAnsattServiceTest(
         val skjermingKlient = mockk<SkjermingKlientImpl>()
         oppdaterTilgangService = mockk()
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
         oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))
         val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
+
         sakService =
             spyk(
                 SakServiceImpl(
-                    sakRepo,
+                    sakSkrivDao,
                     sakLesDao,
                     sakendringerDao,
                     skjermingKlient,
@@ -116,6 +117,7 @@ internal class EgenAnsattServiceTest(
                     krrKlient,
                     pdlTjenesterKlient,
                     featureToggleService,
+                    oppdaterTilgangService,
                 ),
             )
         oppgaveService =
@@ -171,11 +173,11 @@ internal class EgenAnsattServiceTest(
             )
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
+        every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(any(), any()) } just Runs
         val bruktSak =
             sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         every { grunnlagService.hentPersongalleri(bruktSak.id) } returns persongalleri
-        every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) } just Runs
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))
@@ -183,7 +185,7 @@ internal class EgenAnsattServiceTest(
         val egenAnsattSkjermet = EgenAnsattSkjermet(fnr, Tidspunkt.now(), true)
         egenAnsattService.haandterSkjerming(egenAnsattSkjermet)
 
-        verify(exactly = 1) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }
+        verify(exactly = 3) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }
         verify(exactly = 0) { sakService.oppdaterSkjerming(any(), any()) }
     }
 }

@@ -60,6 +60,7 @@ import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
@@ -84,6 +85,7 @@ internal class SakServiceTest {
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val oppdaterTilgangService = mockk<OppdaterTilgangService>()
 
     private val service: SakService =
         SakServiceImpl(
@@ -96,6 +98,7 @@ internal class SakServiceTest {
             krrKlient,
             pdlTjenesterKlient,
             featureToggleService,
+            oppdaterTilgangService,
         )
 
     @BeforeEach
@@ -106,6 +109,7 @@ internal class SakServiceTest {
          Gjelder ikke for oppdaterIdentForSak()
          */
         coEvery { grunnlagservice.opprettGrunnlag(any(), any()) } just runs
+        every { grunnlagservice.hentPersongalleri(any(SakId::class)) } returns null
         every { grunnlagservice.lagreNyeSaksopplysningerBareSak(any(), any()) } just runs
 
         coEvery { krrKlient.hentDigitalKontaktinformasjon(any()) } returns

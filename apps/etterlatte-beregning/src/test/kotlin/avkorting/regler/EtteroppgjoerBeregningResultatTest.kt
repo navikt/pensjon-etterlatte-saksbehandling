@@ -3,11 +3,11 @@ package no.nav.etterlatte.beregning.regler.avkorting.regler
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
-import no.nav.etterlatte.avkorting.EtteroppgjoerResultatType
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode

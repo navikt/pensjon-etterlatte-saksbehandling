@@ -67,8 +67,8 @@ fun Route.etteroppgjoerRoutes(
 
             post("beregn_faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
-                forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                val response = forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                call.respond(response)
             }
         }
 

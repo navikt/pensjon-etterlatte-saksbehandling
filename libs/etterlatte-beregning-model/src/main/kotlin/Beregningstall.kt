@@ -109,6 +109,8 @@ class Beregningstall : Comparable<Beregningstall> {
 
     fun toInteger() = value.toInt()
 
+    fun toDouble() = value.toDouble()
+
     override fun toString(): String = value.toString()
 
     override fun compareTo(other: Beregningstall): Int = this.value.compareTo(other.value)

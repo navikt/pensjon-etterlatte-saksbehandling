@@ -6,9 +6,11 @@ import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -30,9 +32,12 @@ class EtteroppgjoerService(
     private val sanksjonService: SanksjonService,
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
 ) {
-    fun beregnOgLagreEtteroppgjoerResultat(request: EtteroppgjoerBeregnetAvkortingRequest): BeregnetEtteroppgjoerResultat {
-        val (forbehandlingId, sisteIverksatteBehandling, aar) = request
-        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandling)
+    fun beregnOgLagreEtteroppgjoerResultat(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        aar: Int,
+    ): BeregnetEtteroppgjoerResultat {
+        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
 
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
         return etteroppgjoerResultat
@@ -156,7 +161,11 @@ class EtteroppgjoerService(
                     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
-            is Etteroppgjoer -> TODO() // Kan skje hvis et skatteoppgjør endrer seg...
+            is Etteroppgjoer ->
+                AvkortingDto(
+                    avkortingGrunnlag = emptyList(),
+                    avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
+                )
             else -> null
         }
     }
@@ -184,12 +193,23 @@ data class BeregnetEtteroppgjoerResultat(
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.Kilde,
     val referanseAvkorting: ReferanseEtteroppgjoer,
-)
-
-enum class EtteroppgjoerResultatType {
-    TILBAKREVING,
-    ETTERBETALING,
-    IKKE_ETTEROPPGJOER,
+) {
+    fun toDto(): BeregnetEtteroppgjoerResultatDto =
+        BeregnetEtteroppgjoerResultatDto(
+            id = this.id,
+            aar = this.aar,
+            forbehandlingId = this.forbehandlingId,
+            sisteIverksatteBehandlingId = this.sisteIverksatteBehandlingId,
+            utbetaltStoenad = this.utbetaltStoenad,
+            nyBruttoStoenad = this.nyBruttoStoenad,
+            differanse = this.differanse,
+            grense = this.grense.toDto(),
+            resultatType = this.resultatType,
+            tidspunkt = this.tidspunkt,
+            kilde = this.kilde,
+            avkortingForbehandlingId = this.referanseAvkorting.avkortingForbehandling,
+            avkortingSisteIverksatteId = this.referanseAvkorting.avkortingSisteIverksatte,
+        )
 }
 
 data class ReferanseEtteroppgjoer(

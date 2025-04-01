@@ -59,7 +59,7 @@ export interface Avkorting {
 }
 
 export enum EtteroppgjoerResultatType {
-  TILBAKREVING = 'TILBAKEKREVING',
+  TILBAKEKREVING = 'TILBAKEKREVING',
   ETTERBETALING = 'ETTERBETALING',
   IKKE_ETTEROPPGJOER = 'IKKE_ETTEROPPGJOER',
 }

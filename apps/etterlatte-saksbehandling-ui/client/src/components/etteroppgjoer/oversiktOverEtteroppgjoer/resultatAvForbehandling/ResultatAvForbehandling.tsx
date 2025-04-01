@@ -1,7 +1,7 @@
 import { BodyShort, Box, Heading, HStack, Label, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import { EtteroppgjoerResultatType } from '~shared/types/Etteroppgjoer'
-import { CheckmarkCircleIcon, EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
 
 export const ResultatAvForbehandling = () => {
@@ -38,13 +38,13 @@ export const ResultatAvForbehandling = () => {
               </Table.DataCell>
             </Table.Row>
             <Table.Row>
-              <Table.HeaderCell scope="row">Differanse +/-</Table.HeaderCell>
+              <Table.HeaderCell scope="row">Avviksbeløp +/-</Table.HeaderCell>
               <Table.DataCell>
                 <HStack justify="end">+ {NOK(resultat.differanse)}</HStack>
               </Table.DataCell>
             </Table.Row>
             <Table.Row>
-              <Table.HeaderCell scope="row">Grense</Table.HeaderCell>
+              <Table.HeaderCell scope="row">Toleransebeløp</Table.HeaderCell>
               <Table.DataCell>
                 <HStack justify="end">
                   {resultat.differanse > 0 ? NOK(resultat.grense.etterbetaling) : NOK(resultat.grense.tilbakekreving)}
@@ -55,12 +55,12 @@ export const ResultatAvForbehandling = () => {
         </Table>
       </Box>
 
-      {utfallAvForbehandling === EtteroppgjoerResultatType.TILBAKREVING && (
+      {utfallAvForbehandling === EtteroppgjoerResultatType.TILBAKEKREVING && (
         <HStack gap="2" maxWidth="fit-content">
           <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
           <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-            <Label>Resultat av forbehandlingen</Label>
-            <BodyShort>Basert på behandlingen skal du nå sende varselbrev om tilbakekreving til brukeren.</BodyShort>
+            <Label>Forbehandlingen viser at det blir tilbakekreving</Label>
+            <BodyShort>Du skal nå sende varselbrev.</BodyShort>
           </VStack>
         </HStack>
       )}
@@ -68,20 +68,17 @@ export const ResultatAvForbehandling = () => {
         <HStack gap="2" maxWidth="fit-content">
           <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
           <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-            <Label>Resultat av forbehandlingen</Label>
-            <BodyShort>Basert på behandlingen skal du nå sende varselbrev om etterbetaling til brukeren.</BodyShort>
+            <Label>Forbehandlingen viser at det blir etterbetaling</Label>
+            <BodyShort>Du skal nå sende varselbrev.</BodyShort>
           </VStack>
         </HStack>
       )}
       {utfallAvForbehandling === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER && (
         <HStack gap="2" maxWidth="fit-content">
-          <CheckmarkCircleIcon fontSize="1.5rem" aria-hidden />
+          <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
           <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-            <Label>Resultat av forbehandlingen</Label>
-            <BodyShort>
-              Ettersom dette ikke resulterer i etterbetaling eller tilbakekreving og bruker har 0 utbetalt, trenger man
-              ikke sende ut brev. Du kan nå ferdistille oppgaven.
-            </BodyShort>
+            <Label>Forbehandlingen viser at det blir ingen endring</Label>
+            <BodyShort>Du skal nå sende informasjonsbrev.</BodyShort>
           </VStack>
         </HStack>
       )}

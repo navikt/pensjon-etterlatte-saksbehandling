@@ -432,6 +432,8 @@ const LOVHJEMLER_KUN_OMS = [
   'FTRL_17_A_7',
   'FTRL_17_A_8',
 
+  // Disse hjemlene er utdaterte og legges bakerst i listen over hjemler, men vi må ha de med
+  // siden vi har brukt de i klager.
   'FTRL_17_4',
   'FTRL_17_5',
   'FTRL_17_6',

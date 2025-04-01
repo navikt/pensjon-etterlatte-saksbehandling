@@ -80,6 +80,12 @@ fun Route.etteroppgjoerRoutes(
             }
         }
 
+        get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            val forbehandlinger = forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId)
+            call.respond(forbehandlinger)
+        }
+
         post("/skatteoppgjoerhendelser/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {

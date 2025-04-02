@@ -86,10 +86,7 @@ internal fun Route.revurderingRoutes(
             post("/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
-                    val revurdering =
-                        inTransaction {
-                            opprettEtteroppgjoer.opprett(sakId, etteroppgjoerId, brukerTokenInfo)
-                        }
+                    val revurdering = opprettEtteroppgjoer.opprett(sakId, etteroppgjoerId, brukerTokenInfo)
                     call.respond(revurdering.id)
                 }
             }

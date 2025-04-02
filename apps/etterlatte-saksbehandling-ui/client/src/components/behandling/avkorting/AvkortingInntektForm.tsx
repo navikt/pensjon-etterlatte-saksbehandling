@@ -128,9 +128,14 @@ const InntektForm = ({
     if (fomJanuar) {
       return true
     }
-    // forutsetter at nyligster inntekt alltid er første element
-    const tidligereAvkortingGrunnlag = redigerbartGrunnlag ?? alleGrunnlag[0]
-    return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.innvilgaMaaneder === 12 : false
+
+    if (!!redigerbartGrunnlag) {
+      return redigerbartGrunnlag.innvilgaMaaneder === 12
+    }
+    if (behandling.revurderingsaarsak != null) {
+      return alleGrunnlag[0].innvilgaMaaneder === 12
+    }
+    return false
   }
 
   /*

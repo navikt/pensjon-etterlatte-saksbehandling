@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -60,7 +61,10 @@ fun Route.etteroppgjoerRoutes(
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
+                    val etteroppgjoer =
+                        inTransaction {
+                            forbehandlingService.hentForbehandlingForFrontend(brukerTokenInfo, etteroppgjoerId)
+                        }
                     call.respond(etteroppgjoer)
                 }
             }

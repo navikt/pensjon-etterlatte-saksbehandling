@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import io.ktor.server.plugins.NotFoundException
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
@@ -41,50 +42,50 @@ class EtteroppgjoerForbehandlingService(
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
 ) {
-    suspend fun hentEtteroppgjoer(
+    fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
+        dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
+    fun hentForbehandlingForFrontend(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ): ForbehandlingDto {
-        val forbehandling =
-            inTransaction { dao.hentForbehandling(behandlingId) } ?: throw FantIkkeForbehandling(behandlingId)
+        val forbehandling = hentForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
-            inTransaction {
-                behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                    ?: throw InternfeilException("Fant ikke siste iverksatte")
-            }
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
 
         val avkorting =
-            beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                EtteroppgjoerBeregnetAvkortingRequest(
-                    forbehandling = behandlingId,
-                    sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                    aar = forbehandling.aar,
-                ),
-                brukerTokenInfo,
-            )
-
-        return inTransaction {
-            val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
-            val aInntekt = dao.hentAInntekt(behandlingId)
-
-            if (pensjonsgivendeInntekt == null || aInntekt == null) {
-                throw InternfeilException(
-                    "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
+            runBlocking {
+                beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                    EtteroppgjoerBeregnetAvkortingRequest(
+                        forbehandling = behandlingId,
+                        sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                        aar = forbehandling.aar,
+                    ),
+                    brukerTokenInfo,
                 )
             }
 
-            ForbehandlingDto(
-                behandling = forbehandling,
-                opplysninger =
-                    EtteroppgjoerOpplysninger(
-                        skatt = pensjonsgivendeInntekt,
-                        ainntekt = aInntekt,
-                        tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
-                    ),
-                avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
+        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
+        val aInntekt = dao.hentAInntekt(behandlingId)
+
+        if (pensjonsgivendeInntekt == null || aInntekt == null) {
+            throw InternfeilException(
+                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
             )
         }
+
+        return ForbehandlingDto(
+            behandling = forbehandling,
+            opplysninger =
+                EtteroppgjoerOpplysninger(
+                    skatt = pensjonsgivendeInntekt,
+                    ainntekt = aInntekt,
+                    tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
+                ),
+            avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
+        )
     }
 
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }

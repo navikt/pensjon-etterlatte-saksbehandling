@@ -39,7 +39,6 @@ import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakslisteDTO
@@ -105,11 +104,6 @@ interface BehandlingService {
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakslisteDTO: SakslisteDTO): SakIDListe
 
     fun avbryt(behandlingId: UUID): HttpResponse
-
-    fun finnEllerOpprettSak(
-        sakType: SakType,
-        foedselsNummerDTO: FoedselsnummerDTO,
-    ): Sak
 
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
 
@@ -271,18 +265,6 @@ class BehandlingServiceImpl(
                 contentType(ContentType.Application.Json)
             }
         }
-
-    // Ubrukt, fjerne
-    override fun finnEllerOpprettSak(
-        sakType: SakType,
-        foedselsNummerDTO: FoedselsnummerDTO,
-    ) = runBlocking {
-        behandlingKlient
-            .post("$url/personer/saker/${sakType.name}") {
-                contentType(ContentType.Application.Json)
-                setBody(foedselsNummerDTO)
-            }.body<Sak>()
-    }
 
     override fun hentBehandling(behandlingId: UUID): DetaljertBehandling =
         runBlocking {

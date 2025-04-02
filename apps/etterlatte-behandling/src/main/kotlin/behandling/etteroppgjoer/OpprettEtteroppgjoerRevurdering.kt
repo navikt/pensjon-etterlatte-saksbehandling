@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -41,6 +42,15 @@ class OpprettEtteroppgjoerRevurdering(
         val (revurdering, sisteIverksatte) =
             inTransaction {
                 val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+
+                val revurderingForForbehandlingEksisterer =
+                    behandlingService
+                        .hentBehandlingerForSak(sakId)
+                        .filter { it.relatertBehandlingId == forbehandlingId.toString() }
+                        .any { it.status != BehandlingStatus.AVBRUTT }
+
+                if (revurderingForForbehandlingEksisterer) {
+                }
 
                 // TODO her bør det sjekkes for om det allerede er laget en behandling med matchende relatertBehandlingId
 

@@ -144,7 +144,12 @@ fun Route.avkorting(
                 logger.info(
                     "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
                 )
-                val dto = etteroppgjoerService.hentBeregnetAvkorting(request)
+                val dto =
+                    etteroppgjoerService.hentBeregnetAvkorting(
+                        forbehandlingId = request.forbehandling,
+                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                        aar = request.aar,
+                    )
                 call.respond(dto)
             }
 

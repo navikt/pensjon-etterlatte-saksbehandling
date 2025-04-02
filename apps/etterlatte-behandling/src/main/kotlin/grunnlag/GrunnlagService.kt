@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.jetbrains.annotations.TestOnly
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -117,6 +118,7 @@ class GrunnlagServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
     private val opplysningDao: OpplysningDao,
     private val grunnlagHenter: GrunnlagHenter,
+    private val oppdaterTilgangService: OppdaterTilgangService,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -479,6 +481,13 @@ class GrunnlagServiceImpl(
     ) {
         logger.info("Oppretter et grunnlag for personopplysninger")
         oppdaterGrunnlagOgVersjon(sakId, behandlingId, fnr, nyeOpplysninger)
+        val persongalleri = hentPersongalleri(sakId)
+        if (persongalleri != null) {
+            /*
+                For å ha konsistens i beskyttelser ved endringer i persongalleriet.
+             */
+            oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+        }
     }
 
     override fun lagreNyeSaksopplysninger(

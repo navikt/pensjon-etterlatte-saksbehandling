@@ -92,7 +92,7 @@ class DoedshendelseJobService(
     ) {
         val kontrollpunkter =
             try {
-                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseKontrollpunktService.identifiserKontrollpunkter(
                     doedshendelse,
                     bruker,
                 )

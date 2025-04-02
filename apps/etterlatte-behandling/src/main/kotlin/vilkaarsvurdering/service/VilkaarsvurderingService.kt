@@ -202,10 +202,15 @@ class VilkaarsvurderingService(
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
             ) {
-                VilkaarsvurderingMedBehandlingGrunnlagsversjon(
-                    repository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
-                    grunnlag.metadata.versjon,
-                )
+                if (behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
+                    behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, dryRun = false)
+                    VilkaarsvurderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)
+                } else {
+                    VilkaarsvurderingMedBehandlingGrunnlagsversjon(
+                        repository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
+                        grunnlag.metadata.versjon,
+                    )
+                }
             } else {
                 behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, dryRun = false)
                 VilkaarsvurderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)

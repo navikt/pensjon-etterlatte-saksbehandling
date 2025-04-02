@@ -115,7 +115,6 @@ class OpprettEtteroppgjoerRevurdering(
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = revurdering.id,
                     kopierFraBehandling = sisteIverksatte.id,
-                    kopierResultat = true,
                     brukerTokenInfo = brukerTokenInfo,
                 )
 

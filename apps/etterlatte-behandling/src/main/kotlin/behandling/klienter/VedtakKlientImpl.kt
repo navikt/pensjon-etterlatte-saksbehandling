@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -84,6 +85,11 @@ interface VedtakKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto?
+
+    suspend fun hentIverksatteVedtak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<VedtakSammendragDto>
 
     suspend fun hentSakerMedUtbetalingForInntektsaar(
         inntektsaar: Int,
@@ -404,6 +410,33 @@ class VedtakKlientImpl(
                     meta = mapOf("behandlingId" to behandlingId),
                 )
             }
+        }
+    }
+
+    override suspend fun hentIverksatteVedtak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<VedtakSammendragDto> {
+        try {
+            logger.info("Henter alle iverksatte vedtak for sak=$sakId")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/vedtak/sak/${sakId.sakId}/iverksatte"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (re: ResponseException) {
+            logger.error("Ukjent feil ved henting av vedtak i sak=$sakId", re)
+
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
+                detail = "Ukjent feil oppsto ved henting av vedtak",
+                meta = mapOf("sakId" to sakId.sakId),
+            )
         }
     }
 

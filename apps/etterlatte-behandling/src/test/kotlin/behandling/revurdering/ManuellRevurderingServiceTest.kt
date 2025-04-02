@@ -158,6 +158,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         verify {
             grunnlagService.hentPersongalleri(behandling!!.id)
+            grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
             grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             oppgaveService.opprettOppgave(
@@ -279,6 +280,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler)
                 grunnlagService.hentPersongalleri(behandling!!.id)
+                grunnlagService.hentPersongalleri(sak.id)
                 grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
                 grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             }
@@ -343,6 +345,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         verify {
             grunnlagService.hentPersongalleri(behandling!!.id)
+            grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
             grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
             oppgaveService.opprettOppgave(

@@ -399,11 +399,24 @@ internal class ApplicationContext(
         no.nav.etterlatte.grunnlag.aldersovergang
             .AldersovergangService(aldersovergangDao)
 
+    val sakTilgang: SakTilgang = SakTilgangImpl(sakSkrivDao, sakLesDao)
+    val oppdaterTilgangService =
+        OppdaterTilgangService(
+            skjermingKlient = skjermingKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
+            brukerService = brukerService,
+            oppgaveService = oppgaveService,
+            sakSkrivDao = sakSkrivDao,
+            sakTilgang = sakTilgang,
+            sakLesDao = sakLesDao,
+        )
+
     val grunnlagService: GrunnlagService =
         grunnlagServiceOverride ?: GrunnlagServiceImpl(
             pdlTjenesterKlient,
             opplysningDao,
             GrunnlagHenter(pdlTjenesterKlient),
+            oppdaterTilgangService,
         )
 
     val behandlingService =
@@ -526,18 +539,6 @@ internal class ApplicationContext(
             tilbakekrevingKlient,
         )
     val selfTestService = SelfTestService(externalServices)
-
-    val sakTilgang: SakTilgang = SakTilgangImpl(sakSkrivDao, sakLesDao)
-    val oppdaterTilgangService =
-        OppdaterTilgangService(
-            skjermingKlient = skjermingKlient,
-            pdltjenesterKlient = pdlTjenesterKlient,
-            brukerService = brukerService,
-            oppgaveService = oppgaveService,
-            sakSkrivDao = sakSkrivDao,
-            sakTilgang = sakTilgang,
-            sakLesDao = sakLesDao,
-        )
 
     val sakService =
         SakServiceImpl(

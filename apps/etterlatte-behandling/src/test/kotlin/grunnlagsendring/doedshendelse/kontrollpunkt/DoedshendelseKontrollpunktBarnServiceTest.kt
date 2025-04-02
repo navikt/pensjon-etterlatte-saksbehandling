@@ -105,11 +105,11 @@ class DoedshendelseKontrollpunktBarnServiceTest {
             )
         } returns gjenlevende
         every {
-            behandlingService.hentSisteIverksatte(sak.id)
-        } returns foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
+            behandlingService.hentBehandlingerForSak(sak.id)
+        } returns listOf(foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT))
 
         val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, sak, barnet)
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon(sak))
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnErSoektFor(sak))
     }
 
     @Test
@@ -129,8 +129,8 @@ class DoedshendelseKontrollpunktBarnServiceTest {
             )
         } returns gjenlevende
         every {
-            behandlingService.hentSisteIverksatte(sak.id)
-        } returns null
+            behandlingService.hentBehandlingerForSak(sak.id)
+        } returns emptyList()
 
         val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, sak, barnet)
         kontrollpunkter shouldBe emptyList()

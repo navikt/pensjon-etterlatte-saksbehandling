@@ -151,7 +151,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 }
         }
-        coVerify(exactly = 4) {
+        coVerify(exactly = 5) {
             pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
         }
     }
@@ -302,7 +302,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     }
             Assertions.assertFalse(harIkkeTilgang)
         }
-        coVerify(exactly = 4) {
+        coVerify(exactly = 5) {
             pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
         }
     }

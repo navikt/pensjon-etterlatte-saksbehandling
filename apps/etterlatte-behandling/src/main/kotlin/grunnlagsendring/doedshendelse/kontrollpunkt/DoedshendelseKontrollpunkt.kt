@@ -59,12 +59,12 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("BARN_HAR_BP")
-    data class BarnHarBarnepensjon(
+    data class BarnErSoektFor(
         override val sak: Sak,
     ) : DoedshendelseKontrollpunkt(),
         KontrollpunktMedSak {
         override val kode = "BARN_HAR_BP"
-        override val beskrivelse: String = "Barn har barnepensjon"
+        override val beskrivelse: String = "Det er søkt om barnepensjon for Barn"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
@@ -250,12 +250,12 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("EPS_HAR_SAK_I_GJENNY")
-    data class EpsHarSakMedIverksattBehandlingIGjenny(
+    data class EpsHarSoektOMS(
         override val sak: Sak,
     ) : DoedshendelseKontrollpunkt(),
         KontrollpunktMedSak {
         override val kode = "EPS_HAR_SAK_I_GJENNY"
-        override val beskrivelse: String = "Det eksisterer allerede en aktiv sak på EPS i Gjenny med iverksatt behandling"
+        override val beskrivelse: String = "Det eksisterer allerede en aktiv sak på EPS i Gjenny med behandling"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val oppgaveTekst: String? = null

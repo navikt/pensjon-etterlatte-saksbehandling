@@ -1,0 +1,1 @@
+UPDATE sak SET enhet = '4883', erSkjermet = 't' where id = 23060;

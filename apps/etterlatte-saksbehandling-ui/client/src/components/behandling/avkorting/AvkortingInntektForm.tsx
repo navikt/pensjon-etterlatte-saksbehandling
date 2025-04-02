@@ -144,13 +144,8 @@ const InntektForm = ({
       return redigerbartGrunnlag
     }
 
-    if (!erInnevaerendeAar) {
-      const grunnlagNesteAar = historikk[0]
-      if (grunnlagNesteAar !== undefined) {
-        return grunnlagNesteAar
-      }
-    }
-    if (redigerbartGrunnlag && historikk.length > 0) {
+    // Inntektsendringer skjer kun frem i tid
+    if (erInnevaerendeAar && historikk.length > 0) {
       const nyligste = historikk[0]
       // Preutfyller uten id
       return {

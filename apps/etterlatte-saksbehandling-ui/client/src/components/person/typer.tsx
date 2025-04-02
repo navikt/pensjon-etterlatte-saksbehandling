@@ -23,7 +23,7 @@ export interface SakMedBehandlinger {
 }
 
 export interface SakMedBehandlingerOgKanskjeAnnenSak extends SakMedBehandlinger {
-  annenSak?: SakMedBehandlinger
+  ekstraSak?: SakMedBehandlinger
 }
 
 export interface IBehandlingsammendrag {

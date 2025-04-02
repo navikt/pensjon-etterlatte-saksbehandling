@@ -1,7 +1,7 @@
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
-import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { SakOversiktHeader } from '~components/person/sakOgBehandling/SakOversiktHeader'
@@ -33,11 +33,13 @@ export enum OppgaveValg {
 
 function ByttTilAnnenSak(props: { byttSak: () => void }) {
   return (
-    <Box>
+    <Box marginBlock="8 0">
       <Alert variant="info">
         Bruker har en annen sak.
         <div>
-          <Button onClick={props.byttSak}>Se annen sak</Button>
+          <Button variant="secondary" size="small" onClick={props.byttSak}>
+            Se annen sak
+          </Button>
         </div>
       </Alert>
     </Box>
@@ -80,17 +82,23 @@ export const SakOversikt = ({
     }
   }, [fnr, sakResult])
 
+  console.log('bytt til annen sak', byttTilAnnenSakEnabled)
+  console.log(
+    'sak',
+    mapSuccess(sakResult, (r) => r)
+  )
+
   return (
     <>
       {mapResult(sakResult, {
         pending: <Spinner label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
-        success: ({ sak, behandlinger, annenSak }) => (
+        success: ({ sak, behandlinger, ekstraSak }) => (
           <HStack gap="4" wrap={false}>
             <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
-              {byttTilAnnenSakEnabled && annenSak && (
-                <ByttTilAnnenSak byttSak={() => setForetrukketSak(annenSak.sak.id)} />
+              {byttTilAnnenSakEnabled && ekstraSak && (
+                <ByttTilAnnenSak byttSak={() => setForetrukketSak(ekstraSak.sak.id)} />
               )}
             </Box>
             <VStack gap="8">

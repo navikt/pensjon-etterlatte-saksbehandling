@@ -61,8 +61,8 @@ export const Person = () => {
 
   // Setter returnert sak til å eventuelt være den foretrukkede andre saken på bruker, hvis den er valgt
   const transformedSakResult = transformResult(sakResult, (sakData) =>
-    foretrukketSak && foretrukketSak === sakData.annenSak?.sak.id
-      ? { ...sakData.annenSak, annenSak: { ...sakData } }
+    foretrukketSak && foretrukketSak === sakData.ekstraSak?.sak.id
+      ? { ...sakData.ekstraSak, ekstraSak: { ...sakData } }
       : sakData
   )
 

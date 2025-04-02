@@ -36,7 +36,7 @@ class DoedshendelseKontrollpunktService(
     private val kontrollpunktBarnService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
     private val kontrollpunktOMSService = DoedshendelseKontrollpunktOMSService(pesysKlient, behandlingService)
 
-    fun identifiserKontrollerpunkter(
+    fun identifiserKontrollpunkter(
         hendelse: DoedshendelseInternal,
         bruker: BrukerTokenInfo,
     ): List<DoedshendelseKontrollpunkt> =
@@ -127,7 +127,7 @@ class DoedshendelseKontrollpunktService(
     ): Sak? =
         try {
             sakService.finnSak(beroertFnr, sakType)
-        } catch (e: InternfeilException) {
+        } catch (_: InternfeilException) {
             val saker = sakService.finnSaker(beroertFnr)
 
             if (saker.size > 1) {

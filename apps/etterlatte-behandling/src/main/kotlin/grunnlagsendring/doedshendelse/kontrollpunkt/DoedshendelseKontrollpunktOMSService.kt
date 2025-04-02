@@ -58,8 +58,12 @@ internal class DoedshendelseKontrollpunktOMSService(
 
     private fun kontrollerEksisterendeBehandling(sak: Sak?): DoedshendelseKontrollpunkt? =
         sak?.let {
-            behandlingService.hentSisteIverksatte(sak.id)?.let {
-                DoedshendelseKontrollpunkt.EpsHarSakMedIverksattBehandlingIGjenny(sak)
+            val harSoekt =
+                behandlingService.hentBehandlingerForSak(sak.id).any { it.sak.sakType == SakType.OMSTILLINGSSTOENAD }
+            if (harSoekt) {
+                DoedshendelseKontrollpunkt.EpsHarSoektOMS(sak)
+            } else {
+                null
             }
         }
 

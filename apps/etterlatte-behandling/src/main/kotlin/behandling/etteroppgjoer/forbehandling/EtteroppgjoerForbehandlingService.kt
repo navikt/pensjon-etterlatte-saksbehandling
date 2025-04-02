@@ -27,6 +27,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -42,6 +44,8 @@ class EtteroppgjoerForbehandlingService(
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
+
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
@@ -55,14 +59,17 @@ class EtteroppgjoerForbehandlingService(
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
                 ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
 
+        val request =
+            EtteroppgjoerBeregnetAvkortingRequest(
+                forbehandling = behandlingId,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                aar = forbehandling.aar,
+            )
+        logger.info("Henter avkorting for forbehandling: $request")
         val avkorting =
             runBlocking {
                 beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                    EtteroppgjoerBeregnetAvkortingRequest(
-                        forbehandling = behandlingId,
-                        sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                        aar = forbehandling.aar,
-                    ),
+                    request,
                     brukerTokenInfo,
                 )
             }

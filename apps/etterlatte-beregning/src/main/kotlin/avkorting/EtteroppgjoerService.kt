@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -43,12 +42,14 @@ class EtteroppgjoerService(
         return etteroppgjoerResultat
     }
 
-    fun hentBeregnetAvkorting(request: EtteroppgjoerBeregnetAvkortingRequest): EtteroppgjoerBeregnetAvkorting {
-        val (forbehandlingId, sisteIverksatteBehandling, aar) = request
-
+    fun hentBeregnetAvkorting(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        aar: Int,
+    ): EtteroppgjoerBeregnetAvkorting {
         val avkortingMedForventaInntekt =
-            hentAvkortingForBehandling(sisteIverksatteBehandling, aar)
-                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandling")
+            hentAvkortingForBehandling(sisteIverksatteBehandlingId, aar)
+                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandlingId")
 
         val avkortingFaktiskInntekt = hentAvkortingForBehandling(forbehandlingId, aar)
 

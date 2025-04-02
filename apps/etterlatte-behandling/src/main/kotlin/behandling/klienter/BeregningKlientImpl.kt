@@ -5,6 +5,7 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -47,7 +48,7 @@ interface BeregningKlient {
     suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): BeregnetEtteroppgjoerResultatDto
 
     suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,
@@ -164,7 +165,7 @@ class BeregningKlientImpl(
     override suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): BeregnetEtteroppgjoerResultatDto {
         logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling ${request.forbehandlingId}")
         try {
             return downstreamResourceClient
@@ -177,7 +178,7 @@ class BeregningKlientImpl(
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = request,
                 ).mapBoth(
-                    success = { },
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {

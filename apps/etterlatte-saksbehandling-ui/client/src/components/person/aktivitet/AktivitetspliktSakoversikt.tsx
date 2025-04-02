@@ -12,6 +12,7 @@ import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { VurderingAvAktivitetspliktSak } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetspliktSak'
 import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
 import { AktivitetspliktOppgaveVurderingType, harVurdering } from '~shared/types/Aktivitetsplikt'
+import { ApiError } from '~shared/api/apiClient'
 
 export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -43,16 +44,19 @@ export const AktivitetspliktSakoversikt = ({
     }
   }, [sakResult])
 
+  const feilkodehaandtering = (error: ApiError) => {
+    switch (error.status) {
+      case 404:
+        return <ApiWarningAlert>Kan ikke hente aktivitetsplikt: {error.detail}</ApiWarningAlert>
+      case 403:
+        return <ApiWarningAlert>Du mangler tilgang til saken {error.detail}</ApiWarningAlert>
+      default:
+        return <ApiErrorAlert>{error.detail || 'Feil ved henting av sak'}</ApiErrorAlert>
+    }
+  }
+
   if (isFailure(sakResult)) {
-    return (
-      <Box padding="8">
-        {sakResult.error.status === 404 ? (
-          <ApiWarningAlert>Kan ikke hente aktivitetsplikt: {sakResult.error.detail}</ApiWarningAlert>
-        ) : (
-          <ApiErrorAlert>{sakResult.error.detail || 'Feil ved henting av sak'}</ApiErrorAlert>
-        )}
-      </Box>
-    )
+    return <Box padding="8">{feilkodehaandtering(sakResult.error)}</Box>
   }
 
   return (

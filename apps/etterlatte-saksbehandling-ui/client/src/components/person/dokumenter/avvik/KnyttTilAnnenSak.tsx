@@ -18,6 +18,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { JaNei } from '~shared/types/ISvar'
 import { formaterSakstype } from '~utils/formatering/formatering'
 import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ApiError } from '~shared/api/apiClient'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -145,7 +146,16 @@ export const KnyttTilAnnenSak = ({
       </>
     ))
   }
-
+  const feilkodehaandtering = (error: ApiError) => {
+    switch (error.status) {
+      case 404:
+        return <Alert variant="warning">Fant ikke sak {sakid}</Alert>
+      case 403:
+        return <Alert variant="error">Du mangler tilgang til saken {error.detail}</Alert>
+      default:
+        return <Alert variant="error">Ukjent feil ved henting av sak {sakid}</Alert>
+    }
+  }
   return (
     <>
       {mapResult(sakStatus, {
@@ -160,6 +170,8 @@ export const KnyttTilAnnenSak = ({
           ),
         error: (error) => (
           <>
+            {' '}
+            TODO sjekke mot 401
             {error.status === 404 ? (
               <Alert variant="warning">Brukeren har ingen sak i Gjenny</Alert>
             ) : (
@@ -231,15 +243,7 @@ export const KnyttTilAnnenSak = ({
             </HStack>
           </>
         ),
-        error: (error) => (
-          <>
-            {error.status === 404 ? (
-              <Alert variant="warning">Fant ikke sak {sakid}</Alert>
-            ) : (
-              <Alert variant="error">Ukjent feil ved henting av sak {sakid}</Alert>
-            )}
-          </>
-        ),
+        error: (error) => feilkodehaandtering(error),
       })}
     </>
   )

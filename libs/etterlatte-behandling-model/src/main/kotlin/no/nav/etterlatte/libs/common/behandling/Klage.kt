@@ -524,6 +524,11 @@ sealed class GyldigForYtelse {
         override val gyldigForBarnepensjon = true
         override val gyldigForOmstillingsstoenad = false
     }
+
+    data object Utdatert : GyldigForYtelse() {
+        override val gyldigForOmstillingsstoenad: Boolean = false
+        override val gyldigForBarnepensjon: Boolean = false
+    }
 }
 
 enum class KabalHjemmel(
@@ -609,12 +614,25 @@ enum class KabalHjemmel(
     FTRL_17_1_A(GyldigForYtelse.KunOms, "Ftrl. § 17-1 A"),
     FTRL_17_2(GyldigForYtelse.KunOms, "Ftrl. § 17-2"),
     FTRL_17_3(GyldigForYtelse.KunOms, "Ftrl. § 17-3"),
-    FTRL_17_4(GyldigForYtelse.KunOms, "Ftrl. § 17-4"),
-    FTRL_17_5(GyldigForYtelse.KunOms, "Ftrl. § 17-5"),
-    FTRL_17_6(GyldigForYtelse.KunOms, "Ftrl. § 17-6"),
-    FTRL_17_7(GyldigForYtelse.KunOms, "Ftrl. § 17-7"),
-    FTRL_17_8(GyldigForYtelse.KunOms, "Ftrl. § 17-8"),
-    FTRL_17_9(GyldigForYtelse.KunOms, "Ftrl. § 17-9"),
+
+    // Utdaterte hjemler for OMS
+    FTRL_17_4(GyldigForYtelse.Utdatert, "Ftrl. § 17-4 før 2024"),
+    FTRL_17_5(GyldigForYtelse.Utdatert, "Ftrl. § 17-5 før 2024"),
+    FTRL_17_6(GyldigForYtelse.Utdatert, "Ftrl. § 17-6 før 2024"),
+    FTRL_17_7(GyldigForYtelse.Utdatert, "Ftrl. § 17-7 før 2024"),
+    FTRL_17_8(GyldigForYtelse.Utdatert, "Ftrl. § 17-8 før 2024"),
+    FTRL_17_9(GyldigForYtelse.Utdatert, "Ftrl. § 17-9 før 2024"),
+
+    FTRL_17_4_1(GyldigForYtelse.KunOms, "Ftrl. § 17-4 1. ledd"),
+    FTRL_17_4_2(GyldigForYtelse.KunOms, "Ftrl. § 17-4 2. ledd"),
+    FTRL_17_5_1(GyldigForYtelse.KunOms, "Ftrl. § 17-5 1. ledd"),
+    FTRL_17_5_2(GyldigForYtelse.KunOms, "Ftrl. § 17-5 2. ledd"),
+    FTRL_17_5_3(GyldigForYtelse.KunOms, "Ftrl. § 17-5 3. ledd"),
+    FTRL_17_6_NY(GyldigForYtelse.KunOms, "Ftrl. § 17-6"),
+    FTRL_17_7_NY(GyldigForYtelse.KunOms, "Ftrl. § 17-7"),
+    FTRL_17_8_NY(GyldigForYtelse.KunOms, "Ftrl. § 17-8"),
+    FTRL_17_9_NY(GyldigForYtelse.KunOms, "Ftrl. § 17-9"),
+
     FTRL_17_10(GyldigForYtelse.KunOms, "Ftrl. § 17-10"),
     FTRL_17_11(GyldigForYtelse.KunOms, "Ftrl. § 17-11"),
     FTRL_17_12(GyldigForYtelse.KunOms, "Ftrl. § 17-12"),

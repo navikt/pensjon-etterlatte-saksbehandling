@@ -1,7 +1,9 @@
 import { SanksjonType } from '~shared/types/sanksjon'
 
 export interface IAvkorting {
-  avkortingGrunnlag: IAvkortingGrunnlagFrontend[]
+  redigerbarForventetInntekt: IAvkortingGrunnlag | undefined // Holder med id?
+  redigerbarForventetInntektNesteAar: IAvkortingGrunnlag | undefined
+  avkortingGrunnlag: IAvkortingGrunnlag[]
   avkortetYtelse: IAvkortetYtelse[]
   tidligereAvkortetYtelse: IAvkortetYtelse[]
 }
@@ -10,12 +12,7 @@ export interface IAvkortingSkalHaInntektNesteAar {
   skalHaInntektNesteAar: boolean
 }
 
-export interface IAvkortingGrunnlagFrontend {
-  aar: number
-  fraVirk: IAvkortingGrunnlag | null
-  historikk: IAvkortingGrunnlag[]
-}
-
+// TODO generisk for å støtte både forventet og faktisk
 export interface IAvkortingGrunnlag {
   id: string
   fom: string

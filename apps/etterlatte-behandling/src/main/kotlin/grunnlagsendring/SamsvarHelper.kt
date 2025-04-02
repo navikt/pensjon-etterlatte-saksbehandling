@@ -94,10 +94,6 @@ internal fun finnSamsvarForHendelse(
             samsvarBostedsadresse(pdlBosted, grunnlagBosted)
         }
 
-        GrunnlagsendringsType.GRUNNBELOEP -> {
-            SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
-        }
-
         GrunnlagsendringsType.INSTITUSJONSOPPHOLD, GrunnlagsendringsType.UFOERETRYGD -> {
             throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")
         }

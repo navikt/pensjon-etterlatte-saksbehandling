@@ -170,14 +170,6 @@ class GrunnlagsendringshendelseService(
                 ),
         )
 
-    fun opprettEndretGrunnbeloepHendelse(sakId: SakId): List<Grunnlagsendringshendelse> =
-        inTransaction {
-            opprettHendelseAvTypeForSak(
-                sakId,
-                GrunnlagsendringsType.GRUNNBELOEP,
-            )
-        }
-
     fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val sakIder = grunnlagService.hentAlleSakerForFnr(Folkeregisteridentifikator.of(adressebeskyttelse.fnr))
         if (sakIder.isEmpty()) {

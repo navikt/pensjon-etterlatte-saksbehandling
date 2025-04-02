@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -60,15 +61,18 @@ fun Route.etteroppgjoerRoutes(
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
+                    val etteroppgjoer =
+                        inTransaction {
+                            forbehandlingService.hentForbehandlingForFrontend(brukerTokenInfo, etteroppgjoerId)
+                        }
                     call.respond(etteroppgjoer)
                 }
             }
 
             post("beregn_faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
-                forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                val response = forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                call.respond(response)
             }
         }
 
@@ -78,6 +82,12 @@ fun Route.etteroppgjoerRoutes(
                 val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
                 call.respond(eo)
             }
+        }
+
+        get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            val forbehandlinger = forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId)
+            call.respond(forbehandlinger)
         }
 
         post("/skatteoppgjoerhendelser/start-kjoering") {

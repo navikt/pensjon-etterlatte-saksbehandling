@@ -10,7 +10,7 @@ export const OpplysningerFraSkatteetaten = ({
 }) => {
   return (
     <VStack gap="4">
-      <Heading size="medium">Opplysninger fra Skatteetaten</Heading>
+      <Heading size="small">Opplysninger fra Skatteetaten</Heading>
 
       <Table>
         <Table.Header>

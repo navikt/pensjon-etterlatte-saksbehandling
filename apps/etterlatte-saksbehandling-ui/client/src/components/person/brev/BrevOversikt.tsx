@@ -1,6 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevForSak } from '~shared/api/brev'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { BodyShort, Box, Button, HStack, Table } from '@navikt/ds-react'
 import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -15,6 +15,7 @@ import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { SlettBrev } from '~components/person/brev/handlinger/SlettBrev'
 import { BrevUtgaar } from '~components/person/brev/handlinger/BrevUtgaar'
+import { ApiError } from '~shared/api/apiClient'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -73,16 +74,18 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
     }
   }, [sakResult])
 
+  const feilkodehaandtering = (error: ApiError) => {
+    switch (error.status) {
+      case 404:
+        return <ApiWarningAlert>Kan ikke opprette brev: {error.detail}</ApiWarningAlert>
+      case 403:
+        return <ApiErrorAlert>Du mangler tilgang til saken: {error.detail}</ApiErrorAlert>
+      default:
+        return <ApiErrorAlert>{error.detail || 'Feil ved henting av brev'}</ApiErrorAlert>
+    }
+  }
   if (isFailure(sakResult)) {
-    return (
-      <Box padding="8">
-        {sakResult.error.status === 404 ? (
-          <ApiWarningAlert>Kan ikke opprette brev: {sakResult.error.detail}</ApiWarningAlert>
-        ) : (
-          <ApiErrorAlert>{sakResult.error.detail || 'Feil ved henting av brev'}</ApiErrorAlert>
-        )}
-      </Box>
-    )
+    return <Box padding="8">{feilkodehaandtering(sakResult.error)}</Box>
   }
 
   return (

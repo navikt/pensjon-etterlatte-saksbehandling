@@ -25,8 +25,9 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
-import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakTilgang
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -34,13 +35,21 @@ import org.junit.jupiter.params.provider.MethodSource
 class OppdatererTilgangServiceTest {
     private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
-    private val sakService = mockk<SakService>()
     private val sakSkrivDao = mockk<SakSkrivDao>()
+    private val sakLesDao = mockk<SakLesDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
     private val brukerService = mockk<BrukerService>()
-
+    private val sakTilgang = mockk<SakTilgang>()
     private val oppdaterTilgangService =
-        OppdaterTilgangService(sakService, skjermingKlient, pdltjenesterKlient, brukerService, oppgaveService, sakSkrivDao)
+        OppdaterTilgangService(
+            skjermingKlient,
+            pdltjenesterKlient,
+            brukerService,
+            oppgaveService,
+            sakSkrivDao,
+            sakTilgang,
+            sakLesDao,
+        )
     private val soeker = "11057523044"
     private val persongalleri = persongalleri()
 
@@ -61,16 +70,16 @@ class OppdatererTilgangServiceTest {
 
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
-        every { sakService.finnSak(sakId) } returns sak
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
-        every { sakService.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
+        every { sakLesDao.hentSak(sakId) } returns sak
+        every { sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
+        every { sakTilgang.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
-            sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-            sakService.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+            sakTilgang.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
     }
@@ -84,19 +93,19 @@ class OppdatererTilgangServiceTest {
 
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
-        every { sakService.finnSak(sakId) } returns sak
-        every { sakService.oppdaterSkjerming(any(), any()) } just Runs
+        every { sakLesDao.hentSak(sakId) } returns sak
+        every { sakTilgang.oppdaterSkjerming(any(), any()) } just Runs
         every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } just Runs
+        every { sakTilgang.oppdaterAdressebeskyttelse(any(), any()) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
-            sakService.oppdaterSkjerming(sakId, true)
+            sakTilgang.oppdaterSkjerming(sakId, true)
             sakSkrivDao.oppdaterEnhet(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
-            sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
         }
     }
 
@@ -115,29 +124,29 @@ class OppdatererTilgangServiceTest {
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
 
-        every { sakService.finnSak(sakId) } returns sak
-        every { sakService.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
+        every { sakLesDao.hentSak(sakId) } returns sak
+        every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
             SakMedGraderingOgSkjermet(
                 sakId,
                 AdressebeskyttelseGradering.UGRADERT,
                 false,
                 Enheter.PORSGRUNN.enhetNr,
             )
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
+        every { sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
         every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
-        every { sakService.oppdaterSkjerming(match { it == sak.id }, false) } just Runs
+        every { sakTilgang.oppdaterSkjerming(match { it == sak.id }, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 0) {
-            sakService.settEnhetOmAdressebeskyttet(any(), any())
-            sakService.oppdaterSkjerming(any(), any())
+            sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
+            sakTilgang.oppdaterSkjerming(any(), any())
             sakSkrivDao.oppdaterEnhet(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         }
         verify(exactly = 1) {
-            sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
         }
     }
 
@@ -156,27 +165,27 @@ class OppdatererTilgangServiceTest {
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.EGNE_ANSATTE.enhetNr)
 
-        every { sakService.finnSak(sakId) } returns sak
-        every { sakService.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
+        every { sakLesDao.hentSak(sakId) } returns sak
+        every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
             SakMedGraderingOgSkjermet(
                 sakId,
                 AdressebeskyttelseGradering.UGRADERT,
                 true,
                 Enheter.EGNE_ANSATTE.enhetNr,
             )
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
+        every { sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
         every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
-        every { sakService.oppdaterSkjerming(sak.id, false) } just Runs
+        every { sakTilgang.oppdaterSkjerming(sak.id, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 0) {
-            sakService.settEnhetOmAdressebeskyttet(any(), any())
+            sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
         }
         verify(exactly = 1) {
-            sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
-            sakService.oppdaterSkjerming(sak.id, false)
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
+            sakTilgang.oppdaterSkjerming(sak.id, false)
             sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
@@ -217,27 +226,27 @@ class OppdatererTilgangServiceTest {
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, graderingOgEnhet.second)
 
-        every { sakService.finnSak(sakId) } returns sak
-        every { sakService.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
+        every { sakLesDao.hentSak(sakId) } returns sak
+        every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
             SakMedGraderingOgSkjermet(
                 sakId,
                 graderingOgEnhet.first,
                 false,
                 graderingOgEnhet.second,
             )
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
+        every { sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
         every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
-        every { sakService.oppdaterSkjerming(sak.id, false) } just Runs
+        every { sakTilgang.oppdaterSkjerming(sak.id, false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id }) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 0) {
-            sakService.settEnhetOmAdressebeskyttet(any(), any())
+            sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
         }
         verify(exactly = 1) {
-            sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
-            sakService.oppdaterSkjerming(sak.id, false)
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
+            sakTilgang.oppdaterSkjerming(sak.id, false)
             sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, enhet.enhetNr))
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
@@ -256,14 +265,14 @@ class OppdatererTilgangServiceTest {
                 enhet.enhetNr,
             )
         every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
-        every { sakService.oppdaterSkjerming(any(), false) } just Runs
+        every { sakTilgang.oppdaterSkjerming(any(), false) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
 
         oppdaterTilgangService.fjernSkjermingFraSak(sak, soeker)
 
         verify(exactly = 1) {
             sakSkrivDao.oppdaterEnhet(SakMedEnhet(sakId, enhet.enhetNr))
-            sakService.oppdaterSkjerming(sakId, false)
+            sakTilgang.oppdaterSkjerming(sakId, false)
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(
                 match {
                     it.first().id == sak.id &&

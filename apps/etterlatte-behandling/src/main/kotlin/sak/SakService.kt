@@ -77,16 +77,6 @@ interface SakService {
 
     fun finnFlyktningForSak(id: SakId): Flyktning?
 
-    fun oppdaterSkjerming(
-        sakId: SakId,
-        skjermet: Boolean,
-    )
-
-    fun oppdaterAdressebeskyttelse(
-        sakId: SakId,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    )
-
     fun sjekkSkjerming(
         fnr: String,
         sakId: SakId,
@@ -102,11 +92,6 @@ interface SakService {
 
     fun finnSakerOmsOgHvisAvdoed(ident: String): List<SakId>
 
-    fun hentGraderingForSak(
-        sakId: SakId,
-        bruker: Systembruker,
-    ): SakMedGraderingOgSkjermet
-
     fun oppdaterIdentForSak(
         sak: Sak,
         bruker: BrukerTokenInfo,
@@ -114,17 +99,17 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
-    fun settEnhetOmAdressebeskyttet(
-        sak: Sak,
-        gradering: AdressebeskyttelseGradering,
-    )
-
     fun hentSaksendringer(sakId: SakId): List<Saksendring>
 
     fun oppdaterEnhet(
         sak: SakMedEnhet,
         kommentar: String? = null,
     )
+
+    fun hentGraderingForSak(
+        sakId: SakId,
+        bruker: Systembruker,
+    ): SakMedGraderingOgSkjermet
 }
 
 class ManglerTilgangTilEnhet(
@@ -142,7 +127,7 @@ class KanIkkEndreSpesialenhet(
     )
 
 class SakServiceImpl(
-    private val dao: SakSkrivDao,
+    private val skrivDao: SakSkrivDao,
     private val lesDao: SakLesDao,
     private val endringerDao: SakendringerDao,
     private val skjermingKlient: SkjermingKlient,
@@ -152,8 +137,14 @@ class SakServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
     private val featureToggle: FeatureToggleService,
     private val tilgangsService: OppdaterTilgangService,
+    private val sakTilgang: SakTilgang,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun hentGraderingForSak(
+        sakId: SakId,
+        bruker: Systembruker,
+    ): SakMedGraderingOgSkjermet = lesDao.finnSakMedGraderingOgSkjerming(sakId)
 
     override fun oppdaterEnhet(
         sak: SakMedEnhet,
@@ -162,7 +153,7 @@ class SakServiceImpl(
         if (Enheter.erSpesialTilgangsEnheter(sak.enhet)) {
             throw KanIkkEndreSpesialenhet("Kan ikke endre til spesial enhet")
         }
-        dao.oppdaterEnhet(sak, kommentar)
+        skrivDao.oppdaterEnhet(sak, kommentar)
     }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
@@ -240,14 +231,6 @@ class SakServiceImpl(
         return saker.map { it.id } + sakerForAvdoed
     }
 
-    override fun hentGraderingForSak(
-        sakId: SakId,
-        bruker: Systembruker,
-    ): SakMedGraderingOgSkjermet {
-        val sak = lesDao.finnSakMedGraderingOgSkjerming(sakId)
-        return sak
-    }
-
     override fun finnSaker(ident: String): List<Sak> = finnSakerForPerson(ident).filterForEnheter()
 
     private fun finnSakerForPerson(
@@ -260,13 +243,6 @@ class SakServiceImpl(
                 .identifikatorer
                 .flatMap { lesDao.finnSaker(it.folkeregisterident.value, sakType) }
         }
-
-    override fun oppdaterSkjerming(
-        sakId: SakId,
-        skjermet: Boolean,
-    ) {
-        dao.oppdaterSkjerming(sakId, skjermet)
-    }
 
     override fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
@@ -336,7 +312,7 @@ class SakServiceImpl(
             identListe.identifikatorer.singleOrNull { !it.historisk }?.folkeregisterident
                 ?: throw InternfeilException("Sak ${sak.id} har flere eller ingen gyldige identer samtidig. Kan ikke oppdatere ident.")
 
-        dao.oppdaterIdent(sak.id, gjeldendeIdent)
+        skrivDao.oppdaterIdent(sak.id, gjeldendeIdent)
         val oppdatertPersongalleri =
             grunnlagService
                 .hentPersongalleri(sak.id)!!
@@ -398,7 +374,7 @@ class SakServiceImpl(
             logger.info("Fant ingen sak av type=$type på person ${fnr.maskerFnr()} - oppretter ny sak")
 
             val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
-            sak = dao.opprettSak(fnr, type, enhet)
+            sak = skrivDao.opprettSak(fnr, type, enhet)
         }
 
         sjekkSkjerming(fnr = fnr, sakId = sak.id, type = type, overstyrendeEnhet = overstyrendeEnhet)
@@ -412,32 +388,10 @@ class SakServiceImpl(
                     ),
                 )
             }
-        oppdaterAdressebeskyttelse(sak.id, hentetGradering)
-        settEnhetOmAdressebeskyttet(sak, hentetGradering)
+        sakTilgang.oppdaterAdressebeskyttelse(sak.id, hentetGradering)
+        sakTilgang.settEnhetOmAdressebeskyttet(sak, hentetGradering)
         sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
-    }
-
-    override fun settEnhetOmAdressebeskyttet(
-        sak: Sak,
-        gradering: AdressebeskyttelseGradering,
-    ) {
-        when (gradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
-                if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
-                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr))
-                }
-            }
-
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
-                if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
-                    dao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr))
-                }
-            }
-
-            AdressebeskyttelseGradering.FORTROLIG -> return
-            AdressebeskyttelseGradering.UGRADERT -> return
-        }
     }
 
     override fun hentSaksendringer(sakId: SakId): List<Saksendring> {
@@ -522,11 +476,6 @@ class SakServiceImpl(
         return enhet ?: enhetFraNorg
     }
 
-    override fun oppdaterAdressebeskyttelse(
-        sakId: SakId,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ) = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
-
     override fun sjekkSkjerming(
         fnr: String,
         sakId: SakId,
@@ -539,7 +488,7 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             logger.info("Oppdater egen ansatt for sak: $sakId")
-            dao.oppdaterEnhet(
+            skrivDao.oppdaterEnhet(
                 SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr),
             )
         } else {
@@ -548,14 +497,14 @@ class SakServiceImpl(
             if (sakMedSkjerming.enhet == Enheter.EGNE_ANSATTE.enhetNr) {
                 val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
                 if (enhet == Enheter.EGNE_ANSATTE.enhetNr) {
-                    dao.oppdaterEnhet(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr))
+                    skrivDao.oppdaterEnhet(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr))
                 } else {
-                    dao.oppdaterEnhet(SakMedEnhet(sakId, enhet))
+                    skrivDao.oppdaterEnhet(SakMedEnhet(sakId, enhet))
                 }
             }
         }
 
-        dao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
+        skrivDao.oppdaterSkjerming(sakId = sakId, skjermet = erSkjermet)
     }
 
     override fun finnSak(

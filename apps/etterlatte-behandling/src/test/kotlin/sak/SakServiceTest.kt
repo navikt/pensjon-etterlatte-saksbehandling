@@ -86,7 +86,7 @@ internal class SakServiceTest {
     private val krrKlient = mockk<KrrKlient>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val oppdaterTilgangService = mockk<OppdaterTilgangService>()
-
+    private val saktilgang = mockk<SakTilgang>(relaxed = true)
     private val service: SakService =
         SakServiceImpl(
             sakSkrivDao,
@@ -99,6 +99,7 @@ internal class SakServiceTest {
             pdlTjenesterKlient,
             featureToggleService,
             oppdaterTilgangService,
+            saktilgang,
         )
 
     @BeforeEach
@@ -467,7 +468,7 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-        verify(exactly = 1) { sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
+        verify(exactly = 1) { saktilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
     @Test
@@ -522,7 +523,7 @@ internal class SakServiceTest {
             sak1
 
         verify(exactly = 1) {
-            service.oppdaterAdressebeskyttelse(
+            saktilgang.oppdaterAdressebeskyttelse(
                 sak.id,
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
@@ -551,7 +552,6 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-        verify(exactly = 1) { sakSkrivDao.oppdaterEnhet(any()) }
     }
 
     @Test
@@ -622,7 +622,7 @@ internal class SakServiceTest {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         }
         verify(exactly = 1) { sakSkrivDao.oppdaterEnhet(any()) }
-        verify(exactly = 1) { sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
+        verify(exactly = 1) { saktilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
     @Test

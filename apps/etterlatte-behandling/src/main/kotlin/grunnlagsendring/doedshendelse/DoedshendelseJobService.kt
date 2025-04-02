@@ -168,8 +168,6 @@ class DoedshendelseJobService(
 
     private fun opprettSakOgLagGrunnlag(doedshendelse: DoedshendelseInternal): Sak {
         logger.info("Oppretter sak for dødshendelse ${doedshendelse.id} avdøde ${doedshendelse.avdoedFnr.maskerFnr()}")
-        // Denne gjør at man ikke sjekker tilgangsting for 3-parter som trengs for egen ansatt og adressebeskyttelse
-        // her må man bruke oppdatertilgangservice for å ikke overskride eventuelle 3-parts skjerminger fra mor eller far.
         val opprettetSak =
             sakService.finnEllerOpprettSakMedGrunnlag(
                 fnr = doedshendelse.beroertFnr,

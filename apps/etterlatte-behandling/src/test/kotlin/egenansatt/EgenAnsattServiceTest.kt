@@ -42,6 +42,8 @@ import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakTilgang
+import no.nav.etterlatte.sak.SakTilgangImpl
 import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -68,6 +70,7 @@ internal class EgenAnsattServiceTest(
     private lateinit var egenAnsattService: EgenAnsattService
     private lateinit var oppdaterTilgangService: OppdaterTilgangService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
+    private lateinit var sakTilgang: SakTilgang
     private val grunnlagService: GrunnlagService = mockk(relaxed = true)
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
@@ -103,6 +106,7 @@ internal class EgenAnsattServiceTest(
         sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
         oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))
+        sakTilgang = SakTilgangImpl(sakSkrivDao, sakLesDao)
         val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
 
         sakService =
@@ -118,6 +122,7 @@ internal class EgenAnsattServiceTest(
                     pdlTjenesterKlient,
                     featureToggleService,
                     oppdaterTilgangService,
+                    sakTilgang,
                 ),
             )
         oppgaveService =
@@ -186,6 +191,5 @@ internal class EgenAnsattServiceTest(
         egenAnsattService.haandterSkjerming(egenAnsattSkjermet)
 
         verify(exactly = 3) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }
-        verify(exactly = 0) { sakService.oppdaterSkjerming(any(), any()) }
     }
 }

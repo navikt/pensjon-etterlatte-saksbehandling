@@ -2,24 +2,18 @@ package no.nav.etterlatte.adressebeskyttelse
 
 import behandling.tilbakekreving.kravgrunnlag
 import behandling.tilbakekreving.tilbakekrevingVurdering
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.azureAdEgenAnsattClaim
 import no.nav.etterlatte.azureAdFortroligClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.klage.KlageDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
@@ -33,17 +27,15 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakLesDao
-import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakTilgang
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.SakTilgangImpl
 import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.sak.TilgangServiceSjekker
 import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -60,41 +52,21 @@ internal class TilgangServiceTest(
     val dataSource: DataSource,
 ) {
     private lateinit var tilgangService: TilgangServiceSjekker
-    private lateinit var sakService: SakService
-    private lateinit var sakRepo: SakSkrivDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
     private lateinit var sakendringerDao: SakendringerDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var klageDao: KlageDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
-    private val brukerService = mockk<BrukerService>()
-    private val skjermingKlient = mockk<SkjermingKlientImpl>()
-    private val grunnlagservice = mockk<GrunnlagService>()
-    private val krrKlient = mockk<KrrKlient>()
-    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
-    private val featureToggle = mockk<FeatureToggleService>()
-    private val oppdaterTilgangService = mockk<OppdaterTilgangService>()
+    private lateinit var sakTilgang: SakTilgang
 
     @BeforeAll
     fun beforeAll() {
         tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
-
-        sakService =
-            SakServiceImpl(
-                sakRepo,
-                sakLesDao,
-                sakendringerDao,
-                skjermingKlient,
-                brukerService,
-                grunnlagservice,
-                krrKlient,
-                pdlTjenesterKlient,
-                featureToggle,
-                oppdaterTilgangService,
-            )
+        sakTilgang = SakTilgangImpl(sakSkrivDao, sakLesDao)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
@@ -108,13 +80,13 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne sette adressebeskyttelse på sak`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val sakId = sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(),
                 emptyMap(),
             )
-        sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val opprettBehandling =
             opprettBehandling(
@@ -134,14 +106,14 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal sjekke tilganger til klager med klageId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak = sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(ident = "ident", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
-        sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakTilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val klage =
             Klage.ny(
                 sak,
@@ -187,14 +159,14 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal sjekke tilganger til tilbakekreving med tilbakekrevingId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak = sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(ident = "ident", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
-        sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakTilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val tilbakekreving =
             TilbakekrevingBehandling(
                 UUID.randomUUID(),
@@ -246,14 +218,14 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne sette strengt fortrolig på sak og se på den med riktig rolle men ikke fortrolig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val sakId = sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
-        sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val opprettBehandling =
             opprettBehandling(
@@ -286,7 +258,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr).id
+        val sakId = sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr).id
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
@@ -307,7 +279,7 @@ internal class TilgangServiceTest(
 
         Assertions.assertEquals(true, hartilgangtilvanligsak)
 
-        sakRepo.oppdaterSkjerming(sakId, true)
+        sakSkrivDao.oppdaterSkjerming(sakId, true)
 
         val hartilgangSomStrengtFortroligMotEgenAnsattSak =
             tilgangService.harTilgangTilBehandling(

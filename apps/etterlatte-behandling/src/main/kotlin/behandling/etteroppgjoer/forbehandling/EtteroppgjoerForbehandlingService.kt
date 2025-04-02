@@ -42,18 +42,18 @@ class EtteroppgjoerForbehandlingService(
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
 ) {
-    fun hentForbehadling(behandlingId: UUID): EtteroppgjoerForbehandling =
+    fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
     fun hentForbehandlingForFrontend(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ): ForbehandlingDto {
-        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+        val forbehandling = hentForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatte")
+                ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
 
         val avkorting =
             runBlocking {

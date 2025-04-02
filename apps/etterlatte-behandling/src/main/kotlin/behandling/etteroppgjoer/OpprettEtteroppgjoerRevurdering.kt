@@ -34,7 +34,7 @@ class OpprettEtteroppgjoerRevurdering(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehadling(forbehandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
 
         // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId) TODO ønskelig?
 
@@ -44,7 +44,7 @@ class OpprettEtteroppgjoerRevurdering(
 
         val persongalleri =
             grunnlagService.hentPersongalleri(sakId)
-                ?: throw InternfeilException("Fant ikke iverksatt persongaller")
+                ?: throw InternfeilException("Fant ikke iverksatt persongalleri")
 
         val virkningstidspunkt =
             Virkningstidspunkt(

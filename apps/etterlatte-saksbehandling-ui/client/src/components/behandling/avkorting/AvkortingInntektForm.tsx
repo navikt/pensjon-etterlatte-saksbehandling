@@ -66,7 +66,7 @@ export const AvkortingInntektForm = ({
         <InntektForm
           behandling={behandling}
           redigerbartGrunnlag={redigerbartGrunnlag}
-          historikk={historikk}
+          alleGrunnlag={historikk}
           erInnevaerendeAar={erInnevaerendeAar}
           setVisForm={setVisForm}
         />
@@ -95,12 +95,12 @@ const InntektForm = ({
   behandling,
   erInnevaerendeAar,
   redigerbartGrunnlag,
-  historikk,
+  alleGrunnlag,
   setVisForm,
 }: {
   behandling: IBehandlingReducer
   redigerbartGrunnlag: IAvkortingGrunnlag | undefined
-  historikk: IAvkortingGrunnlag[]
+  alleGrunnlag: IAvkortingGrunnlag[]
   erInnevaerendeAar: boolean
   setVisForm: Dispatch<SetStateAction<boolean>>
 }) => {
@@ -129,7 +129,7 @@ const InntektForm = ({
       return true
     }
     // forutsetter at nyligster inntekt alltid er første element
-    const tidligereAvkortingGrunnlag = redigerbartGrunnlag ?? historikk[0]
+    const tidligereAvkortingGrunnlag = redigerbartGrunnlag ?? alleGrunnlag[0]
     return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.innvilgaMaaneder === 12 : false
   }
 
@@ -145,8 +145,8 @@ const InntektForm = ({
     }
 
     // Inntektsendringer skjer kun frem i tid
-    if (erInnevaerendeAar && historikk.length > 0) {
-      const nyligste = historikk[0]
+    if (!!behandling.revurderingsaarsak && alleGrunnlag.length > 0) {
+      const nyligste = alleGrunnlag[0]
       // Preutfyller uten id
       return {
         inntektTom: nyligste.inntektTom,

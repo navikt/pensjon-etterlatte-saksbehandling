@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 
 class EtteroppgjoerDao(
@@ -30,6 +31,26 @@ class EtteroppgjoerDao(
                 statement.setLong(1, sakId.sakId)
                 statement.setInt(2, inntektsaar)
                 statement.executeQuery().singleOrNull { toEtteroppgjoer() }
+            }
+        }
+
+    fun hentEtteroppgjoerForStatus(
+        status: EtteroppgjoerStatus,
+        // TODO sjekke på inntektsaar også?
+    ): List<Etteroppgjoer> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM etteroppgjoer
+                        WHERE status = ?
+                        AND inntektsaar = ?
+                        """.trimIndent(),
+                    )
+                statement.setString(1, status.name)
+                statement.executeQuery().toList { toEtteroppgjoer() }
             }
         }
 

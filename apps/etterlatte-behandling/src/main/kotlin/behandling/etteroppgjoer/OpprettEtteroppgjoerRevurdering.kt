@@ -37,7 +37,7 @@ class OpprettEtteroppgjoerRevurdering(
     ): Revurdering {
         val (revurdering, sisteIverksatte) =
             inTransaction {
-                val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+                val forbehandling = etteroppgjoerForbehandlingService.hentEtteroppgjoerForbehandling(forbehandlingId)
 
                 // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId) TODO ønskelig?
 

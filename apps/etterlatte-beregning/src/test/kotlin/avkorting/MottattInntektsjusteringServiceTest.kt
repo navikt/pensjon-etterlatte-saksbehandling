@@ -11,8 +11,8 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.AvkortingService
-import no.nav.etterlatte.avkorting.MottattInntektsjusteringService
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
+import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.bruker

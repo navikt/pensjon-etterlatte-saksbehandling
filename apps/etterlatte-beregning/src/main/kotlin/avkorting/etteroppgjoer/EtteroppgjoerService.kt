@@ -1,9 +1,15 @@
-package no.nav.etterlatte.avkorting
+package no.nav.etterlatte.avkorting.etteroppgjoer
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
+import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
+import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto

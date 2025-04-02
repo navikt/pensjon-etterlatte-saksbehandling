@@ -25,6 +25,8 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.logger
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
@@ -46,62 +48,32 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
-        dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+    // opprett forbehandling for etteroppgjør med status MOTTATT_SKATTEOPPGJOER
+    suspend fun startOpprettForbehandlingKjoering() {
+        logger.info("Opprette forbehandling for etteroppgjør med mottatt skatteoppgjør")
+        val etteroppgjoerListe = etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
 
-    fun hentForbehandlingForFrontend(
-        brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID,
-    ): ForbehandlingDto {
-        val forbehandling = hentForbehandling(behandlingId)
-
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
-
-        val request =
-            EtteroppgjoerBeregnetAvkortingRequest(
-                forbehandling = behandlingId,
-                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                aar = forbehandling.aar,
-            )
-        logger.info("Henter avkorting for forbehandling: $request")
-        val avkorting =
-            runBlocking {
-                beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                    request,
-                    brukerTokenInfo,
-                )
-            }
-
-        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
-        val aInntekt = dao.hentAInntekt(behandlingId)
-
-        if (pensjonsgivendeInntekt == null || aInntekt == null) {
-            throw InternfeilException(
-                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
-            )
+        for (etteroppgjoer in etteroppgjoerListe) {
+            opprettEtteroppgjoerForbehandling(etteroppgjoer.sakId, etteroppgjoer.inntektsaar, HardkodaSystembruker.etteroppgjoer)
         }
-
-        return ForbehandlingDto(
-            behandling = forbehandling,
-            opplysninger =
-                EtteroppgjoerOpplysninger(
-                    skatt = pensjonsgivendeInntekt,
-                    ainntekt = aInntekt,
-                    tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
-                ),
-            avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
-        )
     }
+
+    fun hentEtteroppgjoerForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
+        dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }
 
-    suspend fun opprettEtteroppgjoer(
+    suspend fun opprettEtteroppgjoerForbehandling(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerOgOppgave {
+    ): EtteroppgjoerForbehandlingOgOppgave {
+        logger.info("Oppretter etteroppgjør forbehandling for sakId=$sakId")
+
+        if (!kanOppretteEtteroppgjoerForbehandling(sakId, inntektsaar)) {
+            throw InternfeilException("Kan ikke opprette forbehandling ... ???")
+        }
+
         val sak =
             inTransaction {
                 sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
@@ -156,11 +128,57 @@ class EtteroppgjoerForbehandlingService(
 
             etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
-            EtteroppgjoerOgOppgave(
-                etteroppgjoerBehandling = nyForbehandling,
+            EtteroppgjoerForbehandlingOgOppgave(
+                etteroppgjoerForbehandling = nyForbehandling,
                 oppgave = oppgave,
             )
         }
+    }
+
+    fun hentForbehandlingForFrontend(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID,
+    ): ForbehandlingDto {
+        val forbehandling = hentEtteroppgjoerForbehandling(behandlingId)
+
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
+
+        val request =
+            EtteroppgjoerBeregnetAvkortingRequest(
+                forbehandling = behandlingId,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                aar = forbehandling.aar,
+            )
+        logger.info("Henter avkorting for forbehandling: $request")
+        val avkorting =
+            runBlocking {
+                beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                    request,
+                    brukerTokenInfo,
+                )
+            }
+
+        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
+        val aInntekt = dao.hentAInntekt(behandlingId)
+
+        if (pensjonsgivendeInntekt == null || aInntekt == null) {
+            throw InternfeilException(
+                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
+            )
+        }
+
+        return ForbehandlingDto(
+            behandling = forbehandling,
+            opplysninger =
+                EtteroppgjoerOpplysninger(
+                    skatt = pensjonsgivendeInntekt,
+                    ainntekt = aInntekt,
+                    tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
+                ),
+            avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
+        )
     }
 
     suspend fun beregnFaktiskInntekt(
@@ -189,10 +207,26 @@ class EtteroppgjoerForbehandlingService(
             }
         return beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo)
     }
+
+    private fun kanOppretteEtteroppgjoerForbehandling(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Boolean {
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sakId, inntektsaar) ?: return false
+
+        // TODO: hva mer må vi sjekke?
+        // finnes en forbehandling fra før?
+        //
+
+        return when (etteroppgjoer.status) {
+            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER -> true
+            else -> false
+        }
+    }
 }
 
-data class EtteroppgjoerOgOppgave(
-    val etteroppgjoerBehandling: EtteroppgjoerForbehandling,
+data class EtteroppgjoerForbehandlingOgOppgave(
+    val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
 )
 

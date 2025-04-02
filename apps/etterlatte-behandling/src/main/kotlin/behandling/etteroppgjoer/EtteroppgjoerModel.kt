@@ -17,7 +17,7 @@ data class Etteroppgjoer(
 
 enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
-    MOTTATT_HENDELSE,
+    MOTTATT_SKATTEOPPGJOER,
     UNDER_FORBEHANDLING,
     UNDER_REVURDERING,
 }

@@ -527,7 +527,6 @@ internal class ApplicationContext(
         )
     val selfTestService = SelfTestService(externalServices)
 
-    // TODO: vurder om private
     val sakTilgang: SakTilgang = SakTilgangImpl(sakSkrivDao, sakLesDao)
     val oppdaterTilgangService =
         OppdaterTilgangService(

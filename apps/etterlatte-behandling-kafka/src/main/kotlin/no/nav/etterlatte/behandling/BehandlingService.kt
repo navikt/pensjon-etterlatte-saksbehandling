@@ -272,6 +272,7 @@ class BehandlingServiceImpl(
             }
         }
 
+    // Ubrukt, fjerne
     override fun finnEllerOpprettSak(
         sakType: SakType,
         foedselsNummerDTO: FoedselsnummerDTO,

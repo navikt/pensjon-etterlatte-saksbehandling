@@ -60,6 +60,7 @@ import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
@@ -84,7 +85,8 @@ internal class SakServiceTest {
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
     private val featureToggleService = mockk<FeatureToggleService>()
-
+    private val oppdaterTilgangService = mockk<OppdaterTilgangService>()
+    private val saktilgang = mockk<SakTilgang>(relaxed = true)
     private val service: SakService =
         SakServiceImpl(
             sakSkrivDao,
@@ -96,6 +98,8 @@ internal class SakServiceTest {
             krrKlient,
             pdlTjenesterKlient,
             featureToggleService,
+            oppdaterTilgangService,
+            saktilgang,
         )
 
     @BeforeEach
@@ -106,6 +110,7 @@ internal class SakServiceTest {
          Gjelder ikke for oppdaterIdentForSak()
          */
         coEvery { grunnlagservice.opprettGrunnlag(any(), any()) } just runs
+        every { grunnlagservice.hentPersongalleri(any(SakId::class)) } returns null
         every { grunnlagservice.lagreNyeSaksopplysningerBareSak(any(), any()) } just runs
 
         coEvery { krrKlient.hentDigitalKontaktinformasjon(any()) } returns
@@ -463,7 +468,7 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-        verify(exactly = 1) { sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
+        verify(exactly = 1) { saktilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
     @Test
@@ -518,7 +523,7 @@ internal class SakServiceTest {
             sak1
 
         verify(exactly = 1) {
-            service.oppdaterAdressebeskyttelse(
+            saktilgang.oppdaterAdressebeskyttelse(
                 sak.id,
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
@@ -547,7 +552,6 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-        verify(exactly = 1) { sakSkrivDao.oppdaterEnhet(any()) }
     }
 
     @Test
@@ -618,7 +622,7 @@ internal class SakServiceTest {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         }
         verify(exactly = 1) { sakSkrivDao.oppdaterEnhet(any()) }
-        verify(exactly = 1) { sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
+        verify(exactly = 1) { saktilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
     @Test

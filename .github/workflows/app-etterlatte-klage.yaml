@@ -16,7 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-klage/**
-      - libs/behandling-model/**
+      - libs/etterlatte-behandling-model/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
@@ -29,7 +29,7 @@ on:
       - apps/etterlatte-klage/**
       - "!apps/etterlatte-klage/.nais/*"
       - libs/saksbehandling-common/**
-      - libs/behandling-model/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml

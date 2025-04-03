@@ -48,7 +48,7 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    // opprett forbehandling for etteroppgjør med status MOTTATT_SKATTEOPPGJOER
+    // kjøring for å opprette forbehandling for etteroppgjør
     suspend fun startOpprettForbehandlingKjoering() {
         logger.info("Opprette forbehandling for etteroppgjør med mottatt skatteoppgjør")
         val etteroppgjoerListe = etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
@@ -215,8 +215,6 @@ class EtteroppgjoerForbehandlingService(
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sakId, inntektsaar) ?: return false
 
         // TODO: hva mer må vi sjekke?
-        // finnes en forbehandling fra før?
-        //
 
         return when (etteroppgjoer.status) {
             EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER -> true

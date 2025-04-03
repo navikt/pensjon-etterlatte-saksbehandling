@@ -60,7 +60,7 @@ export const Person = () => {
   }
 
   // Setter returnert sak til å eventuelt være den foretrukkede andre saken på bruker, hvis den er valgt
-  const transformedSakResult = transformResult(sakResult, (sakData) =>
+  const foretrukketSakResult = transformResult(sakResult, (sakData) =>
     foretrukketSak && foretrukketSak === sakData.ekstraSak?.sak.id
       ? { ...sakData.ekstraSak, ekstraSak: { ...sakData } }
       : sakData
@@ -100,40 +100,40 @@ export const Person = () => {
           <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
           <Tabs.Tab value={PersonOversiktFane.PERSONOPPLYSNINGER} label="Personopplysninger" icon={<PersonIcon />} />
           <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
-          {isOmstillingsstoenad(transformedSakResult) && (
+          {isOmstillingsstoenad(foretrukketSakResult) && (
             <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
           )}
           <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
           <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
           <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />
-          {isOmstillingsstoenad(transformedSakResult) && (
+          {isOmstillingsstoenad(foretrukketSakResult) && (
             <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
           )}
         </Tabs.List>
 
         <Tabs.Panel value={PersonOversiktFane.SAKER}>
-          <SakOversikt sakResult={transformedSakResult} setForetrukketSak={setForetrukketSak} fnr={fnr} />
+          <SakOversikt sakResult={foretrukketSakResult} setForetrukketSak={setForetrukketSak} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-          <Personopplysninger sakResult={transformedSakResult} fnr={fnr} />
+          <Personopplysninger sakResult={foretrukketSakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
-          <Hendelser sakResult={transformedSakResult} fnr={fnr} />
+          <Hendelser sakResult={foretrukketSakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
-          <Dokumentliste sakResult={transformedSakResult} fnr={fnr} />
+          <Dokumentliste sakResult={foretrukketSakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.BREV}>
-          <BrevOversikt sakResult={transformedSakResult} />
+          <BrevOversikt sakResult={foretrukketSakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.NOTATER}>
-          <NotatOversikt sakResult={transformedSakResult} />
+          <NotatOversikt sakResult={foretrukketSakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
-          <SamordningSak fnr={fnr} sakResult={transformedSakResult} />
+          <SamordningSak fnr={fnr} sakResult={foretrukketSakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
-          <AktivitetspliktSakoversikt fnr={fnr} sakResult={transformedSakResult} />
+          <AktivitetspliktSakoversikt fnr={fnr} sakResult={foretrukketSakResult} />
         </Tabs.Panel>
       </Tabs>
     </>

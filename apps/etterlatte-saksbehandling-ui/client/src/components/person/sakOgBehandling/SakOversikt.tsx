@@ -1,7 +1,7 @@
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
-import { isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { SakOversiktHeader } from '~components/person/sakOgBehandling/SakOversiktHeader'
@@ -25,6 +25,7 @@ import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -82,12 +83,6 @@ export const SakOversikt = ({
     }
   }, [fnr, sakResult])
 
-  console.log('bytt til annen sak', byttTilAnnenSakEnabled)
-  console.log(
-    'sak',
-    mapSuccess(sakResult, (r) => r)
-  )
-
   return (
     <>
       {mapResult(sakResult, {
@@ -98,7 +93,12 @@ export const SakOversikt = ({
             <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
               {byttTilAnnenSakEnabled && ekstraSak && (
-                <ByttTilAnnenSak byttSak={() => setForetrukketSak(ekstraSak.sak.id)} />
+                <ByttTilAnnenSak
+                  byttSak={() => {
+                    trackClick(ClickEvent.BYTT_SAK_SAKOVERSIKT)
+                    setForetrukketSak(ekstraSak.sak.id)
+                  }}
+                />
               )}
             </Box>
             <VStack gap="8">

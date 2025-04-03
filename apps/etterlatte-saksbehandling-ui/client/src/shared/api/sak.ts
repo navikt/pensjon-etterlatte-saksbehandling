@@ -1,6 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { ISak, ISaksendring, SakType } from '~shared/types/sak'
-import { SakMedBehandlinger } from '~components/person/typer'
+import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
 
 export interface Navkontor {
   navn: string
@@ -15,7 +15,7 @@ export const hentNavkontorForPerson = async (fnr: string): Promise<ApiResponse<N
   return apiClient.post(`/personer/navkontor`, { foedselsnummer: fnr })
 }
 
-export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<SakMedBehandlinger>> => {
+export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<SakMedBehandlingerOgKanskjeAnnenSak>> => {
   return apiClient.post(`/personer/behandlingerforsak`, { foedselsnummer: fnr })
 }
 

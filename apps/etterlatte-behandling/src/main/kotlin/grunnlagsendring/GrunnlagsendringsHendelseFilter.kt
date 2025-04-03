@@ -67,7 +67,6 @@ class GrunnlagsendringsHendelseFilter(
             -> true
 
             GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
-            GrunnlagsendringsType.GRUNNBELOEP,
             -> false
         }
 }

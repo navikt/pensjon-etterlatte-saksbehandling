@@ -1,5 +1,10 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Etteroppgjoer, FaktiskInntekt } from '~shared/types/Etteroppgjoer'
+import {
+  Etteroppgjoer,
+  EtteroppgjoerBehandling,
+  FaktiskInntekt,
+  BeregnetEtteroppgjoerResultatDto,
+} from '~shared/types/Etteroppgjoer'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
 interface EtteroppgjoerOgOppgave {
@@ -15,10 +20,16 @@ export const opprettEtteroppgjoerIDev = async (sakId: number): Promise<ApiRespon
   return apiClient.post(`/etteroppgjoer/kundev/${sakId}`, {})
 }
 
+export const hentEtteroppgjoerForbehandlinger = async (
+  sakId: number
+): Promise<ApiResponse<EtteroppgjoerBehandling[]>> => {
+  return apiClient.get(`/etteroppgjoer/forbehandlinger/${sakId}`)
+}
+
 export const lagreFaktiskInntekt = async (args: {
   forbehandlingId: string
   faktiskInntekt: FaktiskInntekt
-}): Promise<ApiResponse<any>> => {
+}): Promise<ApiResponse<BeregnetEtteroppgjoerResultatDto>> => {
   return apiClient.post(`/etteroppgjoer/${args.forbehandlingId}/beregn_faktisk_inntekt`, {
     ...args.faktiskInntekt,
   })

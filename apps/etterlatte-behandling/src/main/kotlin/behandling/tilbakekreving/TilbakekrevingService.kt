@@ -161,7 +161,7 @@ class TilbakekrevingService(
             lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(avbruttTilbakekreving),
                 type = TilbakekrevingHendelseType.AVBRUTT,
             )
 
@@ -374,7 +374,7 @@ class TilbakekrevingService(
         lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.FATTET_VEDTAK, vedtak.id, saksbehandler)
 
         tilbakekrevinghendelser.sendTilbakekreving(
-            statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+            statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
             type = TilbakekrevingHendelseType.FATTET_VEDTAK,
         )
 
@@ -425,7 +425,7 @@ class TilbakekrevingService(
                 logger.info("Sender vedtak til tilbakekrevingskomponenten for tilbakekreving=$tilbakekrevingId")
                 tilbakekrevingKlient.sendTilbakekrevingsvedtak(
                     saksbehandler,
-                    tilbakekrevingVedtak(tilbakekreving, vedtak),
+                    tilbakekrevingVedtak(oppdatertTilbakekreving, vedtak),
                 )
             }
 
@@ -448,7 +448,7 @@ class TilbakekrevingService(
             }
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
                 type = TilbakekrevingHendelseType.ATTESTERT,
             )
 
@@ -495,7 +495,7 @@ class TilbakekrevingService(
             )
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
                 type = TilbakekrevingHendelseType.UNDERKJENT,
             )
 

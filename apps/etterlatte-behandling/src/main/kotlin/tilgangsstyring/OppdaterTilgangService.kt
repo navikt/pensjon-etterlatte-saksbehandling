@@ -20,8 +20,9 @@ import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
-import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakTilgang
 import org.slf4j.LoggerFactory
 
 fun SakMedGraderingOgSkjermet.erSpesialSak(): Boolean {
@@ -47,12 +48,13 @@ fun SakMedGraderingOgSkjermet.erSpesialSak(): Boolean {
 }
 
 class OppdaterTilgangService(
-    private val sakService: SakService,
     private val skjermingKlient: SkjermingKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
     private val brukerService: BrukerService,
     private val oppgaveService: OppgaveService,
     private val sakSkrivDao: SakSkrivDao,
+    private val sakTilgang: SakTilgang,
+    private val sakLesDao: SakLesDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -66,7 +68,7 @@ class OppdaterTilgangService(
         persongalleri: Persongalleri,
     ) {
         logger.info("Håndterer tilganger for sakid $sakId")
-        val sak = sakService.finnSak(sakId) ?: throw PersonManglerSak()
+        val sak = sakLesDao.hentSak(sakId) ?: throw PersonManglerSak()
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
         val identerMedGradering =
@@ -76,7 +78,7 @@ class OppdaterTilgangService(
 
         if (identerMedGradering.any { it.harAdressebeskyttelse() }) {
             val hoyesteGradering = identerMedGradering.hentPrioritertGradering()
-            sakService.oppdaterAdressebeskyttelse(sakId, hoyesteGradering)
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, hoyesteGradering)
             /*
                 Hvis det er fotrolig blir det en virtuell enhet og vi kan på forhånd ikke vite hvilken det er
                 Med Streng fortrolig vet vi hvilke enheter som kan behandle disse
@@ -87,7 +89,7 @@ class OppdaterTilgangService(
                 sakSkrivDao.oppdaterEnhet(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
             } else {
-                sakService.settEnhetOmAdressebeskyttet(sak, hoyesteGradering)
+                sakTilgang.settEnhetOmAdressebeskyttet(sak, hoyesteGradering)
                 val enhet =
                     when (hoyesteGradering) {
                         AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG_UTLAND
@@ -98,14 +100,14 @@ class OppdaterTilgangService(
             }
         } else {
             val egenAnsattSkjerming = alleIdenter.map { fnr -> sjekkOmIdentErSkjermet(fnr) }
-            sakService.oppdaterAdressebeskyttelse(sakId, identerMedGradering.hentPrioritertGradering())
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, identerMedGradering.hentPrioritertGradering())
             if (egenAnsattSkjerming.any { it }) {
-                sakService.oppdaterSkjerming(sakId, true)
+                sakTilgang.oppdaterSkjerming(sakId, true)
                 val sakMedEnhet = SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)
                 sakSkrivDao.oppdaterEnhet(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
             } else {
-                val tilgangSak = sakService.hentGraderingForSak(sakId, HardkodaSystembruker.tilgang)
+                val tilgangSak = sakTilgang.hentGraderingForSak(sakId, HardkodaSystembruker.tilgang)
                 /*
                     Vi vil kun tilbakestille en sak som har vært egen anstt, strengt fortrolig(/utland) eller fortrolig
                  */
@@ -113,7 +115,7 @@ class OppdaterTilgangService(
                     val enhetsNummer = hentEnhet(fnr = sak.ident, sak = sak)
                     val sakMedEnhet = SakMedEnhet(sakId, enhetsNummer)
                     sakSkrivDao.oppdaterEnhet(sakMedEnhet)
-                    sakService.oppdaterSkjerming(sakId, false)
+                    sakTilgang.oppdaterSkjerming(sakId, false)
                     oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                 }
             }
@@ -127,7 +129,7 @@ class OppdaterTilgangService(
         val enhet = hentEnhet(fnr = fnr, sak = sak)
         val sakerMedNyEnhet = SakMedEnhet(sak.id, enhet)
         sakSkrivDao.oppdaterEnhet(sakerMedNyEnhet)
-        sakService.oppdaterSkjerming(sak.id, false)
+        sakTilgang.oppdaterSkjerming(sak.id, false)
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakerMedNyEnhet))
     }
 

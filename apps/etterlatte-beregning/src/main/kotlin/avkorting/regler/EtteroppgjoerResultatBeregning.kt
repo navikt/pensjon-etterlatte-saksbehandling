@@ -2,8 +2,9 @@ package no.nav.etterlatte.avkorting.regler
 
 import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
-import no.nav.etterlatte.avkorting.EtteroppgjoerResultatType
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
@@ -119,7 +120,7 @@ val beregneEtteroppgjoerRegel =
 
         val status =
             when {
-                Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKREVING
+                Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKEKREVING
                 Beregningstall(differanse.differanse * -1) > grenser.etterbetaling -> EtteroppgjoerResultatType.ETTERBETALING
                 else -> EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER
             }
@@ -148,7 +149,15 @@ data class EtteroppgjoerGrense(
     val tilbakekreving: Beregningstall,
     val etterbetaling: Beregningstall,
     val rettsgebyr: EtteroppgjoerRettsgebyr,
-)
+) {
+    fun toDto(): EtteroppgjoerGrenseDto =
+        EtteroppgjoerGrenseDto(
+            tilbakekreving = this.tilbakekreving.toDouble(),
+            etterbetaling = this.etterbetaling.toDouble(),
+            rettsgebyr = this.rettsgebyr.rettsgebyr.toDouble(),
+            rettsgebyrGyldigFra = this.rettsgebyr.gyldigFra,
+        )
+}
 
 data class EtteroppgjoerRettsgebyr(
     val gyldigFra: LocalDate,

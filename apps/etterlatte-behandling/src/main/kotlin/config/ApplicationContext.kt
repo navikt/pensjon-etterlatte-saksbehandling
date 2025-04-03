@@ -169,7 +169,9 @@ import no.nav.etterlatte.person.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakTilgang
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.SakTilgangImpl
 import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
@@ -398,11 +400,24 @@ internal class ApplicationContext(
         no.nav.etterlatte.grunnlag.aldersovergang
             .AldersovergangService(aldersovergangDao)
 
+    val sakTilgang: SakTilgang = SakTilgangImpl(sakSkrivDao, sakLesDao)
+    val oppdaterTilgangService =
+        OppdaterTilgangService(
+            skjermingKlient = skjermingKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
+            brukerService = brukerService,
+            oppgaveService = oppgaveService,
+            sakSkrivDao = sakSkrivDao,
+            sakTilgang = sakTilgang,
+            sakLesDao = sakLesDao,
+        )
+
     val grunnlagService: GrunnlagService =
         grunnlagServiceOverride ?: GrunnlagServiceImpl(
             pdlTjenesterKlient,
             opplysningDao,
             GrunnlagHenter(pdlTjenesterKlient),
+            oppdaterTilgangService,
         )
 
     val behandlingService =
@@ -537,7 +552,10 @@ internal class ApplicationContext(
             krrKlient,
             pdlTjenesterKlient,
             featureToggleService,
+            oppdaterTilgangService,
+            sakTilgang,
         )
+
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
 
     val inntektsjusteringSelvbetjeningService =
@@ -567,15 +585,6 @@ internal class ApplicationContext(
         )
 
     private val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
-    val oppdaterTilgangService =
-        OppdaterTilgangService(
-            sakService = sakService,
-            skjermingKlient = skjermingKlient,
-            pdltjenesterKlient = pdlTjenesterKlient,
-            brukerService = brukerService,
-            oppgaveService = oppgaveService,
-            sakSkrivDao = sakSkrivDao,
-        )
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -771,6 +780,7 @@ internal class ApplicationContext(
         OpprettEtteroppgjoerRevurdering(
             behandlingService,
             etteroppgjoerService,
+            etteroppgjoerForbehandlingService,
             grunnlagService,
             revurderingService,
             vilkaarsvurderingService,

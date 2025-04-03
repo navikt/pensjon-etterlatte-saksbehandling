@@ -1,5 +1,5 @@
 import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
-import { Box, Heading } from '@navikt/ds-react'
+import { Label, VStack } from '@navikt/ds-react'
 
 export const SumAvFaktiskInntekt = ({ faktiskInntekt }: { faktiskInntekt: FaktiskInntekt }) => {
   const sumAvFaktiskInntektStringBulder = (faktiskInntekt: FaktiskInntekt) => {
@@ -21,8 +21,9 @@ export const SumAvFaktiskInntekt = ({ faktiskInntekt }: { faktiskInntekt: Faktis
   }
 
   return (
-    <Box background="surface-subtle" padding="6" borderRadius="xlarge" minWidth="25rem" maxWidth="fit-content">
-      <Heading size="medium">Sum = {sumAvFaktiskInntektStringBulder(faktiskInntekt)}</Heading>
-    </Box>
+    <VStack gap="2" padding="2" minWidth="25rem" maxWidth="fit-content">
+      <Label>Sum</Label>
+      <Label>= {sumAvFaktiskInntektStringBulder(faktiskInntekt)}</Label>
+    </VStack>
   )
 }

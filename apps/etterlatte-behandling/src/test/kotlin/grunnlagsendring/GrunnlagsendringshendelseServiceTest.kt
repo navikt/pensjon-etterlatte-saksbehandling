@@ -691,48 +691,6 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `skal kunne opprette hendelser som følge av feilet regulering`() {
-        val sakId = sakId1
-        val lagretHendelse =
-            grunnlagsendringshendelseMedSamsvar(
-                type = GrunnlagsendringsType.GRUNNBELOEP,
-                id = randomUUID(),
-                sakId = sakId,
-                gjelderPerson = KONTANT_FOT.value,
-                samsvarMellomKildeOgGrunnlag = null,
-            )
-
-        val hendelseSomLagres = slot<Grunnlagsendringshendelse>()
-
-        every { sakService.finnSak(sakId) } returns
-            Sak(
-                KONTANT_FOT.value,
-                SakType.BARNEPENSJON,
-                sakId,
-                Enheter.defaultEnhet.enhetNr,
-            )
-
-        every {
-            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(hendelseSomLagres))
-        } returns lagretHendelse
-        every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, any())
-        } returns emptyList()
-        every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-        } returns mockOppgave
-        every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
-        every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
-
-        every { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) } returns Grunnlag.empty()
-
-        grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(sakId)
-
-        assertEquals(hendelseSomLagres.captured.type, GrunnlagsendringsType.GRUNNBELOEP)
-        assertEquals(hendelseSomLagres.captured.sakId, sakId)
-    }
-
-    @Test
     fun `Skal opprette hendelse for ufoeretrygd hvis sak finnes og er loepende`() {
         val sakId = sakId1
         val fnr = KONTANT_FOT.value

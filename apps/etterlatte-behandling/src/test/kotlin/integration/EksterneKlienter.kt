@@ -52,6 +52,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -138,8 +139,7 @@ class BeregningKlientTest :
     override suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-    }
+    ): BeregnetEtteroppgjoerResultatDto = throw NotImplementedError("Ikke implementert for testklient")
 
     override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,

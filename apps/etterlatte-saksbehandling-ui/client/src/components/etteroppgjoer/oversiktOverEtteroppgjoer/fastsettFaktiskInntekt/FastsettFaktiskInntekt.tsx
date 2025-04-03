@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, Tag, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
 import { useForm } from 'react-hook-form'
 import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
@@ -7,8 +7,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
+import { useAppDispatch } from '~store/Store'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -29,13 +30,21 @@ interface FastsettFaktiskInntektSkjema {
   afp: string
   naeringsinntekt: string
   utland: string
+  spesifikasjonAvInntekt: string
 }
 
 export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: string }) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const behandling = useEtteroppgjoer().behandling
+  const dispatch = useAppDispatch()
 
-  const { control, watch, handleSubmit } = useForm<FastsettFaktiskInntektSkjema>({
+  const {
+    register,
+    control,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: {
       loennsinntekt: '0',
       afp: '0',
@@ -45,8 +54,8 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    lagreFaktiskInntektRequest({ forbehandlingId, faktiskInntekt }, () => {
-      //  TODO: her må det gjøre noe snacks for å indikere om at det er lagret, og oppdatere Redux state for videre visning av resultat på forbehandling
+    lagreFaktiskInntektRequest({ forbehandlingId, faktiskInntekt }, (resultat) => {
+      dispatch(addResultatEtteroppgjoer(resultat))
     })
   }
 
@@ -59,10 +68,12 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
           {/* TODO: skal denne være dynamisk? Eller er den alltid "april - desember"? */}
+        </HStack>
+        <div>
           <Tag variant="neutral">
             {maanedNavn(behandling.innvilgetPeriode.fom)} - {maanedNavn(behandling.innvilgetPeriode.tom)}
           </Tag>
-        </HStack>
+        </div>
 
         <VStack gap="4" width="fit-content">
           <ControlledInntektTextField
@@ -77,9 +88,21 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         </VStack>
 
         <SumAvFaktiskInntekt faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch())} />
+        <Box maxWidth="fit-content">
+          <Textarea
+            {...register('spesifikasjonAvInntekt', {
+              required: { value: true, message: 'Du må spesifisere inntekten' },
+            })}
+            label="Spesifikasjon av inntekt"
+            description="Beskriv inntekt lagt til grunn og eventuelle beløp som er trukket fra."
+            error={errors.spesifikasjonAvInntekt?.message}
+          />
+        </Box>
 
         <div>
-          <Button loading={isPending(lagreFaktiskInntektResult)}>Fastsett inntekt</Button>
+          <Button size="small" loading={isPending(lagreFaktiskInntektResult)}>
+            Fastsett inntekt
+          </Button>
         </div>
 
         {isFailureHandler({

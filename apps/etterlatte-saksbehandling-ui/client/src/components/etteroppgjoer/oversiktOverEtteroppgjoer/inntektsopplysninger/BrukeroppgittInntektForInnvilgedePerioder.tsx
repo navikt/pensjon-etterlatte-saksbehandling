@@ -16,7 +16,10 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
 
   return (
     <VStack gap="4">
-      <Heading size="medium">Brukeroppgitt inntekt for innvilgede perioder</Heading>
+      <VStack gap="1">
+        <Heading size="small">Siste brukeroppgitte inntekt for innvilgede perioder</Heading>
+        <BodyShort>Brukeroppgitt inntekt er det brukeren forventer å tjene før skatt</BodyShort>
+      </VStack>
 
       <Table>
         <Table.Header>

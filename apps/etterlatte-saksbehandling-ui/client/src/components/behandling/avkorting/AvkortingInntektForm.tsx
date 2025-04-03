@@ -2,6 +2,7 @@ import {
   BodyShort,
   Box,
   Button,
+  Heading,
   HelpText,
   HStack,
   Label,
@@ -10,8 +11,8 @@ import {
   TextField,
   VStack,
 } from '@navikt/ds-react'
-import { FormProvider, useForm } from 'react-hook-form'
-import { IAvkortingGrunnlagFrontend, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { useForm } from 'react-hook-form'
+import { IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { aarFraDatoString, formaterDato, maanedFraDatoString } from '~utils/formatering/dato'
@@ -21,20 +22,87 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '@reduxjs/toolkit'
 import OverstyrInnvilgaMaander from '~components/behandling/avkorting/OverstyrInnvilgaMaaneder'
-import React, { useState } from 'react'
-import { CogRotationIcon, TrashIcon } from '@navikt/aksel-icons'
+import React, { Dispatch, SetStateAction, useState } from 'react'
+import { CogRotationIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { hentBehandlingstatus } from '~shared/api/behandling'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const AvkortingInntektForm = ({
   behandling,
   erInnevaerendeAar,
-  avkortingGrunnlagFrontend,
+  redigerbartGrunnlag,
+  historikk,
+  redigerbar,
+  resetInntektsavkortingValidering,
+}: {
+  behandling: IBehandlingReducer
+  redigerbartGrunnlag: IAvkortingGrunnlag | undefined
+  historikk: IAvkortingGrunnlag[]
+  erInnevaerendeAar: boolean
+  redigerbar: boolean
+  resetInntektsavkortingValidering: () => void
+}) => {
+  const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, useInnloggetSaksbehandler().skriveEnheter)
+  const [visForm, setVisForm] = useState(false)
+
+  const knappTekst = () => {
+    if (erInnevaerendeAar) {
+      if (redigerbartGrunnlag != null) {
+        return 'Rediger'
+      }
+      return 'Legg til'
+    } else {
+      if (redigerbartGrunnlag != null) {
+        return 'Rediger for neste år'
+      }
+      return 'Legg til for neste år'
+    }
+  }
+
+  return (
+    <>
+      {erRedigerbar && visForm && (
+        <InntektForm
+          behandling={behandling}
+          redigerbartGrunnlag={redigerbartGrunnlag}
+          alleGrunnlag={historikk}
+          erInnevaerendeAar={erInnevaerendeAar}
+          setVisForm={setVisForm}
+        />
+      )}
+      {erRedigerbar && !visForm && (
+        <HStack marginBlock="4 0">
+          <Button
+            size="small"
+            variant="secondary"
+            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            onClick={(e) => {
+              e.preventDefault()
+              setVisForm(true)
+              resetInntektsavkortingValidering()
+            }}
+          >
+            {knappTekst()}
+          </Button>
+        </HStack>
+      )}
+    </>
+  )
+}
+
+const InntektForm = ({
+  behandling,
+  erInnevaerendeAar,
+  redigerbartGrunnlag,
+  alleGrunnlag,
   setVisForm,
 }: {
   behandling: IBehandlingReducer
-  avkortingGrunnlagFrontend: IAvkortingGrunnlagFrontend | undefined
+  redigerbartGrunnlag: IAvkortingGrunnlag | undefined
+  alleGrunnlag: IAvkortingGrunnlag[]
   erInnevaerendeAar: boolean
-  setVisForm: (visForm: boolean) => void
+  setVisForm: Dispatch<SetStateAction<boolean>>
 }) => {
   const dispatch = useAppDispatch()
 
@@ -42,7 +110,8 @@ export const AvkortingInntektForm = ({
   const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
 
   const virk = virkningstidspunkt(behandling).dato
-  const inntektFom = erInnevaerendeAar ? virk : `${aarFraDatoString(virk) + 1}-01`
+  const aar = erInnevaerendeAar ? aarFraDatoString(virk) : aarFraDatoString(virk) + 1
+  const inntektFom = erInnevaerendeAar ? virk : `${aar}-01`
 
   /*
    * Utlede om opptjent før innvilgelse er relevant.
@@ -60,8 +129,13 @@ export const AvkortingInntektForm = ({
       return true
     }
 
-    const tidligereAvkortingGrunnlag = avkortingGrunnlagFrontend?.fraVirk ?? avkortingGrunnlagFrontend?.historikk[0]
-    return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.innvilgaMaaneder === 12 : false
+    if (!!redigerbartGrunnlag) {
+      return redigerbartGrunnlag.innvilgaMaaneder === 12
+    }
+    if (behandling.revurderingsaarsak != null) {
+      return alleGrunnlag[0].innvilgaMaaneder === 12
+    }
+    return false
   }
 
   /*
@@ -71,17 +145,13 @@ export const AvkortingInntektForm = ({
    * vil beløp preutfylles.
    */
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
-    if (avkortingGrunnlagFrontend?.fraVirk != null) {
-      return avkortingGrunnlagFrontend.fraVirk
+    if (!!redigerbartGrunnlag) {
+      return redigerbartGrunnlag
     }
-    if (!erInnevaerendeAar) {
-      const grunnlagNesteAar = avkortingGrunnlagFrontend?.historikk[0]
-      if (grunnlagNesteAar !== undefined) {
-        return grunnlagNesteAar
-      }
-    }
-    if (avkortingGrunnlagFrontend && avkortingGrunnlagFrontend.historikk.length > 0) {
-      const nyligste = avkortingGrunnlagFrontend.historikk[0]
+
+    // Inntektsendringer skjer kun frem i tid
+    if (!!behandling.revurderingsaarsak && alleGrunnlag.length > 0) {
+      const nyligste = alleGrunnlag[0]
       // Preutfyller uten id
       return {
         inntektTom: nyligste.inntektTom,
@@ -97,9 +167,6 @@ export const AvkortingInntektForm = ({
     }
   }
 
-  const methods = useForm<IAvkortingGrunnlagLagre>({
-    defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
-  })
   const {
     register,
     reset,
@@ -108,7 +175,9 @@ export const AvkortingInntektForm = ({
     watch,
     setValue,
     getValues,
-  } = methods
+  } = useForm<IAvkortingGrunnlagLagre>({
+    defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
+  })
 
   const onSubmit = (data: IAvkortingGrunnlagLagre) => {
     lagreAvkortingGrunnlagRequest(
@@ -125,7 +194,7 @@ export const AvkortingInntektForm = ({
         hentBehandlingstatusRequest(behandling.id, (status) => {
           dispatch(oppdaterBehandlingsstatus(status))
           const nyttAvkortingGrunnlag = nyAvkorting.avkortingGrunnlag[nyAvkorting.avkortingGrunnlag.length - 1]
-          if (nyttAvkortingGrunnlag.fraVirk) reset(nyttAvkortingGrunnlag.fraVirk)
+          if (nyttAvkortingGrunnlag) reset(nyttAvkortingGrunnlag)
           dispatch(oppdaterAvkorting(nyAvkorting))
           setVisForm(false)
         })
@@ -142,7 +211,10 @@ export const AvkortingInntektForm = ({
   }
 
   return (
-    <FormProvider {...methods}>
+    <form>
+      <Heading spacing size="small" level="2">
+        {aar}
+      </Heading>
       <VStack>
         <HStack marginBlock="8" gap="2" align="start" wrap={false}>
           <Box maxWidth="14rem">
@@ -161,10 +233,7 @@ export const AvkortingInntektForm = ({
                   </HelpText>
                 </HStack>
               }
-              size="medium"
-              type="tel"
-              inputMode="numeric"
-              error={errors.inntektTom?.message}
+              name="inntektTom"
             />
           </Box>
           <Box maxWidth="14rem">
@@ -277,6 +346,6 @@ export const AvkortingInntektForm = ({
         apiResult: lagreAvkortingGrunnlagResult,
         errorMessage: 'En feil har oppstått',
       })}
-    </FormProvider>
+    </form>
   )
 }

@@ -3,12 +3,12 @@ package no.nav.etterlatte.beregning.regler.avkorting
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.avkorting.BeregnetEtteroppgjoerResultat
 import no.nav.etterlatte.avkorting.EtteroppgjoerRepository
-import no.nav.etterlatte.avkorting.EtteroppgjoerResultatType
 import no.nav.etterlatte.avkorting.ReferanseEtteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerRettsgebyr
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -88,7 +88,7 @@ internal class EtteroppgjoerRepositoryTest(
                             rettsgebyr = Beregningstall(2758.0),
                         ),
                 ),
-            resultatType = EtteroppgjoerResultatType.TILBAKREVING,
+            resultatType = EtteroppgjoerResultatType.TILBAKEKREVING,
             tidspunkt = Tidspunkt.now(),
             regelResultat = mapOf("regel" to "resultat").toObjectNode(),
             kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),

@@ -74,6 +74,7 @@ internal class GrunnlagServiceTest {
             pdltjenesterKlient = pdlTjenesterKlientImpl,
             opplysningDao = opplysningDaoMock,
             grunnlagHenter = grunnlagHenter,
+            mockk(relaxed = true),
         )
 
     private val testData = GrunnlagTestData()

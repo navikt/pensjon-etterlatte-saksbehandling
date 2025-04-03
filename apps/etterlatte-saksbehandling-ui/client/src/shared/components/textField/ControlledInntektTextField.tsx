@@ -1,10 +1,11 @@
 import { Control, Controller, FieldValues, Path } from 'react-hook-form'
 import { TextField } from '@navikt/ds-react'
+import { ReactNode } from 'react'
 
 interface Props<T extends FieldValues> {
   name: Path<T>
   control: Control<T>
-  label?: string
+  label?: string | ReactNode | Array<ReactNode>
   description?: string
 }
 

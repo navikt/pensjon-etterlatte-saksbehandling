@@ -31,16 +31,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -83,22 +79,6 @@ internal class VilkaarsvurderingIntegrationTest(
     private val saksbehandlerident = "Saksbehandler01"
     private val saksbehandler = mockSaksbehandler(saksbehandlerident)
     private val sbBrukertokenInfo = simpleSaksbehandler()
-
-    private fun mockPersongalleri() =
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-            meta = emptyMap<String, String>().toObjectNode(),
-            opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning =
-                Persongalleri(
-                    "soeker",
-                    "innsender",
-                    listOf("soesken"),
-                    listOf("avdoed"),
-                    listOf("gjenlevende"),
-                ),
-        )
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
 

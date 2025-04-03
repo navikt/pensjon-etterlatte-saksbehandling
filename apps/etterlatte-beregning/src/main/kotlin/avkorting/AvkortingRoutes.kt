@@ -144,7 +144,12 @@ fun Route.avkorting(
                 logger.info(
                     "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
                 )
-                val dto = etteroppgjoerService.hentBeregnetAvkorting(request)
+                val dto =
+                    etteroppgjoerService.hentBeregnetAvkorting(
+                        forbehandlingId = request.forbehandling,
+                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                        aar = request.aar,
+                    )
                 call.respond(dto)
             }
 
@@ -152,7 +157,13 @@ fun Route.avkorting(
                 val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
                 logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
                 etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                val resultat =
+                    etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
+                        forbehandlingId = request.forbehandlingId,
+                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                        aar = request.aar,
+                    )
+                call.respond(resultat.toDto())
             }
         }
     }

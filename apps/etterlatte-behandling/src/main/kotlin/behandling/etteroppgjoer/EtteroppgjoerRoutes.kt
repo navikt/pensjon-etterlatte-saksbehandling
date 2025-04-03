@@ -63,7 +63,7 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            forbehandlingService.hentForbehandling(brukerTokenInfo, etteroppgjoerId)
+                            forbehandlingService.hentForbehandlingForFrontend(brukerTokenInfo, etteroppgjoerId)
                         }
                     call.respond(etteroppgjoer)
                 }
@@ -71,10 +71,11 @@ fun Route.etteroppgjoerRoutes(
 
             post("beregn_faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
-                inTransaction {
-                    forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
-                }
-                call.respond(HttpStatusCode.OK)
+                val response =
+                    inTransaction {
+                        forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                    }
+                call.respond(response)
             }
         }
 
@@ -87,6 +88,12 @@ fun Route.etteroppgjoerRoutes(
                     }
                 call.respond(eo)
             }
+        }
+
+        get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            val forbehandlinger = forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId)
+            call.respond(forbehandlinger)
         }
 
         post("/skatteoppgjoerhendelser/start-kjoering") {

@@ -13,6 +13,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -26,6 +28,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -41,24 +45,32 @@ class EtteroppgjoerForbehandlingService(
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
 ) {
-    fun hentForbehandling(
+    private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
+
+    fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
+        dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
+    fun hentForbehandlingForFrontend(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ): ForbehandlingDto {
-        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+        val forbehandling = hentForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatte")
+                ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
 
+        val request =
+            EtteroppgjoerBeregnetAvkortingRequest(
+                forbehandling = behandlingId,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                aar = forbehandling.aar,
+            )
+        logger.info("Henter avkorting for forbehandling: $request")
         val avkorting =
             runBlocking {
                 beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                    EtteroppgjoerBeregnetAvkortingRequest(
-                        forbehandling = behandlingId,
-                        sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                        aar = forbehandling.aar,
-                    ),
+                    request,
                     brukerTokenInfo,
                 )
             }
@@ -91,6 +103,8 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
+
+    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }
 
     fun opprettEtteroppgjoer(
         sakId: SakId,
@@ -157,7 +171,7 @@ class EtteroppgjoerForbehandlingService(
         behandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): BeregnetEtteroppgjoerResultatDto {
         val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
@@ -176,7 +190,7 @@ class EtteroppgjoerForbehandlingService(
                 utland = request.utland,
             )
 
-        runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
+        return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 }
 

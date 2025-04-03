@@ -149,6 +149,8 @@ fun Route.avkorting(
                         forbehandlingId = request.forbehandling,
                         sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
                         aar = request.aar,
+                        sakId = request.sakId,
+                        brukerTokenInfo = brukerTokenInfo,
                     )
                 call.respond(dto)
             }

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -53,9 +54,17 @@ class AvkortingService(
                             eksisterendeAvkorting,
                             brukerTokenInfo,
                         )
-                    avkortingForFrontend(reberegnetAvkorting, behandling, skalHaInntektInnevaerendeOgNesteAar(behandling))
+                    avkortingForFrontend(
+                        reberegnetAvkorting,
+                        behandling,
+                        skalHaInntektInnevaerendeOgNesteAar(behandling),
+                    )
                 } else {
-                    avkortingForFrontend(eksisterendeAvkorting, behandling, skalHaInntektInnevaerendeOgNesteAar(behandling))
+                    avkortingForFrontend(
+                        eksisterendeAvkorting,
+                        behandling,
+                        skalHaInntektInnevaerendeOgNesteAar(behandling),
+                    )
                 }
             }
         }
@@ -64,7 +73,12 @@ class AvkortingService(
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
                 kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
-            avkortingForFrontend(nyAvkorting, behandling, skalHaInntektInnevaerendeOgNesteAar(behandling), forrigeAvkorting)
+            avkortingForFrontend(
+                nyAvkorting,
+                behandling,
+                skalHaInntektInnevaerendeOgNesteAar(behandling),
+                forrigeAvkorting,
+            )
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
             val reberegnetAvkorting =
                 reberegnOgLagreAvkorting(
@@ -72,9 +86,19 @@ class AvkortingService(
                     eksisterendeAvkorting,
                     brukerTokenInfo,
                 )
-            avkortingForFrontend(reberegnetAvkorting, behandling, skalHaInntektInnevaerendeOgNesteAar(behandling), forrigeAvkorting)
+            avkortingForFrontend(
+                reberegnetAvkorting,
+                behandling,
+                skalHaInntektInnevaerendeOgNesteAar(behandling),
+                forrigeAvkorting,
+            )
         } else {
-            avkortingForFrontend(eksisterendeAvkorting, behandling, skalHaInntektInnevaerendeOgNesteAar(behandling), forrigeAvkorting)
+            avkortingForFrontend(
+                eksisterendeAvkorting,
+                behandling,
+                skalHaInntektInnevaerendeOgNesteAar(behandling),
+                forrigeAvkorting,
+            )
         }
     }
 
@@ -207,7 +231,8 @@ class AvkortingService(
             avkortingRepository.hentAvkorting(forbehandlingId)
                 ?: throw InternfeilException("Mangler avkorting fra etteroppgjør forbehandling")
         val kopiertAarsoppgjoerFraForbehandling = avkortingFraForbehandling.kopierAvkorting().aarsoppgjoer.single()
-        val avkortingMedErstattetAarsoppgjoer = kopiertAvkorting.erstattAarsoppgjoer(kopiertAarsoppgjoerFraForbehandling)
+        val avkortingMedErstattetAarsoppgjoer =
+            kopiertAvkorting.erstattAarsoppgjoer(kopiertAarsoppgjoerFraForbehandling)
 
         if (kopiertAvkorting.aarsoppgjoer == avkortingMedErstattetAarsoppgjoer.aarsoppgjoer) {
             throw InternfeilException("Årsoppgjør ble ikke oppdatert med årsoppgjør fra etteroppgjør forbehandling")
@@ -304,6 +329,21 @@ class AvkortingService(
             virkningstidspunkt,
             behandling.sak,
             alleVedtak,
+        )
+    }
+
+    suspend fun hentAvkortingMedReparertAarsoppgjoer(
+        sakId: SakId,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Avkorting {
+        val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
+        val forrigeAvkorting = hentForrigeAvkorting(behandlingId)
+
+        return avkortingReparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
+            sakId = sakId,
+            alleVedtak = alleVedtak,
+            avkortingSistIverksatt = forrigeAvkorting,
         )
     }
 

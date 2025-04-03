@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.BrevFastInnholdData
+import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -176,7 +176,7 @@ data class SkatteoppgjoerHendelser(
 )
 
 data class EtteroppgjoerBrevRequestData(
-    val redigerbar: BrevDataRedigerbar,
+    val redigerbar: BrevRedigerbarInnholdData,
     val innhold: BrevFastInnholdData,
 )
 

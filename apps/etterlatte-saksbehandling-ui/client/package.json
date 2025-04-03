@@ -39,8 +39,8 @@
     "styled-components": "^6.1.15"
   },
   "devDependencies": {
+    "@eslint/js": "^9.23.0",
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.21.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/react-hooks": "^8.0.1",

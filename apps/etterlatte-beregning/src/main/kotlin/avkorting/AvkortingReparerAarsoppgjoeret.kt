@@ -78,7 +78,7 @@ class AvkortingReparerAarsoppgjoeret(
         if (manglerAar) {
             val alleManglendeAar = alleAarMedAarsoppgjoer - alleAarNyAvkortng
             val aarsoppgjoerManglende =
-                alleManglendeAar.toSortedSet().map { manglendeAar ->
+                alleManglendeAar.map { manglendeAar ->
                     val behandlingId = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
                     val avkorting =
                         avkortingRepository.hentAvkorting(behandlingId)
@@ -86,7 +86,7 @@ class AvkortingReparerAarsoppgjoeret(
                     avkorting.aarsoppgjoer.single { manglendeAar == it.aar }
                 }
             return avkortingSistIverksatt.copy(
-                aarsoppgjoer = avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende,
+                aarsoppgjoer = (avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar },
             )
         } else {
             return avkortingSistIverksatt

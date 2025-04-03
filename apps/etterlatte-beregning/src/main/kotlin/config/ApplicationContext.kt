@@ -142,6 +142,7 @@ class ApplicationContext {
             beregningService = beregningService,
             sanksjonService = sanksjonService,
             etteroppgjoerRepository = etteroppgjoerRepository,
+            avkortingService = avkortingService,
         )
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(

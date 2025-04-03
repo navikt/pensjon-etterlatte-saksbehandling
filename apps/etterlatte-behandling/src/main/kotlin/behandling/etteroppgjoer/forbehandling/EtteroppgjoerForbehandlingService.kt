@@ -64,6 +64,7 @@ class EtteroppgjoerForbehandlingService(
                 forbehandling = behandlingId,
                 sisteIverksatteBehandling = sisteIverksatteBehandling.id,
                 aar = forbehandling.aar,
+                sakId = sisteIverksatteBehandling.sak.id,
             )
         logger.info("Henter avkorting for forbehandling: $request")
         val avkorting =

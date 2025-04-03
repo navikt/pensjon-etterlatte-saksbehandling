@@ -60,7 +60,7 @@ internal class GrunnlagsendringsHendelseFilterTest {
     @ParameterizedTest
     @EnumSource(
         GrunnlagsendringsType::class,
-        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD", "GRUNNBELOEP"],
+        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `Skal slippe gjennom relevante hendelser for sak med åpen behandling`(grunnlagendringType: GrunnlagsendringsType) {
@@ -78,7 +78,7 @@ internal class GrunnlagsendringsHendelseFilterTest {
     @ParameterizedTest
     @EnumSource(
         GrunnlagsendringsType::class,
-        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD", "GRUNNBELOEP"],
+        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `Skal slippe gjennom relevante hendelser for sak med løpende vedtak ytelse`(grunnlagendringType: GrunnlagsendringsType) {
@@ -90,7 +90,7 @@ internal class GrunnlagsendringsHendelseFilterTest {
     @ParameterizedTest
     @EnumSource(
         GrunnlagsendringsType::class,
-        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD", "GRUNNBELOEP"],
+        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `Skal ikke slippe gjennom gyldige hendelser hvis sak ikke har en åpen behandling eller løpende vedtak`(
@@ -106,7 +106,7 @@ internal class GrunnlagsendringsHendelseFilterTest {
     @ParameterizedTest
     @EnumSource(
         GrunnlagsendringsType::class,
-        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD", "GRUNNBELOEP"],
+        names = ["DOEDSFALL", "INSTITUSJONSOPPHOLD"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `Ikke løpende ytelse men ikke åpen behandling`(grunnlagendringType: GrunnlagsendringsType) {

@@ -66,7 +66,7 @@ export const AvkortingInntektForm = ({
         <InntektForm
           behandling={behandling}
           redigerbartGrunnlag={redigerbartGrunnlag}
-          historikk={historikk}
+          alleGrunnlag={historikk}
           erInnevaerendeAar={erInnevaerendeAar}
           setVisForm={setVisForm}
         />
@@ -95,12 +95,12 @@ const InntektForm = ({
   behandling,
   erInnevaerendeAar,
   redigerbartGrunnlag,
-  historikk,
+  alleGrunnlag,
   setVisForm,
 }: {
   behandling: IBehandlingReducer
   redigerbartGrunnlag: IAvkortingGrunnlag | undefined
-  historikk: IAvkortingGrunnlag[]
+  alleGrunnlag: IAvkortingGrunnlag[]
   erInnevaerendeAar: boolean
   setVisForm: Dispatch<SetStateAction<boolean>>
 }) => {
@@ -128,9 +128,14 @@ const InntektForm = ({
     if (fomJanuar) {
       return true
     }
-    // forutsetter at nyligster inntekt alltid er første element
-    const tidligereAvkortingGrunnlag = redigerbartGrunnlag ?? historikk[0]
-    return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.innvilgaMaaneder === 12 : false
+
+    if (!!redigerbartGrunnlag) {
+      return redigerbartGrunnlag.innvilgaMaaneder === 12
+    }
+    if (behandling.revurderingsaarsak != null) {
+      return alleGrunnlag[0].innvilgaMaaneder === 12
+    }
+    return false
   }
 
   /*
@@ -144,14 +149,9 @@ const InntektForm = ({
       return redigerbartGrunnlag
     }
 
-    if (!erInnevaerendeAar) {
-      const grunnlagNesteAar = historikk[0]
-      if (grunnlagNesteAar !== undefined) {
-        return grunnlagNesteAar
-      }
-    }
-    if (redigerbartGrunnlag && historikk.length > 0) {
-      const nyligste = historikk[0]
+    // Inntektsendringer skjer kun frem i tid
+    if (!!behandling.revurderingsaarsak && alleGrunnlag.length > 0) {
+      const nyligste = alleGrunnlag[0]
       // Preutfyller uten id
       return {
         inntektTom: nyligste.inntektTom,

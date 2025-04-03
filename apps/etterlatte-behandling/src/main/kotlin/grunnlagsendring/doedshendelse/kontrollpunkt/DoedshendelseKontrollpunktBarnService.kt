@@ -19,20 +19,19 @@ internal class DoedshendelseKontrollpunktBarnService(
         barn: PersonDTO,
     ): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
-            kontrollerBarnOgHarBP(sak),
+            kontrollerBarnErSoektFor(sak),
             kontrollerSamtidigDoedsfall(avdoed, hendelse, barn),
         )
 
-    private fun kontrollerBarnOgHarBP(sak: Sak?): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {
+    private fun kontrollerBarnErSoektFor(sak: Sak?): DoedshendelseKontrollpunkt.BarnErSoektFor? {
         if (sak == null) {
             return null
         }
+        val behandlingerForSak = behandlingService.hentBehandlingerForSak(sak.id).filter { it.sak.sakType == SakType.BARNEPENSJON }
 
-        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sak.id)
-
-        val harBarnepensjon = sisteIverksatteBehandling != null && sisteIverksatteBehandling.sak.sakType == SakType.BARNEPENSJON
-        return if (harBarnepensjon) {
-            DoedshendelseKontrollpunkt.BarnHarBarnepensjon(sak)
+        val harSoektBarnepensjon = behandlingerForSak.isNotEmpty()
+        return if (harSoektBarnepensjon) {
+            DoedshendelseKontrollpunkt.BarnErSoektFor(sak)
         } else {
             null
         }

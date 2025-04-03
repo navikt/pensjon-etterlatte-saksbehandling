@@ -128,7 +128,7 @@ class DoedshendelseJobServiceTest {
                     endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt(),
                 ),
             )
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), bruker) } returns listOf(AvdoedHarDNummer)
+        every { kontrollpunktService.identifiserKontrollpunkter(any(), bruker) } returns listOf(AvdoedHarDNummer)
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
@@ -156,7 +156,7 @@ class DoedshendelseJobServiceTest {
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), bruker) } returns listOf(AvdoedLeverIPDL)
+        every { kontrollpunktService.identifiserKontrollpunkter(any(), bruker) } returns listOf(AvdoedLeverIPDL)
         val doedshendelseInternalCapture = slot<DoedshendelseInternal>()
 
         service.setupKontekstAndRun(kontekst, bruker)
@@ -186,7 +186,7 @@ class DoedshendelseJobServiceTest {
             mockk {
                 every { id } returns oppgaveId
             }
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), bruker) } returns
+        every { kontrollpunktService.identifiserKontrollpunkter(any(), bruker) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
         val doedshendelseCapture = slot<DoedshendelseInternal>()
 
@@ -218,7 +218,7 @@ class DoedshendelseJobServiceTest {
             mockk {
                 every { id } returns oppgaveId
             }
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), bruker) } returns
+        every { kontrollpunktService.identifiserKontrollpunkter(any(), bruker) } returns
             emptyList()
         every { doedshendelserProducer.sendBrevRequestBP(any(), any(), any()) } just runs
         val doedshendelseCapture = slot<DoedshendelseInternal>()

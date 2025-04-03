@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -105,7 +104,7 @@ class EtteroppgjoerForbehandlingService(
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
 
-    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }
+    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlinger(sakId)
 
     fun opprettEtteroppgjoer(
         sakId: SakId,

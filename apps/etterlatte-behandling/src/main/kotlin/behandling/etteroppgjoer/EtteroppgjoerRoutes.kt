@@ -92,7 +92,7 @@ fun Route.etteroppgjoerRoutes(
 
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
-            val forbehandlinger = forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId)
+            val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
             call.respond(forbehandlinger)
         }
 

@@ -33,13 +33,13 @@ class EtteroppgjoerBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, forbehandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
         val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
+                    sak = forbehandling.sak,
                     brevInnholdData = brevData.innhold,
                     brevRedigerbarInnholdData = brevData.redigerbar,
                     skalLagres = false,
@@ -62,13 +62,13 @@ class EtteroppgjoerBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, forbehandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
         val (redigerbartInnhold, brevInnhold) = EtteroppgjoerBrevMapper.fra(forbehandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
+                    sak = forbehandling.sak,
                     brevInnholdData = brevInnhold,
                     skalLagres = false,
                     brukerTokenInfo = brukerTokenInfo,
@@ -119,7 +119,7 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(brukerTokenInfo, behandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
         val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
 
         brevKlient.ferdigstillStrukturertBrev(behandlingId, brevData.innhold.brevKode.brevtype, brukerTokenInfo)
@@ -130,12 +130,12 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): Pdf {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(bruker, behandlingId)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
         val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
         val request =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
+                    sak = forbehandling.sak,
                     brevInnholdData = brevData.innhold,
                     brevRedigerbarInnholdData = brevData.redigerbar,
                     skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
@@ -150,14 +150,14 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): Brev? {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(bruker, behandlingId)
-        if (forbehandling.behandling.brevId == null) {
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
+        if (forbehandling.brevId == null) {
             return null
         }
 
         return brevApiKlient.hentBrev(
-            sakId = forbehandling.behandling.sak.id,
-            brevId = forbehandling.behandling.brevId,
+            sakId = forbehandling.sak.id,
+            brevId = forbehandling.brevId,
             brukerTokenInfo = bruker,
         )
     }

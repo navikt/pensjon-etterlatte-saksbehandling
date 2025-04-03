@@ -182,10 +182,9 @@ data class EtteroppgjoerBrevRequestData(
 
 object EtteroppgjoerBrevMapper {
     // TODO: mappe til riktige brevvarianter avhengig av data i forbehandlingen
-    //  Kanskje også vurdere å ikke sende inn dto etc.
-    fun fra(forbehandlingDto: ForbehandlingDto): EtteroppgjoerBrevRequestData =
+    fun fra(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerBrevRequestData =
         EtteroppgjoerBrevRequestData(
-            redigerbar = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold(forbehandlingDto.behandling.sak),
-            innhold = EtteroppgjoerBrevData.VarselTilbakekreving(forbehandlingDto.behandling.sak),
+            redigerbar = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold(forbehandling.sak),
+            innhold = EtteroppgjoerBrevData.VarselTilbakekreving(forbehandling.sak),
         )
 }

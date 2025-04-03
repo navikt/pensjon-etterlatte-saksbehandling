@@ -118,7 +118,6 @@ export const AktivitetPeriode = ({
             description="Hvis det er oppgitt sluttdato"
             control={control}
             required={false}
-            errorVedTomInput="Du må sette en til og med dato"
           />
         </HStack>
         <VStack gap="4">

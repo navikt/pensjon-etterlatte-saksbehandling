@@ -46,6 +46,28 @@ export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T
   throw new Error(`Ukjent status på result: ${JSON.stringify(result)}`)
 }
 
+/**
+ * Mapper om fra en resultatType til en annen. Kan brukes til å transformere innholdet i et resultat men samtidig
+ * beholde all informasjon om tilstanden til resultatet.
+ *
+ * @param result av type T
+ * @param transform som mapper fra T til R
+ *
+ * @return Result av typen R
+ */
+export const transformResult = <T, R>(result: Result<T>, transform: (_: T) => R): Result<R> =>
+  mapResultFallback(
+    result,
+    {
+      success: (data: T): Result<R> => ({
+        status: 'success',
+        data: transform(data),
+      }),
+    },
+    // Denne casten er trygg siden det er kun success som har objekt med typeinformasjon, og denne mapper vi over
+    result as Result<R>
+  )
+
 export const mapResult = <T, R>(result: Result<T>, mappers: Mappers<T, R>) => mapResultFallback(result, mappers, null)
 
 //TODO: ikke bruk, burde slettes og skrives om til mapResult over

@@ -10,9 +10,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
+import no.nav.etterlatte.samordning.vedtak.haandterUgyldigIdent
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -27,7 +27,7 @@ fun Route.vedtakRoute(vedtakService: VedtakService) {
         post {
             try {
                 val request = call.receive<FoedselsnummerDTO>()
-                val fnr = Folkeregisteridentifikator.of(request.foedselsnummer)
+                val fnr = haandterUgyldigIdent(request.foedselsnummer)
                 val vedtak = vedtakService.hentVedtak(fnr)
                 call.respond(vedtak)
             } catch (e: IllegalArgumentException) {

@@ -25,6 +25,14 @@ import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.samordning.X_ORGNR
 
+fun haandterUgyldigIdent(fnr: String): Folkeregisteridentifikator {
+    try {
+        return Folkeregisteridentifikator.of(fnr)
+    } catch (_: Exception) {
+        throw UgyldigFoedselsnummerException()
+    }
+}
+
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
     config: Config,
@@ -80,7 +88,7 @@ fun Route.samordningVedtakRoute(
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
-                        fnr = Folkeregisteridentifikator.of(fnr),
+                        fnr = haandterUgyldigIdent(fnr),
                         context =
                             MaskinportenTpContext(
                                 tpnr = tpnr,
@@ -104,11 +112,12 @@ fun Route.samordningVedtakRoute(
                 call.request.headers["tpnr"]
                     ?: throw ManglerTpNrException()
 
+            Folkeregisteridentifikator.of(fnr.foedselsnummer)
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
-                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
+                        fnr = haandterUgyldigIdent(fnr.foedselsnummer),
                         context =
                             MaskinportenTpContext(
                                 tpnr = Tjenestepensjonnummer(tpnummer),
@@ -147,7 +156,7 @@ fun Route.samordningVedtakRoute(
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
-                        fnr = Folkeregisteridentifikator.of(fnr),
+                        fnr = haandterUgyldigIdent(fnr),
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
@@ -169,7 +178,7 @@ fun Route.samordningVedtakRoute(
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
-                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
+                        fnr = haandterUgyldigIdent(fnr.foedselsnummer),
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
@@ -187,7 +196,7 @@ fun Route.samordningVedtakRoute(
                 try {
                     samordningVedtakService.harLoependeYtelsePaaDato(
                         dato = paaDato,
-                        fnr = Folkeregisteridentifikator.of(fnr),
+                        fnr = haandterUgyldigIdent(fnr),
                         sakType = SakType.OMSTILLINGSSTOENAD,
                         context = PensjonContext,
                     )
@@ -210,7 +219,7 @@ fun Route.samordningVedtakRoute(
                 try {
                     samordningVedtakService.harLoependeYtelsePaaDato(
                         dato = paaDato,
-                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
+                        fnr = haandterUgyldigIdent(fnr.foedselsnummer),
                         sakType = SakType.OMSTILLINGSSTOENAD,
                         context = PensjonContext,
                     )

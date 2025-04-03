@@ -3,6 +3,7 @@ import { ISak, SakType } from '~shared/types/sak'
 import { Button, Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import { TabsAddIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const temaFraSakstype = (sakstype: SakType): string => {
   switch (sakstype) {
@@ -41,6 +42,7 @@ export const EndreSak = ({
       tema: temaFraSakstype(sak.sakType),
     })
   }
+  const bytteMellomSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
 
   const sakTilhoererIkkeGjenny = fagsak?.fagsakId !== gjennySak.id.toString()
 
@@ -99,7 +101,7 @@ export const EndreSak = ({
                   </Button>
                 </Table.DataCell>
               </Table.Row>
-              {alternativSak && (
+              {bytteMellomSakEnabled && alternativSak && (
                 <Table.Row>
                   <Table.DataCell>{alternativSak.id}</Table.DataCell>
                   <Table.DataCell>{formaterSakstype(Sakstype.FAGSAK)}</Table.DataCell>

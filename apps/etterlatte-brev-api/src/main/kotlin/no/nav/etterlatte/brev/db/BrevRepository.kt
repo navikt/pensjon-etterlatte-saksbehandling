@@ -162,7 +162,7 @@ class BrevRepository(
     ) = ds.transaction { tx ->
         tx.oppdater(
             OPPDATER_BREVKODER_QUERY,
-            mapOf("id" to id, "brevkoder" to brevkoder.name),
+            mapOf("id" to id, "brevkoder" to brevkoder.name, "brevtype" to brevkoder.brevtype.name),
             "Oppdaterer brevkoder for brev $id til $brevkoder",
         )
     }
@@ -665,7 +665,8 @@ class BrevRepository(
 
         const val OPPDATER_BREVKODER_QUERY = """
             UPDATE brev 
-            SET brevkoder = :brevkoder
+            SET brevkoder = :brevkoder,
+            brevtype = :brevtype
             WHERE id = :id
         """
 

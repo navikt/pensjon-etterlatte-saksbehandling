@@ -66,6 +66,9 @@ enum class EtterlatteBrevKode : Brevbakerkode {
 
     OPPLASTET_PDF,
     INGEN_REDIGERBAR_DEL,
+
+    OMS_EO_VARSEL_TILBAKEKREVING,
+    OMS_EO_VARSEL_TILBAKEKREVING_INNHOLD,
 }
 
 enum class Brevtype {

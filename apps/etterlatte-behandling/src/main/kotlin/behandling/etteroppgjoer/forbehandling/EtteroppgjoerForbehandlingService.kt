@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -96,99 +97,101 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
+    fun lagreBrevreferanse(
+        forbehandlingId: UUID,
+        brev: Brev,
+    ) {
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        dao.lagreForbehandling(forbehandling.medBrev(brev))
+    }
+
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }
 
-    suspend fun opprettEtteroppgjoer(
+    fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerOgOppgave {
-        val sak =
-            inTransaction {
-                sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
-            }
+        val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
 
-        val pensjonsgivendeInntekt = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar)
-        val aInntekt = inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar)
+        val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
+        val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+        val virkOgOpphoer = runBlocking { vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo) }
 
-        val virkOgOpphoer = vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo)
-
-        return inTransaction {
-            val nyForbehandling =
-                EtteroppgjoerForbehandling(
-                    id = UUID.randomUUID(),
-                    hendelseId = UUID.randomUUID(),
-                    sak = sak,
-                    status = "opprettet",
-                    aar = inntektsaar,
-                    innvilgetPeriode =
-                        Periode(
-                            fom =
-                                if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
-                                    virkOgOpphoer.foersteVirk
-                                } else {
-                                    YearMonth.of(inntektsaar, Month.JANUARY)
-                                },
-                            tom =
-                                if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
-                                    virkOgOpphoer.opphoer
-                                } else {
-                                    YearMonth.of(inntektsaar, Month.DECEMBER)
-                                },
-                        ),
-                    opprettet = Tidspunkt.now(),
-                )
-
-            val oppgave =
-                oppgaveService.opprettOppgave(
-                    referanse = nyForbehandling.id.toString(),
-                    sakId = sakId,
-                    kilde = OppgaveKilde.BEHANDLING,
-                    type = OppgaveType.ETTEROPPGJOER,
-                    merknad = null,
-                    frist = null,
-                    saksbehandler = null,
-                    gruppeId = null,
-                )
-
-            dao.lagreForbehandling(nyForbehandling)
-            dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
-            dao.lagreAInntekt(aInntekt, nyForbehandling.id)
-
-            etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
-
-            EtteroppgjoerOgOppgave(
-                etteroppgjoerBehandling = nyForbehandling,
-                oppgave = oppgave,
+        val nyForbehandling =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                sak = sak,
+                status = "opprettet",
+                aar = inntektsaar,
+                innvilgetPeriode =
+                    Periode(
+                        fom =
+                            if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
+                                virkOgOpphoer.foersteVirk
+                            } else {
+                                YearMonth.of(inntektsaar, Month.JANUARY)
+                            },
+                        tom =
+                            if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
+                                virkOgOpphoer.opphoer
+                            } else {
+                                YearMonth.of(inntektsaar, Month.DECEMBER)
+                            },
+                    ),
+                opprettet = Tidspunkt.now(),
+                brevId = null,
             )
-        }
+
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                referanse = nyForbehandling.id.toString(),
+                sakId = sakId,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = null,
+                frist = null,
+                saksbehandler = null,
+                gruppeId = null,
+            )
+
+        dao.lagreForbehandling(nyForbehandling)
+        dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
+        dao.lagreAInntekt(aInntekt, nyForbehandling.id)
+
+        etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+
+        return EtteroppgjoerOgOppgave(
+            etteroppgjoerBehandling = nyForbehandling,
+            oppgave = oppgave,
+        )
     }
 
-    suspend fun beregnFaktiskInntekt(
+    fun beregnFaktiskInntekt(
         behandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto {
+        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatte")
+
         val request =
-            inTransaction {
-                val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+            EtteroppgjoerBeregnFaktiskInntektRequest(
+                sakId = forbehandling.sak.id,
+                forbehandlingId = forbehandling.id,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                aar = forbehandling.aar,
+                loennsinntekt = request.loennsinntekt,
+                naeringsinntekt = request.naeringsinntekt,
+                afp = request.afp,
+                utland = request.utland,
+            )
 
-                val sisteIverksatteBehandling =
-                    behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                        ?: throw InternfeilException("Fant ikke siste iverksatte")
-
-                EtteroppgjoerBeregnFaktiskInntektRequest(
-                    sakId = forbehandling.sak.id,
-                    forbehandlingId = forbehandling.id,
-                    sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                    aar = forbehandling.aar,
-                    loennsinntekt = request.loennsinntekt,
-                    naeringsinntekt = request.naeringsinntekt,
-                    afp = request.afp,
-                    utland = request.utland,
-                )
-            }
-        return beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo)
+        return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 }
 

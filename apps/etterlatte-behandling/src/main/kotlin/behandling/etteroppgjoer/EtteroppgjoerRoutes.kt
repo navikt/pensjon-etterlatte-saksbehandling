@@ -71,7 +71,10 @@ fun Route.etteroppgjoerRoutes(
 
             post("beregn_faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
-                val response = forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                val response =
+                    inTransaction {
+                        forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                    }
                 call.respond(response)
             }
         }
@@ -79,7 +82,10 @@ fun Route.etteroppgjoerRoutes(
         post("/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
+                val eo =
+                    inTransaction {
+                        forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
+                    }
                 call.respond(eo)
             }
         }
@@ -94,7 +100,9 @@ fun Route.etteroppgjoerRoutes(
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
                 val request = call.receive<HendelseKjoeringRequest>()
-                skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+                inTransaction {
+                    skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -106,7 +114,9 @@ fun Route.etteroppgjoerRoutes(
                     krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
                         "Inntektsaar mangler"
                     }
-                etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                inTransaction {
+                    etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }

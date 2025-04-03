@@ -52,7 +52,7 @@ fun Route.strukturertBrevRoute(
                 }
             }
 
-            post("ferdigstill") {
+            post("ferdigstill/{$BREV_TYPE_CALL_PARAMETER}") {
                 withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                     logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
                     val brevType =

@@ -16,6 +16,7 @@ import { EndreDokumenter } from '~components/person/journalfoeringsoppgave/journ
 import JournalfoerJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/JournalfoerJournalpostModal'
 import LagreJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/LagreJournalpostModal'
 import { EndreTittelJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/EndreTittelJournalpost'
+import { useAppSelector } from '~store/Store'
 
 interface Props {
   initialJournalpost: Journalpost
@@ -25,6 +26,7 @@ interface Props {
 
 export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Props) => {
   const [journalpost, setJournalpost] = useState<Journalpost>({ ...initialJournalpost })
+  const { sakMedBehandlinger } = useAppSelector((store) => store.journalfoeringOppgaveReducer)
 
   return (
     <>
@@ -84,6 +86,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
         <EndreSak
           fagsak={journalpost.sak}
           gjennySak={sak}
+          alternativSak={sakMedBehandlinger?.ekstraSak?.sak}
           kobleTilSak={(sak) => setJournalpost({ ...journalpost, sak })}
         />
 

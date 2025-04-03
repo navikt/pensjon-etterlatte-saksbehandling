@@ -1,13 +1,13 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { Journalpost } from '~shared/types/Journalpost'
-import { SakMedBehandlinger } from '~components/person/typer'
+import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
 import { NyKlageRequestUtfylling } from '~shared/types/Klage'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const settBruker = createAction<string>('behandling/bruker/sett')
 export const settOppgave = createAction<OppgaveDTO>('behandling/oppgave/sett')
-export const settSak = createAction<SakMedBehandlinger>('behandling/sak/sett')
+export const settSak = createAction<SakMedBehandlingerOgKanskjeAnnenSak>('behandling/sak/sett')
 export const settJournalpost = createAction<Journalpost>('behandling/journalpost/sett')
 export const settOppgaveHandling = createAction<OppgaveHandling>('oppgave/oppgavehandling/sett')
 export const settNyBehandlingRequest = createAction<NyBehandlingRequest>('behandling/behandlingbehov/sett')
@@ -16,7 +16,7 @@ export const settNyKlageRequest = createAction<Partial<NyKlageRequestUtfylling>>
 export interface IJournalfoeringOppgaveReducer {
   bruker?: string
   oppgave?: OppgaveDTO
-  sakMedBehandlinger?: SakMedBehandlinger
+  sakMedBehandlinger?: SakMedBehandlingerOgKanskjeAnnenSak
   journalpost?: Journalpost
   oppgaveHandling?: OppgaveHandling
   nyBehandlingRequest?: NyBehandlingRequest

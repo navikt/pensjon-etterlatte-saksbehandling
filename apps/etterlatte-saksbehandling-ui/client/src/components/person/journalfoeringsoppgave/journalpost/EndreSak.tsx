@@ -26,17 +26,19 @@ export const EndreSak = ({
   fagsak,
   gjennySak,
   kobleTilSak,
+  alternativSak,
 }: {
   fagsak?: JournalpostSak
   gjennySak: ISak
   kobleTilSak: (sak: JournalpostSak | undefined) => void
+  alternativSak?: ISak
 }) => {
-  const konverterOgKobleTilSak = () => {
+  const konverterOgKobleTilSak = (sak: ISak) => () => {
     kobleTilSak({
       sakstype: Sakstype.FAGSAK,
-      fagsakId: gjennySak.id.toString(),
+      fagsakId: sak.id.toString(),
       fagsaksystem: 'EY',
-      tema: temaFraSakstype(gjennySak.sakType),
+      tema: temaFraSakstype(sak.sakType),
     })
   }
 
@@ -78,24 +80,46 @@ export const EndreSak = ({
           )}
 
           {sakTilhoererIkkeGjenny && (
-            <Table.Row style={{ background: 'var(--ac-alert-warning-bg, var(--a-surface-warning-subtle))' }}>
-              <Table.DataCell>{gjennySak.id}</Table.DataCell>
-              <Table.DataCell>{formaterSakstype(Sakstype.FAGSAK)}</Table.DataCell>
-              <Table.DataCell>EY</Table.DataCell>
-              <Table.DataCell>{temaFraSakstype(gjennySak.sakType)}</Table.DataCell>
-              <Table.DataCell>
-                <Button
-                  variant="secondary-neutral"
-                  size="small"
-                  icon={<TabsAddIcon aria-hidden />}
-                  iconPosition="right"
-                  title="Koble til saken"
-                  onClick={konverterOgKobleTilSak}
-                >
-                  Koble til sak
-                </Button>
-              </Table.DataCell>
-            </Table.Row>
+            <>
+              <Table.Row style={{ background: 'var(--ac-alert-warning-bg, var(--a-surface-warning-subtle))' }}>
+                <Table.DataCell>{gjennySak.id}</Table.DataCell>
+                <Table.DataCell>{formaterSakstype(Sakstype.FAGSAK)}</Table.DataCell>
+                <Table.DataCell>EY</Table.DataCell>
+                <Table.DataCell>{temaFraSakstype(gjennySak.sakType)}</Table.DataCell>
+                <Table.DataCell>
+                  <Button
+                    variant="secondary-neutral"
+                    size="small"
+                    icon={<TabsAddIcon aria-hidden />}
+                    iconPosition="right"
+                    title="Koble til saken"
+                    onClick={konverterOgKobleTilSak(gjennySak)}
+                  >
+                    Koble til sak
+                  </Button>
+                </Table.DataCell>
+              </Table.Row>
+              {alternativSak && (
+                <Table.Row>
+                  <Table.DataCell>{alternativSak.id}</Table.DataCell>
+                  <Table.DataCell>{formaterSakstype(Sakstype.FAGSAK)}</Table.DataCell>
+                  <Table.DataCell>EY</Table.DataCell>
+                  <Table.DataCell>{temaFraSakstype(alternativSak.sakType)}</Table.DataCell>
+                  <Table.DataCell>
+                    <Button
+                      variant="secondary-neutral"
+                      size="small"
+                      icon={<TabsAddIcon aria-hidden />}
+                      iconPosition="right"
+                      title="Koble til saken"
+                      onClick={konverterOgKobleTilSak(alternativSak)}
+                    >
+                      Koble til sak
+                    </Button>
+                  </Table.DataCell>
+                </Table.Row>
+              )}
+            </>
           )}
         </Table.Body>
       </Table>

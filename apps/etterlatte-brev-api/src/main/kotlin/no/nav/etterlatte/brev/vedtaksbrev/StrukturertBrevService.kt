@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VedtaksbrevServiceNy(
+class StrukturertBrevService(
     private val brevbaker: BrevbakerService,
     private val adresseService: AdresseService,
     private val db: BrevRepository,
@@ -41,32 +41,36 @@ class VedtaksbrevServiceNy(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
 
-    fun hentVedtaksbrev(behandlingId: UUID): Brev? {
-        logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
+    private fun hentBrevAvTypeForBehandling(
+        behandlingId: UUID,
+        brevType: Brevtype,
+    ): Brev? {
+        logger.info("Henter brev av type=$brevType for behandling (id=$behandlingId)")
 
-        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull()
+        return db.hentBrevForBehandling(behandlingId, brevType).firstOrNull()
     }
 
-    suspend fun opprettVedtaksbrev(
+    suspend fun opprettStrukturertBrev(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
         brevRequest: BrevRequest,
     ): Brev {
-        krev(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
-            "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
+        val typeForBrev = brevRequest.brevFastInnholdData.brevKode.brevtype
+        krev(hentBrevAvTypeForBehandling(behandlingId, typeForBrev) == null) {
+            "Strukturert brev av type $typeForBrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
         val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest
 
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
 
-        val brevKode = brevRequest.brevInnholdData.brevKode
+        val brevKode = brevRequest.brevFastInnholdData.brevKode
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
                 BrevbakerRequest.fra(
                     brevKode = brevKode.redigering,
-                    brevData = ManueltBrevData(),
+                    brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
                     avsender = avsender,
                     soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
                     sakId = sak.id,
@@ -133,12 +137,13 @@ class VedtaksbrevServiceNy(
         return pdf
     }
 
-    fun ferdigstillVedtaksbrev(
+    fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
+        brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val brev =
-            krevIkkeNull(hentVedtaksbrev(behandlingId)) {
+            krevIkkeNull(hentBrevAvTypeForBehandling(behandlingId, brevType)) {
                 "Fant ingen brev for behandling (id=$behandlingId)"
             }
 
@@ -163,7 +168,7 @@ class VedtaksbrevServiceNy(
         }
     }
 
-    suspend fun tilbakestillVedtaksbrev(
+    suspend fun tilbakestillStrukturertBrev(
         brevId: Long,
         bruker: BrukerTokenInfo,
         brevRequest: BrevRequest,
@@ -190,7 +195,7 @@ class VedtaksbrevServiceNy(
                 brevbaker.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(
                         brevKode = brevKode.redigering,
-                        brevData = ManueltBrevData(),
+                        brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
                         avsender = avsender,
                         soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
                         sakId = sak.id,
@@ -209,11 +214,12 @@ class VedtaksbrevServiceNy(
             db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
         }
 
-        if (opprinneligBrevkoder != brevkode) {
-            db.oppdaterBrevkoder(brevId, brevkode)
+         */
+
+        if (brev.brevkoder != brevInnholdData.brevKode) {
+            db.oppdaterBrevkoder(brevId, brevInnholdData.brevKode)
             db.oppdaterTittel(brevId, brevinnhold.tittel, bruker)
         }
-         */
 
         return BrevService.BrevPayload(
             brevinnhold.payload ?: db.hentBrevPayload(brevId),
@@ -241,14 +247,14 @@ class VedtaksbrevServiceNy(
 
         return BrevDataFerdigstillingNy(
             innhold = innholdMedVedlegg.innhold(),
-            data = brevRequest.brevInnholdData,
+            data = brevRequest.brevFastInnholdData,
         )
     }
 
     private suspend fun utledAvsender(
         bruker: BrukerTokenInfo,
         saksbehandlerIdent: String,
-        attestantIdent: String,
+        attestantIdent: String?,
         enhet: Enhetsnummer,
     ): Avsender {
         val avsender =
@@ -272,7 +278,7 @@ class VedtaksbrevServiceNy(
     ): Pdf {
         val brevbakerRequest =
             BrevbakerRequest.fra(
-                brevKode = brevRequest.brevInnholdData.brevKode.ferdigstilling,
+                brevKode = brevRequest.brevFastInnholdData.brevKode.ferdigstilling,
                 brevData = brevInnholdData,
                 avsender = avsender,
                 soekerOgEventuellVerge = SoekerOgEventuellVerge(brevRequest.soeker, brevRequest.verge),

@@ -176,6 +176,7 @@ data class EtteroppgjoerBeregnetAvkortingRequest(
     val forbehandling: UUID,
     val sisteIverksatteBehandling: UUID,
     val aar: Int,
+    val sakId: SakId,
 )
 
 data class EtteroppgjoerBeregnetAvkorting(

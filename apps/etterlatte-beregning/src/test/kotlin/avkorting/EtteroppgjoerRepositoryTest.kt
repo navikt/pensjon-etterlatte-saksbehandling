@@ -10,6 +10,7 @@ import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.regler.Beregningstall
@@ -34,6 +35,7 @@ internal class EtteroppgjoerRepositoryTest(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 2024,
+                SakId(1L),
             )
 
         val etteroppgjoerBeregnetResultat = beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, 1000, 1000)
@@ -56,6 +58,7 @@ internal class EtteroppgjoerRepositoryTest(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 2024,
+                SakId(1L),
             )
         val etteroppgjoerBeregnetResultat = beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, 1000, 1000)
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerBeregnetResultat)

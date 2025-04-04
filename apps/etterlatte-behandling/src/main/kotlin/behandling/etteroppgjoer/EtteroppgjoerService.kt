@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -45,15 +45,18 @@ class EtteroppgjoerService(
 
         // TODO: er det flere ting vi må sjekke på en kun utbetaling i inntektsaar
         val sakerMedUtbetaling =
-            vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
+            runBlocking {
+                vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
+                    inntektsaar,
+                    HardkodaSystembruker.etteroppgjoer,
+                )
+            }
 
-        inTransaction {
-            sakerMedUtbetaling
-                .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
-                .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
+        sakerMedUtbetaling
+            .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
+            .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
 
-            logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
-        }
+        logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
     }
 
     fun hentEtteroppgjoer(

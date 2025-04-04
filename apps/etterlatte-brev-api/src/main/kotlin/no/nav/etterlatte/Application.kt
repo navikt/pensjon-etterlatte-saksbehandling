@@ -5,8 +5,8 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
+import no.nav.etterlatte.brev.vedtaksbrev.strukturertBrevRoute
 import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
-import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRouteNy
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
@@ -43,7 +43,7 @@ private class Server(
             notatRoute(context.notatService, context.nyNotatService, context.tilgangssjekker)
             oversendelseBrevRoute(context.oversendelseBrevService, context.tilgangssjekker)
 
-            vedtaksbrevRouteNy(context.tilbakekrevingBrevService, context.tilgangssjekker)
+            strukturertBrevRoute(context.tilbakekrevingBrevService, context.tilgangssjekker)
         }
 
     fun run() =

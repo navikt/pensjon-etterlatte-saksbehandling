@@ -48,7 +48,6 @@ class SkatteoppgjoerHendelserService(
                     resultat.skalHaEtteroppgjoer
                 }
         }
-
         dao.lagreKjoering(kjoering)
     }
 }

@@ -1,0 +1,1 @@
+alter table etteroppgjoer_behandling add column brev_id bigint;

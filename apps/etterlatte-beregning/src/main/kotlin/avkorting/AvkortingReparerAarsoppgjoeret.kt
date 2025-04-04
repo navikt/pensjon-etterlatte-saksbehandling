@@ -34,8 +34,8 @@ class AvkortingReparerAarsoppgjoeret(
             logger.warn("AvkortingReparerAarsoppgjoeret.kt har nå med sikkerhet blitt kjørt på alle saker etter regulering og kan fjernes!")
         }
 
-        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.distinct()
-        val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }
+        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.toSet()
+        val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
         val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
 
         if (manglerAar) {
@@ -63,6 +63,33 @@ class AvkortingReparerAarsoppgjoeret(
             )
         } else {
             return forrigeAvkorting
+        }
+    }
+
+    fun hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
+        sakId: SakId,
+        alleVedtak: List<VedtakSammendragDto>,
+        avkortingSistIverksatt: Avkorting,
+    ): Avkorting {
+        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.toSet()
+        val alleAarNyAvkortng = avkortingSistIverksatt.aarsoppgjoer.map { it.aar }.toSet()
+        val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
+
+        if (manglerAar) {
+            val alleManglendeAar = alleAarMedAarsoppgjoer - alleAarNyAvkortng
+            val aarsoppgjoerManglende =
+                alleManglendeAar.map { manglendeAar ->
+                    val behandlingId = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
+                    val avkorting =
+                        avkortingRepository.hentAvkorting(behandlingId)
+                            ?: throw InternfeilException("Kunne ikke hente avkorting som skal finnes for $behandlingId")
+                    avkorting.aarsoppgjoer.single { manglendeAar == it.aar }
+                }
+            return avkortingSistIverksatt.copy(
+                aarsoppgjoer = (avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar },
+            )
+        } else {
+            return avkortingSistIverksatt
         }
     }
 }

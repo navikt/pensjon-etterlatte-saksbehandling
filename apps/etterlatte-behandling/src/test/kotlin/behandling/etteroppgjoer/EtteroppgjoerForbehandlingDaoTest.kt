@@ -72,6 +72,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
+                brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
             )
 
@@ -100,7 +101,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         )
 
         with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
-            inntektsaar shouldBe inntektsaar
+            this.inntektsaar shouldBe inntektsaar
             inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
         }
     }

@@ -169,6 +169,7 @@ const opprettBehandling = (
   return {
     id: 'id',
     sakId: 1,
+    relatertBehandlingId: null,
     sakType,
     sakEnhetId: '4808',
     gyldighetsprøving,

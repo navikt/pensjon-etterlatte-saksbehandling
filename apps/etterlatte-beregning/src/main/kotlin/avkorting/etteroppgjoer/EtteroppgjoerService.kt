@@ -80,30 +80,31 @@ class EtteroppgjoerService(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val (sakId, forbehandlingId, sisteIverksatteBehandling, aar, loennsinntekt, afp, naeringsinntekt, utland) = request
-
-        val sanksjoner = sanksjonService.hentSanksjon(sisteIverksatteBehandling) ?: emptyList()
+        val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling) ?: emptyList()
 
         val tidligereAarsoppgjoer =
-            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)?.let {
-                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
+            avkortingRepository.hentAvkorting(request.sisteIverksatteBehandling)?.let {
+                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
             } ?: throw InternfeilException("Mangler avkorting")
 
         val avkorting =
-            Avkorting(
-                // Trenger bare gjeldende år i en forbehandling
-                aarsoppgjoer = listOf(tidligereAarsoppgjoer),
-            ).beregnEtteroppgjoer(
-                brukerTokenInfo = brukerTokenInfo,
-                aar = aar,
-                loennsinntekt = loennsinntekt,
-                afp = afp,
-                naeringsinntekt = naeringsinntekt,
-                utland = utland,
-                sanksjoner = sanksjoner,
-            )
+            with(request) {
+                Avkorting(
+                    // Trenger bare gjeldende år i en forbehandling
+                    aarsoppgjoer = listOf(tidligereAarsoppgjoer),
+                ).beregnEtteroppgjoer(
+                    brukerTokenInfo = brukerTokenInfo,
+                    aar = aar,
+                    loennsinntekt = loennsinntekt,
+                    afp = afp,
+                    naeringsinntekt = naeringsinntekt,
+                    utland = utland,
+                    sanksjoner = sanksjoner,
+                    spesifikasjon = spesifikasjon,
+                )
+            }
 
-        avkortingRepository.lagreAvkorting(forbehandlingId, sakId, avkorting) // TODO lagre med flagg forbehandling?
+        avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
 
     private fun beregnEtteroppgjoerResultat(

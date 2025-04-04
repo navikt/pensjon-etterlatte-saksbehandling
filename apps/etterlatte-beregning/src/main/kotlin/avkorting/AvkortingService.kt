@@ -394,9 +394,15 @@ object AvkortingMapper {
 
         val redigerbarForventetInntekt =
             (
-                avkorting.aarsoppgjoer.singleOrNull {
-                    it.aar == virkningstidspunkt.year
-                } as AarsoppgjoerLoepende?
+                avkorting.aarsoppgjoer
+                    .singleOrNull {
+                        it.aar == virkningstidspunkt.year
+                    }?.let {
+                        when (it) {
+                            is AarsoppgjoerLoepende -> it
+                            else -> null
+                        }
+                    }
             )?.inntektsavkorting
                 ?.singleOrNull {
                     it.grunnlag.periode.fom == virkningstidspunkt
@@ -407,9 +413,15 @@ object AvkortingMapper {
             if (skalHaInntektInnevaerendeOgNesteAar) {
                 val nesteAar =
                     (
-                        avkorting.aarsoppgjoer.singleOrNull {
-                            it.aar == virkningstidspunkt.year + 1
-                        } as AarsoppgjoerLoepende?
+                        avkorting.aarsoppgjoer
+                            .singleOrNull {
+                                it.aar == virkningstidspunkt.year + 1
+                            }?.let {
+                                when (it) {
+                                    is AarsoppgjoerLoepende -> it
+                                    else -> null
+                                }
+                            }
                     )?.inntektsavkorting?.singleOrNull()?.grunnlag?.toDto()
                 nesteAar
             } else {
@@ -421,17 +433,7 @@ object AvkortingMapper {
         return AvkortingFrontend(
             redigerbarForventetInntekt = redigerbarForventetInntekt,
             redigerbarForventetInntektNesteAar = redigerbarForventetInntektNesteAar,
-            avkortingGrunnlag =
-                dto.avkortingGrunnlag
-                    .map {
-                        if (it.tom == null) {
-                            it.copy(
-                                tom = YearMonth.of(it.fom.year, Month.DECEMBER),
-                            )
-                        } else {
-                            it
-                        }
-                    }.sortedByDescending { it.fom },
+            avkortingGrunnlag = dto.avkortingGrunnlag.sortedByDescending { it.fom },
             avkortetYtelse = dto.avkortetYtelse,
             tidligereAvkortetYtelse =
                 if (forrigeAvkorting != null && behandling.status != BehandlingStatus.IVERKSATT) {

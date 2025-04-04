@@ -351,6 +351,7 @@ internal class AvkortingRepositoryTest(
                 afp = 10000,
                 utlandsinntekt = 10000,
                 kilde = Grunnlagsopplysning.Saksbehandler.create("lok"),
+                spesifikasjon = "Spesifikasjon",
                 inntektInnvilgetPeriode =
                     BenyttetInntektInnvilgetPeriode(
                         verdi = 150000,

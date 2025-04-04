@@ -12,7 +12,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { IAvkortingGrunnlag, IAvkortingGrunnlagLagre, isForventetInntekt } from '~shared/types/IAvkorting'
 import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { aarFraDatoString, formaterDato, maanedFraDatoString } from '~utils/formatering/dato'
@@ -152,14 +152,16 @@ const InntektForm = ({
     // Inntektsendringer skjer kun frem i tid
     if (!!behandling.revurderingsaarsak && alleGrunnlag.length > 0) {
       const nyligste = alleGrunnlag[0]
-      // Preutfyller uten id
-      return {
-        inntektTom: nyligste.inntektTom,
-        fratrekkInnAar: nyligste.fratrekkInnAar,
-        inntektUtlandTom: nyligste.inntektUtlandTom,
-        fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
-        spesifikasjon: '',
-        overstyrtInnvilgaMaaneder: nyligste.overstyrtInnvilgaMaaneder,
+      if (isForventetInntekt(nyligste)) {
+        // Preutfyller uten id
+        return {
+          inntektTom: nyligste.inntektTom,
+          fratrekkInnAar: nyligste.fratrekkInnAar,
+          inntektUtlandTom: nyligste.inntektUtlandTom,
+          fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
+          spesifikasjon: '',
+          overstyrtInnvilgaMaaneder: nyligste.overstyrtInnvilgaMaaneder,
+        }
       }
     }
     return {

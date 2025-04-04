@@ -428,9 +428,9 @@ class AvkortingRepository(
         statement =
             """
             INSERT INTO avkortingsgrunnlag_faktisk(
-                id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, kilde
+                id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, spesifikasjon, kilde
             ) VALUES (
-                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :kilde
+                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :spesifikasjon, :kilde
             )
             """.trimIndent(),
         paramMap =
@@ -445,6 +445,7 @@ class AvkortingRepository(
                 "naeringsinntekt" to faktisk.naeringsinntekt,
                 "afp" to faktisk.afp,
                 "utlandsinntekt" to faktisk.utlandsinntekt,
+                "spesifikasjon" to faktisk.spesifikasjon,
                 "kilde" to faktisk.kilde.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
@@ -657,6 +658,7 @@ class AvkortingRepository(
                 objectMapper.readValue(it)
             },
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+        spesifikasjon = stringOrNull("spesifikasjon") ?: "", // TODO fjern denne når feltet har blitt satt til NOT NULL,
     )
 
     private fun Row.toYtelseFoerAvkorting() =

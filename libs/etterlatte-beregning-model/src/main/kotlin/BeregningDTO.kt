@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -53,8 +55,8 @@ data class OverstyrBeregningDTO(
 )
 
 data class AvkortingFrontend(
-    val redigerbarForventetInntekt: AvkortingGrunnlagDto?,
-    val redigerbarForventetInntektNesteAar: AvkortingGrunnlagDto?,
+    val redigerbarForventetInntekt: ForventetInntektDto?,
+    val redigerbarForventetInntektNesteAar: ForventetInntektDto?,
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
     val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
@@ -66,19 +68,45 @@ data class AvkortingDto(
     val avkortetYtelse: List<AvkortetYtelseDto>,
 )
 
-data class AvkortingGrunnlagDto(
-    val id: UUID,
-    val fom: YearMonth,
-    val tom: YearMonth?,
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+sealed class AvkortingGrunnlagDto {
+    abstract val id: UUID
+    abstract val fom: YearMonth
+    abstract val tom: YearMonth?
+    abstract val innvilgaMaaneder: Int
+    abstract val inntektInnvilgetPeriode: Int?
+    abstract val kilde: AvkortingGrunnlagKildeDto
+}
+
+@JsonTypeName("FORVENTET_INNTEKT")
+data class ForventetInntektDto(
+    override val id: UUID,
+    override val fom: YearMonth,
+    override val tom: YearMonth?,
+    override val innvilgaMaaneder: Int,
+    override val inntektInnvilgetPeriode: Int?,
+    override val kilde: AvkortingGrunnlagKildeDto,
+    val spesifikasjon: String,
     val inntektTom: Int,
     val fratrekkInnAar: Int,
     val inntektUtlandTom: Int,
     val fratrekkInnAarUtland: Int,
-    val innvilgaMaaneder: Int,
-    val spesifikasjon: String,
-    val kilde: AvkortingGrunnlagKildeDto,
     val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
-)
+) : AvkortingGrunnlagDto()
+
+@JsonTypeName("FAKTISK_INNTEKT")
+data class FaktiskInntektDto(
+    override val id: UUID,
+    override val fom: YearMonth,
+    override val tom: YearMonth?,
+    override val innvilgaMaaneder: Int,
+    override val inntektInnvilgetPeriode: Int?,
+    override val kilde: AvkortingGrunnlagKildeDto,
+    val loennsinntekt: Int,
+    val naeringsinntekt: Int,
+    val afp: Int,
+    val utlandsinntekt: Int,
+) : AvkortingGrunnlagDto()
 
 data class AvkortingGrunnlagLagreDto(
     val id: UUID = UUID.randomUUID(),
@@ -193,4 +221,5 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val afp: Int,
     val naeringsinntekt: Int,
     val utland: Int,
+    val spesifikasjon: String,
 )

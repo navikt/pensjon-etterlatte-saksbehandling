@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.util.UUID
@@ -29,6 +31,7 @@ class OpprettEtteroppgjoerRevurdering(
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val trygdetidKlient: TrygdetidKlient,
     private val beregningKlient: BeregningKlient,
+    private val vedtakKlient: VedtakKlient,
 ) {
     fun opprett(
         sakId: SakId,
@@ -39,11 +42,36 @@ class OpprettEtteroppgjoerRevurdering(
             inTransaction {
                 val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
 
-                // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId) TODO ønskelig?
+                // TODO her bør det sjekkes for om det allerede er laget en behandling med matchende relatertBehandlingId
+
+                // TODO ønskelig?
+                // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+
+                val iverksatteVedtak =
+                    runBlocking {
+                        vedtakKlient
+                            .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                            .sortedByDescending { it.datoFattet }
+                    }
+
+                if (iverksatteVedtak.isEmpty()) {
+                    throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
+                }
+
+                // TODO vedtak med opphør støttes ikke enda da vi må tenke litt rundt hvordan dette skal håndteres mtp etteroppgjør
+                if (iverksatteVedtak.first().vedtakType === VedtakType.OPPHOER) {
+                    throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
+                }
+
+                val sisteIverksatteIkkeOpphoer = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
+
+                if (sisteIverksatteIkkeOpphoer.opphoerFraOgMed != null) {
+                    throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
+                }
 
                 val sisteIverksatte =
-                    behandlingService.hentSisteIverksatte(sakId)
-                        ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+                    behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
+                        ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
 
                 val persongalleri =
                     grunnlagService.hentPersongalleri(sakId)
@@ -84,6 +112,8 @@ class OpprettEtteroppgjoerRevurdering(
 
                 revurdering to sisteIverksatte
             }
+
+        // TODO her må noe gjøres da feil her medfører en "halvveis behandling"
         runBlocking {
             trygdetidKlient.kopierTrygdetidFraForrigeBehandling(
                 behandlingId = revurdering.id,

@@ -13,6 +13,10 @@ import no.nav.etterlatte.samordning.X_ORGNR
 import no.nav.etterlatte.samordning.vedtak.orgNummer
 import org.slf4j.MDC
 
+/*
+    MaskinportenScopeAuthorizationPlugin brukes for autentisering av brukere utenfor NAV.
+    https://docs.nais.io/auth/maskinporten/?h=maskinpo
+ */
 val MaskinportenScopeAuthorizationPlugin =
     createRouteScopedPlugin(
         name = "MaskinportenScopeAuthorizationPlugin",

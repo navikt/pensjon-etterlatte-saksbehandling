@@ -52,7 +52,14 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(HttpStatusCode.NotFound)
             }
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, brukerTokenInfo)
+                val eo =
+                    inTransaction {
+                        forbehandlingService.opprettEtteroppgjoerForbehandling(
+                            sakId,
+                            2024,
+                            brukerTokenInfo,
+                        )
+                    }
                 call.respond(eo)
             }
         }

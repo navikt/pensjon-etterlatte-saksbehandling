@@ -130,7 +130,11 @@ data class Avkorting(
     companion object {
         fun fraDTO(dto: AvkortingDto) =
             Avkorting(
-                avkortingGrunnlag = dto.avkortingGrunnlag.map { AvkortingGrunnlag.fraDTO(it) },
+                // TODO denne må vi mappe om riktig når vi får etteroppgjør i produksjon og skal støtte faktisk inntekt
+                avkortingGrunnlag =
+                    dto.avkortingGrunnlag.filterIsInstance<ForventetInntektDto>().map {
+                        AvkortingGrunnlag.fraDTO(it)
+                    },
                 avkortetYtelse = dto.avkortetYtelse.map { AvkortetYtelse.fraDTO(it) },
             )
     }

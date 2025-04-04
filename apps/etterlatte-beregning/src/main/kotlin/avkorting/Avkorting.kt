@@ -318,6 +318,12 @@ data class Avkorting(
         return copy(aarsoppgjoer = oppdaterteOppgjoer)
     }
 
+    /**
+     * Beregner avkorting for et år med en eller flere brukeroppgitte [ForventetInntekt] med følgende steg.
+     * 1. Beregner/reberegner [Inntektsavkorting] for alle [AarsoppgjoerLoepende.inntektsavkorting]er.
+     * 2. Beregner [AarsoppgjoerLoepende.avkortetYtelse] med restanse om det finnes
+     * flere [AarsoppgjoerLoepende.inntektsavkorting] (Se [beregnAvkortetYtelseMedRestanse]).
+     */
     private fun beregnAvkortingLoepende(
         aarsoppgjoer: AarsoppgjoerLoepende,
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
@@ -413,13 +419,14 @@ data class Avkorting(
     }
 
     /**
-     * Finner avkortet ytelse med opparbeidet [Restanse].
+     * Beregner [AvkortetYtelse] for hver [Inntektsavkorting.grunnlag] periodsert basert på [ForventetInntekt.periode].
      *
-     * TODO
-     * Det kommes frem til [Restanse] ved å beregne hva [AvkortetYtelse] ville vært for hele innvilget periode for
-     * ny oppgitt [ForventetInntekt] (se [Inntektsavkorting] for så å sammenligne med utbetalte måneder [Aarsoppgjoer.avkortetYtelse] med.
-     * Dette må gjøres på alle [AarsoppgjoerLoepende.inntektsavkorting] for finne hva restansen var på tidspunktet den
-     * inntekten var oppgitt/forventet.
+     * Finnes det flere [Inntektsavkorting] beregnes det også en [Restanse] som legges til beregningen av [AvkortetYtelse].
+     *
+     * [Restanse] beregnes ved å sammenligne hva [AvkortetYtelse] ville vært med
+     * [Inntektsavkorting.grunnlag] ([Inntektsavkorting.avkortetYtelseForventetInntekt]) med tidigere perioder med [AvkortetYtelse]
+     *
+     * @param reberegnetInntektsavkorting vil inneholde hva avkorting ville vært for hver [ForventetInntekt]
      */
     private fun beregnAvkortetYtelseMedRestanse(
         aarsoppgjoer: AarsoppgjoerLoepende,
@@ -846,8 +853,15 @@ data class Etteroppgjoer(
 ) : Aarsoppgjoer()
 
 /**
- * Forventet inntekt kan endre seg gjennom et år. Vi trenger å beregne avkorting for hele året (eller innvilged periode)
- * per oppgitte inntekt for å kunne avgjøre hva restanse vi bli.
+ * Inneholder en [ForventetInntekt] med en periode inntekten var gjeldende (se [ForventetInntekt.periode]).
+ *
+ * I tillegg inneholder den beregnet avkorting med [Inntektsavkorting.grunnlag] for alle innvilgede måneder i gjeldene år for en.
+ *
+ * Det er kun [Inntektsavkorting.avkortingsperioder] innenfor [Inntektsavkorting.grunnlag] sin periode som brukes
+ * beregning av [Aarsoppgjoer.avkortetYtelse] som fører til utbetaling.
+ *
+ * Resten av beregningene brukes IKKE for å avgjøre hva som skal utbetales men
+ * som grunnlag til å beregne [Restanse] ([Avkorting.beregnAvkortetYtelseMedRestanse]).
  *
  * @property grunnlag - Brukeroppgit [ForventetInntekt]
  * @property avkortingsperioder - utregnet basert på [ForventetInntekt].

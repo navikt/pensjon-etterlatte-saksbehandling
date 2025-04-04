@@ -859,8 +859,7 @@ data class Etteroppgjoer(
  *
  * Det er kun [Inntektsavkorting.avkortingsperioder] innenfor [Inntektsavkorting.grunnlag] sin periode som brukes
  * beregning av [Aarsoppgjoer.avkortetYtelse] som fører til utbetaling.
- *
- * Resten av beregningene brukes IKKE for å avgjøre hva som skal utbetales men
+ * Resten brukes IKKE for å avgjøre hva som skal utbetales men
  * som grunnlag til å beregne [Restanse] ([Avkorting.beregnAvkortetYtelseMedRestanse]).
  *
  * @property grunnlag - Brukeroppgit [ForventetInntekt]

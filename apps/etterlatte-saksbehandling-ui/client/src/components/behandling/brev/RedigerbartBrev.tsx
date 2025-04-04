@@ -30,6 +30,7 @@ interface RedigerbartBrevProps {
   kanRedigeres: boolean
   lukkAdvarselBehandlingEndret?: () => void
   tilbakestillingsaction: () => void
+  skalGaaViaBehandling?: boolean
 }
 
 export default function RedigerbartBrev({
@@ -37,6 +38,7 @@ export default function RedigerbartBrev({
   kanRedigeres,
   lukkAdvarselBehandlingEndret,
   tilbakestillingsaction,
+  skalGaaViaBehandling,
 }: RedigerbartBrevProps) {
   const [fane, setFane] = useState<string>(kanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
   const [content, setContent] = useState<any[]>([])
@@ -208,7 +210,7 @@ export default function RedigerbartBrev({
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>
-          <ForhaandsvisningBrev brev={brev} />
+          <ForhaandsvisningBrev skalGaaViaBehandling={skalGaaViaBehandling} brev={brev} />
         </Tabs.Panel>
       </Tabs>
     </Container>

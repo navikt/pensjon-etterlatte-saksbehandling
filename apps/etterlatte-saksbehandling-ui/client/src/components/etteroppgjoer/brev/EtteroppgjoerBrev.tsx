@@ -36,7 +36,7 @@ export function EtteroppgjoerBrev() {
   return (
     <HStack height="100%" minHeight="100%" wrap={false}>
       <Box minWidth="30rem" maxWidth="40rem" borderColor="border-subtle" borderWidth="0 1 0 0">
-        <VStack gap="4" margin="16" width="100%">
+        <VStack gap="4" margin="16">
           <Heading level="1" size="large">
             Brev
           </Heading>
@@ -56,7 +56,12 @@ export function EtteroppgjoerBrev() {
         })}
         {mapResult(brevResult, {
           success: (brev) => (
-            <RedigerbartBrev brev={brev} kanRedigeres={true} tilbakestillingsaction={() => alert('Not supported')} />
+            <RedigerbartBrev
+              brev={brev}
+              kanRedigeres={true}
+              skalGaaViaBehandling
+              tilbakestillingsaction={() => alert('Not supported')}
+            />
           ),
           error: (error) => (
             <ApiErrorAlert>

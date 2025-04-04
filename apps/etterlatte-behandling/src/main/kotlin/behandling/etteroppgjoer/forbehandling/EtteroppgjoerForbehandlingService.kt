@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
-import no.nav.etterlatte.logger
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
@@ -54,20 +53,20 @@ class EtteroppgjoerForbehandlingService(
         val etteroppgjoerListe = etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
 
         for (etteroppgjoer in etteroppgjoerListe) {
-            opprettEtteroppgjoerForbehandling(etteroppgjoer.sakId, etteroppgjoer.inntektsaar, HardkodaSystembruker.etteroppgjoer)
+            opprettEtteroppgjoer(etteroppgjoer.sakId, etteroppgjoer.inntektsaar, HardkodaSystembruker.etteroppgjoer)
         }
     }
 
-    fun hentEtteroppgjoerForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
+    fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }
 
-    suspend fun opprettEtteroppgjoerForbehandling(
+    suspend fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerForbehandlingOgOppgave {
+    ): EtteroppgjoerOgOppgave {
         logger.info("Oppretter etteroppgjør forbehandling for sakId=$sakId")
 
         if (!kanOppretteEtteroppgjoerForbehandling(sakId, inntektsaar)) {
@@ -128,7 +127,7 @@ class EtteroppgjoerForbehandlingService(
 
             etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
-            EtteroppgjoerForbehandlingOgOppgave(
+            EtteroppgjoerOgOppgave(
                 etteroppgjoerForbehandling = nyForbehandling,
                 oppgave = oppgave,
             )
@@ -139,7 +138,7 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ): ForbehandlingDto {
-        val forbehandling = hentEtteroppgjoerForbehandling(behandlingId)
+        val forbehandling = hentForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
@@ -223,7 +222,7 @@ class EtteroppgjoerForbehandlingService(
     }
 }
 
-data class EtteroppgjoerForbehandlingOgOppgave(
+data class EtteroppgjoerOgOppgave(
     val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
 )

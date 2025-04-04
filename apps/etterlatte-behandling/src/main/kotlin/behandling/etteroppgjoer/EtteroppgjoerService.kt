@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -15,6 +15,7 @@ class EtteroppgjoerService(
     val sakService: SakService,
     val vedtakKlient: VedtakKlient,
 ) {
+    // når vi mottar hendelse fra skatt, sjekk om ident skal ha etteroppgjør
     fun skalHaEtteroppgjoer(
         ident: String,
         inntektsaar: Int,
@@ -22,15 +23,21 @@ class EtteroppgjoerService(
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
         val etteroppgjoer = sak?.let { dao.hentEtteroppgjoer(it.id, inntektsaar) }
 
-        val venterPaSkatteoppgjoer = etteroppgjoer?.status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+        val skalHaEtteroppgjoer =
+            when (etteroppgjoer?.status) {
+                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER -> true
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER -> true
+                else -> false
+            }
 
         return SkalHaEtteroppgjoerResultat(
-            venterPaSkatteoppgjoer,
+            skalHaEtteroppgjoer,
             etteroppgjoer,
         )
     }
 
-    suspend fun finnOgOpprettEtteroppgjoer(
+    // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
+    fun finnOgOpprettEtteroppgjoer(
         inntektsaar: Int,
         trigger: String = "Manuell",
     ) {
@@ -38,16 +45,29 @@ class EtteroppgjoerService(
 
         // TODO: er det flere ting vi må sjekke på en kun utbetaling i inntektsaar
         val sakerMedUtbetaling =
-            vedtakKlient.hentSakerMedUtbetalingForInntektsaar(inntektsaar, HardkodaSystembruker.etteroppgjoer)
+            runBlocking {
+                vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
+                    inntektsaar,
+                    HardkodaSystembruker.etteroppgjoer,
+                )
+            }
 
-        inTransaction {
-            sakerMedUtbetaling
-                .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
-                .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
+        sakerMedUtbetaling
+            .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
+            .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
 
-            logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
-        }
+        logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
     }
+
+    fun hentEtteroppgjoer(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Etteroppgjoer? = dao.hentEtteroppgjoer(sakId, inntektsaar)
+
+    fun hentEtteroppgjoerForStatus(
+        status: EtteroppgjoerStatus,
+        inntektsaar: Int,
+    ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForStatus(status, inntektsaar)
 
     fun oppdaterStatus(
         sakId: SakId,

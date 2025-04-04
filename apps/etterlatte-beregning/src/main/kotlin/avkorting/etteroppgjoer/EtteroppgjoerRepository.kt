@@ -1,4 +1,4 @@
-package no.nav.etterlatte.avkorting
+package no.nav.etterlatte.avkorting.etteroppgjoer
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row

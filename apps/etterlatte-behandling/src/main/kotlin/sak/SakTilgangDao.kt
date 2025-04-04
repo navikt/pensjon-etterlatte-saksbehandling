@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
+import java.util.UUID
 import javax.sql.DataSource
 
 class SakTilgangDao(
@@ -33,23 +34,26 @@ class SakTilgangDao(
         }
     }
 
-    fun hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId: UUID): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
+            // tilbakekreving, klage og etteroppgjoer_behandling lagres basert på behandling tabellen sin id.
             val statement =
                 connection.prepareStatement(
                     "select id as sak_id, adressebeskyttelse, erSkjermet, enhet from sak where id =" +
-                        " (select sak_id from behandling where id = ?::uuid" +
-                        " union select sak_id from tilbakekreving where id = ?::uuid" +
-                        " union select sak_id from klage where id = ?::uuid)",
+                        " (select sak_id from behandling where id = ?" +
+                        " union select sak_id from tilbakekreving where id = ?" +
+                        " union select sak_id from klage where id = ?" +
+                        " union select sak_id from etteroppgjoer_behandling where id = ?)",
                 )
-            statement.setString(1, behandlingId)
-            statement.setString(2, behandlingId)
-            statement.setString(3, behandlingId)
+            statement.setObject(1, behandlingId)
+            statement.setObject(2, behandlingId)
+            statement.setObject(3, behandlingId)
+            statement.setObject(4, behandlingId)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
-    fun hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId: UUID): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
@@ -57,15 +61,15 @@ class SakTilgangDao(
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet, s.enhet 
                     FROM oppgave o
                     INNER JOIN sak s on o.sak_id = s.id
-                    WHERE o.id = ?::uuid
+                    WHERE o.id = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, oppgaveId)
+            statement.setObject(1, oppgaveId)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
-    fun hentSakMedGraderingOgSkjermingPaaKlage(klageId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaKlage(klageId: UUID): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
@@ -73,15 +77,15 @@ class SakTilgangDao(
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet, enhet 
                     FROM klage k
                     INNER JOIN sak s on k.sak_id = s.id
-                    WHERE k.id = ?::uuid
+                    WHERE k.id = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, klageId)
+            statement.setObject(1, klageId)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
-    fun hentSakMedGraderingOgSkjermingPaaGenerellbehandling(generellbehandlingId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaGenerellbehandling(generellbehandlingId: UUID): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
@@ -89,15 +93,15 @@ class SakTilgangDao(
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet, enhet 
                     FROM generellbehandling g
                     INNER JOIN sak s on g.sak_id = s.id
-                    WHERE g.id = ?::uuid
+                    WHERE g.id = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, generellbehandlingId)
+            statement.setObject(1, generellbehandlingId)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
-    fun hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId: UUID): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
@@ -105,15 +109,15 @@ class SakTilgangDao(
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet, enhet 
                     FROM tilbakekreving t
                     INNER JOIN sak s on t.sak_id = s.id
-                    WHERE t.id = ?::uuid
+                    WHERE t.id = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, tilbakekrevingId)
+            statement.setObject(1, tilbakekrevingId)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }
 
-    fun hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(etteroppgjoerId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(etteroppgjoerId: UUID): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
@@ -121,10 +125,10 @@ class SakTilgangDao(
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet, enhet 
                     FROM etteroppgjoer_behandling e
                     INNER JOIN sak s on e.sak_id = s.id
-                    WHERE e.id = ?::uuid
+                    WHERE e.id = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, etteroppgjoerId)
+            statement.setObject(1, etteroppgjoerId)
             return statement.executeQuery().singleOrNull { toSakMedGraderingOgSkjermet() }
         }
     }

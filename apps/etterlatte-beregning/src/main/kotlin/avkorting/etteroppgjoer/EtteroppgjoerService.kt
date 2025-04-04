@@ -1,9 +1,17 @@
-package no.nav.etterlatte.avkorting
+package no.nav.etterlatte.avkorting.etteroppgjoer
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
+import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
+import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.AvkortingService
+import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
@@ -13,6 +21,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -30,6 +39,7 @@ class EtteroppgjoerService(
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
+    private val avkortingService: AvkortingService,
 ) {
     fun beregnOgLagreEtteroppgjoerResultat(
         forbehandlingId: UUID,
@@ -45,11 +55,18 @@ class EtteroppgjoerService(
     fun hentBeregnetAvkorting(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
+        sakId: SakId,
         aar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting {
         val avkortingMedForventaInntekt =
-            hentAvkortingForBehandling(sisteIverksatteBehandlingId, aar)
-                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandlingId")
+            runBlocking {
+                avkortingService.hentAvkortingMedReparertAarsoppgjoer(
+                    sakId = sakId,
+                    behandlingId = sisteIverksatteBehandlingId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }.toDto()
 
         val avkortingFaktiskInntekt = hentAvkortingForBehandling(forbehandlingId, aar)
 
@@ -163,11 +180,13 @@ class EtteroppgjoerService(
                     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+
             is Etteroppgjoer ->
                 AvkortingDto(
                     avkortingGrunnlag = emptyList(),
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+
             else -> null
         }
     }

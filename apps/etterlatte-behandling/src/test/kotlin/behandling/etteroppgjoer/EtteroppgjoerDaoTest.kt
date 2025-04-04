@@ -74,4 +74,19 @@ class EtteroppgjoerDaoTest(
             status shouldBe EtteroppgjoerStatus.UNDER_FORBEHANDLING
         }
     }
+
+    @Test
+    fun `hent etteroppgjoer for status`() {
+        etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+        etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+
+        // negative
+        etteroppgjoerDao.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, 2024) shouldBe emptyList()
+
+        val resultat = etteroppgjoerDao.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, 2024)
+        with(resultat) {
+            size shouldBe 1
+            first().inntektsaar shouldBe 2024
+        }
+    }
 }

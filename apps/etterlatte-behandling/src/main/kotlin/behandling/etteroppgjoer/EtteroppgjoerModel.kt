@@ -1,5 +1,9 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.brev.BrevFastInnholdData
+import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -17,7 +21,7 @@ data class Etteroppgjoer(
 
 enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
-    MOTTATT_HENDELSE,
+    MOTTATT_SKATTEOPPGJOER,
     UNDER_FORBEHANDLING,
     UNDER_REVURDERING,
 }
@@ -37,7 +41,10 @@ data class EtteroppgjoerForbehandling(
     val aar: Int,
     val innvilgetPeriode: Periode,
     val opprettet: Tidspunkt,
-)
+    val brevId: Long?,
+) {
+    fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+}
 
 data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkatt,
@@ -142,15 +149,16 @@ data class HendelseslisteFraSkatt(
 ) {
     companion object {
         fun stub(
-            startSekvensnummer: Long = 9007199254740991,
+            startSekvensnummer: Long = 0,
             antall: Int = 10,
+            aar: Int = 2024,
         ): HendelseslisteFraSkatt {
             val hendelser =
                 List(antall) { index ->
                     SkatteoppgjoerHendelser(
-                        gjelderPeriode = "", // TODO
-                        hendelsetype = "", // TODO
-                        identifikator = "", // TODO
+                        gjelderPeriode = aar.toString(),
+                        hendelsetype = "NY", // TODO
+                        identifikator = index.toString(), // TODO
                         sekvensnummer = startSekvensnummer + index,
                         somAktoerid = false,
                     )
@@ -161,9 +169,23 @@ data class HendelseslisteFraSkatt(
 }
 
 data class SkatteoppgjoerHendelser(
-    val gjelderPeriode: String,
+    val gjelderPeriode: String, // inntektsaar
     val hendelsetype: String,
     val identifikator: String,
     val sekvensnummer: Long,
     val somAktoerid: Boolean,
 )
+
+data class EtteroppgjoerBrevRequestData(
+    val redigerbar: BrevRedigerbarInnholdData,
+    val innhold: BrevFastInnholdData,
+)
+
+object EtteroppgjoerBrevMapper {
+    // TODO: mappe til riktige brevvarianter avhengig av data i forbehandlingen
+    fun fra(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerBrevRequestData =
+        EtteroppgjoerBrevRequestData(
+            redigerbar = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold(forbehandling.sak),
+            innhold = EtteroppgjoerBrevData.VarselTilbakekreving(forbehandling.sak),
+        )
+}

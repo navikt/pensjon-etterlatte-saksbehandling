@@ -5,7 +5,7 @@ import { fattVedtak } from '~shared/api/tilbakekreving'
 import React, { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
+import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
@@ -24,8 +24,8 @@ export function TilbakekrevingBrev({
 }) {
   const kanAttesteres = erUnderBehandling(behandling.status)
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
-  const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
-  const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
+  const [hentBrevStatus, hentBrevRequest] = useApiCall(hentBrevTilBehandling)
+  const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettBrevTilBehandling)
   const [tilbakestilt, setTilbakestilt] = useState(false)
 
   useEffect(() => {

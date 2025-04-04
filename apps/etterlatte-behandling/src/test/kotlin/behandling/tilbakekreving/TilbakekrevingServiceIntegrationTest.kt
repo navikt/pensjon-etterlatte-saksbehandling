@@ -413,7 +413,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     fun `skal fatte og attestere vedtak for tilbakekrevingsbehandling`() {
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
-        coEvery { brevKlient.ferdigstillVedtaksbrev(any(), any()) } just runs
+        coEvery { brevKlient.ferdigstillStrukturertBrev(any(), any(), any()) } just runs
         coEvery { tilbakekrevingKlient.sendTilbakekrevingsvedtak(any(), any()) } just runs
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
@@ -474,7 +474,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
             vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet)
             vedtakKlient.hentVedtak(tilbakekreving.id, attestant)
-            brevKlient.ferdigstillVedtaksbrev(tilbakekreving.id, attestant)
+            brevKlient.ferdigstillStrukturertBrev(tilbakekreving.id, Brevtype.VEDTAK, attestant)
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(attestant, any())
         }
 

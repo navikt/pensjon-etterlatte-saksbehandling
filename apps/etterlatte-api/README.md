@@ -105,6 +105,7 @@ Tjenestepensjon endepunkter(maskinporten):
 | 003-FOMDATO-MANGLER         | 400             | Ikke angitt fomDato som query parameter                  |
 | 004-FEIL_SAKSTYPE           | 400             | Etterspurt vedtak som ikke angår omstillingsstønad       |
 | 005-PAADATO-MANGLER         | 400             | Ikke angitt paaDato som query parameter                  |
+| 006-FNR-UGYLDIG             | 400             | Fødselsnummer er ugyldig                                 |
 | 010-TP-TILGANG              | 403             | Ikke tilgang til TP/etterspurt data                      |
 | 011-TP-FORESPOERSEL         | 400             | Feil ved spørring mot TP                                 |
 | 012-TP-IKKE-FUNNET          | 404             | Kunne ikke finne TP-ressurs                              |

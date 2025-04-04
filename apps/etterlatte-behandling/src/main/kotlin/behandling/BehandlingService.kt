@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
+import no.nav.etterlatte.libs.common.behandling.AnnenSakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -335,10 +336,27 @@ internal class BehandlingServiceImpl(
             }
 
         return if (sakerMedBehandlinger.size > 1) {
-            sakerMedBehandlinger.maxByOrNull {
-                it.behandlinger
-                    .count { behandling -> behandling.status != BehandlingStatus.AVBRUTT }
-            }!!
+            val hovedsak =
+                sakerMedBehandlinger.maxByOrNull {
+                    it.behandlinger
+                        .count { behandling -> behandling.status != BehandlingStatus.AVBRUTT }
+                }!!
+            // Har bruker en annen sak på en annen saktype er det relevant å få informasjon om den saken også
+            // hvis begge sakene mangler behandlinger eller begge sakene har behandlinger
+            val annenSak =
+                sakerMedBehandlinger.firstOrNull {
+                    it.sak.id != hovedsak.sak.id &&
+                        (it.behandlinger.isNotEmpty() || hovedsak.behandlinger.isEmpty())
+                }
+            hovedsak.copy(
+                ekstraSak =
+                    annenSak?.let {
+                        AnnenSakMedBehandlinger(
+                            sak = annenSak.sak,
+                            behandlinger = annenSak.behandlinger,
+                        )
+                    },
+            )
         } else {
             sakerMedBehandlinger.single()
         }
@@ -859,7 +877,11 @@ internal class BehandlingServiceImpl(
             if (viderefoertOpphoer.dato == null) {
                 throw DatoMaaFinnesHvisViderefoertOpphoer()
             }
-            if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
+            if (virkningstidspunktErEtterOpphoerFraOgMed(
+                    behandling.virkningstidspunkt?.dato,
+                    viderefoertOpphoer.dato,
+                )
+            ) {
                 throw VirkningstidspunktKanIkkeVaereEtterOpphoer(
                     behandling.virkningstidspunkt?.dato,
                     viderefoertOpphoer.dato,

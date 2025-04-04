@@ -14,7 +14,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@amplitude/analytics-browser": "^2.11.13",
+    "@amplitude/analytics-browser": "^2.12.2",
     "@navikt/aksel-icons": "^7.16.0",
     "@navikt/ds-css": "~7.16.0",
     "@navikt/ds-react": "~7.16.1",
@@ -36,11 +36,11 @@
     "slate-dom": "^0.112.2",
     "slate-history": "^0.110.3",
     "slate-react": "^0.112.1",
-    "styled-components": "^6.1.15"
+    "styled-components": "^6.1.17"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.23.0",
+    "@eslint/eslintrc": "^3.3.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/react-hooks": "^8.0.1",

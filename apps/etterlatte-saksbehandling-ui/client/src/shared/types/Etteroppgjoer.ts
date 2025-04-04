@@ -18,6 +18,7 @@ export interface EtteroppgjoerBehandling {
     tom: string
   }
   opprettet: string // Mottatt?
+  brevId?: number
 }
 
 export interface EtteroppgjoerOpplysninger {

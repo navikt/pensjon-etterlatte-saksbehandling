@@ -6,8 +6,6 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.behandling.erOver18
-import no.nav.etterlatte.brev.behandling.hentForelderVerge
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -19,18 +17,10 @@ import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingPeriodeDataNy
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.UkjentVergemaal
-import no.nav.etterlatte.libs.common.person.Verge
-import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
@@ -44,16 +34,15 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sikkerLogg
 import java.util.UUID
 import kotlin.math.absoluteValue
 
 class TilbakekrevingBrevService(
-    val sakService: SakService,
-    val brevKlient: BrevKlient,
-    val brevApiKlient: BrevApiKlient,
-    val vedtakKlient: VedtakKlient,
-    val grunnlagService: GrunnlagService,
+    private val sakService: SakService,
+    private val brevKlient: BrevKlient,
+    private val brevApiKlient: BrevApiKlient,
+    private val vedtakKlient: VedtakKlient,
+    private val grunnlagService: GrunnlagService,
 ) {
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
@@ -65,10 +54,10 @@ class TilbakekrevingBrevService(
                 utledBrevRequest(bruker, behandlingId, sakId)
             }
 
-        return brevKlient.opprettVedtaksbrev(
+        return brevKlient.opprettStrukturertBrev(
             behandlingId,
-            bruker,
             brevRequest,
+            bruker,
         )
     }
 
@@ -84,7 +73,7 @@ class TilbakekrevingBrevService(
                 utledBrevRequest(bruker, behandlingId, sakId, skalLagres)
             }
 
-        return brevKlient.genererPdf(brevID, behandlingId, bruker, brevRequest)
+        return brevKlient.genererPdf(brevID, behandlingId, brevRequest, bruker)
     }
 
     suspend fun tilbakestillVedtaksbrev(
@@ -98,11 +87,11 @@ class TilbakekrevingBrevService(
                 utledBrevRequest(bruker, behandlingId, sakId)
             }
 
-        return brevKlient.tilbakestillVedtaksbrev(
+        return brevKlient.tilbakestillStrukturertBrev(
             brevID,
             behandlingId,
-            bruker,
             brevRequest,
+            bruker,
         )
     }
 
@@ -110,7 +99,7 @@ class TilbakekrevingBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        brevKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+        brevKlient.ferdigstillStrukturertBrev(behandlingId, Brevtype.VEDTAK, brukerTokenInfo)
     }
 
     suspend fun hentVedtaksbrev(
@@ -132,7 +121,8 @@ class TilbakekrevingBrevService(
                     vedtakKlient.hentVedtak(behandlingId, bruker)
                 }
             val grunnlag =
-                grunnlagService.hentOpplysningsgrunnlagForSak(sak.id) ?: throw InternfeilException("Fant ikke grunnlag med sakId=$sakId")
+                grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)
+                    ?: throw InternfeilException("Fant ikke grunnlag med sakId=$sakId")
 
             val vedtak =
                 vedtakDeferred.await()
@@ -156,69 +146,15 @@ class TilbakekrevingBrevService(
                 attestantIdent = attestantIdent,
                 skalLagre = skalLagres,
                 // TODO kun nødvendig ved foråhdsvisning/ferdigstilling?
-                brevInnholdData =
+                brevFastInnholdData =
                     utledBrevInnholdData(
                         sakType = sak.sakType,
                         soeker = soeker,
                         vedtak = vedtak,
                     ),
+                brevRedigerbarInnholdData = null,
             )
         }
-
-    // TODO trekkes ut som felles metode
-    private fun hentVergeForSak(
-        sakType: SakType,
-        brevutfallDto: BrevutfallDto?,
-        grunnlag: Grunnlag,
-    ): Verge? {
-        val soekerPdl =
-            grunnlag.soeker.hentSoekerPdlV1()
-                ?: throw InternfeilException(
-                    "Finner ikke søker i grunnlaget. Dette kan komme av flere ting, bl.a. endret ident på bruker. " +
-                        "Hvis dette ikke er tilfellet må feilen meldes i Porten.",
-                )
-
-        val verger =
-            hentVerger(
-                soekerPdl.verdi.vergemaalEllerFremtidsfullmakt ?: emptyList(),
-                grunnlag.soeker.hentFoedselsnummer()?.verdi,
-            )
-        return if (verger.size == 1) {
-            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident
-            if (vergeFnr == null) {
-                logger.error(
-                    "Vi genererer et brev til en person som har verge uten ident. Det er verdt å følge " +
-                        "opp saken ekstra, for å sikre at det ikke blir noe feil her (koble på fag). saken har " +
-                        "id=${grunnlag.metadata.sakId}. Denne loggmeldingen kan nok fjernes etter at løpet her" +
-                        " er kvalitetssikret.",
-                )
-                UkjentVergemaal()
-            } else {
-                // TODO: Hente navn direkte fra Grunnlag eller PDL
-                val vergenavn = "placeholder for vergenavn"
-
-                Vergemaal(
-                    vergenavn,
-                    vergeFnr,
-                )
-            }
-        } else if (verger.size > 1) {
-            logger.info(
-                "Fant flere verger for bruker med fnr ${grunnlag.soeker.hentFoedselsnummer()?.verdi} i " +
-                    "mapping av verge til brev.",
-            )
-            sikkerLogg.info(
-                "Fant flere verger for bruker med fnr ${
-                    grunnlag.soeker.hentFoedselsnummer()?.verdi?.value
-                } i mapping av verge til brev.",
-            )
-            UkjentVergemaal()
-        } else if (sakType == SakType.BARNEPENSJON && !grunnlag.erOver18(brevutfallDto?.aldersgruppe)) {
-            grunnlag.hentForelderVerge()
-        } else {
-            null
-        }
-    }
 }
 
 fun Soeker.formaterNavn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
@@ -291,9 +227,13 @@ private fun tilbakekrevingsPerioder(tilbakekreving: Tilbakekreving) =
             beloeper =
                 periode.let { beloeper ->
                     val beregnetFeilutbetaling =
-                        beloepMedKunYtelse.sumOf { beloep -> beloep.beregnetFeilutbetaling ?: 0 } + fastSkattetrekkBarnepensjon
+                        beloepMedKunYtelse.sumOf { beloep ->
+                            beloep.beregnetFeilutbetaling ?: 0
+                        } + fastSkattetrekkBarnepensjon
                     val bruttoTilbakekreving =
-                        beloepMedKunYtelse.sumOf { beloep -> beloep.bruttoTilbakekreving ?: 0 } + fastSkattetrekkBarnepensjon
+                        beloepMedKunYtelse.sumOf { beloep ->
+                            beloep.bruttoTilbakekreving ?: 0
+                        } + fastSkattetrekkBarnepensjon
                     val skatt =
                         beloepMedKunYtelse.sumOf { beloep -> beloep.skatt ?: 0 } + fastSkattetrekkBarnepensjon
                     val netto = beloepMedKunYtelse.sumOf { beloep -> beloep.nettoTilbakekreving ?: 0 }

@@ -615,17 +615,18 @@ class KodeverkKlientTest : KodeverkKlient {
 }
 
 class BrevKlientTest : BrevKlient {
-    override suspend fun tilbakestillVedtaksbrev(
+    override suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         TODO("Not yet implemented")
     }
 
-    override suspend fun ferdigstillVedtaksbrev(
+    override suspend fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
+        brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         TODO("Not yet implemented")
@@ -634,16 +635,16 @@ class BrevKlientTest : BrevKlient {
     override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         TODO("Not yet implemented")
     }
 
-    override suspend fun opprettVedtaksbrev(
+    override suspend fun opprettStrukturertBrev(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
         TODO("Not yet implemented")
     }

@@ -2,14 +2,14 @@ package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import no.nav.etterlatte.avkorting.AarligInntektsjusteringService
 import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.AvkortingTidligAlderspensjonService
-import no.nav.etterlatte.avkorting.EtteroppgjoerRepository
-import no.nav.etterlatte.avkorting.EtteroppgjoerService
-import no.nav.etterlatte.avkorting.MottattInntektsjusteringService
+import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerRepository
+import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.avkorting.inntektsjustering.AarligInntektsjusteringService
+import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
@@ -142,6 +142,7 @@ class ApplicationContext {
             beregningService = beregningService,
             sanksjonService = sanksjonService,
             etteroppgjoerRepository = etteroppgjoerRepository,
+            avkortingService = avkortingService,
         )
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(

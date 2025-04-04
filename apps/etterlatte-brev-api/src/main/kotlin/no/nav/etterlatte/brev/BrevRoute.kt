@@ -238,7 +238,7 @@ fun Route.brevRoute(
                 logger.info("Henter brev tilknyttet sak=$sakId")
 
                 measureTimedValue {
-                    service.hentBrevForSak(sakId)
+                    service.hentBrevForSak(sakId).sortedByDescending { it.statusEndret }
                 }.let { (brev, varighet) ->
                     logger.info("Henting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(brev)

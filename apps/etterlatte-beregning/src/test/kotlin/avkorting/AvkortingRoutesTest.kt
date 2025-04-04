@@ -13,6 +13,9 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.avkorting.inntektsjustering.AarligInntektsjusteringService
+import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer

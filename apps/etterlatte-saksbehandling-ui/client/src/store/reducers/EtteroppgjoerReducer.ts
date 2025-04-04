@@ -2,9 +2,11 @@ import { createAction, createReducer } from '@reduxjs/toolkit'
 import { BeregnetEtteroppgjoerResultatDto, Etteroppgjoer } from '~shared/types/Etteroppgjoer'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { useAppSelector } from '~store/Store'
+import { IBrev } from '~shared/types/Brev'
 
 export const addEtteroppgjoer = createAction<Etteroppgjoer>('etteroppgjoer/add')
-export const addEtteroppgjoerOppgave = createAction<OppgaveDTO>('etteroppjoer/oppgave/add')
+export const addEtteroppgjoerOppgave = createAction<OppgaveDTO>('etteroppgjoer/oppgave/add')
+export const addEtteroppgjoerBrev = createAction<IBrev>('etteroppgjoer/brev/add')
 export const resetEtteroppgjoer = createAction('etteroppgjoer/reset')
 export const addResultatEtteroppgjoer = createAction<BeregnetEtteroppgjoerResultatDto>('etteroppgjoer/resultat/add')
 
@@ -21,6 +23,11 @@ const initialState: {
 export const etteroppgjoerReducer = createReducer(initialState, (builder) => {
   builder.addCase(addEtteroppgjoer, (state, action) => {
     state.etteroppgjoer = action.payload
+  })
+  builder.addCase(addEtteroppgjoerBrev, (state, action) => {
+    if (state.etteroppgjoer?.behandling) {
+      state.etteroppgjoer.behandling.brevId = action.payload.id
+    }
   })
   builder.addCase(addEtteroppgjoerOppgave, (state, action) => {
     state.oppgave = action.payload

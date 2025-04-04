@@ -63,8 +63,8 @@ import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
+import no.nav.etterlatte.brev.vedtaksbrev.StrukturertBrevService
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
-import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevServiceNy
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.EnvEnum
@@ -240,7 +240,7 @@ internal class ApplicationContext {
     val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
     val tilbakekrevingBrevService =
-        VedtaksbrevServiceNy(
+        StrukturertBrevService(
             brevbakerService,
             adresseService,
             db,

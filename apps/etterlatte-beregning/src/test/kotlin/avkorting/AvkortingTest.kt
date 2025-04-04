@@ -383,25 +383,6 @@ internal class AvkortingTest {
                     }
                 }
             }
-
-            @Test
-            fun `Skal feile hvis opphøer er satt tilbake i tid `() {
-                val fomAar = 2024
-                val fom = YearMonth.of(fomAar, Month.MARCH)
-                val forventetInntekt =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 200000,
-                        fom = fom,
-                    )
-
-                assertThrows<InternfeilException> {
-                    Avkorting().oppdaterMedInntektsgrunnlag(
-                        forventetInntekt,
-                        bruker,
-                        opphoerFom = YearMonth.of(fomAar.minus(1), Month.MARCH),
-                    )
-                }
-            }
         }
 
         @Test

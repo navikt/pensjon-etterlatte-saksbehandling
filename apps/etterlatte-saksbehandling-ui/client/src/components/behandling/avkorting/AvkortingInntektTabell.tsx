@@ -1,6 +1,8 @@
 import { BodyShort, HStack, Table, Tag, Tooltip } from '@navikt/ds-react'
 import {
   ForventetInntektHeaderHjelpeTekst,
+  ForventetInntektHjelpeTekst,
+  ForventetInntektUtlandHjelpeTekst,
   InnvilgaMaanederHeaderHjelpeTekst,
 } from '~components/behandling/avkorting/AvkortingHjelpeTekster'
 import { NOK } from '~utils/formatering/formatering'
@@ -119,10 +121,24 @@ const ForventetInntektDetaljer = ({
 
   return (
     <div>
-      <BodyShort>Forventet inntekt Norge: {forventetInntekt}</BodyShort>
+      <HStack gap="2">
+        <BodyShort>Forventet inntekt Norge: {forventetInntekt}</BodyShort>
+        <ForventetInntektHjelpeTekst
+          aarsinntekt={aarsinntekt}
+          fratrekkInnAar={fratrekkInnAar}
+          forventetInntekt={forventetInntekt}
+        />
+      </HStack>
       <BodyShort>Fratrekk inn-år Norge: {fratrekkInnAar}</BodyShort>
-      <BodyShort>Forventet inntekt utland: {forventetInntektUtland}</BodyShort>
-      <BodyShort>Fratrekk inn-år Utland: {fratrekkUtland}</BodyShort>
+      <HStack gap="2">
+        <BodyShort>Forventet inntekt utland: {forventetInntektUtland}</BodyShort>
+        <ForventetInntektUtlandHjelpeTekst
+          inntektUtland={inntektUtland}
+          fratrekkUtland={fratrekkUtland}
+          forventetInntektUtland={forventetInntektUtland}
+        />
+      </HStack>
+      <BodyShort>Fratrekk inn-år utland: {fratrekkUtland}</BodyShort>
     </div>
   )
 }

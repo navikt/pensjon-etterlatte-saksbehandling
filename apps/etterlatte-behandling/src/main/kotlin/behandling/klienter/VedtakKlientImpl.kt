@@ -433,8 +433,8 @@ class VedtakKlientImpl(
 
             throw ForespoerselException(
                 status = re.response.status.value,
-                code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
-                detail = "Ukjent feil oppsto ved henting av vedtak",
+                code = "UKJENT_FEIL_HENTING_AV_IVERKSATTE_VEDTAK",
+                detail = "Ukjent feil oppsto ved henting av iverksatte vedtak",
                 meta = mapOf("sakId" to sakId.sakId),
             )
         }

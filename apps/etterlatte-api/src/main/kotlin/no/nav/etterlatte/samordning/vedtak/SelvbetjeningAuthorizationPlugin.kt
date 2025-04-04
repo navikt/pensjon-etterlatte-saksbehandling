@@ -35,7 +35,7 @@ fun selvbetjeningAuthorizationPlugin(appname: String) =
                             "etterlatte-api" -> {
                                 try {
                                     call.receive<FoedselsnummerDTO>().foedselsnummer
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     throw ManglerFoedselsnummerException()
                                 }
                             }

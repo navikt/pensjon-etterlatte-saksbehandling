@@ -5,7 +5,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
-import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
@@ -15,10 +14,10 @@ import io.ktor.server.routing.route
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.MaskinportenScopeAuthorizationPlugin
+import no.nav.etterlatte.hentFnrBody
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
@@ -107,12 +106,11 @@ fun Route.samordningVedtakRoute(
                 call.dato("fomDato")
                     ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
-            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
+            val fnr = hentFnrBody()
             val tpnummer =
                 call.request.headers["tpnr"]
                     ?: throw ManglerTpNrException()
 
-            Folkeregisteridentifikator.of(fnr.foedselsnummer)
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
@@ -172,7 +170,7 @@ fun Route.samordningVedtakRoute(
                     ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
 
-            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
+            val fnr = hentFnrBody()
 
             val samordningVedtakDtos =
                 try {
@@ -213,7 +211,7 @@ fun Route.samordningVedtakRoute(
 
         post("/har-loepende-oms") {
             val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
-            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
+            val fnr = hentFnrBody()
 
             val harLoependeOmsPaaDato =
                 try {

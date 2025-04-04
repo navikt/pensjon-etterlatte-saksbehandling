@@ -14,7 +14,8 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 /**
- * Basically straight outta the ktor docs
+ * Basically straight outta the ktor docs.
+ * Denne er kun for bruk internt i nav
  */
 val AuthorizationPlugin =
     createRouteScopedPlugin(

@@ -22,7 +22,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 /**
- * TODO
+ * Innholder alt som har med inntektsavkorting for Omstillingstønad. Både data og domenelogikk.
+ * Se videre dokumentasjon i [Aarsoppgjoer], [AvkortingGrunnlag] og nedover.
  */
 data class Avkorting(
     val aarsoppgjoer: List<Aarsoppgjoer> = emptyList(),
@@ -132,6 +133,9 @@ data class Avkorting(
                 },
         )
 
+    /**
+     * Brukes til å beregne avkoring med [ForventetInntekt]
+     */
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
         bruker: BrukerTokenInfo,
@@ -144,6 +148,9 @@ data class Avkorting(
         return oppdatertMedNyInntekt.beregnAvkorting(nyttGrunnlag.fom, beregning, sanksjoner)
     }
 
+    /**
+     * Legger til brukeroppgitt [ForventetInntekt] i [AarsoppgjoerLoepende].
+     */
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
         bruker: BrukerTokenInfo,
@@ -223,6 +230,9 @@ data class Avkorting(
             YearMonth.of(inntektsaar, Month.DECEMBER)
         }
 
+    /**
+     * Brukes til å ta i bruk [FaktiskInntekt] til et [Etteroppgjoer].
+     */
     fun beregnEtteroppgjoer(
         brukerTokenInfo: BrukerTokenInfo,
         aar: Int,
@@ -270,9 +280,16 @@ data class Avkorting(
         return nyAvkorting.beregnAvkorting(tidligereAarsoppgjoer.fom, null, sanksjoner)
     }
 
+    /**
+     * Beregner all avkorting for hele [Avkorting]. Det vil si alle år som har hatt utbetaling eller
+     * inneværende år ([Aarsoppgjoer]).
+     *
+     * @param beregning - Forbehandling av [Etteroppgjoer] har ikke [Beregning]. Vil derfor videreføre ekisterende
+     * [Aarsoppgjoer.ytelseFoerAvkorting].
+     */
     fun beregnAvkorting(
         virkningstidspunkt: YearMonth,
-        beregning: Beregning?, // Kun null for forbehandling etteroppgjør
+        beregning: Beregning?,
         sanksjoner: List<Sanksjon>,
     ): Avkorting {
         val virkningstidspunktAar = virkningstidspunkt.year
@@ -408,10 +425,13 @@ data class Avkorting(
     }
 
     /**
-     * Finner avkortet ytelse med opparbeidet [Restanse]
-     * Opparbeidet restanse beregnes ved å sammenligne samtlige forventa inntektsavkortinger med alle måneder frem til
-     * ny oppgitt forventet inntekt.
-     * For hver forventet inntekt som sammenlignes så akkumuleres det mer eller mindre restanse.
+     * Finner avkortet ytelse med opparbeidet [Restanse].
+     *
+     * TODO
+     * Det kommes frem til [Restanse] ved å beregne hva [AvkortetYtelse] ville vært for hele innvilget periode for
+     * ny oppgitt [ForventetInntekt] (se [Inntektsavkorting] for så å sammenligne med utbetalte måneder [Aarsoppgjoer.avkortetYtelse] med.
+     * Dette må gjøres på alle [AarsoppgjoerLoepende.inntektsavkorting] for finne hva restansen var på tidspunktet den
+     * inntekten var oppgitt/forventet.
      */
     private fun beregnAvkortetYtelseMedRestanse(
         aarsoppgjoer: AarsoppgjoerLoepende,
@@ -537,8 +557,8 @@ data class Avkorting(
         opphoerFom.minusMonths(1)
     }
 
-    /*
-     * Hvilket årsoppgjør som er relevant basers på virkningstidspunkt.
+    /**
+     * Hvilket [Aarsoppgjoer] som er relevant basers på virkningstidspunkt.
      * Hvis det ikke finnes et fra før på virkningstidspunkt opprettes et nytt.
      *
      * Ved innvilgelse/førstegangsbehandling så skal måneder før virkningsitdspunkt trekkes i fra

@@ -21,14 +21,14 @@ class EtteroppgjoerServiceTest {
             }
         every { sakService.finnSak(any(), any()) } returns sak
 
-        // ikke opprett etteroppgjør
+        // ikke oppdatere status
         every { etteroppgjoerService.hentEtteroppgjoer(any(), any()) } returns null
         etteroppgjoerService.skalHaEtteroppgjoer("123", 2024).skalHaEtteroppgjoer shouldBe false
 
         val etteroppgjoer = mockk<Etteroppgjoer>()
         every { etteroppgjoerService.hentEtteroppgjoer(any(), any()) } returns etteroppgjoer
 
-        // skal ha etteroppgjør
+        // skal ha etteroppgjør, oppdater status
         val statusSomSkalHaEtteroppgjoer =
             setOf(
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,

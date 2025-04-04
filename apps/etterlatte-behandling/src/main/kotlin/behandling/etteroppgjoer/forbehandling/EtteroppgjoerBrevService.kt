@@ -3,10 +3,10 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevMapper
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
+import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.behandling.mapAvdoede
@@ -86,7 +86,7 @@ class EtteroppgjoerBrevService(
     private suspend fun utledBrevRequest(
         sak: Sak,
         brevInnholdData: BrevFastInnholdData,
-        brevRedigerbarInnholdData: BrevDataRedigerbar,
+        brevRedigerbarInnholdData: BrevRedigerbarInnholdData,
         skalLagres: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevRequest =

@@ -54,7 +54,7 @@ data class BrevRequest(
     val attestantIdent: String?,
     val skalLagre: Boolean,
     val brevFastInnholdData: BrevFastInnholdData,
-    val brevRedigerbarInnholdData: BrevDataRedigerbar?,
+    val brevRedigerbarInnholdData: BrevRedigerbarInnholdData?,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")

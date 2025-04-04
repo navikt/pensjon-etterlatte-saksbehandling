@@ -114,10 +114,15 @@ fun Route.etteroppgjoerRoutes(
         }
 
         // TODO opprett periodisk jobb
-        post("/start-kjoering-opprett-forbehandling") {
+        post("/{inntektsaar}/opprett-forbehandlinger") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
-                forbehandlingService.startOpprettForbehandlingKjoering()
+                val inntektsaar =
+                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                        "Inntektsaar mangler"
+                    }
+
+                forbehandlingService.startOpprettForbehandlingKjoering(inntektsaar)
             }
         }
     }

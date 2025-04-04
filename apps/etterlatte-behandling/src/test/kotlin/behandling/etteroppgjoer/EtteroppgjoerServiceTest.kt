@@ -28,7 +28,7 @@ class EtteroppgjoerServiceTest {
         val etteroppgjoer = mockk<Etteroppgjoer>()
         every { etteroppgjoerService.hentEtteroppgjoer(any(), any()) } returns etteroppgjoer
 
-        // status som skal ha etteroppgjør
+        // skal ha etteroppgjør
         val statusSomSkalHaEtteroppgjoer =
             setOf(
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,

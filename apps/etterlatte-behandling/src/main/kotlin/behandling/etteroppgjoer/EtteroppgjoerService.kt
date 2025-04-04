@@ -61,7 +61,10 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Etteroppgjoer? = dao.hentEtteroppgjoer(sakId, inntektsaar)
 
-    fun hentEtteroppgjoerForStatus(status: EtteroppgjoerStatus): List<Etteroppgjoer> = dao.hentEtteroppgjoerForStatus(status)
+    fun hentEtteroppgjoerForStatus(
+        status: EtteroppgjoerStatus,
+        inntektsaar: Int,
+    ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForStatus(status, inntektsaar)
 
     fun oppdaterStatus(
         sakId: SakId,

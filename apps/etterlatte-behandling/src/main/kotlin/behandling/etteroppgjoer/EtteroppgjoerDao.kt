@@ -36,7 +36,7 @@ class EtteroppgjoerDao(
 
     fun hentEtteroppgjoerForStatus(
         status: EtteroppgjoerStatus,
-        // TODO sjekke på inntektsaar også?
+        inntektsaar: Int,
     ): List<Etteroppgjoer> =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -50,6 +50,7 @@ class EtteroppgjoerDao(
                         """.trimIndent(),
                     )
                 statement.setString(1, status.name)
+                statement.setInt(2, inntektsaar)
                 statement.executeQuery().toList { toEtteroppgjoer() }
             }
         }

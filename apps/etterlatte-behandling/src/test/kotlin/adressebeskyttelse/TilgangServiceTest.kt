@@ -96,7 +96,7 @@ internal class TilgangServiceTest(
         behandlingRepo.opprettBehandling(opprettBehandling)
         val harTilgangTilBehandling =
             tilgangService.harTilgangTilBehandling(
-                opprettBehandling.id.toString(),
+                opprettBehandling.id,
                 saksbehandlerMedRoller,
             )
 
@@ -135,22 +135,22 @@ internal class TilgangServiceTest(
             )
         val harTilgangStrengtFortroligBehandling =
             tilgangService.harTilgangTilBehandling(
-                klage.id.toString(),
+                klage.id,
                 saksbehandlerMedStrengtfortrolig,
             )
         val harTilgangStrengtFortroligKlage =
-            tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerMedStrengtfortrolig)
+            tilgangService.harTilgangTilKlage(klage.id, saksbehandlerMedStrengtfortrolig)
 
         Assertions.assertTrue(harTilgangStrengtFortroligKlage)
         Assertions.assertTrue(harTilgangStrengtFortroligBehandling)
 
         val harTilgangIkkeFortroligBehandling =
             tilgangService.harTilgangTilBehandling(
-                klage.id.toString(),
+                klage.id,
                 saksbehandlerUtenStrengtFortrolig,
             )
         val harTilgangIkkeFortroligKlage =
-            tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerUtenStrengtFortrolig)
+            tilgangService.harTilgangTilKlage(klage.id, saksbehandlerUtenStrengtFortrolig)
 
         Assertions.assertFalse(harTilgangIkkeFortroligBehandling)
         Assertions.assertFalse(harTilgangIkkeFortroligKlage)
@@ -188,12 +188,12 @@ internal class TilgangServiceTest(
             )
         val harTilgangStrengtFortroligBehandling =
             tilgangService.harTilgangTilBehandling(
-                tilbakekreving.id.toString(),
+                tilbakekreving.id,
                 saksbehandlerMedStrengtfortrolig,
             )
         val harTilgangStrengtFortroligTilbakekreving =
             tilgangService.harTilgangTilTilbakekreving(
-                tilbakekreving.id.toString(),
+                tilbakekreving.id,
                 saksbehandlerMedStrengtfortrolig,
             )
 
@@ -202,12 +202,12 @@ internal class TilgangServiceTest(
 
         val harTilgangIkkeFortroligBehandling =
             tilgangService.harTilgangTilBehandling(
-                tilbakekreving.id.toString(),
+                tilbakekreving.id,
                 saksbehandlerUtenStrengtFortrolig,
             )
         val harTilgangIkkeFortroligKlage =
             tilgangService.harTilgangTilTilbakekreving(
-                tilbakekreving.id.toString(),
+                tilbakekreving.id,
                 saksbehandlerUtenStrengtFortrolig,
             )
 
@@ -235,7 +235,7 @@ internal class TilgangServiceTest(
         behandlingRepo.opprettBehandling(opprettBehandling)
         val harTilgangTilBehandlingSomStrengtFortrolig =
             tilgangService.harTilgangTilBehandling(
-                opprettBehandling.id.toString(),
+                opprettBehandling.id,
                 saksbehandlerMedStrengtfortrolig,
             )
 
@@ -248,7 +248,7 @@ internal class TilgangServiceTest(
             )
         val harTilgangTilBehandlingSomfortrolig =
             tilgangService.harTilgangTilBehandling(
-                opprettBehandling.id.toString(),
+                opprettBehandling.id,
                 saksbehandlerMedFortrolig,
             )
 
@@ -273,7 +273,7 @@ internal class TilgangServiceTest(
         behandlingRepo.opprettBehandling(opprettBehandling)
         val hartilgangtilvanligsak =
             tilgangService.harTilgangTilBehandling(
-                opprettBehandling.id.toString(),
+                opprettBehandling.id,
                 saksbehandlerMedStrengtfortrolig,
             )
 
@@ -283,7 +283,7 @@ internal class TilgangServiceTest(
 
         val hartilgangSomStrengtFortroligMotEgenAnsattSak =
             tilgangService.harTilgangTilBehandling(
-                opprettBehandling.id.toString(),
+                opprettBehandling.id,
                 saksbehandlerMedStrengtfortrolig,
             )
 
@@ -296,7 +296,7 @@ internal class TilgangServiceTest(
             )
         val harTilgangTilBehandlingMedEgenAnsattRolle =
             tilgangService.harTilgangTilBehandling(
-                opprettBehandling.id.toString(),
+                opprettBehandling.id,
                 saksbehandlerMedEgenansatt,
             )
 

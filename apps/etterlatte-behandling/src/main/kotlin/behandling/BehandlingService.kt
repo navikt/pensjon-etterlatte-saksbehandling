@@ -703,6 +703,7 @@ internal class BehandlingServiceImpl(
             sakId = sakId,
             sakType = sakType,
             sakEnhetId = behandling.sak.enhet,
+            relatertBehandlingId = behandling.relatertBehandlingId,
             gyldighetsprøving = behandling.gyldighetsproeving(),
             kommerBarnetTilgode = kommerBarnetTilgode,
             soeknadMottattDato = behandling.mottattDato(),

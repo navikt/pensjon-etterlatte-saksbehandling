@@ -191,6 +191,7 @@ class VilkaarsvurderingService(
                     kopiertFraId = tidligereVilkaarsvurdering.id,
                 )
 
+            // TODO denne har blitt rimelig vanskelig å skjønne seg helt på - bør skrives om
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
             if (!kopierResultat ||
                 (

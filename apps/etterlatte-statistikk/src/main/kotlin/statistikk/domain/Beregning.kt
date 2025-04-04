@@ -4,8 +4,8 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
@@ -145,7 +145,7 @@ data class AvkortingGrunnlag(
     val spesifikasjon: String,
 ) {
     companion object {
-        fun fraDTO(dto: AvkortingGrunnlagDto) =
+        fun fraDTO(dto: ForventetInntektDto) =
             AvkortingGrunnlag(
                 fom = dto.fom,
                 tom = dto.tom,

@@ -12,12 +12,13 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
+import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -25,6 +26,8 @@ import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.Month
+import java.time.YearMonth
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
@@ -174,10 +177,10 @@ data class AvkortingSkalHaInntektNesteAarDTO(
 )
 
 fun ForventetInntekt.toDto() =
-    AvkortingGrunnlagDto(
+    ForventetInntektDto(
         id = id,
         fom = periode.fom,
-        tom = periode.tom,
+        tom = if (periode.tom == null) YearMonth.of(periode.fom.year, Month.DECEMBER) else periode.tom,
         inntektTom = inntektTom,
         fratrekkInnAar = fratrekkInnAar,
         inntektUtlandTom = inntektUtlandTom,
@@ -185,6 +188,11 @@ fun ForventetInntekt.toDto() =
         innvilgaMaaneder = innvilgaMaaneder,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
+        inntektInnvilgetPeriode =
+            when (inntektInnvilgetPeriode) {
+                is BenyttetInntektInnvilgetPeriode -> inntektInnvilgetPeriode.verdi
+                is IngenInntektInnvilgetPeriode -> inntektTom - fratrekkInnAar + inntektUtlandTom - fratrekkInnAarUtland
+            },
         overstyrtInnvilgaMaaneder =
             overstyrtInnvilgaMaanederAarsak?.let {
                 AvkortingOverstyrtInnvilgaMaanederDto(
@@ -193,6 +201,20 @@ fun ForventetInntekt.toDto() =
                     begrunnelse = overstyrtInnvilgaMaanederBegrunnelse ?: "",
                 )
             },
+    )
+
+fun FaktiskInntekt.toDto() =
+    FaktiskInntektDto(
+        id = id,
+        fom = periode.fom,
+        tom = periode.tom,
+        loennsinntekt = loennsinntekt,
+        naeringsinntekt = naeringsinntekt,
+        afp = afp,
+        utlandsinntekt = utlandsinntekt,
+        innvilgaMaaneder = innvilgaMaaneder,
+        kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
+        inntektInnvilgetPeriode = inntektInnvilgetPeriode.verdi,
     )
 
 fun AvkortetYtelse.toDto() =

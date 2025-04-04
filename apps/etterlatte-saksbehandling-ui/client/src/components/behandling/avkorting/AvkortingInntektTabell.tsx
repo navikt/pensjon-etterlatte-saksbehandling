@@ -1,12 +1,16 @@
-import { BodyShort, HStack, Table, Tooltip } from '@navikt/ds-react'
+import { BodyShort, HStack, Table, Tag, Tooltip } from '@navikt/ds-react'
 import {
   ForventetInntektHeaderHjelpeTekst,
-  ForventetInntektHjelpeTekst,
-  ForventetInntektUtlandHjelpeTekst,
   InnvilgaMaanederHeaderHjelpeTekst,
 } from '~components/behandling/avkorting/AvkortingHjelpeTekster'
 import { NOK } from '~utils/formatering/formatering'
-import { IAvkortingGrunnlag, SystemOverstyrtInnvilgaMaanederAarsak } from '~shared/types/IAvkorting'
+import {
+  FaktiskInntektGrunnlag,
+  ForventetInntektGrunnlag,
+  IAvkortingGrunnlag,
+  isForventetInntekt,
+  SystemOverstyrtInnvilgaMaanederAarsak,
+} from '~shared/types/IAvkorting'
 import { ArrowCirclepathIcon, HeadCloudIcon } from '@navikt/aksel-icons'
 import { formaterDato } from '~utils/formatering/dato'
 import { lastDayOfMonth } from 'date-fns'
@@ -24,11 +28,16 @@ export const AvkortingInntektTabell = ({
     <Table className="table" zebraStripes>
       <Table.Header>
         <Table.Row>
-          <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
-          <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
+          <Table.HeaderCell />
           <Table.HeaderCell>
             <HStack gap="2" align="center" wrap={false}>
-              Forventet inntekt totalt
+              Inntektstype
+              <ForventetInntektHeaderHjelpeTekst />
+            </HStack>
+          </Table.HeaderCell>
+          <Table.HeaderCell>
+            <HStack gap="2" align="center" wrap={false}>
+              Inntekt totalt
               <ForventetInntektHeaderHjelpeTekst />
             </HStack>
           </Table.HeaderCell>
@@ -45,39 +54,21 @@ export const AvkortingInntektTabell = ({
       </Table.Header>
       <Table.Body>
         {avkortingGrunnlagListe.map((avkortingGrunnlag, index) => {
-          const aarsinntekt = avkortingGrunnlag.inntektTom ?? 0
-          const fratrekkInnAar = avkortingGrunnlag.fratrekkInnAar ?? 0
-          const forventetInntekt = aarsinntekt - fratrekkInnAar
-          const inntektUtland = avkortingGrunnlag.inntektUtlandTom ?? 0
-          const fratrekkUtland = avkortingGrunnlag.fratrekkInnAarUtland ?? 0
-          const forventetInntektUtland = inntektUtland - fratrekkUtland
           return (
-            <Table.Row key={index}>
-              <Table.DataCell key="Inntekt">
-                <HStack gap="2">
-                  <BodyShort>{NOK(forventetInntekt)}</BodyShort>
-                  <ForventetInntektHjelpeTekst
-                    aarsinntekt={aarsinntekt}
-                    fratrekkInnAar={fratrekkInnAar}
-                    forventetInntekt={forventetInntekt}
-                  />
-                </HStack>
+            <Table.ExpandableRow key={index} content={<InntektDetaljer avkortingGrunnlag={avkortingGrunnlag} />}>
+              <Table.DataCell key="InntektType">
+                {isForventetInntekt(avkortingGrunnlag) ? (
+                  <Tag variant="alt2">Forventet inntekt</Tag>
+                ) : (
+                  <Tag variant="alt1">Faktisk inntekt</Tag>
+                )}
               </Table.DataCell>
-              <Table.DataCell key="InntektUtland">
-                <HStack gap="2">
-                  <BodyShort>{NOK(forventetInntektUtland)}</BodyShort>
-                  <ForventetInntektUtlandHjelpeTekst
-                    inntektUtland={inntektUtland}
-                    fratrekkUtland={fratrekkUtland}
-                    forventetInntektUtland={forventetInntektUtland}
-                  />
-                </HStack>
-              </Table.DataCell>
-              <Table.DataCell key="InntektTotalt">{NOK(forventetInntekt + forventetInntektUtland)}</Table.DataCell>
+              <Table.DataCell key="InntektTotalt">{NOK(avkortingGrunnlag.inntektInnvilgetPeriode)}</Table.DataCell>
               <Table.DataCell>
                 <HStack gap="4" align="center">
                   <BodyShort>{avkortingGrunnlag.innvilgaMaaneder}</BodyShort>
                   {fyller67 &&
+                    isForventetInntekt(avkortingGrunnlag) &&
                     (!avkortingGrunnlag.overstyrtInnvilgaMaaneder ||
                       avkortingGrunnlag.overstyrtInnvilgaMaaneder.aarsak ===
                         SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67) && (
@@ -85,7 +76,7 @@ export const AvkortingInntektTabell = ({
                         <HeadCloudIcon aria-hidden fontSize="1.5rem" />
                       </Tooltip>
                     )}
-                  {!!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
+                  {isForventetInntekt(avkortingGrunnlag) && !!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
                     <Tooltip content="Antall innvilga måneder er overstyrt">
                       <ArrowCirclepathIcon aria-hidden fontSize="1.5rem" />
                     </Tooltip>
@@ -106,10 +97,49 @@ export const AvkortingInntektTabell = ({
                   />
                 )}
               </Table.DataCell>
-            </Table.Row>
+            </Table.ExpandableRow>
           )
         })}
       </Table.Body>
     </Table>
   )
+}
+
+const ForventetInntektDetaljer = ({
+  forventetInntektGrunnlag,
+}: {
+  forventetInntektGrunnlag: ForventetInntektGrunnlag
+}) => {
+  const aarsinntekt = forventetInntektGrunnlag.inntektTom ?? 0
+  const fratrekkInnAar = forventetInntektGrunnlag.fratrekkInnAar ?? 0
+  const forventetInntekt = aarsinntekt - fratrekkInnAar
+  const inntektUtland = forventetInntektGrunnlag.inntektUtlandTom ?? 0
+  const fratrekkUtland = forventetInntektGrunnlag.fratrekkInnAarUtland ?? 0
+  const forventetInntektUtland = inntektUtland - fratrekkUtland
+
+  return (
+    <div>
+      <BodyShort>Forventet inntekt Norge: {forventetInntekt}</BodyShort>
+      <BodyShort>Fratrekk inn-år Norge: {fratrekkInnAar}</BodyShort>
+      <BodyShort>Forventet inntekt utland: {forventetInntektUtland}</BodyShort>
+      <BodyShort>Fratrekk inn-år Utland: {fratrekkUtland}</BodyShort>
+    </div>
+  )
+}
+
+const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrunnlag: FaktiskInntektGrunnlag }) => {
+  return (
+    <div>
+      <BodyShort>Lønnsinntekt: {faktiskInntektGrunnlag.loennsinntekt}</BodyShort>
+      <BodyShort>Næringsinntekt: {faktiskInntektGrunnlag.naeringsinntekt}</BodyShort>
+      <BodyShort>AFP: {faktiskInntektGrunnlag.afp}</BodyShort>
+      <BodyShort>Utlandsinntekt: {faktiskInntektGrunnlag.utlandsinntekt}</BodyShort>
+    </div>
+  )
+}
+
+const InntektDetaljer = ({ avkortingGrunnlag }: { avkortingGrunnlag: IAvkortingGrunnlag }) => {
+  if (isForventetInntekt(avkortingGrunnlag))
+    return <ForventetInntektDetaljer forventetInntektGrunnlag={avkortingGrunnlag} />
+  else return <FaktiskInntektDetaljer faktiskInntektGrunnlag={avkortingGrunnlag} />
 }

@@ -50,7 +50,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangServiceSjekker) {
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     tilgangService.harTilgangTilBehandling(
-                        behandlingId.toString(),
+                        behandlingId,
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }

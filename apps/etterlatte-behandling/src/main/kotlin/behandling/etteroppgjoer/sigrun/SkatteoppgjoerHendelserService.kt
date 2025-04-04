@@ -1,8 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
-import no.nav.etterlatte.inTransaction
 import org.slf4j.LoggerFactory
 
 class SkatteoppgjoerHendelserService(
@@ -12,11 +12,11 @@ class SkatteoppgjoerHendelserService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
+    fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
         logger.info("Starter å behandle ${request.antall} hendelser fra skatt")
 
-        val sisteKjoering = inTransaction { dao.hentSisteKjoering() }
-        val hendelsesListe = sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer())
+        val sisteKjoering = dao.hentSisteKjoering()
+        val hendelsesListe = runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
 
         val kjoering =
             HendelserKjoering(
@@ -25,29 +25,28 @@ class SkatteoppgjoerHendelserService(
                 antallRelevante = 0,
             )
 
-        inTransaction {
-            kjoering.antallRelevante =
-                hendelsesListe.hendelser.count { hendelse ->
-                    val resultat =
-                        etteroppgjoerService.skalHaEtteroppgjoer(
-                            hendelse.identifikator,
-                            hendelse.gjelderPeriode.toInt(),
-                        )
+        kjoering.antallRelevante =
+            hendelsesListe.hendelser.count { hendelse ->
+                val resultat =
+                    etteroppgjoerService.skalHaEtteroppgjoer(
+                        hendelse.identifikator,
+                        hendelse.gjelderPeriode.toInt(),
+                    )
 
-                    if (resultat.skalHaEtteroppgjoer) {
-                        val etteroppgjoer = resultat.etteroppgjoer!!
+                if (resultat.skalHaEtteroppgjoer) {
+                    val etteroppgjoer = resultat.etteroppgjoer!!
 
-                        logger.info("Sak=${etteroppgjoer.sakId} skal ha etteroppgjør for inntektsår=${hendelse.gjelderPeriode}")
-                        etteroppgjoerService.oppdaterStatus(
-                            etteroppgjoer.sakId,
-                            etteroppgjoer.inntektsaar,
-                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                        )
-                    }
-
-                    resultat.skalHaEtteroppgjoer
+                    logger.info("Sak=${etteroppgjoer.sakId} skal ha etteroppgjør for inntektsår=${hendelse.gjelderPeriode}")
+                    etteroppgjoerService.oppdaterStatus(
+                        etteroppgjoer.sakId,
+                        etteroppgjoer.inntektsaar,
+                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    )
                 }
-        }
+
+                resultat.skalHaEtteroppgjoer
+            }
+
         dao.lagreKjoering(kjoering)
     }
 }

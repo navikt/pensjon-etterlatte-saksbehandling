@@ -37,7 +37,7 @@ class EtteroppgjoerService(
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
-    suspend fun finnOgOpprettEtteroppgjoer(
+    fun finnOgOpprettEtteroppgjoer(
         inntektsaar: Int,
         trigger: String = "Manuell",
     ) {

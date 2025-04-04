@@ -22,6 +22,9 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+/**
+ * TODO
+ */
 data class Avkorting(
     val aarsoppgjoer: List<Aarsoppgjoer> = emptyList(),
 ) {
@@ -152,7 +155,7 @@ data class Avkorting(
             } else if (it.year == nyttGrunnlag.fom.year) {
                 it.minusMonths(1)
             } else {
-                throw OpphoerErTilbakeITid(
+                throw InternfeilException(
                     "Opphøer er tilbake i tid, opphør: $opphoerFom nyttgrunnlag er fra: ${nyttGrunnlag.fom} id: ${nyttGrunnlag.id}",
                 )
             }
@@ -561,10 +564,17 @@ data class Avkorting(
     }
 }
 
-class OpphoerErTilbakeITid(
-    msg: String,
-) : InternfeilException(msg)
-
+/**
+ * Grunnlag for beregning av inntektsavkorting er bruker sin innekt i innvilgede måneder innenfor et år.
+ * Kilde til inntekt vil variere basert på om det finnes et skatteoppgjør for gjeldende år.
+ * Se [ForventetInntekt] og [FaktiskInntekt]
+ *
+ * @property periode anvendes ulike mellom [ForventetInntekt] og [FaktiskInntekt]
+ * @property innvilgaMaaneder Det beregnes frem til et månedlig avkortingsbeløp og da må inntekt deles på innvilgede måneder
+ * @property inntektInnvilgetPeriode Inntekten som benyttes til beregning av avkorting.
+ *              Utledes ulikt for [ForventetInntekt] og [FaktiskInntekt]
+ * @property kilde Hvilken saksbehandler som har fylt inn inntektsopplysnigner.
+ */
 sealed class AvkortingGrunnlag {
     abstract val id: UUID
     abstract val periode: Periode
@@ -573,6 +583,26 @@ sealed class AvkortingGrunnlag {
     abstract val kilde: Grunnlagsopplysning.Saksbehandler
 }
 
+/**
+ * Før skatteoppgjør er bruker nødt til å oppgi hva de forventer å tjene.
+ * Siden det oppgis i forkant/løpende i et inntektsår kan det også endre seg.
+ *
+ * @property periode - fra og med måned etter bruker har oppgitt forventet inntekt til og med opphør eller desember.
+ * Eller til bruker oppgir ny inntekt.
+ *
+ * @property inntektTom Alle relevante inntekter for oms i Norge fra og med januer til desember eller til opphør.
+ * @property fratrekkInnAar Alle relevante inntekter fra januar til innvilget OMS
+ * @property inntektUtlandTom Samme som [inntektTom] men for utland
+ * @property fratrekkInnAarUtland Samme som [fratrekkInnAarUtland] men for utland
+ *
+ * @property innvilgaMaaneder se [AvkortingGrunnlag].
+ * @property overstyrtInnvilgaMaanederAarsak - Antall utledes automatisk men kan overstyres manuelt om systemet ikke
+ * fanger opp et opphør.
+ *
+ * @property inntektInnvilgetPeriode Inntekten som benyttes til videre beregning av avkorting.
+ * inntektInnvilgetPeriode beregnes av [inntektTom], [fratrekkInnAar], [inntektUtlandTom] og [fratrekkInnAarUtland].
+ * Se [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt].
+ */
 data class ForventetInntekt(
     override val id: UUID,
     override val periode: Periode,
@@ -588,6 +618,18 @@ data class ForventetInntekt(
     override val inntektInnvilgetPeriode: InntektInnvilgetPeriode,
 ) : AvkortingGrunnlag()
 
+/**
+ * Etter skatteoppgjør vil det gjennomføres et etteroppgjør hvor faktisk inntekt hentes inn.
+ *
+ * @property periode - Innvilget periode for gjeldende år
+ *
+ * @property innvilgaMaaneder se [AvkortingGrunnlag].
+ *
+ * @property inntektInnvilgetPeriode Inntekten som benyttes til videre beregning av avkorting.
+ * inntektInnvilgetPeriode beregnes av [loennsinntekt], [naeringsinntekt], [afp] og [utlandsinntekt].
+ * Se [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt].
+ */
+
 data class FaktiskInntekt(
     override val id: UUID,
     override val periode: Periode,
@@ -600,6 +642,12 @@ data class FaktiskInntekt(
     override val inntektInnvilgetPeriode: BenyttetInntektInnvilgetPeriode,
 ) : AvkortingGrunnlag()
 
+/**
+ * Dette beløpet brukes videre i beregning av avkorting.
+ * Det utledes ulikt for [ForventetInntekt] og [FaktiskInntekt].
+ * Se [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt] og
+ * [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt]
+ */
 sealed class InntektInnvilgetPeriode
 
 data class BenyttetInntektInnvilgetPeriode(
@@ -609,10 +657,12 @@ data class BenyttetInntektInnvilgetPeriode(
     val kilde: Grunnlagsopplysning.RegelKilde,
 ) : InntektInnvilgetPeriode()
 
-/*
- Benyttes for behandlinger som allerede er iverksatt med gammel regelkode hvor InntektInnvilgetPeriode ikke var et konsept
- Se historikk til regelkode for avkorting for mer info.
-*/
+/**
+ * [InntektInnvilgetPeriode] som et objekt som produseres med regelkode var ikke i bruk fra oppstart av OMS.
+ * Det finnes derfor behandlinger som ikke har denne.
+ * I disse tilfellene benyttes [IngenInntektInnvilgetPeriode].
+ * Se historikk til regelkode for avkorting for mer info ([AvkortingRegelkjoring.beregnInntektsavkorting]).
+ */
 data object IngenInntektInnvilgetPeriode : InntektInnvilgetPeriode()
 
 enum class OverstyrtInnvilgaMaanederAarsak {
@@ -621,6 +671,16 @@ enum class OverstyrtInnvilgaMaanederAarsak {
     ANNEN,
 }
 
+/**
+ * Skal inneholde alt som har med avkorting å gjøre innenfor innvelgede månder for et inntektsår.
+ * Kan være et år hvor avkorting har blitt gjennomført med forventet inntekt oppgitt av bruker ([AarsoppgjoerLoepende])
+ * eller en faktisk inntekt ([Etteroppgjoer])
+ *
+ * @property aar - Året inntektsavkortingen gjelder
+ * @property fom - Første måned i inntektsåret som er innvilget
+ * @property ytelseFoerAvkorting er beregning. Anvendes ulikt. Se doc i [AarsoppgjoerLoepende] og [Etteroppgjoer]
+ * @property avkortetYtelse Anvendes ulikt. Se doc i [AarsoppgjoerLoepende] og [Etteroppgjoer]
+ */
 sealed class Aarsoppgjoer {
     abstract val id: UUID
     abstract val aar: Int
@@ -653,6 +713,21 @@ sealed class Aarsoppgjoer {
         }
 }
 
+/**
+ * Inneholder alt som har med avkorting å gjøre innenfor innvilgede månder for et inntektsår som IKKE har hatt skatteoppgjør.
+ *
+ * Opprettes av [Avkorting.hentEllerOpprettAarsoppgjoer]
+ * Beregnes/fylles ut [Avkorting.beregnAvkorting]
+ *
+ * @property aar - se [Aarsoppgjoer]
+ * @property fom - se [Aarsoppgjoer]
+ * @property ytelseFoerAvkorting er beregning. Vi er nødt til å lagre beregning for hele året (eller innvilget periode) for å
+ * beregne restanse. Beregning ellers lagres bare fra og med virkningstidspunkt til behandling.
+ * @property inntektsavkorting - Inneholder det avkorting ville vært for hele år (eller innvilget periode) for hver enkelt brukeroppgitt
+ * forvetet inntekt.
+ * @property avkortetYtelse er sammensatt av [Inntektsavkorting.avkortetYtelseForventetInntekt] basert på
+ * når ny forventet inntekt ble oppgitt.
+ */
 data class AarsoppgjoerLoepende(
     override val id: UUID,
     override val aar: Int,
@@ -712,6 +787,21 @@ data class AarsoppgjoerLoepende(
         }
 }
 
+/**
+ * Inneholder alt som har med avkorting å gjøre innenfor innvilgede månder for et inntektsår som har hatt skatteoppgjør.
+ *
+ * Denne beregnes/fylles ut i to sammenhenter. Først under en forbehandling deretter under en revurdering.
+ * Opprettes og beregnes/fylles ut [Avkorting.beregnEtteroppgjoer]
+ *
+ * @property aar - se [Aarsoppgjoer]
+ * @property fom - se [Aarsoppgjoer]
+ * @property ytelseFoerAvkorting er beregning. Forbehandling av etteroppgjør har ikke beregning og er avhengig
+ * av å videreføre dette feltet.
+ * @property inntekt - Etter et skatteoppgjør vet vi hva inntekt faktisk er og kan bruke dene ene for hele året.
+ * Derav et felt for inntekt i motsetning til liste som i [AarsoppgjoerLoepende].
+ * @property avkortingsperioder beregnede avkortinger med en [FaktiskInntekt].
+ * @property avkortetYtelse beregning etter avkorting med [FaktiskInntekt].
+ */
 data class Etteroppgjoer(
     override val id: UUID,
     override val aar: Int,
@@ -723,11 +813,13 @@ data class Etteroppgjoer(
 ) : Aarsoppgjoer()
 
 /**
- * [avkortingsperioder] utregnet basert på en årsinntekt ([grunnlag]).
+ * Forventet inntekt kan endre seg gjennom et år. Vi trenger å beregne avkorting for hele året (eller innvilged periode)
+ * per oppgitte inntekt for å kunne avgjøre hva restanse vi bli.
  *
- * [avkortetYtelseForventetInntekt] - Benyttes hvis forventet årsinntekt endrer seg i løpet av året for å finne
- * restansen (se [Avkorting.beregnAvkortetYtelseMedRestanse]). Vil da inneholde ytelse etter avkorting slik
- * den ville vært med denne årsinntekten.
+ * @property grunnlag - Brukeroppgit [ForventetInntekt]
+ * @property avkortingsperioder - utregnet basert på [ForventetInntekt].
+ * @property avkortetYtelseForventetInntekt - Beregning etter avkorting for en [ForventetInntekt].
+ * Brukes til å beregne restanse IKKE hva som utbetales. Utbetaling avgjøres av [AarsoppgjoerLoepende.avkortetYtelse].
  */
 data class Inntektsavkorting(
     val grunnlag: ForventetInntekt,
@@ -764,8 +856,10 @@ data class Inntektsavkorting(
 
 /**
  * Beregnet ytelse (ytelse før avkorting / [Beregning]) persisteres for hele år for å kunne
- * beregne ytelse etter avkorting for et helt år av gangen. Det er nødvendig for [Restanse] og etteroppgjør.
+ * beregne ytelse etter avkorting for et helt år av gangen. Det er nødvendig for [Restanse] og [Etteroppgjoer].
  * (se [leggTilNyeBeregninger]).
+ *
+ * @property beregningsreferanse id til duplisert [Beregning].
  */
 data class YtelseFoerAvkorting(
     val beregning: Int,
@@ -774,7 +868,8 @@ data class YtelseFoerAvkorting(
 )
 
 /**
- * Utregnet avkortingsbeløp basert på årsinntekt som benyttes til å avkorte ytelse
+ * Utregnet avkortingsbeløp basert på [AvkortingGrunnlag] som benyttes til å avkorte ytelse.
+ * @property inntektsgrunnlag id til benyttet [AvkortingGrunnlag].
  */
 data class Avkortingsperiode(
     val id: UUID,
@@ -787,9 +882,12 @@ data class Avkortingsperiode(
 )
 
 /**
- * Hvis forventet årsinntekt har endret seg i løpet av året vil det ha blitt avkortet for lite eller for mye.
+ * For et [AarsoppgjoerLoepende] når en [ForventetInntekt] har endret seg i løpet av året vil det ha blitt avkortet for lite eller for mye.
  * Dette avviket blir "restanse" som fordeles over gjenværende måneder av året for å minimere avvik på etteroppgjøret.
  * (se [Avkorting.beregnAvkortetYtelseMedRestanse]).
+ *
+ * @property totalRestanse Summen av restansen til alle måneder som har hatt utbetaling med en tidligere [ForventetInntekt]
+ * @property fordeltRestanse Beløpet som fordeles på gjenværende måneder. [totalRestanse] delt på antall gjenværende måneder
  */
 data class Restanse(
     val id: UUID,
@@ -801,7 +899,14 @@ data class Restanse(
 )
 
 /**
- * Ytelsen etter avkortingsbeløp ([Avkortingsperiode]) er blit trukket ifra [YtelseFoerAvkorting].
+ * Ytelse etter avkortingsbeløp ([Avkortingsperiode]) er blit trukket ifra [YtelseFoerAvkorting] pluss/minsu eventuell [Restanse].
+ *
+ * @property type [AvkortetYtelse] beregnes ulikt hvis det er [FaktiskInntekt] eller [ForventetInntekt]. Se [AvkortetYtelseType].
+ * @property avkortingsbeloep - Videreført beløp fra [Avkortingsperiode]
+ * @property ytelseFoerAvkorting - En videreføring av [Aarsoppgjoer.ytelseFoerAvkorting].
+ * @property ytelseEtterAvkortingFoerRestanse - Beløp etter beregning er truket ifra med [avkortingsbeloep].
+ * @property ytelseEtterAvkorting - Samme som [ytelseEtterAvkortingFoerRestanse] men med [Restanse]
+ * @property inntektsgrunnlag - Id til benyttest [AvkortingGrunnlag]
  */
 data class AvkortetYtelse(
     val id: UUID,
@@ -820,11 +925,12 @@ data class AvkortetYtelse(
 )
 
 /**
- * [FORVENTET_INNTEKT] - Ytelse avkortet etter det som var brukeroppgitt forventet årsinntekt i perioden
+ * [FORVENTET_INNTEKT] - OBS! [AvkortetYtelse] med denne typen er IKKE brukt til utbetaling.
+ * Disse er kun brukt til å beregne [Restanse]. Se [Avkorting.beregnAvkortetYtelseMedRestanse].
  *
- * [AARSOPPGJOER] - Iverksatte perioder. Inneholder restanse hvis forventet inntekt endrer seg i løpet av året
+ * [AARSOPPGJOER] - Benyttes i [AarsoppgjoerLoepende.avkortetYtelse]. Brukes til utbetaling.
  *
- * [ETTEROPPGJOER] - TODO ikke enda implementert
+ * [ETTEROPPGJOER] - Benyttes i [Etteroppgjoer.avkortetYtelse]. Brukes til utbetaling.
  */
 enum class AvkortetYtelseType { FORVENTET_INNTEKT, AARSOPPGJOER, ETTEROPPGJOER }
 

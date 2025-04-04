@@ -394,7 +394,7 @@ internal class AvkortingTest {
                         fom = fom,
                     )
 
-                assertThrows<OpphoerErTilbakeITid> {
+                assertThrows<InternfeilException> {
                     Avkorting().oppdaterMedInntektsgrunnlag(
                         forventetInntekt,
                         bruker,

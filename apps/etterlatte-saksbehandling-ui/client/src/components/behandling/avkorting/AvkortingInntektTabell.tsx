@@ -122,23 +122,23 @@ const ForventetInntektDetaljer = ({
   return (
     <div>
       <HStack gap="2">
-        <BodyShort>Forventet inntekt Norge: {forventetInntekt}</BodyShort>
+        <BodyShort>Forventet inntekt Norge: {NOK(forventetInntekt)}</BodyShort>
         <ForventetInntektHjelpeTekst
           aarsinntekt={aarsinntekt}
           fratrekkInnAar={fratrekkInnAar}
           forventetInntekt={forventetInntekt}
         />
       </HStack>
-      <BodyShort>Fratrekk inn-år Norge: {fratrekkInnAar}</BodyShort>
+      <BodyShort>Fratrekk inn-år Norge: {NOK(fratrekkInnAar)}</BodyShort>
       <HStack gap="2">
-        <BodyShort>Forventet inntekt utland: {forventetInntektUtland}</BodyShort>
+        <BodyShort>Forventet inntekt utland: {NOK(forventetInntektUtland)}</BodyShort>
         <ForventetInntektUtlandHjelpeTekst
           inntektUtland={inntektUtland}
           fratrekkUtland={fratrekkUtland}
           forventetInntektUtland={forventetInntektUtland}
         />
       </HStack>
-      <BodyShort>Fratrekk inn-år utland: {fratrekkUtland}</BodyShort>
+      <BodyShort>Fratrekk inn-år utland: {NOK(fratrekkUtland)}</BodyShort>
     </div>
   )
 }
@@ -146,10 +146,10 @@ const ForventetInntektDetaljer = ({
 const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrunnlag: FaktiskInntektGrunnlag }) => {
   return (
     <div>
-      <BodyShort>Lønnsinntekt: {faktiskInntektGrunnlag.loennsinntekt}</BodyShort>
-      <BodyShort>Næringsinntekt: {faktiskInntektGrunnlag.naeringsinntekt}</BodyShort>
-      <BodyShort>AFP: {faktiskInntektGrunnlag.afp}</BodyShort>
-      <BodyShort>Utlandsinntekt: {faktiskInntektGrunnlag.utlandsinntekt}</BodyShort>
+      <BodyShort>Lønnsinntekt: {NOK(faktiskInntektGrunnlag.loennsinntekt)}</BodyShort>
+      <BodyShort>Næringsinntekt: {NOK(faktiskInntektGrunnlag.naeringsinntekt)}</BodyShort>
+      <BodyShort>AFP: {NOK(faktiskInntektGrunnlag.afp)}</BodyShort>
+      <BodyShort>Utlandsinntekt: {NOK(faktiskInntektGrunnlag.utlandsinntekt)}</BodyShort>
     </div>
   )
 }

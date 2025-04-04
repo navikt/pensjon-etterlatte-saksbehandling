@@ -21,7 +21,7 @@ data class Etteroppgjoer(
 
 enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
-    MOTTATT_HENDELSE,
+    MOTTATT_SKATTEOPPGJOER,
     UNDER_FORBEHANDLING,
     UNDER_REVURDERING,
 }
@@ -149,15 +149,16 @@ data class HendelseslisteFraSkatt(
 ) {
     companion object {
         fun stub(
-            startSekvensnummer: Long = 9007199254740991,
+            startSekvensnummer: Long = 0,
             antall: Int = 10,
+            aar: Int = 2024,
         ): HendelseslisteFraSkatt {
             val hendelser =
                 List(antall) { index ->
                     SkatteoppgjoerHendelser(
-                        gjelderPeriode = "", // TODO
-                        hendelsetype = "", // TODO
-                        identifikator = "", // TODO
+                        gjelderPeriode = aar.toString(),
+                        hendelsetype = "NY", // TODO
+                        identifikator = index.toString(), // TODO
                         sekvensnummer = startSekvensnummer + index,
                         somAktoerid = false,
                     )
@@ -168,7 +169,7 @@ data class HendelseslisteFraSkatt(
 }
 
 data class SkatteoppgjoerHendelser(
-    val gjelderPeriode: String,
+    val gjelderPeriode: String, // inntektsaar
     val hendelsetype: String,
     val identifikator: String,
     val sekvensnummer: Long,

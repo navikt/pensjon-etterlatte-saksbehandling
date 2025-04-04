@@ -1,5 +1,10 @@
-package no.nav.etterlatte.avkorting
+package no.nav.etterlatte.avkorting.inntektsjustering
 
+import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
+import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingFinnesIkkeException
+import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse

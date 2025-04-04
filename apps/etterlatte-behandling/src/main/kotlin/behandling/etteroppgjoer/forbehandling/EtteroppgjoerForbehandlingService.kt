@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
@@ -46,6 +47,16 @@ class EtteroppgjoerForbehandlingService(
     private val vedtakKlient: VedtakKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
+
+    // kjøring for å opprette forbehandling for etteroppgjør
+    fun startOpprettForbehandlingKjoering(inntektsaar: Int) {
+        logger.info("Opprette forbehandling for etteroppgjør med mottatt skatteoppgjør for $inntektsaar")
+        val etteroppgjoerListe = etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
+
+        for (etteroppgjoer in etteroppgjoerListe) {
+            opprettEtteroppgjoerForbehandling(etteroppgjoer.sakId, etteroppgjoer.inntektsaar, HardkodaSystembruker.etteroppgjoer)
+        }
+    }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
@@ -107,11 +118,17 @@ class EtteroppgjoerForbehandlingService(
 
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = inTransaction { dao.hentForbehandlinger(sakId) }
 
-    fun opprettEtteroppgjoer(
+    fun opprettEtteroppgjoerForbehandling(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerOgOppgave {
+    ): EtteroppgjoerForbehandlingOgOppgave {
+        logger.info("Oppretter etteroppgjør forbehandling for sakId=$sakId")
+
+        if (!kanOppretteEtteroppgjoerForbehandling(sakId, inntektsaar)) {
+            throw InternfeilException("Kan ikke opprette forbehandling ... ???")
+        }
+
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
@@ -162,8 +179,8 @@ class EtteroppgjoerForbehandlingService(
 
         etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
-        return EtteroppgjoerOgOppgave(
-            etteroppgjoerBehandling = nyForbehandling,
+        return EtteroppgjoerForbehandlingOgOppgave(
+            etteroppgjoerForbehandling = nyForbehandling,
             oppgave = oppgave,
         )
     }
@@ -193,10 +210,24 @@ class EtteroppgjoerForbehandlingService(
 
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
+
+    private fun kanOppretteEtteroppgjoerForbehandling(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Boolean {
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sakId, inntektsaar) ?: return false
+
+        // TODO: hva mer må vi sjekke?
+
+        return when (etteroppgjoer.status) {
+            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER -> true
+            else -> false
+        }
+    }
 }
 
-data class EtteroppgjoerOgOppgave(
-    val etteroppgjoerBehandling: EtteroppgjoerForbehandling,
+data class EtteroppgjoerForbehandlingOgOppgave(
+    val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
 )
 

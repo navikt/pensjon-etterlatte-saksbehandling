@@ -13,43 +13,41 @@ class SkatteoppgjoerHendelserService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
-        logger.info("Starter kjøring for behandle hendelser fra skatt, sjekker ${request.antall} hendelser")
+        logger.info("Starter å behandle ${request.antall} hendelser fra skatt")
 
         val sisteKjoering = dao.hentSisteKjoering()
-        val hendelsesListe =
-            runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
-        var antallRelevanteHendelser = 0
+        val hendelsesListe = runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
 
         val kjoering =
             HendelserKjoering(
-                hendelsesListe.hendelser.last().sekvensnummer,
-                hendelsesListe.hendelser.size,
-                antallRelevanteHendelser,
+                sisteSekvensnummer = hendelsesListe.hendelser.last().sekvensnummer,
+                antallHendelser = hendelsesListe.hendelser.size,
+                antallRelevante = 0,
             )
 
-        for (hendelse in hendelsesListe.hendelser) {
-            val etteroppgjoerResultat =
-                etteroppgjoerService.skalHaEtteroppgjoer(
-                    hendelse.identifikator,
-                    hendelse.gjelderPeriode.toInt(),
-                )
+        kjoering.antallRelevante =
+            hendelsesListe.hendelser.count { hendelse ->
+                val resultat =
+                    etteroppgjoerService.skalHaEtteroppgjoer(
+                        hendelse.identifikator,
+                        hendelse.gjelderPeriode.toInt(),
+                    )
 
-            if (etteroppgjoerResultat.skalHaEtteroppgjoer) {
-                val etteroppgjoer = etteroppgjoerResultat.etteroppgjoer!!
+                if (resultat.skalHaEtteroppgjoer) {
+                    val etteroppgjoer = resultat.etteroppgjoer!!
 
-                // TODO: opprett forbehandling
+                    logger.info("Sak=${etteroppgjoer.sakId} skal ha etteroppgjør for inntektsår=${hendelse.gjelderPeriode}")
+                    etteroppgjoerService.oppdaterStatus(
+                        etteroppgjoer.sakId,
+                        etteroppgjoer.inntektsaar,
+                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    )
+                }
 
-                etteroppgjoerService.oppdaterStatus(
-                    etteroppgjoer.sakId,
-                    etteroppgjoer.inntektsaar,
-                    EtteroppgjoerStatus.MOTTATT_HENDELSE,
-                )
-                antallRelevanteHendelser++
+                resultat.skalHaEtteroppgjoer
             }
 
-            // TODO legge til status evnt feil?
-            dao.lagreKjoering(kjoering)
-        }
+        dao.lagreKjoering(kjoering)
     }
 }
 

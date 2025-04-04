@@ -1,9 +1,9 @@
 package no.nav.etterlatte.beregning.regler.avkorting
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.avkorting.BeregnetEtteroppgjoerResultat
-import no.nav.etterlatte.avkorting.EtteroppgjoerRepository
-import no.nav.etterlatte.avkorting.ReferanseEtteroppgjoer
+import no.nav.etterlatte.avkorting.etteroppgjoer.BeregnetEtteroppgjoerResultat
+import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerRepository
+import no.nav.etterlatte.avkorting.etteroppgjoer.ReferanseEtteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerRettsgebyr
 import no.nav.etterlatte.beregning.regler.DatabaseExtension

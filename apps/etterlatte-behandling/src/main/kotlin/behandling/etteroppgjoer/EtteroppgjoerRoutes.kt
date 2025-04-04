@@ -52,7 +52,7 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(HttpStatusCode.NotFound)
             }
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
+                val eo = forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, brukerTokenInfo)
                 call.respond(eo)
             }
         }
@@ -84,7 +84,7 @@ fun Route.etteroppgjoerRoutes(
             kunSkrivetilgang {
                 val eo =
                     inTransaction {
-                        forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
+                        forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, brukerTokenInfo)
                     }
                 call.respond(eo)
             }
@@ -96,6 +96,7 @@ fun Route.etteroppgjoerRoutes(
             call.respond(forbehandlinger)
         }
 
+        // TODO opprett periodisk jobb
         post("/skatteoppgjoerhendelser/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
@@ -107,6 +108,7 @@ fun Route.etteroppgjoerRoutes(
             }
         }
 
+        // TODO opprett periodisk jobb
         post("/{inntektsaar}/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
@@ -118,6 +120,19 @@ fun Route.etteroppgjoerRoutes(
                     etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
                 }
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        // TODO opprett periodisk jobb
+        post("/{inntektsaar}/opprett-forbehandlinger") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            kunSystembruker {
+                val inntektsaar =
+                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                        "Inntektsaar mangler"
+                    }
+
+                forbehandlingService.startOpprettForbehandlingKjoering(inntektsaar)
             }
         }
     }

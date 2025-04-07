@@ -35,7 +35,8 @@ interface FastsettFaktiskInntektSkjema {
 
 export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: string }) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
-  const behandling = useEtteroppgjoer().behandling
+
+  const { behandling } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
 
   const {

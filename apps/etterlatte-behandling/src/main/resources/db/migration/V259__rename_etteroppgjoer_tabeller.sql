@@ -1,0 +1,3 @@
+ALTER TABLE pensjonsgivendeinntekt_fra_skatt RENAME TO etteroppgjoer_pensjonsgivendeinntekt;
+ALTER TABLE inntekt_fra_ainntekt RENAME TO etteroppgjoer_ainntekt;
+ALTER TABLE skatteoppgjoer_hendelse_kjoringer RENAME TO etteroppgjoer_hendelse_kjoering

@@ -30,7 +30,7 @@ export const lagreFaktiskInntekt = async (args: {
   forbehandlingId: string
   faktiskInntekt: FaktiskInntekt
 }): Promise<ApiResponse<BeregnetEtteroppgjoerResultatDto>> => {
-  return apiClient.post(`/etteroppgjoer/${args.forbehandlingId}/beregn_faktisk_inntekt`, {
+  return apiClient.post(`/etteroppgjoer/${args.forbehandlingId}/faktisk_inntekt`, {
     ...args.faktiskInntekt,
   })
 }

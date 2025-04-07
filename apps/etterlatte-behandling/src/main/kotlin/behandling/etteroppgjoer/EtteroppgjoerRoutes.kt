@@ -76,11 +76,11 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("beregn_faktisk_inntekt") {
+            post("faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
                 val response =
                     inTransaction {
-                        forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                        forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
                     }
                 call.respond(response)
             }

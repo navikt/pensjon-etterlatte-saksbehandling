@@ -185,7 +185,7 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    fun beregnFaktiskInntekt(
+    fun lagreOgBeregnFaktiskInntekt(
         behandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,

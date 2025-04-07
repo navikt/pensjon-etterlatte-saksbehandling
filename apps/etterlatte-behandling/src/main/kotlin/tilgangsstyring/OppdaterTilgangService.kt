@@ -6,6 +6,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -68,7 +69,7 @@ class OppdaterTilgangService(
         persongalleri: Persongalleri,
     ) {
         logger.info("Håndterer tilganger for sakid $sakId")
-        val sak = sakLesDao.hentSak(sakId) ?: throw PersonManglerSak()
+        val sak = inTransaction { sakLesDao.hentSak(sakId) ?: throw PersonManglerSak() }
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
         val identerMedGradering =

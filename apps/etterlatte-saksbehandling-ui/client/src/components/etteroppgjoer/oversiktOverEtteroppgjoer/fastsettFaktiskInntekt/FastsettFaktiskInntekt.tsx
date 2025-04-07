@@ -67,7 +67,6 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         <Heading size="large">Fastett faktisk inntekt</Heading>
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
-          {/* TODO: skal denne være dynamisk? Eller er den alltid "april - desember"? */}
         </HStack>
         <div>
           <Tag variant="neutral">

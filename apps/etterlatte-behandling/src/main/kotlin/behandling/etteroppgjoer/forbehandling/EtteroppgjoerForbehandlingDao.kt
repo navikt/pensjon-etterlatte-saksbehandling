@@ -106,7 +106,7 @@ class EtteroppgjoerForbehandlingDao(
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO pensjonsgivendeinntekt_fra_skatt(
+                    INSERT INTO etteroppgjoer_pensjonsgivendeinntekt(
                         id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt,fiske_fangst_familiebarnehage
                     ) 
                     VALUES (?, ?, ?, ?, ?, ?, ?) 
@@ -139,7 +139,7 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         SELECT *
-                        FROM pensjonsgivendeinntekt_fra_skatt
+                        FROM etteroppgjoer_pensjonsgivendeinntekt
                         WHERE forbehandling_id = ?
                         """.trimIndent(),
                     )
@@ -168,7 +168,7 @@ class EtteroppgjoerForbehandlingDao(
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO inntekt_fra_ainntekt(
+                    INSERT INTO etteroppgjoer_ainntekt(
                         id, forbehandling_id, aar, inntektsmaaneder
                     ) 
                     VALUES (?, ?, ?, ?) 
@@ -195,7 +195,7 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         SELECT *
-                        FROM inntekt_fra_ainntekt
+                        FROM etteroppgjoer_ainntekt
                         WHERE forbehandling_id = ?
                         """.trimIndent(),
                     )

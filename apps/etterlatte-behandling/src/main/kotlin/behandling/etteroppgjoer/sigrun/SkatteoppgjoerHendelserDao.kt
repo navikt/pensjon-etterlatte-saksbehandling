@@ -13,7 +13,7 @@ class SkatteoppgjoerHendelserDao(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO skatteoppgjoer_hendelse_kjoringer(
+                        INSERT INTO etteroppgjoer_hendelse_kjoering(
                             siste_sekvensnummer, antall_hendelser, antall_relevante
                         ) 
                         VALUES (?, ?, ?) 
@@ -37,7 +37,7 @@ class SkatteoppgjoerHendelserDao(
                     prepareStatement(
                         """
                         SELECT *
-                        FROM skatteoppgjoer_hendelse_kjoringer
+                        FROM etteroppgjoer_hendelse_kjoering
                         ORDER BY opprettet DESC
                         LIMIT 1
                         """.trimIndent(),

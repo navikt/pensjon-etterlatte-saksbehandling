@@ -16,12 +16,14 @@ const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   afp,
   naeringsinntekt,
   utland,
+  spesifikasjonAvInntekt,
 }: FastsettFaktiskInntektSkjema): FaktiskInntekt => {
   return {
     loennsinntekt: Number(loennsinntekt.replace(/[^0-9.]/g, '')),
     afp: Number(afp.replace(/[^0-9.]/g, '')),
     naeringsinntekt: Number(naeringsinntekt.replace(/[^0-9.]/g, '')),
     utland: Number(utland.replace(/[^0-9.]/g, '')),
+    spesifikasjonAvInntekt,
   }
 }
 

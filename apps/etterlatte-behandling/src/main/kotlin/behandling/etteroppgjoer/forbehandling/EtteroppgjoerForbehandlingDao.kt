@@ -220,6 +220,31 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
+    fun hentFaktiskInntekt(forbehandlingId: UUID): FaktiskInntekt? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM etteroppgjoer_faktisk_inntekt
+                        WHERE forbehandling_id = ?
+                        """.trimIndent(),
+                    )
+
+                statement.setObject(1, forbehandlingId)
+                statement.executeQuery().singleOrNull {
+                    FaktiskInntekt(
+                        loensinntekt = getLong("loensinntekt"),
+                        afp = getLong("afp"),
+                        naeringsinntekt = getLong("naeringsinntekt"),
+                        utland = getLong("utland"),
+                        spesifikasjonAvInntekt = getString("spesifikasjon_av_inntekt"),
+                    )
+                }
+            }
+        }
+
     fun hentAInntekt(behandlingId: UUID): AInntekt? =
         connectionAutoclosing.hentConnection {
             with(it) {

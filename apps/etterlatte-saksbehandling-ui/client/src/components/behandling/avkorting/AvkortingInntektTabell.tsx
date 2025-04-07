@@ -50,7 +50,6 @@ export const AvkortingInntektTabell = ({
             </HStack>
           </Table.HeaderCell>
           <Table.HeaderCell>Periode</Table.HeaderCell>
-          <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
           <Table.HeaderCell>Kilde</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
@@ -89,7 +88,6 @@ export const AvkortingInntektTabell = ({
                 {avkortingGrunnlag.fom && formaterDato(avkortingGrunnlag.fom)} -{' '}
                 {avkortingGrunnlag.tom && formaterDato(lastDayOfMonth(new Date(avkortingGrunnlag.tom)))}
               </Table.DataCell>
-              <Table.DataCell key="InntektSpesifikasjon">{avkortingGrunnlag.spesifikasjon}</Table.DataCell>
               <Table.DataCell key="InntektKilde">
                 {avkortingGrunnlag.kilde && (
                   <Info

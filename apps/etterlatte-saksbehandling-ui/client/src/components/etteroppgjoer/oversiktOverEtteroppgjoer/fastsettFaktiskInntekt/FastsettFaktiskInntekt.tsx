@@ -35,7 +35,13 @@ interface FastsettFaktiskInntektSkjema {
   spesifikasjonAvInntekt: string
 }
 
-export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: string }) => {
+export const FastsettFaktiskInntekt = ({
+  forbehandlingId,
+  faktiskInntekt,
+}: {
+  forbehandlingId: string
+  faktiskInntekt?: FaktiskInntekt
+}) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
 
   const { behandling } = useEtteroppgjoer()
@@ -48,13 +54,21 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
     handleSubmit,
     formState: { errors },
   } = useForm<FastsettFaktiskInntektSkjema>({
-    defaultValues: {
-      loennsinntekt: '0',
-      afp: '0',
-      naeringsinntekt: '0',
-      utland: '0',
-      spesifikasjonAvInntekt: '',
-    },
+    defaultValues: faktiskInntekt
+      ? {
+          loennsinntekt: faktiskInntekt.loennsinntekt.toString(),
+          afp: faktiskInntekt.afp.toString(),
+          naeringsinntekt: faktiskInntekt.naeringsinntekt.toString(),
+          utland: faktiskInntekt.utland.toString(),
+          spesifikasjonAvInntekt: faktiskInntekt.spesifikasjonAvInntekt,
+        }
+      : {
+          loennsinntekt: '0',
+          afp: '0',
+          naeringsinntekt: '0',
+          utland: '0',
+          spesifikasjonAvInntekt: '',
+        },
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {

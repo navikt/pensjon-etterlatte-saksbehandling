@@ -235,7 +235,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setObject(1, forbehandlingId)
                 statement.executeQuery().singleOrNull {
                     FaktiskInntekt(
-                        loensinntekt = getLong("loensinntekt"),
+                        loensinntekt = getLong("loennsinntekt"),
                         afp = getLong("afp"),
                         naeringsinntekt = getLong("naeringsinntekt"),
                         utland = getLong("utland"),

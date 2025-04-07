@@ -76,6 +76,14 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
+            get("faktisk_inntekt") {
+                val response =
+                    inTransaction {
+                        forbehandlingService.hentFaktiskInntent(etteroppgjoerId)
+                    }
+                call.respond(response)
+            }
+
             post("faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
                 val response =

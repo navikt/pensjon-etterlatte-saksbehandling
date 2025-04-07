@@ -158,7 +158,7 @@ fun Route.etteroppgjoerRoutes(
 }
 
 private fun sjekkEtteroppgjoerEnabled(featureToggleService: FeatureToggleService) {
-    if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, true)) {
+    if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
         throw IkkeTillattException("ETTEROPPGJOER_NOT_ENABLED", "Etteroppgjør er ikke skrudd på i miljøet.")
     }
 }

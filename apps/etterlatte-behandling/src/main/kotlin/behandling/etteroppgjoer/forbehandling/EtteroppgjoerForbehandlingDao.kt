@@ -220,6 +220,31 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
+    fun oppdaterFaktiskInntekt(
+        forbehandlingId: UUID,
+        faktiskInntekt: FaktiskInntekt,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE etteroppgjoer_faktisk_inntekt
+                    SET loennsinntekt = ?, afp = ?, naeringsinntekt = ?, utland = ?, spesifikasjon_av_inntekt = ?
+                    WHERE forbehandling_id = ?
+                    """.trimIndent(),
+                )
+
+            statement.setLong(1, faktiskInntekt.loennsinntekt)
+            statement.setLong(2, faktiskInntekt.afp)
+            statement.setLong(3, faktiskInntekt.naeringsinntekt)
+            statement.setLong(4, faktiskInntekt.utland)
+            statement.setString(5, faktiskInntekt.spesifikasjonAvInntekt)
+            statement.setObject(6, forbehandlingId)
+
+            statement.executeUpdate()
+        }
+    }
+
     fun hentFaktiskInntekt(forbehandlingId: UUID): FaktiskInntekt? =
         connectionAutoclosing.hentConnection {
             with(it) {

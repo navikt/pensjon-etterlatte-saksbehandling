@@ -227,8 +227,9 @@ class EtteroppgjoerForbehandlingService(
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 
-    fun hentFaktiskInntent(forbehandlingId: UUID): FaktiskInntekt =
-        dao.hentFaktiskInntekt(forbehandlingId) ?: throw FantIkkeFaktiskInntekt(forbehandlingId)
+    fun hentFaktiskInntent(forbehandlingId: UUID): FaktiskInntekt? =
+        dao.hentFaktiskInntekt(forbehandlingId)
+//            ?: throw IkkeFunnetException(code = "INGEN_FAKTISK_INNTEKT", detail = "Fant ikke faktisk inntekt for forbehandling $forbehandlingId")
 
     private fun kanOppretteEtteroppgjoerForbehandling(
         sakId: SakId,
@@ -263,11 +264,4 @@ class FantIkkeForbehandling(
 ) : IkkeFunnetException(
         code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
-    )
-
-class FantIkkeFaktiskInntekt(
-    val behandlingId: UUID,
-) : IkkeFunnetException(
-        code = "FANT_IKKE_FAKTISK_IKKE",
-        detail = "Fant ikke faktisk inntekt for forbehandling $behandlingId",
     )

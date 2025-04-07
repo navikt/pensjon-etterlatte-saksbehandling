@@ -193,4 +193,5 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val afp: Int,
     val naeringsinntekt: Int,
     val utland: Int,
+    val spesifikasjonAvInntekt: String,
 )

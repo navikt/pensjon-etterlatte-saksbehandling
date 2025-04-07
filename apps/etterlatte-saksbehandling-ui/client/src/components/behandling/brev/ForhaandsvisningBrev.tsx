@@ -8,7 +8,13 @@ import { genererPdf } from '~shared/api/brev'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
+export default function ForhaandsvisningBrev({
+  brev,
+  skalGaaViaBehandling,
+}: {
+  brev: IBrev
+  skalGaaViaBehandling?: boolean
+}) {
   const [fileURL, setFileURL] = useState<string>()
   const [pdf, genererBrevPdf] = useApiCall(genererPdf)
 
@@ -26,6 +32,7 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
         behandlingId: brev.behandlingId,
         sakId: brev.sakId,
         brevtype: brev.brevtype,
+        skalGaaViaBehandling: skalGaaViaBehandling,
       },
       (bytes) => {
         const blob = new Blob([bytes], { type: 'application/pdf' })

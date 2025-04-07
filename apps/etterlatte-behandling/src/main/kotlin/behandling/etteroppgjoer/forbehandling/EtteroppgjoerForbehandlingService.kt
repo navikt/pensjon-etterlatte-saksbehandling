@@ -207,6 +207,8 @@ class EtteroppgjoerForbehandlingService(
                 utland = request.utland,
             )
 
+        // TODO: her må vi lagre faktisk inntekt
+
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 

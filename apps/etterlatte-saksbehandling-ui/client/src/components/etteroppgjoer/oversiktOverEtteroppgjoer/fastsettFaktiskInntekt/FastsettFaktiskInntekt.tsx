@@ -56,10 +56,10 @@ export const FastsettFaktiskInntekt = ({
   } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: faktiskInntekt
       ? {
-          loennsinntekt: faktiskInntekt.loennsinntekt.toString(),
-          afp: faktiskInntekt.afp.toString(),
-          naeringsinntekt: faktiskInntekt.naeringsinntekt.toString(),
-          utland: faktiskInntekt.utland.toString(),
+          loennsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt),
+          afp: new Intl.NumberFormat('nb').format(faktiskInntekt.afp),
+          naeringsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt),
+          utland: new Intl.NumberFormat('nb').format(faktiskInntekt.utland),
           spesifikasjonAvInntekt: faktiskInntekt.spesifikasjonAvInntekt,
         }
       : {

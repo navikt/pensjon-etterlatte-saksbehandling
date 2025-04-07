@@ -1,4 +1,4 @@
-import { BodyShort, HStack, Table, Tag, Tooltip } from '@navikt/ds-react'
+import { BodyLong, BodyShort, HStack, Table, Tag, Tooltip } from '@navikt/ds-react'
 import {
   ForventetInntektHeaderHjelpeTekst,
   ForventetInntektHjelpeTekst,
@@ -139,6 +139,7 @@ const ForventetInntektDetaljer = ({
         />
       </HStack>
       <BodyShort>Fratrekk inn-år utland: {NOK(fratrekkUtland)}</BodyShort>
+      <BodyLong>Spesifikasjon: {forventetInntektGrunnlag.spesifikasjon}</BodyLong>
     </div>
   )
 }
@@ -150,6 +151,7 @@ const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrun
       <BodyShort>Næringsinntekt: {NOK(faktiskInntektGrunnlag.naeringsinntekt)}</BodyShort>
       <BodyShort>AFP: {NOK(faktiskInntektGrunnlag.afp)}</BodyShort>
       <BodyShort>Utlandsinntekt: {NOK(faktiskInntektGrunnlag.utlandsinntekt)}</BodyShort>
+      <BodyLong>Spesifikasjon: {faktiskInntektGrunnlag.spesifikasjon}</BodyLong>
     </div>
   )
 }

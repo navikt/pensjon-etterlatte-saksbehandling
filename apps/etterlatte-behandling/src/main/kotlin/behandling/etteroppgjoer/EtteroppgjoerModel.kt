@@ -191,7 +191,7 @@ object EtteroppgjoerBrevMapper {
 }
 
 data class FaktiskInntekt(
-    val loensinntekt: Long,
+    val loennsinntekt: Long,
     val afp: Long,
     val naeringsinntekt: Long,
     val utland: Long,

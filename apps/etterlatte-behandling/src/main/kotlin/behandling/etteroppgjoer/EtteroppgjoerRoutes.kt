@@ -81,7 +81,11 @@ fun Route.etteroppgjoerRoutes(
                     inTransaction {
                         forbehandlingService.hentFaktiskInntent(etteroppgjoerId)
                     }
-                call.respond(response)
+                if (response == null) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(response)
+                }
             }
 
             post("faktisk_inntekt") {

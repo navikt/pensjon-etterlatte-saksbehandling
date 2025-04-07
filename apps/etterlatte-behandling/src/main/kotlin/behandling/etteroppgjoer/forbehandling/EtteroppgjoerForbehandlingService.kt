@@ -215,7 +215,7 @@ class EtteroppgjoerForbehandlingService(
 
         dao.lagreFaktiskInntekt(
             FaktiskInntekt(
-                loensinntekt = request.loennsinntekt.toLong(),
+                loennsinntekt = request.loennsinntekt.toLong(),
                 afp = request.afp.toLong(),
                 naeringsinntekt = request.naeringsinntekt.toLong(),
                 utland = request.utland.toLong(),
@@ -227,8 +227,7 @@ class EtteroppgjoerForbehandlingService(
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 
-    fun hentFaktiskInntent(forbehandlingId: UUID): FaktiskInntekt? =
-        dao.hentFaktiskInntekt(forbehandlingId)
+    fun hentFaktiskInntent(forbehandlingId: UUID): FaktiskInntekt? = dao.hentFaktiskInntekt(forbehandlingId)
 //            ?: throw IkkeFunnetException(code = "INGEN_FAKTISK_INNTEKT", detail = "Fant ikke faktisk inntekt for forbehandling $forbehandlingId")
 
     private fun kanOppretteEtteroppgjoerForbehandling(

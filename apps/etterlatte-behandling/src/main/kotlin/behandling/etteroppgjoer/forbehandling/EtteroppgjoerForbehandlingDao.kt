@@ -206,7 +206,7 @@ class EtteroppgjoerForbehandlingDao(
 
             statement.setObject(1, UUID.randomUUID())
             statement.setObject(2, forbehandlingId)
-            statement.setLong(3, faktiskInntekt.loensinntekt)
+            statement.setLong(3, faktiskInntekt.loennsinntekt)
             statement.setLong(4, faktiskInntekt.afp)
             statement.setLong(5, faktiskInntekt.naeringsinntekt)
             statement.setLong(6, faktiskInntekt.utland)
@@ -235,7 +235,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setObject(1, forbehandlingId)
                 statement.executeQuery().singleOrNull {
                     FaktiskInntekt(
-                        loensinntekt = getLong("loennsinntekt"),
+                        loennsinntekt = getLong("loennsinntekt"),
                         afp = getLong("afp"),
                         naeringsinntekt = getLong("naeringsinntekt"),
                         utland = getLong("utland"),

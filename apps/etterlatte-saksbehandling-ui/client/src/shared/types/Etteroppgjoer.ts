@@ -32,6 +32,7 @@ export interface FaktiskInntekt {
   afp: number
   naeringsinntekt: number
   utland: number
+  spesifikasjonAvInntekt: string
 }
 
 export interface PensjonsgivendeInntektFraSkatteetaten {

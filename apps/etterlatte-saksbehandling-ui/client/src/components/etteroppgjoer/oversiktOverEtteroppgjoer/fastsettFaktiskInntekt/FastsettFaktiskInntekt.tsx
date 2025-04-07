@@ -51,6 +51,7 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
       afp: '0',
       naeringsinntekt: '0',
       utland: '0',
+      spesifikasjonAvInntekt: '',
     },
   })
 

@@ -238,7 +238,6 @@ fun etteroppgjoer(
             utlandsinntekt = 10000,
             spesifikasjon = "Spesifikasjon",
             kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
-            spesifikasjonAvInntekt = "",
             inntektInnvilgetPeriode =
                 BenyttetInntektInnvilgetPeriode(
                     verdi = 130000,

@@ -1,10 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.brev.BrevFastInnholdData
-import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -31,6 +29,7 @@ data class ForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
     val avkortingFaktiskInntekt: AvkortingDto?,
+    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto,
 )
 
 data class EtteroppgjoerForbehandling(
@@ -176,8 +175,9 @@ data class SkatteoppgjoerHendelser(
     val somAktoerid: Boolean,
 )
 
+/* TODO: bruke hvis vi tar i bruk redigerbart innhold
 data class EtteroppgjoerBrevRequestData(
-    val redigerbar: BrevRedigerbarInnholdData,
+    val redigerbar: BrevRedigerbarInnholdData?,
     val innhold: BrevFastInnholdData,
 )
 
@@ -185,7 +185,8 @@ object EtteroppgjoerBrevMapper {
     // TODO: mappe til riktige brevvarianter avhengig av data i forbehandlingen
     fun fra(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerBrevRequestData =
         EtteroppgjoerBrevRequestData(
-            redigerbar = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold(forbehandling.sak),
-            innhold = EtteroppgjoerBrevData.VarselTilbakekreving(forbehandling.sak),
+            redigerbar = null,
+            innhold = EtteroppgjoerBrevData.ForhaandsvarselBrevData(forbehandling.sak),
         )
 }
+ */

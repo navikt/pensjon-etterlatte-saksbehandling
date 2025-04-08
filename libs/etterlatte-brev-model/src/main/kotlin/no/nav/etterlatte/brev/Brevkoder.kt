@@ -247,6 +247,13 @@ enum class Brevkoder(
         "Varsel om etteroppgjør med tilbakekreving",
         Brevtype.VARSEL,
     ),
+
+    OMS_EO_FORHAANDSVARSEL(
+        EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
+        EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL,
+        "Forshåndsvarsel om etteroppgjør av omstillingsstønad",
+        Brevtype.INFORMASJON,
+    ),
     ;
 
     init {

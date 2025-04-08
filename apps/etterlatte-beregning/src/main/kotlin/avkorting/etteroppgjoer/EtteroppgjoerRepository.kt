@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -68,7 +69,7 @@ class EtteroppgjoerRepository(
         aar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
-    ): BeregnetEtteroppgjoerResultat? =
+    ): BeregnetEtteroppgjoerResultat =
         dataSource.transaction { tx ->
             queryOf(
                 """
@@ -86,9 +87,13 @@ class EtteroppgjoerRepository(
             ).let { query ->
                 val results = tx.run(query.map { row -> row.toBeregnetEtteroppgjoerResultat() }.asList)
                 when {
-                    results.isEmpty() -> null
+                    results.isEmpty() -> throw InternfeilException(
+                        "Fant ingen etteroppgjoer resultat for forbehandling med id $forbehandlingId",
+                    )
                     results.size == 1 -> results.first()
-                    else -> throw IllegalStateException("Forventet maks én rad, men fikk ${results.size}")
+                    else -> throw IllegalStateException(
+                        "Forventet maks én rad, men fikk ${results.size} for forbehandling med id $forbehandlingId",
+                    )
                 }
             }
         }

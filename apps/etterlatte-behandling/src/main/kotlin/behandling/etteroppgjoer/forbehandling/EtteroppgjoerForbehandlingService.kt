@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -64,9 +65,9 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun hentForbehandlingForFrontend(
-        brukerTokenInfo: BrukerTokenInfo,
+    fun hentDetaljertForbehandling(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ): ForbehandlingDto {
         val forbehandling = hentForbehandling(behandlingId)
 
@@ -90,6 +91,18 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
+        val beregnetEtteroppgjoerResultat =
+            runBlocking {
+                beregningKlient.hentBeregnetEtteroppgjoerResultat(
+                    EtteroppgjoerHentBeregnetResultatRequest(
+                        forbehandling.aar,
+                        forbehandling.id,
+                        sisteIverksatteBehandling.id,
+                    ),
+                    brukerTokenInfo,
+                )
+            }
+
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
         val aInntekt = dao.hentAInntekt(behandlingId)
 
@@ -108,6 +121,7 @@ class EtteroppgjoerForbehandlingService(
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
             avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
+            beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
         )
     }
 

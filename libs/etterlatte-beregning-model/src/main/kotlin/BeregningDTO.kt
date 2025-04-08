@@ -194,3 +194,9 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val naeringsinntekt: Int,
     val utland: Int,
 )
+
+data class EtteroppgjoerHentBeregnetResultatRequest(
+    val aar: Int,
+    val forbehandlingId: UUID,
+    val sisteIverksatteBehandlingId: UUID,
+)

@@ -70,7 +70,7 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            forbehandlingService.hentForbehandlingForFrontend(brukerTokenInfo, etteroppgjoerId)
+                            forbehandlingService.hentDetaljertForbehandling(etteroppgjoerId, brukerTokenInfo)
                         }
                     call.respond(etteroppgjoer)
                 }

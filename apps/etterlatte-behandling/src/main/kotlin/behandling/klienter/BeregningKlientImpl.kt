@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.deserialize
@@ -44,6 +45,11 @@ interface BeregningKlient {
         request: EtteroppgjoerBeregnetAvkortingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting
+
+    suspend fun hentBeregnetEtteroppgjoerResultat(
+        request: EtteroppgjoerHentBeregnetResultatRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto
 
     suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
@@ -157,6 +163,33 @@ class BeregningKlientImpl(
         } catch (e: Exception) {
             throw InternfeilException(
                 "Henting av avkorting for forbehandling med behandlingId=${request.forbehandling} feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun hentBeregnetEtteroppgjoerResultat(
+        request: EtteroppgjoerHentBeregnetResultatRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto {
+        try {
+            logger.info("Henter beregnet etteroppgjør resultat for forbehandling med id=${request.forbehandlingId}")
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/hent-beregnet-resultat",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = request,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Kunne ikke hente etteroppgjør resultat for forbehandling med id=${request.forbehandlingId}",
                 e,
             )
         }

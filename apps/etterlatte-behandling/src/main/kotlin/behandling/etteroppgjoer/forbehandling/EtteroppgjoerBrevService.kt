@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevMapper
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
@@ -16,11 +16,13 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import java.util.UUID
 
 class EtteroppgjoerBrevService(
@@ -33,15 +35,19 @@ class EtteroppgjoerBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-        val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
+        val forbehandling =
+            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
+                forbehandlingId,
+                HardkodaSystembruker.etteroppgjoer,
+            )
+        val brevInnholdData = utledBrevInnholdData(forbehandling.behandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.sak,
-                    brevInnholdData = brevData.innhold,
-                    brevRedigerbarInnholdData = brevData.redigerbar,
+                    sak = forbehandling.behandling.sak,
+                    brevInnholdData = brevInnholdData,
+                    brevRedigerbarInnholdData = null,
                     skalLagres = false,
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -63,16 +69,16 @@ class EtteroppgjoerBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-        val (redigerbartInnhold, brevInnhold) = EtteroppgjoerBrevMapper.fra(forbehandling)
+        val brevInnholdData = utledBrevInnholdData(forbehandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
                     sak = forbehandling.sak,
-                    brevInnholdData = brevInnhold,
+                    brevInnholdData = brevInnholdData,
                     skalLagres = false,
                     brukerTokenInfo = brukerTokenInfo,
-                    brevRedigerbarInnholdData = redigerbartInnhold,
+                    brevRedigerbarInnholdData = null,
                 )
             }
         return brevKlient.tilbakestillStrukturertBrev(
@@ -83,10 +89,72 @@ class EtteroppgjoerBrevService(
         )
     }
 
+    suspend fun ferdigstillBrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
+        val brevInnholdData = utledBrevInnholdData(forbehandling)
+
+        brevKlient.ferdigstillStrukturertBrev(behandlingId, brevInnholdData.brevKode.brevtype, brukerTokenInfo)
+    }
+
+    suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Pdf {
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
+        val brevInnholdData = utledBrevInnholdData(forbehandling)
+
+        val request =
+            retryOgPakkUt {
+                utledBrevRequest(
+                    sak = forbehandling.sak,
+                    brevInnholdData = brevInnholdData,
+                    brevRedigerbarInnholdData = null,
+                    skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
+                    brukerTokenInfo = bruker,
+                )
+            }
+
+        return brevKlient.genererPdf(brevID, behandlingId, request, bruker)
+    }
+
+    suspend fun hentEtteroppgjoersbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev? {
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
+        if (forbehandling.brevId == null) {
+            return null
+        }
+
+        return brevApiKlient.hentBrev(
+            sakId = forbehandling.sak.id,
+            brevId = forbehandling.brevId,
+            brukerTokenInfo = bruker,
+        )
+    }
+
+    private suspend fun utledBrevInnholdData(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerBrevData.Forhaandsvarsel =
+        coroutineScope {
+            EtteroppgjoerBrevData.Forhaandsvarsel(
+                bosattUtland = false,
+                norskInntekt = false,
+                etteroppgjoersAar = 0,
+                rettsgebyrBeloep = 0,
+                resultatType = "",
+                inntekt = 0,
+                faktiskInntekt = 0,
+                avviksBeloep = 0,
+            )
+        }
+
     private suspend fun utledBrevRequest(
         sak: Sak,
         brevInnholdData: BrevFastInnholdData,
-        brevRedigerbarInnholdData: BrevRedigerbarInnholdData,
+        brevRedigerbarInnholdData: BrevRedigerbarInnholdData?,
         skalLagres: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevRequest =
@@ -114,51 +182,4 @@ class EtteroppgjoerBrevService(
                 brevRedigerbarInnholdData = brevRedigerbarInnholdData,
             )
         }
-
-    suspend fun ferdigstillBrev(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
-        val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
-
-        brevKlient.ferdigstillStrukturertBrev(behandlingId, brevData.innhold.brevKode.brevtype, brukerTokenInfo)
-    }
-
-    suspend fun genererPdf(
-        brevID: BrevID,
-        behandlingId: UUID,
-        bruker: BrukerTokenInfo,
-    ): Pdf {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
-        val brevData = EtteroppgjoerBrevMapper.fra(forbehandling)
-        val request =
-            retryOgPakkUt {
-                utledBrevRequest(
-                    sak = forbehandling.sak,
-                    brevInnholdData = brevData.innhold,
-                    brevRedigerbarInnholdData = brevData.redigerbar,
-                    skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
-                    brukerTokenInfo = bruker,
-                )
-            }
-
-        return brevKlient.genererPdf(brevID, behandlingId, request, bruker)
-    }
-
-    suspend fun hentEtteroppgjoersbrev(
-        behandlingId: UUID,
-        bruker: BrukerTokenInfo,
-    ): Brev? {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
-        if (forbehandling.brevId == null) {
-            return null
-        }
-
-        return brevApiKlient.hentBrev(
-            sakId = forbehandling.sak.id,
-            brevId = forbehandling.brevId,
-            brukerTokenInfo = bruker,
-        )
-    }
 }

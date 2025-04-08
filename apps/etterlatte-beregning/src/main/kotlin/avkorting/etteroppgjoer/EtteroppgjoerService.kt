@@ -52,6 +52,12 @@ class EtteroppgjoerService(
         return etteroppgjoerResultat
     }
 
+    fun hentBeregnetEtteroppgjoerResultat(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        aar: Int,
+    ): BeregnetEtteroppgjoerResultat = etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+
     fun hentBeregnetAvkorting(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,

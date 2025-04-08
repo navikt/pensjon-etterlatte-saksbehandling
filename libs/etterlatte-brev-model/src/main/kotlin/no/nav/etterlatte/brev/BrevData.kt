@@ -6,8 +6,7 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
-import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerForhaandsvarselBrevData
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.Sak
 
@@ -59,18 +58,18 @@ data class BrevRequest(
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
-    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VarselTilbakekreving::class, name = "EO_VARSEL_TILBAKEKREVING"),
+    JsonSubTypes.Type(value = EtteroppgjoerForhaandsvarselBrevData::class, name = "OMS_EO_FORHAANDSVARSEL"),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
     abstract val type: String
 }
 
+/* TODO: når vi skal benytte redigerbart innhold
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold::class, name = "EO_VARSEL_TILBAKEKREVING_REDIGERBAR"),
-)
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold::class, name = "EO_FORHAANDSVARSEL_REDIGERBAR"),
+)*/
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder
     abstract val type: String

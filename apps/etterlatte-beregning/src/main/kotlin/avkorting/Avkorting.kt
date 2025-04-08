@@ -678,6 +678,7 @@ data class FaktiskInntekt(
     val naeringsinntekt: Int,
     val afp: Int,
     val utlandsinntekt: Int,
+    val spesifikasjonAvInntekt: String,
     override val kilde: Grunnlagsopplysning.Saksbehandler,
     override val inntektInnvilgetPeriode: BenyttetInntektInnvilgetPeriode,
 ) : AvkortingGrunnlag()

@@ -37,6 +37,11 @@ class AvkortingRepository(
             alleAarsoppgjoer.isNotEmpty()
         }
 
+    fun hentAvkortingFaktiskInntekt(aarsoppgjoerId: UUID): FaktiskInntekt? =
+        dataSource.transaction { tx ->
+            selectFaktiskInntekt(aarsoppgjoerId = aarsoppgjoerId, tx = tx)
+        }
+
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
@@ -657,6 +662,7 @@ class AvkortingRepository(
                 objectMapper.readValue(it)
             },
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+        spesifikasjonAvInntekt = string("spesifikasjon_av_inntekt"),
     )
 
     private fun Row.toYtelseFoerAvkorting() =

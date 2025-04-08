@@ -8,6 +8,7 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.Etteroppgjoer
+import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -104,6 +106,15 @@ class EtteroppgjoerService(
             )
 
         avkortingRepository.lagreAvkorting(forbehandlingId, sakId, avkorting) // TODO lagre med flagg forbehandling?
+    }
+
+    fun hentAvkortingFaktiskInntekt(request: EtteroppgjoerFaktiskInntektRequest): FaktiskInntekt? {
+        val tidligereAarsoppgjoer =
+            avkortingRepository.hentAvkorting(request.sisteIverksatteBehandlingId)?.let {
+                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
+            } ?: throw InternfeilException("Mangler avkorting")
+
+        return avkortingRepository.hentAvkortingFaktiskInntekt(aarsoppgjoerId = tidligereAarsoppgjoer.id)
     }
 
     private fun beregnEtteroppgjoerResultat(

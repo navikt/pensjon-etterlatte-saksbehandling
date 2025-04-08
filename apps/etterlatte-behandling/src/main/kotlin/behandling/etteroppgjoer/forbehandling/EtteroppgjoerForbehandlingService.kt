@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -212,7 +213,7 @@ class EtteroppgjoerForbehandlingService(
                 utland = request.utland,
                 spesifikasjonAvInntekt = request.spesifikasjonAvInntekt,
             )
-
+        // TODO denne kan slettes når jeg er ferdig med refactor
         val faktiskInntekt =
             FaktiskInntekt(
                 loennsinntekt = request.loennsinntekt.toLong(),
@@ -221,14 +222,15 @@ class EtteroppgjoerForbehandlingService(
                 utland = request.utland.toLong(),
                 spesifikasjonAvInntekt = request.spesifikasjonAvInntekt,
             )
-
+        // TODO denne kan slettes når jeg er ferdig med refactor
         val eksisterendeFaktiskInntekt = dao.hentFaktiskInntekt(forbehandlingId = forbehandling.id)
-
+// TODO denne kan slettes når jeg er ferdig med refactor
         if (eksisterendeFaktiskInntekt == null) {
             dao.lagreFaktiskInntekt(
                 faktiskInntekt = faktiskInntekt,
                 forbehandlingId = forbehandling.id,
             )
+            // TODO denne kan slettes når jeg er ferdig med refactor
         } else {
             dao.oppdaterFaktiskInntekt(
                 forbehandlingId = forbehandling.id,
@@ -239,7 +241,13 @@ class EtteroppgjoerForbehandlingService(
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 
-    fun hentFaktiskInntent(forbehandlingId: UUID): FaktiskInntekt? = dao.hentFaktiskInntekt(forbehandlingId)
+    fun hentFaktiskInntent(
+        request: EtteroppgjoerFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FaktiskInntekt? =
+        runBlocking {
+            beregningKlient.hentAvkortingFaktiskInntekt(request, brukerTokenInfo)
+        }
 
     private fun kanOppretteEtteroppgjoerForbehandling(
         sakId: SakId,

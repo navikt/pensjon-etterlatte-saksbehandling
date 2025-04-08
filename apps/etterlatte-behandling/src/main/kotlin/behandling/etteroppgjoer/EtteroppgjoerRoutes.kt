@@ -16,6 +16,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
@@ -76,19 +77,21 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            get("faktisk_inntekt") {
+            post("beregn_faktisk_inntekt") {
+                val request = call.receive<EtteroppgjoerFaktiskInntektRequest>()
+
                 val response =
                     inTransaction {
-                        forbehandlingService.hentFaktiskInntent(etteroppgjoerId)
+                        forbehandlingService.hentFaktiskInntent(request, brukerTokenInfo)
                     }
                 if (response == null) {
-                    call.respond(HttpStatusCode.OK)
+                    call.respond(HttpStatusCode.NoContent)
                 } else {
                     call.respond(response)
                 }
             }
 
-            post("faktisk_inntekt") {
+            post("beregn_faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
                 val response =
                     inTransaction {

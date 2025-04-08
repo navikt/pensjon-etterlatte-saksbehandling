@@ -7,6 +7,8 @@ import { SakType } from '~shared/types/sak'
 import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 import { BeregneBP } from '~components/behandling/beregne/BeregneBP'
 import { BeregneOMS } from '~components/behandling/beregne/BeregneOMS'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { BeregneEtteroppgjoerOMS } from '~components/behandling/beregne/BeregneEtteroppgjoerOMS'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -29,7 +31,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           case SakType.BARNEPENSJON:
             return <BeregneBP behandling={behandling} />
           case SakType.OMSTILLINGSSTOENAD:
-            return <BeregneOMS />
+            if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) return <BeregneEtteroppgjoerOMS />
+            else return <BeregneOMS />
         }
       })()}
     </>

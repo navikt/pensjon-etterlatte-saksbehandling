@@ -51,7 +51,7 @@ data class Avkorting(
                         }
 
                     is Etteroppgjoer -> {
-                        TODO()
+                        listOf(aarsoppgjoer.inntekt.toDto())
                     }
                 }
             }
@@ -243,6 +243,7 @@ data class Avkorting(
         naeringsinntekt: Int,
         utland: Int,
         sanksjoner: List<Sanksjon>,
+        spesifikasjon: String,
     ): Avkorting {
         val tidligereAarsoppgjoer = aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
 
@@ -260,7 +261,7 @@ data class Avkorting(
                 utlandsinntekt = utland,
                 afp = afp,
                 kilde = kilde,
-                spesifikasjonAvInntekt = "",
+                spesifikasjon = spesifikasjon,
                 inntektInnvilgetPeriode =
                     beregnInntektInnvilgetPeriodeFaktiskInntekt(
                         loennsinntekt = loennsinntekt,
@@ -620,6 +621,7 @@ sealed class AvkortingGrunnlag {
     abstract val periode: Periode
     abstract val innvilgaMaaneder: Int
     abstract val inntektInnvilgetPeriode: InntektInnvilgetPeriode
+    abstract val spesifikasjon: String
     abstract val kilde: Grunnlagsopplysning.Saksbehandler
 }
 
@@ -652,7 +654,7 @@ data class ForventetInntekt(
     val inntektUtlandTom: Int,
     val fratrekkInnAarUtland: Int,
     override val innvilgaMaaneder: Int,
-    val spesifikasjon: String,
+    override val spesifikasjon: String,
     override val kilde: Grunnlagsopplysning.Saksbehandler,
     val overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
@@ -679,7 +681,7 @@ data class FaktiskInntekt(
     val naeringsinntekt: Int,
     val afp: Int,
     val utlandsinntekt: Int,
-    val spesifikasjonAvInntekt: String,
+    override val spesifikasjon: String,
     override val kilde: Grunnlagsopplysning.Saksbehandler,
     override val inntektInnvilgetPeriode: BenyttetInntektInnvilgetPeriode,
 ) : AvkortingGrunnlag()

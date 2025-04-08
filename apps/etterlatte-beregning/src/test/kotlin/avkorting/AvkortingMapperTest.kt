@@ -9,6 +9,7 @@ import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
@@ -115,14 +116,15 @@ internal class AvkortingMapperTest {
             )
 
         AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).avkortingGrunnlag.first().asClue {
-            it.fom shouldBe inntektFraJan25.periode.fom
-            it.tom shouldBe YearMonth.of(2025, Month.DECEMBER)
-            it.inntektTom shouldBe inntektFraJan25.inntektTom
-            it.fratrekkInnAar shouldBe inntektFraJan25.fratrekkInnAar
-            it.inntektUtlandTom shouldBe inntektFraJan25.inntektUtlandTom
-            it.fratrekkInnAarUtland shouldBe inntektFraJan25.fratrekkInnAarUtland
-            it.spesifikasjon shouldBe inntektFraJan25.spesifikasjon
-            it.innvilgaMaaneder shouldBe 12
+            val avkortingGrunnlag = it as ForventetInntektDto
+            avkortingGrunnlag.fom shouldBe inntektFraJan25.periode.fom
+            avkortingGrunnlag.tom shouldBe YearMonth.of(2025, Month.DECEMBER)
+            avkortingGrunnlag.inntektTom shouldBe inntektFraJan25.inntektTom
+            avkortingGrunnlag.fratrekkInnAar shouldBe inntektFraJan25.fratrekkInnAar
+            avkortingGrunnlag.inntektUtlandTom shouldBe inntektFraJan25.inntektUtlandTom
+            avkortingGrunnlag.fratrekkInnAarUtland shouldBe inntektFraJan25.fratrekkInnAarUtland
+            avkortingGrunnlag.spesifikasjon shouldBe inntektFraJan25.spesifikasjon
+            avkortingGrunnlag.innvilgaMaaneder shouldBe 12
         }
     }
 
@@ -135,15 +137,20 @@ internal class AvkortingMapperTest {
             )
         AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).asClue {
             it.avkortingGrunnlag.size shouldBe 3
-            it.avkortingGrunnlag[0].fom shouldBe inntektFraJan25.periode.fom
-            it.avkortingGrunnlag[0].tom shouldBe YearMonth.of(2025, 12)
-            it.avkortingGrunnlag[0].inntektTom shouldBe inntektFraJan25.inntektTom
-            it.avkortingGrunnlag[1].fom shouldBe inntektFraAug24.periode.fom
-            it.avkortingGrunnlag[1].tom shouldBe YearMonth.of(2024, 12)
-            it.avkortingGrunnlag[1].inntektTom shouldBe inntektFraAug24.inntektTom
-            it.avkortingGrunnlag[2].fom shouldBe inntektFraMars24.periode.fom
-            it.avkortingGrunnlag[2].tom shouldBe inntektFraMars24.periode.tom
-            it.avkortingGrunnlag[2].inntektTom shouldBe inntektFraMars24.inntektTom
+            val avkortingGrunnlag0 = it.avkortingGrunnlag[0] as ForventetInntektDto
+            avkortingGrunnlag0.fom shouldBe inntektFraJan25.periode.fom
+            avkortingGrunnlag0.tom shouldBe YearMonth.of(2025, 12)
+            avkortingGrunnlag0.inntektTom shouldBe inntektFraJan25.inntektTom
+
+            val avkortingGrunnlag1 = it.avkortingGrunnlag[1] as ForventetInntektDto
+            avkortingGrunnlag1.fom shouldBe inntektFraAug24.periode.fom
+            avkortingGrunnlag1.tom shouldBe YearMonth.of(2024, 12)
+            avkortingGrunnlag1.inntektTom shouldBe inntektFraAug24.inntektTom
+
+            val avkortingGrunnlag2 = it.avkortingGrunnlag[2] as ForventetInntektDto
+            avkortingGrunnlag2.fom shouldBe inntektFraMars24.periode.fom
+            avkortingGrunnlag2.tom shouldBe inntektFraMars24.periode.tom
+            avkortingGrunnlag2.inntektTom shouldBe inntektFraMars24.inntektTom
         }
     }
 

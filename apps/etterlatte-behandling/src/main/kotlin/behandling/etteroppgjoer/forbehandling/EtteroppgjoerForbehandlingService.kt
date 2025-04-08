@@ -211,7 +211,7 @@ class EtteroppgjoerForbehandlingService(
                 naeringsinntekt = request.naeringsinntekt,
                 afp = request.afp,
                 utland = request.utland,
-                spesifikasjonAvInntekt = request.spesifikasjonAvInntekt,
+                spesifikasjon = request.spesifikasjon,
             )
         // TODO denne kan slettes når jeg er ferdig med refactor
         val faktiskInntekt =
@@ -220,7 +220,7 @@ class EtteroppgjoerForbehandlingService(
                 afp = request.afp.toLong(),
                 naeringsinntekt = request.naeringsinntekt.toLong(),
                 utland = request.utland.toLong(),
-                spesifikasjonAvInntekt = request.spesifikasjonAvInntekt,
+                spesifikasjon = request.spesifikasjon,
             )
         // TODO denne kan slettes når jeg er ferdig med refactor
         val eksisterendeFaktiskInntekt = dao.hentFaktiskInntekt(forbehandlingId = forbehandling.id)
@@ -292,7 +292,7 @@ data class BeregnFaktiskInntektRequest(
     val afp: Int,
     val naeringsinntekt: Int,
     val utland: Int,
-    val spesifikasjonAvInntekt: String,
+    val spesifikasjon: String,
 )
 
 class FantIkkeForbehandling(

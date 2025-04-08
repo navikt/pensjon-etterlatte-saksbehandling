@@ -16,14 +16,14 @@ const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   afp,
   naeringsinntekt,
   utland,
-  spesifikasjonAvInntekt,
+  spesifikasjon,
 }: FastsettFaktiskInntektSkjema): FaktiskInntekt => {
   return {
     loennsinntekt: Number(loennsinntekt.replace(/[^0-9.]/g, '')),
     afp: Number(afp.replace(/[^0-9.]/g, '')),
     naeringsinntekt: Number(naeringsinntekt.replace(/[^0-9.]/g, '')),
     utland: Number(utland.replace(/[^0-9.]/g, '')),
-    spesifikasjonAvInntekt,
+    spesifikasjon,
   }
 }
 
@@ -32,7 +32,7 @@ interface FastsettFaktiskInntektSkjema {
   afp: string
   naeringsinntekt: string
   utland: string
-  spesifikasjonAvInntekt: string
+  spesifikasjon: string
 }
 
 export const FastsettFaktiskInntekt = ({
@@ -60,14 +60,14 @@ export const FastsettFaktiskInntekt = ({
           afp: new Intl.NumberFormat('nb').format(faktiskInntekt.afp),
           naeringsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt),
           utland: new Intl.NumberFormat('nb').format(faktiskInntekt.utland),
-          spesifikasjonAvInntekt: faktiskInntekt.spesifikasjonAvInntekt,
+          spesifikasjon: faktiskInntekt.spesifikasjon,
         }
       : {
           loennsinntekt: '0',
           afp: '0',
           naeringsinntekt: '0',
           utland: '0',
-          spesifikasjonAvInntekt: '',
+          spesifikasjon: '',
         },
   })
 
@@ -107,12 +107,12 @@ export const FastsettFaktiskInntekt = ({
         <SumAvFaktiskInntekt faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch())} />
         <Box maxWidth="fit-content">
           <Textarea
-            {...register('spesifikasjonAvInntekt', {
+            {...register('spesifikasjon', {
               required: { value: true, message: 'Du må spesifisere inntekten' },
             })}
             label="Spesifikasjon av inntekt"
             description="Beskriv inntekt lagt til grunn og eventuelle beløp som er trukket fra."
-            error={errors.spesifikasjonAvInntekt?.message}
+            error={errors.spesifikasjon?.message}
           />
         </Box>
 

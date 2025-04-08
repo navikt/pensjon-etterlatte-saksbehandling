@@ -195,5 +195,5 @@ data class FaktiskInntekt(
     val afp: Long,
     val naeringsinntekt: Long,
     val utland: Long,
-    val spesifikasjonAvInntekt: String,
+    val spesifikasjon: String,
 )

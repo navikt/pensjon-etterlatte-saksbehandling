@@ -210,7 +210,7 @@ class EtteroppgjoerForbehandlingDao(
             statement.setLong(4, faktiskInntekt.afp)
             statement.setLong(5, faktiskInntekt.naeringsinntekt)
             statement.setLong(6, faktiskInntekt.utland)
-            statement.setString(7, faktiskInntekt.spesifikasjonAvInntekt)
+            statement.setString(7, faktiskInntekt.spesifikasjon)
 
             statement.executeUpdate().also {
                 krev(it == 1) {
@@ -238,7 +238,7 @@ class EtteroppgjoerForbehandlingDao(
             statement.setLong(2, faktiskInntekt.afp)
             statement.setLong(3, faktiskInntekt.naeringsinntekt)
             statement.setLong(4, faktiskInntekt.utland)
-            statement.setString(5, faktiskInntekt.spesifikasjonAvInntekt)
+            statement.setString(5, faktiskInntekt.spesifikasjon)
             statement.setObject(6, forbehandlingId)
 
             statement.executeUpdate()
@@ -264,7 +264,7 @@ class EtteroppgjoerForbehandlingDao(
                         afp = getLong("afp"),
                         naeringsinntekt = getLong("naeringsinntekt"),
                         utland = getLong("utland"),
-                        spesifikasjonAvInntekt = getString("spesifikasjon_av_inntekt"),
+                        spesifikasjon = getString("spesifikasjon_av_inntekt"),
                     )
                 }
             }

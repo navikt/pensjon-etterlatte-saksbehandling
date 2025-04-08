@@ -786,6 +786,7 @@ internal class ApplicationContext(
             vilkaarsvurderingService,
             trygdetidKlient,
             beregningsKlient,
+            vedtakKlient,
         )
 
     val migreringService =

@@ -67,7 +67,25 @@ class BeregningOgAvkortingBrevService(
                         erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,
                     )
                 } else {
-                    TODO("FaktiskInntekt er ikke støttet enda")
+                    // TODO FaktiskInntekt er ikke støttet enda - hardkoder her for å kunne fullføre flyt med brev
+                    BeregningOgAvkortingPeriodeDto(
+                        periode = Periode(avkortetYtelse.fom, avkortetYtelse.tom),
+                        ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
+                        restanse = avkortetYtelse.restanse, // TODO
+                        avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
+                        ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
+                        trygdetid = beregningIPeriode.trygdetid,
+                        oppgittInntekt = grunnlag.inntektInnvilgetPeriode!!, // TODO
+                        fratrekkInnAar = 0, // TODO
+                        innvilgaMaaneder = grunnlag.innvilgaMaaneder,
+                        grunnbelop = beregningIPeriode.grunnbelop,
+                        grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
+                        beregningsMetode = beregningIPeriode.beregningsMetode,
+                        beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
+                        sanksjon = avkortetYtelse.sanksjon,
+                        institusjonsopphold = beregningIPeriode.institusjonsopphold,
+                        erOverstyrtInnvilgaMaaneder = false, // TODO
+                    )
                 }
             }
 

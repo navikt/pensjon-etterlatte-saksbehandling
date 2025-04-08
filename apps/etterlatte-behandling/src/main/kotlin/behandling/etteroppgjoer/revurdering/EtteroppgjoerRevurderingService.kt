@@ -1,8 +1,10 @@
-package no.nav.etterlatte.behandling.etteroppgjoer
+package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -22,7 +24,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.util.UUID
 
-class OpprettEtteroppgjoerRevurdering(
+class EtteroppgjoerRevurderingService(
     private val behandlingService: BehandlingService,
     private val etteroppgjoerService: EtteroppgjoerService,
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
@@ -44,8 +46,8 @@ class OpprettEtteroppgjoerRevurdering(
 
                 // TODO her bør det sjekkes for om det allerede er laget en behandling med matchende relatertBehandlingId
 
-                // TODO ønskelig?
-                // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+                // TODO hva blir riktig her? vi ønsker ikke mer enn en oppgave, men kan det være oppgaver åpne på forbehandling?
+                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
 
                 val iverksatteVedtak =
                     runBlocking {
@@ -75,7 +77,7 @@ class OpprettEtteroppgjoerRevurdering(
 
                 val persongalleri =
                     grunnlagService.hentPersongalleri(sakId)
-                        ?: throw InternfeilException("Fant ikke iverksatt persongalleri")
+                        ?: throw InternfeilException("Fant ikke persongalleri for sak $sakId")
 
                 val virkningstidspunkt =
                     Virkningstidspunkt(
@@ -89,15 +91,15 @@ class OpprettEtteroppgjoerRevurdering(
                         .opprettRevurdering(
                             sakId = sakId,
                             forrigeBehandling = sisteIverksatte,
+                            relatertBehandlingId = forbehandling.id.toString(),
                             persongalleri = persongalleri,
-                            prosessType = Prosesstype.MANUELL, // TODO parameter når automatisk implementeres
+                            prosessType = Prosesstype.MANUELL,
                             kilde = Vedtaksloesning.GJENNY,
                             revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                             virkningstidspunkt = virkningstidspunkt,
-                            begrunnelse = "TODO", // TODO
                             saksbehandlerIdent = brukerTokenInfo.ident(),
+                            begrunnelse = null,
                             mottattDato = null,
-                            relatertBehandlingId = forbehandling.id.toString(),
                             frist = null,
                             paaGrunnAvOppgave = null,
                         ).oppdater()

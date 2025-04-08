@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerForhaandsvarselBrevData
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.Sak
 
@@ -58,7 +58,7 @@ data class BrevRequest(
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = EtteroppgjoerForhaandsvarselBrevData::class, name = "OMS_EO_FORHAANDSVARSEL"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder

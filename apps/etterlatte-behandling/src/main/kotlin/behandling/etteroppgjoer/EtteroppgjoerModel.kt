@@ -25,7 +25,7 @@ enum class EtteroppgjoerStatus {
 }
 
 // TODO falte ut behandling..
-data class ForbehandlingDto(
+data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
     val avkortingFaktiskInntekt: AvkortingDto?,

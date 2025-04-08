@@ -3,11 +3,11 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
-import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -68,7 +68,7 @@ class EtteroppgjoerForbehandlingService(
     fun hentDetaljertForbehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): ForbehandlingDto {
+    ): DetaljertForbehandlingDto {
         val forbehandling = hentForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
@@ -112,7 +112,7 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        return ForbehandlingDto(
+        return DetaljertForbehandlingDto(
             behandling = forbehandling,
             opplysninger =
                 EtteroppgjoerOpplysninger(

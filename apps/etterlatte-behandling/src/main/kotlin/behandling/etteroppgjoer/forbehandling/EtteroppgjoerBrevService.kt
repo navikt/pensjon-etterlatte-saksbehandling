@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
@@ -32,20 +32,21 @@ class EtteroppgjoerBrevService(
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
 ) {
     suspend fun opprettEtteroppgjoerBrev(
-        forbehandlingId: UUID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val forbehandling =
+        val detaljertForbehandling =
             etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
-                forbehandlingId,
+                behandlingId,
                 HardkodaSystembruker.etteroppgjoer,
             )
-        val brevInnholdData = utledBrevInnholdData(forbehandling.behandling)
+
+        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
+                    sak = detaljertForbehandling.behandling.sak,
                     brevInnholdData = brevInnholdData,
                     brevRedigerbarInnholdData = null,
                     skalLagres = false,
@@ -55,26 +56,31 @@ class EtteroppgjoerBrevService(
 
         return brevKlient
             .opprettStrukturertBrev(
-                forbehandlingId,
+                behandlingId,
                 brevRequest,
                 brukerTokenInfo,
             ).also {
-                etteroppgjoerForbehandlingService.lagreBrevreferanse(forbehandlingId, it)
+                etteroppgjoerForbehandlingService.lagreBrevreferanse(behandlingId, it)
             }
     }
 
     suspend fun tilbakestillEtteroppgjoerBrev(
         brevId: BrevID,
-        forbehandlingId: UUID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-        val brevInnholdData = utledBrevInnholdData(forbehandling)
+        val detaljertForbehandling =
+            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
+                behandlingId,
+                HardkodaSystembruker.etteroppgjoer,
+            )
+
+        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.sak,
+                    sak = detaljertForbehandling.behandling.sak,
                     brevInnholdData = brevInnholdData,
                     skalLagres = false,
                     brukerTokenInfo = brukerTokenInfo,
@@ -83,7 +89,7 @@ class EtteroppgjoerBrevService(
             }
         return brevKlient.tilbakestillStrukturertBrev(
             brevID = brevId,
-            behandlingId = forbehandlingId,
+            behandlingId = behandlingId,
             brevRequest = brevRequest,
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -93,8 +99,13 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
-        val brevInnholdData = utledBrevInnholdData(forbehandling)
+        val detaljertForbehandling =
+            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
+                behandlingId,
+                HardkodaSystembruker.etteroppgjoer,
+            )
+
+        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
 
         brevKlient.ferdigstillStrukturertBrev(behandlingId, brevInnholdData.brevKode.brevtype, brukerTokenInfo)
     }
@@ -104,13 +115,18 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): Pdf {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
-        val brevInnholdData = utledBrevInnholdData(forbehandling)
+        val detaljertForbehandling =
+            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
+                behandlingId,
+                HardkodaSystembruker.etteroppgjoer,
+            )
+
+        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
 
         val request =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.sak,
+                    sak = detaljertForbehandling.behandling.sak,
                     brevInnholdData = brevInnholdData,
                     brevRedigerbarInnholdData = null,
                     skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
@@ -137,17 +153,19 @@ class EtteroppgjoerBrevService(
         )
     }
 
-    private suspend fun utledBrevInnholdData(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerBrevData.Forhaandsvarsel =
+    private suspend fun utledBrevInnholdData(data: DetaljertForbehandlingDto): EtteroppgjoerBrevData.Forhaandsvarsel =
         coroutineScope {
             EtteroppgjoerBrevData.Forhaandsvarsel(
-                bosattUtland = false,
-                norskInntekt = false,
-                etteroppgjoersAar = 0,
-                rettsgebyrBeloep = 0,
-                resultatType = "",
-                inntekt = 0,
-                faktiskInntekt = 0,
-                avviksBeloep = 0,
+                bosattUtland = false, // TODO
+                norskInntekt = false, // TODO
+                etteroppgjoersAar = data.behandling.aar,
+                rettsgebyrBeloep =
+                    data.beregnetEtteroppgjoerResultat.grense.rettsgebyr
+                        .toInt(),
+                resultatType = data.beregnetEtteroppgjoerResultat.resultatType.name,
+                inntekt = data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt(),
+                faktiskInntekt = data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt(),
+                avviksBeloep = data.beregnetEtteroppgjoerResultat.differanse.toInt(),
             )
         }
 

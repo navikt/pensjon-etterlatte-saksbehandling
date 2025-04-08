@@ -77,7 +77,7 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("beregn_faktisk_inntekt") {
+            post("hent_faktisk_inntekt") {
                 val request = call.receive<EtteroppgjoerFaktiskInntektRequest>()
 
                 val response =

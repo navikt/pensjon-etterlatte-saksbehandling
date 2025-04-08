@@ -56,6 +56,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -135,6 +136,13 @@ class BeregningKlientTest :
             ),
             null,
         )
+
+    override suspend fun hentBeregnetEtteroppgjoerResultat(
+        request: EtteroppgjoerHentBeregnetResultatRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,

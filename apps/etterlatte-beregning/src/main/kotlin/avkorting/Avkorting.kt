@@ -260,6 +260,7 @@ data class Avkorting(
                 utlandsinntekt = utland,
                 afp = afp,
                 kilde = kilde,
+                spesifikasjonAvInntekt = "",
                 inntektInnvilgetPeriode =
                     beregnInntektInnvilgetPeriodeFaktiskInntekt(
                         loennsinntekt = loennsinntekt,

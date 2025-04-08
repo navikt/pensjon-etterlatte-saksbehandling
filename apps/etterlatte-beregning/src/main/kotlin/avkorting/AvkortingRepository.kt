@@ -662,7 +662,7 @@ class AvkortingRepository(
                 objectMapper.readValue(it)
             },
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
-        spesifikasjonAvInntekt = string("spesifikasjon_av_inntekt"),
+        spesifikasjonAvInntekt = string("spesifikasjon"),
     )
 
     private fun Row.toYtelseFoerAvkorting() =

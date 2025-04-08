@@ -19,8 +19,6 @@ export const OversiktOverEtteroppgjoer = () => {
   useEffect(() => {
     hentFaktiskInntektFetch({
       forbehandlingId: etteroppgjoer.behandling.id,
-      sisteIverksatteBehandlingId: etteroppgjoer.behandling.id,
-      aar: etteroppgjoer.behandling.aar,
     })
   }, [])
 

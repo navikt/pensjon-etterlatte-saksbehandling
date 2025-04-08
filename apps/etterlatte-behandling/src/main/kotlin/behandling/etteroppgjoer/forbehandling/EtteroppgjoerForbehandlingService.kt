@@ -242,12 +242,26 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun hentFaktiskInntent(
-        request: EtteroppgjoerFaktiskInntektRequest,
+        request: EtteroppgjoerHentFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ): FaktiskInntekt? =
-        runBlocking {
-            beregningKlient.hentAvkortingFaktiskInntekt(request, brukerTokenInfo)
+    ): FaktiskInntekt? {
+        val forbehandling = dao.hentForbehandling(request.forbehandlingId) ?: throw FantIkkeForbehandling(request.forbehandlingId)
+
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatte")
+
+        return runBlocking {
+            beregningKlient.hentAvkortingFaktiskInntekt(
+                EtteroppgjoerFaktiskInntektRequest(
+                    forbehandlingId = request.forbehandlingId,
+                    sisteIverksatteBehandlingId = sisteIverksatteBehandling.id,
+                    aar = forbehandling.aar,
+                ),
+                brukerTokenInfo,
+            )
         }
+    }
 
     private fun kanOppretteEtteroppgjoerForbehandling(
         sakId: SakId,
@@ -267,6 +281,10 @@ class EtteroppgjoerForbehandlingService(
 data class EtteroppgjoerForbehandlingOgOppgave(
     val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
+)
+
+data class EtteroppgjoerHentFaktiskInntektRequest(
+    val forbehandlingId: UUID,
 )
 
 data class BeregnFaktiskInntektRequest(

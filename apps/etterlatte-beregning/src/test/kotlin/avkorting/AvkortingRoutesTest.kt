@@ -23,9 +23,9 @@ import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -91,7 +91,7 @@ class AvkortingRoutesTest {
         val avkorting =
             AvkortingFrontend(
                 redigerbarForventetInntekt =
-                    AvkortingGrunnlagDto(
+                    ForventetInntektDto(
                         id = avkortingsgrunnlagId,
                         fom = dato,
                         tom = dato,
@@ -101,6 +101,7 @@ class AvkortingRoutesTest {
                         inntektUtlandTom = 0,
                         fratrekkInnAarUtland = 0,
                         innvilgaMaaneder = 12,
+                        inntektInnvilgetPeriode = 90000,
                         kilde =
                             AvkortingGrunnlagKildeDto(
                                 tidspunkt = tidspunkt.toString(),
@@ -110,7 +111,7 @@ class AvkortingRoutesTest {
                 redigerbarForventetInntektNesteAar = null,
                 avkortingGrunnlag =
                     listOf(
-                        AvkortingGrunnlagDto(
+                        ForventetInntektDto(
                             id = avkortingsgrunnlagId,
                             fom = dato,
                             tom = dato,
@@ -120,6 +121,7 @@ class AvkortingRoutesTest {
                             inntektUtlandTom = 0,
                             fratrekkInnAarUtland = 0,
                             innvilgaMaaneder = 12,
+                            inntektInnvilgetPeriode = 90000,
                             kilde =
                                 AvkortingGrunnlagKildeDto(
                                     tidspunkt = tidspunkt.toString(),

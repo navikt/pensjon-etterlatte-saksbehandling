@@ -12,8 +12,10 @@ export interface IAvkortingSkalHaInntektNesteAar {
   skalHaInntektNesteAar: boolean
 }
 
-// TODO generisk for å støtte både forventet og faktisk
-export interface IAvkortingGrunnlag {
+export type IAvkortingGrunnlag = ForventetInntektGrunnlag | FaktiskInntektGrunnlag
+
+export interface ForventetInntektGrunnlag {
+  type: 'FORVENTET_INNTEKT'
   id: string
   fom: string
   tom?: string
@@ -22,12 +24,38 @@ export interface IAvkortingGrunnlag {
   innvilgaMaaneder: number
   inntektUtlandTom: number
   fratrekkInnAarUtland: number
+  inntektInnvilgetPeriode: number
   spesifikasjon: string
   overstyrtInnvilgaMaaneder?: IOverstyrtInnvilgaMaaneder
   kilde: {
     tidspunkt: string
     ident: string
   }
+}
+
+export interface FaktiskInntektGrunnlag {
+  type: 'FAKTISK_INNTEKT'
+  id: string
+  fom: string
+  tom?: string
+  loennsinntekt: number
+  naeringsinntekt: number
+  afp: number
+  utlandsinntekt: number
+  inntektInnvilgetPeriode: number
+  fratrekkInnAarUtland: number
+  innvilgaMaaneder: number
+  spesifikasjon: string
+  kilde: {
+    tidspunkt: string
+    ident: string
+  }
+}
+
+export function isForventetInntekt(
+  avkortingGrunnlag: IAvkortingGrunnlag
+): avkortingGrunnlag is ForventetInntektGrunnlag {
+  return avkortingGrunnlag.type === 'FORVENTET_INNTEKT'
 }
 
 export interface IAvkortingGrunnlagLagre {

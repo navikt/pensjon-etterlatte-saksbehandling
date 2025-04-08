@@ -6,6 +6,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { AvkortingInntektTabell } from '~components/behandling/avkorting/AvkortingInntektTabell'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -20,7 +21,7 @@ export const AvkortingInntekt = ({
   redigerbar: boolean
   resetInntektsavkortingValidering: () => void
 }) => {
-  const [visHistorikk, setVisHistorikk] = useState(false)
+  const [visHistorikk, setVisHistorikk] = useState(behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER)
   const erFoerstegangsbehandling = behandling.revurderingsaarsak == null
 
   // TODO sjekke begge/alle?

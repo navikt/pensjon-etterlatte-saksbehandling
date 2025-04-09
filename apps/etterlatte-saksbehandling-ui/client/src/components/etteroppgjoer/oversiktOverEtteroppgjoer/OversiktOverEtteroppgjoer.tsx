@@ -17,9 +17,7 @@ export const OversiktOverEtteroppgjoer = () => {
   const [hentFaktiskInntektResult, hentFaktiskInntektFetch] = useApiCall(hentFaktiskInntekt)
 
   useEffect(() => {
-    hentFaktiskInntektFetch({
-      forbehandlingId: etteroppgjoer.behandling.id,
-    })
+    hentFaktiskInntektFetch(etteroppgjoer.behandling.id)
   }, [])
 
   return (

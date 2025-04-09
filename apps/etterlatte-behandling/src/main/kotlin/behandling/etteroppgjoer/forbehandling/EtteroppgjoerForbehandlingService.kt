@@ -218,13 +218,13 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun hentFaktiskInntent(
-        request: EtteroppgjoerHentFaktiskInntektRequest,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): FaktiskInntekt? =
         runBlocking {
             beregningKlient.hentAvkortingFaktiskInntekt(
                 EtteroppgjoerFaktiskInntektRequest(
-                    forbehandlingId = request.forbehandlingId,
+                    forbehandlingId = forbehandlingId,
                 ),
                 brukerTokenInfo,
             )

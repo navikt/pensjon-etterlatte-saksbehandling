@@ -35,9 +35,6 @@ export const lagreFaktiskInntekt = async (args: {
   })
 }
 
-// TODO gjøre om til GET
-export const hentFaktiskInntekt = async (args: { forbehandlingId: string }): Promise<ApiResponse<FaktiskInntekt>> => {
-  return apiClient.post(`/etteroppgjoer/${args.forbehandlingId}/hent_faktisk_inntekt`, {
-    ...args,
-  })
+export const hentFaktiskInntekt = async (forbehandlingId: string): Promise<ApiResponse<FaktiskInntekt>> => {
+  return apiClient.get(`/etteroppgjoer/${forbehandlingId}/hent_faktisk_inntekt`)
 }

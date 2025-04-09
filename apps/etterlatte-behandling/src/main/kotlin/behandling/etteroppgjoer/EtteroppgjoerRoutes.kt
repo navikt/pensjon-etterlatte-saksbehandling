@@ -10,7 +10,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHentFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -77,12 +76,10 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("hent_faktisk_inntekt") {
-                val request = call.receive<EtteroppgjoerHentFaktiskInntektRequest>()
-
+            get("hent_faktisk_inntekt") {
                 val response =
                     inTransaction {
-                        forbehandlingService.hentFaktiskInntent(request, brukerTokenInfo)
+                        forbehandlingService.hentFaktiskInntent(etteroppgjoerId, brukerTokenInfo)
                     }
                 if (response == null) {
                     call.respond(HttpStatusCode.NoContent)

@@ -36,5 +36,5 @@ export const lagreFaktiskInntekt = async (args: {
 }
 
 export const hentFaktiskInntekt = async (forbehandlingId: string): Promise<ApiResponse<FaktiskInntekt>> => {
-  return apiClient.get(`/etteroppgjoer/${forbehandlingId}/hent_faktisk_inntekt`)
+  return apiClient.get(`/etteroppgjoer/${forbehandlingId}/faktisk-inntekt`)
 }

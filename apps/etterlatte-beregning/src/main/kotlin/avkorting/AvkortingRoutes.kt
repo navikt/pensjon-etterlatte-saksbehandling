@@ -163,7 +163,7 @@ fun Route.avkorting(
                 call.respond(dto)
             }
 
-            post("hent_faktisk_inntekt") {
+            post("faktisk-inntekt") {
                 val request = call.receive<EtteroppgjoerFaktiskInntektRequest>()
 
                 val faktiskInntekt = etteroppgjoerService.hentAvkortingFaktiskInntekt(request)

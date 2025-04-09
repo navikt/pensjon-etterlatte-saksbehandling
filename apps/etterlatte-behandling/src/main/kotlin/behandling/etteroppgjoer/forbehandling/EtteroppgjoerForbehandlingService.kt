@@ -217,7 +217,7 @@ class EtteroppgjoerForbehandlingService(
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 
-    fun hentFaktiskInntent(
+    fun hentFaktiskInntekt(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): FaktiskInntekt? =

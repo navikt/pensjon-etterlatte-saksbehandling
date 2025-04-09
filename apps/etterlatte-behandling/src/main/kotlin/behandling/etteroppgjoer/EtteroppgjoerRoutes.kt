@@ -76,10 +76,10 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            get("hent_faktisk_inntekt") {
+            get("faktisk-inntekt") {
                 val response =
                     inTransaction {
-                        forbehandlingService.hentFaktiskInntent(etteroppgjoerId, brukerTokenInfo)
+                        forbehandlingService.hentFaktiskInntekt(etteroppgjoerId, brukerTokenInfo)
                     }
                 if (response == null) {
                     call.respond(HttpStatusCode.NoContent)

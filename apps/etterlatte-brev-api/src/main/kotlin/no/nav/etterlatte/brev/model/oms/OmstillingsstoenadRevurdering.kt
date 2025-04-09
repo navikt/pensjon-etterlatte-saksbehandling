@@ -59,7 +59,7 @@ data class OmstillingsstoenadRevurdering(
             innholdMedVedlegg: InnholdMedVedlegg,
             avkortingsinfo: Avkortingsinfo,
             trygdetid: TrygdetidDto,
-            brevutfall: BrevutfallDto,
+            brevutfall: BrevutfallDto?,
             revurderingaarsak: Revurderingaarsak?,
             vilkaarsVurdering: VilkaarsvurderingDto,
             datoVedtakOmgjoering: LocalDate?,
@@ -71,8 +71,13 @@ data class OmstillingsstoenadRevurdering(
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
             val feilutbetaling =
-                krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                    "Feilutbetaling mangler i brevutfall"
+                // TODO midlertidig for å få opp flyt i etteroppgjør før vi har eget brev - skal fjernes
+                if (revurderingaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+                    FeilutbetalingType.INGEN_FEILUTBETALING
+                } else {
+                    krevIkkeNull(brevutfall?.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                        "Feilutbetaling mangler i brevutfall"
+                    }
                 }
             val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
             val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
@@ -153,7 +158,7 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
         fun fra(
             avkortingsinfo: Avkortingsinfo,
             behandling: DetaljertBehandling,
-            brevutfall: BrevutfallDto,
+            brevutfall: BrevutfallDto?,
             etterbetaling: EtterbetalingDTO?,
             revurderingaarsak: Revurderingaarsak?,
         ): OmstillingsstoenadRevurderingRedigerbartUtfall {
@@ -186,8 +191,13 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                         )
                     },
                 feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
+                    if (revurderingaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+                        // TODO midlertidig for å få opp flyt i etteroppgjør før vi har eget brev - skal fjernes
+                        FeilutbetalingType.INGEN_FEILUTBETALING
+                    } else {
+                        krevIkkeNull(brevutfall?.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        }
                     },
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },

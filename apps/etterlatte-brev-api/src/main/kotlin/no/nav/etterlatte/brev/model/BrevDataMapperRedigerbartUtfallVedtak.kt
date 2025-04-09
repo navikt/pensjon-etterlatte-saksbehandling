@@ -367,7 +367,8 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             krevIkkeNull(avkortingsinfo.await()) { "Avkortingsinfo mangler i brevutfall" },
             behandling,
-            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+            // brevutfall.await() ?: throw ManglerBrevutfall(behandlingId), TODO midlertidg for å få opp brev i etteroppgjør
+            brevutfall.await(),
             etterbetaling.await(),
             revurderingaarsak,
         )

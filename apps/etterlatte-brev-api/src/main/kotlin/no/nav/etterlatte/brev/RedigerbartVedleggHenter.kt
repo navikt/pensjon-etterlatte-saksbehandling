@@ -116,7 +116,8 @@ class RedigerbartVedleggHenter(
                     } else if (revurderingaarsak == Revurderingaarsak.INNTEKTSENDRING && prosesstype == Prosesstype.AUTOMATISK) {
                         emptyList()
                     } else {
-                        if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
+                        // TODO fjern unntak for etteroppgjør som er midlertidig
+                        if (revurderingaarsak != Revurderingaarsak.ETTEROPPGJOER && harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                             listOf(
                                 Pair(
                                     Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,

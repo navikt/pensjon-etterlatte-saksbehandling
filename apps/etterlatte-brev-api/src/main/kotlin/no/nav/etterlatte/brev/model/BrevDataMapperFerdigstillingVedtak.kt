@@ -497,7 +497,8 @@ class BrevDataMapperFerdigstillingVedtak(
             innholdMedVedlegg,
             avkortingsinfo.await(),
             krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
-            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+            // brevutfall.await() ?: throw ManglerBrevutfall(behandlingId), TODO midlertidg for å få opp brev i etteroppgjør
+            brevutfall.await(),
             revurderingaarsak,
             krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             klage?.datoVedtakOmgjoering(),

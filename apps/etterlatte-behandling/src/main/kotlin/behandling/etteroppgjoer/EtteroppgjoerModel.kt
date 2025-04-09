@@ -1,12 +1,17 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.brev.BrevFastInnholdData
+import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.Forhaandsvarsel
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.ForhaandsvarselInnhold
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
@@ -199,21 +204,33 @@ data class SkatteoppgjoerHendelser(
     val somAktoerid: Boolean,
 )
 
-/* TODO: bruke hvis vi tar i bruk redigerbart innhold
 data class EtteroppgjoerBrevRequestData(
-    val redigerbar: BrevRedigerbarInnholdData?,
+    val redigerbar: BrevRedigerbarInnholdData,
     val innhold: BrevFastInnholdData,
+    val data: DetaljertForbehandlingDto,
 )
 
-object EtteroppgjoerBrevMapper {
-    // TODO: mappe til riktige brevvarianter avhengig av data i forbehandlingen
-    fun fra(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerBrevRequestData =
+object EtteroppgjoerBrevDataMapper {
+    fun fra(data: DetaljertForbehandlingDto) =
         EtteroppgjoerBrevRequestData(
-            redigerbar = null,
-            innhold = EtteroppgjoerBrevData.ForhaandsvarselBrevData(forbehandling.sak),
+            redigerbar =
+                ForhaandsvarselInnhold(
+                    sak = data.behandling.sak,
+                ),
+            innhold =
+                Forhaandsvarsel(
+                    bosattUtland = false, // TODO
+                    norskInntekt = false, // TODO
+                    etteroppgjoersAar = data.behandling.aar,
+                    rettsgebyrBeloep = Kroner(1234), // TODO hent faktisk rettsgebyr
+                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
+                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()), // TODO long
+                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()), // TODO long
+                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()), // TODO long
+                ),
+            data = data,
         )
 }
- */
 
 data class FaktiskInntekt(
     val loennsinntekt: Long,

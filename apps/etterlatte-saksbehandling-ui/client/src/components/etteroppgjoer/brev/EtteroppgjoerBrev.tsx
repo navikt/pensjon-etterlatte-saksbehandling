@@ -3,6 +3,7 @@ import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/bre
 import React, { useEffect } from 'react'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
+import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
 import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
@@ -11,7 +12,6 @@ import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/Etteroppjoe
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
-import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -55,7 +55,14 @@ export function EtteroppgjoerBrev() {
           ),
         })}
         {mapResult(brevResult, {
-          success: (brev) => <ForhaandsvisningBrev brev={brev} skalGaaViaBehandling />,
+          success: (brev) => (
+            <RedigerbartBrev
+              brev={brev}
+              kanRedigeres={true}
+              skalGaaViaBehandling
+              tilbakestillingsaction={() => alert('Not supported')}
+            />
+          ),
           error: (error) => (
             <ApiErrorAlert>
               Kunne ikke hente ut brevet for etteroppgjør-forbehandlingen, på grunn av feil: {error.detail}

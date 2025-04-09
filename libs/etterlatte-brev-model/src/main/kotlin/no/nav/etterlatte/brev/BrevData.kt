@@ -65,11 +65,10 @@ abstract class BrevFastInnholdData : BrevData {
     abstract val type: String
 }
 
-/* TODO: når vi skal benytte redigerbart innhold
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold::class, name = "EO_FORHAANDSVARSEL_REDIGERBAR"),
-)*/
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.ForhaandsvarselInnhold::class, name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR"),
+)
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder
     abstract val type: String

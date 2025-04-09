@@ -1,7 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevDataMapper
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
@@ -16,13 +17,11 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.util.UUID
 
 class EtteroppgjoerBrevService(
@@ -35,14 +34,14 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
+        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, brukerTokenInfo)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = detaljertForbehandling.behandling.sak,
-                    brevInnholdData = brevInnholdData,
-                    brevRedigerbarInnholdData = null,
+                    sak = forbehandling.behandling.sak,
+                    brevInnholdData = brevInnhold,
+                    brevRedigerbarInnholdData = redigerbartInnhold,
                     skalLagres = false,
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -63,16 +62,16 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
+        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, brukerTokenInfo)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = detaljertForbehandling.behandling.sak,
-                    brevInnholdData = brevInnholdData,
+                    sak = forbehandling.behandling.sak,
+                    brevInnholdData = brevInnhold,
+                    brevRedigerbarInnholdData = redigerbartInnhold,
                     skalLagres = false,
                     brukerTokenInfo = brukerTokenInfo,
-                    brevRedigerbarInnholdData = null,
                 )
             }
         return brevKlient.tilbakestillStrukturertBrev(
@@ -87,8 +86,8 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
-        brevKlient.ferdigstillStrukturertBrev(behandlingId, brevInnholdData.brevKode.brevtype, brukerTokenInfo)
+        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, brukerTokenInfo)
+        brevKlient.ferdigstillStrukturertBrev(behandlingId, brevInnhold.brevKode.brevtype, brukerTokenInfo)
     }
 
     suspend fun genererPdf(
@@ -96,13 +95,13 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
-        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
+        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, brukerTokenInfo)
         val request =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = detaljertForbehandling.behandling.sak,
-                    brevInnholdData = brevInnholdData,
-                    brevRedigerbarInnholdData = null,
+                    sak = forbehandling.behandling.sak,
+                    brevInnholdData = brevInnhold,
+                    brevRedigerbarInnholdData = redigerbartInnhold,
                     skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -127,34 +126,18 @@ class EtteroppgjoerBrevService(
         )
     }
 
-    private suspend fun hentDetaljertForbehandlingOgBrevInnhold(
+    private fun hentBrevRequestData(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<DetaljertForbehandlingDto, EtteroppgjoerBrevData.Forhaandsvarsel> {
+    ): EtteroppgjoerBrevRequestData {
         val detaljertForbehandling =
             etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
                 behandlingId,
                 brukerTokenInfo,
             )
 
-        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
-
-        return Pair(detaljertForbehandling, brevInnholdData)
+        return EtteroppgjoerBrevDataMapper.fra(detaljertForbehandling)
     }
-
-    private suspend fun utledBrevInnholdData(data: DetaljertForbehandlingDto): EtteroppgjoerBrevData.Forhaandsvarsel =
-        coroutineScope {
-            EtteroppgjoerBrevData.Forhaandsvarsel(
-                bosattUtland = false, // TODO
-                norskInntekt = false, // TODO
-                etteroppgjoersAar = data.behandling.aar,
-                rettsgebyrBeloep = Kroner(1234), // TODO hent faktisk rettsgebyr
-                resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
-                inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()), // TODO long
-                faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()), // TODO long
-                avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()), // TODO long
-            )
-        }
 
     private suspend fun utledBrevRequest(
         sak: Sak,

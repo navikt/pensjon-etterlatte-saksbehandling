@@ -10,6 +10,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
 import { useAppDispatch } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -44,8 +46,16 @@ export const FastsettFaktiskInntekt = ({
 }) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
 
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
   const { behandling } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
+
+  const erRedigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sak.enhet,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const {
     register,
@@ -98,10 +108,26 @@ export const FastsettFaktiskInntekt = ({
             control={control}
             label="Lønnsinntekt"
             description="Ekskluder omstillingsstønaden"
+            readOnly={!erRedigerbar}
           />
-          <ControlledInntektTextField name="afp" control={control} label="Avtalefestet pensjon" />
-          <ControlledInntektTextField name="naeringsinntekt" control={control} label="Næringsinntekt" />
-          <ControlledInntektTextField name="utland" control={control} label="Inntekt fra utland" />
+          <ControlledInntektTextField
+            name="afp"
+            control={control}
+            label="Avtalefestet pensjon"
+            readOnly={!erRedigerbar}
+          />
+          <ControlledInntektTextField
+            name="naeringsinntekt"
+            control={control}
+            label="Næringsinntekt"
+            readOnly={!erRedigerbar}
+          />
+          <ControlledInntektTextField
+            name="utland"
+            control={control}
+            label="Inntekt fra utland"
+            readOnly={!erRedigerbar}
+          />
         </VStack>
 
         <SumAvFaktiskInntekt faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch())} />
@@ -113,6 +139,7 @@ export const FastsettFaktiskInntekt = ({
             label="Spesifikasjon av inntekt"
             description="Beskriv inntekt lagt til grunn og eventuelle beløp som er trukket fra."
             error={errors.spesifikasjon?.message}
+            readOnly={!erRedigerbar}
           />
         </Box>
 

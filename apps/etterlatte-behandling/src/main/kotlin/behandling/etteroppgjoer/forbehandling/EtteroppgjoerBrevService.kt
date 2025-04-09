@@ -148,12 +148,7 @@ class EtteroppgjoerBrevService(
                 bosattUtland = false, // TODO
                 norskInntekt = false, // TODO
                 etteroppgjoersAar = data.behandling.aar,
-                rettsgebyrBeloep =
-                    Kroner(
-                        data.beregnetEtteroppgjoerResultat.grense.rettsgebyr
-                            .toInt(),
-                    ),
-                // TODO fix
+                rettsgebyrBeloep = Kroner(1234), // TODO hent faktisk rettsgebyr
                 resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
                 inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()), // TODO long
                 faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()), // TODO long

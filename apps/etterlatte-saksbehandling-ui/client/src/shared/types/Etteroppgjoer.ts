@@ -5,6 +5,7 @@ import { GrunnlagKilde } from '~shared/types/grunnlag'
 export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
   opplysninger: EtteroppgjoerOpplysninger
+  faktiskInntekt?: FaktiskInntekt
   avkortingFaktiskInntekt: Avkorting | undefined
 }
 

@@ -1,1 +1,1 @@
-DROP TABLE etteroppgjoer_faktisk_inntekt;
+DROP TABLE IF EXISTS etteroppgjoer_faktisk_inntekt;

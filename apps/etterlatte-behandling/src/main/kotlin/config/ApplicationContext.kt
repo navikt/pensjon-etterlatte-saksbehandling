@@ -34,13 +34,13 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserDao
@@ -776,8 +776,8 @@ internal class ApplicationContext(
             tilgangsService = oppdaterTilgangService,
         )
 
-    val opprettEtteroppgjoerRevurdering =
-        OpprettEtteroppgjoerRevurdering(
+    val etteroppgjoerRevurderingService =
+        EtteroppgjoerRevurderingService(
             behandlingService,
             etteroppgjoerService,
             etteroppgjoerForbehandlingService,

@@ -8,7 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.etteroppgjoer.OpprettEtteroppgjoerRevurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -35,7 +35,7 @@ internal fun Route.revurderingRoutes(
     omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
     automatiskRevurderingService: AutomatiskRevurderingService,
     aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
-    opprettEtteroppgjoer: OpprettEtteroppgjoerRevurdering,
+    etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
 ) {
     val logger = LoggerFactory.getLogger("RevurderingRoute")
 
@@ -86,7 +86,7 @@ internal fun Route.revurderingRoutes(
             post("/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
-                    val revurdering = opprettEtteroppgjoer.opprett(sakId, etteroppgjoerId, brukerTokenInfo)
+                    val revurdering = etteroppgjoerRevurderingService.opprett(sakId, etteroppgjoerId, brukerTokenInfo)
                     call.respond(revurdering.id)
                 }
             }

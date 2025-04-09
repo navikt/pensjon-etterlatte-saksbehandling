@@ -213,30 +213,6 @@ class EtteroppgjoerForbehandlingService(
                 utland = request.utland,
                 spesifikasjon = request.spesifikasjon,
             )
-        // TODO denne kan slettes når jeg er ferdig med refactor
-        val faktiskInntekt =
-            FaktiskInntekt(
-                loennsinntekt = request.loennsinntekt.toLong(),
-                afp = request.afp.toLong(),
-                naeringsinntekt = request.naeringsinntekt.toLong(),
-                utland = request.utland.toLong(),
-                spesifikasjon = request.spesifikasjon,
-            )
-        // TODO denne kan slettes når jeg er ferdig med refactor
-        val eksisterendeFaktiskInntekt = dao.hentFaktiskInntekt(forbehandlingId = forbehandling.id)
-// TODO denne kan slettes når jeg er ferdig med refactor
-        if (eksisterendeFaktiskInntekt == null) {
-            dao.lagreFaktiskInntekt(
-                faktiskInntekt = faktiskInntekt,
-                forbehandlingId = forbehandling.id,
-            )
-            // TODO denne kan slettes når jeg er ferdig med refactor
-        } else {
-            dao.oppdaterFaktiskInntekt(
-                forbehandlingId = forbehandling.id,
-                faktiskInntekt = faktiskInntekt,
-            )
-        }
 
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
@@ -244,24 +220,15 @@ class EtteroppgjoerForbehandlingService(
     fun hentFaktiskInntent(
         request: EtteroppgjoerHentFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ): FaktiskInntekt? {
-        val forbehandling = dao.hentForbehandling(request.forbehandlingId) ?: throw FantIkkeForbehandling(request.forbehandlingId)
-
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatte")
-
-        return runBlocking {
+    ): FaktiskInntekt? =
+        runBlocking {
             beregningKlient.hentAvkortingFaktiskInntekt(
                 EtteroppgjoerFaktiskInntektRequest(
                     forbehandlingId = request.forbehandlingId,
-                    sisteIverksatteBehandlingId = sisteIverksatteBehandling.id,
-                    aar = forbehandling.aar,
                 ),
                 brukerTokenInfo,
             )
         }
-    }
 
     private fun kanOppretteEtteroppgjoerForbehandling(
         sakId: SakId,

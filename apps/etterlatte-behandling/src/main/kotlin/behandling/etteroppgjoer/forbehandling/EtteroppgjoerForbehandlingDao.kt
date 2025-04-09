@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
@@ -188,87 +187,6 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
     }
-
-    fun lagreFaktiskInntekt(
-        faktiskInntekt: FaktiskInntekt,
-        forbehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    INSERT INTO etteroppgjoer_faktisk_inntekt(
-                        id, forbehandling_id, loennsinntekt, afp, naeringsinntekt, utland, spesifikasjon_av_inntekt
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """.trimIndent(),
-                )
-
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, forbehandlingId)
-            statement.setLong(3, faktiskInntekt.loennsinntekt)
-            statement.setLong(4, faktiskInntekt.afp)
-            statement.setLong(5, faktiskInntekt.naeringsinntekt)
-            statement.setLong(6, faktiskInntekt.utland)
-            statement.setString(7, faktiskInntekt.spesifikasjon)
-
-            statement.executeUpdate().also {
-                krev(it == 1) {
-                    "Kunne ikke lagre faktisk inntekt for forbehandling=$forbehandlingId"
-                }
-            }
-        }
-    }
-
-    fun oppdaterFaktiskInntekt(
-        forbehandlingId: UUID,
-        faktiskInntekt: FaktiskInntekt,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE etteroppgjoer_faktisk_inntekt
-                    SET loennsinntekt = ?, afp = ?, naeringsinntekt = ?, utland = ?, spesifikasjon_av_inntekt = ?
-                    WHERE forbehandling_id = ?
-                    """.trimIndent(),
-                )
-
-            statement.setLong(1, faktiskInntekt.loennsinntekt)
-            statement.setLong(2, faktiskInntekt.afp)
-            statement.setLong(3, faktiskInntekt.naeringsinntekt)
-            statement.setLong(4, faktiskInntekt.utland)
-            statement.setString(5, faktiskInntekt.spesifikasjon)
-            statement.setObject(6, forbehandlingId)
-
-            statement.executeUpdate()
-        }
-    }
-
-    fun hentFaktiskInntekt(forbehandlingId: UUID): FaktiskInntekt? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT *
-                        FROM etteroppgjoer_faktisk_inntekt
-                        WHERE forbehandling_id = ?
-                        """.trimIndent(),
-                    )
-
-                statement.setObject(1, forbehandlingId)
-                statement.executeQuery().singleOrNull {
-                    FaktiskInntekt(
-                        loennsinntekt = getLong("loennsinntekt"),
-                        afp = getLong("afp"),
-                        naeringsinntekt = getLong("naeringsinntekt"),
-                        utland = getLong("utland"),
-                        spesifikasjon = getString("spesifikasjon_av_inntekt"),
-                    )
-                }
-            }
-        }
 
     fun hentAInntekt(behandlingId: UUID): AInntekt? =
         connectionAutoclosing.hentConnection {

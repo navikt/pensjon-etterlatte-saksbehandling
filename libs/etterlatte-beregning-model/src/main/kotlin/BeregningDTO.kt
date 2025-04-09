@@ -209,8 +209,6 @@ data class EtteroppgjoerBeregnetAvkortingRequest(
 
 data class EtteroppgjoerFaktiskInntektRequest(
     val forbehandlingId: UUID,
-    val sisteIverksatteBehandlingId: UUID,
-    val aar: Int,
 )
 
 data class EtteroppgjoerFaktiskInntektResponse(

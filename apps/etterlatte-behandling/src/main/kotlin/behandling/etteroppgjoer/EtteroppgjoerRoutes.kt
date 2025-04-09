@@ -76,18 +76,6 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            get("faktisk-inntekt") {
-                val response =
-                    inTransaction {
-                        forbehandlingService.hentFaktiskInntekt(etteroppgjoerId, brukerTokenInfo)
-                    }
-                if (response == null) {
-                    call.respond(HttpStatusCode.NoContent)
-                } else {
-                    call.respond(response)
-                }
-            }
-
             post("beregn_faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
                 val response =

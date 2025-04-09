@@ -33,6 +33,7 @@ enum class EtteroppgjoerStatus {
 data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
+    val faktiskInntekt: FaktiskInntekt?,
     val avkortingFaktiskInntekt: AvkortingDto?,
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto,
 )

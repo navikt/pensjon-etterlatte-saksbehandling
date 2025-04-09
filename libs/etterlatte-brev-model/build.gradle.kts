@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-tilbakekreving-model"))
+    implementation(project(":libs:etterlatte-beregning-model"))
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 
     testImplementation(libs.test.jupiter.api)

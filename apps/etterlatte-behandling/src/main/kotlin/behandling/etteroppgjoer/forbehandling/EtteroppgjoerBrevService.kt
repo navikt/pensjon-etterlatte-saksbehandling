@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.util.UUID
 
 class EtteroppgjoerBrevService(
@@ -148,12 +149,15 @@ class EtteroppgjoerBrevService(
                 norskInntekt = false, // TODO
                 etteroppgjoersAar = data.behandling.aar,
                 rettsgebyrBeloep =
-                    data.beregnetEtteroppgjoerResultat.grense.rettsgebyr
-                        .toInt(), // TODO long
-                resultatType = data.beregnetEtteroppgjoerResultat.resultatType.name,
-                inntekt = data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt(), // TODO long
-                faktiskInntekt = data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt(), // TODO long
-                avviksBeloep = data.beregnetEtteroppgjoerResultat.differanse.toInt(), // TODO long
+                    Kroner(
+                        data.beregnetEtteroppgjoerResultat.grense.rettsgebyr
+                            .toInt(),
+                    ),
+                // TODO fix
+                resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
+                inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()), // TODO long
+                faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()), // TODO long
+                avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()), // TODO long
             )
         }
 

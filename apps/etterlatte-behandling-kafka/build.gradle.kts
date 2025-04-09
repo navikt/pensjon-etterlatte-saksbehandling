@@ -15,8 +15,11 @@ dependencies {
     implementation(project(":libs:etterlatte-inntektsjustering-model"))
     implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
+    implementation(project(":libs:etterlatte-beregning-model"))
     implementation(project(":libs:etterlatte-tidshendelser-model"))
     implementation(libs.etterlatte.common)
+
+    implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)

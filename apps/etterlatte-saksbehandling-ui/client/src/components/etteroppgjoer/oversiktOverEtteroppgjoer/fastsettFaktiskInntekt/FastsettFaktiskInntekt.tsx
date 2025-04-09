@@ -16,14 +16,14 @@ const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   afp,
   naeringsinntekt,
   utland,
-  spesifikasjonAvInntekt,
+  spesifikasjon,
 }: FastsettFaktiskInntektSkjema): FaktiskInntekt => {
   return {
     loennsinntekt: Number(loennsinntekt.replace(/[^0-9.]/g, '')),
     afp: Number(afp.replace(/[^0-9.]/g, '')),
     naeringsinntekt: Number(naeringsinntekt.replace(/[^0-9.]/g, '')),
     utland: Number(utland.replace(/[^0-9.]/g, '')),
-    spesifikasjon: spesifikasjonAvInntekt,
+    spesifikasjon,
   }
 }
 
@@ -32,12 +32,19 @@ interface FastsettFaktiskInntektSkjema {
   afp: string
   naeringsinntekt: string
   utland: string
-  spesifikasjonAvInntekt: string
+  spesifikasjon: string
 }
 
-export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: string }) => {
+export const FastsettFaktiskInntekt = ({
+  forbehandlingId,
+  faktiskInntekt,
+}: {
+  forbehandlingId: string
+  faktiskInntekt?: FaktiskInntekt
+}) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
-  const behandling = useEtteroppgjoer().behandling
+
+  const { behandling } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
 
   const {
@@ -47,12 +54,21 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
     handleSubmit,
     formState: { errors },
   } = useForm<FastsettFaktiskInntektSkjema>({
-    defaultValues: {
-      loennsinntekt: '0',
-      afp: '0',
-      naeringsinntekt: '0',
-      utland: '0',
-    },
+    defaultValues: faktiskInntekt
+      ? {
+          loennsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt),
+          afp: new Intl.NumberFormat('nb').format(faktiskInntekt.afp),
+          naeringsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt),
+          utland: new Intl.NumberFormat('nb').format(faktiskInntekt.utland),
+          spesifikasjon: faktiskInntekt.spesifikasjon,
+        }
+      : {
+          loennsinntekt: '0',
+          afp: '0',
+          naeringsinntekt: '0',
+          utland: '0',
+          spesifikasjon: '',
+        },
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
@@ -69,7 +85,6 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         <Heading size="large">Fastett faktisk inntekt</Heading>
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
-          {/* TODO: skal denne være dynamisk? Eller er den alltid "april - desember"? */}
         </HStack>
         <div>
           <Tag variant="neutral">
@@ -92,12 +107,12 @@ export const FastsettFaktiskInntekt = ({ forbehandlingId }: { forbehandlingId: s
         <SumAvFaktiskInntekt faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch())} />
         <Box maxWidth="fit-content">
           <Textarea
-            {...register('spesifikasjonAvInntekt', {
+            {...register('spesifikasjon', {
               required: { value: true, message: 'Du må spesifisere inntekten' },
             })}
             label="Spesifikasjon av inntekt"
             description="Beskriv inntekt lagt til grunn og eventuelle beløp som er trukket fra."
-            error={errors.spesifikasjonAvInntekt?.message}
+            error={errors.spesifikasjon?.message}
           />
         </Box>
 

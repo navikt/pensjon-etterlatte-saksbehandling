@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
@@ -16,6 +17,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -161,7 +163,7 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    fun beregnFaktiskInntekt(
+    fun lagreOgBeregnFaktiskInntekt(
         behandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
@@ -187,6 +189,19 @@ class EtteroppgjoerForbehandlingService(
 
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
+
+    fun hentFaktiskInntekt(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FaktiskInntekt? =
+        runBlocking {
+            beregningKlient.hentAvkortingFaktiskInntekt(
+                EtteroppgjoerFaktiskInntektRequest(
+                    forbehandlingId = forbehandlingId,
+                ),
+                brukerTokenInfo,
+            )
+        }
 
     private fun kanOppretteEtteroppgjoerForbehandling(
         sakId: SakId,
@@ -224,6 +239,10 @@ class EtteroppgjoerForbehandlingService(
 data class EtteroppgjoerForbehandlingOgOppgave(
     val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
+)
+
+data class EtteroppgjoerHentFaktiskInntektRequest(
+    val forbehandlingId: UUID,
 )
 
 data class BeregnFaktiskInntektRequest(

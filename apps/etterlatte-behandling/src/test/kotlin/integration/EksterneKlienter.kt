@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
+import no.nav.etterlatte.behandling.etteroppgjoer.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
@@ -56,6 +57,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -141,6 +143,11 @@ class BeregningKlientTest :
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto = throw NotImplementedError("Ikke implementert for testklient")
+
+    override suspend fun hentAvkortingFaktiskInntekt(
+        request: EtteroppgjoerFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FaktiskInntekt? = mockk()
 
     override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,

@@ -213,3 +213,11 @@ object EtteroppgjoerBrevMapper {
             innhold = EtteroppgjoerBrevData.VarselTilbakekreving(forbehandling.sak),
         )
 }
+
+data class FaktiskInntekt(
+    val loennsinntekt: Long,
+    val afp: Long,
+    val naeringsinntekt: Long,
+    val utland: Long,
+    val spesifikasjon: String,
+)

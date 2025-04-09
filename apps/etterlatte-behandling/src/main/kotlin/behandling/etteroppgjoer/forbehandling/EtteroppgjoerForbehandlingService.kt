@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
-import no.nav.etterlatte.behandling.etteroppgjoer.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
@@ -101,6 +100,16 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
+        val faktiskInntekt =
+            runBlocking {
+                beregningKlient.hentAvkortingFaktiskInntekt(
+                    EtteroppgjoerFaktiskInntektRequest(
+                        forbehandlingId = behandlingId,
+                    ),
+                    brukerTokenInfo,
+                )
+            }
+
         return ForbehandlingDto(
             behandling = forbehandling,
             opplysninger =
@@ -109,6 +118,7 @@ class EtteroppgjoerForbehandlingService(
                     ainntekt = aInntekt,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
+            faktiskInntekt = faktiskInntekt,
             avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
         )
     }
@@ -190,19 +200,6 @@ class EtteroppgjoerForbehandlingService(
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 
-    fun hentFaktiskInntekt(
-        forbehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): FaktiskInntekt? =
-        runBlocking {
-            beregningKlient.hentAvkortingFaktiskInntekt(
-                EtteroppgjoerFaktiskInntektRequest(
-                    forbehandlingId = forbehandlingId,
-                ),
-                brukerTokenInfo,
-            )
-        }
-
     private fun kanOppretteEtteroppgjoerForbehandling(
         sakId: SakId,
         inntektsaar: Int,
@@ -239,10 +236,6 @@ class EtteroppgjoerForbehandlingService(
 data class EtteroppgjoerForbehandlingOgOppgave(
     val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
-)
-
-data class EtteroppgjoerHentFaktiskInntektRequest(
-    val forbehandlingId: UUID,
 )
 
 data class BeregnFaktiskInntektRequest(

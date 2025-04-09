@@ -32,16 +32,40 @@ data class DetaljertForbehandlingDto(
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto,
 )
 
+enum class EtteroppgjoerForbehandlingStatus {
+    OPPRETTET,
+    UNDER_BEHANDLING,
+    VARSELBREV_SENDT,
+    SVAR_MOTTATT,
+    INGEN_SVAR_INNEN_TIDSFRIST,
+}
+
 data class EtteroppgjoerForbehandling(
     val id: UUID,
     val hendelseId: UUID,
-    val status: String, // TODO enum
+    val status: EtteroppgjoerForbehandlingStatus,
     val sak: Sak,
     val aar: Int,
     val innvilgetPeriode: Periode,
     val opprettet: Tidspunkt,
     val brevId: Long?,
 ) {
+    companion object {
+        fun opprett(
+            sak: Sak,
+            innvilgetPeriode: Periode,
+        ) = EtteroppgjoerForbehandling(
+            id = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            sak = sak,
+            status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+            aar = innvilgetPeriode.fom.year,
+            innvilgetPeriode = innvilgetPeriode,
+            opprettet = Tidspunkt.now(),
+            brevId = null,
+        )
+    }
+
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 }
 
@@ -190,3 +214,11 @@ object EtteroppgjoerBrevMapper {
         )
 }
  */
+
+data class FaktiskInntekt(
+    val loennsinntekt: Long,
+    val afp: Long,
+    val naeringsinntekt: Long,
+    val utland: Long,
+    val spesifikasjon: String,
+)

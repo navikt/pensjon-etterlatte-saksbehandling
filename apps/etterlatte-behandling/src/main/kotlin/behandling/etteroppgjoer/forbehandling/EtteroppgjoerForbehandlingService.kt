@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -16,6 +17,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -24,7 +26,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -151,32 +153,8 @@ class EtteroppgjoerForbehandlingService(
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
         val virkOgOpphoer = runBlocking { vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo) }
-
-        val nyForbehandling =
-            EtteroppgjoerForbehandling(
-                id = UUID.randomUUID(),
-                hendelseId = UUID.randomUUID(),
-                sak = sak,
-                status = "opprettet",
-                aar = inntektsaar,
-                innvilgetPeriode =
-                    Periode(
-                        fom =
-                            if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
-                                virkOgOpphoer.foersteVirk
-                            } else {
-                                YearMonth.of(inntektsaar, Month.JANUARY)
-                            },
-                        tom =
-                            if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
-                                virkOgOpphoer.opphoer
-                            } else {
-                                YearMonth.of(inntektsaar, Month.DECEMBER)
-                            },
-                    ),
-                opprettet = Tidspunkt.now(),
-                brevId = null,
-            )
+        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
+        val nyForbehandling = EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode)
 
         val oppgave =
             oppgaveService.opprettOppgave(
@@ -185,9 +163,6 @@ class EtteroppgjoerForbehandlingService(
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.ETTEROPPGJOER,
                 merknad = null,
-                frist = null,
-                saksbehandler = null,
-                gruppeId = null,
             )
 
         dao.lagreForbehandling(nyForbehandling)
@@ -202,7 +177,7 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    fun beregnFaktiskInntekt(
+    fun lagreOgBeregnFaktiskInntekt(
         behandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
@@ -229,6 +204,19 @@ class EtteroppgjoerForbehandlingService(
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
     }
 
+    fun hentFaktiskInntekt(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FaktiskInntekt? =
+        runBlocking {
+            beregningKlient.hentAvkortingFaktiskInntekt(
+                EtteroppgjoerFaktiskInntektRequest(
+                    forbehandlingId = forbehandlingId,
+                ),
+                brukerTokenInfo,
+            )
+        }
+
     private fun kanOppretteEtteroppgjoerForbehandling(
         sakId: SakId,
         inntektsaar: Int,
@@ -242,11 +230,33 @@ class EtteroppgjoerForbehandlingService(
             else -> false
         }
     }
+
+    private fun utledInnvilgetPeriode(
+        virkOgOpphoer: FoersteVirkOgOppoerTilSak,
+        inntektsaar: Int,
+    ) = Periode(
+        fom =
+            if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
+                virkOgOpphoer.foersteVirk
+            } else {
+                YearMonth.of(inntektsaar, Month.JANUARY)
+            },
+        tom =
+            if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
+                virkOgOpphoer.opphoer
+            } else {
+                YearMonth.of(inntektsaar, Month.DECEMBER)
+            },
+    )
 }
 
 data class EtteroppgjoerForbehandlingOgOppgave(
     val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
     val oppgave: OppgaveIntern,
+)
+
+data class EtteroppgjoerHentFaktiskInntektRequest(
+    val forbehandlingId: UUID,
 )
 
 data class BeregnFaktiskInntektRequest(

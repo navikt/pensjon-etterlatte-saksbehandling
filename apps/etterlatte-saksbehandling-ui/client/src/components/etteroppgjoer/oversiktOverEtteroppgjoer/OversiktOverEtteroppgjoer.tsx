@@ -6,9 +6,20 @@ import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEt
 import { Link } from 'react-router-dom'
 import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/resultatAvForbehandling/ResultatAvForbehandling'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentFaktiskInntekt } from '~shared/api/etteroppgjoer'
+import { useEffect } from 'react'
+import { mapResult } from '~shared/api/apiUtils'
 
 export const OversiktOverEtteroppgjoer = () => {
   const etteroppgjoer = useEtteroppgjoer()
+
+  const [hentFaktiskInntektResult, hentFaktiskInntektFetch] = useApiCall(hentFaktiskInntekt)
+
+  useEffect(() => {
+    hentFaktiskInntektFetch(etteroppgjoer.behandling.id)
+  }, [])
+
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
       <Heading size="xlarge" level="1">
@@ -18,7 +29,11 @@ export const OversiktOverEtteroppgjoer = () => {
         <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
       </BodyShort>
       <Inntektsopplysninger />
-      <FastsettFaktiskInntekt forbehandlingId={etteroppgjoer.behandling.id} />
+      {mapResult(hentFaktiskInntektResult, {
+        success: (faktiskInntekt) => (
+          <FastsettFaktiskInntekt forbehandlingId={etteroppgjoer.behandling.id} faktiskInntekt={faktiskInntekt} />
+        ),
+      })}
       <ResultatAvForbehandling />
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">

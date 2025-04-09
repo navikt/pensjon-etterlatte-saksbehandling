@@ -218,7 +218,7 @@ data class EtteroppgjoerFaktiskInntektResponse(
     val afp: Long,
     val naeringsinntekt: Long,
     val utland: Long,
-    val spesifikasjonAvInntekt: String,
+    val spesifikasjon: String,
 )
 
 data class EtteroppgjoerBeregnetAvkorting(

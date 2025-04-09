@@ -177,7 +177,7 @@ fun Route.avkorting(
                             afp = faktiskInntekt.afp.toLong(),
                             naeringsinntekt = faktiskInntekt.afp.toLong(),
                             utland = faktiskInntekt.utlandsinntekt.toLong(),
-                            spesifikasjonAvInntekt = faktiskInntekt.spesifikasjon,
+                            spesifikasjon = faktiskInntekt.spesifikasjon,
                         ),
                     )
                 }

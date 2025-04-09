@@ -17,7 +17,7 @@ class EtteroppgjoerBrevDataTest {
                 bosattUtland = false,
                 norskInntekt = false,
                 etteroppgjoersAar = 2024,
-                rettsgebyrBeloep = Kroner(123),
+                rettsgebyrBeloep = 1234,
                 resultatType = EtteroppgjoerResultatType.ETTERBETALING,
                 inntekt = Kroner(123),
                 faktiskInntekt = Kroner(123),

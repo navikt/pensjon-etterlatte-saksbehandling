@@ -223,11 +223,11 @@ object EtteroppgjoerBrevDataMapper {
                     bosattUtland = false, // TODO
                     norskInntekt = false, // TODO
                     etteroppgjoersAar = data.behandling.aar,
-                    rettsgebyrBeloep = Kroner(1234), // TODO hent faktisk rettsgebyr
+                    rettsgebyrBeloep = data.beregnetEtteroppgjoerResultat.grense.rettsgebyr,
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
-                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()), // TODO long
-                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()), // TODO long
-                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()), // TODO long
+                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
                 ),
             data = data,
         )

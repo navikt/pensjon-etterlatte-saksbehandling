@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS etteroppgjoer_faktisk_inntekt;

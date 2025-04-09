@@ -223,6 +223,7 @@ class EtteroppgjoerForbehandlingService(
                 naeringsinntekt = request.naeringsinntekt,
                 afp = request.afp,
                 utland = request.utland,
+                spesifikasjon = request.spesifikasjon,
             )
 
         return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
@@ -253,6 +254,7 @@ data class BeregnFaktiskInntektRequest(
     val afp: Int,
     val naeringsinntekt: Int,
     val utland: Int,
+    val spesifikasjon: String,
 )
 
 class FantIkkeForbehandling(

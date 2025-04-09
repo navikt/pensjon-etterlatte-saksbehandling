@@ -191,6 +191,7 @@ class VilkaarsvurderingService(
                     kopiertFraId = tidligereVilkaarsvurdering.id,
                 )
 
+            // TODO denne har blitt rimelig vanskelig å skjønne seg helt på - bør skrives om
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
             if (!kopierResultat ||
                 (
@@ -202,10 +203,15 @@ class VilkaarsvurderingService(
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
             ) {
-                VilkaarsvurderingMedBehandlingGrunnlagsversjon(
-                    repository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
-                    grunnlag.metadata.versjon,
-                )
+                if (behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
+                    behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, dryRun = false)
+                    VilkaarsvurderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)
+                } else {
+                    VilkaarsvurderingMedBehandlingGrunnlagsversjon(
+                        repository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
+                        grunnlag.metadata.versjon,
+                    )
+                }
             } else {
                 behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, dryRun = false)
                 VilkaarsvurderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)

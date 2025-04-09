@@ -23,6 +23,7 @@ import { aarFraDatoString } from '~utils/formatering/dato'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { hentBehandlingstatus } from '~shared/api/behandling'
 import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInntekt'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const Avkorting = ({
   behandling,
@@ -43,11 +44,10 @@ export const Avkorting = ({
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 
-  const redigerbar = behandlingErRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const redigerbar =
+    behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
+    behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
+
   useEffect(() => {
     if (!avkorting) {
       dispatch(resetAvkorting())

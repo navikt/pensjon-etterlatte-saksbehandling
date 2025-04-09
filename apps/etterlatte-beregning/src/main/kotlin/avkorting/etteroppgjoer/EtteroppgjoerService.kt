@@ -109,14 +109,8 @@ class EtteroppgjoerService(
         avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
 
-    fun hentAvkortingFaktiskInntekt(request: EtteroppgjoerFaktiskInntektRequest): FaktiskInntekt? {
-        val tidligereAarsoppgjoer =
-            avkortingRepository.hentAvkorting(request.sisteIverksatteBehandlingId)?.let {
-                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
-            } ?: throw InternfeilException("Mangler avkorting")
-
-        return avkortingRepository.hentAvkortingFaktiskInntekt(aarsoppgjoerId = tidligereAarsoppgjoer.id)
-    }
+    fun hentAvkortingFaktiskInntekt(request: EtteroppgjoerFaktiskInntektRequest): FaktiskInntekt? =
+        avkortingRepository.hentAvkortingFaktiskInntekt(behandlingId = request.forbehandlingId)
 
     private fun beregnEtteroppgjoerResultat(
         aar: Int,

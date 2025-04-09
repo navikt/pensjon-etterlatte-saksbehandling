@@ -37,9 +37,9 @@ class AvkortingRepository(
             alleAarsoppgjoer.isNotEmpty()
         }
 
-    fun hentAvkortingFaktiskInntekt(aarsoppgjoerId: UUID): FaktiskInntekt? =
+    fun hentAvkortingFaktiskInntekt(behandlingId: UUID): FaktiskInntekt? =
         dataSource.transaction { tx ->
-            selectFaktiskInntekt(aarsoppgjoerId = aarsoppgjoerId, tx = tx)
+            selectFaktiskInntektPaaBehandlingId(behandlingId = behandlingId, tx = tx)
         }
 
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
@@ -164,6 +164,26 @@ class AvkortingRepository(
     ) = queryOf(
         "SELECT * FROM avkortingsgrunnlag_faktisk WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
         aarsoppgjoerId,
+    ).let { query ->
+        tx.run(
+            query
+                .map { row ->
+                    val avkortingGrunnlagId = row.uuid("id")
+                    val inntektInnvilgetPeriode =
+                        selectInntektInnvilgetPeriode(avkortingGrunnlagId, tx)
+                            ?: throw InternfeilException("Grunnlag for etteroppgjør mangler inntekt innvilgede måneder")
+
+                    row.toFaktiskInntekt(avkortingGrunnlagId, inntektInnvilgetPeriode)
+                }.asSingle,
+        )
+    }
+
+    private fun selectFaktiskInntektPaaBehandlingId(
+        behandlingId: UUID,
+        tx: TransactionalSession,
+    ) = queryOf(
+        "SELECT * FROM avkortingsgrunnlag_faktisk WHERE behandling_id = ? ORDER BY fom ASC",
+        behandlingId,
     ).let { query ->
         tx.run(
             query

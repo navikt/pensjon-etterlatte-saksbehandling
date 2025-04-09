@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
@@ -67,17 +68,21 @@ class StrukturertBrevService(
         val brevKode = brevRequest.brevFastInnholdData.brevKode
 
         val innhold =
-            brevbaker.hentRedigerbarTekstFraBrevbakeren(
-                BrevbakerRequest.fra(
-                    brevKode = brevKode.redigering,
-                    brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
-                    avsender = avsender,
-                    soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
-                    sakId = sak.id,
-                    spraak = spraak,
-                    sakType = sak.sakType,
-                ),
-            )
+            if (brevKode.redigering != EtterlatteBrevKode.INGEN_REDIGERBAR_DEL) {
+                brevbaker.hentRedigerbarTekstFraBrevbakeren(
+                    BrevbakerRequest.fra(
+                        brevKode = brevKode.redigering,
+                        brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
+                        avsender = avsender,
+                        soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
+                        sakId = sak.id,
+                        spraak = spraak,
+                        sakType = sak.sakType,
+                    ),
+                )
+            } else {
+                null
+            }
 
         val nyttBrev =
             OpprettNyttBrev(

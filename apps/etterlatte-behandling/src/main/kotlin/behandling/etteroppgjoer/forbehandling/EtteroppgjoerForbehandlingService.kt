@@ -187,7 +187,10 @@ class EtteroppgjoerForbehandlingService(
                 spesifikasjon = request.spesifikasjon,
             )
 
-        return runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
+        val beregnetEtteroppgjoerResultat = runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
+
+        dao.lagreForbehandling(forbehandling.tilBeregnet())
+        return beregnetEtteroppgjoerResultat
     }
 
     fun hentFaktiskInntekt(

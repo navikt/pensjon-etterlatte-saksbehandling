@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -35,7 +36,9 @@ data class ForbehandlingDto(
 
 enum class EtteroppgjoerForbehandlingStatus {
     OPPRETTET,
-    UNDER_BEHANDLING,
+    BEREGNET,
+    TIL_ATTESTERING,
+    ATTESTERT,
     VARSELBREV_SENDT,
     SVAR_MOTTATT,
     INGEN_SVAR_INNEN_TIDSFRIST,
@@ -65,6 +68,22 @@ data class EtteroppgjoerForbehandling(
             opprettet = Tidspunkt.now(),
             brevId = null,
         )
+    }
+
+    fun tilBeregnet(): EtteroppgjoerForbehandling {
+        if (status in listOf(EtteroppgjoerForbehandlingStatus.OPPRETTET, EtteroppgjoerForbehandlingStatus.BEREGNET)) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.BEREGNET)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.BEREGNET}")
+        }
+    }
+
+    fun tilVarselbrevSendt(): EtteroppgjoerForbehandling {
+        if (status == EtteroppgjoerForbehandlingStatus.BEREGNET) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT}")
+        }
     }
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)

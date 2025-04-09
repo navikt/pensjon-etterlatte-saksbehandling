@@ -1,0 +1,1 @@
+DROP TABLE etteroppgjoer_faktisk_inntekt;

@@ -207,7 +207,7 @@ class BeregningKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/beregn_faktisk_inntekt",
+                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/hent_faktisk_inntekt",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = request,

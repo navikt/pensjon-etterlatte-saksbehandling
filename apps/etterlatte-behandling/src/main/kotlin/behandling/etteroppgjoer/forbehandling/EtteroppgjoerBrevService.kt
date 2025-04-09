@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import java.util.UUID
 
 class EtteroppgjoerBrevService(
@@ -35,13 +34,7 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val detaljertForbehandling =
-            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
-                behandlingId,
-                HardkodaSystembruker.etteroppgjoer,
-            )
-
-        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
+        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
 
         val brevRequest =
             retryOgPakkUt {
@@ -69,13 +62,7 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        val detaljertForbehandling =
-            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
-                behandlingId,
-                HardkodaSystembruker.etteroppgjoer,
-            )
-
-        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
+        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
 
         val brevRequest =
             retryOgPakkUt {
@@ -99,30 +86,16 @@ class EtteroppgjoerBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val detaljertForbehandling =
-            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
-                behandlingId,
-                HardkodaSystembruker.etteroppgjoer,
-            )
-
-        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
-
+        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
         brevKlient.ferdigstillStrukturertBrev(behandlingId, brevInnholdData.brevKode.brevtype, brukerTokenInfo)
     }
 
     suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
-        bruker: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
-        val detaljertForbehandling =
-            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
-                behandlingId,
-                HardkodaSystembruker.etteroppgjoer,
-            )
-
-        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
-
+        val (detaljertForbehandling, brevInnholdData) = hentDetaljertForbehandlingOgBrevInnhold(behandlingId, brukerTokenInfo)
         val request =
             retryOgPakkUt {
                 utledBrevRequest(
@@ -130,16 +103,16 @@ class EtteroppgjoerBrevService(
                     brevInnholdData = brevInnholdData,
                     brevRedigerbarInnholdData = null,
                     skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
-                    brukerTokenInfo = bruker,
+                    brukerTokenInfo = brukerTokenInfo,
                 )
             }
 
-        return brevKlient.genererPdf(brevID, behandlingId, request, bruker)
+        return brevKlient.genererPdf(brevID, behandlingId, request, brukerTokenInfo)
     }
 
     suspend fun hentEtteroppgjoersbrev(
         behandlingId: UUID,
-        bruker: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Brev? {
         val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
         if (forbehandling.brevId == null) {
@@ -149,8 +122,23 @@ class EtteroppgjoerBrevService(
         return brevApiKlient.hentBrev(
             sakId = forbehandling.sak.id,
             brevId = forbehandling.brevId,
-            brukerTokenInfo = bruker,
+            brukerTokenInfo = brukerTokenInfo,
         )
+    }
+
+    private suspend fun hentDetaljertForbehandlingOgBrevInnhold(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pair<DetaljertForbehandlingDto, EtteroppgjoerBrevData.Forhaandsvarsel> {
+        val detaljertForbehandling =
+            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
+                behandlingId,
+                brukerTokenInfo,
+            )
+
+        val brevInnholdData = utledBrevInnholdData(detaljertForbehandling)
+
+        return Pair(detaljertForbehandling, brevInnholdData)
     }
 
     private suspend fun utledBrevInnholdData(data: DetaljertForbehandlingDto): EtteroppgjoerBrevData.Forhaandsvarsel =
@@ -161,11 +149,11 @@ class EtteroppgjoerBrevService(
                 etteroppgjoersAar = data.behandling.aar,
                 rettsgebyrBeloep =
                     data.beregnetEtteroppgjoerResultat.grense.rettsgebyr
-                        .toInt(),
+                        .toInt(), // TODO long
                 resultatType = data.beregnetEtteroppgjoerResultat.resultatType.name,
-                inntekt = data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt(),
-                faktiskInntekt = data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt(),
-                avviksBeloep = data.beregnetEtteroppgjoerResultat.differanse.toInt(),
+                inntekt = data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt(), // TODO long
+                faktiskInntekt = data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt(), // TODO long
+                avviksBeloep = data.beregnetEtteroppgjoerResultat.differanse.toInt(), // TODO long
             )
         }
 

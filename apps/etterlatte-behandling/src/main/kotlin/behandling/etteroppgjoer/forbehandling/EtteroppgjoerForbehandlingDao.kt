@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
@@ -77,7 +78,7 @@ class EtteroppgjoerForbehandlingDao(
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
-                statement.setString(2, forbehandling.status)
+                statement.setString(2, forbehandling.status.name)
                 statement.setSakId(3, forbehandling.sak.id)
                 statement.setTidspunkt(4, forbehandling.opprettet)
                 statement.setInt(5, forbehandling.aar)
@@ -222,7 +223,7 @@ class EtteroppgjoerForbehandlingDao(
                 ),
             // sekvensnummerSkatt = "123", // TODO
             opprettet = getTidspunkt("opprettet"),
-            status = getString("status"),
+            status = EtteroppgjoerForbehandlingStatus.valueOf(getString("status")),
             aar = getInt("aar"),
             innvilgetPeriode =
                 Periode(

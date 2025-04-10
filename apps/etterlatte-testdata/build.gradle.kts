@@ -23,7 +23,6 @@ dependencies {
     implementation(libs.ktor2.server)
     implementation("io.ktor:ktor-server-core:2.3.13")
     implementation("io.ktor:ktor-server-swagger:2.3.13")
-    implementation("io.ktor:ktor-server-core:2.3.13")
 
     testImplementation(libs.test.kotest.assertionscore)
 }

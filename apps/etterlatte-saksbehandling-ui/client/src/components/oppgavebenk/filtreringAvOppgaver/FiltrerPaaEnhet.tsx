@@ -7,6 +7,8 @@ export const FiltrerPaaEnhet = ({ filter, setFilter }: { filter: Filter; setFilt
 
   enhetesFilterSomListeSortertAlfabetisk
     .toSorted((first, last) => {
+      console.log(first[1].trim().toLowerCase())
+
       if (first[1].trim().toLowerCase() > last[1].trim().toLowerCase()) {
         return 1
       }

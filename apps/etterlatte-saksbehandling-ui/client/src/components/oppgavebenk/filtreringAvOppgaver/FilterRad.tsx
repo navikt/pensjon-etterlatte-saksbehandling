@@ -10,7 +10,6 @@ import {
   Filter,
   FRISTFILTER,
   FristFilterKeys,
-  OPPGAVESTATUSFILTER,
   OPPGAVETYPEFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
@@ -19,6 +18,7 @@ import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/
 import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { FiltrerPaaEnhet } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaEnhet'
+import { FiltrerPaaOppgavestatus } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaOppgavestatus'
 
 interface Props {
   hentAlleOppgaver: (oppgavestatusFilter?: Array<string>) => void
@@ -95,16 +95,7 @@ export const FilterRad = ({
 
         {oppgavelisteValg !== OppgavelisteValg.GOSYS_OPPGAVER && (
           <>
-            <MultiSelectFilter
-              label="Oppgavestatus"
-              options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
-              values={filter.oppgavestatusFilter}
-              onChange={(statuser) => {
-                const statusFilter = statuser.includes(OPPGAVESTATUSFILTER.visAlle) ? [] : statuser
-                hentAlleOppgaver(statusFilter)
-                setFilter({ ...filter, oppgavestatusFilter: statusFilter })
-              }}
-            />
+            <FiltrerPaaOppgavestatus hentAlleOppgaver={hentAlleOppgaver} filter={filter} setFilter={setFilter} />
 
             <MultiSelectFilter
               label="Oppgavetype"

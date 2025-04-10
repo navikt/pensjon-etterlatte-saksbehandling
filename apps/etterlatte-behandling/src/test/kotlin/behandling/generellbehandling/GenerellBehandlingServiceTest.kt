@@ -640,7 +640,7 @@ internal class GenerellBehandlingServiceTest(
                 opprettBehandling.id.toString(),
                 sak.id,
                 OppgaveKilde.GENERELL_BEHANDLING,
-                OppgaveType.GENERELL_OPPGAVE,
+                OppgaveType.OPPFOELGING,
                 "Sluttbehandling - VO utland",
                 any(),
             )

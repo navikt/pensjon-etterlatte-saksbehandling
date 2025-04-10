@@ -211,7 +211,7 @@ class GenerellBehandlingService(
             generellbehandlingId.toString(),
             hentetBehandling.sakId,
             OppgaveKilde.GENERELL_BEHANDLING,
-            OppgaveType.GENERELL_OPPGAVE,
+            OppgaveType.OPPFOELGING,
             "Sluttbehandling - VO utland",
             Tidspunkt.ofNorskTidssone(LocalDate.now().plus(3, ChronoUnit.MONTHS), LocalTime.NOON),
         )

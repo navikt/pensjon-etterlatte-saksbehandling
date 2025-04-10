@@ -30,7 +30,14 @@ export const GeneriskOppgaveModal = ({
   } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
 
   const avslutt = ({ kommentar }: { kommentar: string }) => {
-    const nyMerknad = `${oppgave.merknad}. Kommentar: ${kommentar}`
+    // hvis oppgave har merknad, kombiner den med ny kommentar
+    // TODO: burde egentlig legge til et eget felt for kommentar så vi slipper tullet under her
+    const nyMerknad = kommentar?.trim()
+      ? oppgave.merknad
+        ? `${oppgave.merknad}${oppgave.merknad.trim().endsWith('.') ? '' : '.'} Kommentar: ${kommentar}`
+        : `Kommentar: ${kommentar}`
+      : (oppgave.merknad ?? '')
+
     avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
       oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
       setOpen(false)

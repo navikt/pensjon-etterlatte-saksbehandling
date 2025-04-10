@@ -25,9 +25,11 @@ import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/
 export const HandlingerForOppgave = ({
   oppgave,
   oppdaterStatus,
+  oppdaterMerknad,
 }: {
   oppgave: OppgaveDTO
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+  oppdaterMerknad: (oppgaveId: string, merknad: string) => void
 }) => {
   const navigate = useNavigate()
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
@@ -154,7 +156,11 @@ export const HandlingerForOppgave = ({
     case Oppgavetype.TILLEGGSINFORMASJON:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <TilleggsinformasjonOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+          <TilleggsinformasjonOppgaveModal
+            oppgave={oppgave}
+            oppdaterStatus={oppdaterStatus}
+            oppdaterMerknad={oppdaterMerknad}
+          />
         )
       )
     case Oppgavetype.OMGJOERING:

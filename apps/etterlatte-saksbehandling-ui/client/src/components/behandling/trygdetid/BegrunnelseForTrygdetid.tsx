@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { DocPencilIcon, FloppydiskIcon, PencilIcon, PlusIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 
-interface Props {
+export const BegrunnelseForTrygdetid = ({
+  redigerbar,
+  trygdetid,
+  oppdaterTrygdetidBegrunnelse,
+}: {
   redigerbar: boolean
   trygdetid: ITrygdetid
   oppdaterTrygdetidBegrunnelse: (begrunnelse: string | undefined) => void
-}
-
-export const BegrunnelseForTrygdetid = ({ redigerbar, trygdetid, oppdaterTrygdetidBegrunnelse }: Props) => {
+}) => {
+  const [redigerBegrunnelse, setRedigerBegrunnelse] = useState<boolean>(false)
   const { register, getValues, reset, handleSubmit } = useForm<{ begrunnelse: string | undefined }>({
     defaultValues: {
       begrunnelse: trygdetid.begrunnelse,
@@ -20,8 +23,6 @@ export const BegrunnelseForTrygdetid = ({ redigerbar, trygdetid, oppdaterTrygdet
   useEffect(() => {
     reset({ begrunnelse: trygdetid.begrunnelse })
   }, [trygdetid])
-
-  const [redigerBegrunnelse, setRedigerBegrunnelse] = useState<boolean>(false)
 
   return (
     <form

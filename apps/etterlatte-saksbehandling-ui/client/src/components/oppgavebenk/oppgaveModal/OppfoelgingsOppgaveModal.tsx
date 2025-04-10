@@ -1,64 +1,99 @@
-import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
-import { Alert, BodyShort, Box, Button, Heading, Modal, Textarea, VStack } from '@navikt/ds-react'
-import React, { useEffect, useState } from 'react'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
+import { Alert, BodyShort, Box, Button, Checkbox, Heading, Modal, Textarea, VStack } from '@navikt/ds-react'
+import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ferdigstillOppgaveMedMerknad, hentOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import { ferdigstillOppgaveMedMerknad, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useForm } from 'react-hook-form'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
-interface FormData {
-  merknad: string
+interface OppfoegingsOppgaveSkjema {
+  hvaSomErFulgtOpp: string
+  skalOppretteNyOppfoelgingsOppgave: boolean
+  nyOppfoelgingsOppgaveFrist: string
+  nyOppfoelgingsOppgaveMerknad: string
 }
 
-export function OppfoelgingAvOppgaveModal(props: {
+export function OppfoelgingAvOppgaveModal({
+  oppgave,
+  oppdaterStatus,
+}: {
   oppgave: OppgaveDTO
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }) {
   const [visModal, setVisModal] = useState(false)
-  const { oppgave: oppgaveProp, oppdaterStatus } = props
-  const [oppgave, setOppgave] = useState<OppgaveDTO>(oppgaveProp)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erSaksbehandlersOppgave = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
-  const [tildelStatus, tildelApi] = useApiCall(tildelSaksbehandlerApi)
+  const [tildelSaksbehandlerResult, tildelSaksbehandlerRequest, resetTildelSaksbehandlerRequest] =
+    useApiCall(tildelSaksbehandlerApi)
 
-  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
-  const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
+  const [opprettOppgaveResult, opprettOppgaveRequest, resetOpprettOppgaveRequest] = useApiCall(opprettOppgave)
+  const [
+    ferdigstillOppgaveMedMerknadResult,
+    ferdigstillOppgaveMedMerknadRequest,
+    resetFerdigstillOppgaveMedMerknadRequest,
+  ] = useApiCall(ferdigstillOppgaveMedMerknad)
+
   const {
     register,
     handleSubmit,
     watch,
+    control,
+    reset,
     formState: { errors },
-  } = useForm<FormData>()
+  } = useForm<OppfoegingsOppgaveSkjema>({
+    defaultValues: {
+      nyOppfoelgingsOppgaveMerknad: oppgave.merknad,
+      nyOppfoelgingsOppgaveFrist: oppgave.frist,
+    },
+  })
 
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
-  useEffect(() => {
-    if (visModal) {
-      apiHentOppgave(oppgave.id, (result) => {
-        setOppgave(result)
-      })
-    }
-  }, [visModal])
-  const merknadSkjema = watch('merknad')
+  const lukkModal = () => {
+    reset()
+    resetOpprettOppgaveRequest()
+    resetFerdigstillOppgaveMedMerknadRequest()
+    resetTildelSaksbehandlerRequest()
+    setVisModal(false)
+  }
 
-  const ferdigstill = () => {
-    if (erRedigerbar) {
-      const merknad = merknadSkjema ? merknadSkjema : oppgave.merknad
-      apiFerdigstillOppgave({ id: oppgave.id, merknad: merknad }, (oppgave) => {
-        setVisModal(false)
+  const ferdigstill = (data: OppfoegingsOppgaveSkjema) => {
+    const merknad = data.hvaSomErFulgtOpp ? data.hvaSomErFulgtOpp : oppgave.merknad
+    ferdigstillOppgaveMedMerknadRequest({ id: oppgave.id, merknad: merknad }, (oppgave) => {
+      if (data.skalOppretteNyOppfoelgingsOppgave) {
+        const justertFrist = new Date(data.nyOppfoelgingsOppgaveFrist)
+        justertFrist.setHours(12)
+
+        opprettOppgaveRequest(
+          {
+            sakId: oppgave.sakId,
+            request: {
+              oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+              oppgaveType: Oppgavetype.OPPFOELGING,
+              merknad: data.nyOppfoelgingsOppgaveMerknad,
+              frist: justertFrist.toISOString(),
+              saksbehandler: innloggetSaksbehandler.ident,
+            },
+          },
+          () => {
+            lukkModal()
+            oppdaterStatus(oppgave.id, oppgave.status)
+          }
+        )
+      } else {
+        lukkModal()
         oppdaterStatus(oppgave.id, oppgave.status)
-      })
-    }
+      }
+    })
   }
   const tildelOppgave = () => {
-    tildelApi({ oppgaveId: oppgave.id, saksbehandlerIdent: innloggetSaksbehandler.ident }, () => {
-      apiHentOppgave(oppgave.id, (result) => setOppgave(result))
-    })
+    tildelSaksbehandlerRequest({ oppgaveId: oppgave.id, saksbehandlerIdent: innloggetSaksbehandler.ident })
   }
 
   return (
@@ -67,7 +102,7 @@ export function OppfoelgingAvOppgaveModal(props: {
         Se oppgave
       </Button>
       {visModal && (
-        <Modal open={visModal} onClose={() => setVisModal(false)} header={{ heading: 'Oppfølging av sak' }}>
+        <Modal open={visModal} onClose={lukkModal} header={{ heading: 'Oppfølging av sak' }}>
           <Box minWidth="41.5rem">
             <form onSubmit={handleSubmit(ferdigstill)}>
               <Modal.Body>
@@ -77,41 +112,64 @@ export function OppfoelgingAvOppgaveModal(props: {
                   )}
 
                   {isFailureHandler({
-                    apiResult: ferdigstillOppgaveStatus,
+                    apiResult: ferdigstillOppgaveMedMerknadResult,
                     errorMessage: 'Kunne ikke ferdigstille oppgaven.',
                   })}
 
                   {isFailureHandler({
-                    apiResult: hentOppgaveStatus,
-                    errorMessage: 'Kunne ikke hente ut oppgaven. Prøv å last Gjenny på nytt.',
+                    apiResult: opprettOppgaveResult,
+                    errorMessage: 'Kunne ikke opprette ny oppgave',
                   })}
 
                   {isFailureHandler({
-                    apiResult: tildelStatus,
+                    apiResult: tildelSaksbehandlerResult,
                     errorMessage: 'Kunne ikke tildele oppgaven til deg.',
                   })}
-                  <div>
+                  <VStack gap="2">
                     <Heading size="xsmall">{erRedigerbar ? 'Hva skal følges opp?' : 'Hva ble fulgt opp'}</Heading>
-                    <BodyShort>
-                      {oppgave.merknad}.{' '}
-                      <PersonLink fnr={oppgave.fnr!!} target="_blank" rel="noreferrer noopener">
-                        Gå til saksoversikten <ExternalLinkIcon title="a11y-title" fontSize="1.3rem" />
-                      </PersonLink>
-                    </BodyShort>
-                  </div>
+                    <BodyShort>{oppgave.merknad}</BodyShort>
+                    <PersonLink fnr={oppgave.fnr!!} target="_blank" rel="noreferrer noopener">
+                      Gå til saksoversikten <ExternalLinkIcon title="a11y-title" fontSize="1.3rem" />
+                    </PersonLink>
+                  </VStack>
 
                   {erRedigerbar &&
                     (erSaksbehandlersOppgave ? (
-                      <Textarea
-                        {...register('merknad', {
-                          required: {
-                            value: true,
-                            message: 'Du må skrive hva som ble fulgt opp for å avslutte oppgaven',
-                          },
-                        })}
-                        error={errors.merknad?.message}
-                        label="Beskriv hva som er fulgt opp"
-                      />
+                      <>
+                        <Textarea
+                          {...register('hvaSomErFulgtOpp', {
+                            required: {
+                              value: true,
+                              message: 'Du må skrive hva som ble fulgt opp for å avslutte oppgaven',
+                            },
+                          })}
+                          label="Beskriv hva som er fulgt opp"
+                          error={errors.hvaSomErFulgtOpp?.message}
+                        />
+                        <Checkbox {...register('skalOppretteNyOppfoelgingsOppgave')}>
+                          Lag ny oppfølgingsoppgave
+                        </Checkbox>
+                        {!!watch('skalOppretteNyOppfoelgingsOppgave') && (
+                          <>
+                            <ControlledDatoVelger
+                              name="nyOppfoelgingsOppgaveFrist"
+                              label="Frist for ny oppgave"
+                              control={control}
+                              errorVedTomInput="Du må sette en frist"
+                            />
+                            <Textarea
+                              {...register('nyOppfoelgingsOppgaveMerknad', {
+                                required: {
+                                  value: true,
+                                  message: 'Du må gi en merknad for den nye oppgaven',
+                                },
+                              })}
+                              label="Merknad på ny oppgave"
+                              error={errors.nyOppfoelgingsOppgaveMerknad?.message}
+                            />
+                          </>
+                        )}
+                      </>
                     ) : (
                       <Alert variant="info">For å ferdigstille oppgaven må den være tildelt deg.</Alert>
                     ))}
@@ -120,23 +178,31 @@ export function OppfoelgingAvOppgaveModal(props: {
               <Modal.Footer>
                 {erRedigerbar &&
                   (erSaksbehandlersOppgave ? (
-                    <Button variant="primary" type="submit" loading={isPending(ferdigstillOppgaveStatus)}>
-                      Ferdigstill
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      loading={isPending(ferdigstillOppgaveMedMerknadResult) || isPending(opprettOppgaveResult)}
+                    >
+                      {!!watch('skalOppretteNyOppfoelgingsOppgave') ? 'Ferdigstill og opprett ny' : 'Ferdigstill'}
                     </Button>
                   ) : (
                     <Button
                       variant="primary"
+                      type="button"
                       onClick={tildelOppgave}
-                      loading={isPending(hentOppgaveStatus) || isPending(tildelStatus)}
+                      loading={isPending(tildelSaksbehandlerResult)}
                     >
                       Tildel meg
                     </Button>
                   ))}
                 <Button
-                  onClick={() => setVisModal(false)}
+                  onClick={lukkModal}
+                  type="button"
                   variant="tertiary"
                   disabled={
-                    isPending(ferdigstillOppgaveStatus) || isPending(hentOppgaveStatus) || isPending(tildelStatus)
+                    isPending(ferdigstillOppgaveMedMerknadResult) ||
+                    isPending(tildelSaksbehandlerResult) ||
+                    isPending(opprettOppgaveResult)
                   }
                 >
                   Avbryt

@@ -83,8 +83,22 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
 
   const oppdaterFrist = (oppgaveId: string, frist: string) => {
     setTimeout(() => {
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterOppgave(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, { frist })
+      )
       dispatcher.setMinOppgavelisteOppgaver(
         finnOgOppdaterOppgave(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, { frist })
+      )
+    }, 2000)
+  }
+
+  const oppdaterMerknad = (oppgaveId: string, merknad: string) => {
+    setTimeout(() => {
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterOppgave(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, { merknad })
+      )
+      dispatcher.setMinOppgavelisteOppgaver(
+        finnOgOppdaterOppgave(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, { merknad })
       )
     }, 2000)
   }
@@ -122,6 +136,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
           oppdaterFrist={oppdaterFrist}
           oppdaterStatus={oppdaterStatus}
+          oppdaterMerknad={oppdaterMerknad}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           filter={filter}
         />

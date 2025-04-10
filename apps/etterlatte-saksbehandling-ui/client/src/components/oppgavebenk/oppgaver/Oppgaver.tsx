@@ -20,6 +20,7 @@ export interface Props {
   oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
   oppdaterFrist: (id: string, nyfrist: string) => void
+  oppdaterMerknad: (oppgaveId: string, merknad: string) => void
   filter?: Filter
 }
 
@@ -29,6 +30,7 @@ export const Oppgaver = ({
   oppdaterSaksbehandlerTildeling,
   oppdaterFrist,
   oppdaterStatus,
+  oppdaterMerknad,
   filter,
 }: Props): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
@@ -73,6 +75,7 @@ export const Oppgaver = ({
         oppdaterTildeling={oppdaterSaksbehandlerTildeling}
         oppdaterFrist={oppdaterFrist}
         oppdaterStatus={oppdaterStatus}
+        oppdaterMerknad={oppdaterMerknad}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}
       />

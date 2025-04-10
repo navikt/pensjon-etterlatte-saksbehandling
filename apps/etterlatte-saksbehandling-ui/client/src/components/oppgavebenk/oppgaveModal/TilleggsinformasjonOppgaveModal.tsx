@@ -14,9 +14,11 @@ import { EyeIcon } from '@navikt/aksel-icons'
 export const TilleggsinformasjonOppgaveModal = ({
   oppgave,
   oppdaterStatus,
+  oppdaterMerknad,
 }: {
   oppgave: OppgaveDTO
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+  oppdaterMerknad: (oppgaveId: string, merknad: string) => void
 }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -56,6 +58,7 @@ export const TilleggsinformasjonOppgaveModal = ({
 
     avsluttOppgave({ id: oppgave.id, merknad }, (oppgave) => {
       oppdaterStatus(oppgave.id, oppgave.status)
+      oppdaterMerknad(oppgave.id, merknad)
       setIsOpen(false)
     })
   }

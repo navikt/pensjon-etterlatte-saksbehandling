@@ -24,7 +24,7 @@ export const SendtilAttesteringModal = ({
     if (!open) {
       resetSendTilAttesteringStatus()
     }
-  }, [open, resetSendTilAttesteringStatus])
+  }, [open])
 
   return (
     <>

@@ -50,7 +50,12 @@ class SjekklisteService(
             when (behandling.sak.sakType) {
                 SakType.BARNEPENSJON ->
                     when (behandling.type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> skjekklisteItemsFoerstegangsbehandlingBP
+                        BehandlingType.FØRSTEGANGSBEHANDLING ->
+                            if (behandling.erSluttbehandling()) {
+                                skjekklisteItemsFoerstegangsbehandlingBP + sjekklisteItemsBosattNorgeSluttbehandling
+                            } else {
+                                skjekklisteItemsFoerstegangsbehandlingBP
+                            }
                         BehandlingType.REVURDERING -> {
                             if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING) {
                                 sjekklisteItemsRevurderingBP + sjekklisteItemsBosattNorgeSluttbehandling
@@ -61,7 +66,13 @@ class SjekklisteService(
                     }
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (behandling.type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> sjekklisteItemsFoerstegangsbehandlingOMS
+                        BehandlingType.FØRSTEGANGSBEHANDLING ->
+                            if (behandling.erSluttbehandling()) {
+                                sjekklisteItemsFoerstegangsbehandlingOMS + sjekklisteItemsBosattNorgeSluttbehandling
+                            } else {
+                                sjekklisteItemsFoerstegangsbehandlingOMS
+                            }
+
                         BehandlingType.REVURDERING -> {
                             if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING) {
                                 sjekklisteItemsRevurderingOMS + sjekklisteItemsBosattNorgeSluttbehandling

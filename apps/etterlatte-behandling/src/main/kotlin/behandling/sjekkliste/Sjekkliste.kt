@@ -45,6 +45,7 @@ internal val skjekklisteItemsFoerstegangsbehandlingBP =
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
+        "Forutsigbart opphør (aldersovergang e.l.) før desember i år eller neste år: Oppgitt inntekt for i år/ neste år i søknaden er kontrollert, og måneder etter opphør er trukket fra i beregningen.",
     )
 
 internal val sjekklisteItemsFoerstegangsbehandlingOMS =

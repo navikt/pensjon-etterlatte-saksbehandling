@@ -21,12 +21,15 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { RedigerMottattDato } from '~components/klage/sidemeny/RedigerMottattDato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 
 export function KlageSidemeny() {
   const klage = useKlage()
   const dispatch = useAppDispatch()
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const oppgave = useSelectorOppgaveUnderBehandling()
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const kanAttestere = !!klage && innloggetSaksbehandler.kanAttestere && klage.status === KlageStatus.FATTET_VEDTAK
   const erRedigerbar = useKlageRedigerbar()
@@ -79,6 +82,10 @@ export function KlageSidemeny() {
           </HStack>
 
           {erRedigerbar && <RedigerMottattDato />}
+
+          <Box marginBlock="2 0">
+            <SettPaaVent oppgave={oppgave} />
+          </Box>
         </VStack>
       </SidebarPanel>
       {kanAttestere && (

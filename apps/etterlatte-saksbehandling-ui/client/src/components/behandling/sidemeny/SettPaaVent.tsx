@@ -20,8 +20,10 @@ export const SettPaaVent = ({ oppgave }: Props) => {
             <Heading size="xsmall" spacing>
               Oppgaven står på vent!
             </Heading>
-            <Info label="Merknad" tekst={oppgave.merknad || 'Ingen'} />
-            <Info label="Ny frist" tekst={formaterDato(oppgave.frist)} />
+            <VStack gap="4">
+              <Info label="Merknad" tekst={oppgave.merknad || 'Ingen'} />
+              <Info label="Ny frist" tekst={formaterDato(oppgave.frist)} />
+            </VStack>
           </Alert>
         </>
       )}

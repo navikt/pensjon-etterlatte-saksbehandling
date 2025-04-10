@@ -8,15 +8,17 @@ export const finnOgOppdaterOppgave = (
     status?: Oppgavestatus
     frist?: string
     saksbehandler?: OppgaveSaksbehandler | null
+    merknad?: string
   }
 ) => {
-  const { status, frist, saksbehandler } = felter
+  const { status, frist, saksbehandler, merknad } = felter
   const index = oppgaver.findIndex((o) => o.id === oppgaveId)
   if (index > -1) {
     const oppdatertOppgaveState = [...oppgaver]
     if (status) oppdatertOppgaveState[index].status = status
     if (frist) oppdatertOppgaveState[index].frist = frist
     if (saksbehandler) oppdatertOppgaveState[index].saksbehandler = saksbehandler
+    if (merknad) oppdatertOppgaveState[index].merknad = merknad
     return oppdatertOppgaveState
   } else {
     return oppgaver

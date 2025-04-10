@@ -7,8 +7,6 @@ import {
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaSaksbehandler'
 import {
-  ENHETFILTER,
-  EnhetFilterKeys,
   Filter,
   FRISTFILTER,
   FristFilterKeys,
@@ -20,6 +18,7 @@ import {
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
 import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
+import { FiltrerPaaEnhet } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaEnhet'
 
 interface Props {
   hentAlleOppgaver: (oppgavestatusFilter?: Array<string>) => void
@@ -79,17 +78,7 @@ export const FilterRad = ({
           <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
         )}
         {oppgavelisteValg !== OppgavelisteValg.MIN_OPPGAVELISTE && (
-          <Select
-            label="Enhet"
-            value={filter.enhetsFilter}
-            onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
-          >
-            {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
-              <option key={enhetsnummer} value={enhetsnummer}>
-                {enhetBeskrivelse}
-              </option>
-            ))}
-          </Select>
+          <FiltrerPaaEnhet filter={filter} setFilter={setFilter} />
         )}
 
         <Select

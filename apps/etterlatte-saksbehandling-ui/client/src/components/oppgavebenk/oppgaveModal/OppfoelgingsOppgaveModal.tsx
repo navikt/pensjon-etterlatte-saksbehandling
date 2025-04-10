@@ -39,13 +39,11 @@ export function OppfoelgingAvOppgaveModal({
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
   const ferdigstill = (data: OppfoegingsOppgaveSkjema) => {
-    if (erRedigerbar) {
-      const merknad = data.hvaSomErFulgtOpp ? data.hvaSomErFulgtOpp : oppgave.merknad
-      ferdigstillOppgaveMedMerknadRequest({ id: oppgave.id, merknad: merknad }, (oppgave) => {
-        setVisModal(false)
-        oppdaterStatus(oppgave.id, oppgave.status)
-      })
-    }
+    const merknad = data.hvaSomErFulgtOpp ? data.hvaSomErFulgtOpp : oppgave.merknad
+    ferdigstillOppgaveMedMerknadRequest({ id: oppgave.id, merknad: merknad }, (oppgave) => {
+      setVisModal(false)
+      oppdaterStatus(oppgave.id, oppgave.status)
+    })
   }
   const tildelOppgave = () => {
     tildelSaksbehandlerRequest({ oppgaveId: oppgave.id, saksbehandlerIdent: innloggetSaksbehandler.ident })
@@ -107,12 +105,18 @@ export function OppfoelgingAvOppgaveModal({
                       Ferdigstill
                     </Button>
                   ) : (
-                    <Button variant="primary" onClick={tildelOppgave} loading={isPending(tildelSaksbehandlerResult)}>
+                    <Button
+                      variant="primary"
+                      type="button"
+                      onClick={tildelOppgave}
+                      loading={isPending(tildelSaksbehandlerResult)}
+                    >
                       Tildel meg
                     </Button>
                   ))}
                 <Button
                   onClick={() => setVisModal(false)}
+                  type="button"
                   variant="tertiary"
                   disabled={isPending(ferdigstillOppgaveMedMerknadResult) || isPending(tildelSaksbehandlerResult)}
                 >

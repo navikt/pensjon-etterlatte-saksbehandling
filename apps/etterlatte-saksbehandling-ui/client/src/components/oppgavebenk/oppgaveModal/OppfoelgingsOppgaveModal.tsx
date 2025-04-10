@@ -29,11 +29,15 @@ export function OppfoelgingAvOppgaveModal({
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erSaksbehandlersOppgave = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
-  const [tildelSaksbehandlerResult, tildelSaksbehandlerRequest] = useApiCall(tildelSaksbehandlerApi)
+  const [tildelSaksbehandlerResult, tildelSaksbehandlerRequest, resetTildelSaksbehandlerRequest] =
+    useApiCall(tildelSaksbehandlerApi)
 
-  const [opprettOppgaveResult, opprettOppgaveRequest] = useApiCall(opprettOppgave)
-  const [ferdigstillOppgaveMedMerknadResult, ferdigstillOppgaveMedMerknadRequest] =
-    useApiCall(ferdigstillOppgaveMedMerknad)
+  const [opprettOppgaveResult, opprettOppgaveRequest, resetOpprettOppgaveRequest] = useApiCall(opprettOppgave)
+  const [
+    ferdigstillOppgaveMedMerknadResult,
+    ferdigstillOppgaveMedMerknadRequest,
+    resetFerdigstillOppgaveMedMerknadRequest,
+  ] = useApiCall(ferdigstillOppgaveMedMerknad)
 
   const {
     register,
@@ -53,6 +57,9 @@ export function OppfoelgingAvOppgaveModal({
 
   const lukkModal = () => {
     reset()
+    resetOpprettOppgaveRequest()
+    resetFerdigstillOppgaveMedMerknadRequest()
+    resetTildelSaksbehandlerRequest()
     setVisModal(false)
   }
 
@@ -107,6 +114,11 @@ export function OppfoelgingAvOppgaveModal({
                   {isFailureHandler({
                     apiResult: ferdigstillOppgaveMedMerknadResult,
                     errorMessage: 'Kunne ikke ferdigstille oppgaven.',
+                  })}
+
+                  {isFailureHandler({
+                    apiResult: opprettOppgaveResult,
+                    errorMessage: 'Kunne ikke opprette ny oppgave',
                   })}
 
                   {isFailureHandler({

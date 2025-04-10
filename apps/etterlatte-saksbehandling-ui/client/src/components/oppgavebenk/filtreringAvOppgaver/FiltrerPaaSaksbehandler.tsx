@@ -11,7 +11,16 @@ interface Props {
 
 export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhet }: Props) => {
   const saksbehandlerFilterValues: string[] = Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
-  const options = [...saksbehandlerFilterValues, ...saksbehandlereIEnhet.map((behandler) => behandler.navn)]
+  const saksbehandlereIEnhetSortertAlfabetisk = [...saksbehandlereIEnhet].toSorted((first, last) => {
+    if (first.navn.trim().toLowerCase() > last.navn.trim().toLowerCase()) {
+      return 1
+    }
+    return -1
+  })
+  const options = [
+    ...saksbehandlerFilterValues,
+    ...saksbehandlereIEnhetSortertAlfabetisk.map((behandler) => behandler.navn),
+  ]
 
   /*
    * Først sjekkke om valgt saksbehandler finnes i SAKSBEHANDLERFILTER.

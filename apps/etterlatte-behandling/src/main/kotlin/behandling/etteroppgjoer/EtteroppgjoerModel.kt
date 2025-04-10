@@ -39,6 +39,7 @@ enum class EtteroppgjoerForbehandlingStatus {
     BEREGNET,
     TIL_ATTESTERING,
     ATTESTERT,
+    RETURNERT,
     VARSELBREV_SENDT,
     SVAR_MOTTATT,
     INGEN_SVAR_INNEN_TIDSFRIST,

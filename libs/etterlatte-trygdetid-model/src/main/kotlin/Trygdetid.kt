@@ -16,6 +16,7 @@ data class TrygdetidDto(
     val opplysninger: GrunnlagOpplysningerDto,
     val overstyrtNorskPoengaar: Int?,
     val opplysningerDifferanse: OpplysningerDifferanse,
+    val begrunnelse: String?,
 )
 
 const val UKJENT_AVDOED = "UKJENT_AVDOED"
@@ -30,6 +31,12 @@ data class TrygdetidYrkesskadeDto(
     val id: UUID,
     val behandlingId: UUID,
     val yrkesskade: Boolean,
+)
+
+data class TrygdetidBegrunnelseDto(
+    val id: UUID,
+    val behandlingId: UUID,
+    val begrunnelse: String?,
 )
 
 data class GrunnlagOpplysningerDto(

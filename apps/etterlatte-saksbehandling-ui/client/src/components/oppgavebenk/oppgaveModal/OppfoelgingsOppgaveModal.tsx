@@ -1,8 +1,8 @@
-import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { Alert, BodyShort, Box, Button, Checkbox, Heading, Modal, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ferdigstillOppgaveMedMerknad, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import { ferdigstillOppgaveMedMerknad, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useForm } from 'react-hook-form'
@@ -31,6 +31,7 @@ export function OppfoelgingAvOppgaveModal({
   const erSaksbehandlersOppgave = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const [tildelSaksbehandlerResult, tildelSaksbehandlerRequest] = useApiCall(tildelSaksbehandlerApi)
 
+  const [opprettOppgaveResult, opprettOppgaveRequest] = useApiCall(opprettOppgave)
   const [ferdigstillOppgaveMedMerknadResult, ferdigstillOppgaveMedMerknadRequest] =
     useApiCall(ferdigstillOppgaveMedMerknad)
 
@@ -41,7 +42,12 @@ export function OppfoelgingAvOppgaveModal({
     control,
     reset,
     formState: { errors },
-  } = useForm<OppfoegingsOppgaveSkjema>()
+  } = useForm<OppfoegingsOppgaveSkjema>({
+    defaultValues: {
+      nyOppfoelgingsOppgaveMerknad: oppgave.merknad,
+      nyOppfoelgingsOppgaveFrist: oppgave.frist,
+    },
+  })
 
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
@@ -53,8 +59,30 @@ export function OppfoelgingAvOppgaveModal({
   const ferdigstill = (data: OppfoegingsOppgaveSkjema) => {
     const merknad = data.hvaSomErFulgtOpp ? data.hvaSomErFulgtOpp : oppgave.merknad
     ferdigstillOppgaveMedMerknadRequest({ id: oppgave.id, merknad: merknad }, (oppgave) => {
-      lukkModal()
-      oppdaterStatus(oppgave.id, oppgave.status)
+      if (data.skalOppretteNyOppfoelgingsOppgave) {
+        const justertFrist = new Date(data.nyOppfoelgingsOppgaveFrist)
+        justertFrist.setHours(12)
+
+        opprettOppgaveRequest(
+          {
+            sakId: oppgave.sakId,
+            request: {
+              oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+              oppgaveType: Oppgavetype.OPPFOELGING,
+              merknad: data.nyOppfoelgingsOppgaveMerknad,
+              frist: justertFrist.toISOString(),
+              saksbehandler: innloggetSaksbehandler.ident,
+            },
+          },
+          () => {
+            lukkModal()
+            oppdaterStatus(oppgave.id, oppgave.status)
+          }
+        )
+      } else {
+        lukkModal()
+        oppdaterStatus(oppgave.id, oppgave.status)
+      }
     })
   }
   const tildelOppgave = () => {
@@ -138,7 +166,11 @@ export function OppfoelgingAvOppgaveModal({
               <Modal.Footer>
                 {erRedigerbar &&
                   (erSaksbehandlersOppgave ? (
-                    <Button variant="primary" type="submit" loading={isPending(ferdigstillOppgaveMedMerknadResult)}>
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      loading={isPending(ferdigstillOppgaveMedMerknadResult) || isPending(opprettOppgaveResult)}
+                    >
                       {!!watch('skalOppretteNyOppfoelgingsOppgave') ? 'Ferdigstill og opprett ny' : 'Ferdigstill'}
                     </Button>
                   ) : (
@@ -155,7 +187,11 @@ export function OppfoelgingAvOppgaveModal({
                   onClick={lukkModal}
                   type="button"
                   variant="tertiary"
-                  disabled={isPending(ferdigstillOppgaveMedMerknadResult) || isPending(tildelSaksbehandlerResult)}
+                  disabled={
+                    isPending(ferdigstillOppgaveMedMerknadResult) ||
+                    isPending(tildelSaksbehandlerResult) ||
+                    isPending(opprettOppgaveResult)
+                  }
                 >
                   Avbryt
                 </Button>

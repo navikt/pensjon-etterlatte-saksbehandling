@@ -1,7 +1,6 @@
 import { ISak } from '~shared/types/sak'
 import { IAvkortetYtelse, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
@@ -12,7 +11,7 @@ export interface Etteroppgjoer {
 
 export interface EtteroppgjoerBehandling {
   id: string
-  status: IBehandlingStatus
+  status: string
   sak: ISak
   aar: number
   innvilgetPeriode: {

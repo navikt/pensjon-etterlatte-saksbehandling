@@ -11,7 +11,7 @@ import { addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/Ette
 import { maanedNavn } from '~utils/formatering/dato'
 import { useAppDispatch } from '~store/Store'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -51,11 +51,8 @@ export const FastsettFaktiskInntekt = ({
   const { behandling } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
 
-  const erRedigerbar = behandlingErRedigerbar(
-    behandling.status,
-    behandling.sak.enhet,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const erRedigerbar =
+    behandling.status !== 'ATTESTERING' && enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {
     register,

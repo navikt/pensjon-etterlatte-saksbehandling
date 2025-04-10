@@ -160,7 +160,7 @@ class BrevService(
             BehandlingMedBrevType.ETTEROPPGJOER ->
                 etteroppgjoerBrevService.tilbakestillEtteroppgjoerBrev(
                     brevId = brevID,
-                    forbehandlingId = behandlingId,
+                    behandlingId = behandlingId,
                     brukerTokenInfo = bruker,
                 )
 

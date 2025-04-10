@@ -24,7 +24,7 @@ data class BeregnetEtteroppgjoerResultatDto(
 data class EtteroppgjoerGrenseDto(
     val tilbakekreving: Double,
     val etterbetaling: Double,
-    val rettsgebyr: Double,
+    val rettsgebyr: Int,
     val rettsgebyrGyldigFra: LocalDate,
 )
 

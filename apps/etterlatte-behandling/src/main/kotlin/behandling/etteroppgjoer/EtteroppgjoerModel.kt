@@ -3,13 +3,16 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.Forhaandsvarsel
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.ForhaandsvarselInnhold
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
@@ -28,11 +31,12 @@ enum class EtteroppgjoerStatus {
 }
 
 // TODO falte ut behandling..
-data class ForbehandlingDto(
+data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
     val faktiskInntekt: FaktiskInntekt?,
     val avkortingFaktiskInntekt: AvkortingDto?,
+    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto,
 )
 
 enum class EtteroppgjoerForbehandlingStatus {
@@ -224,14 +228,28 @@ data class SkatteoppgjoerHendelser(
 data class EtteroppgjoerBrevRequestData(
     val redigerbar: BrevRedigerbarInnholdData,
     val innhold: BrevFastInnholdData,
+    val data: DetaljertForbehandlingDto,
 )
 
-object EtteroppgjoerBrevMapper {
-    // TODO: mappe til riktige brevvarianter avhengig av data i forbehandlingen
-    fun fra(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerBrevRequestData =
+object EtteroppgjoerBrevDataMapper {
+    fun fra(data: DetaljertForbehandlingDto) =
         EtteroppgjoerBrevRequestData(
-            redigerbar = EtteroppgjoerBrevData.VarselTilbakekrevingInnhold(forbehandling.sak),
-            innhold = EtteroppgjoerBrevData.VarselTilbakekreving(forbehandling.sak),
+            redigerbar =
+                ForhaandsvarselInnhold(
+                    sak = data.behandling.sak,
+                ),
+            innhold =
+                Forhaandsvarsel(
+                    bosattUtland = false, // TODO
+                    norskInntekt = false, // TODO
+                    etteroppgjoersAar = data.behandling.aar,
+                    rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
+                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                ),
+            data = data,
         )
 }
 

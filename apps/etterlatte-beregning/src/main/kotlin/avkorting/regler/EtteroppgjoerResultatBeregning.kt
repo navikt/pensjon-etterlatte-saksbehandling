@@ -154,7 +154,7 @@ data class EtteroppgjoerGrense(
         EtteroppgjoerGrenseDto(
             tilbakekreving = this.tilbakekreving.toDouble(),
             etterbetaling = this.etterbetaling.toDouble(),
-            rettsgebyr = this.rettsgebyr.rettsgebyr.toDouble(),
+            rettsgebyr = this.rettsgebyr.rettsgebyr.toInteger(),
             rettsgebyrGyldigFra = this.rettsgebyr.gyldigFra,
         )
 }

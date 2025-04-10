@@ -3,11 +3,11 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
-import no.nav.etterlatte.behandling.etteroppgjoer.ForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -65,10 +66,10 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun hentForbehandlingForFrontend(
-        brukerTokenInfo: BrukerTokenInfo,
+    fun hentDetaljertForbehandling(
         behandlingId: UUID,
-    ): ForbehandlingDto {
+        brukerTokenInfo: BrukerTokenInfo,
+    ): DetaljertForbehandlingDto {
         val forbehandling = hentForbehandling(behandlingId)
 
         val sisteIverksatteBehandling =
@@ -87,6 +88,18 @@ class EtteroppgjoerForbehandlingService(
             runBlocking {
                 beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
                     request,
+                    brukerTokenInfo,
+                )
+            }
+
+        val beregnetEtteroppgjoerResultat =
+            runBlocking {
+                beregningKlient.hentBeregnetEtteroppgjoerResultat(
+                    EtteroppgjoerHentBeregnetResultatRequest(
+                        forbehandling.aar,
+                        forbehandling.id,
+                        sisteIverksatteBehandling.id,
+                    ),
                     brukerTokenInfo,
                 )
             }
@@ -110,7 +123,7 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
-        return ForbehandlingDto(
+        return DetaljertForbehandlingDto(
             behandling = forbehandling,
             opplysninger =
                 EtteroppgjoerOpplysninger(
@@ -120,6 +133,7 @@ class EtteroppgjoerForbehandlingService(
                 ),
             faktiskInntekt = faktiskInntekt,
             avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
+            beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
         )
     }
 

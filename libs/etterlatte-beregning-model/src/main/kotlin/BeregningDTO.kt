@@ -235,3 +235,9 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val utland: Int,
     val spesifikasjon: String,
 )
+
+data class EtteroppgjoerHentBeregnetResultatRequest(
+    val aar: Int,
+    val forbehandlingId: UUID,
+    val sisteIverksatteBehandlingId: UUID,
+)

@@ -240,12 +240,11 @@ enum class Brevkoder(
         Brevtype.OPPLASTET_PDF,
     ),
 
-    // TODO: avklare hvilke forskjellige brev vi faktisk har i etteroppgjøret
-    OMS_EO_VARSEL_TILBAKEKREVING(
-        EtterlatteBrevKode.OMS_EO_VARSEL_TILBAKEKREVING_INNHOLD,
-        EtterlatteBrevKode.OMS_EO_VARSEL_TILBAKEKREVING,
-        "Varsel om etteroppgjør med tilbakekreving",
-        Brevtype.VARSEL,
+    OMS_EO_FORHAANDSVARSEL(
+        EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL_INNHOLD,
+        EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL,
+        "Forshåndsvarsel om etteroppgjør av omstillingsstønad",
+        Brevtype.INFORMASJON,
     ),
     ;
 

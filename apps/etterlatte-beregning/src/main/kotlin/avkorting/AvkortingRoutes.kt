@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntekt
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektResponse
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
@@ -192,6 +193,17 @@ fun Route.avkorting(
                         forbehandlingId = request.forbehandlingId,
                         sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
                         aar = request.aar,
+                    )
+                call.respond(resultat.toDto())
+            }
+
+            post("hent-beregnet-resultat") {
+                val request = call.receive<EtteroppgjoerHentBeregnetResultatRequest>()
+                val resultat =
+                    etteroppgjoerService.hentBeregnetEtteroppgjoerResultat(
+                        request.forbehandlingId,
+                        request.sisteIverksatteBehandlingId,
+                        request.aar,
                     )
                 call.respond(resultat.toDto())
             }

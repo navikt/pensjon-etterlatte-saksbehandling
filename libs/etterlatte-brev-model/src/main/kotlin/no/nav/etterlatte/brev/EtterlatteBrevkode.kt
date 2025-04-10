@@ -69,6 +69,9 @@ enum class EtterlatteBrevKode : Brevbakerkode {
 
     OMS_EO_VARSEL_TILBAKEKREVING,
     OMS_EO_VARSEL_TILBAKEKREVING_INNHOLD,
+
+    OMS_EO_FORHAANDSVARSEL,
+    OMS_EO_FORHAANDSVARSEL_INNHOLD,
 }
 
 enum class Brevtype {

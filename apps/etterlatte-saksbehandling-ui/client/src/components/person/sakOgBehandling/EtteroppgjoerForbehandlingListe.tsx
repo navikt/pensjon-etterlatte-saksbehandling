@@ -5,7 +5,11 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Alert, Button, Link, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
-import { EtteroppgjoerBehandling } from '~shared/types/Etteroppgjoer'
+import {
+  EtteroppgjoerBehandling,
+  EtteroppgjoerBehandlingStatus,
+  teksterEtteroppgjoerBehandlingStatus,
+} from '~shared/types/Etteroppgjoer'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
 
@@ -53,8 +57,7 @@ function EtteroppgjoerForbehandlingTabell({
         {forbehandlinger.map((forbehandling) => (
           <Table.Row key={forbehandling.id} shadeOnHover={false}>
             <Table.DataCell>{formaterDato(forbehandling.opprettet)}</Table.DataCell>
-            {/* TODO riktig visning av statuser når de er klare */}
-            <Table.DataCell>{forbehandling.status}</Table.DataCell>
+            <Table.DataCell>{teksterEtteroppgjoerBehandlingStatus[forbehandling.status]}</Table.DataCell>
             <Table.DataCell>{forbehandling.aar}</Table.DataCell>
             <Table.DataCell>
               {forbehandling.innvilgetPeriode.fom} - {forbehandling.innvilgetPeriode.tom}
@@ -63,13 +66,16 @@ function EtteroppgjoerForbehandlingTabell({
               <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Gå til behandling</Link>
             </Table.DataCell>
             <Table.DataCell>
-              <Button
-                loading={isPending(opprettRevurderingResult)}
-                size="small"
-                onClick={() => opprettRevurderingEtteroppgjoer(forbehandling.id)}
-              >
-                Opprett revurdering
-              </Button>
+              {forbehandling.status == EtteroppgjoerBehandlingStatus.SVAR_MOTTATT ||
+                (forbehandling.status == EtteroppgjoerBehandlingStatus.INGEN_SVAR_INNEN_TIDSFRIST && (
+                  <Button
+                    loading={isPending(opprettRevurderingResult)}
+                    size="small"
+                    onClick={() => opprettRevurderingEtteroppgjoer(forbehandling.id)}
+                  >
+                    Opprett revurdering
+                  </Button>
+                ))}
             </Table.DataCell>
           </Table.Row>
         ))}

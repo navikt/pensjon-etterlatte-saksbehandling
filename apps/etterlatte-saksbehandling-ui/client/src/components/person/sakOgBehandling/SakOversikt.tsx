@@ -203,7 +203,7 @@ export const SakOversikt = ({
                       variant="secondary"
                       onClick={() => apiOpprettEtteroppjoer(sak.id)}
                     >
-                      Opprett etteroppgjør
+                      Opprett etteroppgjør forbehandling
                     </Button>
                   </Box>
                 </VStack>

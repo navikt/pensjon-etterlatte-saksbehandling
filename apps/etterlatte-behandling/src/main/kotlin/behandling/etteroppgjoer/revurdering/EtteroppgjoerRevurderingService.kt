@@ -47,8 +47,7 @@ class EtteroppgjoerRevurderingService(
                 val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
 
                 if (forbehandling.status !in listOf(SVAR_MOTTATT, INGEN_SVAR_INNEN_TIDSFRIST)) {
-                    // TODO få inn dette når resten av flyten støtter disse statusene
-                    // throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
+                    throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
                 }
 
                 // TODO her bør det sjekkes for om det allerede er laget en behandling med matchende relatertBehandlingId

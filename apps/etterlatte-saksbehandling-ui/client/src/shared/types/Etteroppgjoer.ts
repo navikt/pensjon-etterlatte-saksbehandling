@@ -7,6 +7,7 @@ export interface Etteroppgjoer {
   opplysninger: EtteroppgjoerOpplysninger
   faktiskInntekt?: FaktiskInntekt
   avkortingFaktiskInntekt: Avkorting | undefined
+  beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
 }
 
 export interface EtteroppgjoerBehandling {

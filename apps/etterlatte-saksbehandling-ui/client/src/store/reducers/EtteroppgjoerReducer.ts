@@ -13,11 +13,9 @@ export const addResultatEtteroppgjoer = createAction<BeregnetEtteroppgjoerResult
 const initialState: {
   etteroppgjoer: Etteroppgjoer | null
   oppgave: OppgaveDTO | null
-  resultat: BeregnetEtteroppgjoerResultatDto | null
 } = {
   etteroppgjoer: null,
   oppgave: null,
-  resultat: null,
 }
 
 export const etteroppgjoerReducer = createReducer(initialState, (builder) => {
@@ -37,7 +35,7 @@ export const etteroppgjoerReducer = createReducer(initialState, (builder) => {
     state.oppgave = null
   })
   builder.addCase(addResultatEtteroppgjoer, (state, action) => {
-    state.resultat = action.payload
+    state.etteroppgjoer!!.beregnetEtteroppgjoerResultat = action.payload
   })
 })
 

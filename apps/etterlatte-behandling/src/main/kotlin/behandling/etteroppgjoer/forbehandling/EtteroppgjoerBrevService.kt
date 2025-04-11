@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevDataMapper
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -20,7 +19,6 @@ import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -140,19 +138,7 @@ class EtteroppgjoerBrevService(
                 brukerTokenInfo,
             )
 
-        val beregnetEtteroppgjoerResultat =
-            runBlocking {
-                beregningKlient.hentBeregnetEtteroppgjoerResultat(
-                    EtteroppgjoerHentBeregnetResultatRequest(
-                        detaljertForbehandling.behandling.aar,
-                        detaljertForbehandling.behandling.id,
-                        detaljertForbehandling.sisteIverksatteBehandling,
-                    ),
-                    brukerTokenInfo,
-                )
-            }
-
-        return EtteroppgjoerBrevDataMapper.fra(detaljertForbehandling, beregnetEtteroppgjoerResultat)
+        return EtteroppgjoerBrevDataMapper.fra(detaljertForbehandling)
     }
 
     private suspend fun utledBrevRequest(

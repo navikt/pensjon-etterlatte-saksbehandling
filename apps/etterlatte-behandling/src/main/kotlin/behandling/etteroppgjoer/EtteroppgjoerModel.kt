@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.ForhaandsvarselInn
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -37,6 +38,7 @@ data class DetaljertForbehandlingDto(
     val opplysninger: EtteroppgjoerOpplysninger,
     val faktiskInntekt: FaktiskInntekt?,
     val avkortingFaktiskInntekt: AvkortingDto?,
+    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
 )
 
 enum class EtteroppgjoerForbehandlingStatus {
@@ -232,27 +234,30 @@ data class EtteroppgjoerBrevRequestData(
 )
 
 object EtteroppgjoerBrevDataMapper {
-    fun fra(
-        data: DetaljertForbehandlingDto,
-        beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto,
-    ) = EtteroppgjoerBrevRequestData(
-        redigerbar =
-            ForhaandsvarselInnhold(
-                sak = data.behandling.sak,
-            ),
-        innhold =
-            Forhaandsvarsel(
-                bosattUtland = false, // TODO
-                norskInntekt = false, // TODO
-                etteroppgjoersAar = data.behandling.aar,
-                rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
-                resultatType = beregnetEtteroppgjoerResultat.resultatType,
-                inntekt = Kroner(beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
-                faktiskInntekt = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
-                avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
-            ),
-        data = data,
-    )
+    fun fra(data: DetaljertForbehandlingDto): EtteroppgjoerBrevRequestData {
+        krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
+            "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
+        }
+
+        return EtteroppgjoerBrevRequestData(
+            redigerbar =
+                ForhaandsvarselInnhold(
+                    sak = data.behandling.sak,
+                ),
+            innhold =
+                Forhaandsvarsel(
+                    bosattUtland = false, // TODO
+                    norskInntekt = false, // TODO
+                    etteroppgjoersAar = data.behandling.aar,
+                    rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
+                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                ),
+            data = data,
+        )
+    }
 }
 
 data class FaktiskInntekt(

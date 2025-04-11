@@ -28,7 +28,9 @@ enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
     MOTTATT_SKATTEOPPGJOER,
     UNDER_FORBEHANDLING,
+    FERDIGSTILT_FORBEHANDLING,
     UNDER_REVURDERING,
+    FERDIGSTILT_REVURDERING,
 }
 
 // TODO falte ut behandling..
@@ -44,9 +46,6 @@ data class DetaljertForbehandlingDto(
 enum class EtteroppgjoerForbehandlingStatus {
     OPPRETTET,
     BEREGNET,
-    TIL_ATTESTERING,
-    ATTESTERT,
-    RETURNERT,
     VARSELBREV_SENDT,
     SVAR_MOTTATT,
     INGEN_SVAR_INNEN_TIDSFRIST,

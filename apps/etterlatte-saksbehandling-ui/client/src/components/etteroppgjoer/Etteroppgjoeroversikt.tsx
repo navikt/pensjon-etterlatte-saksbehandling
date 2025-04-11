@@ -40,7 +40,7 @@ export const Etteroppgjoeroversikt = ({ behandling }: { behandling: IDetaljertBe
 
         <Inntektsopplysninger />
         <FastsettFaktiskInntekt forbehandlingId={etteroppgjoer.behandling.id} />
-        <ResultatAvForbehandling resultat={etteroppgjoer.beregnetEtteroppgjoerResultat} />
+        <ResultatAvForbehandling />
 
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">

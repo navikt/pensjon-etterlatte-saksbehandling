@@ -1,13 +1,17 @@
 import { BodyShort, Box, Heading, HelpText, HStack, Label, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
-import { BeregnetEtteroppgjoerResultatDto, EtteroppgjoerResultatType } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerResultatType } from '~shared/types/Etteroppgjoer'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { useAppSelector } from '~store/Store'
 
-export const ResultatAvForbehandling = ({ resultat }: { resultat: BeregnetEtteroppgjoerResultatDto | undefined }) => {
-  if (!resultat) {
+export const ResultatAvForbehandling = () => {
+  const { etteroppgjoer } = useAppSelector((state) => state.etteroppgjoerReducer)
+
+  if (!etteroppgjoer || !etteroppgjoer.beregnetEtteroppgjoerResultat) {
     return null
   }
 
+  const resultat = etteroppgjoer?.beregnetEtteroppgjoerResultat
   const utfallAvForbehandling = resultat.resultatType
 
   return (

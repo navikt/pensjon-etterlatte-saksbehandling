@@ -23,7 +23,7 @@ export const OversiktOverEtteroppgjoer = () => {
         forbehandlingId={etteroppgjoer.behandling.id}
         faktiskInntekt={etteroppgjoer.faktiskInntekt}
       />
-      <ResultatAvForbehandling resultat={etteroppgjoer.beregnetEtteroppgjoerResultat} />
+      <ResultatAvForbehandling />
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">

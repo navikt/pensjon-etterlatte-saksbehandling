@@ -66,16 +66,15 @@ function EtteroppgjoerForbehandlingTabell({
               <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Gå til behandling</Link>
             </Table.DataCell>
             <Table.DataCell>
-              {forbehandling.status == EtteroppgjoerBehandlingStatus.SVAR_MOTTATT ||
-                (forbehandling.status == EtteroppgjoerBehandlingStatus.INGEN_SVAR_INNEN_TIDSFRIST && (
-                  <Button
-                    loading={isPending(opprettRevurderingResult)}
-                    size="small"
-                    onClick={() => opprettRevurderingEtteroppgjoer(forbehandling.id)}
-                  >
-                    Opprett revurdering
-                  </Button>
-                ))}
+              {forbehandling.status == EtteroppgjoerBehandlingStatus.VARSELBREV_SENDT && (
+                <Button
+                  loading={isPending(opprettRevurderingResult)}
+                  size="small"
+                  onClick={() => opprettRevurderingEtteroppgjoer(forbehandling.id)}
+                >
+                  Opprett revurdering
+                </Button>
+              )}
             </Table.DataCell>
           </Table.Row>
         ))}

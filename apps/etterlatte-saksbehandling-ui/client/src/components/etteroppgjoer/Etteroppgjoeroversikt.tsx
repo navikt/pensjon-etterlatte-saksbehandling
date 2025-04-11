@@ -27,8 +27,8 @@ export const Etteroppgjoeroversikt = ({ behandling }: { behandling: IDetaljertBe
   }, [etteroppgjoerId])
 
   return mapResult(etteroppgjoerResult, {
-    pending: <Spinner label="Henter etteroppgjørbehandling" />,
-    error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandlingen for etteroppgjør: {error.detail}</ApiErrorAlert>,
+    pending: <Spinner label="Henter forbehandling" />,
+    error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandling for etteroppgjør: {error.detail}</ApiErrorAlert>,
     success: (etteroppgjoer) => (
       <VStack gap="10" paddingInline="16" paddingBlock="16 4">
         <Heading size="xlarge" level="1">

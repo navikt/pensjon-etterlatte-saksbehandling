@@ -3,8 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus.INGEN_SVAR_INNEN_TIDSFRIST
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus.SVAR_MOTTATT
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
@@ -46,7 +45,7 @@ class EtteroppgjoerRevurderingService(
             inTransaction {
                 val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
 
-                if (forbehandling.status !in listOf(SVAR_MOTTATT, INGEN_SVAR_INNEN_TIDSFRIST)) {
+                if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)) {
                     throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
                 }
 

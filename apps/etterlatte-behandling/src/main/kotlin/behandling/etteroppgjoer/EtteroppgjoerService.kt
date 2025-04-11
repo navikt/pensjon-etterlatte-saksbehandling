@@ -41,7 +41,7 @@ class EtteroppgjoerService(
         inntektsaar: Int,
         trigger: String = "Manuell",
     ) {
-        logger.info("$trigger: Søker etter og opprett etteroppgjoer for inntektsaar=$inntektsaar")
+        logger.info("$trigger: leter etter saker som skal ha etteroppgjoer for inntektsaar=$inntektsaar")
 
         // TODO: er det flere ting vi må sjekke på en kun utbetaling i inntektsaar
         val sakerMedUtbetaling =
@@ -54,6 +54,7 @@ class EtteroppgjoerService(
 
         sakerMedUtbetaling
             .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
+            .filter { sakId -> sakLesDao.hentSak(sakId)?.sakType == SakType.OMSTILLINGSSTOENAD }
             .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
 
         logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")

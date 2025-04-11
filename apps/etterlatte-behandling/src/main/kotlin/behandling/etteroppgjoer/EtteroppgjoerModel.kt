@@ -33,10 +33,10 @@ enum class EtteroppgjoerStatus {
 // TODO falte ut behandling..
 data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
+    val sisteIverksatteBehandling: UUID,
     val opplysninger: EtteroppgjoerOpplysninger,
     val faktiskInntekt: FaktiskInntekt?,
     val avkortingFaktiskInntekt: AvkortingDto?,
-    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto,
 )
 
 enum class EtteroppgjoerForbehandlingStatus {
@@ -232,25 +232,27 @@ data class EtteroppgjoerBrevRequestData(
 )
 
 object EtteroppgjoerBrevDataMapper {
-    fun fra(data: DetaljertForbehandlingDto) =
-        EtteroppgjoerBrevRequestData(
-            redigerbar =
-                ForhaandsvarselInnhold(
-                    sak = data.behandling.sak,
-                ),
-            innhold =
-                Forhaandsvarsel(
-                    bosattUtland = false, // TODO
-                    norskInntekt = false, // TODO
-                    etteroppgjoersAar = data.behandling.aar,
-                    rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
-                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
-                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
-                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
-                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
-                ),
-            data = data,
-        )
+    fun fra(
+        data: DetaljertForbehandlingDto,
+        beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto,
+    ) = EtteroppgjoerBrevRequestData(
+        redigerbar =
+            ForhaandsvarselInnhold(
+                sak = data.behandling.sak,
+            ),
+        innhold =
+            Forhaandsvarsel(
+                bosattUtland = false, // TODO
+                norskInntekt = false, // TODO
+                etteroppgjoersAar = data.behandling.aar,
+                rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                resultatType = beregnetEtteroppgjoerResultat.resultatType,
+                inntekt = Kroner(beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                faktiskInntekt = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
+            ),
+        data = data,
+    )
 }
 
 data class FaktiskInntekt(

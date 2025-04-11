@@ -225,17 +225,22 @@ class EtteroppgjoerForbehandlingService(
         sak: Sak,
         inntektsaar: Int,
     ) {
-        val etteroppgjoer =
-            etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
-                ?: throw InternfeilException("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
+
+        if (etteroppgjoer == null) {
+            logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
+            throw InternfeilException("Kan ikke opprette forbehandling fordi etteroppgjør for sak=${sak.id} ikke er opprettet")
+        }
 
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
-            throw InternfeilException("Kan ikke opprette etteroppgjør forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
+            logger.error("Kan ikke opprette etteroppgjør forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
+            throw InternfeilException("Kan ikke opprette etteroppgjør for sakType=${sak.sakType}")
         }
 
         if (etteroppgjoer.status != EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
             throw InternfeilException(
-                "Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}",
+                "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
             )
         }
     }

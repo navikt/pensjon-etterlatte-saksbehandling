@@ -33,32 +33,14 @@ enum class EtteroppgjoerStatus {
     FERDIGSTILT_REVURDERING,
 }
 
-// TODO falte ut behandling..
-data class DetaljertForbehandlingDto(
-    val behandling: EtteroppgjoerForbehandling,
-    val sisteIverksatteBehandling: UUID,
-    val opplysninger: EtteroppgjoerOpplysninger,
-    val faktiskInntekt: FaktiskInntekt?,
-    val avkortingFaktiskInntekt: AvkortingDto?,
-    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
-)
-
-enum class EtteroppgjoerForbehandlingStatus {
-    OPPRETTET,
-    BEREGNET,
-    VARSELBREV_SENDT,
-    SVAR_MOTTATT,
-    INGEN_SVAR_INNEN_TIDSFRIST,
-}
-
 data class EtteroppgjoerForbehandling(
     val id: UUID,
     val hendelseId: UUID,
+    val opprettet: Tidspunkt,
     val status: EtteroppgjoerForbehandlingStatus,
     val sak: Sak,
     val aar: Int,
     val innvilgetPeriode: Periode,
-    val opprettet: Tidspunkt,
     val brevId: Long?,
 ) {
     companion object {
@@ -94,7 +76,35 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+
+    fun isUnderBehandling() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                EtteroppgjoerForbehandlingStatus.BEREGNET,
+            )
+
+    fun isFerdigstilt() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT,
+            )
 }
+
+enum class EtteroppgjoerForbehandlingStatus {
+    OPPRETTET,
+    BEREGNET,
+    VARSELBREV_SENDT,
+}
+
+data class DetaljertForbehandlingDto(
+    val behandling: EtteroppgjoerForbehandling,
+    val sisteIverksatteBehandling: UUID,
+    val opplysninger: EtteroppgjoerOpplysninger,
+    val faktiskInntekt: FaktiskInntekt?,
+    val avkortingFaktiskInntekt: AvkortingDto?,
+    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
+)
 
 data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkatt,

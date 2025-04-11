@@ -26,6 +26,7 @@ import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
 import { ClickEvent, trackClick } from '~utils/amplitude'
+import { SakType } from '~shared/types/sak'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -188,7 +189,7 @@ export const SakOversikt = ({
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>
 
-              {etteroppgjoerEnabled && (
+              {etteroppgjoerEnabled && sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingListe sakId={sak.id} />
@@ -203,7 +204,7 @@ export const SakOversikt = ({
                       variant="secondary"
                       onClick={() => apiOpprettEtteroppjoer(sak.id)}
                     >
-                      Opprett etteroppgjør
+                      Opprett etteroppgjør forbehandling
                     </Button>
                   </Box>
                 </VStack>

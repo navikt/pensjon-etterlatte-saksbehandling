@@ -1,7 +1,7 @@
 import { BodyShort, Box, Button, Heading, HStack, Tag, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
 import { useForm } from 'react-hook-form'
-import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerBehandlingStatus, FaktiskInntekt } from '~shared/types/Etteroppgjoer'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
@@ -52,7 +52,9 @@ export const FastsettFaktiskInntekt = ({
   const dispatch = useAppDispatch()
 
   const erRedigerbar =
-    behandling.status !== 'ATTESTERING' && enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
+    (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
+      behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
+    enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {
     register,
@@ -89,7 +91,7 @@ export const FastsettFaktiskInntekt = ({
       onSubmit={handleSubmit((data) => submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data)))}
     >
       <VStack gap="4">
-        <Heading size="large">Fastett faktisk inntekt</Heading>
+        <Heading size="large">Fastsett faktisk inntekt</Heading>
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
         </HStack>
@@ -140,11 +142,13 @@ export const FastsettFaktiskInntekt = ({
           />
         </Box>
 
-        <div>
-          <Button size="small" loading={isPending(lagreFaktiskInntektResult)}>
-            Fastsett inntekt
-          </Button>
-        </div>
+        {erRedigerbar && (
+          <div>
+            <Button size="small" loading={isPending(lagreFaktiskInntektResult)}>
+              Fastsett inntekt
+            </Button>
+          </div>
+        )}
 
         {isFailureHandler({
           apiResult: lagreFaktiskInntektResult,

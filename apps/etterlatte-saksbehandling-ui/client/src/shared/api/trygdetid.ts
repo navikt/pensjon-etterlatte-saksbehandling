@@ -25,6 +25,11 @@ export const overstyrTrygdetid = async (overstyring: ITrygdetidOverstyring): Pro
 export const setTrygdetidYrkesskade = async (yrkesskade: ITrygdetidYrkesskade): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid_v2/${yrkesskade.behandlingId}/yrkesskade`, { ...yrkesskade })
 
+export const oppdaterTrygdetidBegrunnelse = async (
+  begrunnelse: ITrygdetidBegrunnelse
+): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid_v2/${begrunnelse.behandlingId}/begrunnelse`, { ...begrunnelse })
+
 export const lagreTrygdetidgrunnlag = async (args: {
   behandlingId: string
   trygdetidId: string
@@ -167,6 +172,7 @@ export interface ITrygdetid {
   id: string
   ident: string
   behandlingId: string
+  begrunnelse: string | undefined
   beregnetTrygdetid?: IDetaljertBeregnetTrygdetid
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
   opplysninger: IGrunnlagOpplysninger
@@ -184,6 +190,12 @@ export interface ITrygdetidYrkesskade {
   id: string
   behandlingId: string
   yrkesskade: boolean
+}
+
+export interface ITrygdetidBegrunnelse {
+  id: string
+  behandlingId: string
+  begrunnelse: string | undefined
 }
 
 export interface IGrunnlagOpplysninger {

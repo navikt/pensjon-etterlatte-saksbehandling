@@ -342,6 +342,49 @@ internal class TrygdetidServiceIntegrationTest(
         }
     }
 
+    @Test
+    fun `skal oppdatere begrunnelse i trygdetid`() {
+        val behandlingId = UUID.randomUUID()
+        val grunnlagTestData = GrunnlagTestData()
+        val begrunnelseTekst = "En begrunnelse"
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
+        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+
+        val opprettetTrygdetid =
+            repository.opprettTrygdetid(
+                trygdetid(
+                    behandlingId = behandlingId,
+                    sakId = randomSakId(),
+                    opplysninger = opplysningsgrunnlag(grunnlagTestData),
+                ),
+            )
+
+        val trygdetidMedBegrunnelse =
+            runBlocking {
+                trygdetidService.oppdaterTrygdetidMedBegrunnelse(
+                    trygdetidId = opprettetTrygdetid.id,
+                    behandlingId = behandlingId,
+                    begrunnelse = begrunnelseTekst,
+                    brukerTokenInfo = saksbehandler,
+                )
+            }
+
+        trygdetidMedBegrunnelse.begrunnelse shouldBe begrunnelseTekst
+
+        val trygdetidMedSlettetBegrunnelse =
+            runBlocking {
+                trygdetidService.oppdaterTrygdetidMedBegrunnelse(
+                    trygdetidId = opprettetTrygdetid.id,
+                    behandlingId = behandlingId,
+                    begrunnelse = null,
+                    brukerTokenInfo = saksbehandler,
+                )
+            }
+
+        trygdetidMedSlettetBegrunnelse.begrunnelse shouldBe null
+    }
+
     private fun opprettTrygdeavtale(behandlingId: UUID) =
         Trygdeavtale(
             behandlingId = behandlingId,

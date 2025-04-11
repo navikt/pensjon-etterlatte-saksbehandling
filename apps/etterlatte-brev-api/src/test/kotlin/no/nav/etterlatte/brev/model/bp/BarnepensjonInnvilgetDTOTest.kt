@@ -88,6 +88,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                             overstyrtNorskPoengaar = null,
                             opplysningerDifferanse = mockk(),
                             opplysninger = mockk(),
+                            begrunnelse = null,
                         ),
                     ),
                 grunnbeloep =

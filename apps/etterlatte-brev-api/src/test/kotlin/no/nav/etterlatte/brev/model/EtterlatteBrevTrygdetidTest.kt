@@ -130,6 +130,7 @@ fun trygdetidDto(
     overstyrtNorskPoengaar = null,
     opplysningerDifferanse = mockk(),
     opplysninger = mockk(),
+    begrunnelse = null,
 )
 
 fun trygdetidGrunnlagDto(

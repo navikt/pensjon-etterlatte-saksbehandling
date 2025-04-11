@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -52,11 +54,16 @@ class EtteroppgjoerForbehandlingService(
     // kjøring for å opprette forbehandling for etteroppgjør
     fun startOpprettForbehandlingKjoering(inntektsaar: Int) {
         logger.info("Opprette forbehandling for etteroppgjør med mottatt skatteoppgjør for $inntektsaar")
-        val etteroppgjoerListe = etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
+        val etteroppgjoerListe =
+            etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
 
         for (etteroppgjoer in etteroppgjoerListe) {
             try {
-                opprettEtteroppgjoerForbehandling(etteroppgjoer.sakId, etteroppgjoer.inntektsaar, HardkodaSystembruker.etteroppgjoer)
+                opprettEtteroppgjoerForbehandling(
+                    etteroppgjoer.sakId,
+                    etteroppgjoer.inntektsaar,
+                    HardkodaSystembruker.etteroppgjoer,
+                )
             } catch (e: Exception) {
                 logger.error("Kunne ikke opprette forbehandling for sakId=${etteroppgjoer.sakId} grunnen: ${e.message}")
             }
@@ -153,28 +160,16 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandlingOgOppgave {
-        logger.info("Oppretter etteroppgjør forbehandling for sakId=$sakId")
+        logger.info("Oppretter forbehandling for etteroppgjør sakId=$sakId, inntektsår=$inntektsaar")
+        val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Kunne ikke hente sak=$sakId")
 
-        if (!kanOppretteEtteroppgjoerForbehandling(sakId, inntektsaar)) {
-            throw InternfeilException("Kan ikke opprette forbehandling ... ???")
-        }
-
-        val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
+        kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar)
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
         val virkOgOpphoer = runBlocking { vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
         val nyForbehandling = EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode)
-
-        val oppgave =
-            oppgaveService.opprettOppgave(
-                referanse = nyForbehandling.id.toString(),
-                sakId = sakId,
-                kilde = OppgaveKilde.BEHANDLING,
-                type = OppgaveType.ETTEROPPGJOER,
-                merknad = null,
-            )
 
         dao.lagreForbehandling(nyForbehandling)
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
@@ -184,7 +179,14 @@ class EtteroppgjoerForbehandlingService(
 
         return EtteroppgjoerForbehandlingOgOppgave(
             etteroppgjoerForbehandling = nyForbehandling,
-            oppgave = oppgave,
+            oppgave =
+                oppgaveService.opprettOppgave(
+                    referanse = nyForbehandling.id.toString(),
+                    sakId = sakId,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.ETTEROPPGJOER,
+                    merknad = null,
+                ),
         )
     }
 
@@ -212,23 +214,34 @@ class EtteroppgjoerForbehandlingService(
                 spesifikasjon = request.spesifikasjon,
             )
 
-        val beregnetEtteroppgjoerResultat = runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
+        val beregnetEtteroppgjoerResultat =
+            runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
 
         dao.lagreForbehandling(forbehandling.tilBeregnet())
         return beregnetEtteroppgjoerResultat
     }
 
-    private fun kanOppretteEtteroppgjoerForbehandling(
-        sakId: SakId,
+    private fun kanOppretteForbehandlingForEtteroppgjoer(
+        sak: Sak,
         inntektsaar: Int,
-    ): Boolean {
-        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sakId, inntektsaar) ?: return false
+    ) {
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
 
-        // TODO: hva mer må vi sjekke?
+        if (etteroppgjoer == null) {
+            logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
+            throw InternfeilException("Kan ikke opprette forbehandling fordi etteroppgjør for sak=${sak.id} ikke er opprettet")
+        }
 
-        return when (etteroppgjoer.status) {
-            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER -> true
-            else -> false
+        if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
+            logger.error("Kan ikke opprette etteroppgjør forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
+            throw InternfeilException("Kan ikke opprette etteroppgjør for sakType=${sak.sakType}")
+        }
+
+        if (etteroppgjoer.status != EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
+            throw InternfeilException(
+                "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
+            )
         }
     }
 

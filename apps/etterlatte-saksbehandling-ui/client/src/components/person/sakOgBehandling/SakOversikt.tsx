@@ -189,10 +189,15 @@ export const SakOversikt = ({
               </VStack>
 
               {etteroppgjoerEnabled && (
-                <VStack marginBlock="0" gap="4">
+                <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingListe sakId={sak.id} />
                   <Box>
+                    {mapResult(opprettEtteroppgjoerStatus, {
+                      pending: <Spinner label="Oppretter etteroppgjør" />,
+                      error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                    })}
+
                     <Button
                       loading={isPending(opprettEtteroppgjoerStatus)}
                       variant="secondary"

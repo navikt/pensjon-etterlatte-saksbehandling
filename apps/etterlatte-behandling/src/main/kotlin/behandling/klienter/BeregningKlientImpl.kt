@@ -51,7 +51,7 @@ interface BeregningKlient {
     suspend fun hentBeregnetEtteroppgjoerResultat(
         request: EtteroppgjoerHentBeregnetResultatRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BeregnetEtteroppgjoerResultatDto
+    ): BeregnetEtteroppgjoerResultatDto?
 
     suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
@@ -178,7 +178,7 @@ class BeregningKlientImpl(
     override suspend fun hentBeregnetEtteroppgjoerResultat(
         request: EtteroppgjoerHentBeregnetResultatRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BeregnetEtteroppgjoerResultatDto {
+    ): BeregnetEtteroppgjoerResultatDto? {
         try {
             logger.info("Henter beregnet etteroppgjør resultat for forbehandling med id=${request.forbehandlingId}")
             return downstreamResourceClient

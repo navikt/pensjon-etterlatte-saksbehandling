@@ -205,7 +205,11 @@ fun Route.avkorting(
                         request.sisteIverksatteBehandlingId,
                         request.aar,
                     )
-                call.respond(resultat.toDto())
+
+                when (resultat) {
+                    null -> call.respond(HttpStatusCode.NoContent)
+                    else -> call.respond(resultat.toDto())
+                }
             }
         }
     }

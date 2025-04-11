@@ -37,6 +37,7 @@ export const Etteroppgjoeroversikt = ({ behandling }: { behandling: IDetaljertBe
         <BodyShort>
           <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
         </BodyShort>
+
         <Inntektsopplysninger />
         <FastsettFaktiskInntekt forbehandlingId={etteroppgjoer.behandling.id} />
         <ResultatAvForbehandling />

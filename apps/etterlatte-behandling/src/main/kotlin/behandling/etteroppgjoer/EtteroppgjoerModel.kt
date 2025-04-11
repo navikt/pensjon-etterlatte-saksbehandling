@@ -94,6 +94,21 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+
+    fun isUnderBehandling() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                EtteroppgjoerForbehandlingStatus.BEREGNET,
+                EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT,
+            )
+
+    fun isFerdigstilt() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.SVAR_MOTTATT,
+                EtteroppgjoerForbehandlingStatus.INGEN_SVAR_INNEN_TIDSFRIST,
+            )
 }
 
 data class EtteroppgjoerOpplysninger(

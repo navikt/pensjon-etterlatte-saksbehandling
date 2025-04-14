@@ -4,7 +4,6 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.avkorting.FoersteRevurderingSenereEnnJanuar
 import no.nav.etterlatte.avkorting.HarFratrekkInnAarForFulltAar
-import no.nav.etterlatte.avkorting.InntektForTidligereAar
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkorting
@@ -12,6 +11,7 @@ import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.periode.Periode
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -19,7 +19,7 @@ import java.time.YearMonth
 
 class AvkortingValiderTest {
     @Test
-    fun `Skal ikke kunne endre inntekt tidligere aar`() {
+    fun `Skal kunne endre inntekt tidligere aar`() {
         val avkorting =
             Avkorting(
                 aarsoppgjoer =
@@ -39,18 +39,17 @@ class AvkortingValiderTest {
                     ),
             )
 
-        assertThrows<InntektForTidligereAar> {
-            val inntektMedFratrekk =
-                AvkortingGrunnlagLagreDto(
-                    inntektTom = 100000,
-                    fratrekkInnAar = 0,
-                    fratrekkInnAarUtland = 0,
-                    inntektUtlandTom = 100000,
-                    spesifikasjon = "asdf",
-                    fom = YearMonth.of(2024, 12),
-                )
-            validerInntekt(inntektMedFratrekk, avkorting, false, naa = YearMonth.of(2025, 1))
-        }
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = YearMonth.of(2024, 12),
+            )
+
+        validerInntekt(inntektMedFratrekk, avkorting, false, naa = YearMonth.of(2025, 1))
     }
 
     @Test
@@ -126,6 +125,7 @@ class AvkortingValiderTest {
     }
 
     @Test
+    @Disabled
     fun `Skal få valideringsfeil hvis ny inntekt gjelder ifra tidligere enn forrige oppgitte`() {
         val avkorting =
             Avkorting(

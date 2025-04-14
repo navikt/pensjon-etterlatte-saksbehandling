@@ -70,12 +70,13 @@ object AvkortingValider {
         val gjeldendeAar = avkorting.aarsoppgjoer.singleOrNull { it.aar == fom.year }
         when (gjeldendeAar) {
             is AarsoppgjoerLoepende -> {
-                val nyligsteInntekt = gjeldendeAar?.inntektsavkorting?.lastOrNull()
+                val nyligsteInntekt = gjeldendeAar.inntektsavkorting.lastOrNull()
                 if (nyligsteInntekt != null && nyligsteInntekt.grunnlag.periode.fom > fom) {
-                    throw IkkeTillattException(
-                        code = "NY_INNTEKT_KUN_NY_ELLER_NYLIGSTE",
-                        detail = "Kan ikke legge til eller endre årsinntekt som er tidligere enn forrige angitte årsinntekt.",
-                    )
+                    // TODO er det en god ide å fjerne dette egentlig?
+                    // throw IkkeTillattException(
+                    // code = "NY_INNTEKT_KUN_NY_ELLER_NYLIGSTE",
+                    // detail = "Kan ikke legge til eller endre årsinntekt som er tidligere enn forrige angitte årsinntekt.",
+                    // )
                 }
             }
 

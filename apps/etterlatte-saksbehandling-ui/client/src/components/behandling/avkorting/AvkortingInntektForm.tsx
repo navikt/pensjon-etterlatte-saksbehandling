@@ -132,7 +132,8 @@ const InntektForm = ({
     if (!!redigerbartGrunnlag) {
       return redigerbartGrunnlag.innvilgaMaaneder === 12
     }
-    if (behandling.revurderingsaarsak != null) {
+
+    if (behandling.revurderingsaarsak != null && new Date(virk).getFullYear() === new Date().getFullYear()) {
       return alleGrunnlag[0].innvilgaMaaneder === 12
     }
     return false

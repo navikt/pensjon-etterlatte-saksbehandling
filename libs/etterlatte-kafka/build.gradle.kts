@@ -24,4 +24,6 @@ dependencies {
 
     testFixturesImplementation(libs.ktor2.servercontentnegotiation)
     testFixturesImplementation(libs.kafka.clients)
+
+    testFixturesRuntimeOnly(libs.test.junit.platform.launcher)
 }

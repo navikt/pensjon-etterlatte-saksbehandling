@@ -25,4 +25,5 @@ dependencies {
 
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
 }

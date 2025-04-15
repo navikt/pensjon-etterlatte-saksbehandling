@@ -21,6 +21,7 @@ dependencies {
     compileOnly(libs.logging.slf4japi)
 
     testRuntimeOnly(libs.test.jupiter.engine)
+    testFixturesRuntimeOnly(libs.test.junit.platform.launcher)
     testImplementation(libs.logging.slf4japi)
     testImplementation(libs.logging.logbackclassic)
     testImplementation(libs.test.jupiter.api)

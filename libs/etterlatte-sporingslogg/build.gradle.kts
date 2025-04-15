@@ -10,5 +10,6 @@ dependencies {
 
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
     testImplementation(libs.test.kotest.assertionscore)
 }

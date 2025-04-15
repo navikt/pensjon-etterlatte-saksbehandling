@@ -55,6 +55,7 @@ dependencies {
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.engine)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
     testImplementation(libs.ktor2.servertests)

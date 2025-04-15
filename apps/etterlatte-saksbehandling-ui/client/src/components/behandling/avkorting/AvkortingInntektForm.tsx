@@ -12,7 +12,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { IAvkortingGrunnlag, IAvkortingGrunnlagLagre, isForventetInntekt } from '~shared/types/IAvkorting'
+import { IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { aarFraDatoString, formaterDato, maanedFraDatoString } from '~utils/formatering/dato'
@@ -132,7 +132,8 @@ const InntektForm = ({
     if (!!redigerbartGrunnlag) {
       return redigerbartGrunnlag.innvilgaMaaneder === 12
     }
-    if (behandling.revurderingsaarsak != null) {
+
+    if (behandling.revurderingsaarsak != null && new Date(virk).getFullYear() === new Date().getFullYear()) {
       return alleGrunnlag[0].innvilgaMaaneder === 12
     }
     return false
@@ -141,29 +142,12 @@ const InntektForm = ({
   /*
    * Hvis det finnes avkortingGrunnlag med fom samme som virkningstidspunkt fylles den i form med id for å kunne oppdatere.
    * Hvis det er førstegangsbehandling og avkortingGrunnlag for neste år og det allerede finens avkortingGrunnlag fylles den i form med id for å kunne oppdatere.
-   * Hvis ikke så er det form uten id slik at det opprettes nytt avkortingGrunnlag. Finnes det tidligere avkortingGrunnlag i samme år
-   * vil beløp preutfylles.
    */
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
     if (!!redigerbartGrunnlag) {
       return redigerbartGrunnlag
     }
 
-    // Inntektsendringer skjer kun frem i tid
-    if (!!behandling.revurderingsaarsak && alleGrunnlag.length > 0) {
-      const nyligste = alleGrunnlag[0]
-      if (isForventetInntekt(nyligste)) {
-        // Preutfyller uten id
-        return {
-          inntektTom: nyligste.inntektTom,
-          fratrekkInnAar: nyligste.fratrekkInnAar,
-          inntektUtlandTom: nyligste.inntektUtlandTom,
-          fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
-          spesifikasjon: '',
-          overstyrtInnvilgaMaaneder: nyligste.overstyrtInnvilgaMaaneder,
-        }
-      }
-    }
     return {
       spesifikasjon: '',
     }

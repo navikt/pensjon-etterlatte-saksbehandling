@@ -20,4 +20,5 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testRuntimeOnly(libs.test.junit.platform.launcher)
 }

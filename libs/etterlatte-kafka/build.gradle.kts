@@ -16,7 +16,6 @@ dependencies {
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.params)
     testRuntimeOnly(libs.test.jupiter.engine)
-    testRuntimeOnly(libs.test.junit.platform.launcher)
     testImplementation(libs.test.kotest.assertionscore)
     implementation(libs.kafka.clients)
     testImplementation(libs.kafka.avroserializer)
@@ -25,4 +24,6 @@ dependencies {
 
     testFixturesImplementation(libs.ktor2.servercontentnegotiation)
     testFixturesImplementation(libs.kafka.clients)
+
+    testFixturesRuntimeOnly(libs.test.junit.platform.launcher)
 }

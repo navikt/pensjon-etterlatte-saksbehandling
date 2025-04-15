@@ -16,6 +16,5 @@ dependencies {
 
     testImplementation(libs.test.testcontainer.kafka)
     testImplementation(libs.ktor2.servertests)
-    testRuntimeOnly(libs.test.junit.platform.launcher)
     testImplementation(testFixtures((project(":libs:etterlatte-kafka"))))
 }

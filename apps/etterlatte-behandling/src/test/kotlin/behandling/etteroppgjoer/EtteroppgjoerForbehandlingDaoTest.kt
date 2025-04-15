@@ -8,6 +8,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.common.Enheter
@@ -67,11 +68,12 @@ class EtteroppgjoerForbehandlingDaoTest(
         val ny =
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
-                status = "status",
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
+                brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
             )
 
@@ -100,7 +102,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         )
 
         with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
-            inntektsaar shouldBe inntektsaar
+            this.inntektsaar shouldBe inntektsaar
             inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
         }
     }

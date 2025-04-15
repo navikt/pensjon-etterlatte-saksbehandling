@@ -52,6 +52,7 @@ const val PAA_VENT_AARSAK_KEY = "paaVentAarsak"
 enum class PaaVentAarsak {
     OPPLYSNING_FRA_BRUKER,
     OPPLYSNING_FRA_ANDRE,
+    OPPLYSNINGER_FRA_UTLAND,
     KRAVGRUNNLAG_SPERRET,
     ANNET,
 }

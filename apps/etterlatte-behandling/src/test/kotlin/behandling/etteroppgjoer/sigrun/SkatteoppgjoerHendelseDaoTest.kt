@@ -38,7 +38,7 @@ class SkatteoppgjoerHendelseDaoTest(
     @BeforeEach
     fun resetTabell() {
         dataSource.connection.use {
-            it.prepareStatement("""TRUNCATE TABLE skatteoppgjoer_hendelse_kjoringer CASCADE""").executeUpdate()
+            it.prepareStatement("""TRUNCATE TABLE etteroppgjoer_hendelse_kjoering CASCADE""").executeUpdate()
         }
     }
 
@@ -59,6 +59,7 @@ class SkatteoppgjoerHendelseDaoTest(
             sisteSekvensnummer shouldBe 5
             antallHendelser shouldBe 105
             antallRelevante shouldBe 15
+            nesteSekvensnummer() shouldBe 6
         }
     }
 }

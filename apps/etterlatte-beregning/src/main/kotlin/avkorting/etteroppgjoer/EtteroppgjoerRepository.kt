@@ -1,4 +1,4 @@
-package no.nav.etterlatte.avkorting
+package no.nav.etterlatte.avkorting.etteroppgjoer
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
@@ -88,7 +88,9 @@ class EtteroppgjoerRepository(
                 when {
                     results.isEmpty() -> null
                     results.size == 1 -> results.first()
-                    else -> throw IllegalStateException("Forventet maks én rad, men fikk ${results.size}")
+                    else -> throw IllegalStateException(
+                        "Forventet maks én rad, men fikk ${results.size} for forbehandling med id $forbehandlingId",
+                    )
                 }
             }
         }

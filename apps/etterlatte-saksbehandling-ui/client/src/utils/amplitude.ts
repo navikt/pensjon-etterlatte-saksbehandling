@@ -67,6 +67,9 @@ export enum ClickEvent {
   // Personopplysninger
   AAPNE_PERSONOPPLYSNINGER_FRA_STATUS_BAR = 'åpne personopplysninger fra status bar',
 
+  // Bytt sak i sakoversikten
+  BYTT_SAK_SAKOVERSIKT = 'bytt sak sakoversikt',
+
   // Generelt
   VIS_VARSLINGER = 'vis varslinger',
   VIS_BEHANDLING_HISTORIKK = 'vis behandling historikk',

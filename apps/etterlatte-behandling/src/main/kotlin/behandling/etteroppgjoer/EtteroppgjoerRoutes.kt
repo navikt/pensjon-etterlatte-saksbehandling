@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -51,7 +52,14 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(HttpStatusCode.NotFound)
             }
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
+                val eo =
+                    inTransaction {
+                        forbehandlingService.opprettEtteroppgjoerForbehandling(
+                            sakId,
+                            2024,
+                            brukerTokenInfo,
+                        )
+                    }
                 call.respond(eo)
             }
         }
@@ -60,14 +68,20 @@ fun Route.etteroppgjoerRoutes(
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
+                    val etteroppgjoer =
+                        inTransaction {
+                            forbehandlingService.hentDetaljertForbehandling(etteroppgjoerId, brukerTokenInfo)
+                        }
                     call.respond(etteroppgjoer)
                 }
             }
 
             post("beregn_faktisk_inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
-                val response = forbehandlingService.beregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                val response =
+                    inTransaction {
+                        forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                    }
                 call.respond(response)
             }
         }
@@ -75,26 +89,33 @@ fun Route.etteroppgjoerRoutes(
         post("/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024, brukerTokenInfo)
+                val eo =
+                    inTransaction {
+                        forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, brukerTokenInfo)
+                    }
                 call.respond(eo)
             }
         }
 
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
-            val forbehandlinger = forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId)
+            val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
             call.respond(forbehandlinger)
         }
 
+        // TODO opprett periodisk jobb
         post("/skatteoppgjoerhendelser/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
                 val request = call.receive<HendelseKjoeringRequest>()
-                skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+                inTransaction {
+                    skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }
 
+        // TODO opprett periodisk jobb
         post("/{inntektsaar}/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
@@ -102,8 +123,23 @@ fun Route.etteroppgjoerRoutes(
                     krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
                         "Inntektsaar mangler"
                     }
-                etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                inTransaction {
+                    etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                }
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        // TODO opprett periodisk jobb
+        post("/{inntektsaar}/opprett-forbehandlinger") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            kunSystembruker {
+                val inntektsaar =
+                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                        "Inntektsaar mangler"
+                    }
+
+                forbehandlingService.startOpprettForbehandlingKjoering(inntektsaar)
             }
         }
     }

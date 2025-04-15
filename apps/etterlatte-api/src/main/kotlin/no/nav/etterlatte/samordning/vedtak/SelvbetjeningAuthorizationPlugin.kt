@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 /**
- * Sjekk av at bruker kun spør etter egne data
+ * Sjekk av at bruker kun spør etter egne data - denne brukes kun av selvbetjeningsløsinger(id-porten)
  */
 fun selvbetjeningAuthorizationPlugin(appname: String) =
     createRouteScopedPlugin(
@@ -35,7 +35,7 @@ fun selvbetjeningAuthorizationPlugin(appname: String) =
                             "etterlatte-api" -> {
                                 try {
                                     call.receive<FoedselsnummerDTO>().foedselsnummer
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     throw ManglerFoedselsnummerException()
                                 }
                             }

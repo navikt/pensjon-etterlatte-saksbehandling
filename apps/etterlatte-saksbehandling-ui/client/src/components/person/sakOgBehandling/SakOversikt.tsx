@@ -1,6 +1,6 @@
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
-import { SakMedBehandlinger } from '~components/person/typer'
+import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -25,16 +25,42 @@ import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
+import { ClickEvent, trackClick } from '~utils/amplitude'
+import { SakType } from '~shared/types/sak'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
   FERDIGSTILTE = 'FERDIGSTILTE',
 }
 
-export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
+function ByttTilAnnenSak(props: { byttSak: () => void }) {
+  return (
+    <Box marginBlock="8 0">
+      <Alert variant="info">
+        Bruker har en annen sak.
+        <div>
+          <Button variant="secondary" size="small" onClick={props.byttSak}>
+            Se annen sak
+          </Button>
+        </div>
+      </Alert>
+    </Box>
+  )
+}
+
+export const SakOversikt = ({
+  sakResult,
+  fnr,
+  setForetrukketSak,
+}: {
+  sakResult: Result<SakMedBehandlingerOgKanskjeAnnenSak>
+  fnr: string
+  setForetrukketSak: (sakId: number) => void
+}) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const etteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer)
+  const byttTilAnnenSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
@@ -63,10 +89,18 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
       {mapResult(sakResult, {
         pending: <Spinner label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
-        success: ({ sak, behandlinger }) => (
+        success: ({ sak, behandlinger, ekstraSak }) => (
           <HStack gap="4" wrap={false}>
             <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
+              {byttTilAnnenSakEnabled && ekstraSak && (
+                <ByttTilAnnenSak
+                  byttSak={() => {
+                    trackClick(ClickEvent.BYTT_SAK_SAKOVERSIKT)
+                    setForetrukketSak(ekstraSak.sak.id)
+                  }}
+                />
+              )}
             </Box>
             <VStack gap="8">
               {harEndretFnr() && (
@@ -155,17 +189,22 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>
 
-              {etteroppgjoerEnabled && (
-                <VStack marginBlock="0" gap="4">
+              {etteroppgjoerEnabled && sak.sakType === SakType.OMSTILLINGSSTOENAD && (
+                <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingListe sakId={sak.id} />
                   <Box>
+                    {mapResult(opprettEtteroppgjoerStatus, {
+                      pending: <Spinner label="Oppretter etteroppgjør" />,
+                      error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                    })}
+
                     <Button
                       loading={isPending(opprettEtteroppgjoerStatus)}
                       variant="secondary"
                       onClick={() => apiOpprettEtteroppjoer(sak.id)}
                     >
-                      Opprett etteroppgjør
+                      Opprett etteroppgjør forbehandling
                     </Button>
                   </Box>
                 </VStack>

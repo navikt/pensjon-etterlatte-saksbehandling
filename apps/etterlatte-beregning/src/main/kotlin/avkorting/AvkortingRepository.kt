@@ -37,6 +37,11 @@ class AvkortingRepository(
             alleAarsoppgjoer.isNotEmpty()
         }
 
+    fun hentAvkortingFaktiskInntekt(behandlingId: UUID): FaktiskInntekt? =
+        dataSource.transaction { tx ->
+            selectFaktiskInntektPaaBehandlingId(behandlingId = behandlingId, tx = tx)
+        }
+
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
@@ -159,6 +164,26 @@ class AvkortingRepository(
     ) = queryOf(
         "SELECT * FROM avkortingsgrunnlag_faktisk WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
         aarsoppgjoerId,
+    ).let { query ->
+        tx.run(
+            query
+                .map { row ->
+                    val avkortingGrunnlagId = row.uuid("id")
+                    val inntektInnvilgetPeriode =
+                        selectInntektInnvilgetPeriode(avkortingGrunnlagId, tx)
+                            ?: throw InternfeilException("Grunnlag for etteroppgjør mangler inntekt innvilgede måneder")
+
+                    row.toFaktiskInntekt(avkortingGrunnlagId, inntektInnvilgetPeriode)
+                }.asSingle,
+        )
+    }
+
+    private fun selectFaktiskInntektPaaBehandlingId(
+        behandlingId: UUID,
+        tx: TransactionalSession,
+    ) = queryOf(
+        "SELECT * FROM avkortingsgrunnlag_faktisk WHERE behandling_id = ? ORDER BY fom ASC",
+        behandlingId,
     ).let { query ->
         tx.run(
             query
@@ -428,9 +453,9 @@ class AvkortingRepository(
         statement =
             """
             INSERT INTO avkortingsgrunnlag_faktisk(
-                id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, kilde
+                id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, spesifikasjon, kilde
             ) VALUES (
-                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :kilde
+                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :spesifikasjon, :kilde
             )
             """.trimIndent(),
         paramMap =
@@ -445,6 +470,7 @@ class AvkortingRepository(
                 "naeringsinntekt" to faktisk.naeringsinntekt,
                 "afp" to faktisk.afp,
                 "utlandsinntekt" to faktisk.utlandsinntekt,
+                "spesifikasjon" to faktisk.spesifikasjon,
                 "kilde" to faktisk.kilde.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
@@ -657,6 +683,7 @@ class AvkortingRepository(
                 objectMapper.readValue(it)
             },
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+        spesifikasjon = stringOrNull("spesifikasjon") ?: "", // TODO fjern denne når feltet har blitt satt til NOT NULL,
     )
 
     private fun Row.toYtelseFoerAvkorting() =

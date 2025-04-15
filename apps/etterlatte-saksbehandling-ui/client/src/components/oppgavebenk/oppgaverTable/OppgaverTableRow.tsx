@@ -18,6 +18,7 @@ interface Props {
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
   oppdaterFrist: (id: string, nyfrist: string) => void
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+  oppdaterMerknad: (oppgaveId: string, merknad: string) => void
 }
 
 export const OppgaverTableRow = ({
@@ -26,6 +27,7 @@ export const OppgaverTableRow = ({
   oppdaterTildeling,
   oppdaterFrist,
   oppdaterStatus,
+  oppdaterMerknad,
 }: Props): ReactNode => (
   <Table.Row>
     <Table.DataCell>{oppgave.sakId}</Table.DataCell>
@@ -59,7 +61,7 @@ export const OppgaverTableRow = ({
       />
     </Table.DataCell>
     <HandlingerDataCell>
-      <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+      <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} oppdaterMerknad={oppdaterMerknad} />
     </HandlingerDataCell>
   </Table.Row>
 )

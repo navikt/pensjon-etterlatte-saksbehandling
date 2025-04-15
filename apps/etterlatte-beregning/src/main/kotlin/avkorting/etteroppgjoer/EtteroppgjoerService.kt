@@ -1,19 +1,29 @@
-package no.nav.etterlatte.avkorting
+package no.nav.etterlatte.avkorting.etteroppgjoer
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
+import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
+import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.AvkortingService
+import no.nav.etterlatte.avkorting.Etteroppgjoer
+import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -31,6 +41,7 @@ class EtteroppgjoerService(
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
+    private val avkortingService: AvkortingService,
 ) {
     fun beregnOgLagreEtteroppgjoerResultat(
         forbehandlingId: UUID,
@@ -43,12 +54,27 @@ class EtteroppgjoerService(
         return etteroppgjoerResultat
     }
 
-    fun hentBeregnetAvkorting(request: EtteroppgjoerBeregnetAvkortingRequest): EtteroppgjoerBeregnetAvkorting {
-        val (forbehandlingId, sisteIverksatteBehandling, aar) = request
+    fun hentBeregnetEtteroppgjoerResultat(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        aar: Int,
+    ): BeregnetEtteroppgjoerResultat? = etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
 
+    fun hentBeregnetAvkorting(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        sakId: SakId,
+        aar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): EtteroppgjoerBeregnetAvkorting {
         val avkortingMedForventaInntekt =
-            hentAvkortingForBehandling(sisteIverksatteBehandling, aar)
-                ?: throw InternfeilException("Mangler avkorting for siste iverksatte behandling id=$sisteIverksatteBehandling")
+            runBlocking {
+                avkortingService.hentAvkortingMedReparertAarsoppgjoer(
+                    sakId = sakId,
+                    behandlingId = sisteIverksatteBehandlingId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }.toDto()
 
         val avkortingFaktiskInntekt = hentAvkortingForBehandling(forbehandlingId, aar)
 
@@ -62,31 +88,35 @@ class EtteroppgjoerService(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val (sakId, forbehandlingId, sisteIverksatteBehandling, aar, loennsinntekt, afp, naeringsinntekt, utland) = request
-
-        val sanksjoner = sanksjonService.hentSanksjon(sisteIverksatteBehandling) ?: emptyList()
+        val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling) ?: emptyList()
 
         val tidligereAarsoppgjoer =
-            avkortingRepository.hentAvkorting(sisteIverksatteBehandling)?.let {
-                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
+            avkortingRepository.hentAvkorting(request.sisteIverksatteBehandling)?.let {
+                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
             } ?: throw InternfeilException("Mangler avkorting")
 
         val avkorting =
-            Avkorting(
-                // Trenger bare gjeldende år i en forbehandling
-                aarsoppgjoer = listOf(tidligereAarsoppgjoer),
-            ).beregnEtteroppgjoer(
-                brukerTokenInfo = brukerTokenInfo,
-                aar = aar,
-                loennsinntekt = loennsinntekt,
-                afp = afp,
-                naeringsinntekt = naeringsinntekt,
-                utland = utland,
-                sanksjoner = sanksjoner,
-            )
+            with(request) {
+                Avkorting(
+                    // Trenger bare gjeldende år i en forbehandling
+                    aarsoppgjoer = listOf(tidligereAarsoppgjoer),
+                ).beregnEtteroppgjoer(
+                    brukerTokenInfo = brukerTokenInfo,
+                    aar = aar,
+                    loennsinntekt = loennsinntekt,
+                    afp = afp,
+                    naeringsinntekt = naeringsinntekt,
+                    utland = utland,
+                    sanksjoner = sanksjoner,
+                    spesifikasjon = spesifikasjon,
+                )
+            }
 
-        avkortingRepository.lagreAvkorting(forbehandlingId, sakId, avkorting) // TODO lagre med flagg forbehandling?
+        avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
+
+    fun hentAvkortingFaktiskInntekt(request: EtteroppgjoerFaktiskInntektRequest): FaktiskInntekt? =
+        avkortingRepository.hentAvkortingFaktiskInntekt(behandlingId = request.forbehandlingId)
 
     private fun beregnEtteroppgjoerResultat(
         aar: Int,
@@ -161,11 +191,13 @@ class EtteroppgjoerService(
                     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+
             is Etteroppgjoer ->
                 AvkortingDto(
                     avkortingGrunnlag = emptyList(),
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+
             else -> null
         }
     }

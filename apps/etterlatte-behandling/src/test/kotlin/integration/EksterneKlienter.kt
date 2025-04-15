@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
+import no.nav.etterlatte.behandling.etteroppgjoer.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
@@ -56,6 +57,8 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -78,6 +81,7 @@ import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
@@ -136,10 +140,22 @@ class BeregningKlientTest :
             null,
         )
 
+    override suspend fun hentBeregnetEtteroppgjoerResultat(
+        request: EtteroppgjoerHentBeregnetResultatRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto = throw NotImplementedError("Ikke implementert for testklient")
+
+    override suspend fun hentAvkortingFaktiskInntekt(
+        request: EtteroppgjoerFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FaktiskInntekt? = mockk()
 
     override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,
@@ -248,6 +264,13 @@ class VedtakKlientTest : VedtakKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto? = null
+
+    override suspend fun hentIverksatteVedtak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<VedtakSammendragDto> {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun hentSakerMedUtbetalingForInntektsaar(
         inntektsaar: Int,
@@ -607,17 +630,18 @@ class KodeverkKlientTest : KodeverkKlient {
 }
 
 class BrevKlientTest : BrevKlient {
-    override suspend fun tilbakestillVedtaksbrev(
+    override suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         TODO("Not yet implemented")
     }
 
-    override suspend fun ferdigstillVedtaksbrev(
+    override suspend fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
+        brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         TODO("Not yet implemented")
@@ -626,16 +650,16 @@ class BrevKlientTest : BrevKlient {
     override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         TODO("Not yet implemented")
     }
 
-    override suspend fun opprettVedtaksbrev(
+    override suspend fun opprettStrukturertBrev(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
         TODO("Not yet implemented")
     }

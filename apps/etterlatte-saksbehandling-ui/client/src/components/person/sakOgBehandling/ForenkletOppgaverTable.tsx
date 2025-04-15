@@ -58,6 +58,11 @@ export const ForenkletOppgaverTable = ({
     setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg(oppdaterteOppgaver))
   }
 
+  const oppdaterMerknad = (oppgaveId: string, merknad: string) => {
+    const oppdaterteOppgaver = finnOgOppdaterOppgave(filtrerteOppgaver, oppgaveId, { merknad })
+    setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg(oppdaterteOppgaver))
+  }
+
   useEffect(() => {
     setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg(oppgaver))
   }, [oppgaveValg, oppgaver])
@@ -111,7 +116,11 @@ export const ForenkletOppgaverTable = ({
             <Table.DataCell>
               <Box minWidth="13rem">
                 {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && (
-                  <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+                  <HandlingerForOppgave
+                    oppgave={oppgave}
+                    oppdaterStatus={oppdaterStatus}
+                    oppdaterMerknad={oppdaterMerknad}
+                  />
                 )}
               </Box>
             </Table.DataCell>

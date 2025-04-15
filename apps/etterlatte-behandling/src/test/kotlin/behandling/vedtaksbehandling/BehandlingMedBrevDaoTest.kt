@@ -40,11 +40,11 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class VedtaksbehandlingDaoTest(
+internal class BehandlingMedBrevDaoTest(
     val dataSource: DataSource,
 ) {
     private lateinit var sakRepo: SakSkrivDao
-    private lateinit var vedtaksbehandlingDao: VedtaksbehandlingDao
+    private lateinit var behandlingMedBrevDao: BehandlingMedBrevDao
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var klageDao: KlageDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
@@ -54,7 +54,7 @@ internal class VedtaksbehandlingDaoTest(
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         val revurderingDao = RevurderingDao(ConnectionAutoclosingTest(dataSource))
         sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
-        vedtaksbehandlingDao = VedtaksbehandlingDao(ConnectionAutoclosingTest(dataSource))
+        behandlingMedBrevDao = BehandlingMedBrevDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, ConnectionAutoclosingTest(dataSource))
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
@@ -78,11 +78,11 @@ internal class VedtaksbehandlingDaoTest(
             ).also { behandlingDao.opprettBehandling(it) }
                 .let { requireNotNull(behandlingDao.hentBehandling(it.id)) as Foerstegangsbehandling }
 
-        vedtaksbehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe true
+        behandlingMedBrevDao.erBehandlingRedigerbar(behandling.id) shouldBe true
 
         behandlingDao.avbrytBehandling(behandling.id, null, null)
 
-        vedtaksbehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe false
+        behandlingMedBrevDao.erBehandlingRedigerbar(behandling.id) shouldBe false
     }
 
     @Test
@@ -96,11 +96,11 @@ internal class VedtaksbehandlingDaoTest(
 
         klageDao.lagreKlage(klage)
 
-        vedtaksbehandlingDao.erBehandlingRedigerbar(klage.id) shouldBe true
+        behandlingMedBrevDao.erBehandlingRedigerbar(klage.id) shouldBe true
 
         klageDao.lagreKlage(klage.copy(status = KlageStatus.AVBRUTT))
 
-        vedtaksbehandlingDao.erBehandlingRedigerbar(klage.id) shouldBe false
+        behandlingMedBrevDao.erBehandlingRedigerbar(klage.id) shouldBe false
     }
 
     @Test
@@ -113,11 +113,11 @@ internal class VedtaksbehandlingDaoTest(
 
         tilbakekrevingDao.lagreTilbakekreving(tilbakekreving)
 
-        vedtaksbehandlingDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe true
+        behandlingMedBrevDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe true
 
         tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT))
 
-        vedtaksbehandlingDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe false
+        behandlingMedBrevDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe false
     }
 
     private fun tilbakekreving(sak: Sak) =

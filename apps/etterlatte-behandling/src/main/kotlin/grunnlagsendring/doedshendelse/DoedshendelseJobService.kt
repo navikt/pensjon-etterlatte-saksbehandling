@@ -92,7 +92,7 @@ class DoedshendelseJobService(
     ) {
         val kontrollpunkter =
             try {
-                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseKontrollpunktService.identifiserKontrollpunkter(
                     doedshendelse,
                     bruker,
                 )
@@ -136,7 +136,7 @@ class DoedshendelseJobService(
             }
 
             false -> {
-                logger.info("Skal håndtere dødshendelse")
+                logger.info("Skal håndtere dødshendelse ${doedshendelse.id}")
                 val sak: Sak =
                     kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 

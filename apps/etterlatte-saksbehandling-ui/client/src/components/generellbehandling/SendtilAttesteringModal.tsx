@@ -1,6 +1,6 @@
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { useNavigate } from 'react-router-dom'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Button, Modal } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { sendTilAttesteringGenerellBehandling } from '~shared/api/generellbehandling'
@@ -15,8 +15,16 @@ export const SendtilAttesteringModal = ({
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland }
 }) => {
   const navigate = useNavigate()
-  const [sendTilAttesteringStatus, sendTilAttestering] = useApiCall(sendTilAttesteringGenerellBehandling)
+  const [sendTilAttesteringStatus, sendTilAttestering, resetSendTilAttesteringStatus] = useApiCall(
+    sendTilAttesteringGenerellBehandling
+  )
   const [open, setOpen] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (!open) {
+      resetSendTilAttesteringStatus()
+    }
+  }, [open])
 
   return (
     <>

@@ -66,7 +66,8 @@ class TrygdetidRepository(
                         yrkesskade,
                         beregnet_samlet_trygdetid_norge,
                         kopiert_grunnlag_fra_behandling,
-                        overstyrt_begrunnelse
+                        overstyrt_begrunnelse,
+                        begrunnelse
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -123,6 +124,13 @@ class TrygdetidRepository(
                     gjeldendeTrygdetid.id,
                     gjeldendeTrygdetid.behandlingId,
                     oppdatertTrygdetid.kopiertGrunnlagFraBehandling,
+                    tx,
+                )
+
+                oppdaterBegrunnelse(
+                    gjeldendeTrygdetid.id,
+                    gjeldendeTrygdetid.behandlingId,
+                    oppdatertTrygdetid.begrunnelse,
                     tx,
                 )
 
@@ -401,6 +409,29 @@ class TrygdetidRepository(
         }
     }
 
+    private fun oppdaterBegrunnelse(
+        id: UUID,
+        behandlingId: UUID,
+        begrunnelse: String?,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                UPDATE trygdetid 
+                  SET begrunnelse = :begrunnelse WHERE id = :id AND  behandling_id = :behandlingId
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "id" to id,
+                    "behandlingId" to behandlingId,
+                    "begrunnelse" to begrunnelse,
+                ),
+        ).let { query ->
+            tx.update(query)
+        }
+    }
+
     private fun oppdaterYrkesskade(
         id: UUID,
         behandlingId: UUID,
@@ -661,6 +692,7 @@ class TrygdetidRepository(
         ident = string("ident"),
         yrkesskade = boolean("yrkesskade"),
         kopiertGrunnlagFraBehandling = uuidOrNull("kopiert_grunnlag_fra_behandling"),
+        begrunnelse = stringOrNull("begrunnelse"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

@@ -15,6 +15,7 @@ import { datoIMorgen, datoToAarFramITid } from '~utils/formatering/dato'
 enum AarsakForAaSettePaaVent {
   OPPLYSNING_FRA_BRUKER = 'Opplysning fra bruker',
   OPPLYSNING_FRA_ANDRE = 'Opplysning fra andre',
+  OPPLYSNINGER_FRA_UTLAND = 'Sak i bero - venter opplysninger utland',
   KRAVGRUNNLAG_SPERRET = 'Kravgrunnlag sperret',
   ANNET = 'Annet',
 }

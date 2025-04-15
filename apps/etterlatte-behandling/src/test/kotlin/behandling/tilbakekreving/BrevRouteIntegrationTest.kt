@@ -116,11 +116,11 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
     private val grunnlagServiceMock: GrunnlagService = mockk()
     private val brevKlientMock: BrevKlient =
         mockk {
-            coEvery { opprettVedtaksbrev(any(), any(), any()) } answers {
+            coEvery { opprettStrukturertBrev(any(), any(), any()) } answers {
                 opprettetBrev(behandlingId = firstArg())
             }
-            coEvery { tilbakestillVedtaksbrev(any(), any(), any(), any()) } returns tilbakestiltPayload
-            coEvery { ferdigstillVedtaksbrev(any(), any()) } just runs
+            coEvery { tilbakestillStrukturertBrev(any(), any(), any(), any()) } returns tilbakestiltPayload
+            coEvery { ferdigstillStrukturertBrev(any(), any(), any()) } just runs
             coEvery { genererPdf(any(), any(), any(), any()) } returns generertPdf
         }
 
@@ -174,7 +174,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
             withTestApplication { client ->
                 val response =
-                    client.post("/api/behandling/brev/${behandling.id}/vedtak?sakId=${behandling.sak.id}") {
+                    client.post("/api/behandling/brev/${behandling.id}?sakId=${behandling.sak.id}") {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }
@@ -193,7 +193,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.put(
-                        "/api/behandling/brev/${behandling.id}/vedtak/tilbakestill?" +
+                        "/api/behandling/brev/${behandling.id}/tilbakestill?" +
                             "brevId=42&sakId=${behandling.sak.id}&brevtype=${Brevtype.VEDTAK}",
                     ) {
                         addAuthToken(tokenSaksbehandler)
@@ -223,7 +223,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.get(
-                        "/api/behandling/brev/${behandling.id}/vedtak/pdf?" +
+                        "/api/behandling/brev/${behandling.id}/pdf?" +
                             "brevId=42&sakId=${behandling.sak.id}",
                     ) {
                         addAuthToken(tokenSaksbehandler)
@@ -243,7 +243,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.post(
-                        "/api/behandling/brev/${behandling.id}/vedtak/ferdigstill",
+                        "/api/behandling/brev/${behandling.id}/ferdigstill",
                     ) {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -263,7 +263,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.get(
-                        "/api/behandling/brev/${behandling.id}/vedtak",
+                        "/api/behandling/brev/${behandling.id}",
                     ) {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -289,7 +289,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
             withTestApplication { client ->
                 val response =
-                    client.post("/api/behandling/brev/$tilbakekrevingId/vedtak?sakId=${sak.id}") {
+                    client.post("/api/behandling/brev/$tilbakekrevingId?sakId=${sak.id}") {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     }
@@ -297,7 +297,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                 val brev: Brev = response.body()
                 brev.behandlingId shouldBe tilbakekrevingId
 
-                coVerify { brevKlientMock.opprettVedtaksbrev(tilbakekrevingId, any(), any()) }
+                coVerify { brevKlientMock.opprettStrukturertBrev(tilbakekrevingId, any(), any()) }
             }
         }
 
@@ -313,7 +313,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.put(
-                        "/api/behandling/brev/$tilbakekrevingId/vedtak/tilbakestill?" +
+                        "/api/behandling/brev/$tilbakekrevingId/tilbakestill?" +
                             "brevId=42&sakId=${sak.id}&brevtype=${Brevtype.VEDTAK}",
                     ) {
                         addAuthToken(tokenSaksbehandler)
@@ -322,7 +322,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                 response.status shouldBe HttpStatusCode.OK
                 response.body<BrevPayload>() shouldBeEqual tilbakestiltPayload
                 coVerify {
-                    brevKlientMock.tilbakestillVedtaksbrev(
+                    brevKlientMock.tilbakestillStrukturertBrev(
                         42,
                         tilbakekrevingId,
                         any(),
@@ -344,7 +344,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.get(
-                        "/api/behandling/brev/$tilbakekrevingId/vedtak/pdf?" +
+                        "/api/behandling/brev/$tilbakekrevingId/pdf?" +
                             "brevId=42&sakId=${tilbakekrevingBehandling.sak.id}",
                     ) {
                         addAuthToken(tokenSaksbehandler)
@@ -366,7 +366,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.post(
-                        "/api/behandling/brev/$tilbakekrevingId/vedtak/ferdigstill",
+                        "/api/behandling/brev/$tilbakekrevingId/ferdigstill",
                     ) {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -374,8 +374,9 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                 response.status shouldBe HttpStatusCode.OK
                 response.bodyAsText() shouldBeEqual ""
                 coVerify {
-                    brevKlientMock.ferdigstillVedtaksbrev(
+                    brevKlientMock.ferdigstillStrukturertBrev(
                         tilbakekrevingId,
+                        Brevtype.VEDTAK,
                         any(),
                     )
                 }
@@ -393,7 +394,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             withTestApplication { client ->
                 val response =
                     client.get(
-                        "/api/behandling/brev/$tilbakekrevingId/vedtak",
+                        "/api/behandling/brev/$tilbakekrevingId",
                     ) {
                         addAuthToken(tokenSaksbehandler)
                     }

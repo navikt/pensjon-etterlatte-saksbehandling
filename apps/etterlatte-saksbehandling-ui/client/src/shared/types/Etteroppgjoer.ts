@@ -5,12 +5,14 @@ import { GrunnlagKilde } from '~shared/types/grunnlag'
 export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
   opplysninger: EtteroppgjoerOpplysninger
+  faktiskInntekt?: FaktiskInntekt
   avkortingFaktiskInntekt: Avkorting | undefined
+  beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
 }
 
 export interface EtteroppgjoerBehandling {
   id: string
-  status: string
+  status: EtteroppgjoerBehandlingStatus
   sak: ISak
   aar: number
   innvilgetPeriode: {
@@ -18,6 +20,19 @@ export interface EtteroppgjoerBehandling {
     tom: string
   }
   opprettet: string // Mottatt?
+  brevId?: number
+}
+
+export enum EtteroppgjoerBehandlingStatus {
+  OPPRETTET = 'OPPRETTET',
+  BEREGNET = 'BEREGNET',
+  VARSELBREV_SENDT = 'VARSELBREV_SENDT',
+}
+
+export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlingStatus, string> = {
+  OPPRETTET: 'Opprettet',
+  BEREGNET: 'Beregnet',
+  VARSELBREV_SENDT: 'Forhåndsvarsel sendt',
 }
 
 export interface EtteroppgjoerOpplysninger {
@@ -31,6 +46,7 @@ export interface FaktiskInntekt {
   afp: number
   naeringsinntekt: number
   utland: number
+  spesifikasjon: string
 }
 
 export interface PensjonsgivendeInntektFraSkatteetaten {

@@ -26,25 +26,32 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.tilSakId
 import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
+import no.nav.etterlatte.libs.ktor.route.generellBehandlingId
+import no.nav.etterlatte.libs.ktor.route.klageId
+import no.nav.etterlatte.libs.ktor.route.oppgaveId
+import no.nav.etterlatte.libs.ktor.route.tilbakekrevingId
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangServiceSjekker
+import java.util.UUID
 
 class PluginConfiguration {
-    var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangBehandling: (behandlingId: UUID, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilSak: (sakId: SakId, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilOppgave: (oppgaveId: UUID, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilKlage: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilKlage: (klageId: UUID, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilGenerellBehandling: (generellbehandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilGenerellBehandling: (generellbehandlingId: UUID, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilTilbakekreving: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilTilbakekreving: (tilbakekrevingId: UUID, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilEtteroppgjoer: (etteroppgjoerId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilEtteroppgjoer: (etteroppgjoerId: UUID, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
@@ -96,7 +103,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
                     when (funnetCallIdParametersType) {
                         CallParamAuthId.BEHANDLINGID -> {
                             if (!pluginConfig.harTilgangBehandling(
-                                    idForRequest,
+                                    UUID.fromString(idForRequest),
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
@@ -118,7 +125,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
 
                         CallParamAuthId.OPPGAVEID -> {
                             if (!pluginConfig.harTilgangTilOppgave(
-                                    idForRequest,
+                                    UUID.fromString(idForRequest),
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
@@ -129,7 +136,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
 
                         CallParamAuthId.KLAGEID -> {
                             if (!pluginConfig.harTilgangTilKlage(
-                                    idForRequest,
+                                    UUID.fromString(idForRequest),
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
@@ -140,7 +147,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
 
                         CallParamAuthId.GENERELLBEHANDLINGID -> {
                             if (!pluginConfig.harTilgangTilGenerellBehandling(
-                                    idForRequest,
+                                    UUID.fromString(idForRequest),
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
@@ -151,7 +158,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
 
                         CallParamAuthId.TILBAKEKREVINGID -> {
                             if (!pluginConfig.harTilgangTilTilbakekreving(
-                                    idForRequest,
+                                    UUID.fromString(idForRequest),
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
@@ -162,7 +169,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
 
                         CallParamAuthId.ETTEROPPGJOERID -> {
                             if (!pluginConfig.harTilgangTilEtteroppgjoer(
-                                    idForRequest,
+                                    UUID.fromString(idForRequest),
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
@@ -239,18 +246,18 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Sa
     } else {
         val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
         when (funnetCallIdParametersType) {
-            CallParamAuthId.BEHANDLINGID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(idForRequest)?.enhetNr
+            CallParamAuthId.BEHANDLINGID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId)?.enhetNr
             CallParamAuthId.SAKID -> sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.tilSakId())?.enhetNr
-            CallParamAuthId.OPPGAVEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(idForRequest)?.enhetNr
-            CallParamAuthId.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(idForRequest)?.enhetNr
+            CallParamAuthId.OPPGAVEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId)?.enhetNr
+            CallParamAuthId.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(klageId)?.enhetNr
             CallParamAuthId.GENERELLBEHANDLINGID ->
-                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(idForRequest)?.enhetNr
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(generellBehandlingId)?.enhetNr
 
             CallParamAuthId.TILBAKEKREVINGID ->
-                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(idForRequest)?.enhetNr
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId)?.enhetNr
 
             CallParamAuthId.ETTEROPPGJOERID ->
-                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(idForRequest)?.enhetNr
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(etteroppgjoerId)?.enhetNr
         }
     }
 }

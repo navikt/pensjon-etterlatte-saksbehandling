@@ -116,6 +116,13 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
 
+    suspend fun oppdaterTrygdetidMedBegrunnelse(
+        trygdetidId: UUID,
+        behandlingId: UUID,
+        begrunnelse: String?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
     suspend fun kopierSisteTrygdetidberegninger(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
@@ -872,6 +879,23 @@ class TrygdetidServiceImpl(
             logger.info("Oppdatere yrkesskade $yrkesskade for trygdetid $trygdetidId for behandling $behandlingId")
 
             oppdaterBeregnetTrygdetid(behandlingId, trygdetid.copy(yrkesskade = yrkesskade), brukerTokenInfo)
+        }
+
+    override suspend fun oppdaterTrygdetidMedBegrunnelse(
+        trygdetidId: UUID,
+        behandlingId: UUID,
+        begrunnelse: String?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid =
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            val trygdetid =
+                trygdetidRepository
+                    .hentTrygdetidMedId(behandlingId, trygdetidId)
+                    ?: throw TrygdetidIkkeFunnetForBehandling()
+
+            trygdetidRepository
+                .oppdaterTrygdetid(trygdetid.oppdaterBegrunnelse(begrunnelse))
+                .let { sjekkTrygdetidMotGrunnlag(it, brukerTokenInfo)!! }
         }
 
     override fun overstyrBeregnetTrygdetidForAvdoed(

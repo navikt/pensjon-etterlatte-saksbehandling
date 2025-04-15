@@ -63,6 +63,13 @@ class ManglerFoedselsnummerException :
         meta = getMeta(),
     )
 
+class UgyldigFoedselsnummerException :
+    UgyldigForespoerselException(
+        code = "006-FNR-UGYLDIG",
+        detail = "Ugyldig fødselsnummer",
+        meta = getMeta(),
+    )
+
 class ManglerFomDatoException :
     UgyldigForespoerselException(
         code = "003-FOMDATO-MANGLER",

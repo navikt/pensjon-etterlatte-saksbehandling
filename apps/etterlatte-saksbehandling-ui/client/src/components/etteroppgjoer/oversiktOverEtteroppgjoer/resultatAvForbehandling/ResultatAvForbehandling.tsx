@@ -5,12 +5,13 @@ import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
 
 export const ResultatAvForbehandling = () => {
-  const { resultat } = useAppSelector((state) => state.etteroppgjoerReducer)
+  const { etteroppgjoer } = useAppSelector((state) => state.etteroppgjoerReducer)
 
-  if (!resultat) {
+  if (!etteroppgjoer || !etteroppgjoer.beregnetEtteroppgjoerResultat) {
     return null
   }
 
+  const resultat = etteroppgjoer?.beregnetEtteroppgjoerResultat
   const utfallAvForbehandling = resultat.resultatType
 
   return (

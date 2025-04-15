@@ -3,8 +3,11 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.hendelse.getLongOrNull
+import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -33,7 +36,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.id = ?
                         """.trimIndent(),
@@ -49,7 +52,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.sak_id = ?
                         """.trimIndent(),
@@ -60,21 +63,22 @@ class EtteroppgjoerForbehandlingDao(
         }
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) =
-        connectionAutoclosing.hentConnection {
-            with(it) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
                 val statement =
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
-                            status = excluded.status
+                            status = excluded.status,
+                            brev_id = excluded.brev_id
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
-                statement.setString(2, forbehandling.status)
+                statement.setString(2, forbehandling.status.name)
                 statement.setSakId(3, forbehandling.sak.id)
                 statement.setTidspunkt(4, forbehandling.opprettet)
                 statement.setInt(5, forbehandling.aar)
@@ -86,6 +90,7 @@ class EtteroppgjoerForbehandlingDao(
                             ?: throw InternfeilException("Etteroppgjoer forbehandling mangler periode"),
                     ),
                 )
+                statement.setLong(8, forbehandling.brevId)
                 statement.executeUpdate().also {
                     krev(it == 1) {
                         "Kunne ikke lagre forbehandling etteroppgjør for sakId=${forbehandling.sak.id}"
@@ -102,7 +107,7 @@ class EtteroppgjoerForbehandlingDao(
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO pensjonsgivendeinntekt_fra_skatt(
+                    INSERT INTO etteroppgjoer_pensjonsgivendeinntekt(
                         id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt,fiske_fangst_familiebarnehage
                     ) 
                     VALUES (?, ?, ?, ?, ?, ?, ?) 
@@ -135,7 +140,7 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         SELECT *
-                        FROM pensjonsgivendeinntekt_fra_skatt
+                        FROM etteroppgjoer_pensjonsgivendeinntekt
                         WHERE forbehandling_id = ?
                         """.trimIndent(),
                     )
@@ -164,7 +169,7 @@ class EtteroppgjoerForbehandlingDao(
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO inntekt_fra_ainntekt(
+                    INSERT INTO etteroppgjoer_ainntekt(
                         id, forbehandling_id, aar, inntektsmaaneder
                     ) 
                     VALUES (?, ?, ?, ?) 
@@ -191,7 +196,7 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         SELECT *
-                        FROM inntekt_fra_ainntekt
+                        FROM etteroppgjoer_ainntekt
                         WHERE forbehandling_id = ?
                         """.trimIndent(),
                     )
@@ -218,13 +223,14 @@ class EtteroppgjoerForbehandlingDao(
                 ),
             // sekvensnummerSkatt = "123", // TODO
             opprettet = getTidspunkt("opprettet"),
-            status = getString("status"),
+            status = EtteroppgjoerForbehandlingStatus.valueOf(getString("status")),
             aar = getInt("aar"),
             innvilgetPeriode =
                 Periode(
                     fom = getDate("fom").let { YearMonth.from(it.toLocalDate()) },
                     tom = getDate("tom").let { YearMonth.from(it.toLocalDate()) },
                 ),
+            brevId = getLongOrNull("brev_id"),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

@@ -1,10 +1,15 @@
-package no.nav.etterlatte.behandling.etteroppgjoer
+package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
@@ -15,40 +20,73 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
-import java.time.YearMonth
+import java.util.UUID
 
-class OpprettEtteroppgjoerRevurdering(
+class EtteroppgjoerRevurderingService(
     private val behandlingService: BehandlingService,
     private val etteroppgjoerService: EtteroppgjoerService,
+    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val trygdetidKlient: TrygdetidKlient,
     private val beregningKlient: BeregningKlient,
+    private val vedtakKlient: VedtakKlient,
 ) {
     fun opprett(
         sakId: SakId,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val inntektsaar = 2024 // TODO utledes fra hvor? forbehandling?
-
         val (revurdering, sisteIverksatte) =
             inTransaction {
-                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+                val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+
+                if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)) {
+                    throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
+                }
+
+                // TODO her bør det sjekkes for om det allerede er laget en behandling med matchende relatertBehandlingId
+
+                // TODO hva blir riktig her? vi ønsker ikke mer enn en oppgave, men kan det være oppgaver åpne på forbehandling?
+                // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+
+                val iverksatteVedtak =
+                    runBlocking {
+                        vedtakKlient
+                            .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                            .sortedByDescending { it.datoFattet }
+                    }
+
+                if (iverksatteVedtak.isEmpty()) {
+                    throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
+                }
+
+                // TODO vedtak med opphør støttes ikke enda da vi må tenke litt rundt hvordan dette skal håndteres mtp etteroppgjør
+                if (iverksatteVedtak.first().vedtakType === VedtakType.OPPHOER) {
+                    throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
+                }
+
+                val sisteIverksatteIkkeOpphoer = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
+
+                if (sisteIverksatteIkkeOpphoer.opphoerFraOgMed != null) {
+                    throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
+                }
 
                 val sisteIverksatte =
-                    behandlingService.hentSisteIverksatte(sakId)
-                        ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+                    behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
+                        ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
 
                 val persongalleri =
                     grunnlagService.hentPersongalleri(sakId)
-                        ?: throw InternfeilException("Fant ikke iverksatt persongaller")
+                        ?: throw InternfeilException("Fant ikke persongalleri for sak $sakId")
 
                 val virkningstidspunkt =
                     Virkningstidspunkt(
-                        dato = YearMonth.of(inntektsaar, 1), // TODO må utledes
+                        dato = forbehandling.innvilgetPeriode.fom,
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                         begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
                     )
@@ -58,15 +96,15 @@ class OpprettEtteroppgjoerRevurdering(
                         .opprettRevurdering(
                             sakId = sakId,
                             forrigeBehandling = sisteIverksatte,
+                            relatertBehandlingId = forbehandling.id.toString(),
                             persongalleri = persongalleri,
-                            prosessType = Prosesstype.MANUELL, // TODO parameter når automatisk implementeres
+                            prosessType = Prosesstype.MANUELL,
                             kilde = Vedtaksloesning.GJENNY,
                             revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                             virkningstidspunkt = virkningstidspunkt,
-                            begrunnelse = "TODO", // TODO
                             saksbehandlerIdent = brukerTokenInfo.ident(),
+                            begrunnelse = null,
                             mottattDato = null,
-                            relatertBehandlingId = null,
                             frist = null,
                             paaGrunnAvOppgave = null,
                         ).oppdater()
@@ -77,10 +115,12 @@ class OpprettEtteroppgjoerRevurdering(
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
-                etteroppgjoerService.oppdaterStatus(sakId, inntektsaar, EtteroppgjoerStatus.UNDER_REVURDERING)
+                etteroppgjoerService.oppdaterStatus(sakId, forbehandling.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
 
-                Pair(revurdering, sisteIverksatte)
+                revurdering to sisteIverksatte
             }
+
+        // TODO her må noe gjøres da feil her medfører en "halvveis behandling"
         runBlocking {
             trygdetidKlient.kopierTrygdetidFraForrigeBehandling(
                 behandlingId = revurdering.id,
@@ -97,9 +137,8 @@ class OpprettEtteroppgjoerRevurdering(
                 behandlingId = revurdering.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
-
-            // TODO Avkorting basert på faktisk inntekt fra forbehandling
         }
+
         return revurdering
     }
 }

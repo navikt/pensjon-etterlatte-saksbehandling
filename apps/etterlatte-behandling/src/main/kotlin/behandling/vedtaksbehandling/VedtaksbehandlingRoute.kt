@@ -9,11 +9,11 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 
-internal fun Route.vedtaksbehandlingRoutes(vedtaksbehandlingService: VedtaksbehandlingService) {
-    get("/vedtaksbehandling/{$BEHANDLINGID_CALL_PARAMETER}/redigerbar") {
+internal fun Route.behandlingMedBrevRoutes(behandlingMedBrevService: BehandlingMedBrevService) {
+    get("/behandling-med-brev/{$BEHANDLINGID_CALL_PARAMETER}/redigerbar") {
         val redigerbar =
             inTransaction {
-                vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
+                behandlingMedBrevService.erBehandlingRedigerbar(behandlingId)
             }
         call.respond(HttpStatusCode.OK, redigerbar)
     }

@@ -32,6 +32,7 @@ data class Trygdetid(
     val opplysningerDifferanse: OpplysningerDifferanse? = null,
     val yrkesskade: Boolean,
     val kopiertGrunnlagFraBehandling: UUID? = null,
+    val begrunnelse: String? = null,
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()
@@ -64,6 +65,13 @@ data class Trygdetid(
         this.copy(beregnetTrygdetid = beregnetTrygdetid)
 
     fun nullstillBeregnetTrygdetid(): Trygdetid = this.copy(beregnetTrygdetid = null)
+
+    fun oppdaterBegrunnelse(begrunnelse: String?) =
+        if (begrunnelse.isNullOrEmpty()) {
+            this.copy(begrunnelse = null)
+        } else {
+            this.copy(begrunnelse = begrunnelse)
+        }
 }
 
 data class DetaljertBeregnetTrygdetid(

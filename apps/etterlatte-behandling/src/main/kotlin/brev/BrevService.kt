@@ -2,10 +2,11 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerBrevService
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
-import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingType
+import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
+import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
@@ -21,29 +22,33 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BrevService(
-    val vedtaksbehandlingService: VedtaksbehandlingService,
-    val brevApiKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
-    val vedtakKlient: VedtakKlient,
-    val tilbakekrevingBrevService: TilbakekrevingBrevService,
+    private val behandlingMedBrevService: BehandlingMedBrevService,
+    private val brevApiKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
+    private val vedtakKlient: VedtakKlient,
+    private val tilbakekrevingBrevService: TilbakekrevingBrevService,
+    private val etteroppgjoerBrevService: EtteroppgjoerBrevService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun opprettVedtaksbrev(
+    suspend fun opprettStrukturertBrev(
         behandlingId: UUID,
         sakId: SakId,
         bruker: BrukerTokenInfo,
     ): Brev {
         if (bruker is Saksbehandler) {
-            val kanRedigeres = vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
+            val kanRedigeres = behandlingMedBrevService.erBehandlingRedigerbar(behandlingId)
             if (!kanRedigeres) {
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }
         }
 
-        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
-        return when (vedtaksbehandlingType) {
-            VedtaksbehandlingType.TILBAKEKREVING ->
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
+        return when (behandlingMedBrevType) {
+            BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+
+            BehandlingMedBrevType.ETTEROPPGJOER ->
+                etteroppgjoerBrevService.opprettEtteroppgjoerBrev(behandlingId, bruker)
 
             else ->
                 videresendInterneFeil {
@@ -58,29 +63,38 @@ class BrevService(
         sakId: SakId,
         bruker: BrukerTokenInfo,
     ): Pdf {
-        val vedtak =
-            vedtakKlient.hentVedtak(behandlingId, bruker)
-                ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
-        val saksbehandlerident: String = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
 
         val skalLagrePdf =
-            if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
-                logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (behandlingId=$behandlingId)")
-                false
-            } else if (bruker.erSammePerson(saksbehandlerident)) {
-                logger.warn(
-                    "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerident)" +
-                        " og attestant (${bruker.ident()}) er samme person.",
-                )
-                false
+            if (behandlingMedBrevType.harVedtaksbrev) {
+                val vedtak =
+                    vedtakKlient.hentVedtak(behandlingId, bruker)
+                        ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
+                val saksbehandlerident: String = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
+
+                if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+                    logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (behandlingId=$behandlingId)")
+                    false
+                } else if (bruker.erSammePerson(saksbehandlerident)) {
+                    logger.warn(
+                        "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerident)" +
+                            " og attestant (${bruker.ident()}) er samme person.",
+                    )
+                    false
+                } else {
+                    true
+                }
             } else {
-                true
+                // TODO: se på statusen for behandlingstypen EO (og andre) her
+                false
             }
 
-        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
-        return when (vedtaksbehandlingType) {
-            VedtaksbehandlingType.TILBAKEKREVING ->
+        return when (behandlingMedBrevType) {
+            BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
+
+            BehandlingMedBrevType.ETTEROPPGJOER ->
+                etteroppgjoerBrevService.genererPdf(brevID, behandlingId, bruker)
 
             else ->
                 videresendInterneFeil {
@@ -89,29 +103,34 @@ class BrevService(
         }
     }
 
-    suspend fun ferdigstillVedtaksbrev(
+    suspend fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val vedtakDto =
-            krevIkkeNull(vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)) {
-                "Fant ikke vedtak for behandling (id=$behandlingId)"
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
+        if (behandlingMedBrevType.harVedtaksbrev) {
+            val vedtakDto =
+                krevIkkeNull(vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)) {
+                    "Fant ikke vedtak for behandling (id=$behandlingId)"
+                }
+            val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident()
+
+            if (vedtakDto.status != VedtakStatus.FATTET_VEDTAK) {
+                throw IllegalStateException(
+                    "Vedtak status er ${vedtakDto.status}. Avventer ferdigstilling av brev (behandlingId=$behandlingId)",
+                )
             }
-        val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident()
-
-        if (vedtakDto.status != VedtakStatus.FATTET_VEDTAK) {
-            throw IllegalStateException(
-                "Vedtak status er ${vedtakDto.status}. Avventer ferdigstilling av brev (behandlingId=$behandlingId)",
-            )
-        }
-        if (brukerTokenInfo.erSammePerson(saksbehandlerIdent)) {
-            throw SaksbehandlerOgAttestantSammePerson(saksbehandlerIdent, brukerTokenInfo.ident())
+            if (brukerTokenInfo.erSammePerson(saksbehandlerIdent)) {
+                throw SaksbehandlerOgAttestantSammePerson(saksbehandlerIdent, brukerTokenInfo.ident())
+            }
         }
 
-        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
-        when (vedtaksbehandlingType) {
-            VedtaksbehandlingType.TILBAKEKREVING ->
+        when (behandlingMedBrevType) {
+            BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+
+            BehandlingMedBrevType.ETTEROPPGJOER ->
+                etteroppgjoerBrevService.ferdigstillBrev(behandlingId, brukerTokenInfo)
 
             else ->
                 videresendInterneFeil {
@@ -120,7 +139,7 @@ class BrevService(
         }
     }
 
-    suspend fun tilbakestillVedtaksbrev(
+    suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
         sakId: SakId,
@@ -128,15 +147,22 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ): BrevPayload {
         if (bruker is Saksbehandler) {
-            val kanRedigeres = vedtaksbehandlingService.erBehandlingRedigerbar(behandlingId)
+            val kanRedigeres = behandlingMedBrevService.erBehandlingRedigerbar(behandlingId)
             if (!kanRedigeres) {
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }
         }
-        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
-        return when (vedtaksbehandlingType) {
-            VedtaksbehandlingType.TILBAKEKREVING ->
+        val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
+        return when (behandlingMedBrevType) {
+            BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+
+            BehandlingMedBrevType.ETTEROPPGJOER ->
+                etteroppgjoerBrevService.tilbakestillEtteroppgjoerBrev(
+                    brevId = brevID,
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = bruker,
+                )
 
             else ->
                 videresendInterneFeil {
@@ -202,14 +228,17 @@ class BrevService(
         }
     }
 
-    suspend fun hentVedtaksbrev(
+    suspend fun hentStrukturertBrev(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): Brev? {
-        val vedtaksbehandlingType = vedtaksbehandlingService.hentVedtaksbehandling(behandlingId).type
+        val vedtaksbehandlingType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
         return when (vedtaksbehandlingType) {
-            VedtaksbehandlingType.TILBAKEKREVING ->
+            BehandlingMedBrevType.TILBAKEKREVING ->
                 tilbakekrevingBrevService.hentVedtaksbrev(behandlingId, bruker)
+
+            BehandlingMedBrevType.ETTEROPPGJOER ->
+                etteroppgjoerBrevService.hentEtteroppgjoersbrev(behandlingId, bruker)
 
             else ->
                 videresendInterneFeil {

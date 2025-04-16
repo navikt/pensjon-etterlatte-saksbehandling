@@ -13,7 +13,7 @@ class EtteroppgjoerBrevDataTest {
     @Test
     fun `tester serialisering og deserialisering av brevFastInnholdData`() {
         val brevData =
-            EtteroppgjoerBrevData.Forhaandsvarsel(
+            EtteroppgjoerBrevdata.Forhaandsvarsel(
                 bosattUtland = false,
                 norskInntekt = false,
                 etteroppgjoersAar = 2024,
@@ -26,6 +26,6 @@ class EtteroppgjoerBrevDataTest {
 
         val json = brevData.toJson()
         val gjenskapt = objectMapper.readValue<BrevFastInnholdData>(json)
-        assertInstanceOf<EtteroppgjoerBrevData.Forhaandsvarsel>(gjenskapt)
+        assertInstanceOf<EtteroppgjoerBrevdata.Forhaandsvarsel>(gjenskapt)
     }
 }

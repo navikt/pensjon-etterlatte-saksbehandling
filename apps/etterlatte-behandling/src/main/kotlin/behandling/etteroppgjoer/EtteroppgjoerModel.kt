@@ -3,8 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.Forhaandsvarsel
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.ForhaandsvarselInnhold
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevdata
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -250,11 +249,11 @@ object EtteroppgjoerBrevDataMapper {
 
         return EtteroppgjoerBrevRequestData(
             redigerbar =
-                ForhaandsvarselInnhold(
+                EtteroppgjoerBrevdata.ForhaandsvarselInnhold(
                     sak = data.behandling.sak,
                 ),
             innhold =
-                Forhaandsvarsel(
+                EtteroppgjoerBrevdata.Forhaandsvarsel(
                     bosattUtland = false, // TODO
                     norskInntekt = false, // TODO
                     etteroppgjoersAar = data.behandling.aar,

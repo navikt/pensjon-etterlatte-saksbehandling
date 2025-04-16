@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
-object EtteroppgjoerBrevData {
+object EtteroppgjoerBrevdata {
     data class Forhaandsvarsel(
         val bosattUtland: Boolean,
         val norskInntekt: Boolean,
@@ -27,5 +27,17 @@ object EtteroppgjoerBrevData {
     ) : BrevRedigerbarInnholdData() {
         override val type: String = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR"
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_FORHAANDSVARSEL
+    }
+
+    data class Vedtak(
+        val bosattUtland: Boolean,
+    ) : BrevFastInnholdData() {
+        override val type: String = "OMS_EO_VEDTAK"
+        override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
+    }
+
+    class VedtakInnhold : BrevRedigerbarInnholdData() {
+        override val type: String = "OMS_EO_VEDTAK_UTFALL"
+        override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }
 }

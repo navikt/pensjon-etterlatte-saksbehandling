@@ -4,13 +4,18 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 
 object BlockTilSlateKonverterer {
-    internal fun konverter(it: LetterMarkup) =
-        Slate(
-            it
-                .blocks
-                .flatMap { block -> tilSlateElement(block) }
-                .toList(),
-        )
+    internal fun konverter(it: LetterMarkup): Slate =
+        it.blocks
+            .flatMap { block -> tilSlateElement(block) }
+            .ifEmpty {
+                // Tom placeholder dersom ingen innhold slik at Slate får riktig format
+                listOf(
+                    Slate.Element(
+                        type = Slate.ElementType.PARAGRAPH,
+                        children = listOf(Slate.InnerElement(type = Slate.ElementType.PARAGRAPH, text = "")),
+                    ),
+                )
+            }.let { Slate(it) }
 
     private fun tilSlateElement(block: LetterMarkup.Block) =
         when (block.type) {

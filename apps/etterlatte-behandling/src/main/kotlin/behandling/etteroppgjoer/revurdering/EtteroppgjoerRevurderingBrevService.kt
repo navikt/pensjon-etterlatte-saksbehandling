@@ -15,7 +15,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevdata
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -112,8 +112,8 @@ class EtteroppgjoerRevurderingBrevService(
                 saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent,
                 attestantIdent = vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
                 skalLagre = skalLagres,
-                brevFastInnholdData = EtteroppgjoerBrevdata.Vedtak(bosattUtland = false),
-                brevRedigerbarInnholdData = EtteroppgjoerBrevdata.VedtakInnhold(),
+                brevFastInnholdData = EtteroppgjoerBrevData.Vedtak(bosattUtland = false),
+                brevRedigerbarInnholdData = EtteroppgjoerBrevData.VedtakInnhold(),
             )
         }
 }

@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevdata
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -60,8 +60,8 @@ data class BrevRequest(
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
-    JsonSubTypes.Type(value = EtteroppgjoerBrevdata.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
-    JsonSubTypes.Type(value = EtteroppgjoerBrevdata.Vedtak::class, name = "OMS_EO_VEDTAK"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.Vedtak::class, name = "OMS_EO_VEDTAK"),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
@@ -71,10 +71,10 @@ abstract class BrevFastInnholdData : BrevData {
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(
-        value = EtteroppgjoerBrevdata.ForhaandsvarselInnhold::class,
+        value = EtteroppgjoerBrevData.ForhaandsvarselInnhold::class,
         name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR",
     ),
-    JsonSubTypes.Type(value = EtteroppgjoerBrevdata.VedtakInnhold::class, name = "OMS_EO_VEDTAK_UTFALL"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VedtakInnhold::class, name = "OMS_EO_VEDTAK_UTFALL"),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder

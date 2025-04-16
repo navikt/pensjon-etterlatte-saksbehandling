@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
-object EtteroppgjoerBrevdata {
+object EtteroppgjoerBrevData {
     data class Forhaandsvarsel(
         val bosattUtland: Boolean,
         val norskInntekt: Boolean,

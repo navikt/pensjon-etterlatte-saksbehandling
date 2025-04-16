@@ -2,13 +2,16 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerBrevService
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingBrevService
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -23,10 +26,12 @@ import java.util.UUID
 
 class BrevService(
     private val behandlingMedBrevService: BehandlingMedBrevService,
+    private val behandlingService: BehandlingService,
     private val brevApiKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
     private val vedtakKlient: VedtakKlient,
     private val tilbakekrevingBrevService: TilbakekrevingBrevService,
-    private val etteroppgjoerBrevService: EtteroppgjoerBrevService,
+    private val etteroppgjoerForbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
+    private val etteroppgjoerRevurderingBrevService: EtteroppgjoerRevurderingBrevService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -48,13 +53,27 @@ class BrevService(
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.opprettEtteroppgjoerBrev(behandlingId, bruker)
+                etteroppgjoerForbehandlingBrevService.opprettEtteroppgjoerBrev(behandlingId, bruker)
 
+            BehandlingMedBrevType.BEHANDLING -> {
+                if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
+                    etteroppgjoerRevurderingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                    }
+                }
+            }
             else ->
                 videresendInterneFeil {
                     brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
                 }
         }
+    }
+
+    private fun isRevurderingEtteroppgjoerVedtak(behandlingId: UUID): Boolean {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return behandling?.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
     }
 
     suspend fun genererPdf(
@@ -94,7 +113,17 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.genererPdf(brevID, behandlingId, bruker)
+                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, bruker)
+
+            BehandlingMedBrevType.BEHANDLING -> {
+                if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
+                    etteroppgjoerRevurderingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.genererPdf(brevID, behandlingId, bruker)
+                    }
+                }
+            }
 
             else ->
                 videresendInterneFeil {
@@ -130,7 +159,17 @@ class BrevService(
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.ferdigstillBrev(behandlingId, brukerTokenInfo)
+                etteroppgjoerForbehandlingBrevService.ferdigstillBrev(behandlingId, brukerTokenInfo)
+
+            BehandlingMedBrevType.BEHANDLING -> {
+                if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
+                    etteroppgjoerRevurderingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                    }
+                }
+            }
 
             else ->
                 videresendInterneFeil {
@@ -158,11 +197,21 @@ class BrevService(
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.tilbakestillEtteroppgjoerBrev(
+                etteroppgjoerForbehandlingBrevService.tilbakestillEtteroppgjoerBrev(
                     brevId = brevID,
                     behandlingId = behandlingId,
                     brukerTokenInfo = bruker,
                 )
+
+            BehandlingMedBrevType.BEHANDLING -> {
+                if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
+                    etteroppgjoerRevurderingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
+                    }
+                }
+            }
 
             else ->
                 videresendInterneFeil {
@@ -238,7 +287,17 @@ class BrevService(
                 tilbakekrevingBrevService.hentVedtaksbrev(behandlingId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.hentEtteroppgjoersbrev(behandlingId, bruker)
+                etteroppgjoerForbehandlingBrevService.hentEtteroppgjoersbrev(behandlingId, bruker)
+
+            BehandlingMedBrevType.BEHANDLING -> {
+                if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
+                    etteroppgjoerRevurderingBrevService.hentVedtaksbrev(behandlingId, bruker)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.hentVedtaksbrev(behandlingId, bruker)
+                    }
+                }
+            }
 
             else ->
                 videresendInterneFeil {

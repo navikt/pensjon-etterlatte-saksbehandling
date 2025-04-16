@@ -3,8 +3,6 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevDataMapper
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
@@ -25,12 +23,10 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
-class EtteroppgjoerBrevService(
+class EtteroppgjoerForbehandlingBrevService(
     private val brevKlient: BrevKlient,
-    private val brevApiKlient: BrevApiKlient,
     private val grunnlagService: GrunnlagService,
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
-    private val beregningKlient: BeregningKlient,
 ) {
     suspend fun opprettEtteroppgjoerBrev(
         behandlingId: UUID,
@@ -121,7 +117,7 @@ class EtteroppgjoerBrevService(
             return null
         }
 
-        return brevApiKlient.hentBrev(
+        return brevKlient.hentBrev(
             sakId = forbehandling.sak.id,
             brevId = forbehandling.brevId,
             brukerTokenInfo = brukerTokenInfo,

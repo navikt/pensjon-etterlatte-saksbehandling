@@ -92,7 +92,7 @@ fun Route.etteroppgjoerRoutes(
                 val response =
                     inTransaction {
                         forbehandlingService.oppdaterForbehandlingStatus(
-                            forbehandlingId = request.forbehandlingId,
+                            forbehandlingId = etteroppgjoerId,
                             nyStatus = request.nyStatus,
                         )
                     }

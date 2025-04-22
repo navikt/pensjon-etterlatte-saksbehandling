@@ -294,7 +294,6 @@ data class BeregnFaktiskInntektRequest(
 )
 
 data class OppdaterEtterppgjoerForbehandlingStatusRequest(
-    val forbehandlingId: UUID,
     val nyStatus: EtteroppgjoerForbehandlingStatus,
 )
 

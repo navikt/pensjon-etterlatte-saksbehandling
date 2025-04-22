@@ -685,7 +685,6 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
         )
-
     private val etteroppgjoerRevurderingBrevService =
         EtteroppgjoerRevurderingBrevService(
             sakService = sakService,
@@ -694,7 +693,7 @@ internal class ApplicationContext(
             brevKlient = brevKlient,
         )
 
-    private val etteroppgjoerForbehandlingBrevService =
+    val etteroppgjoerForbehandlingBrevService =
         EtteroppgjoerForbehandlingBrevService(
             brevKlient = brevKlient,
             grunnlagService = grunnlagService,

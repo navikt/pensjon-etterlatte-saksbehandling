@@ -9,11 +9,14 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OppdaterEtterppgjoerForbehandlingStatusRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -43,6 +46,7 @@ enum class EtteroppgjoerToggles(
 
 fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
+    forbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     etteroppgjoerService: EtteroppgjoerService,
     featureToggleService: FeatureToggleService,
@@ -85,6 +89,13 @@ fun Route.etteroppgjoerRoutes(
                         forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
                     }
                 call.respond(response)
+            }
+
+            post("ferdigstill-forbehandling-varselbrev") {
+                runBlocking {
+                    forbehandlingBrevService.ferdigstillBrev(etteroppgjoerId, Brevtype.VARSEL, brukerTokenInfo)
+                }
+                call.respond(HttpStatusCode.OK)
             }
 
             put("/status") {

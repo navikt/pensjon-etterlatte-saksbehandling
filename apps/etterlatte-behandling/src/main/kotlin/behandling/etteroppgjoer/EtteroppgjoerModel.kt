@@ -1,9 +1,11 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -242,10 +244,19 @@ data class EtteroppgjoerBrevRequestData(
 )
 
 object EtteroppgjoerBrevDataMapper {
-    fun fra(data: DetaljertForbehandlingDto): EtteroppgjoerBrevRequestData {
+    fun fra(
+        data: DetaljertForbehandlingDto,
+        sisteIverksatteBehandling: Behandling,
+        pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt?,
+    ): EtteroppgjoerBrevRequestData {
         krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
         }
+
+        val bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND
+
+        // TODO: usikker om dette blir rett, følge opp ifm testing
+        val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
 
         return EtteroppgjoerBrevRequestData(
             redigerbar =
@@ -254,8 +265,8 @@ object EtteroppgjoerBrevDataMapper {
                 ),
             innhold =
                 EtteroppgjoerBrevData.Forhaandsvarsel(
-                    bosattUtland = false, // TODO
-                    norskInntekt = false, // TODO
+                    bosattUtland = bosattUtland,
+                    norskInntekt = norskInntekt,
                     etteroppgjoersAar = data.behandling.aar,
                     rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,

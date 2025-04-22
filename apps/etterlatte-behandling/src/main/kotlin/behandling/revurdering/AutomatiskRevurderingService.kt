@@ -73,7 +73,11 @@ class AutomatiskRevurderingService(
                 )
             }
 
-        retryOgPakkUt { revurderingOgOppfoelging.leggInnGrunnlag() }
+        retryOgPakkUt {
+            inTransaction {
+                revurderingOgOppfoelging.leggInnGrunnlag()
+            }
+        }
         retryOgPakkUt {
             inTransaction {
                 revurderingOgOppfoelging.opprettOgTildelOppgave()

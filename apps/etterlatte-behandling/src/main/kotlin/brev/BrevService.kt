@@ -53,7 +53,7 @@ class BrevService(
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.opprettEtteroppgjoerBrev(behandlingId, bruker)
+                etteroppgjoerForbehandlingBrevService.opprettEtteroppgjoerBrev(behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -113,7 +113,7 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, bruker)
+                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -159,7 +159,11 @@ class BrevService(
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.ferdigstillBrev(behandlingId, brukerTokenInfo)
+                etteroppgjoerForbehandlingBrevService.ferdigstillBrev(
+                    behandlingId,
+                    Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
+                    brukerTokenInfo,
+                )
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -200,6 +204,7 @@ class BrevService(
                 etteroppgjoerForbehandlingBrevService.tilbakestillEtteroppgjoerBrev(
                     brevId = brevID,
                     behandlingId = behandlingId,
+                    sakId = sakId,
                     brukerTokenInfo = bruker,
                 )
 

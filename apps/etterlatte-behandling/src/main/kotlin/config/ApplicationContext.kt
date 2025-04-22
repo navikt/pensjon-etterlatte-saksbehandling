@@ -699,6 +699,7 @@ internal class ApplicationContext(
             brevKlient = brevKlient,
             grunnlagService = grunnlagService,
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
+            behandlingService = behandlingService,
         )
 
     val brevService =

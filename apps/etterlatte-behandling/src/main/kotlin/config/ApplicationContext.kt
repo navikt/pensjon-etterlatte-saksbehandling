@@ -689,7 +689,7 @@ internal class ApplicationContext(
             brevApiKlient = brevApiKlient,
             grunnlagService = grunnlagService,
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
-            beregningKlient = beregningsKlient,
+            behandlingService = behandlingService,
         )
     val brevService =
         BrevService(

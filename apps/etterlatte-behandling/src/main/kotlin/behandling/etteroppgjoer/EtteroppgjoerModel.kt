@@ -4,8 +4,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.Forhaandsvarsel
-import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData.ForhaandsvarselInnhold
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
@@ -261,11 +260,11 @@ object EtteroppgjoerBrevDataMapper {
 
         return EtteroppgjoerBrevRequestData(
             redigerbar =
-                ForhaandsvarselInnhold(
+                EtteroppgjoerBrevData.ForhaandsvarselInnhold(
                     sak = data.behandling.sak,
                 ),
             innhold =
-                Forhaandsvarsel(
+                EtteroppgjoerBrevData.Forhaandsvarsel(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
                     etteroppgjoersAar = data.behandling.aar,

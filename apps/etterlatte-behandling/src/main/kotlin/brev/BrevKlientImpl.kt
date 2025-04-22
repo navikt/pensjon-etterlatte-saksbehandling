@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -46,6 +47,17 @@ interface BrevKlient {
         brevRequest: BrevRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
+
+    suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev?
+
+    suspend fun hentBrev(
+        sakId: SakId,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev
 }
 
 class BrevKlientImpl(
@@ -68,6 +80,27 @@ class BrevKlientImpl(
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
             postBody = brevRequest,
+        )
+
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev? =
+        get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
+            brukerTokenInfo = bruker,
+        )
+
+    override suspend fun hentBrev(
+        sakId: SakId,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev =
+        get(
+            url = "$resourceUrl/api/brev/$brevId?sakId=${sakId.sakId}",
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
+            brukerTokenInfo = brukerTokenInfo,
         )
 
     override suspend fun genererPdf(

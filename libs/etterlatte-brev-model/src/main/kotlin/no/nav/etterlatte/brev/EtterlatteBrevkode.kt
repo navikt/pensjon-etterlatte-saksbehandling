@@ -72,6 +72,9 @@ enum class EtterlatteBrevKode : Brevbakerkode {
 
     OMS_EO_FORHAANDSVARSEL,
     OMS_EO_FORHAANDSVARSEL_INNHOLD,
+
+    OMS_EO_VEDTAK,
+    OMS_EO_VEDTAK_UTFALL,
 }
 
 enum class Brevtype {

@@ -61,6 +61,7 @@ data class BrevRequest(
 @JsonSubTypes(
     JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.Vedtak::class, name = "OMS_EO_VEDTAK"),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
@@ -69,7 +70,11 @@ abstract class BrevFastInnholdData : BrevData {
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = EtteroppgjoerBrevData.ForhaandsvarselInnhold::class, name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR"),
+    JsonSubTypes.Type(
+        value = EtteroppgjoerBrevData.ForhaandsvarselInnhold::class,
+        name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR",
+    ),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VedtakInnhold::class, name = "OMS_EO_VEDTAK_UTFALL"),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder

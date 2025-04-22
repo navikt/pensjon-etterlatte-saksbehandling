@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OppdaterEtterppgjoerForbehandlingStatusRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
-import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -93,7 +93,7 @@ fun Route.etteroppgjoerRoutes(
 
             post("ferdigstill-forbehandling-varselbrev") {
                 runBlocking {
-                    forbehandlingBrevService.ferdigstillBrev(etteroppgjoerId, Brevtype.VARSEL, brukerTokenInfo)
+                    forbehandlingBrevService.ferdigstillBrev(etteroppgjoerId, Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype, brukerTokenInfo)
                 }
                 call.respond(HttpStatusCode.OK)
             }

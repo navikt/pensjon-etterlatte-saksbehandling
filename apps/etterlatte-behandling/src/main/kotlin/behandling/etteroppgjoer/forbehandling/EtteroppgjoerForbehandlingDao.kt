@@ -99,6 +99,27 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
+    fun oppdaterForbehandlingStatus(
+        forbehandlingId: UUID,
+        nyStatus: EtteroppgjoerForbehandlingStatus,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE etteroppgjoer_behandling
+                    SET status = ?
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
+
+            statement.setObject(1, nyStatus)
+            statement.setObject(2, forbehandlingId)
+
+            statement.executeUpdate()
+        }
+    }
+
     fun lagrePensjonsgivendeInntekt(
         inntekterFraSkatt: PensjonsgivendeInntektFraSkatt,
         behandlingId: UUID,

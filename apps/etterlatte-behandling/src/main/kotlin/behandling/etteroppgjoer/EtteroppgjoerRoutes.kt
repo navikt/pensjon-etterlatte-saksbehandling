@@ -7,9 +7,11 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OppdaterEtterppgjoerForbehandlingStatusRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -83,6 +85,20 @@ fun Route.etteroppgjoerRoutes(
                         forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
                     }
                 call.respond(response)
+            }
+
+            route("/forbehandling") {
+                put("/status") {
+                    val request = call.receive<OppdaterEtterppgjoerForbehandlingStatusRequest>()
+                    val response =
+                        inTransaction {
+                            forbehandlingService.oppdaterForbehandlingStatus(
+                                forbehandlingId = request.forbehandlingId,
+                                nyStatus = request.nyStatus,
+                            )
+                        }
+                    call.respond(response)
+                }
             }
         }
 

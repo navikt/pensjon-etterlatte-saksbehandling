@@ -1,8 +1,8 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
+import { ferdigstillBrev, hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import React, { useEffect } from 'react'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { mapResult, mapSuccess } from '~shared/api/apiUtils'
+import { isPending, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
 import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
@@ -12,15 +12,27 @@ import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/Etteroppjoe
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
+import { Brevtype } from '~shared/types/Brev'
 
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
   const dispatch = useAppDispatch()
+
   const [hentBrevTilBehandlingResult, hentBrevTilBehandlingFetch] = useApiCall(hentBrevTilBehandling)
   const [opprettBrevTilBehandlingResult, opprettBrevTilBehandlingRequest] = useApiCall(opprettBrevTilBehandling)
+  const [ferdigstillBrevResult, ferdigstillBrevRequest] = useApiCall(ferdigstillBrev)
 
   const ferdigstillForbehandling = () => {
     // TODO 1. ferdigstill brev og send, 2. oppdater forbehandling status til VARSELBREV_SENDT, 3. send bruker til person-oversikten
+
+    ferdigstillBrevRequest(
+      {
+        brevId: etteroppgjoer.behandling.brevId!,
+        sakId: etteroppgjoer.behandling.sak.id,
+        brevtype: Brevtype.VARSEL,
+      },
+      () => {}
+    )
   }
 
   useEffect(() => {
@@ -85,7 +97,9 @@ export function EtteroppgjoerBrev() {
             </Button>
           </div>
           <div>
-            <Button variant="primary">Ferdigstill</Button>
+            <Button variant="primary" onClick={ferdigstillForbehandling} loading={isPending(ferdigstillBrevResult)}>
+              Ferdigstill
+            </Button>
           </div>
         </EtteroppgjoerFramTilbakeKnapperad>
       </VStack>

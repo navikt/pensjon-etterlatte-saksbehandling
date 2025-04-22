@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -224,6 +225,13 @@ class EtteroppgjoerForbehandlingService(
         return beregnetEtteroppgjoerResultat
     }
 
+    fun oppdaterForbehandlingStatus(
+        forbehandlingId: UUID,
+        nyStatus: EtteroppgjoerForbehandlingStatus,
+    ) {
+        dao.oppdaterForbehandlingStatus(forbehandlingId = forbehandlingId, nyStatus = nyStatus)
+    }
+
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
@@ -283,6 +291,11 @@ data class BeregnFaktiskInntektRequest(
     val naeringsinntekt: Int,
     val utland: Int,
     val spesifikasjon: String,
+)
+
+data class OppdaterEtterppgjoerForbehandlingStatusRequest(
+    val forbehandlingId: UUID,
+    val nyStatus: EtteroppgjoerForbehandlingStatus,
 )
 
 class FantIkkeForbehandling(

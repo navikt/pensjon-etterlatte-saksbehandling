@@ -11,6 +11,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Revurdering'
     case Revurderingaarsak.REGULERING:
       return 'Regulering'
+    case Revurderingaarsak.ALDERSOVERGANG:
+      return 'Aldersovergang'
     case Revurderingaarsak.OMREGNING:
       return 'Omregning'
     case Revurderingaarsak.ANSVARLIGE_FORELDRE:

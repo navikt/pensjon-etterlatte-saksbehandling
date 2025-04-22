@@ -48,7 +48,7 @@ class BrevService(
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.opprettEtteroppgjoerBrev(behandlingId, bruker)
+                etteroppgjoerBrevService.opprettEtteroppgjoerBrev(behandlingId, sakId, bruker)
 
             else ->
                 videresendInterneFeil {
@@ -94,7 +94,7 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.genererPdf(brevID, behandlingId, bruker)
+                etteroppgjoerBrevService.genererPdf(brevID, behandlingId, sakId, bruker)
 
             else ->
                 videresendInterneFeil {
@@ -130,7 +130,7 @@ class BrevService(
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerBrevService.ferdigstillBrev(behandlingId, brukerTokenInfo)
+                etteroppgjoerBrevService.ferdigstillBrev(behandlingId, Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype, brukerTokenInfo)
 
             else ->
                 videresendInterneFeil {
@@ -161,6 +161,7 @@ class BrevService(
                 etteroppgjoerBrevService.tilbakestillEtteroppgjoerBrev(
                     brevId = brevID,
                     behandlingId = behandlingId,
+                    sakId = sakId,
                     brukerTokenInfo = bruker,
                 )
 

@@ -87,18 +87,16 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(response)
             }
 
-            route("/forbehandling") {
-                put("/status") {
-                    val request = call.receive<OppdaterEtterppgjoerForbehandlingStatusRequest>()
-                    val response =
-                        inTransaction {
-                            forbehandlingService.oppdaterForbehandlingStatus(
-                                forbehandlingId = request.forbehandlingId,
-                                nyStatus = request.nyStatus,
-                            )
-                        }
-                    call.respond(response)
-                }
+            put("/status") {
+                val request = call.receive<OppdaterEtterppgjoerForbehandlingStatusRequest>()
+                val response =
+                    inTransaction {
+                        forbehandlingService.oppdaterForbehandlingStatus(
+                            forbehandlingId = request.forbehandlingId,
+                            nyStatus = request.nyStatus,
+                        )
+                    }
+                call.respond(response)
             }
         }
 

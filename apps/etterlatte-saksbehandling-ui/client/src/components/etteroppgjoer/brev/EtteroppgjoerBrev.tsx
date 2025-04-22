@@ -16,14 +16,18 @@ import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottak
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
   const dispatch = useAppDispatch()
-  const [brevResult, fetchBrev] = useApiCall(hentBrevTilBehandling)
-  const [opprettBrevResult, opprettBrevApi] = useApiCall(opprettBrevTilBehandling)
+  const [hentBrevTilBehandlingResult, hentBrevTilBehandlingFetch] = useApiCall(hentBrevTilBehandling)
+  const [opprettBrevTilBehandlingResult, opprettBrevTilBehandlingRequest] = useApiCall(opprettBrevTilBehandling)
+
+  const ferdigstillForbehandling = () => {
+    // TODO 1. ferdigstill brev og send, 2. oppdater forbehandling status til VARSELBREV_SENDT, 3. send bruker til person-oversikten
+  }
 
   useEffect(() => {
     if (etteroppgjoer.behandling.brevId) {
-      fetchBrev(etteroppgjoer.behandling.id)
+      hentBrevTilBehandlingFetch(etteroppgjoer.behandling.id)
     } else {
-      opprettBrevApi(
+      opprettBrevTilBehandlingRequest(
         {
           behandlingId: etteroppgjoer.behandling.id,
           sakId: etteroppgjoer.behandling.sak.id,
@@ -40,13 +44,13 @@ export function EtteroppgjoerBrev() {
           <Heading level="1" size="large">
             Brev
           </Heading>
-          {mapSuccess(brevResult, (brev) => (
+          {mapSuccess(hentBrevTilBehandlingResult, (brev) => (
             <BrevMottakerWrapper brev={brev} kanRedigeres />
           ))}
         </VStack>
       </Box>
       <VStack width="100%">
-        {mapResult(opprettBrevResult, {
+        {mapResult(opprettBrevTilBehandlingResult, {
           pending: <Spinner label="Oppretter brev for etteroppgjør forbehandling" />,
           error: (error) => (
             <ApiErrorAlert>
@@ -54,7 +58,7 @@ export function EtteroppgjoerBrev() {
             </ApiErrorAlert>
           ),
         })}
-        {mapResult(brevResult, {
+        {mapResult(hentBrevTilBehandlingResult, {
           success: (brev) => (
             <RedigerbartBrev
               brev={brev}

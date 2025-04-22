@@ -76,6 +76,8 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
+    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
+
     fun hentDetaljertForbehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

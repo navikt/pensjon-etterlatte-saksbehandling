@@ -44,12 +44,13 @@ class EtteroppgjoerRevurderingService(
         val (revurdering, sisteIverksatte) =
             inTransaction {
                 val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-
                 if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)) {
                     throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
                 }
 
-                // TODO her bør det sjekkes for om det allerede er laget en behandling med matchende relatertBehandlingId
+                // opprett ny kopi av forbehandling for revurdering så vi overskriver tidligere oppgitt inntekter
+                val forbehandlingCopy = forbehandling.copy(id = UUID.randomUUID(), relatertForbehandlingId = forbehandling.id)
+                etteroppgjoerForbehandlingService.lagreForbehandling(forbehandlingCopy)
 
                 // TODO hva blir riktig her? vi ønsker ikke mer enn en oppgave, men kan det være oppgaver åpne på forbehandling?
                 // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
@@ -86,7 +87,7 @@ class EtteroppgjoerRevurderingService(
 
                 val virkningstidspunkt =
                     Virkningstidspunkt(
-                        dato = forbehandling.innvilgetPeriode.fom,
+                        dato = forbehandlingCopy.innvilgetPeriode.fom,
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                         begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
                     )
@@ -96,7 +97,7 @@ class EtteroppgjoerRevurderingService(
                         .opprettRevurdering(
                             sakId = sakId,
                             forrigeBehandling = sisteIverksatte,
-                            relatertBehandlingId = forbehandling.id.toString(),
+                            relatertBehandlingId = forbehandlingCopy.id.toString(),
                             persongalleri = persongalleri,
                             prosessType = Prosesstype.MANUELL,
                             kilde = Vedtaksloesning.GJENNY,

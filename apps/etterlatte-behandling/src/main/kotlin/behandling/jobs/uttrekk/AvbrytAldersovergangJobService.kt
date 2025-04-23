@@ -9,6 +9,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveDao
 import org.slf4j.LoggerFactory
@@ -227,6 +228,7 @@ class AvbrytAldersovergangJobService(
                             logger.info("Fikser referanse på oppgave $oppgaveId til å peke på behandling $behandlingId")
                             val oppgave = oppgaveDao.hentOppgave(oppgaveId)
 
+                            oppgaveDao.settNySaksbehandler(oppgaveId, Fagsaksystem.EY.navn)
                             oppgaveDao.oppdaterReferanseOgMerknad(
                                 oppgaveId,
                                 behandlingId.toString(),

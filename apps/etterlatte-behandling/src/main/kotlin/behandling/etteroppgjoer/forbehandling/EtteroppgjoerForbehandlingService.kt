@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -76,7 +77,22 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
+    fun lagreForbehandlingKopi(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+        val forbehandlingCopy =
+            forbehandling.copy(
+                id = UUID.randomUUID(),
+                relatertForbehandlingId = forbehandling.id,
+                status = EtteroppgjoerForbehandlingStatus.REVURDERING,
+            )
+
+        dao.lagreForbehandling(forbehandlingCopy)
+        dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
+
+        // TODO: burde egentlig kopiere faktiskInntekt også i beregning, hvis ikke vil dette vises som null?
+
+        return forbehandlingCopy
+    }
 
     fun hentDetaljertForbehandling(
         behandlingId: UUID,

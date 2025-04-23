@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -83,6 +84,7 @@ class EtteroppgjoerForbehandlingService(
                 id = UUID.randomUUID(),
                 relatertForbehandlingId = forbehandling.id,
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                opprettet = Tidspunkt.now(), // ny dato
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

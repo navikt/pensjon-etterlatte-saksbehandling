@@ -82,14 +82,12 @@ class EtteroppgjoerForbehandlingService(
             forbehandling.copy(
                 id = UUID.randomUUID(),
                 relatertForbehandlingId = forbehandling.id,
-                status = EtteroppgjoerForbehandlingStatus.REVURDERING,
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)
         dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
-
-        // TODO: burde egentlig kopiere faktiskInntekt også i beregning, hvis ikke vil dette vises som null?
 
         return forbehandlingCopy
     }
@@ -129,7 +127,8 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        // WIP - hente de som ble oppgitt i forrige forbehandling
+        // hvis relatertForbehandlingId er satt, vis faktiskInntekt fra forrige ferdigstilte forbehandling
+        // slik at saksbehandler kan se hva som ble satt og kan korrigere
         val relevantBehandlingId = forbehandling.relatertForbehandlingId ?: forbehandling.id
         val faktiskInntekt =
             runBlocking {
@@ -151,7 +150,6 @@ class EtteroppgjoerForbehandlingService(
                     brukerTokenInfo,
                 )
             }
-        // WIP END
 
         return DetaljertForbehandlingDto(
             behandling = forbehandling,

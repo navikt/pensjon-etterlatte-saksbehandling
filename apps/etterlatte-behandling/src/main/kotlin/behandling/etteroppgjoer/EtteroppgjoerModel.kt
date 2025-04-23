@@ -71,9 +71,9 @@ data class EtteroppgjoerForbehandling(
 
     fun tilVarselbrevSendt(): EtteroppgjoerForbehandling {
         if (status == EtteroppgjoerForbehandlingStatus.BEREGNET) {
-            return copy(status = EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)
+            return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         } else {
-            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT}")
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.FERDIGSTILT}")
         }
     }
 
@@ -89,15 +89,14 @@ data class EtteroppgjoerForbehandling(
     fun isFerdigstilt() =
         status in
             listOf(
-                EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT,
+                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
             )
 }
 
 enum class EtteroppgjoerForbehandlingStatus {
     OPPRETTET,
     BEREGNET,
-    VARSELBREV_SENDT,
-    REVURDERING,
+    FERDIGSTILT,
 }
 
 data class DetaljertForbehandlingDto(

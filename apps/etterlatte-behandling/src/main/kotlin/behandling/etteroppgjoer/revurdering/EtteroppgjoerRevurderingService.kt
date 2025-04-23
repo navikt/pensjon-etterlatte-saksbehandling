@@ -44,7 +44,7 @@ class EtteroppgjoerRevurderingService(
         val (revurdering, sisteIverksatte) =
             inTransaction {
                 val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-                if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)) {
+                if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT)) {
                     throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
                 }
 

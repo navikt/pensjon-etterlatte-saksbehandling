@@ -13,6 +13,7 @@ export interface Etteroppgjoer {
 export interface EtteroppgjoerBehandling {
   id: string
   status: EtteroppgjoerBehandlingStatus
+  relatertForbehandlingId: string // burde bruke denne for å hente faktiskInntekt etteroppgjør revurdering
   sak: ISak
   aar: number
   innvilgetPeriode: {

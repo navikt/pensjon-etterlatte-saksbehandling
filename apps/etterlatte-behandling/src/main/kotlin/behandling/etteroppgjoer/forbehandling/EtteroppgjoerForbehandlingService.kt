@@ -95,10 +95,10 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun hentDetaljertForbehandling(
-        behandlingId: UUID,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertForbehandlingDto {
-        val forbehandling = hentForbehandling(behandlingId)
+        val forbehandling = hentForbehandling(forbehandlingId)
 
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
@@ -106,7 +106,7 @@ class EtteroppgjoerForbehandlingService(
 
         val request =
             EtteroppgjoerBeregnetAvkortingRequest(
-                forbehandling = behandlingId,
+                forbehandling = forbehandlingId,
                 sisteIverksatteBehandling = sisteIverksatteBehandling.id,
                 aar = forbehandling.aar,
                 sakId = sisteIverksatteBehandling.sak.id,
@@ -120,36 +120,38 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
-        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
-        val aInntekt = dao.hentAInntekt(behandlingId)
+        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
+        val aInntekt = dao.hentAInntekt(forbehandlingId)
 
         if (pensjonsgivendeInntekt == null || aInntekt == null) {
             throw InternfeilException(
-                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
+                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$forbehandlingId",
             )
         }
 
+        // WIP - hente de som ble oppgitt i forrige forbehandling
+        val relevantBehandlingId = forbehandling.relatertForbehandlingId ?: forbehandling.id
         val faktiskInntekt =
             runBlocking {
                 beregningKlient.hentAvkortingFaktiskInntekt(
                     EtteroppgjoerFaktiskInntektRequest(
-                        forbehandlingId = behandlingId,
+                        forbehandlingId = relevantBehandlingId,
                     ),
                     brukerTokenInfo,
                 )
             }
-
         val beregnetEtteroppgjoerResultat =
             runBlocking {
                 beregningKlient.hentBeregnetEtteroppgjoerResultat(
                     EtteroppgjoerHentBeregnetResultatRequest(
                         forbehandling.aar,
-                        forbehandling.id,
+                        relevantBehandlingId,
                         sisteIverksatteBehandling.id,
                     ),
                     brukerTokenInfo,
                 )
             }
+        // WIP END
 
         return DetaljertForbehandlingDto(
             behandling = forbehandling,

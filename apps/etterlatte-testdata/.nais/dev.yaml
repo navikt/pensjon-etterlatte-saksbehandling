@@ -90,4 +90,4 @@ spec:
           cluster: dev-gcp
         - application: team-dolly-lokal-app
           namespace: dolly
-          cluster: dev-fss
+          cluster: dev-gcp

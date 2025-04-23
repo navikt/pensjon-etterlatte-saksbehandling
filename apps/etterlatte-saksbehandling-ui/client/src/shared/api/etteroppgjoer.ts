@@ -4,6 +4,7 @@ import {
   EtteroppgjoerBehandling,
   FaktiskInntekt,
   BeregnetEtteroppgjoerResultatDto,
+  EtteroppgjoerForbehandlingStatus,
 } from '~shared/types/Etteroppgjoer'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
@@ -24,6 +25,19 @@ export const hentEtteroppgjoerForbehandlinger = async (
   sakId: number
 ): Promise<ApiResponse<EtteroppgjoerBehandling[]>> => {
   return apiClient.get(`/etteroppgjoer/forbehandlinger/${sakId}`)
+}
+
+export const oppdaterStatusPaaEtteroppgjoerForbehandling = async (args: {
+  forbehandlingId: string
+  nyStatus: EtteroppgjoerForbehandlingStatus
+}): Promise<ApiResponse<any>> => {
+  return apiClient.put(`/etteroppgjoer/${args.forbehandlingId}/`, { nyStatus: args.nyStatus })
+}
+
+export const ferdigstillEtteroppgjoerForbehandlingVarselbrev = async (args: {
+  forbehandlingId: string
+}): Promise<ApiResponse<any>> => {
+  return apiClient.post(`etteroppgjoer/${args.forbehandlingId}/ferdigstill-forbehandling-varselbrev`, {})
 }
 
 export const lagreFaktiskInntekt = async (args: {

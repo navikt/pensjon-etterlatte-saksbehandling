@@ -13,6 +13,11 @@ import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { Brevtype } from '~shared/types/Brev'
+import {
+  ferdigstillEtteroppgjoerForbehandlingVarselbrev,
+  oppdaterStatusPaaEtteroppgjoerForbehandling,
+} from '~shared/api/etteroppgjoer'
+import { EtteroppgjoerForbehandlingStatus } from '~shared/types/Etteroppgjoer'
 
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -20,18 +25,30 @@ export function EtteroppgjoerBrev() {
 
   const [hentBrevTilBehandlingResult, hentBrevTilBehandlingFetch] = useApiCall(hentBrevTilBehandling)
   const [opprettBrevTilBehandlingResult, opprettBrevTilBehandlingRequest] = useApiCall(opprettBrevTilBehandling)
-  const [ferdigstillBrevResult, ferdigstillBrevRequest] = useApiCall(ferdigstillBrev)
+  const [
+    ferdigstillEtteroppgjoerForbehandlingVarselbrevResult,
+    ferdigstillEtteroppgjoerForbehandlingVarselbrevRequest,
+  ] = useApiCall(ferdigstillEtteroppgjoerForbehandlingVarselbrev)
+
+  const [oppdaterStatusPaaEtteroppgjoerForbehandlingResult, oppdaterStatusPaaEtteroppgjoerForbehandlingRequest] =
+    useApiCall(oppdaterStatusPaaEtteroppgjoerForbehandling)
 
   const ferdigstillForbehandling = () => {
-    // TODO 1. ferdigstill brev og send, 2. oppdater forbehandling status til VARSELBREV_SENDT, 3. send bruker til person-oversikten
-
-    ferdigstillBrevRequest(
+    ferdigstillEtteroppgjoerForbehandlingVarselbrevRequest(
       {
-        brevId: etteroppgjoer.behandling.brevId!,
-        sakId: etteroppgjoer.behandling.sak.id,
-        brevtype: Brevtype.VARSEL,
+        forbehandlingId: etteroppgjoer.behandling.id,
       },
-      () => {}
+      () => {
+        oppdaterStatusPaaEtteroppgjoerForbehandlingRequest(
+          {
+            forbehandlingId: etteroppgjoer.behandling.id,
+            nyStatus: EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT,
+          },
+          () => {
+            // TODO, sende bruker til person oversikten
+          }
+        )
+      }
     )
   }
 
@@ -97,7 +114,14 @@ export function EtteroppgjoerBrev() {
             </Button>
           </div>
           <div>
-            <Button variant="primary" onClick={ferdigstillForbehandling} loading={isPending(ferdigstillBrevResult)}>
+            <Button
+              variant="primary"
+              onClick={ferdigstillForbehandling}
+              loading={
+                isPending(ferdigstillEtteroppgjoerForbehandlingVarselbrevResult) ||
+                isPending(oppdaterStatusPaaEtteroppgjoerForbehandlingResult)
+              }
+            >
               Ferdigstill
             </Button>
           </div>

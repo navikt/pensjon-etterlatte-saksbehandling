@@ -7,7 +7,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
 import {
   EtteroppgjoerBehandling,
-  EtteroppgjoerBehandlingStatus,
+  EtteroppgjoerForbehandlingStatus,
   teksterEtteroppgjoerBehandlingStatus,
 } from '~shared/types/Etteroppgjoer'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -66,7 +66,7 @@ function EtteroppgjoerForbehandlingTabell({
               <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Gå til behandling</Link>
             </Table.DataCell>
             <Table.DataCell>
-              {forbehandling.status == EtteroppgjoerBehandlingStatus.VARSELBREV_SENDT && (
+              {forbehandling.status == EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT && (
                 <Button
                   loading={isPending(opprettRevurderingResult)}
                   size="small"

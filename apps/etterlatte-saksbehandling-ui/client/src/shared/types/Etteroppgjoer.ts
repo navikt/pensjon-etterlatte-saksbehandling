@@ -12,7 +12,7 @@ export interface Etteroppgjoer {
 
 export interface EtteroppgjoerBehandling {
   id: string
-  status: EtteroppgjoerBehandlingStatus
+  status: EtteroppgjoerForbehandlingStatus
   sak: ISak
   aar: number
   innvilgetPeriode: {
@@ -23,13 +23,13 @@ export interface EtteroppgjoerBehandling {
   brevId?: number
 }
 
-export enum EtteroppgjoerBehandlingStatus {
+export enum EtteroppgjoerForbehandlingStatus {
   OPPRETTET = 'OPPRETTET',
   BEREGNET = 'BEREGNET',
   VARSELBREV_SENDT = 'VARSELBREV_SENDT',
 }
 
-export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlingStatus, string> = {
+export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerForbehandlingStatus, string> = {
   OPPRETTET: 'Opprettet',
   BEREGNET: 'Beregnet',
   VARSELBREV_SENDT: 'Forhåndsvarsel sendt',

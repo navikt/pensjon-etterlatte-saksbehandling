@@ -1,7 +1,7 @@
 import { BodyShort, Box, Button, Heading, HStack, Tag, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
 import { useForm } from 'react-hook-form'
-import { EtteroppgjoerBehandlingStatus, FaktiskInntekt } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerForbehandlingStatus, FaktiskInntekt } from '~shared/types/Etteroppgjoer'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
@@ -52,8 +52,8 @@ export const FastsettFaktiskInntekt = ({
   const dispatch = useAppDispatch()
 
   const erRedigerbar =
-    (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
-      behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
+    (behandling.status == EtteroppgjoerForbehandlingStatus.OPPRETTET ||
+      behandling.status == EtteroppgjoerForbehandlingStatus.BEREGNET) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {

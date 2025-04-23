@@ -1,5 +1,4 @@
--- Kjører aldersovergang BP20 på nytt etter at de feilet grunnet bug
--- se V173__avbryte_oppgaver_for_feilet_aldersovergang (behandling)
+-- Kjører aldersovergang BP20, BP21 og OMS67 på nytt etter at de feilet
 INSERT INTO jobb (type, kjoeredato, behandlingsmaaned)
 values ('AO_BP20', '2025-04-23', '2025-05');
 

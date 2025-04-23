@@ -233,7 +233,7 @@ class EtteroppgjoerForbehandlingDao(
                     tom = getDate("tom").let { YearMonth.from(it.toLocalDate()) },
                 ),
             brevId = getLongOrNull("brev_id"),
-            relatertForbehandlingId = getString("relatert_forbehandling_id").let { UUID.fromString(it) },
+            relatertForbehandlingId = getString("relatert_forbehandling_id")?.let { UUID.fromString(it) },
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

@@ -60,10 +60,12 @@ import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
+import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.AvbrytAldersovergangJob
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18JobService
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
+import no.nav.etterlatte.behandling.jobs.uttrekk.AvbrytAldersovergangJobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -748,6 +750,13 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
+    private val avbrytAldersovergangJobService =
+        AvbrytAldersovergangJobService(
+            behandlingService,
+            oppgaveDaoEndringer,
+            featureToggleService,
+        )
+
     private val sjekkAdressebeskyttelseJobService =
         SjekkAdressebeskyttelseJobService(
             SjekkAdressebeskyttelseJobDao(autoClosingDatabase),
@@ -914,6 +923,17 @@ internal class ApplicationContext(
             sakTilgangDao = sakTilgangDao,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.DAYS),
+        )
+    }
+
+    val avbrytAldersovergangJob: AvbrytAldersovergangJob by lazy {
+        AvbrytAldersovergangJob(
+            service = avbrytAldersovergangJobService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.DAYS),
         )
     }

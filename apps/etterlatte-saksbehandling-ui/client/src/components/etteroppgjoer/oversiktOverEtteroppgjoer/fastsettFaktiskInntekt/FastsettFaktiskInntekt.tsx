@@ -53,8 +53,7 @@ export const FastsettFaktiskInntekt = ({
 
   const erRedigerbar =
     (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
-      behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET ||
-      behandling.status == EtteroppgjoerBehandlingStatus.REVURDERING) &&
+      behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {

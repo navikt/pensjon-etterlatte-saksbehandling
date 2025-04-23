@@ -49,7 +49,12 @@ class EtteroppgjoerRevurderingService(
                 }
 
                 // lager kopi av forbehandling for revurdering slik at vi ikke overskriver tidligere oppgitt inntekt
-                val forbehandlingCopy = forbehandling.copy(id = UUID.randomUUID(), relatertForbehandlingId = forbehandling.id)
+                val forbehandlingCopy =
+                    forbehandling.copy(
+                        id = UUID.randomUUID(),
+                        relatertForbehandlingId = forbehandling.id,
+                        status = EtteroppgjoerForbehandlingStatus.REVURDERING,
+                    )
                 etteroppgjoerForbehandlingService.lagreForbehandling(forbehandlingCopy)
 
                 // TODO hva blir riktig her? vi ønsker ikke mer enn en oppgave, men kan det være oppgaver åpne på forbehandling?

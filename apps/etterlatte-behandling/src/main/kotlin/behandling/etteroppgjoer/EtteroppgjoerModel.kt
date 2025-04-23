@@ -97,6 +97,7 @@ enum class EtteroppgjoerForbehandlingStatus {
     OPPRETTET,
     BEREGNET,
     VARSELBREV_SENDT,
+    REVURDERING,
 }
 
 data class DetaljertForbehandlingDto(

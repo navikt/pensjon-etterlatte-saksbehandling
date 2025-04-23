@@ -27,12 +27,14 @@ export enum EtteroppgjoerBehandlingStatus {
   OPPRETTET = 'OPPRETTET',
   BEREGNET = 'BEREGNET',
   VARSELBREV_SENDT = 'VARSELBREV_SENDT',
+  REVURDERING = 'REVURDERING',
 }
 
 export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlingStatus, string> = {
   OPPRETTET: 'Opprettet',
   BEREGNET: 'Beregnet',
   VARSELBREV_SENDT: 'Forhåndsvarsel sendt',
+  REVURDERING: 'Til revurdering',
 }
 
 export interface EtteroppgjoerOpplysninger {

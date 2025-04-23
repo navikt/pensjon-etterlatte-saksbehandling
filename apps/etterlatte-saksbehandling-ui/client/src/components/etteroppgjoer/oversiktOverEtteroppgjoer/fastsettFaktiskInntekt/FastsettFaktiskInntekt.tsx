@@ -52,7 +52,9 @@ export const FastsettFaktiskInntekt = ({
   const dispatch = useAppDispatch()
 
   const erRedigerbar =
-    behandling.status != EtteroppgjoerBehandlingStatus.VARSELBREV_SENDT &&
+    (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
+      behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET ||
+      behandling.status == EtteroppgjoerBehandlingStatus.REVURDERING) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {

@@ -116,7 +116,7 @@ class EtteroppgjoerRevurderingService(
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
-                etteroppgjoerService.oppdaterStatus(sakId, forbehandling.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
+                etteroppgjoerService.oppdaterStatus(sakId, forbehandlingCopy.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
 
                 revurdering to sisteIverksatte
             }
@@ -128,7 +128,6 @@ class EtteroppgjoerRevurderingService(
                 forrigeBehandlingId = sisteIverksatte.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
-
             beregningKlient.opprettBeregningsgrunnlagFraForrigeBehandling(
                 behandlingId = revurdering.id,
                 forrigeBehandlingId = sisteIverksatte.id,

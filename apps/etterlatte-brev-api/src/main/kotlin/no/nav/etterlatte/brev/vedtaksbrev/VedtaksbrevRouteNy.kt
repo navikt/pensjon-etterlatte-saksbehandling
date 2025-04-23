@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
-const val BREV_TYPE_CALL_PARAMETER = "brevtype"
+const val BREV_TYPE_CALL_PARAMETER = "brevType"
 
 fun Route.strukturertBrevRoute(
     service: StrukturertBrevService,
@@ -51,7 +51,7 @@ fun Route.strukturertBrevRoute(
                 }
             }
 
-            post("ferdigstill?brevtype={$BREV_TYPE_CALL_PARAMETER}") {
+            post("ferdigstill") {
                 withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                     logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
                     val brevType =
@@ -104,7 +104,7 @@ fun Route.strukturertBrevRoute(
             }
         }
 
-        post("ferdigstill?brevtype={$BREV_TYPE_CALL_PARAMETER}") {
+        post("ferdigstill") {
             withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 logger.info("Ferdigstiller strukturert brev for behandling (id=$behandlingId)")
                 val brevType =

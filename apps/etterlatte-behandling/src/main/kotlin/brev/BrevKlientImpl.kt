@@ -129,7 +129,7 @@ class BrevKlientImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/strukturert/$behandlingId/ferdigstill?brevtype=${brevType.name}",
+            url = "$resourceUrl/api/brev/strukturert/$behandlingId/ferdigstill?brevType=${brevType.name}",
             onSuccess = { _ -> },
             brukerTokenInfo = brukerTokenInfo,
         )

@@ -40,9 +40,7 @@ class AvbrytAldersovergangJobService(
             // oppgaveId, behandlingId
             val behandlingerSomSkalAvbrytes =
                 listOf(
-                    // Starter med å teste en behandling med tilhørende oppgave
-                    Pair("0f02837f-e5a7-4718-9ca4-a6a48cd3e8be", "6e324deb-e0ef-40e5-afbc-5f024341af14"),
-                    /*
+                    // Ferdig Pair("0f02837f-e5a7-4718-9ca4-a6a48cd3e8be", "6e324deb-e0ef-40e5-afbc-5f024341af14"),
                     Pair("bfc75ca4-99ab-49ed-8a93-6f9d0230f5f2", "0ed42567-3d3f-442d-9e54-bc73166f01cf"),
                     Pair("5869931e-2c8d-4537-ad45-409fefb48b7d", "5aa02465-9693-4c08-afd5-000e2ff50638"),
                     Pair("c0fa152e-59e7-4d2c-a0ba-fb81f8b27377", "2c911391-1217-44d5-b446-1badc2de92f6"),
@@ -219,40 +217,42 @@ class AvbrytAldersovergangJobService(
                     Pair("4ce79f8f-8c73-45aa-ba85-8306adc689b6", "7a08448d-9004-4024-a9ac-c1a93240a74a"),
                     Pair("9e87c7cf-28fd-4d1a-8329-b0799082f75e", "e77b07b1-f2af-42f5-915b-161be431458d"),
                     Pair("43ea775d-6e02-4854-949d-9935a7ae4081", "8ee24c88-9a29-4af1-85e4-d2827403b98e"),
-
-                     */
                 )
 
             behandlingerSomSkalAvbrytes
                 .map { Pair(UUID.fromString(it.first), UUID.fromString(it.second)) }
                 .forEach { (oppgaveId, behandlingId) ->
-                    inTransaction {
-                        logger.info("Fikser referanse på oppgave $oppgaveId til å peke på behandling $behandlingId")
-                        val oppgave = oppgaveDao.hentOppgave(oppgaveId)
+                    try {
+                        inTransaction {
+                            logger.info("Fikser referanse på oppgave $oppgaveId til å peke på behandling $behandlingId")
+                            val oppgave = oppgaveDao.hentOppgave(oppgaveId)
 
-                        oppgaveDao.oppdaterReferanseOgMerknad(
-                            oppgaveId,
-                            behandlingId.toString(),
-                            oppgave?.merknad ?: "",
-                        )
-
-                        logger.info("Avbryter behandling $behandlingId med tilhørende oppgave $oppgaveId")
-                        val behandling = behandlingService.hentBehandling(behandlingId)
-                        if (behandling != null &&
-                            behandling.status == BehandlingStatus.OPPRETTET &&
-                            behandling.revurderingsaarsak() == Revurderingaarsak.ALDERSOVERGANG
-                        ) {
-                            behandlingService.avbrytBehandling(
-                                behandlingId,
-                                HardkodaSystembruker.uttrekk,
-                                AarsakTilAvbrytelse.ANNET,
-                                "Aldersovergangsjobb feilet - avbryter behandling for å kjøre jobb på nytt",
+                            oppgaveDao.oppdaterReferanseOgMerknad(
+                                oppgaveId,
+                                behandlingId.toString(),
+                                oppgave?.merknad ?: "",
                             )
 
-                            logger.info("Behandling $behandlingId ble avbrutt")
-                        } else {
-                            logger.info("Behandling $behandlingId hadde feil status eller tilstand: ${behandling?.status}")
+                            logger.info("Avbryter behandling $behandlingId med tilhørende oppgave $oppgaveId")
+                            val behandling = behandlingService.hentBehandling(behandlingId)
+                            if (behandling != null &&
+                                behandling.status == BehandlingStatus.OPPRETTET &&
+                                behandling.revurderingsaarsak() == Revurderingaarsak.ALDERSOVERGANG
+                            ) {
+                                behandlingService.avbrytBehandling(
+                                    behandlingId,
+                                    HardkodaSystembruker.uttrekk,
+                                    AarsakTilAvbrytelse.ANNET,
+                                    "Aldersovergangsjobb feilet - avbryter behandling for å kjøre jobb på nytt",
+                                )
+
+                                logger.info("Behandling $behandlingId ble avbrutt")
+                            } else {
+                                logger.info("Behandling $behandlingId hadde feil status eller tilstand: ${behandling?.status}")
+                            }
                         }
+                    } catch (ex: Exception) {
+                        logger.error("Feilet ved avbrytelse av behandling $behandlingId ifm feilet aldersovergangsjobb", ex)
                     }
                 }
 

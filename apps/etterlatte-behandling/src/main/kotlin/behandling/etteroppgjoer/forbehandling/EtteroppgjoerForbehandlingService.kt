@@ -129,7 +129,11 @@ class EtteroppgjoerForbehandlingService(
 
         // hvis relatertForbehandlingId er satt, vis faktiskInntekt fra forrige ferdigstilte forbehandling
         // slik at saksbehandler kan se hva som ble satt og kan korrigere
-        val relevantBehandlingId = forbehandling.relatertForbehandlingId ?: forbehandling.id
+        val relevantBehandlingId = forbehandling.relatertForbehandlingId ?: forbehandlingId
+        if (relevantBehandlingId != forbehandlingId) {
+            logger.info("Henter faktiskInntekt for forbehandling $forbehandlingId fra forbehandling $relevantBehandlingId")
+        }
+
         val faktiskInntekt =
             runBlocking {
                 beregningKlient.hentAvkortingFaktiskInntekt(

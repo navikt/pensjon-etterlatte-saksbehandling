@@ -235,9 +235,7 @@ class AvbrytAldersovergangJobService(
                             behandlingId.toString(),
                             oppgave?.merknad ?: "",
                         )
-                    }
 
-                    inTransaction {
                         logger.info("Avbryter behandling $behandlingId med tilhørende oppgave $oppgaveId")
                         val behandling = behandlingService.hentBehandling(behandlingId)
                         if (behandling != null &&

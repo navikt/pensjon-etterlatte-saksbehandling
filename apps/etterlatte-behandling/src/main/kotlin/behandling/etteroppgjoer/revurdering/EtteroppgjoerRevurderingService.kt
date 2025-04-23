@@ -48,7 +48,7 @@ class EtteroppgjoerRevurderingService(
                     throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
                 }
 
-                // opprett ny kopi av forbehandling for revurdering så vi overskriver tidligere oppgitt inntekter
+                // lager kopi av forbehandling for revurdering slik at vi ikke overskriver tidligere oppgitt inntekt
                 val forbehandlingCopy = forbehandling.copy(id = UUID.randomUUID(), relatertForbehandlingId = forbehandling.id)
                 etteroppgjoerForbehandlingService.lagreForbehandling(forbehandlingCopy)
 

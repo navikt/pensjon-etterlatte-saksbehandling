@@ -7,16 +7,9 @@ interface Props<T extends FieldValues> {
   control: Control<T>
   label?: string | ReactNode | Array<ReactNode>
   description?: string
-  readOnly?: boolean
 }
 
-export const ControlledInntektTextField = <T extends FieldValues>({
-  name,
-  control,
-  label,
-  description,
-  readOnly = false,
-}: Props<T>) => {
+export const ControlledInntektTextField = <T extends FieldValues>({ name, control, label, description }: Props<T>) => {
   return (
     <Controller
       name={name}
@@ -29,7 +22,6 @@ export const ControlledInntektTextField = <T extends FieldValues>({
           // Fjerne alt som ikke er tall og gjøre om til Number
           onChange={(e) => onChange(new Intl.NumberFormat('nb').format(Number(e.target.value.replace(/[^0-9.]/g, ''))))}
           inputMode="numeric"
-          readOnly={readOnly}
         />
       )}
     />

@@ -7,6 +7,7 @@ import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useState } from 'react'
 import { FaktiskInntektSkjema } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektVisning'
+import { PencilIcon } from '@navikt/aksel-icons'
 
 export const FastsettFaktiskInntekt = ({
   forbehandlingId,
@@ -48,7 +49,12 @@ export const FastsettFaktiskInntekt = ({
         <VStack gap="4">
           <FaktiskInntektVisning faktiskInntekt={faktiskInntekt} />
           <div>
-            <Button size="small" onClick={() => setRedigerFaktiskInntekt(true)}>
+            <Button
+              size="small"
+              variant="secondary"
+              icon={<PencilIcon aria-hidden />}
+              onClick={() => setRedigerFaktiskInntekt(true)}
+            >
               Rediger
             </Button>
           </div>

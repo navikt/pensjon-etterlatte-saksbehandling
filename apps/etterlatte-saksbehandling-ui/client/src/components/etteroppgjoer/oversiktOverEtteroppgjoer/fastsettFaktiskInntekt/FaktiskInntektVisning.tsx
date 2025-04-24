@@ -1,8 +1,10 @@
-import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
-export const FaktiskInntektVisning = ({ faktiskInntekt }: { faktiskInntekt?: FaktiskInntekt }) => {
+export const FaktiskInntektVisning = () => {
+  const { faktiskInntekt } = useEtteroppgjoer()
+
   return !!faktiskInntekt ? (
     <VStack gap="4">
       <VStack gap="2">

@@ -1,5 +1,5 @@
 import { BodyShort, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
-import { EtteroppgjoerBehandlingStatus, FaktiskInntekt } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
@@ -9,13 +9,7 @@ import { FaktiskInntektSkjema } from '~components/etteroppgjoer/oversiktOverEtte
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
 
-export const FastsettFaktiskInntekt = ({
-  forbehandlingId,
-  faktiskInntekt,
-}: {
-  forbehandlingId: string
-  faktiskInntekt?: FaktiskInntekt
-}) => {
+export const FastsettFaktiskInntekt = () => {
   const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(false)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -40,14 +34,10 @@ export const FastsettFaktiskInntekt = ({
       </div>
 
       {redigerFaktiskInntekt && erRedigerbar ? (
-        <FaktiskInntektSkjema
-          forbehandlingId={forbehandlingId}
-          faktiskInntekt={faktiskInntekt}
-          setRedigerFaktiskInntekt={setRedigerFaktiskInntekt}
-        />
+        <FaktiskInntektSkjema setRedigerFaktiskInntekt={setRedigerFaktiskInntekt} />
       ) : (
         <VStack gap="4">
-          <FaktiskInntektVisning faktiskInntekt={faktiskInntekt} />
+          <FaktiskInntektVisning />
           <div>
             <Button
               size="small"

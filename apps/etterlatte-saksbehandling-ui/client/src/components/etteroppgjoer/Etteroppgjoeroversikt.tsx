@@ -38,10 +38,7 @@ export const Etteroppgjoeroversikt = ({ behandling }: { behandling: IDetaljertBe
           <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
         </BodyShort>
         <Inntektsopplysninger />
-        <FastsettFaktiskInntekt
-          forbehandlingId={etteroppgjoer.behandling.id}
-          faktiskInntekt={etteroppgjoer.faktiskInntekt}
-        />
+        <FastsettFaktiskInntekt />
         <ResultatAvForbehandling />
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">

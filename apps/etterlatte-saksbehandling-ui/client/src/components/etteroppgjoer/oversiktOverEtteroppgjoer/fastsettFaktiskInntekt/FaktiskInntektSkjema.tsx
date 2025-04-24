@@ -36,15 +36,13 @@ interface FastsettFaktiskInntektSkjema {
 }
 
 interface Props {
-  forbehandlingId: string
-  faktiskInntekt?: FaktiskInntekt
   setRedigerFaktiskInntekt: (redigerFaktiskInntekt: boolean) => void
 }
 
-export const FaktiskInntektSkjema = ({ forbehandlingId, faktiskInntekt, setRedigerFaktiskInntekt }: Props) => {
+export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
 
-  const { behandling } = useEtteroppgjoer()
+  const { behandling, faktiskInntekt } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
 
   const {
@@ -72,7 +70,7 @@ export const FaktiskInntektSkjema = ({ forbehandlingId, faktiskInntekt, setRedig
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    lagreFaktiskInntektRequest({ forbehandlingId, faktiskInntekt }, (resultat) => {
+    lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
       dispatch(addResultatEtteroppgjoer(resultat))
       setRedigerFaktiskInntekt(false)
     })

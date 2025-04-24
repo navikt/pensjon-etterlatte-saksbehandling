@@ -69,7 +69,7 @@ data class EtteroppgjoerForbehandling(
         }
     }
 
-    fun tilVarselbrevSendt(): EtteroppgjoerForbehandling {
+    fun tilFerdigstilt(): EtteroppgjoerForbehandling {
         if (status == EtteroppgjoerForbehandlingStatus.BEREGNET) {
             return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         } else {
@@ -79,14 +79,14 @@ data class EtteroppgjoerForbehandling(
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 
-    fun isUnderBehandling() =
+    fun erUnderBehandling() =
         status in
             listOf(
                 EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 EtteroppgjoerForbehandlingStatus.BEREGNET,
             )
 
-    fun isFerdigstilt() =
+    fun erFerdigstilt() =
         status in
             listOf(
                 EtteroppgjoerForbehandlingStatus.FERDIGSTILT,

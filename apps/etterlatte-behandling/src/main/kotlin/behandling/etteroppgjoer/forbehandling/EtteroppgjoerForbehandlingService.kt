@@ -253,7 +253,7 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
     ) {
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
-        if (forbehandlinger.any { it.aar == inntektsaar && !it.isFerdigstilt() }) {
+        if (forbehandlinger.any { it.aar == inntektsaar && !it.erFerdigstilt() }) {
             throw InternfeilException("Kan ikke opprette forbehandling fordi det allerede finnes en forbehandling som ikke er ferdigstilt")
         }
 

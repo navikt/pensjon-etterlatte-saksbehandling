@@ -28,7 +28,7 @@ export const FaktiskInntektVisning = () => {
 
       <VStack gap="2" maxWidth="30rem">
         <Label>Spesifikasjon av inntekt</Label>
-        <Label>{faktiskInntekt.spesifikasjon}</Label>
+        <BodyShort>{faktiskInntekt.spesifikasjon}</BodyShort>
       </VStack>
     </VStack>
   ) : (

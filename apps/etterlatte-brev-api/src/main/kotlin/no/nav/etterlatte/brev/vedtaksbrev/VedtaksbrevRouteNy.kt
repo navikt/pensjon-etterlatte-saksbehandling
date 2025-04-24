@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
 const val BREV_TYPE_CALL_PARAMETER = "brevType"
+const val BREV_ID_CALL_PARAMETER = "brevId"
 
 fun Route.strukturertBrevRoute(
     service: StrukturertBrevService,
@@ -41,7 +42,7 @@ fun Route.strukturertBrevRoute(
             post("pdf") {
                 withBehandlingId(tilgangssjekker) {
                     val brevId =
-                        krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                        krevIkkeNull(call.request.queryParameters[BREV_ID_CALL_PARAMETER]?.toLong()) {
                             "Kan ikke generere PDF uten brevId"
                         }
                     val request = call.receive<BrevRequest>()
@@ -52,7 +53,7 @@ fun Route.strukturertBrevRoute(
                 }
             }
 
-            post("ferdigstill/{$BREV_TYPE_CALL_PARAMETER}") {
+            post("ferdigstill") {
                 withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                     logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
                     val brevType =
@@ -67,7 +68,7 @@ fun Route.strukturertBrevRoute(
             put("tilbakestill") {
                 withBehandlingId(tilgangssjekker, skrivetilgang = true) {
                     val brevId =
-                        krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                        krevIkkeNull(call.request.queryParameters[BREV_ID_CALL_PARAMETER]?.toLong()) {
                             "Kan ikke tilbakestille PDF uten brevId"
                         }
                     val brevRequest = call.receive<BrevRequest>()
@@ -94,7 +95,7 @@ fun Route.strukturertBrevRoute(
         post("pdf") {
             withBehandlingId(tilgangssjekker) {
                 val brevId =
-                    krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                    krevIkkeNull(call.request.queryParameters[BREV_ID_CALL_PARAMETER]?.toLong()) {
                         "Kan ikke generere PDF uten brevId"
                     }
                 val request = call.receive<BrevRequest>()
@@ -105,7 +106,7 @@ fun Route.strukturertBrevRoute(
             }
         }
 
-        post("ferdigstill/{$BREV_TYPE_CALL_PARAMETER}") {
+        post("ferdigstill") {
             withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 logger.info("Ferdigstiller strukturert brev for behandling (id=$behandlingId)")
                 val brevType =
@@ -120,7 +121,7 @@ fun Route.strukturertBrevRoute(
         put("tilbakestill") {
             withBehandlingId(tilgangssjekker, skrivetilgang = true) {
                 val brevId =
-                    krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                    krevIkkeNull(call.request.queryParameters[BREV_ID_CALL_PARAMETER]?.toLong()) {
                         "Kan ikke tilbakestille PDF uten brevId"
                     }
                 val brevRequest = call.receive<BrevRequest>()

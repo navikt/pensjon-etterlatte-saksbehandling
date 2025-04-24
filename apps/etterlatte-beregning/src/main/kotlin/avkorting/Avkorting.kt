@@ -172,6 +172,9 @@ data class Avkorting(
         val kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now())
         val periode = Periode(fom = nyttGrunnlag.fom, tom = tom)
 
+        // Ved revurdering tilbake i tid - betyr det at fom i årsoppgjøret også må flyttes til fom i nytt inntektsgrunnlag
+        val gjeldendeAaarsoppgjoerFom = if (nyttGrunnlag.fom < aarsoppgjoer.fom) nyttGrunnlag.fom else aarsoppgjoer.fom
+
         val forventetInntekt =
             ForventetInntekt(
                 id = nyttGrunnlag.id,
@@ -182,7 +185,7 @@ data class Avkorting(
                 fratrekkInnAarUtland = fratrekkInnAarUtland,
                 innvilgaMaaneder =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, tom, aldersovergang),
+                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergang),
                 overstyrtInnvilgaMaanederAarsak =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
@@ -205,15 +208,16 @@ data class Avkorting(
 
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
-                // Fjerner hvis det finnes fra før for å erstatte/redigere
-                .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map {
-                    it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom)
-                }.plus(Inntektsavkorting(grunnlag = forventetInntekt))
+                // Kun ta med perioder før nytt virkningstidspunkt - revurdering bakover i tid vil fjerne alt etter
+                // Dette vil også gjelde ved redigering
+                .filter { it.grunnlag.periode.fom < nyttGrunnlag.fom }
+                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom) }
+                .plus(Inntektsavkorting(grunnlag = forventetInntekt))
 
         val oppdatertAarsoppjoer =
             aarsoppgjoer.copy(
                 inntektsavkorting = oppdatert,
+                fom = gjeldendeAaarsoppgjoerFom,
             )
         return erstattAarsoppgjoer(oppdatertAarsoppjoer)
     }

@@ -44,12 +44,12 @@ class EtteroppgjoerRevurderingService(
         val (revurdering, sisteIverksatte) =
             inTransaction {
                 val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-
-                if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)) {
+                if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT)) {
                     throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
                 }
 
-                // TODO her bør det sjekkes for om det allerede er laget en behandling med matchende relatertBehandlingId
+                // lager kopi av forbehandling for revurdering slik at vi ikke overskriver tidligere oppgitt inntekt
+                val forbehandlingCopy = etteroppgjoerForbehandlingService.lagreForbehandlingKopi(forbehandling)
 
                 // TODO hva blir riktig her? vi ønsker ikke mer enn en oppgave, men kan det være oppgaver åpne på forbehandling?
                 // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
@@ -86,7 +86,7 @@ class EtteroppgjoerRevurderingService(
 
                 val virkningstidspunkt =
                     Virkningstidspunkt(
-                        dato = forbehandling.innvilgetPeriode.fom,
+                        dato = forbehandlingCopy.innvilgetPeriode.fom,
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                         begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
                     )
@@ -96,7 +96,7 @@ class EtteroppgjoerRevurderingService(
                         .opprettRevurdering(
                             sakId = sakId,
                             forrigeBehandling = sisteIverksatte,
-                            relatertBehandlingId = forbehandling.id.toString(),
+                            relatertBehandlingId = forbehandlingCopy.id.toString(),
                             persongalleri = persongalleri,
                             prosessType = Prosesstype.MANUELL,
                             kilde = Vedtaksloesning.GJENNY,
@@ -115,7 +115,7 @@ class EtteroppgjoerRevurderingService(
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
-                etteroppgjoerService.oppdaterStatus(sakId, forbehandling.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
+                etteroppgjoerService.oppdaterStatus(sakId, forbehandlingCopy.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
 
                 revurdering to sisteIverksatte
             }
@@ -127,7 +127,6 @@ class EtteroppgjoerRevurderingService(
                 forrigeBehandlingId = sisteIverksatte.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
-
             beregningKlient.opprettBeregningsgrunnlagFraForrigeBehandling(
                 behandlingId = revurdering.id,
                 forrigeBehandlingId = sisteIverksatte.id,

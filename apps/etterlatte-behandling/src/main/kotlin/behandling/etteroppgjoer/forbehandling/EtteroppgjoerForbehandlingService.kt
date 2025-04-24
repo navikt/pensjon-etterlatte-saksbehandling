@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -76,11 +78,27 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
+    fun lagreForbehandlingKopi(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+        val forbehandlingCopy =
+            forbehandling.copy(
+                id = UUID.randomUUID(),
+                relatertForbehandlingId = forbehandling.id,
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                opprettet = Tidspunkt.now(), // ny dato
+            )
+
+        dao.lagreForbehandling(forbehandlingCopy)
+        dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
+
+        return forbehandlingCopy
+    }
+
     fun hentDetaljertForbehandling(
-        behandlingId: UUID,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertForbehandlingDto {
-        val forbehandling = hentForbehandling(behandlingId)
+        val forbehandling = hentForbehandling(forbehandlingId)
 
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
@@ -88,7 +106,7 @@ class EtteroppgjoerForbehandlingService(
 
         val request =
             EtteroppgjoerBeregnetAvkortingRequest(
-                forbehandling = behandlingId,
+                forbehandling = forbehandlingId,
                 sisteIverksatteBehandling = sisteIverksatteBehandling.id,
                 aar = forbehandling.aar,
                 sakId = sisteIverksatteBehandling.sak.id,
@@ -102,31 +120,37 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
-        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(behandlingId)
-        val aInntekt = dao.hentAInntekt(behandlingId)
+        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
+        val aInntekt = dao.hentAInntekt(forbehandlingId)
 
         if (pensjonsgivendeInntekt == null || aInntekt == null) {
             throw InternfeilException(
-                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$behandlingId",
+                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$forbehandlingId",
             )
+        }
+
+        // hvis relatertForbehandlingId er satt, vis faktiskInntekt fra forrige ferdigstilte forbehandling
+        // slik at saksbehandler kan se hva som ble satt og kan korrigere
+        val relevantBehandlingId = forbehandling.relatertForbehandlingId ?: forbehandlingId
+        if (relevantBehandlingId != forbehandlingId) {
+            logger.info("Henter faktiskInntekt for forbehandling $forbehandlingId fra forbehandling $relevantBehandlingId")
         }
 
         val faktiskInntekt =
             runBlocking {
                 beregningKlient.hentAvkortingFaktiskInntekt(
                     EtteroppgjoerFaktiskInntektRequest(
-                        forbehandlingId = behandlingId,
+                        forbehandlingId = relevantBehandlingId,
                     ),
                     brukerTokenInfo,
                 )
             }
-
         val beregnetEtteroppgjoerResultat =
             runBlocking {
                 beregningKlient.hentBeregnetEtteroppgjoerResultat(
                     EtteroppgjoerHentBeregnetResultatRequest(
                         forbehandling.aar,
-                        forbehandling.id,
+                        relevantBehandlingId,
                         sisteIverksatteBehandling.id,
                     ),
                     brukerTokenInfo,
@@ -229,7 +253,7 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
     ) {
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
-        if (forbehandlinger.any { it.aar == inntektsaar && !it.isFerdigstilt() }) {
+        if (forbehandlinger.any { it.aar == inntektsaar && !it.erFerdigstilt() }) {
             throw InternfeilException("Kan ikke opprette forbehandling fordi det allerede finnes en forbehandling som ikke er ferdigstilt")
         }
 

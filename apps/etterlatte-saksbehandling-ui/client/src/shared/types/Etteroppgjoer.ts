@@ -13,6 +13,7 @@ export interface Etteroppgjoer {
 export interface EtteroppgjoerBehandling {
   id: string
   status: EtteroppgjoerBehandlingStatus
+  relatertForbehandlingId: string // burde bruke denne for å hente faktiskInntekt etteroppgjør revurdering
   sak: ISak
   aar: number
   innvilgetPeriode: {
@@ -26,13 +27,13 @@ export interface EtteroppgjoerBehandling {
 export enum EtteroppgjoerBehandlingStatus {
   OPPRETTET = 'OPPRETTET',
   BEREGNET = 'BEREGNET',
-  VARSELBREV_SENDT = 'VARSELBREV_SENDT',
+  FERDIGSTILT = 'FERDIGSTILT',
 }
 
 export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlingStatus, string> = {
   OPPRETTET: 'Opprettet',
   BEREGNET: 'Beregnet',
-  VARSELBREV_SENDT: 'Forhåndsvarsel sendt',
+  FERDIGSTILT: 'Ferdigstilt',
 }
 
 export interface EtteroppgjoerOpplysninger {

@@ -39,6 +39,7 @@ data class EtteroppgjoerForbehandling(
     val hendelseId: UUID,
     val opprettet: Tidspunkt,
     val status: EtteroppgjoerForbehandlingStatus,
+    val relatertForbehandlingId: UUID? = null,
     val sak: Sak,
     val aar: Int,
     val innvilgetPeriode: Periode,
@@ -68,34 +69,34 @@ data class EtteroppgjoerForbehandling(
         }
     }
 
-    fun tilVarselbrevSendt(): EtteroppgjoerForbehandling {
+    fun tilFerdigstilt(): EtteroppgjoerForbehandling {
         if (status == EtteroppgjoerForbehandlingStatus.BEREGNET) {
-            return copy(status = EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT)
+            return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         } else {
-            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT}")
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.FERDIGSTILT}")
         }
     }
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 
-    fun isUnderBehandling() =
+    fun erUnderBehandling() =
         status in
             listOf(
                 EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 EtteroppgjoerForbehandlingStatus.BEREGNET,
             )
 
-    fun isFerdigstilt() =
+    fun erFerdigstilt() =
         status in
             listOf(
-                EtteroppgjoerForbehandlingStatus.VARSELBREV_SENDT,
+                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
             )
 }
 
 enum class EtteroppgjoerForbehandlingStatus {
     OPPRETTET,
     BEREGNET,
-    VARSELBREV_SENDT,
+    FERDIGSTILT,
 }
 
 data class DetaljertForbehandlingDto(

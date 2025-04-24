@@ -125,4 +125,47 @@ class EtteroppgjoerForbehandlingDaoTest(
             inntektsmaaneder shouldBe AInntekt.stub(inntektsaar).inntektsmaaneder
         }
     }
+
+    @Test
+    fun `kopier aInntekt til ny forbehandling`() {
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+        val nyForbehandlingId = UUID.randomUUID()
+        etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.hentAInntekt(nyForbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.lagreAInntekt(
+            AInntekt.stub(inntektsaar),
+            forbehandlingId,
+        )
+
+        etteroppgjoerForbehandlingDao.kopierAInntekt(forbehandlingId, nyForbehandlingId)
+
+        val aInntekt = etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId)!!
+        val aInntektKopi = etteroppgjoerForbehandlingDao.hentAInntekt(nyForbehandlingId)!!
+
+        aInntekt.inntektsmaaneder shouldBe aInntektKopi.inntektsmaaneder
+        aInntekt.aar shouldBe aInntektKopi.aar
+    }
+
+    @Test
+    fun `kopier pensjonsgivendeInntekt til ny forbehandling`() {
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+        val nyForbehandlingId = UUID.randomUUID()
+
+        etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
+            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
+            forbehandlingId,
+        )
+
+        etteroppgjoerForbehandlingDao.kopierPensjonsgivendeInntekt(forbehandlingId, nyForbehandlingId)
+
+        val pensjonsgivendeInntekt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!
+        val pensjonsgivendeInntektKopi = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId)!!
+
+        pensjonsgivendeInntekt.inntekter shouldBe pensjonsgivendeInntektKopi.inntekter
+        pensjonsgivendeInntekt.inntektsaar shouldBe pensjonsgivendeInntektKopi.inntektsaar
+    }
 }

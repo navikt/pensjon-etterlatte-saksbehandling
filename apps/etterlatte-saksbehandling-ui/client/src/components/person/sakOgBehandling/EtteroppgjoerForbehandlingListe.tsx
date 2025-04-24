@@ -66,7 +66,7 @@ function EtteroppgjoerForbehandlingTabell({
               <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Gå til behandling</Link>
             </Table.DataCell>
             <Table.DataCell>
-              {forbehandling.status == EtteroppgjoerBehandlingStatus.VARSELBREV_SENDT && (
+              {forbehandling.status == EtteroppgjoerBehandlingStatus.FERDIGSTILT && (
                 <Button
                   loading={isPending(opprettRevurderingResult)}
                   size="small"

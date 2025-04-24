@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
+import io.ktor.server.request.receive
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -141,15 +142,16 @@ class DollyFeature(
             post("opprett-ytelse") {
                 try {
 
-                    val params = call.receiveParameters()
-                    val ytelse = SoeknadType.valueOf(params["ytelse"]!!)
+                    val params = call.receive<NySoeknadRequest>()
+                    val ytelse = SoeknadType.valueOf(params.type.toString())
                     val behandlingssteg = Behandlingssteg.IVERKSATT
-                    val gjenlevende = params["gjenlevende"]!!
-                    val avdoed = params["avdoed"]!!
-                    val barnListe = params.getAll("barnListe")!!
+                    val gjenlevende = params.gjenlevende
+                    val avdoed = params.avdoed
+                    val barnListe = params.barn
                     val soeker =
                         when (ytelse) {
-                            SoeknadType.BARNEPENSJON -> params["barn"]!!
+                            // TODO
+                            SoeknadType.BARNEPENSJON -> params.barn.first()
                             SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
                         }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {

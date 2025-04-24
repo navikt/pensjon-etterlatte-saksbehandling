@@ -350,11 +350,13 @@ class BehandlingFactory(
 
         val persongalleri = grunnlagService.hentPersongalleri(sakId)!!
 
-        runBlocking {
-            grunnlagService.opprettGrunnlag(
-                behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
-                opplysningsbehov(behandlingerForOmgjoering.nyFoerstegangsbehandling.sak, persongalleri),
-            )
+        inTransaction {
+            runBlocking {
+                grunnlagService.opprettGrunnlag(
+                    behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
+                    opplysningsbehov(behandlingerForOmgjoering.nyFoerstegangsbehandling.sak, persongalleri),
+                )
+            }
         }
 
         if (omgjoeringRequest.skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {

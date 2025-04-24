@@ -11,6 +11,7 @@ dependencies {
     compileOnly(libs.logging.slf4japi)
 
     testImplementation(libs.test.jupiter.engine)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.test.mockk)
 }

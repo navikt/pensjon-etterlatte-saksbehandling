@@ -21,6 +21,7 @@ dependencies {
     testFixturesImplementation(libs.test.mockk)
     testFixturesImplementation(libs.test.testcontainer.jupiter)
     testFixturesImplementation(libs.test.testcontainer.postgresql)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
     testFixturesImplementation(libs.database.flywaydb)
     testFixturesImplementation(libs.database.hikaricp)
     testFixturesImplementation(libs.database.kotliquery)

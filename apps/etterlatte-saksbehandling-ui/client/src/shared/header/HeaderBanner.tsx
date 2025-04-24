@@ -9,13 +9,13 @@ export const HeaderBanner = () => {
 
   const erDesember = new Date().getMonth() === 11
 
-  const erApril = new Date().getMonth() === 3
+  const erPaaske = false
 
   return (
     <InternalHeader data-theme="light">
       <InternalHeader.Title href="/">
         <HStack gap="4">
-          {erApril && (
+          {erPaaske && (
             <div>
               <img src="/paaskekylling.png" alt="Påskekylling" style={{ height: '1.75rem', width: '1.75rem' }} />
             </div>
@@ -26,7 +26,7 @@ export const HeaderBanner = () => {
             </div>
           )}
           Gjenny
-          {erApril && (
+          {erPaaske && (
             <div>
               <img src="/paaskeegg.png" alt="Påskeegg" style={{ height: '1.75rem', width: '1.75rem' }} />
             </div>

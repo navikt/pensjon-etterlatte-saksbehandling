@@ -28,4 +28,16 @@ object EtteroppgjoerBrevData {
         override val type: String = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR"
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_FORHAANDSVARSEL
     }
+
+    data class Vedtak(
+        val bosattUtland: Boolean,
+    ) : BrevFastInnholdData() {
+        override val type: String = "OMS_EO_VEDTAK"
+        override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
+    }
+
+    class VedtakInnhold : BrevRedigerbarInnholdData() {
+        override val type: String = "OMS_EO_VEDTAK_UTFALL"
+        override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
+    }
 }

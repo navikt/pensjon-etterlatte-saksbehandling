@@ -34,12 +34,13 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerBrevService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlientImpl
@@ -59,10 +60,12 @@ import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
+import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.AvbrytAldersovergangJob
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18JobService
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
 import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
+import no.nav.etterlatte.behandling.jobs.uttrekk.AvbrytAldersovergangJobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -671,6 +674,7 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
         )
+
     val etteroppgjoerForbehandlingService =
         EtteroppgjoerForbehandlingService(
             dao = etteroppgjoerForbehandlingDao,
@@ -683,21 +687,32 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
         )
-    private val etteroppgjoerBrevService =
-        EtteroppgjoerBrevService(
+
+    private val etteroppgjoerRevurderingBrevService =
+        EtteroppgjoerRevurderingBrevService(
+            sakService = sakService,
+            grunnlagService = grunnlagService,
+            vedtakKlient = vedtakKlient,
             brevKlient = brevKlient,
-            brevApiKlient = brevApiKlient,
+        )
+
+    private val etteroppgjoerForbehandlingBrevService =
+        EtteroppgjoerForbehandlingBrevService(
+            brevKlient = brevKlient,
             grunnlagService = grunnlagService,
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
-            beregningKlient = beregningsKlient,
+            behandlingService = behandlingService,
         )
+
     val brevService =
         BrevService(
             behandlingMedBrevService,
+            behandlingService,
             brevApiKlient,
             vedtakKlient,
             tilbakekrevingBrevService,
-            etteroppgjoerBrevService,
+            etteroppgjoerForbehandlingBrevService,
+            etteroppgjoerRevurderingBrevService,
         )
 
     val tilbakekrevingService =
@@ -732,6 +747,13 @@ internal class ApplicationContext(
             vedtakKlient,
             sakService,
             nyAldersovergangService,
+            featureToggleService,
+        )
+
+    private val avbrytAldersovergangJobService =
+        AvbrytAldersovergangJobService(
+            behandlingService,
+            oppgaveDaoEndringer,
             featureToggleService,
         )
 
@@ -901,6 +923,17 @@ internal class ApplicationContext(
             sakTilgangDao = sakTilgangDao,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.DAYS),
+        )
+    }
+
+    val avbrytAldersovergangJob: AvbrytAldersovergangJob by lazy {
+        AvbrytAldersovergangJob(
+            service = avbrytAldersovergangJobService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.DAYS),
         )
     }

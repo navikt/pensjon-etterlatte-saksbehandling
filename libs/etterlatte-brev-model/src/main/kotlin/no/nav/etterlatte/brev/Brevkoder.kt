@@ -246,6 +246,13 @@ enum class Brevkoder(
         "Forshåndsvarsel om etteroppgjør av omstillingsstønad",
         Brevtype.INFORMASJON,
     ),
+
+    OMS_EO_VEDTAK(
+        EtterlatteBrevKode.OMS_EO_VEDTAK_UTFALL,
+        EtterlatteBrevKode.OMS_EO_VEDTAK,
+        "Vedtak om etteroppgjør av omstillingsstønad",
+        Brevtype.VEDTAK,
+    ),
     ;
 
     init {

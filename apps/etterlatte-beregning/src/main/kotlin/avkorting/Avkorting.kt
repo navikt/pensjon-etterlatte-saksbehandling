@@ -172,6 +172,9 @@ data class Avkorting(
         val kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now())
         val periode = Periode(fom = nyttGrunnlag.fom, tom = tom)
 
+        // Dersom vi revurderer tilbake i tid - må fom for årsoppgjør også oppdateres
+        val aarsoppgjoerFom = if (nyttGrunnlag.fom < aarsoppgjoer.fom) nyttGrunnlag.fom else aarsoppgjoer.fom
+
         val forventetInntekt =
             ForventetInntekt(
                 id = nyttGrunnlag.id,
@@ -182,7 +185,7 @@ data class Avkorting(
                 fratrekkInnAarUtland = fratrekkInnAarUtland,
                 innvilgaMaaneder =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, tom, aldersovergang),
+                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoerFom, tom, aldersovergang),
                 overstyrtInnvilgaMaanederAarsak =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
@@ -215,7 +218,7 @@ data class Avkorting(
             aarsoppgjoer.copy(
                 inntektsavkorting = oppdatert,
                 // Dersom vi revurderer tilbake i tid - må fom for årsoppgjør også oppdateres
-                fom = if (nyttGrunnlag.fom < aarsoppgjoer.fom) nyttGrunnlag.fom else aarsoppgjoer.fom,
+                fom = aarsoppgjoerFom,
             )
         return erstattAarsoppgjoer(oppdatertAarsoppjoer)
     }

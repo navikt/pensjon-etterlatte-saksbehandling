@@ -142,16 +142,16 @@ class DollyFeature(
             post("opprett-ytelse") {
                 try {
 
-                    val params = call.receive<NySoeknadRequest>()
-                    val ytelse = SoeknadType.valueOf(params.type.toString())
+                    val nySoeknadRequest = call.receive<NySoeknadRequest>()
+                    val ytelse = nySoeknadRequest.type
                     val behandlingssteg = Behandlingssteg.IVERKSATT
-                    val gjenlevende = params.gjenlevende
-                    val avdoed = params.avdoed
-                    val barnListe = params.barn
+                    val gjenlevende = nySoeknadRequest.gjenlevende
+                    val avdoed = nySoeknadRequest.avdoed
+                    val barnListe = nySoeknadRequest.barn
                     val soeker =
                         when (ytelse) {
                             // TODO
-                            SoeknadType.BARNEPENSJON -> params.barn.first()
+                            SoeknadType.BARNEPENSJON -> nySoeknadRequest.barn.first()
                             SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
                         }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
@@ -168,7 +168,7 @@ class DollyFeature(
 
                     val brukerId = brukerTokenInfo.ident()
                     val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
-                    call.respond(HttpStatusCode.OK, "Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}")
+                    call.respond(SoeknadResponse(200, noekkel))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }

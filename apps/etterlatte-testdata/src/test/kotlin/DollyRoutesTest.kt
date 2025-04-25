@@ -3,26 +3,36 @@ package no.nav.etterlatte.dolly
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
+import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.config
 import no.nav.etterlatte.ktor.runServerWithConfig
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.CLIENT_ID
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
+import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
+import no.nav.etterlatte.testdata.features.dolly.SoeknadResponse
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -33,8 +43,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DollyRoutesTest {
     private val mockOAuth2Server =
-        no.nav.security.mock.oauth2
-            .MockOAuth2Server()
+        MockOAuth2Server()
     private val dollyService: DollyService = mockk<DollyService>()
 
     @BeforeAll
@@ -73,224 +82,86 @@ class DollyRoutesTest {
             response.status shouldBe HttpStatusCode.Unauthorized
         }
     }
-}
 
-private fun configMedRoller(
-    port: Int,
-    issuerId: String,
-    pensjonSaksbehandler: String? = UUID.randomUUID().toString(),
-    gjennySaksbehandler: String? = UUID.randomUUID().toString(),
-): Config =
-    ConfigFactory.parseMap(
-        mapOf(
-            "testnav.resource.url" to "http://localhost",
-            "no.nav.security.jwt.issuers" to
-                listOf(
-                    mapOf(
-                        "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
-                        "issuer_name" to issuerId,
-                        "accepted_audience" to CLIENT_ID,
+    @Test
+    fun `skal gi 400 når body mangler `() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff =
+            configMedRoller(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
+        testApplication {
+            runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
+
+            val response =
+                client.post("/opprett-ytelse") {
+                    contentType(ContentType.Application.Json)
+                    // setBody(FoedselsnummerDTO(fnr).toJson())
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.BadRequest
+        }
+    }
+
+    @Test
+    fun `kan opprette soeknad`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff =
+            configMedRoller(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
+        val request =
+            NySoeknadRequest(
+                type = SoeknadType.BARNEPENSJON,
+                avdoed = fnr,
+                gjenlevende = fnr,
+                barn =
+                    listOf(
+                        fnr,
+                        fnr,
                     ),
-                ),
-            "roller" to
-                mapOf(
-                    "pensjon-saksbehandler" to pensjonSaksbehandler,
-                    "gjenny-saksbehandler" to gjennySaksbehandler,
-                ),
-        ),
-    )
-
-/*
-    @Test
-    fun `skal gi 401 når rolle mangler`() {
-        val conff = no.nav.etterlatte.behandling.sak.configMedRoller(
-            mockOAuth2Server.config.httpServer.port(),
-            Issuer.AZURE.issuerName
-        )
-        io.ktor.server.testing.testApplication {
-            runServerWithConfig(applicationConfig = conff) {
-                behandlingSakRoutes(
-                    behandlingService = behandlingService,
-                    config = conff,
-                )
-            }
-
-            val response =
-                client.post("api/oms/person/sak") {
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr).toJson())
-                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
-                }
-            response.status shouldBe HttpStatusCode.Unauthorized
-            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
-        }
-    }
-
-    @Test
-    fun `skal gi 500 når body mangler pensjonSaksbehandler`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff =
-            no.nav.etterlatte.behandling.sak.configMedRoller(
-                mockOAuth2Server.config.httpServer.port(),
-                Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler
             )
-        io.ktor.server.testing.testApplication {
-            runServerWithConfig(applicationConfig = conff) {
-                behandlingSakRoutes(
-                    behandlingService = behandlingService,
-                    config = conff,
-                )
-            }
+        coEvery { dollyService.sendSoeknad(any(), any(), any()) } returns "1"
 
-            val response =
-                client.post("api/oms/person/sak") {
-                    contentType(ContentType.Application.Json)
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
-                    )
-                }
-            response.status shouldBe HttpStatusCode.InternalServerError
-            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
-        }
-    }
-
-    @Test
-    fun `pensjonSaksbehandler kan hente saksliste for fnr`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff =
-            no.nav.etterlatte.behandling.sak.configMedRoller(
-                mockOAuth2Server.config.httpServer.port(),
-                Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler
-            )
-        val requestFnr = FoedselsnummerDTO(fnr)
-        val sakIdListesvar = listOf(no.nav.etterlatte.behandling.sakId1)
-        coEvery { behandlingService.hentSakforPerson(requestFnr) } returns sakIdListesvar
-        io.ktor.server.testing.testApplication {
+        testApplication {
             val client =
-                runServerWithConfig(applicationConfig = conff) {
-                    behandlingSakRoutes(
-                        behandlingService = behandlingService,
-                        config = conff,
-                    )
-                }
+                runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
 
             val response =
-                client.post("api/oms/person/sak") {
+                client.post("/opprett-ytelse") {
                     contentType(ContentType.Application.Json)
-                    setBody(requestFnr.toJson())
+                    setBody(request.toJson())
                     header(
                         HttpHeaders.Authorization,
                         "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.OK
-            val sakliste: List<SakId> = response.body()
+            val resultat: SoeknadResponse = response.body()
 
-            sakliste shouldBe sakIdListesvar
+            resultat shouldBe SoeknadResponse(200, resultat.noekkel)
 
-            coVerify(exactly = 1) { behandlingService.hentSakforPerson(requestFnr) }
+            coVerify(exactly = 1) { dollyService.sendSoeknad(any(), any(), any()) }
         }
     }
 
-    @Test
-    fun `Kan hente sak men sak er null og kaster da exception IkkeFunnetException men logges `() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff =
-            no.nav.etterlatte.behandling.sak.configMedRoller(
-                mockOAuth2Server.config.httpServer.port(),
-                Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler
-            )
-        coEvery { behandlingService.hentSak(any()) } returns null
-        io.ktor.server.testing.testApplication {
-            runServerWithConfig(applicationConfig = conff) {
-                behandlingSakRoutes(
-                    behandlingService = behandlingService,
-                    config = conff,
-                )
-            }
-            val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
-                }
-
-            val response =
-                client.get("/api/sak/25895819") {
-                    contentType(ContentType.Application.Json)
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak"))}",
-                    )
-                }
-            response.status shouldBe HttpStatusCode.NotFound
-            val feil: ExceptionResponse = response.body()
-            feil.code shouldBe "SAK_IKKE_FUNNET"
-            feil.status shouldBe HttpStatusCode.NotFound.value
-
-            coVerify(exactly = 1) { behandlingService.hentSak(any()) }
-        }
-    }
-
-    @Test
-    fun `Kan hente sak, verifiserer at den blir returnert`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff =
-            no.nav.etterlatte.behandling.sak.configMedRoller(
-                mockOAuth2Server.config.httpServer.port(),
-                Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler
-            )
-        val sakId: Long = 12
-        val funnetSak =
-            Sak(
-                "ident",
-                SakType.OMSTILLINGSSTOENAD,
-                SakId(sakId),
-                Enhetsnummer(
-                    "4808",
-                ),
-            )
-        coEvery { behandlingService.hentSak(any()) } returns funnetSak
-        io.ktor.server.testing.testApplication {
-            val client =
-                runServerWithConfig(applicationConfig = conff) {
-                    behandlingSakRoutes(
-                        behandlingService = behandlingService,
-                        config = conff,
-                    )
-                }
-
-            val response =
-                client.get("/api/sak/$sakId") {
-                    contentType(ContentType.Application.Json)
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak"))}",
-                    )
-                }
-            response.status shouldBe HttpStatusCode.OK
-            val hentetSak: Sak? = response.body()
-
-            hentetSak shouldBe funnetSak
-
-            coVerify(exactly = 1) { behandlingService.hentSak(SakId(sakId)) }
-        }
-    }
-}
-private fun configMedRoller(
-    port: Int,
-    issuerId: String,
-    pensjonSaksbehandler: String? = UUID.randomUUID().toString(),
-    gjennySaksbehandler: String? = UUID.randomUUID().toString(),
-): Config =
-    ConfigFactory.parseMap(
-        mapOf(
-            "no.nav.security.jwt.issuers" to
+    private fun configMedRoller(
+        port: Int,
+        issuerId: String,
+        pensjonSaksbehandler: String? = UUID.randomUUID().toString(),
+        gjennySaksbehandler: String? = UUID.randomUUID().toString(),
+    ): Config =
+        ConfigFactory.parseMap(
+            mapOf(
+                "testnav.resource.url" to "http://localhost",
+                "no.nav.security.jwt.issuers" to
                     listOf(
                         mapOf(
                             "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
@@ -298,11 +169,11 @@ private fun configMedRoller(
                             "accepted_audience" to CLIENT_ID,
                         ),
                     ),
-            "roller" to
+                "roller" to
                     mapOf(
                         "pensjon-saksbehandler" to pensjonSaksbehandler,
                         "gjenny-saksbehandler" to gjennySaksbehandler,
                     ),
-        ),
-    )
-*/
+            ),
+        )
+}

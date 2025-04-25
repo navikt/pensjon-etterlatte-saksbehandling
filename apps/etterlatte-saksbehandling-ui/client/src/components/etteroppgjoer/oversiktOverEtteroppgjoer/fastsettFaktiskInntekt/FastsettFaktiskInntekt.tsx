@@ -38,16 +38,18 @@ export const FastsettFaktiskInntekt = () => {
       ) : (
         <VStack gap="4">
           <FaktiskInntektVisning />
-          <div>
-            <Button
-              size="small"
-              variant="secondary"
-              icon={<PencilIcon aria-hidden />}
-              onClick={() => setRedigerFaktiskInntekt(true)}
-            >
-              Rediger
-            </Button>
-          </div>
+          {erRedigerbar && (
+            <div>
+              <Button
+                size="small"
+                variant="secondary"
+                icon={<PencilIcon aria-hidden />}
+                onClick={() => setRedigerFaktiskInntekt(true)}
+              >
+                Rediger
+              </Button>
+            </div>
+          )}
         </VStack>
       )}
     </VStack>

@@ -38,7 +38,7 @@ components:
     NySoeknadRequestDTO:
       type: object
       properties:
-        ytelse:
+        type:
           $ref: '#/components/schemas/SoeknadType'
         avdoed:
           type: string

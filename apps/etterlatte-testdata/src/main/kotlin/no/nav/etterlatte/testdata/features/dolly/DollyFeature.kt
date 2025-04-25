@@ -147,7 +147,7 @@ class DollyFeature(
                     val behandlingssteg = Behandlingssteg.IVERKSATT
                     val gjenlevende = nySoeknadRequest.gjenlevende
                     val avdoed = nySoeknadRequest.avdoed
-                    val barnListe = nySoeknadRequest.barn
+                    val barnListe: List<String> = nySoeknadRequest.barn
                     val soeker =
                         when (ytelse) {
                             // TODO

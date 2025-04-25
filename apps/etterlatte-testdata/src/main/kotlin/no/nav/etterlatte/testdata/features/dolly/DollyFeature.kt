@@ -1,10 +1,8 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
-import io.ktor.server.request.receive
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -32,7 +30,7 @@ class DollyFeature(
     override val path: String
         get() = "dolly"
     override val kunEtterlatte: Boolean
-        get() = true
+        get() = false
 
     override val routes: Route.() -> Unit
         get() = {
@@ -139,7 +137,8 @@ class DollyFeature(
                 }
             }
 
-            post("opprett-ytelse") {
+           /* post("opprett-ytelse") {
+                val accessToken = getDollyAccessToken()
                 try {
 
                     val nySoeknadRequest = call.receive<NySoeknadRequest>()
@@ -173,6 +172,8 @@ class DollyFeature(
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }
             }
+
+            */
         }
 }
 

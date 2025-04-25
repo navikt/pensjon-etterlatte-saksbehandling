@@ -43,9 +43,6 @@ class EtteroppgjoerService(
     ) {
         logger.info("$trigger: leter etter saker som skal ha etteroppgjoer for inntektsaar=$inntektsaar")
 
-        // TODO: er det flere ting vi må sjekke på en kun utbetaling i inntektsaar
-        // TODO: burde vi sjekke på om sak har sist iverksatte behandling?
-
         val sakerMedUtbetaling =
             runBlocking {
                 vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
@@ -55,8 +52,7 @@ class EtteroppgjoerService(
             }
 
         sakerMedUtbetaling
-            .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null }
-            .filter { sakId -> sakLesDao.hentSak(sakId)?.sakType == SakType.OMSTILLINGSSTOENAD }
+            .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null } // kun hvis ikke allerede opprettet etteroppgjør
             .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
 
         logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")

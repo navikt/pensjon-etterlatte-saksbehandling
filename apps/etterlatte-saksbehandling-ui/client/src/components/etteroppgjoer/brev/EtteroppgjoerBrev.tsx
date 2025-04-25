@@ -14,6 +14,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
+import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
 
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -83,6 +84,11 @@ export function EtteroppgjoerBrev() {
           ),
           pending: <Spinner label="Laster brev" />,
         })}
+
+        {mapResult(ferdigstillForbehandlingResult, {
+          error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+        })}
+
         <EtteroppgjoerFramTilbakeKnapperad>
           <div>
             <Button
@@ -93,15 +99,18 @@ export function EtteroppgjoerBrev() {
               Gå tilbake
             </Button>
           </div>
-          <div>
-            <Button
-              variant="primary"
-              onClick={ferdigstillForbehandling}
-              loading={isPending(ferdigstillForbehandlingResult)}
-            >
-              Ferdigstill
-            </Button>
-          </div>
+
+          {etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT && (
+            <div>
+              <Button
+                variant="primary"
+                onClick={ferdigstillForbehandling}
+                loading={isPending(ferdigstillForbehandlingResult)}
+              >
+                Ferdigstill
+              </Button>
+            </div>
+          )}
         </EtteroppgjoerFramTilbakeKnapperad>
       </VStack>
     </HStack>

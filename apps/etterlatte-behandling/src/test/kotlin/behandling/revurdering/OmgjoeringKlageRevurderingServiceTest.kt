@@ -260,12 +260,13 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             behandlingInfoService = mockk(),
             tilgangsService =
                 OppdaterTilgangService(
-                    applicationContext.sakService,
                     applicationContext.skjermingKlient,
                     applicationContext.pdlTjenesterKlient,
                     applicationContext.brukerService,
                     applicationContext.oppgaveService,
                     applicationContext.sakSkrivDao,
+                    applicationContext.sakTilgang,
+                    applicationContext.sakLesDao,
                 ),
         )
 }

@@ -83,7 +83,6 @@ class DoedshendelseKontrollpunktServiceTest {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr, bruker) } returns emptyList()
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr, bruker) } returns emptyList()
 
-        every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
             pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
@@ -168,7 +167,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
 
         val kontrollpunkter =
-            kontrollpunktService.identifiserKontrollerpunkter(
+            kontrollpunktService.identifiserKontrollpunkter(
                 doedshendelseInternalAvdoed,
                 bruker,
             )
@@ -206,7 +205,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
 
         val kontrollpunkter =
-            kontrollpunktService.identifiserKontrollerpunkter(
+            kontrollpunktService.identifiserKontrollpunkter(
                 doedshendelseInternalAvdoed,
                 bruker,
             )
@@ -243,7 +242,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
 
         val kontrollpunkter =
-            kontrollpunktService.identifiserKontrollerpunkter(
+            kontrollpunktService.identifiserKontrollpunkter(
                 doedshendelseInternalAvdoed,
                 bruker,
             )
@@ -304,7 +303,7 @@ class DoedshendelseKontrollpunktServiceTest {
         every { oppgaveService.hentOppgaverForReferanse(grunnlagshendelseID.toString()) } returns listOf(oppgaveIntern)
 
         val kontrollpunkter =
-            kontrollpunktService.identifiserKontrollerpunkter(
+            kontrollpunktService.identifiserKontrollpunkter(
                 doedshendelseInternalAvdoed,
                 bruker,
             )
@@ -341,9 +340,10 @@ class DoedshendelseKontrollpunktServiceTest {
             grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns listOf(grunnlagsendringshendelse)
         every { oppgaveService.hentOppgaverForReferanse(grunnlagsendringshendelseId.toString()) } returns listOf(oppgaveIntern)
+        every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
 
         val kontrollpunkter =
-            kontrollpunktService.identifiserKontrollerpunkter(
+            kontrollpunktService.identifiserKontrollpunkter(
                 doedshendelseInternalBP,
                 bruker,
             )
@@ -382,7 +382,7 @@ class DoedshendelseKontrollpunktServiceTest {
                     ),
             )
         val kontrollpunkter =
-            kontrollpunktService.identifiserKontrollerpunkter(
+            kontrollpunktService.identifiserKontrollpunkter(
                 doedshendelseInternalBP,
                 bruker,
             )
@@ -392,6 +392,6 @@ class DoedshendelseKontrollpunktServiceTest {
 
     @Test
     fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
-        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP, bruker) shouldBe emptyList()
+        kontrollpunktService.identifiserKontrollpunkter(doedshendelseInternalBP, bruker) shouldBe emptyList()
     }
 }

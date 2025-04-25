@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
 import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.brev.BrevInnholdData
+import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
@@ -11,8 +11,6 @@ import java.time.LocalDate
 
 @JsonTypeName("TILBAKEKREVING")
 data class TilbakekrevingBrevInnholdDataNy(
-    override val brevKode: Brevkoder = Brevkoder.TILBAKEKREVING,
-    override val type: String = "TILBAKEKREVING",
     val sakType: SakType,
     val bosattUtland: Boolean,
     val brukerNavn: String,
@@ -21,7 +19,10 @@ data class TilbakekrevingBrevInnholdDataNy(
     val datoVarselEllerVedtak: LocalDate,
     val datoTilsvarBruker: LocalDate?,
     val tilbakekreving: TilbakekrevingDataNy,
-) : BrevInnholdData(type)
+) : BrevFastInnholdData() {
+    override val type: String = "TILBAKEKREVING"
+    override val brevKode: Brevkoder = Brevkoder.TILBAKEKREVING
+}
 
 data class TilbakekrevingDataNy(
     val fraOgMed: LocalDate,

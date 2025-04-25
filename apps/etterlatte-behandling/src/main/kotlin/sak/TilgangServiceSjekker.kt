@@ -5,10 +5,11 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import java.util.UUID
 
 interface TilgangServiceSjekker {
     fun harTilgangTilBehandling(
-        behandlingId: String,
+        behandlingId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
@@ -23,27 +24,27 @@ interface TilgangServiceSjekker {
     ): Boolean
 
     fun harTilgangTilOppgave(
-        oppgaveId: String,
+        oppgaveId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
     fun harTilgangTilKlage(
-        klageId: String,
+        klageId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
     fun harTilgangTilGenerellBehandling(
-        behandlingId: String,
+        behandlingId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
     fun harTilgangTilTilbakekreving(
-        tilbakekrevingId: String,
+        tilbakekrevingId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
     fun harTilgangTilEtteroppgjoer(
-        etteroppgjoerId: String,
+        etteroppgjoerId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 }
@@ -66,7 +67,7 @@ class TilgangServiceSjekkerImpl(
     }
 
     override fun harTilgangTilOppgave(
-        oppgaveId: String,
+        oppgaveId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
@@ -75,7 +76,7 @@ class TilgangServiceSjekkerImpl(
     }
 
     override fun harTilgangTilKlage(
-        klageId: String,
+        klageId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
@@ -84,7 +85,7 @@ class TilgangServiceSjekkerImpl(
     }
 
     override fun harTilgangTilGenerellBehandling(
-        behandlingId: String,
+        behandlingId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
@@ -93,7 +94,7 @@ class TilgangServiceSjekkerImpl(
     }
 
     override fun harTilgangTilTilbakekreving(
-        tilbakekrevingId: String,
+        tilbakekrevingId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
@@ -102,7 +103,7 @@ class TilgangServiceSjekkerImpl(
     }
 
     override fun harTilgangTilEtteroppgjoer(
-        etteroppgjoerId: String,
+        etteroppgjoerId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
@@ -119,7 +120,7 @@ class TilgangServiceSjekkerImpl(
     }
 
     override fun harTilgangTilBehandling(
-        behandlingId: String,
+        behandlingId: UUID,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =

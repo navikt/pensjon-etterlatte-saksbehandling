@@ -1,7 +1,9 @@
 import { SanksjonType } from '~shared/types/sanksjon'
 
 export interface IAvkorting {
-  avkortingGrunnlag: IAvkortingGrunnlagFrontend[]
+  redigerbarForventetInntekt: IAvkortingGrunnlag | undefined // Holder med id?
+  redigerbarForventetInntektNesteAar: IAvkortingGrunnlag | undefined
+  avkortingGrunnlag: IAvkortingGrunnlag[]
   avkortetYtelse: IAvkortetYtelse[]
   tidligereAvkortetYtelse: IAvkortetYtelse[]
 }
@@ -10,13 +12,10 @@ export interface IAvkortingSkalHaInntektNesteAar {
   skalHaInntektNesteAar: boolean
 }
 
-export interface IAvkortingGrunnlagFrontend {
-  aar: number
-  fraVirk: IAvkortingGrunnlag | null
-  historikk: IAvkortingGrunnlag[]
-}
+export type IAvkortingGrunnlag = ForventetInntektGrunnlag | FaktiskInntektGrunnlag
 
-export interface IAvkortingGrunnlag {
+export interface ForventetInntektGrunnlag {
+  type: 'FORVENTET_INNTEKT'
   id: string
   fom: string
   tom?: string
@@ -25,12 +24,38 @@ export interface IAvkortingGrunnlag {
   innvilgaMaaneder: number
   inntektUtlandTom: number
   fratrekkInnAarUtland: number
+  inntektInnvilgetPeriode: number
   spesifikasjon: string
   overstyrtInnvilgaMaaneder?: IOverstyrtInnvilgaMaaneder
   kilde: {
     tidspunkt: string
     ident: string
   }
+}
+
+export interface FaktiskInntektGrunnlag {
+  type: 'FAKTISK_INNTEKT'
+  id: string
+  fom: string
+  tom?: string
+  loennsinntekt: number
+  naeringsinntekt: number
+  afp: number
+  utlandsinntekt: number
+  inntektInnvilgetPeriode: number
+  fratrekkInnAarUtland: number
+  innvilgaMaaneder: number
+  spesifikasjon: string
+  kilde: {
+    tidspunkt: string
+    ident: string
+  }
+}
+
+export function isForventetInntekt(
+  avkortingGrunnlag: IAvkortingGrunnlag
+): avkortingGrunnlag is ForventetInntektGrunnlag {
+  return avkortingGrunnlag.type === 'FORVENTET_INNTEKT'
 }
 
 export interface IAvkortingGrunnlagLagre {

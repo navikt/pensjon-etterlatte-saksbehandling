@@ -28,7 +28,7 @@ import no.nav.etterlatte.behandling.sjekkliste.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
-import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
+import no.nav.etterlatte.behandling.vedtaksbehandling.behandlingMedBrevRoutes
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
@@ -59,7 +59,7 @@ import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
-import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
+import no.nav.etterlatte.tilgangsstyring.SpesialTilgangPlugin
 import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import org.slf4j.Logger
@@ -101,9 +101,12 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
+        context.etteroppgjoerJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.uttrekkLoependeYtelseEtter20Job,
         context.sjekkAdressebeskyttelseJob,
+        context.uttrekkFylt18Job,
+        context.avbrytAldersovergangJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -119,7 +122,7 @@ internal fun Application.module(context: ApplicationContext) {
 internal fun Route.settOppApplikasjonen(context: ApplicationContext) {
     attachContekst(context.dataSource, context)
     settOppRoutes(context)
-    settOppTilganger(context, adressebeskyttelsePlugin)
+    settOppTilganger(context, SpesialTilgangPlugin)
 }
 
 private fun Route.attachContekst(
@@ -199,14 +202,14 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         generellBehandlingService = applicationContext.generellBehandlingService,
         sakService = applicationContext.sakService,
     )
-    vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
+    behandlingMedBrevRoutes(behandlingMedBrevService = applicationContext.behandlingMedBrevService)
     revurderingRoutes(
         revurderingService = applicationContext.revurderingService,
         manuellRevurderingService = applicationContext.manuellRevurderingService,
         omgjoeringKlageRevurderingService = applicationContext.omgjoeringKlageRevurderingService,
         automatiskRevurderingService = applicationContext.automatiskRevurderingService,
         aarligInntektsjusteringJobbService = applicationContext.aarligInntektsjusteringJobbService,
-        opprettEtteroppgjoer = applicationContext.opprettEtteroppgjoerRevurdering,
+        etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
     )
     omregningRoutes(omregningService = applicationContext.omregningService)
     aarligInntektsjusteringRoute(service = applicationContext.aarligInntektsjusteringJobbService)

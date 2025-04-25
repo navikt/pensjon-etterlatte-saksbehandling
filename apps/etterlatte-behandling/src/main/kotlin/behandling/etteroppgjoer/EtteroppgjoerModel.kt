@@ -1,9 +1,20 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.brev.BrevFastInnholdData
+import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
@@ -16,25 +27,85 @@ data class Etteroppgjoer(
 
 enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
-    MOTTATT_HENDELSE,
+    MOTTATT_SKATTEOPPGJOER,
     UNDER_FORBEHANDLING,
+    FERDIGSTILT_FORBEHANDLING,
     UNDER_REVURDERING,
+    FERDIGSTILT_REVURDERING,
 }
-
-// TODO falte ut behandling..
-data class ForbehandlingDto(
-    val behandling: EtteroppgjoerForbehandling,
-    val opplysninger: EtteroppgjoerOpplysninger,
-    val avkortingFaktiskInntekt: AvkortingDto?,
-)
 
 data class EtteroppgjoerForbehandling(
     val id: UUID,
     val hendelseId: UUID,
-    val status: String, // TODO enum
+    val opprettet: Tidspunkt,
+    val status: EtteroppgjoerForbehandlingStatus,
+    val relatertForbehandlingId: UUID? = null,
     val sak: Sak,
     val aar: Int,
-    val opprettet: Tidspunkt,
+    val innvilgetPeriode: Periode,
+    val brevId: Long?,
+) {
+    companion object {
+        fun opprett(
+            sak: Sak,
+            innvilgetPeriode: Periode,
+        ) = EtteroppgjoerForbehandling(
+            id = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            sak = sak,
+            status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+            aar = innvilgetPeriode.fom.year,
+            innvilgetPeriode = innvilgetPeriode,
+            opprettet = Tidspunkt.now(),
+            brevId = null,
+        )
+    }
+
+    fun tilBeregnet(): EtteroppgjoerForbehandling {
+        if (status in listOf(EtteroppgjoerForbehandlingStatus.OPPRETTET, EtteroppgjoerForbehandlingStatus.BEREGNET)) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.BEREGNET)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.BEREGNET}")
+        }
+    }
+
+    fun tilFerdigstilt(): EtteroppgjoerForbehandling {
+        if (status == EtteroppgjoerForbehandlingStatus.BEREGNET) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.FERDIGSTILT}")
+        }
+    }
+
+    fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+
+    fun erUnderBehandling() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                EtteroppgjoerForbehandlingStatus.BEREGNET,
+            )
+
+    fun erFerdigstilt() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+            )
+}
+
+enum class EtteroppgjoerForbehandlingStatus {
+    OPPRETTET,
+    BEREGNET,
+    FERDIGSTILT,
+}
+
+data class DetaljertForbehandlingDto(
+    val behandling: EtteroppgjoerForbehandling,
+    val sisteIverksatteBehandling: UUID,
+    val opplysninger: EtteroppgjoerOpplysninger,
+    val faktiskInntekt: FaktiskInntekt?,
+    val avkortingFaktiskInntekt: AvkortingDto?,
+    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
 )
 
 data class EtteroppgjoerOpplysninger(
@@ -140,15 +211,16 @@ data class HendelseslisteFraSkatt(
 ) {
     companion object {
         fun stub(
-            startSekvensnummer: Long = 9007199254740991,
+            startSekvensnummer: Long = 0,
             antall: Int = 10,
+            aar: Int = 2024,
         ): HendelseslisteFraSkatt {
             val hendelser =
                 List(antall) { index ->
                     SkatteoppgjoerHendelser(
-                        gjelderPeriode = "", // TODO
-                        hendelsetype = "", // TODO
-                        identifikator = "", // TODO
+                        gjelderPeriode = aar.toString(),
+                        hendelsetype = "NY", // TODO
+                        identifikator = index.toString(), // TODO
                         sekvensnummer = startSekvensnummer + index,
                         somAktoerid = false,
                     )
@@ -159,9 +231,59 @@ data class HendelseslisteFraSkatt(
 }
 
 data class SkatteoppgjoerHendelser(
-    val gjelderPeriode: String,
+    val gjelderPeriode: String, // inntektsaar
     val hendelsetype: String,
     val identifikator: String,
     val sekvensnummer: Long,
     val somAktoerid: Boolean,
+)
+
+data class EtteroppgjoerBrevRequestData(
+    val redigerbar: BrevRedigerbarInnholdData,
+    val innhold: BrevFastInnholdData,
+    val data: DetaljertForbehandlingDto,
+)
+
+object EtteroppgjoerBrevDataMapper {
+    fun fra(
+        data: DetaljertForbehandlingDto,
+        sisteIverksatteBehandling: Behandling,
+        pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt?,
+    ): EtteroppgjoerBrevRequestData {
+        krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
+            "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
+        }
+
+        val bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND
+
+        // TODO: usikker om dette blir rett, følge opp ifm testing
+        val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
+
+        return EtteroppgjoerBrevRequestData(
+            redigerbar =
+                EtteroppgjoerBrevData.ForhaandsvarselInnhold(
+                    sak = data.behandling.sak,
+                ),
+            innhold =
+                EtteroppgjoerBrevData.Forhaandsvarsel(
+                    bosattUtland = bosattUtland,
+                    norskInntekt = norskInntekt,
+                    etteroppgjoersAar = data.behandling.aar,
+                    rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
+                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                ),
+            data = data,
+        )
+    }
+}
+
+data class FaktiskInntekt(
+    val loennsinntekt: Long,
+    val afp: Long,
+    val naeringsinntekt: Long,
+    val utland: Long,
+    val spesifikasjon: String,
 )

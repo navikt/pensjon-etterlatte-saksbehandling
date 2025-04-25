@@ -10,6 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
+import no.nav.etterlatte.hentFnrBody
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -45,7 +46,7 @@ fun Route.behandlingSakRoutes(
                 accessPolicyRolesEllerAdGrupper = setOf("les-oms-sak")
             }
             post {
-                val foedselsnummer = call.receive<FoedselsnummerDTO>()
+                val foedselsnummer = hentFnrBody()
                 val saker = behandlingService.hentSakforPerson(foedselsnummer)
 
                 call.respond(HarOMSSakIGjenny(saker.isNotEmpty()))
@@ -57,7 +58,7 @@ fun Route.behandlingSakRoutes(
                 accessPolicyRolesEllerAdGrupper = setOf("les-oms-sak")
             }
             post {
-                val foedselsnummer = call.receive<FoedselsnummerDTO>()
+                val foedselsnummer = hentFnrBody()
                 val harLopendeSak = behandlingService.hentLopendeSakForPerson(foedselsnummer)
 
                 call.respond(HarOMSSakIGjenny(harLopendeSak))

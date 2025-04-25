@@ -170,3 +170,8 @@ data class TilbakekrevingVedtakLagretDto(
     val enhet: Enhetsnummer,
     val dato: LocalDate,
 )
+
+data class FoersteVirkOgOppoerTilSak(
+    val foersteVirk: YearMonth,
+    val opphoer: YearMonth?,
+)

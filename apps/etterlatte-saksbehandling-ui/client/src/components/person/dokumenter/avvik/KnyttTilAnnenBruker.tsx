@@ -16,6 +16,7 @@ import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ApiError } from '~shared/api/apiClient'
 
 export const KnyttTilAnnenBruker = ({
   journalpost,
@@ -92,6 +93,17 @@ export const KnyttTilAnnenBruker = ({
 
   const isLoading = isPending(oppdaterResult) || isPending(opprettOppgaveStatus)
 
+  const feilkodehaandtering = (error: ApiError) => {
+    switch (error.status) {
+      case 404:
+        return <Alert variant="warning">Fant ikke sak {sakid}</Alert>
+      case 403:
+        return <Alert variant="error">Du mangler tilgang til saken {error.detail}</Alert>
+      default:
+        return <Alert variant="error">Ukjent feil ved henting av sak {sakid}</Alert>
+    }
+  }
+
   return mapResult(annenSakStatus, {
     initial: (
       <HStack gap="4" align="end">
@@ -128,11 +140,6 @@ export const KnyttTilAnnenBruker = ({
         </HStack>
       </VStack>
     ),
-    error: (error) =>
-      error.status === 404 ? (
-        <Alert variant="warning">Fant ikke sak {sakid}</Alert>
-      ) : (
-        <Alert variant="error">Ukjent feil ved henting av sak {sakid}</Alert>
-      ),
+    error: (error) => feilkodehaandtering(error),
   })
 }

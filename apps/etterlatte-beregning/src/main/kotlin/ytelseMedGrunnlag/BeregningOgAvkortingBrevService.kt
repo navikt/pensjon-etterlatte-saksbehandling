@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
+import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -42,27 +43,50 @@ class BeregningOgAvkortingBrevService(
                     avkorting.avkortingGrunnlag
                         .filter { it.fom <= avkortetYtelse.fom }
                         .maxBy { it.fom }
-                val oppgittInntekt = grunnlag.inntektTom + grunnlag.inntektUtlandTom
-                val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
 
-                BeregningOgAvkortingPeriodeDto(
-                    periode = Periode(avkortetYtelse.fom, avkortetYtelse.tom),
-                    ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
-                    restanse = avkortetYtelse.restanse,
-                    avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
-                    ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
-                    trygdetid = beregningIPeriode.trygdetid,
-                    oppgittInntekt = oppgittInntekt,
-                    fratrekkInnAar = fratrekkInnAar,
-                    innvilgaMaaneder = grunnlag.innvilgaMaaneder,
-                    grunnbelop = beregningIPeriode.grunnbelop,
-                    grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
-                    beregningsMetode = beregningIPeriode.beregningsMetode,
-                    beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
-                    sanksjon = avkortetYtelse.sanksjon,
-                    institusjonsopphold = beregningIPeriode.institusjonsopphold,
-                    erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,
-                )
+                if (grunnlag is ForventetInntektDto) {
+                    val oppgittInntekt = grunnlag.inntektTom + grunnlag.inntektUtlandTom
+                    val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
+
+                    BeregningOgAvkortingPeriodeDto(
+                        periode = Periode(avkortetYtelse.fom, avkortetYtelse.tom),
+                        ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
+                        restanse = avkortetYtelse.restanse,
+                        avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
+                        ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
+                        trygdetid = beregningIPeriode.trygdetid,
+                        oppgittInntekt = oppgittInntekt,
+                        fratrekkInnAar = fratrekkInnAar,
+                        innvilgaMaaneder = grunnlag.innvilgaMaaneder,
+                        grunnbelop = beregningIPeriode.grunnbelop,
+                        grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
+                        beregningsMetode = beregningIPeriode.beregningsMetode,
+                        beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
+                        sanksjon = avkortetYtelse.sanksjon,
+                        institusjonsopphold = beregningIPeriode.institusjonsopphold,
+                        erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,
+                    )
+                } else {
+                    // TODO FaktiskInntekt er ikke støttet enda - hardkoder her for å kunne fullføre flyt med brev
+                    BeregningOgAvkortingPeriodeDto(
+                        periode = Periode(avkortetYtelse.fom, avkortetYtelse.tom),
+                        ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
+                        restanse = avkortetYtelse.restanse, // TODO
+                        avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
+                        ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
+                        trygdetid = beregningIPeriode.trygdetid,
+                        oppgittInntekt = grunnlag.inntektInnvilgetPeriode!!, // TODO
+                        fratrekkInnAar = 0, // TODO
+                        innvilgaMaaneder = grunnlag.innvilgaMaaneder,
+                        grunnbelop = beregningIPeriode.grunnbelop,
+                        grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
+                        beregningsMetode = beregningIPeriode.beregningsMetode,
+                        beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
+                        sanksjon = avkortetYtelse.sanksjon,
+                        institusjonsopphold = beregningIPeriode.institusjonsopphold,
+                        erOverstyrtInnvilgaMaaneder = false, // TODO
+                    )
+                }
             }
 
         return BeregningOgAvkortingDto(

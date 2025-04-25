@@ -1,6 +1,12 @@
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
-import { ITrygdetid, ITrygdetidGrunnlagType, overstyrTrygdetid, setTrygdetidYrkesskade } from '~shared/api/trygdetid'
+import {
+  ITrygdetid,
+  ITrygdetidGrunnlagType,
+  oppdaterTrygdetidBegrunnelse,
+  overstyrTrygdetid,
+  setTrygdetidYrkesskade,
+} from '~shared/api/trygdetid'
 import { OverstyrtTrygdetid } from '~components/behandling/trygdetid/OverstyrtTrygdetid'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -17,6 +23,7 @@ import { Alert, Box, VStack } from '@navikt/ds-react'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
 import { ILand } from '~utils/kodeverk'
+import { BegrunnelseForTrygdetid } from '~components/behandling/trygdetid/BegrunnelseForTrygdetid'
 
 interface Props {
   redigerbar: boolean
@@ -47,6 +54,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   const [trygdetid, setTrygdetid] = useState<ITrygdetid | undefined>()
   const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
   const [oppdaterYrkesskadeRequest, requestOppdaterYrkesskade] = useApiCall(setTrygdetidYrkesskade)
+  const [oppdaterBegrunnelseRequest, requestOppdaterBegrunnelse] = useApiCall(oppdaterTrygdetidBegrunnelse)
 
   useEffect(() => {
     if (props.trygdetid) {
@@ -80,6 +88,21 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           id: trygdetid.id,
           behandlingId: trygdetid.behandlingId,
           yrkesskade: yrkesskade,
+        },
+        (trygdetid: ITrygdetid) => {
+          oppdaterTrygdetid(trygdetid)
+        }
+      )
+    }
+  }
+
+  const oppdaterBegrunnelse = (begrunnelse: string | undefined) => {
+    if (trygdetid) {
+      requestOppdaterBegrunnelse(
+        {
+          id: trygdetid.id,
+          behandlingId: trygdetid.behandlingId,
+          begrunnelse: begrunnelse,
         },
         (trygdetid: ITrygdetid) => {
           oppdaterTrygdetid(trygdetid)
@@ -157,9 +180,20 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
           />
 
-          <Spinner label="Oppdatere poengår" visible={isPending(overstyrTrygdetidRequest)} />
-          <Spinner label="Oppdater yrkesskade" visible={isPending(oppdaterYrkesskadeRequest)} />
+          <BegrunnelseForTrygdetid
+            redigerbar={redigerbar}
+            trygdetid={trygdetid}
+            oppdaterTrygdetidBegrunnelse={oppdaterBegrunnelse}
+          />
 
+          <Spinner label="Oppdaterer begrunnelse" visible={isPending(oppdaterBegrunnelseRequest)} />
+          <Spinner label="Oppdaterer poengår" visible={isPending(overstyrTrygdetidRequest)} />
+          <Spinner label="Oppdaterer yrkesskade" visible={isPending(oppdaterYrkesskadeRequest)} />
+
+          {isFailureHandler({
+            apiResult: oppdaterBegrunnelseRequest,
+            errorMessage: 'En feil har oppstått ved lagring av begrunnelse',
+          })}
           {isFailureHandler({
             apiResult: overstyrTrygdetidRequest,
             errorMessage: 'En feil har oppstått ved lagring av norsk poengår',

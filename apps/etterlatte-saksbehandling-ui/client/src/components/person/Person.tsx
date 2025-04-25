@@ -18,7 +18,7 @@ import {
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isSuccess, Result } from '~shared/api/apiUtils'
+import { isSuccess, Result, transformResult } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -47,6 +47,8 @@ export const Person = () => {
   const [search, setSearch] = useSearchParams()
   const fnr = usePersonLocationState(search.get('key'))?.fnr
 
+  const [foretrukketSak, setForetrukketSak] = useState<number | undefined>()
+
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
@@ -56,6 +58,13 @@ export const Person = () => {
     setSearch({ fane: valgtFane }, { state: { fnr } })
     setFane(valgtFane)
   }
+
+  // Setter returnert sak til å eventuelt være den foretrukkede andre saken på bruker, hvis den er valgt
+  const foretrukketSakResult = transformResult(sakResult, (sakData) =>
+    foretrukketSak && foretrukketSak === sakData.ekstraSak?.sak.id
+      ? { ...sakData.ekstraSak, ekstraSak: { ...sakData } }
+      : sakData
+  )
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
@@ -91,40 +100,40 @@ export const Person = () => {
           <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
           <Tabs.Tab value={PersonOversiktFane.PERSONOPPLYSNINGER} label="Personopplysninger" icon={<PersonIcon />} />
           <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
-          {isOmstillingsstoenad(sakResult) && (
+          {isOmstillingsstoenad(foretrukketSakResult) && (
             <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
           )}
           <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
           <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
           <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />
-          {isOmstillingsstoenad(sakResult) && (
+          {isOmstillingsstoenad(foretrukketSakResult) && (
             <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
           )}
         </Tabs.List>
 
         <Tabs.Panel value={PersonOversiktFane.SAKER}>
-          <SakOversikt sakResult={sakResult} fnr={fnr} />
+          <SakOversikt sakResult={foretrukketSakResult} setForetrukketSak={setForetrukketSak} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-          <Personopplysninger sakResult={sakResult} fnr={fnr} />
+          <Personopplysninger sakResult={foretrukketSakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
-          <Hendelser sakResult={sakResult} fnr={fnr} />
+          <Hendelser sakResult={foretrukketSakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
-          <Dokumentliste sakResult={sakResult} fnr={fnr} />
+          <Dokumentliste sakResult={foretrukketSakResult} fnr={fnr} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.BREV}>
-          <BrevOversikt sakResult={sakResult} />
+          <BrevOversikt sakResult={foretrukketSakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.NOTATER}>
-          <NotatOversikt sakResult={sakResult} />
+          <NotatOversikt sakResult={foretrukketSakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
-          <SamordningSak fnr={fnr} sakResult={sakResult} />
+          <SamordningSak fnr={fnr} sakResult={foretrukketSakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
-          <AktivitetspliktSakoversikt fnr={fnr} sakResult={sakResult} />
+          <AktivitetspliktSakoversikt fnr={fnr} sakResult={foretrukketSakResult} />
         </Tabs.Panel>
       </Tabs>
     </>

@@ -9,15 +9,22 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.avkorting.inntektsjustering.AarligInntektsjusteringService
+import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektResponse
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
+import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -25,6 +32,8 @@ import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.Month
+import java.time.YearMonth
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
@@ -144,15 +153,63 @@ fun Route.avkorting(
                 logger.info(
                     "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
                 )
-                val dto = etteroppgjoerService.hentBeregnetAvkorting(request)
+                val dto =
+                    etteroppgjoerService.hentBeregnetAvkorting(
+                        forbehandlingId = request.forbehandling,
+                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                        aar = request.aar,
+                        sakId = request.sakId,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
                 call.respond(dto)
+            }
+
+            post("faktisk-inntekt") {
+                val request = call.receive<EtteroppgjoerFaktiskInntektRequest>()
+
+                val faktiskInntekt = etteroppgjoerService.hentAvkortingFaktiskInntekt(request)
+
+                if (faktiskInntekt == null) {
+                    call.respond(HttpStatusCode.NoContent)
+                } else {
+                    call.respond(
+                        EtteroppgjoerFaktiskInntektResponse(
+                            loennsinntekt = faktiskInntekt.loennsinntekt.toLong(),
+                            afp = faktiskInntekt.afp.toLong(),
+                            naeringsinntekt = faktiskInntekt.naeringsinntekt.toLong(),
+                            utland = faktiskInntekt.utlandsinntekt.toLong(),
+                            spesifikasjon = faktiskInntekt.spesifikasjon,
+                        ),
+                    )
+                }
             }
 
             post("beregn_faktisk_inntekt") {
                 val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
                 logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
                 etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                val resultat =
+                    etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
+                        forbehandlingId = request.forbehandlingId,
+                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                        aar = request.aar,
+                    )
+                call.respond(resultat.toDto())
+            }
+
+            post("hent-beregnet-resultat") {
+                val request = call.receive<EtteroppgjoerHentBeregnetResultatRequest>()
+                val resultat =
+                    etteroppgjoerService.hentBeregnetEtteroppgjoerResultat(
+                        request.forbehandlingId,
+                        request.sisteIverksatteBehandlingId,
+                        request.aar,
+                    )
+
+                when (resultat) {
+                    null -> call.respond(HttpStatusCode.NoContent)
+                    else -> call.respond(resultat.toDto())
+                }
             }
         }
     }
@@ -163,10 +220,10 @@ data class AvkortingSkalHaInntektNesteAarDTO(
 )
 
 fun ForventetInntekt.toDto() =
-    AvkortingGrunnlagDto(
+    ForventetInntektDto(
         id = id,
         fom = periode.fom,
-        tom = periode.tom,
+        tom = if (periode.tom == null) YearMonth.of(periode.fom.year, Month.DECEMBER) else periode.tom,
         inntektTom = inntektTom,
         fratrekkInnAar = fratrekkInnAar,
         inntektUtlandTom = inntektUtlandTom,
@@ -174,6 +231,11 @@ fun ForventetInntekt.toDto() =
         innvilgaMaaneder = innvilgaMaaneder,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
+        inntektInnvilgetPeriode =
+            when (inntektInnvilgetPeriode) {
+                is BenyttetInntektInnvilgetPeriode -> inntektInnvilgetPeriode.verdi
+                is IngenInntektInnvilgetPeriode -> inntektTom - fratrekkInnAar + inntektUtlandTom - fratrekkInnAarUtland
+            },
         overstyrtInnvilgaMaaneder =
             overstyrtInnvilgaMaanederAarsak?.let {
                 AvkortingOverstyrtInnvilgaMaanederDto(
@@ -182,6 +244,20 @@ fun ForventetInntekt.toDto() =
                     begrunnelse = overstyrtInnvilgaMaanederBegrunnelse ?: "",
                 )
             },
+    )
+
+fun FaktiskInntekt.toDto() =
+    FaktiskInntektDto(
+        id = id,
+        fom = periode.fom,
+        tom = periode.tom,
+        loennsinntekt = loennsinntekt,
+        naeringsinntekt = naeringsinntekt,
+        afp = afp,
+        utlandsinntekt = utlandsinntekt,
+        innvilgaMaaneder = innvilgaMaaneder,
+        kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
+        inntektInnvilgetPeriode = inntektInnvilgetPeriode.verdi,
     )
 
 fun AvkortetYtelse.toDto() =

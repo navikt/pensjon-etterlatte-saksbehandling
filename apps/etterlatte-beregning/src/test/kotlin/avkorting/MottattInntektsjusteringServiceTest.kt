@@ -11,12 +11,12 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.AvkortingService
-import no.nav.etterlatte.avkorting.Inntektsavkorting
-import no.nav.etterlatte.avkorting.MottattInntektsjusteringService
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
-import no.nav.etterlatte.beregning.regler.avkorting
+import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
+import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -57,16 +57,18 @@ class MottattInntektsjusteringServiceTest {
         val eksisterendeInntekt =
             avkortinggrunnlag(
                 periode = Periode(fom = request.virkningstidspunkt, tom = null),
-                aarsinntekt = 300,
+                inntektTom = 300,
             )
 
         val inntektSomLagres = slot<AvkortingGrunnlagLagreDto>()
 
         coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(request.behandlingId, bruker) } returns
-            avkorting(
-                aar = 2025,
-                inntektsavkorting = listOf(Inntektsavkorting(grunnlag = eksisterendeInntekt)),
-            ).toFrontend(request.virkningstidspunkt)
+            AvkortingFrontend(
+                redigerbarForventetInntekt = eksisterendeInntekt.toDto(),
+                redigerbarForventetInntektNesteAar = null,
+                avkortingGrunnlag = emptyList(),
+                avkortetYtelse = emptyList(),
+            )
 
         coEvery {
             avkortingService.beregnAvkortingMedNyttGrunnlag(
@@ -121,7 +123,7 @@ class MottattInntektsjusteringServiceTest {
         val eksisterendeInntekt =
             avkortinggrunnlag(
                 periode = Periode(fom = request.virkningstidspunkt, tom = null),
-                aarsinntekt = 300,
+                inntektTom = 300,
                 innvilgaMaaneder = 12,
             )
 
@@ -133,15 +135,12 @@ class MottattInntektsjusteringServiceTest {
                 bruker,
             )
         } returns
-            avkorting(
-                aar = 2025,
-                inntektsavkorting =
-                    listOf(
-                        Inntektsavkorting(
-                            grunnlag = eksisterendeInntekt,
-                        ),
-                    ),
-            ).toFrontend(request.virkningstidspunkt)
+            AvkortingFrontend(
+                redigerbarForventetInntekt = eksisterendeInntekt.toDto(),
+                redigerbarForventetInntektNesteAar = null,
+                avkortingGrunnlag = emptyList(),
+                avkortetYtelse = emptyList(),
+            )
         coEvery {
             avkortingService.beregnAvkortingMedNyttGrunnlag(
                 any(),

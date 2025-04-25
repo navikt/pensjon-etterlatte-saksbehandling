@@ -6,7 +6,9 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Avkortingsperiode
+import no.nav.etterlatte.avkorting.BenyttetInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.Etteroppgjoer
+import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.ForventetInntekt
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
@@ -133,8 +136,9 @@ fun avkorting(
 
 fun avkortinggrunnlag(
     id: UUID = UUID.randomUUID(),
-    aarsinntekt: Int = 100000,
+    inntektTom: Int = 100000,
     fratrekkInnAar: Int = 10000,
+    inntektUtlandTom: Int = 0,
     fratrekkInnAarUtland: Int = 0,
     innvilgaMaaneder: Int = 12,
     periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
@@ -144,15 +148,27 @@ fun avkortinggrunnlag(
 ) = ForventetInntekt(
     id = id,
     periode = periode,
-    inntektTom = aarsinntekt,
+    inntektTom = inntektTom,
     fratrekkInnAar = fratrekkInnAar,
-    inntektUtlandTom = 0,
+    inntektUtlandTom = inntektUtlandTom,
     fratrekkInnAarUtland = fratrekkInnAarUtland,
     innvilgaMaaneder = innvilgaMaaneder,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
     overstyrtInnvilgaMaanederAarsak = overstyrtInnvilgaMaanederAarsak,
     overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
+    inntektInnvilgetPeriode =
+        BenyttetInntektInnvilgetPeriode(
+            verdi = inntektTom - fratrekkInnAar + inntektUtlandTom - fratrekkInnAarUtland,
+            tidspunkt = Tidspunkt.now(),
+            regelResultat = "".toJsonNode(),
+            kilde =
+                Grunnlagsopplysning.RegelKilde(
+                    navn = "",
+                    ts = Tidspunkt.now(),
+                    versjon = "",
+                ),
+        ),
 )
 
 fun avkortinggrunnlagLagreDto(
@@ -174,18 +190,13 @@ fun avkortinggrunnlagLagreDto(
 
 fun inntektAvkortingGrunnlag(
     inntekt: Int = 500000,
-    fratrekkInnAar: Int = 0,
-    inntektUtland: Int = 0,
     relevanteMaaneder: Int = 12,
 ) = InntektAvkortingGrunnlagWrapper(
     inntektAvkortingGrunnlag =
         FaktumNode(
             verdi =
                 InntektAvkortingGrunnlag(
-                    inntekt = Beregningstall(inntekt),
-                    fratrekkInnAar = Beregningstall(fratrekkInnAar),
-                    inntektUtland = Beregningstall(inntektUtland),
-                    fratrekkInnAarUtland = Beregningstall(0),
+                    inntektInnvilgetNedrundet = Beregningstall(inntekt),
                     relevanteMaaneder = Beregningstall(relevanteMaaneder),
                     grunnlagId = UUID.randomUUID(),
                 ),
@@ -207,6 +218,42 @@ fun aarsoppgjoer(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     inntektsavkorting = inntektsavkorting,
     avkortetYtelse = avkortetYtelse,
+)
+
+fun etteroppgjoer(
+    aar: Int = 2024,
+    fom: YearMonth = YearMonth.of(aar, 1),
+    faktiskInntekt: FaktiskInntekt =
+        FaktiskInntekt(
+            id = UUID.randomUUID(),
+            periode =
+                Periode(
+                    fom = fom,
+                    tom = fom.plusMonths(11),
+                ),
+            innvilgaMaaneder = 12,
+            loennsinntekt = 100000,
+            naeringsinntekt = 10000,
+            afp = 10000,
+            utlandsinntekt = 10000,
+            spesifikasjon = "Spesifikasjon",
+            kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+            inntektInnvilgetPeriode =
+                BenyttetInntektInnvilgetPeriode(
+                    verdi = 130000,
+                    tidspunkt = Tidspunkt.now(),
+                    regelResultat = "".toJsonNode(),
+                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
+                ),
+        ),
+    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
+) = Etteroppgjoer(
+    id = UUID.randomUUID(),
+    aar = aar,
+    fom = fom,
+    inntekt = faktiskInntekt,
+    avkortetYtelse = avkortetYtelse,
+    avkortingsperioder = emptyList(),
 )
 
 fun Aarsoppgjoer.inntektsavkorting(): List<Inntektsavkorting> =
@@ -340,6 +387,7 @@ fun behandling(
     sak: SakId = STANDARDSAK,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    revurderingaarsak: Revurderingaarsak? = null,
     virkningstidspunkt: Virkningstidspunkt? = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
     opphoerFraOgMed: YearMonth? = null,
@@ -351,7 +399,7 @@ fun behandling(
     status = status,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
-    revurderingsaarsak = null,
+    revurderingsaarsak = revurderingaarsak,
     prosesstype = Prosesstype.MANUELL,
     boddEllerArbeidetUtlandet = null,
     utlandstilknytning = null,

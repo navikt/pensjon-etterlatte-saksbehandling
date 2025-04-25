@@ -8,10 +8,12 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -65,11 +68,13 @@ class EtteroppgjoerForbehandlingDaoTest(
         val ny =
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
-                status = "status",
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -79,6 +84,7 @@ class EtteroppgjoerForbehandlingDaoTest(
             status shouldBe ny.status
             aar shouldBe ny.aar
             opprettet shouldBe ny.opprettet
+            innvilgetPeriode shouldBe ny.innvilgetPeriode
         }
     }
 
@@ -96,7 +102,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         )
 
         with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
-            inntektsaar shouldBe inntektsaar
+            this.inntektsaar shouldBe inntektsaar
             inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
         }
     }
@@ -118,5 +124,48 @@ class EtteroppgjoerForbehandlingDaoTest(
             inntektsaar shouldBe inntektsaar
             inntektsmaaneder shouldBe AInntekt.stub(inntektsaar).inntektsmaaneder
         }
+    }
+
+    @Test
+    fun `kopier aInntekt til ny forbehandling`() {
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+        val nyForbehandlingId = UUID.randomUUID()
+        etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.hentAInntekt(nyForbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.lagreAInntekt(
+            AInntekt.stub(inntektsaar),
+            forbehandlingId,
+        )
+
+        etteroppgjoerForbehandlingDao.kopierAInntekt(forbehandlingId, nyForbehandlingId)
+
+        val aInntekt = etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId)!!
+        val aInntektKopi = etteroppgjoerForbehandlingDao.hentAInntekt(nyForbehandlingId)!!
+
+        aInntekt.inntektsmaaneder shouldBe aInntektKopi.inntektsmaaneder
+        aInntekt.aar shouldBe aInntektKopi.aar
+    }
+
+    @Test
+    fun `kopier pensjonsgivendeInntekt til ny forbehandling`() {
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+        val nyForbehandlingId = UUID.randomUUID()
+
+        etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
+            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
+            forbehandlingId,
+        )
+
+        etteroppgjoerForbehandlingDao.kopierPensjonsgivendeInntekt(forbehandlingId, nyForbehandlingId)
+
+        val pensjonsgivendeInntekt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!
+        val pensjonsgivendeInntektKopi = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId)!!
+
+        pensjonsgivendeInntekt.inntekter shouldBe pensjonsgivendeInntektKopi.inntekter
+        pensjonsgivendeInntekt.inntektsaar shouldBe pensjonsgivendeInntektKopi.inntektsaar
     }
 }

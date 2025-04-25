@@ -23,7 +23,15 @@ dependencies {
     implementation(libs.ktor2.server)
     implementation("io.ktor:ktor-server-core:2.3.13")
     implementation("io.ktor:ktor-server-swagger:2.3.13")
-    implementation("io.ktor:ktor-server-core:2.3.13")
 
     testImplementation(libs.test.kotest.assertionscore)
+
+    testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(libs.ktor2.jackson)
+    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.ktor2.servertests)
+    testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(libs.navfelles.mockoauth2server)
+    testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

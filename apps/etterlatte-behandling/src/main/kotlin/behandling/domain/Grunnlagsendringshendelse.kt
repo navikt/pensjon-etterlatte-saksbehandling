@@ -26,7 +26,6 @@ enum class GrunnlagsendringsType {
     FORELDER_BARN_RELASJON,
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
     SIVILSTAND,
-    GRUNNBELOEP,
     BOSTED,
     FOLKEREGISTERIDENTIFIKATOR,
     INSTITUSJONSOPPHOLD,
@@ -40,7 +39,6 @@ enum class GrunnlagsendringsType {
             FORELDER_BARN_RELASJON -> "Forelder- / barn-relasjon"
             VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål / fremtidsfullmakt"
             SIVILSTAND -> "Sivilstand"
-            GRUNNBELOEP -> "Grunnbeløp"
             INSTITUSJONSOPPHOLD -> "Institusjonsopphold"
             BOSTED -> "Bostedsadresse"
             FOLKEREGISTERIDENTIFIKATOR -> "Folkeregisteridentifikator"

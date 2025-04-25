@@ -1,7 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect } from 'react'
-import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInntekt'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
@@ -23,6 +22,8 @@ import { IAvkorting } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { hentBehandlingstatus } from '~shared/api/behandling'
+import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInntekt'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const Avkorting = ({
   behandling,
@@ -43,11 +44,10 @@ export const Avkorting = ({
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 
-  const redigerbar = behandlingErRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const redigerbar =
+    behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
+    behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
+
   useEffect(() => {
     if (!avkorting) {
       dispatch(resetAvkorting())
@@ -62,7 +62,7 @@ export const Avkorting = ({
 
   const avkortingGrunnlagInnevaerendeAar = () => {
     return avkorting?.avkortingGrunnlag.find(
-      (grunnlag) => grunnlag.aar == aarFraDatoString(virkningstidspunkt(behandling).dato)
+      (grunnlag) => aarFraDatoString(grunnlag.fom) == aarFraDatoString(virkningstidspunkt(behandling).dato)
     )
   }
 
@@ -100,20 +100,11 @@ export const Avkorting = ({
               </VStack>
               <AvkortingInntekt
                 behandling={behandling}
-                avkortingGrunnlagFrontend={avkortingGrunnlagInnevaerendeAar()}
-                erInnevaerendeAar={true}
+                avkorting={avkorting}
+                skalHaInntektNesteAar={skalHaInntektNesteAar}
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-              />{' '}
-              {skalHaInntektNesteAar && !!avkorting?.avkortingGrunnlag?.length && (
-                <AvkortingInntekt
-                  behandling={behandling}
-                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                  erInnevaerendeAar={false}
-                  redigerbar={redigerbar}
-                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                />
-              )}
+              />
             </>
           ),
         })}

@@ -13,4 +13,5 @@ dependencies {
     implementation(libs.klage.kodeverk)
 
     testImplementation(libs.test.jupiter.api)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
 }

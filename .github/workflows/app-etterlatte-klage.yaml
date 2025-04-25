@@ -2,20 +2,13 @@ name: etterlatte-klage
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
-    inputs:
-      deploy-prod:
-        description: 'Deploy til produksjon'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - true
-          - false
+
   push:
     branches:
       - main
     paths:
       - apps/etterlatte-klage/**
+      - libs/etterlatte-behandling-model/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
@@ -28,6 +21,7 @@ on:
       - apps/etterlatte-klage/**
       - "!apps/etterlatte-klage/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml

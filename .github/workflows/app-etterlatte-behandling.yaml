@@ -2,15 +2,6 @@ name: etterlatte-behandling
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
-    inputs:
-      deploy-prod:
-        description: 'Deploy til produksjon'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - true
-          - false
   push:
     branches:
       - main
@@ -21,6 +12,7 @@ on:
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-pdl-model/**
@@ -43,6 +35,7 @@ on:
       - libs/etterlatte-jobs/**
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-omregning-model/**

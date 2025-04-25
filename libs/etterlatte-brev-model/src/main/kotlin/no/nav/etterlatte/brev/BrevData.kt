@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -39,12 +40,8 @@ data class ManueltBrevMedTittelData(
 
 data class BrevDataFerdigstillingNy(
     override val innhold: List<Slate.Element>,
-    val data: BrevInnholdData,
+    val data: BrevFastInnholdData,
 ) : BrevDataFerdigstilling
-
-data class BrevDataRedigerbarNy(
-    val brevInnholdData: BrevInnholdData,
-) : BrevData
 
 data class BrevRequest(
     val spraak: Spraak, // TODO ?
@@ -54,17 +51,32 @@ data class BrevRequest(
     val avdoede: List<Avdoed>,
     val verge: Verge?,
     val saksbehandlerIdent: String,
-    val attestantIdent: String,
+    val attestantIdent: String?,
     val skalLagre: Boolean,
-    val brevInnholdData: BrevInnholdData,
+    val brevFastInnholdData: BrevFastInnholdData,
+    val brevRedigerbarInnholdData: BrevRedigerbarInnholdData?,
 )
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.Vedtak::class, name = "OMS_EO_VEDTAK"),
 )
-abstract class BrevInnholdData(
-    open val type: String,
-) {
+abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
+    abstract val type: String
+}
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonSubTypes(
+    JsonSubTypes.Type(
+        value = EtteroppgjoerBrevData.ForhaandsvarselInnhold::class,
+        name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR",
+    ),
+    JsonSubTypes.Type(value = EtteroppgjoerBrevData.VedtakInnhold::class, name = "OMS_EO_VEDTAK_UTFALL"),
+)
+abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
+    abstract val brevKode: Brevkoder
+    abstract val type: String
 }

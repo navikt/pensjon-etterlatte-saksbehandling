@@ -239,6 +239,20 @@ enum class Brevkoder(
         "Ubrukt tittel",
         Brevtype.OPPLASTET_PDF,
     ),
+
+    OMS_EO_FORHAANDSVARSEL(
+        EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL_INNHOLD,
+        EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL,
+        "Forshåndsvarsel om etteroppgjør av omstillingsstønad",
+        Brevtype.INFORMASJON,
+    ),
+
+    OMS_EO_VEDTAK(
+        EtterlatteBrevKode.OMS_EO_VEDTAK_UTFALL,
+        EtterlatteBrevKode.OMS_EO_VEDTAK,
+        "Vedtak om etteroppgjør av omstillingsstønad",
+        Brevtype.VEDTAK,
+    ),
     ;
 
     init {

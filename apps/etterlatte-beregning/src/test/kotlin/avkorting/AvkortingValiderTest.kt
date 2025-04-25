@@ -9,8 +9,8 @@ import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ import java.time.YearMonth
 
 class AvkortingValiderTest {
     @Test
-    fun `Skal ikke kunne endre inntekt tidligere aar`() {
+    fun `Skal kunne endre inntekt tidligere aar hvis aarsoppgjoer er aarsoppgjoerloepende`() {
         val avkorting =
             Avkorting(
                 aarsoppgjoer =
@@ -39,16 +39,40 @@ class AvkortingValiderTest {
                     ),
             )
 
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = YearMonth.of(2024, 12),
+            )
+
+        validerInntekt(inntektMedFratrekk, avkorting, false, naa = YearMonth.of(2025, 1))
+    }
+
+    @Test
+    fun `Skal ikke kunne endre inntekt tidligere aar hvis aarsoppgjoer er etteroppgjoer`() {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        etteroppgjoer(aar = 2024),
+                    ),
+            )
+
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = YearMonth.of(2024, 12),
+            )
+
         assertThrows<InntektForTidligereAar> {
-            val inntektMedFratrekk =
-                AvkortingGrunnlagLagreDto(
-                    inntektTom = 100000,
-                    fratrekkInnAar = 0,
-                    fratrekkInnAarUtland = 0,
-                    inntektUtlandTom = 100000,
-                    spesifikasjon = "asdf",
-                    fom = YearMonth.of(2024, 12),
-                )
             validerInntekt(inntektMedFratrekk, avkorting, false, naa = YearMonth.of(2025, 1))
         }
     }
@@ -126,7 +150,7 @@ class AvkortingValiderTest {
     }
 
     @Test
-    fun `Skal få valideringsfeil hvis ny inntekt gjelder ifra tidligere enn forrige oppgitte`() {
+    fun `Skal kunne angi ny inntekt gjeldende ifra tidligere enn forrige oppgitte`() {
         val avkorting =
             Avkorting(
                 aarsoppgjoer =
@@ -137,7 +161,7 @@ class AvkortingValiderTest {
                                 listOf(
                                     Inntektsavkorting(
                                         avkortinggrunnlag(
-                                            innvilgaMaaneder = 11,
+                                            innvilgaMaaneder = 12,
                                             periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
                                         ),
                                     ),
@@ -152,18 +176,16 @@ class AvkortingValiderTest {
                     ),
             )
 
-        assertThrows<IkkeTillattException> {
-            val inntektMedFratrekk =
-                AvkortingGrunnlagLagreDto(
-                    inntektTom = 100000,
-                    fratrekkInnAar = 0,
-                    fratrekkInnAarUtland = 0,
-                    inntektUtlandTom = 100000,
-                    spesifikasjon = "asdf",
-                    fom = YearMonth.of(2024, 1),
-                )
-            validerInntekt(inntektMedFratrekk, avkorting, false)
-        }
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = YearMonth.of(2024, 1),
+            )
+        validerInntekt(inntektMedFratrekk, avkorting, false)
     }
 
     @Nested

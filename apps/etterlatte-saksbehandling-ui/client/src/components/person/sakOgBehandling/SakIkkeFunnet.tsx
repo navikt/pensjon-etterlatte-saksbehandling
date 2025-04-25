@@ -5,6 +5,7 @@ import { OpprettSakModal } from '~components/person/sakOgBehandling/OpprettSakMo
 import { Box } from '@navikt/ds-react'
 
 export const SakIkkeFunnet = ({ error, fnr }: { error: ApiError; fnr: string }) => {
+  //TODO håndtere 401
   return (
     <Box padding="8">
       {error.status === 404 ? (

@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -21,29 +22,41 @@ class Pdf(
 )
 
 interface BrevKlient {
-    suspend fun tilbakestillVedtaksbrev(
+    suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload
 
-    suspend fun ferdigstillVedtaksbrev(
+    suspend fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
+        brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Pdf
 
-    suspend fun opprettVedtaksbrev(
+    suspend fun opprettStrukturertBrev(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev
+
+    suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev?
+
+    suspend fun hentBrev(
+        sakId: SakId,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Brev
 }
 
@@ -57,26 +70,47 @@ class BrevKlientImpl(
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
 
-    override suspend fun opprettVedtaksbrev(
+    override suspend fun opprettStrukturertBrev(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
         post(
-            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak",
+            url = "$resourceUrl/api/brev/strukturert/$behandlingId/",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
             postBody = brevRequest,
         )
 
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev? =
+        get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
+            brukerTokenInfo = bruker,
+        )
+
+    override suspend fun hentBrev(
+        sakId: SakId,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev =
+        get(
+            url = "$resourceUrl/api/brev/$brevId?sakId=${sakId.sakId}",
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
     override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Pdf =
         post(
-            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak/pdf?brevId=$brevID",
+            url = "$resourceUrl/api/brev/strukturert/$behandlingId/pdf?brevId=$brevID",
             onSuccess = { resource ->
                 resource.response?.let { deserialize(it.toJson()) }
                     ?: throw InternfeilException("Feil ved generering av pdf vedtaksbrev")
@@ -89,25 +123,26 @@ class BrevKlientImpl(
             },
         )
 
-    override suspend fun ferdigstillVedtaksbrev(
+    override suspend fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
+        brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak/ferdigstill",
+            url = "$resourceUrl/api/brev/strukturert/$behandlingId/ferdigstill?brevType=${brevType.name}",
             onSuccess = { _ -> },
             brukerTokenInfo = brukerTokenInfo,
         )
     }
 
-    override suspend fun tilbakestillVedtaksbrev(
+    override suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         brevRequest: BrevRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload =
         put(
-            url = "$resourceUrl/api/brev/vedtak/$behandlingId/vedtak/tilbakestill?brevId=$brevID",
+            url = "$resourceUrl/api/brev/strukturert/$behandlingId/tilbakestill?brevId=$brevID",
             onSuccess = { resource ->
                 resource.response?.let { deserialize(it.toJson()) }
                     ?: throw InternfeilException("Feil ved tilbakestilling av pdf vedtaksbrev")

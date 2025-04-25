@@ -9,6 +9,12 @@ import java.util.UUID
 data class SakMedBehandlinger(
     val sak: SakMedUtlandstilknytning,
     val behandlinger: List<BehandlingSammendrag>,
+    val ekstraSak: AnnenSakMedBehandlinger? = null,
+)
+
+data class AnnenSakMedBehandlinger(
+    val sak: SakMedUtlandstilknytning,
+    val behandlinger: List<BehandlingSammendrag>,
 )
 
 data class BehandlingSammendrag(

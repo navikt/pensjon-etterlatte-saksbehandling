@@ -49,7 +49,8 @@ class SamordningVedtakRouteTest {
         mockOAuth2Server.startRandomPort()
     }
 
-    // TODO: alle tester her skal oppdateres med fnr i body 1.mars 2025
+    // TODO: alle tester her skal oppdateres med fnr i body når tp leverandører er over på post fra get ifbm fnr endring
+    // i tillegg til fjerning av etterlatte-samordning-vedtak
     @Nested
     inner class MaskinportenApi {
         @BeforeEach
@@ -60,7 +61,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 401 når token mangler`() {
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -72,9 +73,9 @@ class SamordningVedtakRouteTest {
         }
 
         @Test
-        fun `skal gi 401 med token hvor scope mangler`() {
+        fun `skal gi 401 med token hvis scope mangler`() {
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -89,7 +90,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 400 dersom tpnr-header mangler`() {
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -104,7 +105,69 @@ class SamordningVedtakRouteTest {
         }
 
         @Test
-        fun `skal gi 200 med gyldig token inkl scope`() {
+        fun `skal gi 400 med gyldig token og scope hvis fnr i body mangler`() {
+            testApplication {
+                val client = samordningVedtakApi(appname = "etterlatte-api")
+                val virkFom = LocalDate.now()
+                val response =
+                    client.post("/api/vedtak") {
+                        parameter("fomDato", virkFom)
+                        header("tpnr", "3010")
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(
+                            HttpHeaders.Authorization,
+                            "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
+                        )
+                    }
+
+                response.status shouldBe HttpStatusCode.BadRequest
+            }
+        }
+
+        @Test
+        fun `skal gi 400 med gyldig token og scope hvis fnr i body er ugyldig`() {
+            testApplication {
+                val virkFom = LocalDate.now()
+                val client = samordningVedtakApi(appname = "etterlatte-api")
+                val response =
+                    client.post("/api/vedtak") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(
+                            HttpHeaders.Authorization,
+                            "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
+                        )
+                        parameter("fomDato", virkFom)
+                        header("tpnr", "3010")
+                        setBody(FoedselsnummerDTO("00081006800"))
+                    }
+
+                response.status shouldBe HttpStatusCode.BadRequest
+            }
+        }
+
+        @Test
+        fun `skal gi 400 med gyldig token og scope hvis fnr i body ikke har riktig struktur`() {
+            testApplication {
+                val virkFom = LocalDate.now()
+                val client = samordningVedtakApi(appname = "etterlatte-api")
+                val response =
+                    client.post("/api/vedtak") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(
+                            HttpHeaders.Authorization,
+                            "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
+                        )
+                        parameter("fomDato", virkFom)
+                        header("tpnr", "3010")
+                        setBody(mapOf("fnr" to "00081006800"))
+                    }
+
+                response.status shouldBe HttpStatusCode.BadRequest
+            }
+        }
+
+        @Test
+        fun `skal gi 200 med gyldig token og scope`() {
             coEvery {
                 samordningVedtakService.hentVedtak(
                     vedtakId = any<Long>(),
@@ -114,7 +177,7 @@ class SamordningVedtakRouteTest {
                 opprettSamordningVedtakDto()
 
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -149,7 +212,7 @@ class SamordningVedtakRouteTest {
                 listOf(opprettSamordningVedtakDto())
 
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak") {
                         parameter("fomDato", virkFom)
@@ -199,7 +262,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 401 når token mangler`() {
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -214,7 +277,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 401 med token hvor rolle mangler`() {
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -239,7 +302,7 @@ class SamordningVedtakRouteTest {
                 listOf(opprettSamordningVedtakDto())
 
             testApplication {
-                samordningVedtakApi()
+                val client = samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         parameter("fomDato", virkFom)
@@ -278,7 +341,7 @@ class SamordningVedtakRouteTest {
     }
 
     @Nested
-    inner class SamordningApi {
+    inner class PensjonSelvbetjeningSamordningApi {
         private val virkFom = LocalDate.now()
         private val fnr = "06237240748"
 

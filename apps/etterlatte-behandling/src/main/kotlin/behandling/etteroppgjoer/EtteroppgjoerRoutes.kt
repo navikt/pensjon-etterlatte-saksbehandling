@@ -8,12 +8,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnAvkortingFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -32,6 +33,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER("etteroppgjoer"),
     ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
+    ETTEROPPGJOER_PERIODISK_JOBB("ettteroppgjoer_periodisk_jobb"),
     ;
 
     override fun key(): String = toggle
@@ -50,42 +52,70 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(HttpStatusCode.NotFound)
             }
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024)
+                val eo =
+                    inTransaction {
+                        forbehandlingService.opprettEtteroppgjoerForbehandling(
+                            sakId,
+                            2024,
+                            brukerTokenInfo,
+                        )
+                    }
                 call.respond(eo)
             }
         }
 
-        get("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            kunSkrivetilgang {
-                val etteroppgjoer = forbehandlingService.hentEtteroppgjoer(brukerTokenInfo, etteroppgjoerId)
-                call.respond(etteroppgjoer)
+        route("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
+            get {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    val etteroppgjoer =
+                        inTransaction {
+                            forbehandlingService.hentDetaljertForbehandling(etteroppgjoerId, brukerTokenInfo)
+                        }
+                    call.respond(etteroppgjoer)
+                }
             }
-        }
 
-        post("beregn_faktisk_inntekt") {
-            val request = call.receive<BeregnAvkortingFaktiskInntektRequest>()
-            forbehandlingService.beregnAvkortingFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
-            call.respond(HttpStatusCode.OK)
+            post("beregn_faktisk_inntekt") {
+                val request = call.receive<BeregnFaktiskInntektRequest>()
+                val response =
+                    inTransaction {
+                        forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                    }
+                call.respond(response)
+            }
         }
 
         post("/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSkrivetilgang {
-                val eo = forbehandlingService.opprettEtteroppgjoer(sakId, 2024)
+                val eo =
+                    inTransaction {
+                        forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, brukerTokenInfo)
+                    }
                 call.respond(eo)
             }
         }
 
+        get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
+            call.respond(forbehandlinger)
+        }
+
+        // TODO opprett periodisk jobb
         post("/skatteoppgjoerhendelser/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
                 val request = call.receive<HendelseKjoeringRequest>()
-                skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+                inTransaction {
+                    skatteoppgjoerHendelserService.startHendelsesKjoering(request)
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }
 
+        // TODO opprett periodisk jobb
         post("/{inntektsaar}/start-kjoering") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             kunSystembruker {
@@ -93,8 +123,23 @@ fun Route.etteroppgjoerRoutes(
                     krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
                         "Inntektsaar mangler"
                     }
-                etteroppgjoerService.finnSakerForEtteroppgjoer(inntektsaar)
+                inTransaction {
+                    etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                }
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        // TODO opprett periodisk jobb
+        post("/{inntektsaar}/opprett-forbehandlinger") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            kunSystembruker {
+                val inntektsaar =
+                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                        "Inntektsaar mangler"
+                    }
+
+                forbehandlingService.startOpprettForbehandlingKjoering(inntektsaar)
             }
         }
     }

@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.MigreringOverstyringDto
 import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidBegrunnelseDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
@@ -192,6 +193,23 @@ fun Route.trygdetid(
                             )!!
                             .toDto(),
                     )
+                }
+            }
+
+            post("begrunnelse") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    logger.info("Oppdater begrunnelse for behandling $behandlingId")
+                    val trygdetidBegrunnelse = call.receive<TrygdetidBegrunnelseDto>()
+
+                    val trygdetid =
+                        trygdetidService.oppdaterTrygdetidMedBegrunnelse(
+                            trygdetidBegrunnelse.id,
+                            behandlingId,
+                            trygdetidBegrunnelse.begrunnelse,
+                            brukerTokenInfo,
+                        )
+
+                    call.respond(trygdetid.toDto())
                 }
             }
 
@@ -411,6 +429,7 @@ fun Trygdetid.toDto(): TrygdetidDto =
         overstyrtNorskPoengaar = this.overstyrtNorskPoengaar,
         ident = this.ident,
         opplysningerDifferanse = krevIkkeNull(opplysningerDifferanse) { "Differanseopplysninger mangler" },
+        begrunnelse = this.begrunnelse,
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =

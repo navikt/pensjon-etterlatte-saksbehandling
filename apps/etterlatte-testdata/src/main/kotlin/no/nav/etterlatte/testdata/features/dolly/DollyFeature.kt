@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
+import io.ktor.server.request.receive
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -141,15 +142,16 @@ class DollyFeature(
             post("opprett-ytelse") {
                 try {
 
-                    val params = call.receiveParameters()
-                    val ytelse = SoeknadType.valueOf(params["ytelse"]!!)
+                    val nySoeknadRequest = call.receive<NySoeknadRequest>()
+                    val ytelse = nySoeknadRequest.type
                     val behandlingssteg = Behandlingssteg.IVERKSATT
-                    val gjenlevende = params["gjenlevende"]!!
-                    val avdoed = params["avdoed"]!!
-                    val barnListe = params.getAll("barnListe")!!
+                    val gjenlevende = nySoeknadRequest.gjenlevende
+                    val avdoed = nySoeknadRequest.avdoed
+                    val barnListe = nySoeknadRequest.barn
                     val soeker =
                         when (ytelse) {
-                            SoeknadType.BARNEPENSJON -> params["barn"]!!
+                            // TODO
+                            SoeknadType.BARNEPENSJON -> nySoeknadRequest.barn.first()
                             SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
                         }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
@@ -166,7 +168,7 @@ class DollyFeature(
 
                     val brukerId = brukerTokenInfo.ident()
                     val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
-                    call.respond(HttpStatusCode.OK, "Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}")
+                    call.respond(SoeknadResponse(200, noekkel))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }

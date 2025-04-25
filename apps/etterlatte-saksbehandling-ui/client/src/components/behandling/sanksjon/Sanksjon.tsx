@@ -32,6 +32,7 @@ import { useAppDispatch } from '~store/Store'
 import { hentAvkorting } from '~shared/api/avkorting'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
@@ -78,11 +79,9 @@ export const Sanksjon = ({
   const [avkortingStatus, fetchAvkorting] = useApiCall(hentAvkorting)
   const dispatch = useAppDispatch()
 
-  const redigerbar = behandlingErRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const redigerbar =
+    behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
+    behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
 
   const {
     register,

@@ -219,7 +219,7 @@ class StatusPagesKonfigurasjon(
         val requestobjekt =
             try {
                 call.receive<String>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 "Kunne ikke hente requestobjektet"
             }
         sikkerLogg.debug("Henta requestobjekt på totalt ${requestobjekt.length} tegn")

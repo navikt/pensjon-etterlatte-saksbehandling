@@ -13,6 +13,9 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.avkorting.inntektsjustering.AarligInntektsjusteringService
+import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
@@ -20,10 +23,9 @@ import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -88,28 +90,43 @@ class AvkortingRoutesTest {
         val avkortetYtelseId = UUID.randomUUID()
         val avkorting =
             AvkortingFrontend(
+                redigerbarForventetInntekt =
+                    ForventetInntektDto(
+                        id = avkortingsgrunnlagId,
+                        fom = dato,
+                        tom = dato,
+                        inntektTom = 100000,
+                        fratrekkInnAar = 10000,
+                        spesifikasjon = "Spesifikasjon",
+                        inntektUtlandTom = 0,
+                        fratrekkInnAarUtland = 0,
+                        innvilgaMaaneder = 12,
+                        inntektInnvilgetPeriode = 90000,
+                        kilde =
+                            AvkortingGrunnlagKildeDto(
+                                tidspunkt = tidspunkt.toString(),
+                                ident = "Saksbehandler01",
+                            ),
+                    ),
+                redigerbarForventetInntektNesteAar = null,
                 avkortingGrunnlag =
                     listOf(
-                        AvkortingGrunnlagFrontend(
-                            aar = 2024,
-                            fraVirk =
-                                AvkortingGrunnlagDto(
-                                    id = avkortingsgrunnlagId,
-                                    fom = dato,
-                                    tom = dato,
-                                    inntektTom = 100000,
-                                    fratrekkInnAar = 10000,
-                                    spesifikasjon = "Spesifikasjon",
-                                    inntektUtlandTom = 0,
-                                    fratrekkInnAarUtland = 0,
-                                    innvilgaMaaneder = 12,
-                                    kilde =
-                                        AvkortingGrunnlagKildeDto(
-                                            tidspunkt = tidspunkt.toString(),
-                                            ident = "Saksbehandler01",
-                                        ),
+                        ForventetInntektDto(
+                            id = avkortingsgrunnlagId,
+                            fom = dato,
+                            tom = dato,
+                            inntektTom = 100000,
+                            fratrekkInnAar = 10000,
+                            spesifikasjon = "Spesifikasjon",
+                            inntektUtlandTom = 0,
+                            fratrekkInnAarUtland = 0,
+                            innvilgaMaaneder = 12,
+                            inntektInnvilgetPeriode = 90000,
+                            kilde =
+                                AvkortingGrunnlagKildeDto(
+                                    tidspunkt = tidspunkt.toString(),
+                                    ident = "Saksbehandler01",
                                 ),
-                            historikk = emptyList(),
                         ),
                     ),
                 avkortetYtelse =
@@ -147,14 +164,14 @@ class AvkortingRoutesTest {
             val response =
                 client.post("/api/beregning/avkorting/$behandlingsId") {
                     val request =
-                        avkorting.avkortingGrunnlag[0].let {
+                        with(avkorting.redigerbarForventetInntekt!!) {
                             AvkortingGrunnlagLagreDto(
-                                id = it.fraVirk!!.id,
-                                inntektTom = it.fraVirk!!.inntektTom,
-                                fratrekkInnAar = it.fraVirk!!.fratrekkInnAar,
-                                inntektUtlandTom = it.fraVirk!!.inntektUtlandTom,
-                                fratrekkInnAarUtland = it.fraVirk!!.fratrekkInnAarUtland,
-                                spesifikasjon = it.fraVirk!!.spesifikasjon,
+                                id = id,
+                                inntektTom = inntektTom,
+                                fratrekkInnAar = fratrekkInnAar,
+                                inntektUtlandTom = inntektUtlandTom,
+                                fratrekkInnAarUtland = fratrekkInnAarUtland,
+                                spesifikasjon = spesifikasjon,
                                 fom = dato,
                             )
                         }

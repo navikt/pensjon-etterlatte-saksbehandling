@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regler
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.etterlatte.beregning.grunnlag.Prosent
 import java.math.BigDecimal
@@ -20,11 +21,18 @@ class Beregningstall : Comparable<Beregningstall> {
         value = number.toBigDecimal()
     }
 
+    constructor(number: Long) {
+        value = number.toBigDecimal()
+    }
+
     constructor(number: Double) {
         value = number.toBigDecimal()
     }
 
-    constructor(number: BigDecimal) {
+    @JsonCreator
+    constructor(
+        @JsonProperty("value") number: BigDecimal,
+    ) {
         value = number
     }
 
@@ -100,6 +108,8 @@ class Beregningstall : Comparable<Beregningstall> {
     ): Beregningstall = Beregningstall(value.setScale(decimals, roundingMode))
 
     fun toInteger() = value.toInt()
+
+    fun toDouble() = value.toDouble()
 
     override fun toString(): String = value.toString()
 

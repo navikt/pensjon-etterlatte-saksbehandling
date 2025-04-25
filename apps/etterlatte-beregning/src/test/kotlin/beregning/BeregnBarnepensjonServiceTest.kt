@@ -622,6 +622,7 @@ internal class BeregnBarnepensjonServiceTest {
                     opplysninger = GrunnlagOpplysningerDto(null, null, null, null),
                     overstyrtNorskPoengaar = null,
                     opplysningerDifferanse = OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>()),
+                    begrunnelse = null,
                 ),
             )
 
@@ -701,6 +702,7 @@ internal class BeregnBarnepensjonServiceTest {
                     opplysninger = GrunnlagOpplysningerDto(null, null, null, null),
                     overstyrtNorskPoengaar = null,
                     opplysningerDifferanse = OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>()),
+                    begrunnelse = null,
                 ),
             )
         coEvery {

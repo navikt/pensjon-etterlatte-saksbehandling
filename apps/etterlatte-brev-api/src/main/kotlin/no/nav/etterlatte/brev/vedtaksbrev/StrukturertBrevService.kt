@@ -46,7 +46,6 @@ class StrukturertBrevService(
         brevType: Brevtype,
     ): Brev? {
         logger.info("Henter brev av type=$brevType for behandling (id=$behandlingId)")
-
         return db.hentBrevForBehandling(behandlingId, brevType).firstOrNull()
     }
 

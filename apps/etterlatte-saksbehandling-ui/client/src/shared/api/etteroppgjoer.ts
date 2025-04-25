@@ -34,3 +34,9 @@ export const lagreFaktiskInntekt = async (args: {
     ...args.faktiskInntekt,
   })
 }
+
+export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
+  forbehandlingId: string
+}): Promise<ApiResponse<any>> => {
+  return apiClient.post(`etteroppgjoer/${args.forbehandlingId}/ferdigstill-forbehandling`, {})
+}

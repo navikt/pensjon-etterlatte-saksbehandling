@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -73,12 +74,22 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
+    fun ferdigstillForbehandling(behandlingId: UUID) {
+        logger.info("Ferdigstiller forbehandling for behandling=$behandlingId")
+        val forbehandling = dao.hentForbehandling(behandlingId)
+        dao.lagreForbehandling(forbehandling!!.tilFerdigstilt())
+    }
+
     fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun lagreForbehandlingKopi(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+        dao.lagreForbehandling(forbehandling)
+    }
+
+    fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val forbehandlingCopy =
             forbehandling.copy(
                 id = UUID.randomUUID(),
@@ -212,7 +223,7 @@ class EtteroppgjoerForbehandlingService(
                     sakId = sakId,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.ETTEROPPGJOER,
-                    merknad = null,
+                    merknad = "Etteroppgjør for $inntektsaar",
                 ),
         )
     }
@@ -254,19 +265,21 @@ class EtteroppgjoerForbehandlingService(
     ) {
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
         if (forbehandlinger.any { it.aar == inntektsaar && !it.erFerdigstilt() }) {
-            throw InternfeilException("Kan ikke opprette forbehandling fordi det allerede finnes en forbehandling som ikke er ferdigstilt")
+            throw InternfeilException(
+                "Kan ikke opprette forbehandling fordi det allerede er opprettett forbehandling som ikke er ferdigstilt",
+            )
         }
 
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
 
         if (etteroppgjoer == null) {
             logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
-            throw InternfeilException("Kan ikke opprette forbehandling fordi etteroppgjør for sak=${sak.id} ikke er opprettet")
+            throw InternfeilException("Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør")
         }
 
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
-            logger.error("Kan ikke opprette etteroppgjør forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
-            throw InternfeilException("Kan ikke opprette etteroppgjør for sakType=${sak.sakType}")
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
+            throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
         }
 
         if (etteroppgjoer.status != EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
@@ -275,6 +288,15 @@ class EtteroppgjoerForbehandlingService(
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
             )
         }
+
+        if (behandlingService.hentSisteIverksatte(sak.id) == null) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
+            throw InternfeilException(
+                "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
+            )
+        }
+
+        // TODO: flere sjekker?
     }
 
     private fun utledInnvilgetPeriode(

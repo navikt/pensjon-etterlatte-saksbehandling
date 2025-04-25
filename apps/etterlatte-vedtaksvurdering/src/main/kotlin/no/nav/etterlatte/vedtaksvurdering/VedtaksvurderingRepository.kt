@@ -245,6 +245,7 @@ class VedtaksvurderingRepository(
             JOIN utbetalingsperiode u ON v.id = u.vedtakid
             WHERE EXTRACT(YEAR FROM u.datofom) = :aar
             ${if (sakType == null) "" else "AND saktype = :saktype"}
+            AND vedtakstatus = :vedtakStatus
             """.trimIndent()
 
         return tx.session {
@@ -254,6 +255,7 @@ class VedtaksvurderingRepository(
                     mapOf(
                         "aar" to inntektsaar,
                         "saktype" to sakType?.name,
+                        "vedtakStatus" to VedtakStatus.IVERKSATT.name,
                     )
                 },
             ) {

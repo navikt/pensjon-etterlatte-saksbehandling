@@ -113,7 +113,7 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, sakId, bruker)
+                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, true)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -159,9 +159,8 @@ class BrevService(
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.ferdigstillBrev(
+                etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingBrev(
                     behandlingId,
-                    Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
                     brukerTokenInfo,
                 )
 

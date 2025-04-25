@@ -12,6 +12,8 @@ export function EtteroppjoerSidemeny() {
         <Heading size="small">Forbehandling etteroppgjør</Heading>
       </SidebarPanel>
 
+      {etteroppgjoer.behandling.status}
+
       <DokumentlisteLiten fnr={etteroppgjoer.behandling.sak.ident} />
     </Sidebar>
   )

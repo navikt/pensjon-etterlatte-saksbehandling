@@ -486,6 +486,20 @@ internal class VedtaksvurderingRepositoryTest(
                 status = VedtakStatus.IVERKSATT,
                 sakType = SakType.OMSTILLINGSSTOENAD,
             ),
+            opprettVedtak(
+                sakId = sakid,
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.FATTET_VEDTAK,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            ),
+            opprettVedtak(
+                sakId = sakid,
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.IVERKSATT,
+                sakType = SakType.BARNEPENSJON,
+            ),
         ).map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 

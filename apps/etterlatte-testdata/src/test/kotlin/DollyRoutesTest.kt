@@ -98,7 +98,6 @@ class DollyRoutesTest {
             val response =
                 client.post("/opprett-ytelse") {
                     contentType(ContentType.Application.Json)
-                    // setBody(FoedselsnummerDTO(fnr).toJson())
                     header(
                         HttpHeaders.Authorization,
                         "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",

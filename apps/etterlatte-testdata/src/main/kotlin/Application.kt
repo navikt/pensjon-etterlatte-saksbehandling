@@ -10,6 +10,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -25,6 +26,7 @@ import io.ktor.server.http.content.staticResources
 import io.ktor.server.mustache.Mustache
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.callloging.processingTimeMillis
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.httpMethod
@@ -127,6 +129,9 @@ fun main() {
                 install(Mustache) {
                     mustacheFactory = DefaultMustacheFactory("templates")
                 }
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
                 install(CallLogging) {
                     level = org.slf4j.event.Level.INFO
                     filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics|.*/static")) }
@@ -161,6 +166,7 @@ fun main() {
                     install(Authentication) {
                         tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
                     }
+
                     routing {
                         get("/health/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/health/isready") { call.respondText("READY", ContentType.Text.Plain) }

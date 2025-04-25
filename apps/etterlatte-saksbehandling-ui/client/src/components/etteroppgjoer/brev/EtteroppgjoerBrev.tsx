@@ -72,7 +72,7 @@ export function EtteroppgjoerBrev() {
           success: (brev) => (
             <RedigerbartBrev
               brev={brev}
-              kanRedigeres={true}
+              kanRedigeres={etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT}
               skalGaaViaBehandling
               tilbakestillingsaction={() => alert('Not supported')}
             />

@@ -44,6 +44,8 @@ class EtteroppgjoerService(
         logger.info("$trigger: leter etter saker som skal ha etteroppgjoer for inntektsaar=$inntektsaar")
 
         // TODO: er det flere ting vi må sjekke på en kun utbetaling i inntektsaar
+        // TODO: burde vi sjekke på om sak har sist iverksatte behandling?
+
         val sakerMedUtbetaling =
             runBlocking {
                 vedtakKlient.hentSakerMedUtbetalingForInntektsaar(

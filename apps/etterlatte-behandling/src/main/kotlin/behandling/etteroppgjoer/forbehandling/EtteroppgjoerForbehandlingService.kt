@@ -254,19 +254,21 @@ class EtteroppgjoerForbehandlingService(
     ) {
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
         if (forbehandlinger.any { it.aar == inntektsaar && !it.erFerdigstilt() }) {
-            throw InternfeilException("Kan ikke opprette forbehandling fordi det allerede finnes en forbehandling som ikke er ferdigstilt")
+            throw InternfeilException(
+                "Kan ikke opprette forbehandling fordi det allerede er opprettett forbehandling som ikke er ferdigstilt",
+            )
         }
 
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
 
         if (etteroppgjoer == null) {
             logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
-            throw InternfeilException("Kan ikke opprette forbehandling fordi etteroppgjør for sak=${sak.id} ikke er opprettet")
+            throw InternfeilException("Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør")
         }
 
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
-            logger.error("Kan ikke opprette etteroppgjør forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
-            throw InternfeilException("Kan ikke opprette etteroppgjør for sakType=${sak.sakType}")
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
+            throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
         }
 
         if (etteroppgjoer.status != EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
@@ -275,6 +277,15 @@ class EtteroppgjoerForbehandlingService(
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
             )
         }
+
+        if (behandlingService.hentSisteIverksatte(sak.id) == null) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
+            throw InternfeilException(
+                "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
+            )
+        }
+
+        // TODO: flere sjekker?
     }
 
     private fun utledInnvilgetPeriode(

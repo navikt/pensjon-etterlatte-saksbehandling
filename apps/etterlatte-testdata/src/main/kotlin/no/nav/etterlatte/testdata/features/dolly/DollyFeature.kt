@@ -32,7 +32,7 @@ class DollyFeature(
     override val path: String
         get() = "dolly"
     override val kunEtterlatte: Boolean
-        get() = true
+        get() = false
 
     override val routes: Route.() -> Unit
         get() = {

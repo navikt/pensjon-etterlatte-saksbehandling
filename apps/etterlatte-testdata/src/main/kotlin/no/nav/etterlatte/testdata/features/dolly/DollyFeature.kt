@@ -143,7 +143,7 @@ class DollyFeature(
                 try {
 
                     val nySoeknadRequest = call.receive<NySoeknadRequest>()
-                    val ytelse = SoeknadType.valueOf(nySoeknadRequest.type.toString())
+                    val ytelse = nySoeknadRequest.type
                     val behandlingssteg = Behandlingssteg.IVERKSATT
                     val gjenlevende = nySoeknadRequest.gjenlevende
                     val avdoed = nySoeknadRequest.avdoed

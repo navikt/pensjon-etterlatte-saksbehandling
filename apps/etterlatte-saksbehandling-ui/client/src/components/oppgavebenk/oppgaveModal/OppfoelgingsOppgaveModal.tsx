@@ -10,6 +10,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 interface OppfoegingsOppgaveSkjema {
   hvaSomErFulgtOpp: string
@@ -82,6 +83,7 @@ export function OppfoelgingAvOppgaveModal({
             },
           },
           () => {
+            trackClick(ClickEvent.OPPRETT_OPPFOELGINGSOPPGAVE)
             lukkModal()
             oppdaterStatus(oppgave.id, oppgave.status)
           }

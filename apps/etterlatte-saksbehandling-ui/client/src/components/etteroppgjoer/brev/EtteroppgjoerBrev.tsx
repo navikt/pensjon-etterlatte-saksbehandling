@@ -4,7 +4,7 @@ import React, { useEffect } from 'react'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
 import { EtteroppgjoerFramTilbakeKnapperad } from '~components/etteroppgjoer/stegmeny/EtteroppgjoerFramTilbakeKnapperad'
@@ -15,6 +15,7 @@ import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottak
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
 import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -27,13 +28,11 @@ export function EtteroppgjoerBrev() {
   )
 
   const kanRedigeres = etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT
-
+  const navigate = useNavigate()
   const ferdigstillForbehandling = async () => {
     const forbehandlingId = etteroppgjoer.behandling.id
     ferdigstillForbehandlingRequest({ forbehandlingId })
-
-    // TODO: redirect?
-    alert('Ferdigstilt, mangler redirect')
+    hentSakOgNavigerTilSaksoversikt(etteroppgjoer.behandling.sak.id, navigate)
   }
 
   useEffect(() => {

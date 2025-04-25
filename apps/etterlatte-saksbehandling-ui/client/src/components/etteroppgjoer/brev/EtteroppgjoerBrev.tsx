@@ -12,12 +12,24 @@ import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/Etteroppjoe
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
+import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
+import { isPending } from '@reduxjs/toolkit'
 
 export function EtteroppgjoerBrev() {
   const etteroppgjoer = useEtteroppgjoer()
   const dispatch = useAppDispatch()
   const [brevResult, fetchBrev] = useApiCall(hentBrevTilBehandling)
   const [opprettBrevResult, opprettBrevApi] = useApiCall(opprettBrevTilBehandling)
+
+  const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest] = useApiCall(
+    ferdigstillEtteroppgjoerForbehandlingBrev
+  )
+
+  const ferdigstillForbehandling = async () => {
+    const forbehandlingId = etteroppgjoer.behandling.id
+    ferdigstillForbehandlingRequest({ forbehandlingId })
+    // TODO: redirect?
+  }
 
   useEffect(() => {
     if (etteroppgjoer.behandling.brevId) {
@@ -81,7 +93,13 @@ export function EtteroppgjoerBrev() {
             </Button>
           </div>
           <div>
-            <Button variant="primary">Ferdigstill</Button>
+            <Button
+              variant="primary"
+              onClick={ferdigstillForbehandling}
+              loading={isPending(ferdigstillForbehandlingResult)}
+            >
+              Ferdigstill
+            </Button>
           </div>
         </EtteroppgjoerFramTilbakeKnapperad>
       </VStack>

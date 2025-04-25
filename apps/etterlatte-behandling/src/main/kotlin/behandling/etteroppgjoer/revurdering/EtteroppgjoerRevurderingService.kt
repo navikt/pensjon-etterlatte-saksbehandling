@@ -49,7 +49,7 @@ class EtteroppgjoerRevurderingService(
                 }
 
                 // lager kopi av forbehandling for revurdering slik at vi ikke overskriver tidligere oppgitt inntekt
-                val forbehandlingCopy = etteroppgjoerForbehandlingService.lagreForbehandlingKopi(forbehandling)
+                val forbehandlingCopy = etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(forbehandling)
 
                 // TODO hva blir riktig her? vi ønsker ikke mer enn en oppgave, men kan det være oppgaver åpne på forbehandling?
                 // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)

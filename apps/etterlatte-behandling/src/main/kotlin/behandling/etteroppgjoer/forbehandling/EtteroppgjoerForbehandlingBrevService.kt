@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.BrevRequest
-import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
@@ -87,12 +87,11 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillBrev(
+    suspend fun ferdigstillForbehandlingBrev(
         behandlingId: UUID,
-        brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        brevKlient.ferdigstillStrukturertBrev(behandlingId, brevType, brukerTokenInfo)
+        brevKlient.ferdigstillStrukturertBrev(behandlingId, Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype, brukerTokenInfo)
     }
 
     suspend fun genererPdf(

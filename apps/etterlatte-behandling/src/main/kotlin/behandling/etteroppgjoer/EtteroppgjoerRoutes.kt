@@ -8,7 +8,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
@@ -19,11 +21,14 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -41,6 +46,7 @@ enum class EtteroppgjoerToggles(
 
 fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
+    forbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     etteroppgjoerService: EtteroppgjoerService,
     featureToggleService: FeatureToggleService,
@@ -141,6 +147,15 @@ fun Route.etteroppgjoerRoutes(
 
                 forbehandlingService.startOpprettForbehandlingKjoering(inntektsaar)
             }
+        }
+
+        post("/${BEHANDLINGID_CALL_PARAMETER}/ferdigstill-forbehandling") {
+            runBlocking {
+                forbehandlingBrevService.ferdigstillForbehandlingBrev(behandlingId, HardkodaSystembruker.etteroppgjoer)
+                forbehandlingService.ferdigstillForbehandling(behandlingId)
+            }
+
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

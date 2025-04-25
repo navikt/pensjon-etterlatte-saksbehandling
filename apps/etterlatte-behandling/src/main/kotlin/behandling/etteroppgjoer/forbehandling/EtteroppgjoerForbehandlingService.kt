@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -73,12 +74,22 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
+    fun ferdigstillForbehandling(behandlingId: UUID) {
+        logger.info("Ferdigstiller forbehandling for behandling=$behandlingId")
+        val forbehandling = dao.hentForbehandling(behandlingId)
+        dao.lagreForbehandling(forbehandling!!.tilFerdigstilt())
+    }
+
     fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun lagreForbehandlingKopi(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+        dao.lagreForbehandling(forbehandling)
+    }
+
+    fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val forbehandlingCopy =
             forbehandling.copy(
                 id = UUID.randomUUID(),

@@ -159,9 +159,8 @@ class BrevService(
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.ferdigstillBrev(
+                etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingBrev(
                     behandlingId,
-                    Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
                     brukerTokenInfo,
                 )
 

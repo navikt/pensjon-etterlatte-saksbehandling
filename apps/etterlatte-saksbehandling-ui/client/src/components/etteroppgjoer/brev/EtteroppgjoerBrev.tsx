@@ -26,11 +26,14 @@ export function EtteroppgjoerBrev() {
     ferdigstillEtteroppgjoerForbehandlingBrev
   )
 
+  const kanRedigeres = etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT
+
   const ferdigstillForbehandling = async () => {
     const forbehandlingId = etteroppgjoer.behandling.id
     ferdigstillForbehandlingRequest({ forbehandlingId })
 
     // TODO: redirect?
+    alert('Ferdigstilt, mangler redirect')
   }
 
   useEffect(() => {
@@ -55,7 +58,7 @@ export function EtteroppgjoerBrev() {
             Brev
           </Heading>
           {mapSuccess(brevResult, (brev) => (
-            <BrevMottakerWrapper brev={brev} kanRedigeres />
+            <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
           ))}
         </VStack>
       </Box>
@@ -72,7 +75,7 @@ export function EtteroppgjoerBrev() {
           success: (brev) => (
             <RedigerbartBrev
               brev={brev}
-              kanRedigeres={etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT}
+              kanRedigeres={kanRedigeres}
               skalGaaViaBehandling
               tilbakestillingsaction={() => alert('Not supported')}
             />
@@ -100,7 +103,7 @@ export function EtteroppgjoerBrev() {
             </Button>
           </div>
 
-          {etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT && (
+          {kanRedigeres && (
             <div>
               <Button
                 variant="primary"

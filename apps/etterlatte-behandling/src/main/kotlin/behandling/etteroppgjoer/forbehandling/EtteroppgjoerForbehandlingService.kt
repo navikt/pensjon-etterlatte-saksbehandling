@@ -212,7 +212,7 @@ class EtteroppgjoerForbehandlingService(
                     sakId = sakId,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.ETTEROPPGJOER,
-                    merknad = null,
+                    merknad = "Etteroppgjør for $inntektsaar",
                 ),
         )
     }

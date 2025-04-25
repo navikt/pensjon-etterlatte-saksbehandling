@@ -113,7 +113,7 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, sakId, bruker)
+                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, true)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {

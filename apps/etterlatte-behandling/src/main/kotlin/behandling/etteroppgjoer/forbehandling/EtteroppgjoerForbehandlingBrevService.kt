@@ -99,6 +99,7 @@ class EtteroppgjoerForbehandlingBrevService(
         behandlingId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
+        skalLagres: Boolean,
     ): Pdf {
         val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
         val request =
@@ -107,7 +108,7 @@ class EtteroppgjoerForbehandlingBrevService(
                     sak = forbehandling.behandling.sak,
                     brevInnholdData = brevInnhold,
                     brevRedigerbarInnholdData = redigerbartInnhold,
-                    skalLagres = false, // TODO: utlede dette for etteroppgjørbrev
+                    skalLagres = skalLagres, // TODO: utlede dette for etteroppgjørbrev
                     brukerTokenInfo = brukerTokenInfo,
                 )
             }

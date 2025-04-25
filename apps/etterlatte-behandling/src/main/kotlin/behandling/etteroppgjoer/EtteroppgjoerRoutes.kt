@@ -153,7 +153,9 @@ fun Route.etteroppgjoerRoutes(
             sjekkEtteroppgjoerEnabled(featureToggleService)
             runBlocking {
                 forbehandlingBrevService.ferdigstillForbehandlingBrev(behandlingId, HardkodaSystembruker.etteroppgjoer)
-                forbehandlingService.ferdigstillForbehandling(behandlingId)
+                inTransaction {
+                    forbehandlingService.ferdigstillForbehandling(behandlingId)
+                }
             }
 
             call.respond(HttpStatusCode.OK)

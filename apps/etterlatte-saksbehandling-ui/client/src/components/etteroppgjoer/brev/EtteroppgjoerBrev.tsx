@@ -28,6 +28,7 @@ export function EtteroppgjoerBrev() {
   const ferdigstillForbehandling = async () => {
     const forbehandlingId = etteroppgjoer.behandling.id
     ferdigstillForbehandlingRequest({ forbehandlingId })
+
     // TODO: redirect?
   }
 

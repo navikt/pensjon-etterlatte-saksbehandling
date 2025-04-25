@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -65,14 +66,19 @@ class BeregningsGrunnlagService(
 
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
+                val virkningstidspunkt =
+                    behandling.virkningstidspunkt ?: throw InternfeilException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
-                if (behandling.sakType == SakType.BARNEPENSJON) {
+                if (behandling.sakType == SakType.BARNEPENSJON && virkningstidspunkt.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
                     validerSoeskenMedIBeregning(
                         behandlingId,
                         beregningsGrunnlag,
                         grunnlag,
                     )
+                } else {
+                    logger.info("Virkningstidspunktet er $virkningstidspunkt, trenger ikke å validere søsken i beregningsgrunnlaget")
                 }
+
                 val kanLagreDetteGrunnlaget =
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {
                         // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
@@ -161,7 +167,14 @@ class BeregningsGrunnlagService(
                 .map { it.foedselsnummer.value }
 
         if (soeskensFoedselsnummere.isNotEmpty()) {
-            val avdoed = grunnlag.hentAvdoede().first().hentAvdoedesbarn()!!
+            val avdoede = grunnlag.hentAvdoede()
+
+            // Gammelt regelverk i Gjenyn har ikke støtte for flere avdøde. Dette skal beregnes med andre regler enn vanlig søskenjustering
+            if (avdoede.size > 1) {
+                throw BPBeregningsgrunnlagStoetterIkkeFlereAvdoedeVedSoeskenJusteringException(behandlingId)
+            }
+
+            val avdoed = avdoede.first().hentAvdoedesbarn()!!
             val avdoedesBarn = avdoed.verdi.avdoedesBarn!!.associateBy({ it.foedselsnummer.value }, { it })
 
             val alleSoeskenFinnes = soeskensFoedselsnummere.all { fnr -> avdoedesBarn.contains(fnr) }
@@ -531,6 +544,16 @@ class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
 ) : UgyldigForespoerselException(
         code = "BP_BEREGNING_SOESKEN_IKKE_AVDOEDES_BARN",
         detail = "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn",
+        meta = mapOf("behandlingId" to behandlingId),
+    )
+
+class BPBeregningsgrunnlagStoetterIkkeFlereAvdoedeVedSoeskenJusteringException(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BP_BEREGNING_STOETTER_IKKE_FLERE_AVDOEDE",
+        detail =
+            "Behandlingsgrunnlaget inneholder flere avdøde, dette er ikke støttet ved søskenjustering " +
+                "og gammelt regelverk. Vurder manuell overstyring av beregning..",
         meta = mapOf("behandlingId" to behandlingId),
     )
 

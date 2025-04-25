@@ -95,6 +95,10 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
+                coEvery { virkningstidspunkt } returns
+                    mockk {
+                        coEvery { dato } returns YearMonth.of(2022, 8)
+                    }
             }
         val behandlingId = randomUUID()
         val brukertokeninfo = simpleSaksbehandler()
@@ -129,6 +133,10 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
+                coEvery { virkningstidspunkt } returns
+                    mockk {
+                        coEvery { dato } returns YearMonth.of(2022, 8)
+                    }
             }
         val behandlingId = randomUUID()
         val brukertokeninfo = simpleSaksbehandler()

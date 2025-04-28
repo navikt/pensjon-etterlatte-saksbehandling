@@ -36,7 +36,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id, t.relatert_forbehandling_id
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.id = ?
                         """.trimIndent(),
@@ -52,7 +52,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id, t.relatert_forbehandling_id
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.sak_id = ?
                         """.trimIndent(),

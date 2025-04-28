@@ -317,6 +317,7 @@ class BehandlingStatusServiceImpl(
                 "Iverksatt behandling må ha virkningstidspunkt"
             }
 
+        // TODO: kanskje litt bedre sjekk her
         val virkAar = virk.dato.year
         if (Year.now().value > virkAar) {
             etteroppgjoerService.opprettEtteroppgjoer(behandling.sak.id, virkAar)

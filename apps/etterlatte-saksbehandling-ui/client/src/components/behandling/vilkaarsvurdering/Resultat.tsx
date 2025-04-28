@@ -23,9 +23,6 @@ import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnla
 import { formaterSakstype } from '~utils/formatering/formatering'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/EnigUenigTilbakemelding'
-import { ClickEvent } from '~utils/amplitude'
-import { useBehandling } from '~components/behandling/useBehandling'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -53,7 +50,6 @@ export const Resultat = (props: Props) => {
     revurderingsaarsak,
   } = props
   const [svar, setSvar] = useState<ISvar>()
-  const behandling = useBehandling()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
   const dispatch = useAppDispatch()
@@ -198,17 +194,6 @@ export const Resultat = (props: Props) => {
           </VStack>
         </VurderAlleVilkaarBox>
       )}
-
-      {behandling?.behandlingType === IBehandlingsType.REVURDERING &&
-        behandling.sakType === SakType.OMSTILLINGSSTOENAD && (
-          <Box paddingBlock="8 0">
-            <EnigUenigTilbakemelding
-              spoersmaal="Informasjonen bruker har oppgitt gir meg nok til å behandle saken"
-              clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER_REVURDERING}
-              behandlingId={behandlingId}
-            />
-          </Box>
-        )}
 
       <Box paddingBlock="4 8" paddingInline="16 4">
         {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (

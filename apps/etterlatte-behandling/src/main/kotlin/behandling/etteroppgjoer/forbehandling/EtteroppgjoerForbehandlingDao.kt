@@ -69,9 +69,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, relatert_forbehandling_id
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id
@@ -91,7 +91,6 @@ class EtteroppgjoerForbehandlingDao(
                     ),
                 )
                 statement.setLong(8, forbehandling.brevId)
-                statement.setObject(9, forbehandling.relatertForbehandlingId)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -311,7 +310,6 @@ class EtteroppgjoerForbehandlingDao(
                     tom = getDate("tom").let { YearMonth.from(it.toLocalDate()) },
                 ),
             brevId = getLongOrNull("brev_id"),
-            relatertForbehandlingId = getString("relatert_forbehandling_id")?.let { UUID.fromString(it) },
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

@@ -93,7 +93,6 @@ class EtteroppgjoerForbehandlingService(
         val forbehandlingCopy =
             forbehandling.copy(
                 id = UUID.randomUUID(),
-                relatertForbehandlingId = forbehandling.id,
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
             )

@@ -140,28 +140,22 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        // hvis relatertForbehandlingId er satt, vis faktiskInntekt fra forrige ferdigstilte forbehandling
-        // slik at saksbehandler kan se hva som ble satt og kan korrigere
-        val relevantBehandlingId = forbehandling.relatertForbehandlingId ?: forbehandlingId
-        if (relevantBehandlingId != forbehandlingId) {
-            logger.info("Henter faktiskInntekt for forbehandling $forbehandlingId fra forbehandling $relevantBehandlingId")
-        }
-
         val faktiskInntekt =
             runBlocking {
                 beregningKlient.hentAvkortingFaktiskInntekt(
                     EtteroppgjoerFaktiskInntektRequest(
-                        forbehandlingId = relevantBehandlingId,
+                        forbehandlingId = forbehandlingId,
                     ),
                     brukerTokenInfo,
                 )
             }
+
         val beregnetEtteroppgjoerResultat =
             runBlocking {
                 beregningKlient.hentBeregnetEtteroppgjoerResultat(
                     EtteroppgjoerHentBeregnetResultatRequest(
                         forbehandling.aar,
-                        relevantBehandlingId,
+                        forbehandlingId,
                         sisteIverksatteBehandling.id,
                     ),
                     brukerTokenInfo,
@@ -263,23 +257,22 @@ class EtteroppgjoerForbehandlingService(
         sak: Sak,
         inntektsaar: Int,
     ) {
-        val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
-        if (forbehandlinger.any { it.aar == inntektsaar && !it.erFerdigstilt() }) {
+        if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
+            throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
+        }
+
+        if (behandlingService.hentSisteIverksatte(sak.id) == null) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
             throw InternfeilException(
-                "Kan ikke opprette forbehandling fordi det allerede er opprettett forbehandling som ikke er ferdigstilt",
+                "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
             )
         }
 
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
-
         if (etteroppgjoer == null) {
             logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
             throw InternfeilException("Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør")
-        }
-
-        if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
-            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
-            throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
         }
 
         if (etteroppgjoer.status != EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
@@ -289,10 +282,10 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        if (behandlingService.hentSisteIverksatte(sak.id) == null) {
-            logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
+        val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
+        if (forbehandlinger.any { it.aar == inntektsaar && !it.erFerdigstilt() }) {
             throw InternfeilException(
-                "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
+                "Kan ikke opprette forbehandling fordi det allerede eksisterer en forbehandling som ikke er ferdigstilt",
             )
         }
 

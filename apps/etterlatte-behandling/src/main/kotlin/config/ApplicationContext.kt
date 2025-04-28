@@ -561,6 +561,14 @@ internal class ApplicationContext(
             sakTilgang,
         )
 
+    val etteroppgjoerService =
+        EtteroppgjoerService(
+            dao = etteroppgjoerDao,
+            sakLesDao = sakLesDao,
+            sakService = sakService,
+            vedtakKlient = vedtakKlient,
+        )
+
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
 
     val inntektsjusteringSelvbetjeningService =
@@ -639,6 +647,7 @@ internal class ApplicationContext(
             generellBehandlingService,
             aktivitetspliktService,
             saksbehandlerService,
+            etteroppgjoerService,
         )
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
@@ -652,14 +661,6 @@ internal class ApplicationContext(
             brevApiKlient,
             vedtakKlient,
             grunnlagService,
-        )
-
-    val etteroppgjoerService =
-        EtteroppgjoerService(
-            dao = etteroppgjoerDao,
-            sakLesDao = sakLesDao,
-            sakService = sakService,
-            vedtakKlient = vedtakKlient,
         )
 
     private val inntektskomponentService =

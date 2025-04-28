@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -14,6 +15,8 @@ import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -28,6 +31,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
+import java.time.Year
 import java.util.UUID
 
 interface BehandlingStatusService {
@@ -112,6 +116,7 @@ class BehandlingStatusServiceImpl(
     private val generellBehandlingService: GenerellBehandlingService,
     private val aktivitetspliktService: AktivitetspliktService,
     private val saksbehandlerService: SaksbehandlerService,
+    private val etteroppgjoerService: EtteroppgjoerService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -216,6 +221,8 @@ class BehandlingStatusServiceImpl(
         vedtak: VedtakEndringDTO,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        // TODO: ferdigstill forbehandling
+
         if (vedtak.vedtakType == VedtakType.AVSLAG) {
             lagreNyBehandlingStatus(behandling.tilAvslag())
             haandterUtland(behandling)
@@ -290,11 +297,29 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId)
         lagreNyBehandlingStatus(behandling.tilIverksatt())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
+
+        haandterEtteroppgjoer(behandling)
+
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
         haandterAktivitetspliktOppgave(behandling)
         if (behandling.type == BehandlingType.REVURDERING) {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
+        }
+    }
+
+    private fun haandterEtteroppgjoer(behandling: Behandling) {
+        if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) return
+        if (behandling.sak.sakType != SakType.OMSTILLINGSSTOENAD) return
+
+        val virk =
+            krevIkkeNull(behandling.virkningstidspunkt) {
+                "Iverksatt behandling må ha virkningstidspunkt"
+            }
+
+        val virkAar = virk.dato.year
+        if (Year.now().value > virkAar) {
+            etteroppgjoerService.opprettEtteroppgjoer(behandling.sak.id, virkAar)
         }
     }
 

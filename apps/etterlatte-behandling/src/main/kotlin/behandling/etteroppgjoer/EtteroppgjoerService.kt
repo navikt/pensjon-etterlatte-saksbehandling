@@ -52,7 +52,6 @@ class EtteroppgjoerService(
             }
 
         sakerMedUtbetaling
-            .filter { sakId -> dao.hentEtteroppgjoer(sakId, inntektsaar) == null } // kun hvis ikke allerede opprettet etteroppgjør
             .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
 
         logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
@@ -76,18 +75,22 @@ class EtteroppgjoerService(
         dao.lagerEtteroppgjoer(sakId, inntektsaar, status)
     }
 
-    private fun opprettEtteroppgjoer(
+    fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
     ) {
-        // TODO ytterlige sjekker på sak før vi oppretter etteroppgjoer
+        if (dao.hentEtteroppgjoer(sakId, inntektsaar) != null) {
+            logger.error("Kan ikke opprette etteroppgjør for sak=$sakId for inntektsaar=$inntektsaar da det allerede eksisterer")
+            return
+        }
+
+        logger.info(
+            "Oppretter etteroppgjør for sakId=$sakId for inntektsaar=$inntektsaar med status=${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}",
+        )
         dao.lagerEtteroppgjoer(
             sakId,
             inntektsaar,
             EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-        )
-        logger.info(
-            "Oppretter etteroppgjør for sakId=$sakId for inntektsaar=$inntektsaar med status=${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}",
         )
     }
 }

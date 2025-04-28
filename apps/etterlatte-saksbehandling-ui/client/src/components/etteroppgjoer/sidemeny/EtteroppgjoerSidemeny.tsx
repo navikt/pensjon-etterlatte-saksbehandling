@@ -1,19 +1,15 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
-import { Heading } from '@navikt/ds-react'
+import { Sidebar } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import React from 'react'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
+import { EtteroppgjoerSidemenyOppsummering } from '~components/etteroppgjoer/sidemeny/EtteroppgjoerSidemenyOppsummering'
 
 export function EtteroppjoerSidemeny() {
   const etteroppgjoer = useEtteroppgjoer()
   return (
     <Sidebar>
-      <SidebarPanel $border>
-        <Heading size="small">Forbehandling etteroppgjør</Heading>
-      </SidebarPanel>
-
-      {etteroppgjoer.behandling.status}
+      <EtteroppgjoerSidemenyOppsummering />
 
       <NotatPanel sakId={etteroppgjoer.behandling.sak.id} fnr={etteroppgjoer.behandling.sak.ident} />
 

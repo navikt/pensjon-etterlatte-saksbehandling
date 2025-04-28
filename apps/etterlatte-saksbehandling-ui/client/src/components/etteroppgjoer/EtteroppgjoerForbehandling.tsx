@@ -14,7 +14,7 @@ import {
   EtteroppjoerForbehandlingSteg,
   EtteroppjoerSteg,
 } from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
-import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/EtteroppgjoerSidemeny'
+import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/sidemeny/EtteroppgjoerSidemeny'
 import { OversiktOverEtteroppgjoer } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/OversiktOverEtteroppgjoer'
 
 export function EtteroppgjoerForbehandling() {

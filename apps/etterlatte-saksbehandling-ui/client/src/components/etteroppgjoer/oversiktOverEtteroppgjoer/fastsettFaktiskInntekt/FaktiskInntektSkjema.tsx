@@ -85,6 +85,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
       onSubmit={handleSubmit((data) => submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data)))}
     >
       <VStack gap="4">
+        {/*TODO fiks dobbel visning av tag og heading*/}
         <Heading size="large">Fastsett faktisk inntekt</Heading>
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
@@ -129,6 +130,9 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
         })}
 
         <HStack gap="4">
+          <Button size="small" loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}>
+            Fastsett inntekt
+          </Button>
           <Button
             type="button"
             variant="secondary"
@@ -137,10 +141,6 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
             onClick={() => setRedigerFaktiskInntekt(false)}
           >
             Avbryt
-          </Button>
-
-          <Button size="small" loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}>
-            Fastsett inntekt
           </Button>
         </HStack>
       </VStack>

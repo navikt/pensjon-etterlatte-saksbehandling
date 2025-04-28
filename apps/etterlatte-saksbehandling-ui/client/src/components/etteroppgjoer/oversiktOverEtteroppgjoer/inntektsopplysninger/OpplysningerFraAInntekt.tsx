@@ -1,4 +1,4 @@
-import { Heading, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Heading, Table, VStack } from '@navikt/ds-react'
 import { AInntekt, AInntektMaaned } from '~shared/types/Etteroppgjoer'
 import { NOK } from '~utils/formatering/formatering'
 
@@ -10,6 +10,7 @@ export const OpplysningerFraAInntekt = ({ ainntekt }: { ainntekt: AInntekt }) =>
   return (
     <VStack gap="4">
       <Heading size="small">Opplysninger fra A-Inntekt</Heading>
+      <BodyShort>Opplysnignene er oppgitt som brutto inntekt</BodyShort>
       {!!ainntekt.inntektsmaaneder?.length ? (
         <Table>
           <Table.Header>

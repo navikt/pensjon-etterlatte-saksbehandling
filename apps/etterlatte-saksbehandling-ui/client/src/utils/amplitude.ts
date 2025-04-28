@@ -69,6 +69,9 @@ export enum ClickEvent {
   // Bytt sak i sakoversikten
   BYTT_SAK_SAKOVERSIKT = 'bytt sak sakoversikt',
 
+  // Sidemeny
+  KOLLAPS_SIDEMENY = 'kollaps sidmeny',
+
   // Generelt
   VIS_VARSLINGER = 'vis varslinger',
   VIS_BEHANDLING_HISTORIKK = 'vis behandling historikk',

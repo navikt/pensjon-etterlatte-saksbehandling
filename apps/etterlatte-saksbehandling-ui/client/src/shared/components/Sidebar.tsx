@@ -2,14 +2,23 @@ import { ReactNode, useState } from 'react'
 import { Button } from '@navikt/ds-react'
 import styled, { css } from 'styled-components'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const Sidebar = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false)
 
+  const paaKollaps = (kollaps: boolean) => {
+    if (kollaps) {
+      trackClick(ClickEvent.KOLLAPS_SIDEMENY)
+    }
+
+    setCollapsed(kollaps)
+  }
+
   return (
     <CollapsibleSidebar $collapsed={collapsed}>
       <SidebarTools>
-        <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed(!collapsed)}>
+        <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => paaKollaps(!collapsed)}>
           {collapsed ? (
             <ChevronLeftDoubleIcon aria-label="Åpne sidemeny" />
           ) : (

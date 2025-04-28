@@ -207,7 +207,13 @@ class EtteroppgjoerService(
         behandlingId: UUID,
     ): Aarsoppgjoer {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw GenerellIkkeFunnetException()
-        return avkorting.aarsoppgjoer.single { it.aar == aar }
+
+        val aarsoppgjoer = avkorting.aarsoppgjoer.filter { it.aar == aar }
+        return when (aarsoppgjoer.size) {
+            1 -> aarsoppgjoer.single()
+            0 -> throw InternfeilException("Fant ikke aarsoppgjoer for $aar")
+            else -> throw InternfeilException("Fant ${aarsoppgjoer.size} for $aar som ikke håndteres riktig")
+        }
     }
 }
 

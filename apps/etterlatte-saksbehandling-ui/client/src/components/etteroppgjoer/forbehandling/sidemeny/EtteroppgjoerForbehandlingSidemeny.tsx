@@ -3,13 +3,13 @@ import { Sidebar } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import React from 'react'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
-import { EtteroppgjoerSidemenyOppsummering } from '~components/etteroppgjoer/sidemeny/EtteroppgjoerSidemenyOppsummering'
+import { EtteroppgjoerForbehandlingSidemenyOppsummering } from '~components/etteroppgjoer/forbehandling/sidemeny/EtteroppgjoerForbehandlingSidemenyOppsummering'
 
 export function EtteroppjoerSidemeny() {
   const etteroppgjoer = useEtteroppgjoer()
   return (
     <Sidebar>
-      <EtteroppgjoerSidemenyOppsummering />
+      <EtteroppgjoerForbehandlingSidemenyOppsummering />
 
       <NotatPanel sakId={etteroppgjoer.behandling.sak.id} fnr={etteroppgjoer.behandling.sak.ident} />
 

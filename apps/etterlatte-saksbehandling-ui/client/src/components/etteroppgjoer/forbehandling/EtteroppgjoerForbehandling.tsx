@@ -15,7 +15,7 @@ import {
   EtteroppjoerForbehandlingStegmeny,
 } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { EtteroppgjoerForbehandlingOversikt } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandlingOversikt'
-import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/sidemeny/EtteroppgjoerSidemeny'
+import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/forbehandling/sidemeny/EtteroppgjoerForbehandlingSidemeny'
 
 export function EtteroppgjoerForbehandling() {
   const { etteroppgjoerId } = useParams()

@@ -6,6 +6,7 @@ import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fas
 import { Link } from 'react-router-dom'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
+import { BrevutfallAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/BrevutfallAvForbehandling'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const etteroppgjoer = useEtteroppgjoer()
@@ -20,7 +21,13 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
       <FastsettFaktiskInntekt />
-      <ResultatAvForbehandling />
+
+      {!!etteroppgjoer.beregnetEtteroppgjoerResultat && (
+        <VStack gap="4">
+          <ResultatAvForbehandling />
+          <BrevutfallAvForbehandling />
+        </VStack>
+      )}
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">

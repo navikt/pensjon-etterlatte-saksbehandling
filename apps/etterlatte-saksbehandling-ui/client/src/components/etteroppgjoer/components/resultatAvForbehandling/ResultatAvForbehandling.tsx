@@ -1,18 +1,15 @@
-import { BodyShort, Box, Heading, HelpText, HStack, Label, Table, VStack } from '@navikt/ds-react'
+import { Box, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
-import { EtteroppgjoerResultatType } from '~shared/types/Etteroppgjoer'
-import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
-import { useAppSelector } from '~store/Store'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
 export const ResultatAvForbehandling = () => {
-  const { etteroppgjoer } = useAppSelector((state) => state.etteroppgjoerReducer)
+  const etteroppgjoer = useEtteroppgjoer()
 
   if (!etteroppgjoer || !etteroppgjoer.beregnetEtteroppgjoerResultat) {
     return null
   }
 
   const resultat = etteroppgjoer?.beregnetEtteroppgjoerResultat
-  const utfallAvForbehandling = resultat.resultatType
 
   return (
     <VStack gap="4">
@@ -66,64 +63,6 @@ export const ResultatAvForbehandling = () => {
           </Table.Body>
         </Table>
       </Box>
-      {/*TODO: ikke vise dette ved revurdering*/}
-      {utfallAvForbehandling === EtteroppgjoerResultatType.TILBAKEKREVING && (
-        <Box
-          marginBlock="8 0"
-          paddingInline="6"
-          paddingBlock="8"
-          background="surface-action-subtle"
-          borderColor="border-action"
-          borderWidth="0 0 0 4"
-          maxWidth="42.5rem"
-        >
-          <HStack gap="2" maxWidth="fit-content">
-            <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
-            <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-              <Label>Forbehandlingen viser at det blir tilbakekreving</Label>
-              <BodyShort>Du skal sende varselbrev.</BodyShort>
-            </VStack>
-          </HStack>
-        </Box>
-      )}
-      {utfallAvForbehandling === EtteroppgjoerResultatType.ETTERBETALING && (
-        <Box
-          marginBlock="8 0"
-          paddingInline="8"
-          paddingBlock="4"
-          background="surface-action-subtle"
-          borderColor="border-action"
-          borderWidth="0 0 0 4"
-          maxWidth="42.5rem"
-        >
-          <HStack gap="2" maxWidth="fit-content">
-            <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
-            <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-              <Label>Forbehandlingen viser at det blir etterbetaling</Label>
-              <BodyShort>Du skal sende varselbrev.</BodyShort>
-            </VStack>
-          </HStack>
-        </Box>
-      )}
-      {utfallAvForbehandling === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER && (
-        <Box
-          marginBlock="8 0"
-          paddingInline="6"
-          paddingBlock="4"
-          background="surface-action-subtle"
-          borderColor="border-action"
-          borderWidth="0 0 0 4"
-          maxWidth="42.5rem"
-        >
-          <HStack gap="2" maxWidth="fit-content">
-            <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
-            <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-              <Label>Forbehandlingen viser at det blir ingen endring</Label>
-              <BodyShort>Du skal sende informasjonsbrev.</BodyShort>
-            </VStack>
-          </HStack>
-        </Box>
-      )}
     </VStack>
   )
 }

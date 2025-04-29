@@ -5,7 +5,7 @@ import { Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React from 'react'
 
-export const EtteroppgjoerSidemenyOppsummering = () => {
+export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
   const etteroppgjoer = useEtteroppgjoer()
 
   const forbehandlingErFerdigstilt = etteroppgjoer.behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT

@@ -9,7 +9,7 @@ import { FaktiskInntektSkjema } from '~components/etteroppgjoer/oversiktOverEtte
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
 
-export const FastsettFaktiskInntekt = () => {
+export const FastsettFaktiskInntekt = ({ kanRedigere = false }: { kanRedigere?: boolean }) => {
   const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(false)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -17,6 +17,7 @@ export const FastsettFaktiskInntekt = () => {
   const { behandling } = useEtteroppgjoer()
 
   const erRedigerbar =
+    kanRedigere &&
     (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
       behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)

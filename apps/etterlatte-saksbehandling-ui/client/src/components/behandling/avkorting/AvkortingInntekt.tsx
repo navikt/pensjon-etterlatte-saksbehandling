@@ -64,9 +64,14 @@ export const AvkortingInntekt = ({
         </VStack>
       )}
       {avkorting && !erFoerstegangsbehandling && avkorting.avkortingGrunnlag.length > 1 && (
-        <Button variant="tertiary" onClick={() => setVisHistorikk(!visHistorikk)}>
-          Historikk{' '}
-          {visHistorikk ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />}
+        <Button
+          variant="tertiary"
+          onClick={() => setVisHistorikk(!visHistorikk)}
+          icon={
+            visHistorikk ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />
+          }
+        >
+          Vis alle
         </Button>
       )}
       <AvkortingInntektForm

@@ -7,8 +7,7 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link, useNavigate } from 'react-router-dom'
 import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
-import { EtteroppgjoerFramTilbakeKnapperad } from '~components/etteroppgjoer/stegmeny/EtteroppgjoerFramTilbakeKnapperad'
-import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
+import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
@@ -17,7 +16,7 @@ import { isPending } from '@reduxjs/toolkit'
 import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
-export function EtteroppgjoerBrev() {
+export function EtteroppgjoerForbehandlingBrev() {
   const etteroppgjoer = useEtteroppgjoer()
   const dispatch = useAppDispatch()
   const [brevResult, fetchBrev] = useApiCall(hentBrevTilBehandling)
@@ -91,29 +90,31 @@ export function EtteroppgjoerBrev() {
           error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
         })}
 
-        <EtteroppgjoerFramTilbakeKnapperad>
-          <div>
-            <Button
-              as={Link}
-              to={`/etteroppgjoer/${etteroppgjoer.behandling.id}/${EtteroppjoerSteg.OVERSIKT}`}
-              variant="secondary"
-            >
-              Gå tilbake
-            </Button>
-          </div>
-
-          {kanRedigeres && (
+        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+          <HStack width="100%" justify="center" gap="6">
             <div>
               <Button
-                variant="primary"
-                onClick={ferdigstillForbehandling}
-                loading={isPending(ferdigstillForbehandlingResult)}
+                as={Link}
+                to={`/etteroppgjoer/${etteroppgjoer.behandling.id}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
+                variant="secondary"
               >
-                Ferdigstill
+                Gå tilbake
               </Button>
             </div>
-          )}
-        </EtteroppgjoerFramTilbakeKnapperad>
+
+            {kanRedigeres && (
+              <div>
+                <Button
+                  variant="primary"
+                  onClick={ferdigstillForbehandling}
+                  loading={isPending(ferdigstillForbehandlingResult)}
+                >
+                  Ferdigstill
+                </Button>
+              </div>
+            )}
+          </HStack>
+        </Box>
       </VStack>
     </HStack>
   )

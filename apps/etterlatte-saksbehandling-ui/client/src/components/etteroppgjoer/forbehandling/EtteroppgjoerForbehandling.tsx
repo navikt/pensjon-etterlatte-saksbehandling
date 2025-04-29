@@ -7,15 +7,15 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { EtteroppgjoerBrev } from '~components/etteroppgjoer/brev/EtteroppgjoerBrev'
+import { EtteroppgjoerForbehandlingBrev } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandlingBrev'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import {
+  EtteroppjoerForbehandlingStegmeny,
   EtteroppjoerForbehandlingSteg,
-  EtteroppjoerSteg,
-} from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
+} from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/EtteroppgjoerSidemeny'
-import { OversiktOverEtteroppgjoer } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/OversiktOverEtteroppgjoer'
+import { EtteroppgjoerForbehandlingOversikt } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandlingOversikt'
 
 export function EtteroppgjoerForbehandling() {
   const { etteroppgjoerId } = useParams()
@@ -34,7 +34,7 @@ export function EtteroppgjoerForbehandling() {
   return (
     <>
       <StatusBar ident={etteroppgjoerReducer.etteroppgjoer?.behandling.sak.ident} />
-      <EtteroppjoerForbehandlingSteg />
+      <EtteroppjoerForbehandlingStegmeny />
 
       {mapResult(etteroppgjoerResult, {
         pending: <Spinner label="Henter etteroppgjørbehandling" />,
@@ -47,13 +47,13 @@ export function EtteroppgjoerForbehandling() {
         <HStack height="100%" minHeight="100vh" wrap={false}>
           <Box width="100%">
             <Routes>
-              <Route path={EtteroppjoerSteg.OVERSIKT} element={<OversiktOverEtteroppgjoer />} />
-              <Route path={EtteroppjoerSteg.OPPSUMMERING_OG_BREV} element={<EtteroppgjoerBrev />} />
+              <Route path={EtteroppjoerForbehandlingSteg.OVERSIKT} element={<EtteroppgjoerForbehandlingOversikt />} />
+              <Route path={EtteroppjoerForbehandlingSteg.BREV} element={<EtteroppgjoerForbehandlingBrev />} />
               <Route
                 path="*"
                 element={
                   <Navigate
-                    to={`/etteroppgjoer/${etteroppgjoerReducer.etteroppgjoer.behandling.id}/${EtteroppjoerSteg.OVERSIKT}`}
+                    to={`/etteroppgjoer/${etteroppgjoerReducer.etteroppgjoer.behandling.id}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
                     replace
                   />
                 }

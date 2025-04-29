@@ -27,7 +27,7 @@ import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
 import { initAmplitude } from '~utils/amplitude'
 import { Unleashcontext, useUnleash } from '~useUnleash'
-import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/EtteroppgjoerForbehandling'
+import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandling'
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
 
 initAmplitude()

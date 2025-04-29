@@ -66,7 +66,7 @@ export const ResultatAvForbehandling = () => {
           </Table.Body>
         </Table>
       </Box>
-
+      {/*TODO: ikke vise dette ved revurdering*/}
       {utfallAvForbehandling === EtteroppgjoerResultatType.TILBAKEKREVING && (
         <Box
           marginBlock="8 0"

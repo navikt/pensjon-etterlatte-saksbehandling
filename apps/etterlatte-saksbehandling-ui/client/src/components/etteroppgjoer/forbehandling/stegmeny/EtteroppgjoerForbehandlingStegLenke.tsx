@@ -4,16 +4,16 @@ import { Label } from '@navikt/ds-react'
 import { NavLink } from 'react-router-dom'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
 import React from 'react'
-import { EtteroppjoerSteg } from '~components/etteroppgjoer/stegmeny/EtteroppjoerForbehandlingSteg'
+import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 
 interface Props {
-  path: EtteroppjoerSteg
+  path: EtteroppjoerForbehandlingSteg
   description: string
   enabled: boolean
   erSisteRoute?: boolean
 }
 
-export function EtteroppgjoerStegLenke({ path, description, enabled, erSisteRoute }: Props) {
+export function EtteroppgjoerForbehandlingStegLenke({ path, description, enabled, erSisteRoute }: Props) {
   const match = useMatch('/etteroppgjoer/:etteroppgjoerId/:steg')
   const { etteroppgjoerId, steg } = match?.params || {}
 

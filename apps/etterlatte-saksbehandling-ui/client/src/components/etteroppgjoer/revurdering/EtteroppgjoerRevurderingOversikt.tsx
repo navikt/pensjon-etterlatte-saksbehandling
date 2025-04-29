@@ -14,7 +14,7 @@ import { Inntektsopplysninger } from '~components/etteroppgjoer/oversiktOverEtte
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/resultatAvForbehandling/ResultatAvForbehandling'
 
-export const Etteroppgjoeroversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const etteroppgjoerId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)

@@ -11,11 +11,11 @@ import { EtteroppgjoerForbehandlingBrev } from '~components/etteroppgjoer/forbeh
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import {
-  EtteroppjoerForbehandlingStegmeny,
   EtteroppjoerForbehandlingSteg,
+  EtteroppjoerForbehandlingStegmeny,
 } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
-import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/EtteroppgjoerSidemeny'
 import { EtteroppgjoerForbehandlingOversikt } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandlingOversikt'
+import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/sidemeny/EtteroppgjoerSidemeny'
 
 export function EtteroppgjoerForbehandling() {
   const { etteroppgjoerId } = useParams()

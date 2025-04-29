@@ -39,7 +39,6 @@ data class EtteroppgjoerForbehandling(
     val hendelseId: UUID,
     val opprettet: Tidspunkt,
     val status: EtteroppgjoerForbehandlingStatus,
-    val relatertForbehandlingId: UUID? = null,
     val sak: Sak,
     val aar: Int,
     val innvilgetPeriode: Periode,

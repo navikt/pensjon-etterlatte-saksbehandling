@@ -152,7 +152,7 @@ fun Route.etteroppgjoerRoutes(
         post("/{$BEHANDLINGID_CALL_PARAMETER}/ferdigstill-forbehandling") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             runBlocking {
-                forbehandlingBrevService.ferdigstillForbehandlingBrev(behandlingId, HardkodaSystembruker.etteroppgjoer)
+                forbehandlingBrevService.ferdigstillOgDistribuerBrev(behandlingId, HardkodaSystembruker.etteroppgjoer)
                 inTransaction {
                     forbehandlingService.ferdigstillForbehandling(behandlingId)
                 }

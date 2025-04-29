@@ -87,11 +87,16 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillForbehandlingBrev(
+    suspend fun ferdigstillOgDistribuerBrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         brevKlient.ferdigstillStrukturertBrev(behandlingId, Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype, brukerTokenInfo)
+
+        // TODO: se klage/aktivitetsplikt
+
+        // TODO: journalfoer brev
+        // TODO: distribuer brev
     }
 
     suspend fun genererPdf(

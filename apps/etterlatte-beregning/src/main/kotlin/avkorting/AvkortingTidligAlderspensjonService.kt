@@ -2,7 +2,7 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -27,45 +27,7 @@ class AvkortingTidligAlderspensjonService(
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
 
-        val (overstyrtInntektsavkorting, aarsoppgjoer) =
-            when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    val foersteAar =
-                        avkorting.aarsoppgjoer.first() as? AarsoppgjoerLoepende
-                            ?: throw InternfeilException("Førstegangsbehandling inneholder etteroppgjør")
-                    val overstyrtFoersteAar =
-                        foersteAar.inntektsavkorting.find {
-                            it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
-                        }
-                    if (overstyrtFoersteAar == null && avkorting.aarsoppgjoer.size == 2) {
-                        val andreAar =
-                            avkorting.aarsoppgjoer.last() as? AarsoppgjoerLoepende
-                                ?: throw InternfeilException("Førstegangsbehandling inneholder etteroppgjør")
-                        val overstyrtAndreAar =
-                            andreAar.inntektsavkorting.find {
-                                it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
-                            }
-                        Pair(overstyrtAndreAar, avkorting.aarsoppgjoer.last())
-                    } else {
-                        Pair(overstyrtFoersteAar, avkorting.aarsoppgjoer.first())
-                    }
-                }
-
-                BehandlingType.REVURDERING -> {
-                    val aarsoppgjoer =
-                        avkorting.aarsoppgjoer.single {
-                            it.aar == behandling.virkningstidspunkt?.dato?.year
-                        } as? AarsoppgjoerLoepende
-                            ?: throw InternfeilException("Første revurdering i nytt år inneholder etteroppgjør")
-                    val overstyrt =
-                        aarsoppgjoer.inntektsavkorting
-                            .find {
-                                it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG &&
-                                    it.grunnlag.periode.fom == behandling.virkningstidspunkt?.dato
-                            }
-                    Pair(overstyrt, aarsoppgjoer)
-                }
-            }
+        val (overstyrtInntektsavkorting, aarsoppgjoer) = skalHaOppgaveTidligAlderspensjon(avkorting, behandling) ?: return
 
         if (overstyrtInntektsavkorting != null) {
             logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
@@ -91,5 +53,63 @@ class AvkortingTidligAlderspensjonService(
         } else {
             logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sak.sakId}, trenger ingen oppgave om opphør.")
         }
+    }
+
+    private fun skalHaOppgaveTidligAlderspensjon(
+        avkorting: Avkorting,
+        behandling: DetaljertBehandling,
+    ): Pair<Inntektsavkorting?, Aarsoppgjoer>? {
+        val (overstyrtInntektsavkorting, aarsoppgjoer) =
+            when (behandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    val foersteAar =
+                        avkorting.aarsoppgjoer.firstOrNull() as? AarsoppgjoerLoepende ?: run {
+                            logger.info(
+                                "Førstegangsbehandling=${behandling.id} inneholder etteroppgjør, skal ikke ha oppgave for tidligAlderpensjon",
+                            )
+                            return null
+                        }
+                    val overstyrtFoersteAar =
+                        foersteAar.inntektsavkorting.find {
+                            it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
+                        }
+                    if (overstyrtFoersteAar == null && avkorting.aarsoppgjoer.size == 2) {
+                        val andreAar =
+                            avkorting.aarsoppgjoer.lastOrNull() as? AarsoppgjoerLoepende ?: run {
+                                logger.info(
+                                    "Førstegangsbehandling=${behandling.id} inneholder etteroppgjør, skal ikke ha oppgave for tidligAlderpensjon",
+                                )
+                                return null
+                            }
+                        val overstyrtAndreAar =
+                            andreAar.inntektsavkorting.find {
+                                it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
+                            }
+                        Pair(overstyrtAndreAar, avkorting.aarsoppgjoer.last())
+                    } else {
+                        Pair(overstyrtFoersteAar, avkorting.aarsoppgjoer.first())
+                    }
+                }
+
+                BehandlingType.REVURDERING -> {
+                    val aarsoppgjoer =
+                        avkorting.aarsoppgjoer.singleOrNull {
+                            it.aar == behandling.virkningstidspunkt?.dato?.year
+                        } as? AarsoppgjoerLoepende ?: run {
+                            logger.info(
+                                "Første revurdering=${behandling.id} i nytt år inneholder etteroppgjør, skal ikke ha oppgave for tidligAlderpensjon",
+                            )
+                            return null
+                        }
+                    val overstyrt =
+                        aarsoppgjoer.inntektsavkorting.find {
+                            it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG &&
+                                it.grunnlag.periode.fom == behandling.virkningstidspunkt?.dato
+                        }
+                    Pair(overstyrt, aarsoppgjoer)
+                }
+            }
+
+        return Pair(overstyrtInntektsavkorting, aarsoppgjoer)
     }
 }

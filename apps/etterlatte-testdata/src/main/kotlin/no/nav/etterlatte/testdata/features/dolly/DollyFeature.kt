@@ -1,6 +1,7 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
@@ -159,7 +160,7 @@ class DollyFeature(
                     val soeker =
                         when (ytelse) {
                             // TODO
-                            SoeknadType.BARNEPENSJON -> nySoeknadRequest.barn.first()
+                            SoeknadType.BARNEPENSJON -> barnListe.first()
                             SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
                         }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {

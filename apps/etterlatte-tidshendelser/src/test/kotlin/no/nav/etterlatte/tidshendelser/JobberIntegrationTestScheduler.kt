@@ -59,7 +59,7 @@ class JobberIntegrationTestScheduler(
     @Test
     fun `skal lage jobber om selv om det fins andre ikke faste jobber`() {
         jobbTestdata.opprettJobb(
-            JobbType.AO_BP20,
+            JobbType.REGULERING,
             nesteMaaned,
             nesteMaaned.atDay(5),
         )

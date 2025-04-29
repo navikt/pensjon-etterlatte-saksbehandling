@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -151,14 +150,19 @@ fun Route.etteroppgjoerRoutes(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/ferdigstill-forbehandling") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
-            runBlocking {
-                forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(behandlingId, HardkodaSystembruker.etteroppgjoer)
-                inTransaction {
-                    forbehandlingService.ferdigstillForbehandling(behandlingId)
+            kunSkrivetilgang {
+                runBlocking {
+                    forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
+                        behandlingId,
+                        brukerTokenInfo,
+                    )
+                    inTransaction {
+                        forbehandlingService.ferdigstillForbehandling(behandlingId, brukerTokenInfo)
+                    }
                 }
-            }
 
-            call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

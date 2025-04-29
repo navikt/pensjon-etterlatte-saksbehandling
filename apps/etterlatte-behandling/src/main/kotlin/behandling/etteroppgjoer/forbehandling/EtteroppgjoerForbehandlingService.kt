@@ -73,10 +73,15 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun ferdigstillForbehandling(behandlingId: UUID) {
+    fun ferdigstillForbehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         logger.info("Ferdigstiller forbehandling for behandling=$behandlingId")
         val forbehandling = dao.hentForbehandling(behandlingId)
+
         dao.lagreForbehandling(forbehandling!!.tilFerdigstilt())
+        oppgaveService.ferdigStillOppgaveUnderBehandling(forbehandling.id.toString(), OppgaveType.ETTEROPPGJOER, brukerTokenInfo)
     }
 
     fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)

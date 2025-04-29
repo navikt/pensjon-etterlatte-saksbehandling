@@ -16,7 +16,7 @@ export const EtteroppgjoerSidemenyOppsummering = () => {
       style={
         forbehandlingErFerdigstilt
           ? {
-              borderLeft: '5px solid #007C2E',
+              borderLeft: '5px solid var(--a-green-400)',
             }
           : {}
       }
@@ -25,7 +25,7 @@ export const EtteroppgjoerSidemenyOppsummering = () => {
         <VStack gap="2">
           <Heading size="small">Etteroppgjør forbehandling</Heading>
           {forbehandlingErFerdigstilt && (
-            <Heading size="xsmall" style={{ color: '#007C2E' }}>
+            <Heading size="xsmall" style={{ color: 'var(--a-green-400)' }}>
               Ferdigstilt
             </Heading>
           )}

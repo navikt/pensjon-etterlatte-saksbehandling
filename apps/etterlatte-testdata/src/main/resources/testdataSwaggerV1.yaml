@@ -27,11 +27,23 @@ paths:
       responses:
         "200": # status code
           description: Response
+    get:
+      summary: Hente vedtaket til en bruker basert på fnr
+      description: Henter en liste med alle vedtak for en gitt bruker
+      requestBody:
+        description: Request objekt med fnr for bruker.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NySoeknadRequestDTO"
+      responses:
+        "200": # status code
+          description: Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SoeknadResponseDTO'
-
+                $ref: '#/components/schemas/VedtakDTO'
 components:
   schemas:
 
@@ -49,12 +61,10 @@ components:
           items:
             type: string
 
-    SoeknadResponseDTO:
+    FoedselsnummerDTO:
       type: object
       properties:
-        status:
-          type: number
-        noekkel:
+        foedselsnummer:
           type: string
 
     SoeknadType:
@@ -62,6 +72,43 @@ components:
       enum:
         - BARNEPENSJON
         - OMSTILLINGSSTOENAD
+
+    VedtakDTO:
+      type: object
+      properties:
+        vedtak:
+          type: array
+          items:
+              $ref: '#/components/schemas/Vedtak'
+
+    Vedtak:
+      type: object
+      properties:
+        sakId:
+          type: integer
+        sakType:
+          type: string
+        virkningstidspunkt:
+          type: string
+        type:
+            type: string
+        utbetaling:
+          type: array
+          items:
+              $ref: '#/components/schemas/VedtakUtbetaling'
+
+    VedtakUtbetaling:
+      type: object
+      properties:
+        fraOgMed:
+          type: string
+        tilOgMed:
+          type: string
+        beloep:
+          type: number
+
+
+
 
   securitySchemes:
     BearerAuth:

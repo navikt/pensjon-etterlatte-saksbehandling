@@ -159,7 +159,7 @@ fun main() {
                 if (localDevelopment) {
                     routing {
                         staticResources("/static", "static")
-                        swaggerUI(path = "dolly/opprett-ytelse/swagger", swaggerFile = "testdataSwaggerV1.yaml")
+                        swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
                         api()
                     }
                 } else {
@@ -170,7 +170,7 @@ fun main() {
                     routing {
                         get("/health/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/health/isready") { call.respondText("READY", ContentType.Text.Plain) }
-                        swaggerUI(path = "dolly/opprett-ytelse/swagger", swaggerFile = "testdataSwaggerV1.yaml")
+                        swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
                         staticResources("/static", "static")
 
                         authenticate {

@@ -224,11 +224,11 @@ class EtteroppgjoerForbehandlingService(
     ): BeregnetEtteroppgjoerResultatDto {
         var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        // hvis ferdigstilt, ikke overskriv men opprett ny kopi
+        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling som skal brukes av revurdering
         if (forbehandling.erFerdigstilt()) {
             logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
             forbehandling = kopierOgLagreNyForbehandling(forbehandling)
-            // TODO: burde forbehandlingen indikere at den er for revurdering og ikke skal være synlig?
+            // TODO: burde forbehandlingen indikere at den er for revurdering og ikke skal være synlig for sb?
         }
 
         val sisteIverksatteBehandling =

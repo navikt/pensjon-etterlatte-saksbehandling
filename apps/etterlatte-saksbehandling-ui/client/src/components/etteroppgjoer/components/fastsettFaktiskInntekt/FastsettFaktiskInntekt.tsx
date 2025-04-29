@@ -5,8 +5,8 @@ import { maanedNavn } from '~utils/formatering/dato'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useState } from 'react'
-import { FaktiskInntektSkjema } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektSkjema'
-import { FaktiskInntektVisning } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektVisning'
+import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
+import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
 
 export const FastsettFaktiskInntekt = ({ kanRedigere = false }: { kanRedigere?: boolean }) => {

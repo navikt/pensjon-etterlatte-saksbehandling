@@ -10,9 +10,9 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { BodyShort, Box, Heading, HStack, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
-import { Inntektsopplysninger } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/Inntektsopplysninger'
-import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
-import { ResultatAvForbehandling } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/resultatAvForbehandling/ResultatAvForbehandling'
+import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
+import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
+import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const etteroppgjoerId = behandling.relatertBehandlingId

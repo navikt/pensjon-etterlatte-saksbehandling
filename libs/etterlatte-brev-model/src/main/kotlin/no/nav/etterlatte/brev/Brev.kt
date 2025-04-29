@@ -115,6 +115,8 @@ data class Brev(
     val brevkoder: Brevkoder?,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
+
+    fun erFerdigstilt() = status in listOf(Status.FERDIGSTILT)
 }
 
 enum class BrevProsessType {

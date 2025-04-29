@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
@@ -14,6 +15,8 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -21,7 +24,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -37,6 +39,8 @@ class StrukturertBrevService(
     private val brevbaker: BrevbakerService,
     private val adresseService: AdresseService,
     private val db: BrevRepository,
+    private val journalfoerBrevService: JournalfoerBrevService,
+    private val distribuerBrev: Brevdistribuerer,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
@@ -136,6 +140,42 @@ class StrukturertBrevService(
         return pdf
     }
 
+    suspend fun ferdigstillJournalfoerOgDistribuerStrukturertBrev(
+        behandlingId: UUID,
+        brevType: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brev =
+            krevIkkeNull(hentBrevAvTypeForBehandling(behandlingId, brevType)) {
+                "Fant ingen brev for behandling (id=$behandlingId)"
+            }
+
+        try {
+            if (!brev.erFerdigstilt()) {
+                ferdigstillStrukturertBrev(behandlingId, brevType, brukerTokenInfo)
+            } else {
+                logger.info("Behandling=$behandlingId med strukturert brev=${brev.id} er allerede ferdigstilt")
+            }
+
+            if (brev.status.ikkeJournalfoert()) {
+                journalfoerBrevService.journalfoer(brev.id, brukerTokenInfo)
+            } else {
+                logger.info("Behandling=$behandlingId med strukturert brev=${brev.id} er allerede journalfoert")
+            }
+
+            if (brev.status.ikkeDistribuert()) {
+                distribuerBrev.distribuer(brev.id, DistribusjonsType.ANNET, brukerTokenInfo)
+            } else {
+                logger.info("Behandling=$behandlingId med strukturert brev=${brev.id} er allerede distribuert")
+            }
+        } catch (e: Exception) {
+            logger.error(
+                "Det oppstod en feil under ferdigstilling, journalføring eller distribusjon av strukturert brev med brevID=${brev.id}, status: ${brev.status}",
+                e,
+            )
+        }
+    }
+
     fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
         brevType: Brevtype,
@@ -146,12 +186,16 @@ class StrukturertBrevService(
                 "Fant ingen brev for behandling (id=$behandlingId)"
             }
 
-        if (brev.status == Status.FERDIGSTILT) {
+        if (brev.erFerdigstilt()) {
             logger.warn("Brev (id=${brev.id}) er allerede ferdigstilt. Avbryter ferdigstilling...")
             return
-        } else if (!brev.kanEndres()) {
+        }
+
+        if (!brev.kanEndres()) {
             throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
-        } else if (brev.mottakere.size !in 1..2) {
+        }
+
+        if (brev.mottakere.size !in 1..2) {
             logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
             throw UgyldigAntallMottakere()
         } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
@@ -160,11 +204,8 @@ class StrukturertBrevService(
         }
 
         logger.info("Ferdigstiller brev med id=${brev.id}")
-        if (db.hentPdf(brev.id) == null) {
-            throw BrevManglerPDF(brev.id)
-        } else {
-            db.settBrevFerdigstilt(brev.id, brukerTokenInfo)
-        }
+        db.hentPdf(brev.id) ?: throw BrevManglerPDF(brev.id)
+        db.settBrevFerdigstilt(brev.id, brukerTokenInfo)
     }
 
     suspend fun tilbakestillStrukturertBrev(

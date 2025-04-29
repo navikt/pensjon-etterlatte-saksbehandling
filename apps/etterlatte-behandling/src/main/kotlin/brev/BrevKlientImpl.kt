@@ -35,6 +35,12 @@ interface BrevKlient {
         brukerTokenInfo: BrukerTokenInfo,
     )
 
+    suspend fun ferdigstillJournalfoerStrukturertBrev(
+        behandlingId: UUID,
+        brevType: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
     suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
@@ -130,6 +136,18 @@ class BrevKlientImpl(
     ) {
         post(
             url = "$resourceUrl/api/brev/strukturert/$behandlingId/ferdigstill?brevType=${brevType.name}",
+            onSuccess = { _ -> },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    override suspend fun ferdigstillJournalfoerStrukturertBrev(
+        behandlingId: UUID,
+        brevType: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        post(
+            url = "$resourceUrl/api/brev/strukturert/$behandlingId/ferdigstill-journalfoer-distribuer?brevType=${brevType.name}",
             onSuccess = { _ -> },
             brukerTokenInfo = brukerTokenInfo,
         )

@@ -140,7 +140,7 @@ class VedtaksbrevService(
                 "Fant ingen brev for behandling (id=$behandlingId)"
             }
 
-        if (brev.status == Status.FERDIGSTILT) {
+        if (brev.erFerdigstilt()) {
             logger.warn("Brev (id=${brev.id}) er allerede ferdigstilt. Avbryter ferdigstilling...")
             return
         } else if (!brev.kanEndres()) {

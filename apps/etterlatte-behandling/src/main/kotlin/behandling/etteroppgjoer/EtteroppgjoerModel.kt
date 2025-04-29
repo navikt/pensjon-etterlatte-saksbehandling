@@ -43,6 +43,7 @@ data class EtteroppgjoerForbehandling(
     val aar: Int,
     val innvilgetPeriode: Periode,
     val brevId: Long?,
+    val kopiertFra: UUID? = null,
 ) {
     companion object {
         fun opprett(
@@ -57,6 +58,7 @@ data class EtteroppgjoerForbehandling(
             innvilgetPeriode = innvilgetPeriode,
             opprettet = Tidspunkt.now(),
             brevId = null,
+            kopiertFra = null,
         )
     }
 

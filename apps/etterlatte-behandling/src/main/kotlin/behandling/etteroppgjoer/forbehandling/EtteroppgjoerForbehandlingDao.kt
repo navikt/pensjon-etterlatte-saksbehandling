@@ -38,7 +38,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id, t.kopiert_fra
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.id = ?
                         """.trimIndent(),
@@ -54,7 +54,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id, t.kopiert_fra
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.sak_id = ?
                         """.trimIndent(),
@@ -71,9 +71,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id
@@ -93,6 +93,7 @@ class EtteroppgjoerForbehandlingDao(
                     ),
                 )
                 statement.setLong(8, forbehandling.brevId)
+                statement.setString(9, forbehandling.kopiertFra.toString())
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -336,6 +337,7 @@ class EtteroppgjoerForbehandlingDao(
                     tom = getDate("tom").let { YearMonth.from(it.toLocalDate()) },
                 ),
             brevId = getLongOrNull("brev_id"),
+            kopiertFra = getString("kopiert_fra").let { UUID.fromString(it) },
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

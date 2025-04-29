@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.common.Enheter
@@ -72,6 +73,7 @@ internal class BehandlingStatusServiceTest {
     private val aktivitetspliktService = mockk<AktivitetspliktService>(relaxUnitFun = true)
     private val saksbehandlerService: SaksbehandlerService = mockk()
     private val etteroppgjoerService: EtteroppgjoerService = mockk()
+    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService = mockk()
 
     private val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
@@ -86,6 +88,7 @@ internal class BehandlingStatusServiceTest {
             aktivitetspliktService,
             saksbehandlerService,
             etteroppgjoerService,
+            etteroppgjoerForbehandlingService,
         )
 
     @BeforeEach

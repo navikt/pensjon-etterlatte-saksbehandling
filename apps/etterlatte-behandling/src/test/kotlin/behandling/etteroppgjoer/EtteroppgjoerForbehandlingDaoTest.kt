@@ -1,6 +1,7 @@
 package behandling.etteroppgjoer
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -85,6 +86,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 sak = sak,
                 brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = UUID.randomUUID(),
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -95,6 +97,7 @@ class EtteroppgjoerForbehandlingDaoTest(
             aar shouldBe ny.aar
             opprettet shouldBe ny.opprettet
             innvilgetPeriode shouldBe ny.innvilgetPeriode
+            kopiertFra shouldNotBe null
         }
     }
 

@@ -6,6 +6,8 @@ import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -117,6 +119,7 @@ class BehandlingStatusServiceImpl(
     private val aktivitetspliktService: AktivitetspliktService,
     private val saksbehandlerService: SaksbehandlerService,
     private val etteroppgjoerService: EtteroppgjoerService,
+    private val forbehandlingService: EtteroppgjoerForbehandlingService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -221,15 +224,15 @@ class BehandlingStatusServiceImpl(
         vedtak: VedtakEndringDTO,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        // TODO: ferdigstill forbehandling
-
         if (vedtak.vedtakType == VedtakType.AVSLAG) {
             lagreNyBehandlingStatus(behandling.tilAvslag())
             haandterUtland(behandling)
         } else {
             lagreNyBehandlingStatus(behandling.tilAttestert())
         }
+
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)
+        haandterEtteroppgjoerAttestertVedtak(behandling)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             referanse = vedtak.sakIdOgReferanse.referanse,
@@ -298,7 +301,7 @@ class BehandlingStatusServiceImpl(
         lagreNyBehandlingStatus(behandling.tilIverksatt())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
 
-        haandterEtteroppgjoer(behandling)
+        haandterEtteroppgjoerIverksattVedtak(behandling)
 
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
@@ -308,8 +311,7 @@ class BehandlingStatusServiceImpl(
         }
     }
 
-    private fun haandterEtteroppgjoer(behandling: Behandling) {
-        if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) return
+    private fun haandterEtteroppgjoerIverksattVedtak(behandling: Behandling) {
         if (behandling.sak.sakType != SakType.OMSTILLINGSSTOENAD) return
 
         val virk =
@@ -317,11 +319,30 @@ class BehandlingStatusServiceImpl(
                 "Iverksatt behandling må ha virkningstidspunkt"
             }
 
-        // TODO: kanskje litt bedre sjekk her
-        val virkAar = virk.dato.year
-        if (Year.now().value > virkAar) {
-            etteroppgjoerService.opprettEtteroppgjoer(behandling.sak.id, virkAar)
+        // opprett forventet etteroppgjør hvis virkningstidspunkt er tilbake
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            val virkAar = virk.dato.year
+            val aar = Year.now().value
+
+            // TODO: litt for enkelt, må kanskje sjekke mer
+            if (aar > virkAar) {
+                etteroppgjoerService.opprettEtteroppgjoer(behandling.sak.id, virkAar)
+            }
         }
+
+        // oppdater etteroppgjoer status til ferdigstilt
+        if (behandling.type == BehandlingType.REVURDERING && behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
+            etteroppgjoerService.oppdaterStatus(behandling.sak.id, virk.dato.year, EtteroppgjoerStatus.FERDIGSTILT_REVURDERING)
+        }
+    }
+
+    private fun haandterEtteroppgjoerAttestertVedtak(behandling: Behandling) {
+        if (behandling.type != BehandlingType.REVURDERING && behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) {
+            return
+        }
+
+        val forbehandling = forbehandlingService.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
+        forbehandlingService.lagreForbehandling(forbehandling.tilFerdigstilt())
     }
 
     private fun haandterUtland(behandling: Behandling) {

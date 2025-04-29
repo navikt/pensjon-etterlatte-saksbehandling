@@ -81,6 +81,8 @@ class EtteroppgjoerForbehandlingService(
 
     fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
+    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
+
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
@@ -90,6 +92,7 @@ class EtteroppgjoerForbehandlingService(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
+                kopiertFra = forbehandling.id,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

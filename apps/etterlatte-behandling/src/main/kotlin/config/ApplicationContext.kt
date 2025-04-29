@@ -637,6 +637,25 @@ internal class ApplicationContext(
     val saksbehandlerService: SaksbehandlerService =
         SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
 
+    private val inntektskomponentService =
+        InntektskomponentService(
+            klient = inntektskomponentKlient,
+            featureToggleService = featureToggleService,
+        )
+
+    val etteroppgjoerForbehandlingService =
+        EtteroppgjoerForbehandlingService(
+            dao = etteroppgjoerForbehandlingDao,
+            etteroppgjoerService = etteroppgjoerService,
+            sakDao = sakLesDao,
+            oppgaveService = oppgaveService,
+            inntektskomponentService = inntektskomponentService,
+            sigrunKlient = sigrunKlient,
+            beregningKlient = beregningsKlient,
+            behandlingService = behandlingService,
+            vedtakKlient = vedtakKlient,
+        )
+
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
             behandlingDao,
@@ -648,6 +667,7 @@ internal class ApplicationContext(
             aktivitetspliktService,
             saksbehandlerService,
             etteroppgjoerService,
+            etteroppgjoerForbehandlingService,
         )
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
@@ -663,30 +683,11 @@ internal class ApplicationContext(
             grunnlagService,
         )
 
-    private val inntektskomponentService =
-        InntektskomponentService(
-            klient = inntektskomponentKlient,
-            featureToggleService = featureToggleService,
-        )
-
     val skatteoppgjoerHendelserService =
         SkatteoppgjoerHendelserService(
             dao = skatteoppgjoerHendelserDao,
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
-        )
-
-    val etteroppgjoerForbehandlingService =
-        EtteroppgjoerForbehandlingService(
-            dao = etteroppgjoerForbehandlingDao,
-            etteroppgjoerService = etteroppgjoerService,
-            sakDao = sakLesDao,
-            oppgaveService = oppgaveService,
-            inntektskomponentService = inntektskomponentService,
-            sigrunKlient = sigrunKlient,
-            beregningKlient = beregningsKlient,
-            behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
         )
 
     private val etteroppgjoerRevurderingBrevService =

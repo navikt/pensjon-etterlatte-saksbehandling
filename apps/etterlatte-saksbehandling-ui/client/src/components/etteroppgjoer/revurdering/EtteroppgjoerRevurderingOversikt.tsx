@@ -48,7 +48,11 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           <Radio value="JA">Ja</Radio>
           <Radio value="NEI">Nei</Radio>
         </RadioGroup>
-        {skalKunneRedigereFastsattInntekt == 'JA' ? <FastsettFaktiskInntekt kanRedigere /> : <FastsettFaktiskInntekt />}
+        {skalKunneRedigereFastsattInntekt == 'JA' ? (
+          <FastsettFaktiskInntekt erRedigerbar />
+        ) : (
+          <FastsettFaktiskInntekt erRedigerbar={false} />
+        )}
         <ResultatAvForbehandling />
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">

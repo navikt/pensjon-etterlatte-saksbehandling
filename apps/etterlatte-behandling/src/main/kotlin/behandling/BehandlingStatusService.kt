@@ -332,7 +332,7 @@ class BehandlingStatusServiceImpl(
 
         // oppdater etteroppgjoer status til ferdigstilt
         if (behandling.type == BehandlingType.REVURDERING && behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
-            etteroppgjoerService.oppdaterStatus(behandling.sak.id, virk.dato.year, EtteroppgjoerStatus.FERDIGSTILT_REVURDERING)
+            etteroppgjoerService.oppdaterEtteroppgjoerStatus(behandling.sak.id, virk.dato.year, EtteroppgjoerStatus.FERDIGSTILT_REVURDERING)
         }
     }
 

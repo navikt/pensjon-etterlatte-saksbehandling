@@ -112,7 +112,7 @@ class EtteroppgjoerRevurderingService(
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
-                etteroppgjoerService.oppdaterStatus(sakId, forbehandling.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(sakId, forbehandling.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
 
                 revurdering to sisteIverksatte
             }

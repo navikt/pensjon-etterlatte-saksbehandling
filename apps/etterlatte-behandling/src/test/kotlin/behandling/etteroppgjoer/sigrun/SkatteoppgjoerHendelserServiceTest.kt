@@ -53,7 +53,7 @@ class SkatteoppgjoerHendelserServiceTest {
             )
 
         coEvery { dao.lagreKjoering(any()) } returns 1
-        coEvery { etteroppgjoerService.oppdaterStatus(any(), any(), any()) } just runs
+        coEvery { etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any()) } just runs
 
         runBlocking {
             skatteoppgjoerHendelserService.startHendelsesKjoering(HendelseKjoeringRequest(antall))
@@ -70,7 +70,7 @@ class SkatteoppgjoerHendelserServiceTest {
         }
 
         coVerify {
-            etteroppgjoerService.oppdaterStatus(
+            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                 any(),
                 any(),
                 withArg { status ->

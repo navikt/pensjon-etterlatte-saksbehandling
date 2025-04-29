@@ -81,6 +81,11 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = dao.hentForbehandling(behandlingId)
 
         dao.lagreForbehandling(forbehandling!!.tilFerdigstilt())
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            forbehandling.sak.id,
+            forbehandling.aar,
+            EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
+        )
         oppgaveService.ferdigStillOppgaveUnderBehandling(forbehandling.id.toString(), OppgaveType.ETTEROPPGJOER, brukerTokenInfo)
     }
 
@@ -210,7 +215,7 @@ class EtteroppgjoerForbehandlingService(
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 
-        etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
         return EtteroppgjoerForbehandlingOgOppgave(
             etteroppgjoerForbehandling = nyForbehandling,

@@ -40,7 +40,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
         </BodyShort>
         <Inntektsopplysninger />
-        {/*  TODO: sjekke om det er revurdering */}
         <RadioGroup
           legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
           onChange={(val) => setSkalKunneRedigereFastsattInntekt(val)}
@@ -48,7 +47,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           <Radio value="JA">Ja</Radio>
           <Radio value="NEI">Nei</Radio>
         </RadioGroup>
-        {skalKunneRedigereFastsattInntekt == 'JA' ? (
+        {skalKunneRedigereFastsattInntekt === 'JA' ? (
           <FastsettFaktiskInntekt erRedigerbar />
         ) : (
           <FastsettFaktiskInntekt erRedigerbar={false} />

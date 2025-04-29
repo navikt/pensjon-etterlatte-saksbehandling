@@ -118,6 +118,18 @@ fun Route.strukturertBrevRoute(
             }
         }
 
+        post("ferdigstill-journalfoer-distribuer") {
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
+                logger.info("Ferdigstiller, Journalfoerer og distribuerer strukturert brev for behandling (id=$behandlingId)")
+                val brevType =
+                    krevIkkeNull(call.request.queryParameters[BREV_TYPE_CALL_PARAMETER]?.let { enumValueOf<Brevtype>(it) }) {
+                        "Mangler brevtype-parameter"
+                    }
+                service.ferdigstillJournalfoerOgDistribuerStrukturertBrev(behandlingId, brevType, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         put("tilbakestill") {
             withBehandlingId(tilgangssjekker, skrivetilgang = true) {
                 val brevId =

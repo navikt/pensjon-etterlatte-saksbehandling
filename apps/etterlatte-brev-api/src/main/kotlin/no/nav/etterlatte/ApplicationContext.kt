@@ -244,6 +244,8 @@ internal class ApplicationContext {
             brevbakerService,
             adresseService,
             db,
+            journalfoerBrevService,
+            brevdistribuerer,
         )
 
     private fun httpClient(

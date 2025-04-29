@@ -647,6 +647,14 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
+    override suspend fun ferdigstillJournalfoerStrukturertBrev(
+        behandlingId: UUID,
+        brevType: Brevtype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,

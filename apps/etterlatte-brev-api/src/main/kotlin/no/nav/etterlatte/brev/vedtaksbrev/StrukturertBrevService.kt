@@ -151,14 +151,22 @@ class StrukturertBrevService(
             }
 
         try {
-            ferdigstillStrukturertBrev(behandlingId, brevType, brukerTokenInfo)
+            if (!brev.erFerdigstilt()) {
+                ferdigstillStrukturertBrev(behandlingId, brevType, brukerTokenInfo)
+            } else {
+                logger.info("Behandling=$behandlingId med strukturert brev=${brev.id} er allerede ferdigstilt")
+            }
 
             if (brev.status.ikkeJournalfoert()) {
                 journalfoerBrevService.journalfoer(brev.id, brukerTokenInfo)
+            } else {
+                logger.info("Behandling=$behandlingId med strukturert brev=${brev.id} er allerede journalfoert")
             }
 
             if (brev.status.ikkeDistribuert()) {
                 distribuerBrev.distribuer(brev.id, DistribusjonsType.ANNET, brukerTokenInfo)
+            } else {
+                logger.info("Behandling=$behandlingId med strukturert brev=${brev.id} er allerede distribuert")
             }
         } catch (e: Exception) {
             logger.error(

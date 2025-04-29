@@ -67,5 +67,8 @@ class JobbScheduler(
         OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK, 8, 0),
         OMS_DOED_12MND(JobbType.OMS_DOED_12MND, 1, 0),
         OMS_DOED_10MND(JobbType.OMS_DOED_10MND, 1, 0),
+        AO_BP21(JobbType.AO_BP21, 20, 1),
+        AO_BP20(JobbType.AO_BP20, 20, 1),
+        AO_OMS67(JobbType.AO_OMS67, 20, 1),
     }
 }

@@ -2,24 +2,33 @@ import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-import { BodyShort, Box, Heading, HStack, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
+import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const etteroppgjoerId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
+  const { next } = useContext(BehandlingRouteContext)
 
   const [skalKunneRedigereFastsattInntekt, setSkalKunneRedigereFastsattInntekt] = useState<string>('')
+
+  const paaNeste = () => {
+    /* TODO: legg til validering og feilmelding for radio kanpper */
+    /* TODO: hvis de velger "JA" så må vi sjekke mot orginal forbehandling om SB faktisk har endret på fastsatt faktisk inntekt, hvis ikke blokker disse fra å gå videre og vis feilmelding */
+
+    next()
+  }
 
   useEffect(() => {
     if (!etteroppgjoerId) return
@@ -55,9 +64,12 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         <ResultatAvForbehandling />
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">
-            {/* TODO: legg til validering og feilmelding for radio kanpper */}
-            {/* TODO: hvis de velger "JA" så må vi sjekke mot orginal forbehandling om SB faktisk har endret på fastsatt faktisk inntekt, hvis ikke blokker disse fra å gå videre og vis feilmelding */}
-            <NesteOgTilbake />
+            <VStack gap="4">
+              <Button type="button" variant="primary" onClick={paaNeste}>
+                {skalKunneRedigereFastsattInntekt === 'JA' ? 'Rediger' : 'Gå videre'}
+              </Button>
+              <AvbrytBehandling />
+            </VStack>
           </HStack>
         </Box>
       </VStack>

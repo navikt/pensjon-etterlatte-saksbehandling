@@ -228,6 +228,7 @@ fun opprettBehandling(
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     opphoerFraOgMed: YearMonth? = null,
+    relatertBehandlingId: String? = null,
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,
@@ -239,6 +240,7 @@ fun opprettBehandling(
     kilde = kilde,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
+    relatertBehandlingId = relatertBehandlingId,
 )
 
 fun foerstegangsbehandling(

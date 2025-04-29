@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
-import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -85,10 +84,6 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) {
-        dao.lagreForbehandling(forbehandling)
-    }
-
     fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val forbehandlingCopy =
             forbehandling.copy(
@@ -100,6 +95,7 @@ class EtteroppgjoerForbehandlingService(
         dao.lagreForbehandling(forbehandlingCopy)
         dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
 
         return forbehandlingCopy
     }
@@ -222,17 +218,24 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun lagreOgBeregnFaktiskInntekt(
-        behandlingId: UUID,
+        forbehandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto {
-        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+        var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+
+        // hvis ferdigstilt, ikke overskriv men opprett ny kopi
+        if (forbehandling.erFerdigstilt()) {
+            logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
+            forbehandling = kopierOgLagreNyForbehandling(forbehandling)
+            // TODO: burde forbehandlingen indikere at den er for revurdering og ikke skal være synlig?
+        }
 
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
                 ?: throw InternfeilException("Fant ikke siste iverksatte")
 
-        val request =
+        val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
                 forbehandlingId = forbehandling.id,
@@ -246,7 +249,7 @@ class EtteroppgjoerForbehandlingService(
             )
 
         val beregnetEtteroppgjoerResultat =
-            runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
+            runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(beregningRequest, brukerTokenInfo) }
 
         dao.lagreForbehandling(forbehandling.tilBeregnet())
         return beregnetEtteroppgjoerResultat

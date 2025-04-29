@@ -10,6 +10,8 @@ import no.nav.etterlatte.behandling.hendelse.getLongOrNull
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
@@ -180,6 +182,30 @@ class EtteroppgjoerForbehandlingDao(
             krev(result.size == inntekterFraSkatt.inntekter.size) {
                 "Kunne ikke lagre alle pensjonsgivendeInntekter for behandlingId=$behandlingId"
             }
+        }
+    }
+
+    fun oppdaterRelatertBehandling(
+        forbehandlingId: UUID,
+        nyForbehandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE behandling b
+                    SET relatert_behandling = ?
+                    WHERE b.relatert_behandling = ?
+                    AND b.revurdering_aarsak = ?
+                    AND b.status != ?
+                    """.trimIndent(),
+                )
+            statement.setString(1, nyForbehandlingId.toString())
+            statement.setString(2, forbehandlingId.toString())
+            statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
+            statement.setString(4, BehandlingStatus.IVERKSATT.name)
+
+            statement.executeUpdate()
         }
     }
 

@@ -28,9 +28,9 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelsePoller
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePollerTask
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePublisher
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
+import no.nav.etterlatte.tidshendelser.omregning.OmregningDao
+import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
-import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
-import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import java.time.Duration
 import java.util.UUID
 
@@ -60,9 +60,9 @@ class AppContext(
     val hendelseDao = HendelseDao(dataSource)
     private val aldersovergangerService = AldersovergangerService(hendelseDao, behandlingKlient)
     private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, behandlingKlient)
-    private val reguleringDao = ReguleringDao(dataSource)
-    private val reguleringService = ReguleringService(publisher, reguleringDao)
-    private val inntektsjusteringService = AarligInntektsjusteringService(publisher, reguleringDao)
+    private val omregningDao = OmregningDao(dataSource)
+    private val reguleringService = ReguleringService(publisher, omregningDao)
+    private val inntektsjusteringService = AarligInntektsjusteringService(publisher, omregningDao)
 
     val jobbPollerTask =
         JobbPollerTask(

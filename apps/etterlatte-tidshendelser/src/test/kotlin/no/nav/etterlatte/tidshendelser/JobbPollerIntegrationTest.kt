@@ -16,8 +16,8 @@ import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
 import no.nav.etterlatte.tidshendelser.hendelser.Steg
+import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
-import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

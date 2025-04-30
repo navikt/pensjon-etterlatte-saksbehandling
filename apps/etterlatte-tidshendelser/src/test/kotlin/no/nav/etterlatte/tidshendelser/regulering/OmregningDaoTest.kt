@@ -8,7 +8,9 @@ import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.insert
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.DatabaseExtension
-import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao.Databasetabell
+import no.nav.etterlatte.tidshendelser.omregning.OmregningDao
+import no.nav.etterlatte.tidshendelser.omregning.OmregningDao.Databasetabell
+import no.nav.etterlatte.tidshendelser.omregning.Omregningskonfigurasjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -19,7 +21,7 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ReguleringDaoTest(
+class OmregningDaoTest(
     private val dataSource: DataSource,
 ) {
     @Test
@@ -32,8 +34,8 @@ class ReguleringDaoTest(
             listOf(sakId1, sakId2, sakId3, SakId(4), SakId(5)),
             listOf(sakId1, sakId2, SakId(4)),
         )
-        val dao = ReguleringDao(datasource = dataSource)
-        val konfigurasjon: Reguleringskonfigurasjon = dao.hentNyesteKonfigurasjon()
+        val dao = OmregningDao(datasource = dataSource)
+        val konfigurasjon: Omregningskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(20, konfigurasjon.antall)
         assertEquals(dato, konfigurasjon.dato)
         containsInOrder(listOf(1, 2, 3, 4, 5), konfigurasjon.spesifikkeSaker)
@@ -45,8 +47,8 @@ class ReguleringDaoTest(
         val dato = LocalDate.of(2024, Month.JUNE, 22)
         leggInnReguleringskonfigurasjon(dato, 10, null, null)
         leggInnReguleringskonfigurasjon(dato, 20, null, null)
-        val dao = ReguleringDao(datasource = dataSource)
-        val konfigurasjon: Reguleringskonfigurasjon = dao.hentNyesteKonfigurasjon()
+        val dao = OmregningDao(datasource = dataSource)
+        val konfigurasjon: Omregningskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(20, konfigurasjon.antall)
         assertEquals(dato, konfigurasjon.dato)
         containsInOrder(listOf(1, 2, 3, 4, 5), konfigurasjon.spesifikkeSaker)
@@ -58,8 +60,8 @@ class ReguleringDaoTest(
         val dato = LocalDate.of(2024, Month.JUNE, 22)
         leggInnReguleringskonfigurasjon(dato, 10, emptyList(), emptyList())
         leggInnReguleringskonfigurasjon(dato, 20, emptyList(), emptyList(), false)
-        val dao = ReguleringDao(datasource = dataSource)
-        val konfigurasjon: Reguleringskonfigurasjon = dao.hentNyesteKonfigurasjon()
+        val dao = OmregningDao(datasource = dataSource)
+        val konfigurasjon: Omregningskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(10, konfigurasjon.antall)
         assertEquals(dato, konfigurasjon.dato)
     }

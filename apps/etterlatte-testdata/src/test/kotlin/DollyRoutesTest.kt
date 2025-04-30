@@ -3,7 +3,6 @@ package no.nav.etterlatte.dolly
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -17,7 +16,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.config
 import no.nav.etterlatte.ktor.runServerWithConfig
@@ -31,7 +29,6 @@ import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
-import no.nav.etterlatte.testdata.features.dolly.SoeknadResponse
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -58,14 +55,13 @@ class DollyRoutesTest {
 
     @AfterEach
     fun afterEach() {
-        confirmVerified()
         clearAllMocks()
     }
 
     val fnr = "01448203510"
 
     @Test
-    fun `skal gi 401 naar token mangler`() {
+    fun `skal gi 400 naar token mangler`() {
         val conff =
             configMedRoller(
                 mockOAuth2Server.config.httpServer.port(),
@@ -75,7 +71,7 @@ class DollyRoutesTest {
             runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
 
             val response =
-                client.post("/opprett-ytelse") {
+                client.post("/api/v1/ytelse") {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr).toJson())
                 }
@@ -84,7 +80,7 @@ class DollyRoutesTest {
     }
 
     @Test
-    fun `skal gi 400 når body mangler `() {
+    fun `skal gi 400 naar body mangler `() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =
             configMedRoller(
@@ -96,9 +92,8 @@ class DollyRoutesTest {
             runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
 
             val response =
-                client.post("/opprett-ytelse") {
+                client.post("/api/v1/ytelse") {
                     contentType(ContentType.Application.Json)
-                    // setBody(FoedselsnummerDTO(fnr).toJson())
                     header(
                         HttpHeaders.Authorization,
                         "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
@@ -119,7 +114,7 @@ class DollyRoutesTest {
             )
         val request =
             NySoeknadRequest(
-                type = SoeknadType.BARNEPENSJON,
+                type = SoeknadType.OMSTILLINGSSTOENAD,
                 avdoed = fnr,
                 gjenlevende = fnr,
                 barn =
@@ -128,14 +123,14 @@ class DollyRoutesTest {
                         fnr,
                     ),
             )
-        coEvery { dollyService.sendSoeknad(any(), any(), any()) } returns "1"
+        coEvery { dollyService.sendSoeknadFraDolly(any(), any(), any()) } returns Unit
 
         testApplication {
             val client =
                 runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
 
             val response =
-                client.post("/opprett-ytelse") {
+                client.post("/api/v1/ytelse") {
                     contentType(ContentType.Application.Json)
                     setBody(request.toJson())
                     header(
@@ -143,12 +138,9 @@ class DollyRoutesTest {
                         "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
                     )
                 }
-            response.status shouldBe HttpStatusCode.OK
-            val resultat: SoeknadResponse = response.body()
+            response.status shouldBe HttpStatusCode.Created
 
-            resultat shouldBe SoeknadResponse(200, resultat.noekkel)
-
-            coVerify(exactly = 1) { dollyService.sendSoeknad(any(), any(), any()) }
+            coVerify(exactly = 1) { dollyService.sendSoeknadFraDolly(any(), any(), any()) }
         }
     }
 

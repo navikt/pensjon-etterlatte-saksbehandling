@@ -32,6 +32,12 @@ interface DollyInterface {
         navIdent: String?,
         behandlingssteg: Behandlingssteg,
     ): String
+
+    fun sendSoeknadFraDolly(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    )
 }
 
 class DollyService(
@@ -141,6 +147,29 @@ class DollyService(
         return noekkel
     }
 
+    override fun sendSoeknadFraDolly(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ) {
+        val noekkel = UUID.randomUUID().toString()
+        val (partisjon, offset) =
+            producer.publiser(
+                noekkel,
+                SoeknadMapper
+                    .opprettJsonMessage(
+                        type = request.type,
+                        gjenlevendeFnr = request.gjenlevende,
+                        avdoedFnr = request.avdoed,
+                        barn = request.barn,
+                        soeker = request.soeker,
+                        behandlingssteg = behandlingssteg,
+                    ).toJson(),
+                mapOf("NavIdent" to (navIdent!!.toByteArray())),
+            )
+        logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
+    }
+
     private fun markerSomIBruk(
         ident: String,
         accessToken: String,
@@ -205,4 +234,11 @@ class DollyMock : DollyInterface {
         navIdent: String?,
         behandlingssteg: Behandlingssteg,
     ): String = "123"
+
+    override fun sendSoeknadFraDolly(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ) {
+    }
 }

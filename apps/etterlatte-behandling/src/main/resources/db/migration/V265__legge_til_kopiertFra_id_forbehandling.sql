@@ -1,2 +1,5 @@
 ALTER TABLE etteroppgjoer_behandling
-    ADD COLUMN kopiert_fra TEXT;
+    DROP COLUMN IF EXISTS kopiert_fra;
+
+ALTER TABLE etteroppgjoer_behandling
+    ADD COLUMN IF NOT EXISTS kopiert_fra UUID;

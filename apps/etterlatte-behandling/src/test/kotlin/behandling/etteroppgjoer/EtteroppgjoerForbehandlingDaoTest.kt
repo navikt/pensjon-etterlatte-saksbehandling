@@ -1,7 +1,6 @@
 package behandling.etteroppgjoer
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -76,6 +75,7 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og oppdatere forbehandling`() {
+        val kopiertFra = UUID.randomUUID()
         val ny =
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
@@ -86,7 +86,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 sak = sak,
                 brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
-                kopiertFra = UUID.randomUUID(),
+                kopiertFra = kopiertFra,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -97,7 +97,41 @@ class EtteroppgjoerForbehandlingDaoTest(
             aar shouldBe ny.aar
             opprettet shouldBe ny.opprettet
             innvilgetPeriode shouldBe ny.innvilgetPeriode
-            kopiertFra shouldNotBe null
+            kopiertFra shouldBe kopiertFra
+        }
+    }
+
+    @Test
+    fun `hent forbehandlinger`() {
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = UUID.randomUUID(),
+            ),
+        )
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = null,
+            ),
+        )
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandlinger(sak.id)) {
+            size shouldBe 2
         }
     }
 

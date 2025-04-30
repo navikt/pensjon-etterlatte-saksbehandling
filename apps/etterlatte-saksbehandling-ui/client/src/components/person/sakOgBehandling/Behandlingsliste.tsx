@@ -9,7 +9,6 @@ import {
   behandlingStatusTilLesbartnavn,
   genbehandlingTypeTilLesbartNavn,
   generellBehandlingsStatusTilLesbartNavn,
-  lenkeTilBehandling,
   mapAarsak,
 } from '~components/person/sakOgBehandling/behandlingsslistemappere'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
@@ -92,7 +91,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                     </Table.DataCell>
                     <VedtakKolonner behandlingId={behandling.id} />
                     <Table.DataCell>
-                      <Link href={lenkeTilBehandling(behandling)}>Gå til behandling</Link>
+                      <Link href={`/behandling/${behandling.id}/`}>Gå til behandling</Link>
                     </Table.DataCell>
                   </Table.Row>
                 )

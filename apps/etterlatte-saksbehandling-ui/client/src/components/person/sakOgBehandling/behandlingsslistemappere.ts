@@ -1,6 +1,6 @@
-import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag } from '~components/person/typer'
+import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType } from '~components/person/typer'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { GenerellBehandlingType, Status } from '~shared/types/Generellbehandling'
 
 export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
@@ -109,14 +109,6 @@ export function behandlingStatusTilLesbartnavn(status: IBehandlingStatus) {
   }
 }
 
-export const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string => {
-  switch (behandlingSammendrag.behandlingType) {
-    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return `/behandling/${behandlingSammendrag.id}/soeknadsoversikt`
-    case IBehandlingsType.REVURDERING:
-      return `/behandling/${behandlingSammendrag.id}/revurderingsoversikt`
-  }
-}
 export const generellBehandlingsStatusTilLesbartNavn = (status: Status) => {
   switch (status) {
     case Status.RETURNERT:

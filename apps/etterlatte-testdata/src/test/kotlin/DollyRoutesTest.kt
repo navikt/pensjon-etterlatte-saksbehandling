@@ -71,7 +71,7 @@ class DollyRoutesTest {
             runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
 
             val response =
-                client.post("/api/v1/opprett-ytelse") {
+                client.post("/api/v1/ytelse") {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr).toJson())
                 }
@@ -92,7 +92,7 @@ class DollyRoutesTest {
             runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
 
             val response =
-                client.post("/api/v1/opprett-ytelse") {
+                client.post("/api/v1/ytelse") {
                     contentType(ContentType.Application.Json)
                     header(
                         HttpHeaders.Authorization,
@@ -130,7 +130,7 @@ class DollyRoutesTest {
                 runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
 
             val response =
-                client.post("/api/v1/opprett-ytelse") {
+                client.post("/api/v1/ytelse") {
                     contentType(ContentType.Application.Json)
                     setBody(request.toJson())
                     header(

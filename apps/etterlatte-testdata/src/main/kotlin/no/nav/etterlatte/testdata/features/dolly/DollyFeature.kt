@@ -148,7 +148,7 @@ class DollyFeature(
                 }
             }
 
-            post("api/v1/opprett-ytelse") {
+            post("api/v1/ytelse") {
                 try {
 
                     val nySoeknadRequest = call.receive<NySoeknadRequest>()
@@ -182,7 +182,7 @@ class DollyFeature(
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }
             }
-            get("api/v1/opprett-ytelse") {
+            get("api/v1/ytelse") {
                 try {
                     val request = call.receive<FoedselsnummerDTO>()
                     // TODO hente faktisk vedtak

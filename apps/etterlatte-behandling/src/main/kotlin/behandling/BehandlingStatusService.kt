@@ -337,7 +337,7 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterEtteroppgjoerAttestertVedtak(behandling: Behandling) {
-        if (behandling.type != BehandlingType.REVURDERING && behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) {
+        if (behandling.type != BehandlingType.REVURDERING || behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) {
             return
         }
 

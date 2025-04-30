@@ -14,7 +14,7 @@ security:
   - BearerAuth: []
 
 paths:
-  /vedtak:
+  /api/v1/vedtak:
     post:
       summary: Liste med vedtak for person
       description: Liste med vedtak av type innvilgelse, avslag, endring og opphør for en person

@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
-import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -74,20 +73,28 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun ferdigstillForbehandling(behandlingId: UUID) {
+    fun ferdigstillForbehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         logger.info("Ferdigstiller forbehandling for behandling=$behandlingId")
         val forbehandling = dao.hentForbehandling(behandlingId)
+
         dao.lagreForbehandling(forbehandling!!.tilFerdigstilt())
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            forbehandling.sak.id,
+            forbehandling.aar,
+            EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
+        )
+        oppgaveService.ferdigStillOppgaveUnderBehandling(forbehandling.id.toString(), OppgaveType.ETTEROPPGJOER, brukerTokenInfo)
     }
 
     fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
+    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
+
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
-
-    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) {
-        dao.lagreForbehandling(forbehandling)
-    }
 
     fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val forbehandlingCopy =
@@ -95,11 +102,13 @@ class EtteroppgjoerForbehandlingService(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
+                kopiertFra = forbehandling.id,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)
         dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
 
         return forbehandlingCopy
     }
@@ -206,7 +215,7 @@ class EtteroppgjoerForbehandlingService(
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 
-        etteroppgjoerService.oppdaterStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
         return EtteroppgjoerForbehandlingOgOppgave(
             etteroppgjoerForbehandling = nyForbehandling,
@@ -222,17 +231,24 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun lagreOgBeregnFaktiskInntekt(
-        behandlingId: UUID,
+        forbehandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto {
-        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+        var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+
+        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling som skal brukes av revurdering
+        if (forbehandling.erFerdigstilt()) {
+            logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
+            forbehandling = kopierOgLagreNyForbehandling(forbehandling)
+            // TODO: burde forbehandlingen indikere at den er for revurdering og ikke skal være synlig for sb?
+        }
 
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
                 ?: throw InternfeilException("Fant ikke siste iverksatte")
 
-        val request =
+        val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
                 forbehandlingId = forbehandling.id,
@@ -246,7 +262,7 @@ class EtteroppgjoerForbehandlingService(
             )
 
         val beregnetEtteroppgjoerResultat =
-            runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(request, brukerTokenInfo) }
+            runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(beregningRequest, brukerTokenInfo) }
 
         dao.lagreForbehandling(forbehandling.tilBeregnet())
         return beregnetEtteroppgjoerResultat

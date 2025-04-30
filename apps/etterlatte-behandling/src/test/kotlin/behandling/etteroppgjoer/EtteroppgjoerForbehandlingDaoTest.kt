@@ -6,17 +6,24 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
+import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
@@ -35,12 +42,15 @@ class EtteroppgjoerForbehandlingDaoTest(
 ) {
     private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao
-
+    private lateinit var behandlingRepo: BehandlingDao
     private lateinit var sak: Sak
 
     @BeforeAll
     fun setup() {
+        val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
+        val revurderingDao = RevurderingDao(ConnectionAutoclosingTest(dataSource))
         sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        behandlingRepo = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, ConnectionAutoclosingTest(dataSource))
         etteroppgjoerForbehandlingDao = EtteroppgjoerForbehandlingDao(ConnectionAutoclosingTest(dataSource))
 
         nyKontekstMedBrukerOgDatabase(
@@ -65,6 +75,7 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og oppdatere forbehandling`() {
+        val kopiertFra = UUID.randomUUID()
         val ny =
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
@@ -75,6 +86,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 sak = sak,
                 brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = kopiertFra,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -85,7 +97,63 @@ class EtteroppgjoerForbehandlingDaoTest(
             aar shouldBe ny.aar
             opprettet shouldBe ny.opprettet
             innvilgetPeriode shouldBe ny.innvilgetPeriode
+            kopiertFra shouldBe kopiertFra
         }
+    }
+
+    @Test
+    fun `hent forbehandlinger`() {
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = UUID.randomUUID(),
+            ),
+        )
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = null,
+            ),
+        )
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandlinger(sak.id)) {
+            size shouldBe 2
+        }
+    }
+
+    @Test
+    fun `oppdater relatert behandling id`() {
+        val relatertForbehandlingId = UUID.randomUUID()
+
+        val sak1 = sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+                prosesstype = Prosesstype.MANUELL,
+                relatertBehandlingId = relatertForbehandlingId.toString(),
+            )
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        val nyRelatertForbehandlingId = UUID.randomUUID()
+        etteroppgjoerForbehandlingDao.oppdaterRelatertBehandling(relatertForbehandlingId, nyRelatertForbehandlingId)
+
+        behandlingRepo.hentBehandling(opprettBehandling.id)!!.relatertBehandlingId shouldBe nyRelatertForbehandlingId.toString()
     }
 
     @Test

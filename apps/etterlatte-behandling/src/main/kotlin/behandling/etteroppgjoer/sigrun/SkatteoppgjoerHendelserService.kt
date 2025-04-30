@@ -37,7 +37,7 @@ class SkatteoppgjoerHendelserService(
                     val etteroppgjoer = resultat.etteroppgjoer!!
 
                     logger.info("Sak=${etteroppgjoer.sakId} skal ha etteroppgjør for inntektsår=${hendelse.gjelderPeriode}")
-                    etteroppgjoerService.oppdaterStatus(
+                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                         etteroppgjoer.sakId,
                         etteroppgjoer.inntektsaar,
                         EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,

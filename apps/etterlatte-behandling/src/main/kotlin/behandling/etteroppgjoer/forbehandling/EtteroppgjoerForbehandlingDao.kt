@@ -10,6 +10,8 @@ import no.nav.etterlatte.behandling.hendelse.getLongOrNull
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
@@ -36,7 +38,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id, t.kopiert_fra
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.id = ?
                         """.trimIndent(),
@@ -52,7 +54,7 @@ class EtteroppgjoerForbehandlingDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id
+                        SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.aar, t.fom, t.tom, t.brev_id, t.kopiert_fra  
                         FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
                         WHERE t.sak_id = ?
                         """.trimIndent(),
@@ -69,9 +71,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id
@@ -91,6 +93,7 @@ class EtteroppgjoerForbehandlingDao(
                     ),
                 )
                 statement.setLong(8, forbehandling.brevId)
+                statement.setObject(9, forbehandling.kopiertFra)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -180,6 +183,30 @@ class EtteroppgjoerForbehandlingDao(
             krev(result.size == inntekterFraSkatt.inntekter.size) {
                 "Kunne ikke lagre alle pensjonsgivendeInntekter for behandlingId=$behandlingId"
             }
+        }
+    }
+
+    fun oppdaterRelatertBehandling(
+        forbehandlingId: UUID,
+        nyForbehandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE behandling b
+                    SET relatert_behandling = ?
+                    WHERE b.relatert_behandling = ?
+                    AND b.revurdering_aarsak = ?
+                    AND b.status != ?
+                    """.trimIndent(),
+                )
+            statement.setString(1, nyForbehandlingId.toString())
+            statement.setString(2, forbehandlingId.toString())
+            statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
+            statement.setString(4, BehandlingStatus.IVERKSATT.name)
+
+            statement.executeUpdate()
         }
     }
 
@@ -310,6 +337,7 @@ class EtteroppgjoerForbehandlingDao(
                     tom = getDate("tom").let { YearMonth.from(it.toLocalDate()) },
                 ),
             brevId = getLongOrNull("brev_id"),
+            kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

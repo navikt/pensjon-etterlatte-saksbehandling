@@ -81,9 +81,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit((data) => submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data)))}
-    >
+    <form>
       <VStack gap="4">
         <Heading size="large">Fastsett faktisk inntekt</Heading>
         <HStack gap="2" align="center">
@@ -129,7 +127,13 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
         })}
 
         <HStack gap="4">
-          <Button size="small" loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}>
+          <Button
+            onClick={handleSubmit((data) =>
+              submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data))
+            )}
+            size="small"
+            loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
+          >
             Fastsett inntekt
           </Button>
           <Button

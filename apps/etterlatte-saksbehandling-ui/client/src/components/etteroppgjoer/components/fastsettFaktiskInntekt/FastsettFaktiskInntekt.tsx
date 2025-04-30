@@ -1,26 +1,15 @@
 import { BodyShort, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
-import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useState } from 'react'
-import { FaktiskInntektSkjema } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektSkjema'
-import { FaktiskInntektVisning } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/FaktiskInntektVisning'
+import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
+import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
 
-export const FastsettFaktiskInntekt = ({ kanRedigere = false }: { kanRedigere?: boolean }) => {
+export const FastsettFaktiskInntekt = ({ erRedigerbar }: { erRedigerbar: boolean }) => {
   const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(false)
 
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
   const { behandling } = useEtteroppgjoer()
-
-  const erRedigerbar =
-    kanRedigere &&
-    (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
-      behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
-    enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   return (
     <VStack gap="4">

@@ -1,8 +1,8 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Box, Heading, Label, VStack } from '@navikt/ds-react'
-import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/OpplysningerFraSkatteetaten'
-import { OpplysningerFraAInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/OpplysningerFraAInntekt'
-import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
+import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraSkatteetaten'
+import { OpplysningerFraAInntekt } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraAInntekt'
+import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/components/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
 
 export const Inntektsopplysninger = () => {
   const etteroppgjoer = useEtteroppgjoer()

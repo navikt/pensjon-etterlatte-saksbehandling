@@ -6,8 +6,8 @@ import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents
 import no.nav.etterlatte.rapidsandrivers.tilSeparertString
 import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
-import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
-import no.nav.etterlatte.tidshendelser.regulering.Reguleringskonfigurasjon
+import no.nav.etterlatte.tidshendelser.omregning.OmregningDao
+import no.nav.etterlatte.tidshendelser.omregning.Omregningskonfigurasjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,18 +15,18 @@ import java.util.UUID
 
 class AarligInntektsjusteringService(
     private val rapidsPublisher: (UUID, String) -> Unit,
-    private val reguleringDao: ReguleringDao,
+    private val omregningDao: OmregningDao,
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun execute(jobb: HendelserJobb): List<Long> {
         logger.info("Handling jobb ${jobb.id}, type ${jobb.type} (${jobb.type.beskrivelse})")
-        val konfigurasjon = reguleringDao.hentNyesteKonfigurasjon()
+        val konfigurasjon = omregningDao.hentNyesteKonfigurasjon()
         startAarligInntektsjustering(konfigurasjon)
         return emptyList()
     }
 
-    private fun startAarligInntektsjustering(konfigurasjon: Reguleringskonfigurasjon) {
+    private fun startAarligInntektsjustering(konfigurasjon: Omregningskonfigurasjon) {
         logger.info("StartInntektsJob startet")
         rapidsPublisher(
             UUID.randomUUID(),
@@ -36,7 +36,7 @@ class AarligInntektsjusteringService(
     }
 }
 
-fun createRecord(konfigurasjon: Reguleringskonfigurasjon) =
+fun createRecord(konfigurasjon: Omregningskonfigurasjon) =
     JsonMessage
         .newMessage(
             mapOf(

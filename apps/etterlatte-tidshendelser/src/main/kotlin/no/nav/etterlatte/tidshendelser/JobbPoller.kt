@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.tidshendelser.JobbKategori
 import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
-import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer

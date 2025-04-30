@@ -108,7 +108,12 @@ export const Behandling = () => {
                   {routedata.behandlingRoutes.map((route) => (
                     <Route key={route.path} path={route.path} element={route.element(behandling)} />
                   ))}
-                  <Route path="*" element={<Navigate to={routedata.behandlingRoutes[0].path} replace />} />
+                  <Route
+                    path="*"
+                    element={
+                      <Navigate to={`/behandling/${behandling.id}/${routedata.behandlingRoutes[0].path}`} replace />
+                    }
+                  />
                 </Routes>
               </Box>
               <BehandlingSidemeny behandling={behandling} />

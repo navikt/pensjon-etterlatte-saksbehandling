@@ -57,15 +57,6 @@ import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.EtteropppgjoerJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
-import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
-import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
-import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.AvbrytAldersovergangJob
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18Job
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18JobService
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20Job
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkLoependeYtelseEtter20JobService
-import no.nav.etterlatte.behandling.jobs.uttrekk.AvbrytAldersovergangJobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -734,39 +725,6 @@ internal class ApplicationContext(
 
     val etteroppgjoerJobService = EtteroppgjoerJobService(etteroppgjoerService, featureToggleService)
 
-    private val uttrekkLoependeYtelseEtter20JobService =
-        UttrekkLoependeYtelseEtter20JobService(
-            vedtakKlient,
-            sakService,
-            nyAldersovergangService,
-            vilkaarsvurderingDao,
-            featureToggleService,
-        )
-
-    private val uttrekkFylt18JobService =
-        UttrekkFylt18JobService(
-            vedtakKlient,
-            sakService,
-            nyAldersovergangService,
-            featureToggleService,
-        )
-
-    private val avbrytAldersovergangJobService =
-        AvbrytAldersovergangJobService(
-            behandlingService,
-            oppgaveDaoEndringer,
-            featureToggleService,
-        )
-
-    private val sjekkAdressebeskyttelseJobService =
-        SjekkAdressebeskyttelseJobService(
-            SjekkAdressebeskyttelseJobDao(autoClosingDatabase),
-            pdlTjenesterKlient,
-            oppdaterTilgangService,
-            grunnlagService,
-            featureToggleService,
-        )
-
     private val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
             aktivitetspliktDao,
@@ -903,50 +861,6 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.DAYS),
-        )
-    }
-
-    val uttrekkLoependeYtelseEtter20Job: UttrekkLoependeYtelseEtter20Job by lazy {
-        UttrekkLoependeYtelseEtter20Job(
-            service = uttrekkLoependeYtelseEtter20JobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.HOURS),
-        )
-    }
-
-    val uttrekkFylt18Job: UttrekkFylt18Job by lazy {
-        UttrekkFylt18Job(
-            service = uttrekkFylt18JobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.DAYS),
-        )
-    }
-
-    val avbrytAldersovergangJob: AvbrytAldersovergangJob by lazy {
-        AvbrytAldersovergangJob(
-            service = avbrytAldersovergangJobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.DAYS),
-        )
-    }
-
-    val sjekkAdressebeskyttelseJob: SjekkAdressebeskyttelseJob by lazy {
-        SjekkAdressebeskyttelseJob(
-            service = sjekkAdressebeskyttelseJobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

@@ -157,12 +157,14 @@ class DollyFeature(
                     val gjenlevende = nySoeknadRequest.gjenlevende
                     val avdoed = nySoeknadRequest.avdoed
                     val barnListe = nySoeknadRequest.barn
-                    val soeker =
-                        when (ytelse) {
-                            // TODO
-                            SoeknadType.BARNEPENSJON -> barnListe.first()
-                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
-                        }
+                    var soeker = nySoeknadRequest.soeker
+                    if (soeker == "") {
+                        soeker =
+                            when (ytelse) {
+                                SoeknadType.BARNEPENSJON -> barnListe.first()
+                                SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                            }
+                    }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
                         call.respond(HttpStatusCode.BadRequest, "Påkrevde felter mangler")
                     }

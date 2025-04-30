@@ -1,5 +1,5 @@
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
-import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
+import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
 export const FaktiskInntektVisning = () => {

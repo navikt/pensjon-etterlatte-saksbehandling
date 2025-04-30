@@ -4,7 +4,7 @@ import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~s
 import { BodyShort, Box, Button, Heading, HStack, Tag, Textarea, VStack } from '@navikt/ds-react'
 import { maanedNavn } from '~utils/formatering/dato'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
-import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/oversiktOverEtteroppgjoer/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
+import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'

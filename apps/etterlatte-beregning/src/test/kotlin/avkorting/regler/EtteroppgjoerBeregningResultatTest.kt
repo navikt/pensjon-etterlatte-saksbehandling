@@ -41,6 +41,58 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     @Test
+    fun `akkurat utenfor grense for tilbakekreving gir tilbakekreving`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11340),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 10990),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.differanse.differanse shouldBe 1400
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKEKREVING.name
+    }
+
+    @Test
+    fun `akkurat utenfor grense for etterbetaling gir etterbetaling`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11340),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11440),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.differanse.differanse shouldBe -400
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.ETTERBETALING.name
+    }
+
+    @Test
     fun `skal tilbakekreve hvis differanse er mer en grense for tilbakekreving`() {
         val nyBruttoStoenad =
             listOf(
@@ -61,7 +113,7 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     @Test
-    fun `skal ikke ha etteroppgjoer hvis differanse er null`() {
+    fun `ikke etteroppgjør hvis differanse er null`() {
         val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), listOfUtbetaltStoenad())
         val resultat =
             beregneEtteroppgjoerRegel.anvend(

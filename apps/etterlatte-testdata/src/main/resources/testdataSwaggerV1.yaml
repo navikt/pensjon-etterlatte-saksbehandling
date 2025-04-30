@@ -25,7 +25,7 @@ paths:
             schema:
               $ref: "#/components/schemas/NySoeknadRequestDTO"
       responses:
-        "200": # status code
+        "201": # status code
           description: Response
     get:
       summary: Hente vedtaket til en bruker basert på fnr
@@ -36,7 +36,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NySoeknadRequestDTO"
+              $ref: "#/components/schemas/FoedselsnummerDTO"
       responses:
         "200": # status code
           description: Response

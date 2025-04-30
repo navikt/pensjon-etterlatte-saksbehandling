@@ -13,7 +13,7 @@ security:
   - BearerAuth: []
 
 paths:
-  /ytelse:
+  /api/v1/ytelse:
     post:
       summary: Opprette BP eller OMS for et sett med dollybrukere
       description: Oppretter ytelsen BARNEPENSJON eller OMSTILLINGSSTOENAD for et sett med dollybrukere

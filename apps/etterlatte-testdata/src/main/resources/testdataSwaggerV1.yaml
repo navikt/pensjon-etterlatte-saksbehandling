@@ -13,7 +13,7 @@ security:
   - BearerAuth: []
 
 paths:
-  /api/v1/ytelse:
+  /api/v1/opprett-ytelse:
     post:
       summary: Opprette BP eller OMS for et sett med dollybrukere
       description: Oppretter ytelsen BARNEPENSJON eller OMSTILLINGSSTOENAD for et sett med dollybrukere
@@ -27,7 +27,8 @@ paths:
       responses:
         "201": # status code
           description: Response
-    get:
+  /api/v1/hent-ytelse:
+    post:
       summary: Hente vedtaket til en bruker basert på fnr
       description: Henter en liste med alle vedtak for en gitt bruker
       requestBody:

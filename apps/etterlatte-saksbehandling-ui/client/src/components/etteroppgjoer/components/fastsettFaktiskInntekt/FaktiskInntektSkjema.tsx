@@ -73,7 +73,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
     lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
       dispatch(addResultatEtteroppgjoer(resultat))
-      hentEtteroppgjoerFetch(behandling.id, (etteroppgjoer) => {
+      hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
         dispatch(addEtteroppgjoer(etteroppgjoer))
         setRedigerFaktiskInntekt(false)
       })
@@ -85,7 +85,6 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
       onSubmit={handleSubmit((data) => submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data)))}
     >
       <VStack gap="4">
-        {/*TODO fiks dobbel visning av tag og heading*/}
         <Heading size="large">Fastsett faktisk inntekt</Heading>
         <HStack gap="2" align="center">
           <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>

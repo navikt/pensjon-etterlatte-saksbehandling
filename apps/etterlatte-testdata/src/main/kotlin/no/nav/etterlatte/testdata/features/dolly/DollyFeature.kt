@@ -1,20 +1,27 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
@@ -22,6 +29,8 @@ import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
+import java.time.LocalDate
 
 class DollyFeature(
     private val dollyService: DollyService,
@@ -32,7 +41,7 @@ class DollyFeature(
     override val path: String
         get() = "dolly"
     override val kunEtterlatte: Boolean
-        get() = true
+        get() = false
 
     override val routes: Route.() -> Unit
         get() = {
@@ -139,7 +148,7 @@ class DollyFeature(
                 }
             }
 
-            post("opprett-ytelse") {
+            post("api/v1/ytelse") {
                 try {
 
                     val nySoeknadRequest = call.receive<NySoeknadRequest>()
@@ -148,12 +157,14 @@ class DollyFeature(
                     val gjenlevende = nySoeknadRequest.gjenlevende
                     val avdoed = nySoeknadRequest.avdoed
                     val barnListe = nySoeknadRequest.barn
-                    val soeker =
-                        when (ytelse) {
-                            // TODO
-                            SoeknadType.BARNEPENSJON -> nySoeknadRequest.barn.first()
-                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
-                        }
+                    var soeker = nySoeknadRequest.soeker
+                    if (soeker == "") {
+                        soeker =
+                            when (ytelse) {
+                                SoeknadType.BARNEPENSJON -> barnListe.first()
+                                SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                            }
+                    }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
                         call.respond(HttpStatusCode.BadRequest, "Påkrevde felter mangler")
                     }
@@ -167,13 +178,52 @@ class DollyFeature(
                         )
 
                     val brukerId = brukerTokenInfo.ident()
-                    val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
-                    call.respond(SoeknadResponse(200, noekkel))
+                    dollyService.sendSoeknadFraDolly(request, brukerId, behandlingssteg)
+                    call.respond(HttpStatusCode.Created)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Noe gikk galt")
                 }
             }
+            get("api/v1/ytelse") {
+                try {
+                    val request = call.receive<FoedselsnummerDTO>()
+                    // TODO hente faktisk vedtak
+                    val fnr = haandterUgyldigIdent(request.foedselsnummer)
+                    // val vedtak = vedtakService.hentVedtak(fnr)
+                    val vedtak =
+                        VedtakTilPerson(
+                            vedtak =
+                                listOf(
+                                    Vedtak(
+                                        sakId = 1,
+                                        sakType = "BARNEPENSJON",
+                                        virkningstidspunkt = LocalDate.now(),
+                                        type = VedtakType.INNVILGELSE,
+                                        utbetaling =
+                                            listOf(
+                                                VedtakUtbetaling(
+                                                    fraOgMed = LocalDate.now(),
+                                                    tilOgMed = LocalDate.now(),
+                                                    beloep = BigDecimal(1000),
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        )
+                    call.respond(vedtak)
+                } catch (e: IllegalArgumentException) {
+                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+            }
         }
+
+    fun haandterUgyldigIdent(fnr: String): Folkeregisteridentifikator {
+        try {
+            return Folkeregisteridentifikator.of(fnr)
+        } catch (_: Exception) {
+            throw UgyldigFoedselsnummerException()
+        }
+    }
 }
 
 data class NySoeknadRequest(
@@ -188,3 +238,41 @@ data class SoeknadResponse(
     val status: Number,
     val noekkel: String,
 )
+
+data class VedtakTilPerson(
+    val vedtak: List<Vedtak>,
+)
+
+data class Vedtak(
+    val sakId: Long,
+    val sakType: String,
+    val virkningstidspunkt: LocalDate,
+    val type: VedtakType,
+    val utbetaling: List<VedtakUtbetaling>,
+)
+
+enum class VedtakType {
+    INNVILGELSE,
+    OPPHOER,
+    AVSLAG,
+    ENDRING,
+}
+
+data class VedtakUtbetaling(
+    val fraOgMed: LocalDate,
+    val tilOgMed: LocalDate?,
+    val beloep: BigDecimal?,
+)
+
+class UgyldigFoedselsnummerException :
+    UgyldigForespoerselException(
+        code = "006-FNR-UGYLDIG",
+        detail = "Ugyldig fødselsnummer",
+        meta = getMeta(),
+    )
+
+fun getMeta() =
+    mapOf(
+        "correlation-id" to getCorrelationId(),
+        "tidspunkt" to Tidspunkt.now(),
+    )

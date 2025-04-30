@@ -46,6 +46,9 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
+      autoLoginIgnorePaths:
+        - /dolly/api/**
+        - /dolly/swagger
   kafka:
     pool: nav-dev
   env:

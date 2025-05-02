@@ -19,6 +19,13 @@ data class ForventetInntektGrunnlag(
     val fratrekkInnAarUtland: Beregningstall,
 )
 
+data class FaktiskInntektGrunnlag(
+    val loennsinntekt: Beregningstall,
+    val afp: Beregningstall,
+    val naeringsinntekt: Beregningstall,
+    val utland: Beregningstall,
+)
+
 val forventetInntektGrunnlag: Regel<FaktumNode<ForventetInntektGrunnlag>, ForventetInntektGrunnlag> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
@@ -39,4 +46,24 @@ val forventetInntektInnvilgetPeriode =
             .plus(inntektutlandTom)
             .minus(fratrekkInnAarUtland)
             .round(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt)
+    }
+
+val faktiskInntektGrunnlag: Regel<FaktumNode<FaktiskInntektGrunnlag>, FaktiskInntektGrunnlag> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Finner grunnlag for faktisk inntekt",
+        finnFaktum = { it },
+        finnFelt = { it },
+    )
+
+val faktiskInntektInnvilgetPeriode =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Beregner faktisk inntekt i innvilget periode",
+        regelReferanse = RegelReferanse(id = "REGEL-FAKTISK-INNTEKT", versjon = "1"),
+    ) benytter faktiskInntektGrunnlag med { grunnlagFaktiskInntekt ->
+        grunnlagFaktiskInntekt.loennsinntekt
+            .plus(grunnlagFaktiskInntekt.afp)
+            .plus(grunnlagFaktiskInntekt.naeringsinntekt)
+            .plus(grunnlagFaktiskInntekt.loennsinntekt)
     }

@@ -35,7 +35,7 @@ function EtteroppgjoerForbehandlingTabell({
   }
 
   // TODO toggle visning av kopier eller ikke?
-  forbehandlinger = forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
+  const relevanteForbehandlinger = forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
 
   // TODO disse revurderingene skal antageligvis ikke opprettes på denne måten, men vi trenger en måte å komme fra forbehandling
   const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
@@ -57,7 +57,7 @@ function EtteroppgjoerForbehandlingTabell({
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {forbehandlinger.map((forbehandling) => (
+        {relevanteForbehandlinger.map((forbehandling) => (
           <Table.Row key={forbehandling.id} shadeOnHover={false}>
             <Table.DataCell>{formaterDato(forbehandling.opprettet)}</Table.DataCell>
             <Table.DataCell>{teksterEtteroppgjoerBehandlingStatus[forbehandling.status]}</Table.DataCell>

@@ -96,7 +96,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             <HStack width="100%" justify="center">
               <VStack gap="4">
                 <Button type="submit" variant="primary">
-                  {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? 'Rediger' : 'Gå videre'}
+                  Neste steg
                 </Button>
                 <AvbrytBehandling />
               </VStack>

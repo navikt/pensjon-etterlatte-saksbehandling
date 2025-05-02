@@ -100,7 +100,7 @@ class EtteroppgjoerRevurderingService(
                             revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                             virkningstidspunkt = virkningstidspunkt,
                             saksbehandlerIdent = brukerTokenInfo.ident(),
-                            begrunnelse = null,
+                            begrunnelse = "Etteroppgjør ${forbehandling.aar}",
                             mottattDato = null,
                             frist = null,
                             paaGrunnAvOppgave = null,

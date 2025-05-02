@@ -43,6 +43,7 @@ data class EtteroppgjoerForbehandling(
     val aar: Int,
     val innvilgetPeriode: Periode,
     val brevId: Long?,
+    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val kopiertFra: UUID? = null,
 ) {
     companion object {

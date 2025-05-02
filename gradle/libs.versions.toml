@@ -4,20 +4,20 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
-jackson-version = "2.18.3"
-jupiter-version = "5.12.1"
+jackson-version = "2.19.0"
+jupiter-version = "5.12.2"
 ktor2-version = "2.3.13"
-navfelles-token-version = "5.0.24"
+navfelles-token-version = "5.0.25"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.20.6"
+testcontainer-version = "1.21.0"
 tjenestespesifikasjoner-version = "1.1436e29"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.5.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.5.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.8.0" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.8.0" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
@@ -62,7 +62,7 @@ teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:t
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.18" }
-logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
+logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.14.6" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
@@ -86,7 +86,7 @@ test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", versi
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.9.1" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.17" }
+test-mockk = { module = "io.mockk:mockk", version = "1.14.2" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }

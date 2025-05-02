@@ -1,7 +1,7 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
-import React, { useEffect } from 'react'
-import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
+import { BodyShort, Box, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link, useNavigate } from 'react-router-dom'
@@ -21,6 +21,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   const dispatch = useAppDispatch()
   const [brevResult, fetchBrev] = useApiCall(hentBrevTilBehandling)
   const [opprettBrevResult, opprettBrevApi] = useApiCall(opprettBrevTilBehandling)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest] = useApiCall(
     ferdigstillEtteroppgjoerForbehandlingBrev
@@ -30,8 +31,9 @@ export function EtteroppgjoerForbehandlingBrev() {
   const navigate = useNavigate()
   const ferdigstillForbehandling = async () => {
     const forbehandlingId = etteroppgjoer.behandling.id
-    ferdigstillForbehandlingRequest({ forbehandlingId })
-    hentSakOgNavigerTilSaksoversikt(etteroppgjoer.behandling.sak.id, navigate)
+    ferdigstillForbehandlingRequest({ forbehandlingId }, () =>
+      hentSakOgNavigerTilSaksoversikt(etteroppgjoer.behandling.sak.id, navigate)
+    )
   }
 
   useEffect(() => {
@@ -50,6 +52,39 @@ export function EtteroppgjoerForbehandlingBrev() {
 
   return (
     <HStack height="100%" minHeight="100%" wrap={false}>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        header={{
+          heading: 'Ferdigstill forbehandling etteroppgjør',
+        }}
+      >
+        <Modal.Body>
+          <BodyShort>
+            Når forbehandlingen for etteroppgjøret ferdigstilles vil brevet sendes ut og forbehandlingen låses for
+            endringer.
+          </BodyShort>
+          {mapResult(ferdigstillForbehandlingResult, {
+            error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+          })}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="primary"
+            onClick={ferdigstillForbehandling}
+            loading={isPending(ferdigstillForbehandlingResult)}
+          >
+            Ferdigstill
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={isPending(ferdigstillForbehandlingResult)}
+            onClick={() => setModalOpen(false)}
+          >
+            Avbryt
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Box minWidth="30rem" maxWidth="40rem" borderColor="border-subtle" borderWidth="0 1 0 0">
         <VStack gap="4" margin="16">
           <Heading level="1" size="large">
@@ -86,10 +121,6 @@ export function EtteroppgjoerForbehandlingBrev() {
           pending: <Spinner label="Laster brev" />,
         })}
 
-        {mapResult(ferdigstillForbehandlingResult, {
-          error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-        })}
-
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center" gap="6">
             <div>
@@ -104,11 +135,7 @@ export function EtteroppgjoerForbehandlingBrev() {
 
             {kanRedigeres && (
               <div>
-                <Button
-                  variant="primary"
-                  onClick={ferdigstillForbehandling}
-                  loading={isPending(ferdigstillForbehandlingResult)}
-                >
+                <Button variant="primary" onClick={() => setModalOpen(true)}>
                   Ferdigstill
                 </Button>
               </div>

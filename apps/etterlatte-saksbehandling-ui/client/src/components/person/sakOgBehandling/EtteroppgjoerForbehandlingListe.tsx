@@ -34,6 +34,9 @@ function EtteroppgjoerForbehandlingTabell({
     )
   }
 
+  // TODO toggle visning av kopier eller ikke?
+  forbehandlinger = forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
+
   // TODO disse revurderingene skal antageligvis ikke opprettes på denne måten, men vi trenger en måte å komme fra forbehandling
   const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
     opprettRevurderingRequest({ sakId: sakId, forbehandlingId: forbehandlingId }, () => {

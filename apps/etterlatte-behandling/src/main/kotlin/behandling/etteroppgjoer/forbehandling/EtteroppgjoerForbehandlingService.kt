@@ -193,11 +193,7 @@ class EtteroppgjoerForbehandlingService(
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
 
-    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> {
-        return dao
-            .hentForbehandlinger(sakId)
-            .filter { it.kopiertFra == null } // ikke ta med kopier som brukes i revurdering
-    }
+    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlinger(sakId)
 
     fun opprettEtteroppgjoerForbehandling(
         sakId: SakId,

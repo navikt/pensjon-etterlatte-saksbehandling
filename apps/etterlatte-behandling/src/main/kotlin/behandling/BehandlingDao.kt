@@ -412,7 +412,7 @@ class BehandlingDao(
                             "sist_endret=CURRENT_TIMESTAMP",
                     )
                 statement.setString(1, viderefoertOpphoer.skalViderefoere.name)
-                statement.setString(2, objectMapper.writeValueAsString(viderefoertOpphoer.dato))
+                statement.setString(2, viderefoertOpphoer.dato?.let { objectMapper.writeValueAsString(viderefoertOpphoer.dato) })
                 statement.setJsonb(3, viderefoertOpphoer.kilde)
                 statement.setString(4, viderefoertOpphoer.begrunnelse)
                 statement.setObject(5, behandlingId)
@@ -466,7 +466,7 @@ class BehandlingDao(
                 statement.executeQuery().singleOrNull {
                     ViderefoertOpphoer(
                         skalViderefoere = JaNei.valueOf(getString("skalViderefoere")),
-                        dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
+                        dato = getString("dato")?.let { objectMapper.readValue<YearMonth>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
                         behandlingId = behandlingId,

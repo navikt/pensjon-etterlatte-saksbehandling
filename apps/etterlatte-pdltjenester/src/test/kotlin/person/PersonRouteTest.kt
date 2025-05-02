@@ -213,7 +213,7 @@ class PersonRouteTest {
             }
 
             val response =
-                client.post(PERSON_ENDEPUNKT) {
+                client.post(PDLIDENT_ENDEPUNKT) {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(hentFolkeregisterIdentReq.toJson())

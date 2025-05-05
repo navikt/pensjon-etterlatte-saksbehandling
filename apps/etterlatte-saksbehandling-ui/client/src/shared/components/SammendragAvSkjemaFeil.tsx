@@ -23,7 +23,6 @@ const fieldErrorsSomListe = (errors: FieldErrors): Array<FieldError> => {
 }
 
 export const formaterFieldErrors = (errors: FieldErrors): Array<SkjemaError> => {
-  console.log(errors)
   return fieldErrorsSomListe(errors)
     .filter((error) => !!error)
     .map((error) => ({ name: error.ref!.name, message: error.message! }))

@@ -144,7 +144,7 @@ fun Route.etteroppgjoerRoutes(
                         "Inntektsaar mangler"
                     }
 
-                forbehandlingService.startOpprettForbehandlingKjoering(inntektsaar)
+                forbehandlingService.finnOgOpprettForbehandlinger(inntektsaar)
             }
         }
 

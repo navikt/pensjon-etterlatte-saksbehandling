@@ -37,12 +37,8 @@ class EtteroppgjoerService(
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
-    fun finnOgOpprettEtteroppgjoer(
-        inntektsaar: Int,
-        trigger: String = "Manuell",
-    ) {
-        logger.info("$trigger: leter etter saker som skal ha etteroppgjoer for inntektsaar=$inntektsaar")
-
+    fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
+        logger.info("Starter oppretting av etteroppgjør for inntektsår $inntektsaar")
         val sakerMedUtbetaling =
             runBlocking {
                 vedtakKlient.hentSakerMedUtbetalingForInntektsaar(

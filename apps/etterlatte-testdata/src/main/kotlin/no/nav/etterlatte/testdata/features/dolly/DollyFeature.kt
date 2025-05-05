@@ -211,6 +211,8 @@ class DollyFeature(
                                 ),
                         )
                     call.respond(vedtak)
+                } catch (e: UgyldigFoedselsnummerException) {
+                    call.respondNullable(HttpStatusCode.BadRequest, e.detail)
                 } catch (e: IllegalArgumentException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }

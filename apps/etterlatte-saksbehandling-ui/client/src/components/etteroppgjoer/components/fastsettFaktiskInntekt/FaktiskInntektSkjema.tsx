@@ -72,8 +72,6 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    // TODO hvis skjemaet ikke er skittent, ikke gjør noe, og si ifra til kallet videre opp i prop treet at skjemaet ikke er endret -> Hvis feilmelding for revurdering
-
     if (isDirty) {
       if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(true)
 

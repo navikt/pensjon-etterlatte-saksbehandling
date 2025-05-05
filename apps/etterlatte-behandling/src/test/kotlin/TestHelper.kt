@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
@@ -513,6 +514,27 @@ fun mockPerson(
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) },
     pdlStatsborgerskap = null,
 )
+
+fun mockDoedshendelsePerson(
+    utland: Utland? = null,
+    familieRelasjon: FamilieRelasjon? = null,
+): PersonDoedshendelseDto =
+    mockPerson(utland, familieRelasjon).let {
+        PersonDoedshendelseDto(
+            foedselsnummer = it.foedselsnummer,
+            foedselsdato = it.foedselsdato,
+            foedselsaar = it.foedselsaar,
+            doedsdato = it.doedsdato,
+            bostedsadresse = it.bostedsadresse,
+            deltBostedsadresse = it.deltBostedsadresse,
+            kontaktadresse = it.kontaktadresse,
+            oppholdsadresse = it.oppholdsadresse,
+            sivilstand = it.sivilstand,
+            utland = it.utland,
+            familieRelasjon = it.familieRelasjon,
+            avdoedesBarn = it.avdoedesBarn,
+        )
+    }
 
 fun kommerBarnetTilGodeVurdering(behandlingId: UUID) =
     KommerBarnetTilgode(

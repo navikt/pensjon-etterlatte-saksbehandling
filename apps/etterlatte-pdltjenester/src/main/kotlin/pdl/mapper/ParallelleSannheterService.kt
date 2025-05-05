@@ -385,6 +385,7 @@ class ParallelleSannheterService(
                         foedselsdato.metadata.opplysningsId,
                     )
                 },
+            foedselsaar = OpplysningDTO(foedselsdato.foedselsaar, foedselsdato.metadata.opplysningsId),
             doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
             bostedsadresse =
                 hentPerson.bostedsadresse

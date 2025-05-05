@@ -26,7 +26,7 @@ import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockDoedshendelsePerson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -197,12 +197,12 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
         private val avdoed =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
                 doedsdato = OpplysningDTO(doedsdato, null),
             )
         private val gjenlevende =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
             )
         private val sak =

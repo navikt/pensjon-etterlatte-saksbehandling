@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockDoedshendelsePerson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -16,7 +16,7 @@ class DoedshendelseKontrollpunktAvdoedServiceTest {
 
     @Test
     fun `Skal returnere kontrollpunkt hvis avdoed ikke har doedsdato i PDL`() {
-        val avdoed = mockPerson().copy(doedsdato = null)
+        val avdoed = mockDoedshendelsePerson().copy(doedsdato = null)
 
         val kontrollpunkter = kontrollpunktService.identifiser(avdoed)
 
@@ -26,7 +26,7 @@ class DoedshendelseKontrollpunktAvdoedServiceTest {
     @Test
     fun `Skal returnere kontrollpunkt hvis den avdoede har D-nummer`() {
         val avdoed =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 doedsdato = OpplysningDTO(LocalDate.now(), null),
                 foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of("69057949961"), null),
             )
@@ -39,7 +39,7 @@ class DoedshendelseKontrollpunktAvdoedServiceTest {
     @Test
     fun `Skal returnere kontrollpunkt hvis den avdoede hadde utvandring`() {
         val avdoed =
-            mockPerson(
+            mockDoedshendelsePerson(
                 Utland(
                     innflyttingTilNorge = emptyList(),
                     utflyttingFraNorge = listOf(UtflyttingFraNorge("Sverige", LocalDate.now().minusMonths(2))),

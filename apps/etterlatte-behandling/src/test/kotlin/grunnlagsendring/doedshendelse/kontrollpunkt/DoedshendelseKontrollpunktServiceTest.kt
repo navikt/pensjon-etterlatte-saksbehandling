@@ -34,7 +34,7 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockDoedshendelsePerson
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
@@ -84,25 +84,33 @@ class DoedshendelseKontrollpunktServiceTest {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr, bruker) } returns emptyList()
 
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.avdoedFnr), null),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalBP.avdoedFnr),
+                        null,
+                    ),
                 doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
             )
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr),
+                        null,
+                    ),
                 familieRelasjon =
                     OpplysningDTO(
                         FamilieRelasjon(
@@ -114,14 +122,18 @@ class DoedshendelseKontrollpunktServiceTest {
                     ),
             )
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr), null),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr),
+                        null,
+                    ),
             )
         every { sakService.finnSak(any(), any()) } returns null
         every {
@@ -155,14 +167,18 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr), null),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
+                        null,
+                    ),
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
@@ -193,14 +209,18 @@ class DoedshendelseKontrollpunktServiceTest {
         } returns listOf(sak)
         every { behandlingService.hentSisteIverksatte(sak.id) } returns null
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr), null),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
+                        null,
+                    ),
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
@@ -230,14 +250,18 @@ class DoedshendelseKontrollpunktServiceTest {
         } returns emptyList()
 
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr), null),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
+                        null,
+                    ),
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
@@ -273,14 +297,18 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns foerstegangsbehandling(sakId = sakIdd, status = BehandlingStatus.IVERKSATT)
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalAvdoed.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr), null),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
+                        null,
+                    ),
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
@@ -311,7 +339,10 @@ class DoedshendelseKontrollpunktServiceTest {
         kontrollpunkter shouldContainExactlyInAnyOrder
             listOf(
                 DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak),
-                DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(grunnlagsendringshendelse.id, oppgaveIntern.id),
+                DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(
+                    grunnlagsendringshendelse.id,
+                    oppgaveIntern.id,
+                ),
             )
     }
 
@@ -339,7 +370,10 @@ class DoedshendelseKontrollpunktServiceTest {
         every {
             grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns listOf(grunnlagsendringshendelse)
-        every { oppgaveService.hentOppgaverForReferanse(grunnlagsendringshendelseId.toString()) } returns listOf(oppgaveIntern)
+        every { oppgaveService.hentOppgaverForReferanse(grunnlagsendringshendelseId.toString()) } returns
+            listOf(
+                oppgaveIntern,
+            )
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
 
         val kontrollpunkter =
@@ -360,15 +394,25 @@ class DoedshendelseKontrollpunktServiceTest {
     @Test
     fun `Skal gi kontrollpunkt dersom gjenlevende ikke har aktiv adresse`() {
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
-                bostedsadresse = listOf(OpplysningDTO(Adresse(AdresseType.VEGADRESSE, false, kilde = "FREG"), null)),
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr),
+                        null,
+                    ),
+                bostedsadresse =
+                    listOf(
+                        OpplysningDTO(
+                            Adresse(AdresseType.VEGADRESSE, false, kilde = "FREG"),
+                            null,
+                        ),
+                    ),
                 kontaktadresse = emptyList(),
                 oppholdsadresse = emptyList(),
                 familieRelasjon =

@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockDoedshendelsePerson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -35,14 +35,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal opprette kontrollpunkt ved samtidig doedsfall`() {
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -57,14 +57,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal opprette kontrollpunkt dersom vi ikke finner den andre forelderen`() {
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -91,14 +91,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal opprette kontrollpunkt ved iverksatt vedtak`() {
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -115,14 +115,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal ikke opprette kontrollpunkt ved dersom det kun eksisterer en sak`() {
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -147,16 +147,16 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
         private val avdoed =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
                 doedsdato = OpplysningDTO(doedsdato, null),
             )
         private val gjenlevende =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
             )
         private val barnet =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
                 familieRelasjon =
                     OpplysningDTO(

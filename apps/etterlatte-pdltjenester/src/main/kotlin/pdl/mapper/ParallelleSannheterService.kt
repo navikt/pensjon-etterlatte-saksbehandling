@@ -245,7 +245,7 @@ class ParallelleSannheterService(
     ): PersonDTO =
         runBlocking {
             val folkeregisteridentifikator =
-                if (hentPerson.folkeregisteridentifikator == null) {
+                if (hentPerson.folkeregisteridentifikator.isNullOrEmpty()) {
                     logger.warn(
                         "Fikk person som mangler folkeregisteridentifikator i PDL. Se sikkerlogg for fnr som oppslaget ble utført med.",
                     )

@@ -63,6 +63,7 @@ import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRes
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -695,11 +696,23 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         saktype: SakType,
     ): PersonDTO = mockPerson()
 
+    override fun hentPdlModellDoedshendelseForSaktype(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktype: SakType,
+    ): PersonDoedshendelseDto = mockDoedshendelsePerson()
+
     override fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktyper: List<SakType>,
     ): PersonDTO = mockPerson()
+
+    override fun hentPdlModellDoedshendelseFlereSaktyper(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktyper: List<SakType>,
+    ): PersonDoedshendelseDto = mockDoedshendelsePerson()
 
     override fun hentGeografiskTilknytning(
         foedselsnummer: String,

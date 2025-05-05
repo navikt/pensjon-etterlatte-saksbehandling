@@ -224,7 +224,7 @@ class DoedshendelseJobService(
 
     private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? =
         pdlTjenesterKlient
-            .hentPdlModellForSaktype(
+            .hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelse.beroertFnr,
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,
@@ -259,19 +259,19 @@ class DoedshendelseJobService(
 
     private fun sjekkUnder18aar(doedshendelse: DoedshendelseInternal): Boolean {
         val person =
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelse.beroertFnr,
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,
             )
-        return person.toPerson().under18aarPaaDato(LocalDate.now())
+        return person.under18aarPaaDato(LocalDate.now())
     }
 
     private fun sjekkUtlandForBeroertIHendelse(doedshendelse: DoedshendelseInternal): Boolean {
         val beroertPersonDto =
             when (doedshendelse.sakTypeForEpsEllerBarn()) {
                 SakType.BARNEPENSJON -> {
-                    pdlTjenesterKlient.hentPdlModellForSaktype(
+                    pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                         foedselsnummer = doedshendelse.beroertFnr,
                         rolle = PersonRolle.BARN,
                         saktype = SakType.BARNEPENSJON,
@@ -279,7 +279,7 @@ class DoedshendelseJobService(
                 }
 
                 SakType.OMSTILLINGSSTOENAD -> {
-                    pdlTjenesterKlient.hentPdlModellForSaktype(
+                    pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                         foedselsnummer = doedshendelse.beroertFnr,
                         rolle = PersonRolle.GJENLEVENDE,
                         saktype = SakType.OMSTILLINGSSTOENAD,

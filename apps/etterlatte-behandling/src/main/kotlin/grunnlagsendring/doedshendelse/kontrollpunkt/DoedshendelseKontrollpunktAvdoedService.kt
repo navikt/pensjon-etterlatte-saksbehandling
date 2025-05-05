@@ -1,28 +1,28 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 
 internal class DoedshendelseKontrollpunktAvdoedService {
-    fun identifiser(avdoed: PersonDTO): List<DoedshendelseKontrollpunkt> =
+    fun identifiser(avdoed: PersonDoedshendelseDto): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
             kontrollerDoedsdato(avdoed),
             kontrollerDNummer(avdoed),
             kontrollerUtvandring(avdoed),
         )
 
-    private fun kontrollerDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
+    private fun kontrollerDoedsdato(avdoed: PersonDoedshendelseDto): DoedshendelseKontrollpunkt? =
         when (avdoed.doedsdato) {
             null -> DoedshendelseKontrollpunkt.AvdoedLeverIPDL
             else -> null
         }
 
-    private fun kontrollerDNummer(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
+    private fun kontrollerDNummer(avdoed: PersonDoedshendelseDto): DoedshendelseKontrollpunkt? =
         when (avdoed.foedselsnummer.verdi.isDNumber()) {
             true -> DoedshendelseKontrollpunkt.AvdoedHarDNummer
             false -> null
         }
 
-    private fun kontrollerUtvandring(avdoed: PersonDTO): DoedshendelseKontrollpunkt? {
+    private fun kontrollerUtvandring(avdoed: PersonDoedshendelseDto): DoedshendelseKontrollpunkt? {
         val utflytting = avdoed.utland?.verdi?.utflyttingFraNorge
         val innflytting = avdoed.utland?.verdi?.innflyttingTilNorge
 

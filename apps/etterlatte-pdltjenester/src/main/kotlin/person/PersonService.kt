@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -60,6 +61,30 @@ class PersonService(
             } else {
                 parallelleSannheterService.mapOpplysningsperson(
                     request = request,
+                    hentPerson = it.data.hentPerson,
+                )
+            }
+        }
+    }
+
+    suspend fun hentDoedshendelseOpplysningsperson(hentPersonRequest: HentPersonRequest): PersonDoedshendelseDto {
+        logger.info("Henter dødshendelse-opplysninger for person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
+
+        return pdlKlient.hentPerson(hentPersonRequest).let {
+            if (it.data?.hentPerson == null) {
+                val pdlFeil = it.errors?.asFormatertFeil()
+                if (it.errors?.harAdressebeskyttelse() == true) {
+                    throw pdlForesporselFeiletForAdressebeskyttelse()
+                } else if (it.errors?.personIkkeFunnet() == true) {
+                    throw FantIkkePersonException("Fant ikke personen ${hentPersonRequest.foedselsnummer}")
+                } else {
+                    throw PdlForesporselFeilet(
+                        "Kunne ikke hente opplysninger for ${hentPersonRequest.foedselsnummer} fra PDL: $pdlFeil",
+                    )
+                }
+            } else {
+                parallelleSannheterService.mapDoedshendelsePerson(
+                    request = hentPersonRequest,
                     hentPerson = it.data.hentPerson,
                 )
             }

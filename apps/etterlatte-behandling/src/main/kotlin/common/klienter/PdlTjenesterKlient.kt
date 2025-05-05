@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -49,11 +50,23 @@ interface PdlTjenesterKlient : Pingable {
         saktype: SakType,
     ): PersonDTO
 
+    fun hentPdlModellDoedshendelseForSaktype(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktype: SakType,
+    ): PersonDoedshendelseDto
+
     fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktyper: List<SakType>,
     ): PersonDTO
+
+    fun hentPdlModellDoedshendelseFlereSaktyper(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktyper: List<SakType>,
+    ): PersonDoedshendelseDto
 
     fun hentGeografiskTilknytning(
         foedselsnummer: String,
@@ -133,7 +146,7 @@ class PdlTjenesterKlientImpl(
         rolle: PersonRolle,
         saktyper: List<SakType>,
     ): PersonDTO {
-        logger.info("Henter Pdl-modell for rolle ${rolle.name}")
+        logger.info("Henter Pdl-modell for rolle ${rolle.name} for sakstyper ${saktyper.joinToString { it.name }}")
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktyper)
         val response =
             runBlocking {
@@ -146,23 +159,35 @@ class PdlTjenesterKlientImpl(
         return response
     }
 
+    override fun hentPdlModellDoedshendelseFlereSaktyper(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktyper: List<SakType>,
+    ): PersonDoedshendelseDto {
+        logger.info("Henter Pdl-modell for dødshendelser for rolle ${rolle.name} og saktyper ${saktyper.joinToString { it.name }}")
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktyper)
+        val response =
+            runBlocking {
+                client
+                    .post("$url/person/v2/doedshendelse") {
+                        contentType(ContentType.Application.Json)
+                        setBody(personRequest)
+                    }.body<PersonDoedshendelseDto>()
+            }
+        return response
+    }
+
     override fun hentPdlModellForSaktype(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,
-    ): PersonDTO {
-        logger.info("Henter Pdl-modell for rolle ${rolle.name}")
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(saktype))
-        val response =
-            runBlocking {
-                client
-                    .post("$url/person/v2") {
-                        contentType(ContentType.Application.Json)
-                        setBody(personRequest)
-                    }.body<PersonDTO>()
-            }
-        return response
-    }
+    ): PersonDTO = hentPdlModellFlereSaktyper(foedselsnummer, rolle, listOf(saktype))
+
+    override fun hentPdlModellDoedshendelseForSaktype(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktype: SakType,
+    ): PersonDoedshendelseDto = hentPdlModellDoedshendelseFlereSaktyper(foedselsnummer, rolle, listOf(saktype))
 
     override fun hentGeografiskTilknytning(
         foedselsnummer: String,
@@ -311,9 +336,13 @@ class PdlTjenesterKlientImpl(
 
 fun PersonDTO.hentDoedsdato(): LocalDate? = this.doedsdato?.verdi
 
+fun PersonDoedshendelseDto.hentDoedsdato(): LocalDate? = this.doedsdato?.verdi
+
 fun PersonDTO.hentAnsvarligeForeldre(): List<Folkeregisteridentifikator>? = this.familieRelasjon?.verdi?.ansvarligeForeldre
 
 fun PersonDTO.hentBarn(): List<Folkeregisteridentifikator>? = this.familieRelasjon?.verdi?.barn
+
+fun PersonDoedshendelseDto.hentBarn(): List<Folkeregisteridentifikator>? = this.familieRelasjon?.verdi?.barn
 
 fun PersonDTO.hentVergemaal(): List<VergemaalEllerFremtidsfullmakt>? =
     this.vergemaalEllerFremtidsfullmakt?.map {

@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockDoedshendelsePerson
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.personOpplysning
 import org.junit.jupiter.api.BeforeEach
@@ -50,7 +50,7 @@ internal class DoedshendelseServiceTest {
         )
 
     private val avdoed =
-        mockPerson().copy(
+        mockDoedshendelsePerson().copy(
             doedsdato = OpplysningDTO(LocalDate.now().minusYears(2), null),
             avdoedesBarn =
                 listOf(
@@ -115,7 +115,7 @@ internal class DoedshendelseServiceTest {
             )
 
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 PersonRolle.AVDOED,
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -123,7 +123,7 @@ internal class DoedshendelseServiceTest {
         } returns avdoed.copy(avdoedesBarn = listOf(fellesbarn, fellesbarn), bostedsadresse = bostedsadresse)
 
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 annenForelder.value,
                 PersonRolle.TILKNYTTET_BARN,
                 SakType.OMSTILLINGSSTOENAD,
@@ -194,7 +194,7 @@ internal class DoedshendelseServiceTest {
             )
 
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 PersonRolle.AVDOED,
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -220,7 +220,7 @@ internal class DoedshendelseServiceTest {
             )
 
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 annenForelder.value,
                 PersonRolle.TILKNYTTET_BARN,
                 SakType.OMSTILLINGSSTOENAD,
@@ -291,7 +291,7 @@ internal class DoedshendelseServiceTest {
             )
 
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 PersonRolle.AVDOED,
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -328,7 +328,7 @@ internal class DoedshendelseServiceTest {
             )
 
         every {
-            pdlTjenesterKlient.hentPdlModellForSaktype(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 annenForelder.value,
                 PersonRolle.TILKNYTTET_BARN,
                 SakType.OMSTILLINGSSTOENAD,
@@ -355,7 +355,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal opprette doedshendelse for alle ektefeller`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -420,7 +420,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal opprette doedshendelse en for avdød uten barn`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -446,7 +446,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal opprette doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -472,7 +472,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal lagre nye hendelser hvis nye beroerte finnes`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -517,7 +517,7 @@ internal class DoedshendelseServiceTest {
         val barnfemtenaar = LocalDate.now().minusYears(15)
         val nyttBarn = personOpplysning(foedselsdato = barnfemtenaar).copy(foedselsnummer = HELSOESKEN_FOEDSELSNUMMER)
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -548,7 +548,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal oppdatere korrigert hendelse`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -611,7 +611,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal oppdatere annullert hendelse`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -675,7 +675,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal ikke opprette doedshendelser dersom avdoed ikke er registert som avdoed i PDL`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),

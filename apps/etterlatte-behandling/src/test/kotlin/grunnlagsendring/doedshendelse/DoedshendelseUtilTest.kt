@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockDoedshendelsePerson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -15,7 +15,7 @@ internal class DoedshendelseUtilTest {
     @Test
     fun `Skal finne naavaerende ektefelle`() {
         val person =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 sivilstand =
                     listOf(
                         sivilstand(
@@ -33,7 +33,7 @@ internal class DoedshendelseUtilTest {
     fun `Skal finne naavaerende ektefelle selv om man tidligere er gift med en annen`() {
         val tidligereEktefelle = "30901699972"
         val person =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 sivilstand =
                     listOf(
                         sivilstand(
@@ -61,7 +61,7 @@ internal class DoedshendelseUtilTest {
     fun `Skal returnere null dersom det finnes en skilt sivilstand uten gyldig fomDato`() {
         val tidligereEktefelle = "30901699972"
         val person =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 sivilstand =
                     listOf(
                         sivilstand(
@@ -88,7 +88,7 @@ internal class DoedshendelseUtilTest {
     @Test
     fun `Skal returnere null dersom personen er skilt`() {
         val person =
-            mockPerson().copy(
+            mockDoedshendelsePerson().copy(
                 sivilstand =
                     listOf(
                         sivilstand(

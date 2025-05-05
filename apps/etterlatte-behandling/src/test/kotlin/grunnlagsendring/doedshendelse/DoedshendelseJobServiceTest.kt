@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockDoedshendelsePerson
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakService
@@ -78,7 +78,7 @@ class DoedshendelseJobServiceTest {
 
     private val pdlTjenesterKlient =
         mockk<PdlTjenesterKlient> {
-            every { hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+            every { hentPdlModellDoedshendelseForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockDoedshendelsePerson()
         }
 
     private val krrKlient =

@@ -1,28 +1,27 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.common.klienter.hentBarn
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType.UTENLANDSKADRESSE
 import no.nav.etterlatte.libs.common.person.AdresseType.UTENLANDSKADRESSEFRITTFORMAT
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
 import kotlin.math.absoluteValue
 
-fun Person.under18aarPaaDato(dato: LocalDate): Boolean {
+fun PersonDoedshendelseDto.under18aarPaaDato(dato: LocalDate): Boolean {
     val aar18 = 18
-    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
+    val benyttetFoedselsdato = foedselsdato?.verdi ?: LocalDate.of(foedselsaar.verdi, 12, 31)
 
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < aar18
 }
 
-fun harAktivAdresse(person: PersonDTO): Boolean = person.alleAdresser().any { it.aktiv }
+fun harAktivAdresse(person: PersonDoedshendelseDto): Boolean = person.alleAdresser().any { it.aktiv }
 
-fun personBorIUtlandet(person: PersonDTO): Boolean {
+fun personBorIUtlandet(person: PersonDoedshendelseDto): Boolean {
     val alleAdresser = person.alleAdresser()
     return if (alleAdresser.any { it.aktiv }) {
         alleAdresser
@@ -39,11 +38,11 @@ fun personBorIUtlandet(person: PersonDTO): Boolean {
     }
 }
 
-private fun PersonDTO.alleAdresser(): List<Adresse> =
-    this.toPerson().let { person ->
-        val kontaktadresse = person.kontaktadresse ?: emptyList()
-        val bostedsadresse = person.bostedsadresse ?: emptyList()
-        val oppholdsadresse = person.oppholdsadresse ?: emptyList()
+private fun PersonDoedshendelseDto.alleAdresser(): List<Adresse> =
+    this.let { person ->
+        val kontaktadresse = person.kontaktadresse?.let { opplysningsDtoListe -> opplysningsDtoListe.map { it.verdi } } ?: emptyList()
+        val bostedsadresse = person.bostedsadresse?.let { opplysningsDtoListe -> opplysningsDtoListe.map { it.verdi } } ?: emptyList()
+        val oppholdsadresse = person.oppholdsadresse?.let { opplysningsDtoListe -> opplysningsDtoListe.map { it.verdi } } ?: emptyList()
 
         kontaktadresse + bostedsadresse + oppholdsadresse
     }
@@ -51,13 +50,13 @@ private fun PersonDTO.alleAdresser(): List<Adresse> =
 private fun Adresse.erUtland(): Boolean = this.type in listOf(UTENLANDSKADRESSE, UTENLANDSKADRESSEFRITTFORMAT) && this.land != "NOR"
 
 fun harFellesBarn(
-    avdoed: PersonDTO,
-    eps: PersonDTO,
+    avdoed: PersonDoedshendelseDto,
+    eps: PersonDoedshendelseDto,
 ): Boolean = finnBarn(avdoed).intersect(finnBarn(eps).toSet()).isNotEmpty()
 
-fun harBarn(personDTO: PersonDTO): Boolean = personDTO.hentBarn()?.isNotEmpty() ?: false
+fun harBarn(personDTO: PersonDoedshendelseDto): Boolean = personDTO.hentBarn()?.isNotEmpty() ?: false
 
-fun finnBarn(personDTO: PersonDTO): List<Folkeregisteridentifikator> = personDTO.hentBarn() ?: emptyList()
+fun finnBarn(personDTO: PersonDoedshendelseDto): List<Folkeregisteridentifikator> = personDTO.hentBarn() ?: emptyList()
 
 fun safeYearsBetween(
     first: Temporal?,
@@ -74,7 +73,7 @@ fun safeYearsBetween(
 }
 
 fun varEktefelleVedDoedsfall(
-    avdoed: PersonDTO,
+    avdoed: PersonDoedshendelseDto,
     eps: String,
 ): Boolean =
     avdoed.sivilstand
@@ -98,7 +97,7 @@ fun varEktefelleVedDoedsfall(
         ?: false
 
 // Finner siste sivilstand, og returnerer fnr dersom det er en ektefelle/partner, og det ikke finnes en skilsmisse uten gyldig fom-dato
-fun finnEktefelleSafe(person: PersonDTO): String? =
+fun finnEktefelleSafe(person: PersonDoedshendelseDto): String? =
     person.sivilstand
         ?.asSequence()
         ?.map { it.verdi }
@@ -120,8 +119,8 @@ fun finnEktefelleSafe(person: PersonDTO): String? =
         }
 
 fun finnAntallAarGiftVedDoedsfall(
-    avdoed: PersonDTO,
-    eps: PersonDTO,
+    avdoed: PersonDoedshendelseDto,
+    eps: PersonDoedshendelseDto,
 ): Long? =
     avdoed.sivilstand
         ?.asSequence()
@@ -145,7 +144,7 @@ fun finnAntallAarGiftVedDoedsfall(
             }
         }
 
-fun harSkiltSivilstandUtenGyldigFomDato(person: PersonDTO): Boolean =
+fun harSkiltSivilstandUtenGyldigFomDato(person: PersonDoedshendelseDto): Boolean =
     person.sivilstand
         ?.map { it.verdi }
         ?.filter { it.sivilstatus in listOf(Sivilstatus.SKILT, Sivilstatus.SKILT_PARTNER) }

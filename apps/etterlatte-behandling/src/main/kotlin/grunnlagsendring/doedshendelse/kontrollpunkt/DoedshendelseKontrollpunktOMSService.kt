@@ -9,7 +9,7 @@ import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.TIL_BEHAND
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import kotlin.math.absoluteValue
@@ -21,8 +21,8 @@ internal class DoedshendelseKontrollpunktOMSService(
     fun identifiser(
         hendelse: DoedshendelseInternal,
         sak: Sak?,
-        eps: PersonDTO,
-        avdoed: PersonDTO,
+        eps: PersonDoedshendelseDto,
+        avdoed: PersonDoedshendelseDto,
         bruker: BrukerTokenInfo,
     ): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
@@ -68,8 +68,8 @@ internal class DoedshendelseKontrollpunktOMSService(
         }
 
     private fun kontrollerBeroertFylt67Aar(
-        eps: PersonDTO,
-        avdoed: PersonDTO,
+        eps: PersonDoedshendelseDto,
+        avdoed: PersonDoedshendelseDto,
     ): DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon? =
         if (eps.foedselsdato != null) {
             val foedselsdato = eps.foedselsdato?.verdi
@@ -89,7 +89,7 @@ internal class DoedshendelseKontrollpunktOMSService(
             null
         }
 
-    private fun kontrollerBeroertErDoed(eps: PersonDTO): DoedshendelseKontrollpunkt.EpsHarDoedsdato? =
+    private fun kontrollerBeroertErDoed(eps: PersonDoedshendelseDto): DoedshendelseKontrollpunkt.EpsHarDoedsdato? =
         if (eps.doedsdato != null) {
             DoedshendelseKontrollpunkt.EpsHarDoedsdato
         } else {

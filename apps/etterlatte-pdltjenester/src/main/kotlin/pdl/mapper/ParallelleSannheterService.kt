@@ -364,7 +364,7 @@ class ParallelleSannheterService(
                     .let { Folkeregisteridentifikator.of(it.identifikasjonsnummer) }
             }
 
-        val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
+        val foedselsdato = ppsKlient.avklarNullableFoedselsdato(hentPerson.foedselsdato)
         val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
         val barnekull =
             if (request.rolle == PersonRolle.AVDOED) {
@@ -379,13 +379,19 @@ class ParallelleSannheterService(
         return PersonDoedshendelseDto(
             foedselsnummer = OpplysningDTO(folkeregisteridentifikator, null),
             foedselsdato =
-                foedselsdato.foedselsdato?.let {
+                foedselsdato?.foedselsdato?.let {
                     OpplysningDTO(
                         it,
                         foedselsdato.metadata.opplysningsId,
                     )
                 },
-            foedselsaar = OpplysningDTO(foedselsdato.foedselsaar, foedselsdato.metadata.opplysningsId),
+            foedselsaar =
+                foedselsdato?.let {
+                    OpplysningDTO(
+                        foedselsdato.foedselsaar,
+                        foedselsdato.metadata.opplysningsId,
+                    )
+                },
             doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
             bostedsadresse =
                 hentPerson.bostedsadresse

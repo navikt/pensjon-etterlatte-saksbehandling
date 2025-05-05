@@ -91,6 +91,8 @@ class ParallelleSannheterKlient(
 
     suspend fun avklarFoedselsdato(pdlFoedselsdato: List<PdlFoedselsdato>) = avklar(pdlFoedselsdato, Avklaring.FOEDSELSDATO)
 
+    suspend fun avklarNullableFoedselsdato(pdlFoedselsdato: List<PdlFoedselsdato>) = avklarNullable(pdlFoedselsdato, Avklaring.FOEDSELSDATO)
+
     suspend fun avklarFoedested(pdlFoedested: List<PdlFoedested>) = avklarNullable(pdlFoedested, Avklaring.FOEDESTED)
 
     suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)

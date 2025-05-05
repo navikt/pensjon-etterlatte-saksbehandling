@@ -6,7 +6,12 @@ import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fasts
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
 
-export const FastsettFaktiskInntekt = ({ erRedigerbar }: { erRedigerbar: boolean }) => {
+interface Props {
+  erRedigerbar: boolean
+  setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
+}
+
+export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaErSkittent }: Props) => {
   const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(false)
 
   const { behandling } = useEtteroppgjoer()
@@ -24,7 +29,10 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar }: { erRedigerbar: boolean
       </div>
 
       {redigerFaktiskInntekt && erRedigerbar ? (
-        <FaktiskInntektSkjema setRedigerFaktiskInntekt={setRedigerFaktiskInntekt} />
+        <FaktiskInntektSkjema
+          setRedigerFaktiskInntekt={setRedigerFaktiskInntekt}
+          setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
+        />
       ) : (
         <VStack gap="4">
           <FaktiskInntektVisning />

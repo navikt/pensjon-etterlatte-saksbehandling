@@ -2,7 +2,7 @@ import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -20,6 +20,7 @@ import { SammendragAvSkjemaFeil } from '~shared/components/SammendragAvSkjemaFei
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
+  fastsettInntektSkjemaErSkittent: boolean
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
@@ -28,19 +29,27 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
   const { next } = useContext(BehandlingRouteContext)
 
+  const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
+
   const {
     control,
     handleSubmit,
     watch,
+    setError,
     formState: { errors },
-  } = useForm<EtteroppgjoerRevurderingOversiktSkjema>()
+  } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+    defaultValues: { skalKunneRedigereFastsattInntekt: '', fastsettInntektSkjemaErSkittent: false },
+  })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
-    // TODO: sjekke her om fastsatt inntekt er faktisk redigert
-    // TODO: hvis den ikke er redigert, legg til error. Kan man legge til custom valideringsregler, hvor RHF automagisk legger til error i lista over errors?
-
-    if (!data) {
-      // TODO: denne sjekken er bare for å få linteren til å holde kjeft, full fiks kommer i neste PR...
+    if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
+      next()
+    } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
+      setError('fastsettInntektSkjemaErSkittent', {
+        type: 'required',
+        message: 'Du må gjøre en endring i fastsatt inntekt',
+      })
+      // Saksbehandler har trykket "Nei", da kan man gå videre
     } else {
       next()
     }
@@ -66,7 +75,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
           </BodyShort>
           <Inntektsopplysninger />
-
+          {/* TODO: lagret resultatet her noen sted */}
           <ControlledRadioGruppe
             name="skalKunneRedigereFastsattInntekt"
             control={control}
@@ -81,7 +90,10 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           />
 
           {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? (
-            <FastsettFaktiskInntekt erRedigerbar />
+            <FastsettFaktiskInntekt
+              erRedigerbar
+              setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
+            />
           ) : (
             <FastsettFaktiskInntekt erRedigerbar={false} />
           )}

@@ -12,8 +12,11 @@ class SkatteoppgjoerHendelserService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun startHendelsesKjoering(request: HendelseKjoeringRequest) {
-        logger.info("Starter å behandle ${request.antall} hendelser fra skatt")
+    fun startHendelsesKjoering(
+        request: HendelseKjoeringRequest,
+        trigger: String? = "manuelt",
+    ) {
+        logger.info("Starter å behandle ${request.antall} hendelser fra skatt (type: $trigger)")
 
         val sisteKjoering = dao.hentSisteKjoering()
         val hendelsesListe = runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }

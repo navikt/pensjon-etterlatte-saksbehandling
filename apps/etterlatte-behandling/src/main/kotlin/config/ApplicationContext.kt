@@ -724,7 +724,13 @@ internal class ApplicationContext(
 
     private val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
-    val etteroppgjoerJobService = EtteroppgjoerJobService(etteroppgjoerService, featureToggleService)
+    val etteroppgjoerJobService =
+        EtteroppgjoerJobService(
+            etteroppgjoerService,
+            etteroppgjoerForbehandlingService,
+            skatteoppgjoerHendelserService,
+            featureToggleService,
+        )
 
     private val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
@@ -860,7 +866,7 @@ internal class ApplicationContext(
         EtteropppgjoerJob(
             etteroppgjoerJobService = etteroppgjoerJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(30, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.DAYS),
         )
     }

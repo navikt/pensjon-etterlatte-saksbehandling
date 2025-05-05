@@ -54,9 +54,14 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    // kjøring for å opprette forbehandling for etteroppgjør
-    fun startOpprettForbehandlingKjoering(inntektsaar: Int) {
-        logger.info("Opprette forbehandling for etteroppgjør med mottatt skatteoppgjør for $inntektsaar")
+    // finn saker med etteroppgjoer og mottatt skatteoppgjoer som skal ha forbehandling
+    fun finnOgOpprettForbehandlinger(
+        inntektsaar: Int,
+        trigger: String? = "manuelt",
+    ) {
+        logger.info(
+            "Starter oppretting av forbehandlingfor etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar (type: $trigger)",
+        )
         val etteroppgjoerListe =
             etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
 
@@ -95,23 +100,6 @@ class EtteroppgjoerForbehandlingService(
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
-
-    fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
-        val forbehandlingCopy =
-            forbehandling.copy(
-                id = UUID.randomUUID(),
-                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                opprettet = Tidspunkt.now(), // ny dato
-                kopiertFra = forbehandling.id,
-            )
-
-        dao.lagreForbehandling(forbehandlingCopy)
-        dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
-        dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
-        dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
-
-        return forbehandlingCopy
-    }
 
     fun hentDetaljertForbehandling(
         forbehandlingId: UUID,
@@ -324,6 +312,23 @@ class EtteroppgjoerForbehandlingService(
                 YearMonth.of(inntektsaar, Month.DECEMBER)
             },
     )
+
+    private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+        val forbehandlingCopy =
+            forbehandling.copy(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                opprettet = Tidspunkt.now(), // ny dato
+                kopiertFra = forbehandling.id,
+            )
+
+        dao.lagreForbehandling(forbehandlingCopy)
+        dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
+
+        return forbehandlingCopy
+    }
 }
 
 data class EtteroppgjoerForbehandlingOgOppgave(

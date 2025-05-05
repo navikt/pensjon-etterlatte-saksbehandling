@@ -55,12 +55,9 @@ class EtteroppgjoerForbehandlingService(
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
     // finn saker med etteroppgjoer og mottatt skatteoppgjoer som skal ha forbehandling
-    fun finnOgOpprettForbehandlinger(
-        inntektsaar: Int,
-        trigger: String? = "manuelt",
-    ) {
+    fun finnOgOpprettForbehandlinger(inntektsaar: Int) {
         logger.info(
-            "Starter oppretting av forbehandlingfor etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar (type: $trigger)",
+            "Starter oppretting av forbehandlingfor etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar",
         )
         val etteroppgjoerListe =
             etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)

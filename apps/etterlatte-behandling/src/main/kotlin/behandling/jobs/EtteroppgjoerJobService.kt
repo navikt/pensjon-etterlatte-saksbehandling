@@ -46,11 +46,11 @@ internal fun startEtteroppgjoerKjoering(
     val antallHendelser = 500
 
     for (inntektsaar in aarMellom2024OgNaa) {
-        etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar, "automatisk")
+        etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
 
         // TODO: legge inn denne når vi har testet litt mer?
         // skatteoppgjoerHendelserService.startHendelsesKjoering(HendelseKjoeringRequest(500),"automatisk")
 
-        etteroppgjoerForbehandlingService.finnOgOpprettForbehandlinger(inntektsaar, "automatisk")
+        etteroppgjoerForbehandlingService.finnOgOpprettForbehandlinger(inntektsaar)
     }
 }

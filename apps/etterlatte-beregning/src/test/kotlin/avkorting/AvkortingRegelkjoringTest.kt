@@ -8,8 +8,11 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -138,6 +141,40 @@ class AvkortingRegelkjoringTest {
             ytelseEtterAvkorting shouldBe 7000
             avkortingsbeloep shouldBe 3000
             ytelseFoerAvkorting shouldBe 10000
+        }
+    }
+
+    @Nested
+    inner class FaktiskInntektRegel {
+        @Test
+        fun `Regner med alle inntekter i sum for avkorting`() {
+            val periode = RegelPeriode(fraDato = LocalDate.of(2024, 1, 1), tilDato = LocalDate.of(2024, 12, 31))
+            val faktiskInntekt =
+                AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt(
+                    loennsinntekt = 1,
+                    afp = 10,
+                    naeringsinntekt = 100,
+                    utland = 1000,
+                    periode = periode,
+                    kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                )
+
+            faktiskInntekt.verdi shouldBe 1111
+        }
+
+        @Test
+        fun `regner ingen inntekter som 0`() {
+            val periode = RegelPeriode(fraDato = LocalDate.of(2024, 1, 1), tilDato = LocalDate.of(2024, 12, 31))
+            val faktiskInntekt =
+                AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt(
+                    loennsinntekt = 0,
+                    afp = 0,
+                    naeringsinntekt = 0,
+                    utland = 0,
+                    periode = periode,
+                    kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                )
+            faktiskInntekt.verdi shouldBe 0
         }
     }
 }

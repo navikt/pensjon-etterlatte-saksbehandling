@@ -65,5 +65,5 @@ val faktiskInntektInnvilgetPeriode =
         grunnlagFaktiskInntekt.loennsinntekt
             .plus(grunnlagFaktiskInntekt.afp)
             .plus(grunnlagFaktiskInntekt.naeringsinntekt)
-            .plus(grunnlagFaktiskInntekt.loennsinntekt)
+            .plus(grunnlagFaktiskInntekt.utland)
     }

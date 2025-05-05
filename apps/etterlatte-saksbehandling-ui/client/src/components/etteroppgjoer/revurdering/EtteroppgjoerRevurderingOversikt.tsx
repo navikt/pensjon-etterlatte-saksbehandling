@@ -7,7 +7,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { BodyShort, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
@@ -16,7 +16,6 @@ import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { SammendragAvSkjemaFeil } from '~shared/components/SammendragAvSkjemaFeil'
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
@@ -30,27 +29,22 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const { next } = useContext(BehandlingRouteContext)
 
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
+  const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
+    useState<string>('')
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setError,
-    formState: { errors },
-  } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
-    defaultValues: { skalKunneRedigereFastsattInntekt: '', fastsettInntektSkjemaErSkittent: false },
+  const { control, handleSubmit, watch } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+    defaultValues: { skalKunneRedigereFastsattInntekt: '' },
   })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
     if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
+      setFastsettInntektSkjemaErSkittentFeilmelding('')
       next()
     } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
-      setError('fastsettInntektSkjemaErSkittent', {
-        type: 'required',
-        message: 'Du må gjøre en endring i fastsatt inntekt',
-      })
+      setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
       // Saksbehandler har trykket "Nei", da kan man gå videre
     } else {
+      setFastsettInntektSkjemaErSkittentFeilmelding('')
       next()
     }
   }
@@ -100,9 +94,11 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
           <ResultatAvForbehandling />
 
-          <HStack width="100%" justify="center">
-            <SammendragAvSkjemaFeil errors={errors} />
-          </HStack>
+          {fastsettInntektSkjemaErSkittentFeilmelding && (
+            <HStack width="100%" justify="center">
+              <Alert variant="error">{fastsettInntektSkjemaErSkittentFeilmelding}</Alert>
+            </HStack>
+          )}
 
           <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
             <HStack width="100%" justify="center">

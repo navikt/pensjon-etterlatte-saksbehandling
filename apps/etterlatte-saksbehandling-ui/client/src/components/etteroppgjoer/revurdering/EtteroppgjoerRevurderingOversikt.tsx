@@ -2,12 +2,12 @@ import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { BodyShort, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
@@ -16,10 +16,10 @@ import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { SammendragAvSkjemaFeil } from '~shared/components/SammendragAvSkjemaFeil'
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
+  fastsettInntektSkjemaErSkittent: boolean
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
@@ -28,20 +28,23 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
   const { next } = useContext(BehandlingRouteContext)
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<EtteroppgjoerRevurderingOversiktSkjema>()
+  const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
+  const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
+    useState<string>('')
+
+  const { control, handleSubmit, watch } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+    defaultValues: { skalKunneRedigereFastsattInntekt: '' },
+  })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
-    // TODO: sjekke her om fastsatt inntekt er faktisk redigert
-    // TODO: hvis den ikke er redigert, legg til error. Kan man legge til custom valideringsregler, hvor RHF automagisk legger til error i lista over errors?
-
-    if (!data) {
-      // TODO: denne sjekken er bare for å få linteren til å holde kjeft, full fiks kommer i neste PR...
+    if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
+      setFastsettInntektSkjemaErSkittentFeilmelding('')
+      next()
+    } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
+      setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+      // Saksbehandler har trykket "Nei", da kan man gå videre
     } else {
+      setFastsettInntektSkjemaErSkittentFeilmelding('')
       next()
     }
   }
@@ -66,7 +69,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
           </BodyShort>
           <Inntektsopplysninger />
-
+          {/* TODO: lagret resultatet her noen sted */}
           <ControlledRadioGruppe
             name="skalKunneRedigereFastsattInntekt"
             control={control}
@@ -81,16 +84,21 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           />
 
           {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? (
-            <FastsettFaktiskInntekt erRedigerbar />
+            <FastsettFaktiskInntekt
+              erRedigerbar
+              setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
+            />
           ) : (
             <FastsettFaktiskInntekt erRedigerbar={false} />
           )}
 
           <ResultatAvForbehandling />
 
-          <HStack width="100%" justify="center">
-            <SammendragAvSkjemaFeil errors={errors} />
-          </HStack>
+          {fastsettInntektSkjemaErSkittentFeilmelding && (
+            <HStack width="100%" justify="center">
+              <Alert variant="error">{fastsettInntektSkjemaErSkittentFeilmelding}</Alert>
+            </HStack>
+          )}
 
           <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
             <HStack width="100%" justify="center">

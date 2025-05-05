@@ -37,9 +37,10 @@ interface FastsettFaktiskInntektSkjema {
 
 interface Props {
   setRedigerFaktiskInntekt: (redigerFaktiskInntekt: boolean) => void
+  setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
+export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInntektSkjemaErSkittent }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoer)
 
@@ -51,7 +52,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
     control,
     watch,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: faktiskInntekt
       ? {
@@ -71,13 +72,20 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt }: Props) => {
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
-      dispatch(addResultatEtteroppgjoer(resultat))
-      hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
-        dispatch(addEtteroppgjoer(etteroppgjoer))
-        setRedigerFaktiskInntekt(false)
+    if (isDirty) {
+      if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(true)
+
+      lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
+        dispatch(addResultatEtteroppgjoer(resultat))
+        hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
+          dispatch(addEtteroppgjoer(etteroppgjoer))
+          setRedigerFaktiskInntekt(false)
+        })
       })
-    })
+    } else {
+      if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(false)
+      setRedigerFaktiskInntekt(false)
+    }
   }
 
   return (

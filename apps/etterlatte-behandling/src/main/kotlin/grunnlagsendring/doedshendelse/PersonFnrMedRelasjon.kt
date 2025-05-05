@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 
 data class PersonFnrMedRelasjon(
     val fnr: String,
@@ -8,6 +8,6 @@ data class PersonFnrMedRelasjon(
 )
 
 data class AvdoedOgAnnenForelderMedFellesbarn(
-    val avdoedPerson: PersonDTO,
-    val gjenlevendeForelder: PersonDTO,
+    val avdoedPerson: PersonDoedshendelseDto,
+    val gjenlevendeForelder: PersonDoedshendelseDto,
 )

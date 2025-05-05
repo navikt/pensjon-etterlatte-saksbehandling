@@ -12,7 +12,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.harAktivAdresse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -106,13 +106,13 @@ class DoedshendelseKontrollpunktService(
     private fun hentDataForBeroert(
         hendelse: DoedshendelseInternal,
         beroert: PersonRolle,
-    ): Triple<Sak?, PersonDTO, PersonDTO> {
+    ): Triple<Sak?, PersonDoedshendelseDto, PersonDoedshendelseDto> {
         val sakType = hendelse.sakTypeForEpsEllerBarn()
         val sak = hentSakForDoedshendelse(hendelse.beroertFnr, sakType)
 
-        val avdoed = pdlTjenesterKlient.hentPdlModellForSaktype(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
+        val avdoed = pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
         val gjenlevende =
-            pdlTjenesterKlient.hentPdlModellForSaktype(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())
 
         return Triple(sak, avdoed, gjenlevende)
     }
@@ -173,7 +173,7 @@ class DoedshendelseKontrollpunktService(
     private fun fellesKontrollpunkter(
         hendelse: DoedshendelseInternal,
         sak: Sak?,
-        gjenlevende: PersonDTO,
+        gjenlevende: PersonDoedshendelseDto,
     ): List<DoedshendelseKontrollpunkt> {
         val duplikatKontrollpunkt = kontrollerDuplikatHendelse(hendelse, sak)
         val adresseKontrollpunkt = kontrollerAktivAdresse(gjenlevende)
@@ -181,7 +181,7 @@ class DoedshendelseKontrollpunktService(
         return listOfNotNull(duplikatKontrollpunkt, adresseKontrollpunkt)
     }
 
-    private fun kontrollerAktivAdresse(gjenlevende: PersonDTO): DoedshendelseKontrollpunkt? =
+    private fun kontrollerAktivAdresse(gjenlevende: PersonDoedshendelseDto): DoedshendelseKontrollpunkt? =
         when (harAktivAdresse(gjenlevende)) {
             true -> null
             false -> DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse

@@ -4,7 +4,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
 
@@ -14,9 +14,9 @@ internal class DoedshendelseKontrollpunktBarnService(
 ) {
     fun identifiser(
         hendelse: DoedshendelseInternal,
-        avdoed: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
         sak: Sak?,
-        barn: PersonDTO,
+        barn: PersonDoedshendelseDto,
     ): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
             kontrollerBarnErSoektFor(sak),
@@ -38,9 +38,9 @@ internal class DoedshendelseKontrollpunktBarnService(
     }
 
     private fun kontrollerSamtidigDoedsfall(
-        avdoed: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
         hendelse: DoedshendelseInternal,
-        barn: PersonDTO,
+        barn: PersonDoedshendelseDto,
     ): DoedshendelseKontrollpunkt? =
         avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
             val annenForelderFnr =

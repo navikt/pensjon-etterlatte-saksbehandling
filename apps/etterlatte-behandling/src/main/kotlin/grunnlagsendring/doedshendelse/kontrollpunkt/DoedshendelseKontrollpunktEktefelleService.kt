@@ -8,7 +8,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.harBarn
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.harFellesBarn
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.varEktefelleVedDoedsfall
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.Sivilstatus.GIFT
 import no.nav.etterlatte.libs.common.person.Sivilstatus.REGISTRERT_PARTNER
 import no.nav.etterlatte.libs.common.person.Sivilstatus.SEPARERT
@@ -20,13 +20,13 @@ import kotlin.math.absoluteValue
 
 internal class DoedshendelseKontrollpunktEktefelleService {
     fun identifiser(
-        eps: PersonDTO,
-        avdoed: PersonDTO,
+        eps: PersonDoedshendelseDto,
+        avdoed: PersonDoedshendelseDto,
     ): List<DoedshendelseKontrollpunkt> = kontrollerEpsVarighet(avdoed, eps)
 
     private fun kontrollerEpsVarighet(
-        avdoed: PersonDTO,
-        eps: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
+        eps: PersonDoedshendelseDto,
     ): List<DoedshendelseKontrollpunkt> =
         if (varEktefelleVedDoedsfall(avdoed, eps.foedselsnummer.verdi.value)) {
             when (val antallAarGiftVedDoedsfall = finnAntallAarGiftVedDoedsfall(avdoed, eps)) {
@@ -45,8 +45,8 @@ internal class DoedshendelseKontrollpunktEktefelleService {
 
     private fun kontrollerEktefelle(
         antallAarGift: Long,
-        avdoed: PersonDTO,
-        eps: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
+        eps: PersonDoedshendelseDto,
     ): List<DoedshendelseKontrollpunkt> =
         if (antallAarGift < 5) {
             if (harFellesBarn(avdoed, eps)) {
@@ -61,8 +61,8 @@ internal class DoedshendelseKontrollpunktEktefelleService {
         }
 
     private fun kontrollerTidligereEktefelle(
-        avdoed: PersonDTO,
-        eps: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
+        eps: PersonDoedshendelseDto,
     ): DoedshendelseKontrollpunkt {
         finnEktefelleSafe(eps)?.let { epsEktefelle ->
             if (epsEktefelle != avdoed.foedselsnummer.verdi.value) {

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.RelativPersonrolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -343,6 +344,78 @@ class ParallelleSannheterService(
                         ?.map { OpplysningDTO(it, null) },
             )
         }
+
+    suspend fun mapDoedshendelsePerson(
+        request: HentPersonRequest,
+        hentPerson: PdlHentPerson,
+    ): PersonDoedshendelseDto {
+        val folkeregisteridentifikator =
+            if (hentPerson.folkeregisteridentifikator.isNullOrEmpty()) {
+                logger.warn(
+                    "Fikk person som mangler folkeregisteridentifikator i PDL. Se sikkerlogg for fnr som oppslaget ble utført med.",
+                )
+                sikkerLogg.warn(
+                    "Person med fnr=${request.foedselsnummer} og mangler folkeregisteridentifikator i PDL",
+                )
+                request.foedselsnummer
+            } else {
+                ppsKlient
+                    .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                    .let { Folkeregisteridentifikator.of(it.identifikasjonsnummer) }
+            }
+
+        val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
+        val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
+        val barnekull =
+            if (request.rolle == PersonRolle.AVDOED) {
+                mapBarnekull(
+                    hentPerson,
+                    request.saktyper,
+                )
+            } else {
+                null
+            }
+
+        return PersonDoedshendelseDto(
+            foedselsnummer = OpplysningDTO(folkeregisteridentifikator, null),
+            foedselsdato =
+                foedselsdato.foedselsdato?.let {
+                    OpplysningDTO(
+                        it,
+                        foedselsdato.metadata.opplysningsId,
+                    )
+                },
+            doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
+            bostedsadresse =
+                hentPerson.bostedsadresse
+                    ?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
+                    ?.map { OpplysningDTO(it, null) },
+            oppholdsadresse =
+                hentPerson.oppholdsadresse
+                    ?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }
+                    ?.map { OpplysningDTO(it, null) },
+            deltBostedsadresse =
+                hentPerson.deltBostedsadresse
+                    ?.let {
+                        AdresseMapper.mapDeltBostedsadresse(ppsKlient, it)
+                    }?.map { OpplysningDTO(it, null) },
+            kontaktadresse =
+                hentPerson.kontaktadresse
+                    ?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) }
+                    ?.map { OpplysningDTO(it, null) },
+            sivilstand =
+                hentPerson.sivilstand
+                    ?.let { SivilstandMapper.mapSivilstand(it) }
+                    ?.map { OpplysningDTO(it, null) },
+            utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
+            familieRelasjon =
+                OpplysningDTO(
+                    FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle),
+                    null,
+                ),
+            avdoedesBarn = barnekull?.barn,
+        )
+    }
 
     private suspend fun mapBarnekull(
         forelder: PdlHentPerson,

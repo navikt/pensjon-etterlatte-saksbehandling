@@ -12,6 +12,20 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 
+data class PersonDoedshendelseDto(
+    val foedselsnummer: OpplysningDTO<Folkeregisteridentifikator>,
+    val foedselsdato: OpplysningDTO<LocalDate>?,
+    val doedsdato: OpplysningDTO<LocalDate>?,
+    var bostedsadresse: List<OpplysningDTO<Adresse>>?,
+    var deltBostedsadresse: List<OpplysningDTO<Adresse>>?,
+    var kontaktadresse: List<OpplysningDTO<Adresse>>?,
+    var oppholdsadresse: List<OpplysningDTO<Adresse>>?,
+    val sivilstand: List<OpplysningDTO<Sivilstand>>?,
+    var utland: OpplysningDTO<Utland>?,
+    var familieRelasjon: OpplysningDTO<FamilieRelasjon>?,
+    var avdoedesBarn: List<Person>?,
+)
+
 data class PersonDTO(
     val fornavn: OpplysningDTO<String>,
     val mellomnavn: OpplysningDTO<String>?,

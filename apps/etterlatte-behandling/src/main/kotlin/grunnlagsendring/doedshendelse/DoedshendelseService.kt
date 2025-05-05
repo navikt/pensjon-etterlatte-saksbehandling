@@ -6,7 +6,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Person
@@ -31,7 +31,7 @@ class DoedshendelseService(
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
 
         val avdoed =
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
                 doedshendelse.fnr,
                 PersonRolle.AVDOED,
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -65,7 +65,7 @@ class DoedshendelseService(
     private fun haandterEksisterendeHendelser(
         doedshendelse: PdlDoedshendelse,
         doedshendelserForAvdoed: List<DoedshendelseInternal>,
-        avdoed: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
         beroerte: List<PersonFnrMedRelasjon>,
     ) {
         val aapneDoedshendelser = doedshendelserForAvdoed.filter { it.status !== Status.FERDIG }
@@ -96,7 +96,7 @@ class DoedshendelseService(
     private fun haandterNyeBerorte(
         doedshendelserForAvdoed: List<DoedshendelseInternal>,
         beroerte: List<PersonFnrMedRelasjon>,
-        avdoed: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
         endringstype: Endringstype,
     ) {
         val eksisterendeBeroerte = doedshendelserForAvdoed.map { it.beroertFnr }
@@ -119,7 +119,7 @@ class DoedshendelseService(
 
     private fun lagreDoedshendelser(
         beroerte: List<PersonFnrMedRelasjon>,
-        avdoed: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
         endringstype: Endringstype,
     ) {
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
@@ -145,7 +145,7 @@ class DoedshendelseService(
         )
     }
 
-    private fun finnBeroerteBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+    private fun finnBeroerteBarn(avdoed: PersonDoedshendelseDto): List<PersonFnrMedRelasjon> {
         val maanedenEtterDoedsfall =
             avdoed.doedsdato!!
                 .verdi
@@ -160,7 +160,7 @@ class DoedshendelseService(
         }
     }
 
-    private fun finnSamboereForAvdoedMedFellesBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+    private fun finnSamboereForAvdoedMedFellesBarn(avdoed: PersonDoedshendelseDto): List<PersonFnrMedRelasjon> {
         val avdoedesBarn = avdoed.avdoedesBarn
         val andreForeldreForAvdoedesBarn =
             avdoedesBarn
@@ -186,14 +186,14 @@ class DoedshendelseService(
     }
 
     private fun harSammeAdresseSomAvdoed(
-        avdoed: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
         andreForeldreForAvdoedesBarn: List<String>?,
     ): List<PersonFnrMedRelasjon> =
         andreForeldreForAvdoedesBarn
             ?.map {
                 val annenForelder =
                     runBlocking {
-                        pdlTjenesterKlient.hentPdlModellForSaktype(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
+                        pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
                     }
                 AvdoedOgAnnenForelderMedFellesbarn(avdoed, annenForelder)
             }?.filter { erSamboere(it) }
@@ -230,7 +230,7 @@ class DoedshendelseService(
         adresse1.postnr == adresse2.postnr
 
     private fun finnBeroerteEktefeller(
-        avdoed: PersonDTO,
+        avdoed: PersonDoedshendelseDto,
         samboere: List<PersonFnrMedRelasjon>,
     ): List<PersonFnrMedRelasjon> {
         val avdoedesSivilstander = avdoed.sivilstand ?: emptyList()

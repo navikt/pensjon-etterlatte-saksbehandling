@@ -271,7 +271,7 @@ class DoedshendelseJobService(
         val beroertPersonDto =
             when (doedshendelse.sakTypeForEpsEllerBarn()) {
                 SakType.BARNEPENSJON -> {
-                    pdlTjenesterKlient.hentPdlModellForSaktype(
+                    pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                         foedselsnummer = doedshendelse.beroertFnr,
                         rolle = PersonRolle.BARN,
                         saktype = SakType.BARNEPENSJON,
@@ -279,7 +279,7 @@ class DoedshendelseJobService(
                 }
 
                 SakType.OMSTILLINGSSTOENAD -> {
-                    pdlTjenesterKlient.hentPdlModellForSaktype(
+                    pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                         foedselsnummer = doedshendelse.beroertFnr,
                         rolle = PersonRolle.GJENLEVENDE,
                         saktype = SakType.OMSTILLINGSSTOENAD,

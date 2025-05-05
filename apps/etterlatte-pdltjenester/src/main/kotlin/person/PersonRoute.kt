@@ -36,6 +36,12 @@ fun Route.personRoute(service: PersonService) {
 
                 service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
             }
+
+            post("doedshendelse") {
+                val hentPersonRequest = call.receive<HentPersonRequest>()
+                logger.info("Henter personpplysning med fnr=${hentPersonRequest.foedselsnummer}")
+                call.respond(service.hentDoedshendelseOpplysningsperson(hentPersonRequest))
+            }
         }
 
         post("/adressebeskyttelse") {

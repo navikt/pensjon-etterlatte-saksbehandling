@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -8,6 +9,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.slf4j.LoggerFactory
 
@@ -26,6 +28,7 @@ class SjekkAdressebeskyttelseJobService(
     private val tilgangService: OppdaterTilgangService,
     private val grunnlagService: GrunnlagService,
     private val featureToggleService: FeatureToggleService,
+    private val sakLesDao: SakLesDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -36,12 +39,29 @@ class SjekkAdressebeskyttelseJobService(
 
     private fun run() {
         if (featureToggleService.isEnabled(SjekkAdressebeskyttelseToggles.SJEKK_ADRESSEBESKYTTELSE_JOBB, false)) {
-            val aktuelleSaker = listOf(SakId(5286), SakId(22597), SakId(17474), SakId(11517), SakId(11652), SakId(15436))
+            val aktuelleSaker = listOf(SakId(22092))
             aktuelleSaker.forEach { aktuellSak ->
-                val persongalleri = inTransaction { grunnlagService.hentPersongalleri(aktuellSak) }
-                if (persongalleri != null) {
+                val (sak, persongalleriGrunnlag) =
+                    inTransaction {
+                        sakLesDao.hentSak(aktuellSak) to grunnlagService.hentPersongalleri(aktuellSak)
+                    }
+                if (sak == null) return@forEach
+                val persongalleriPdl =
+                    runBlocking {
+                        pdlTjenesterKlient.hentPersongalleri(
+                            foedselsnummer = sak.ident,
+                            sakType = sak.sakType,
+                            innsender = persongalleriGrunnlag?.innsender,
+                        )
+                    }
+                if (persongalleriGrunnlag != null || persongalleriPdl != null) {
                     logger.info("Oppdaterer gradering på sak ${aktuellSak.sakId}")
-                    inTransaction { tilgangService.haandtergraderingOgEgenAnsatt(aktuellSak, persongalleri) }
+                    inTransaction {
+                        tilgangService.haandtergraderingOgEgenAnsatt(
+                            aktuellSak,
+                            persongalleriPdl ?: persongalleriGrunnlag!!,
+                        )
+                    }
                 } else {
                     logger.info("Fant ikke persongalleri på sak ${aktuellSak.sakId}")
                 }

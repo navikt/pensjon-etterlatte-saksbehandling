@@ -57,7 +57,7 @@ class EtteroppgjoerForbehandlingService(
     // finn saker med etteroppgjoer og mottatt skatteoppgjoer som skal ha forbehandling
     fun finnOgOpprettForbehandlinger(inntektsaar: Int) {
         logger.info(
-            "Starter oppretting av forbehandlingfor etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar",
+            "Starter oppretting av forbehandling for etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar",
         )
         val etteroppgjoerListe =
             etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)

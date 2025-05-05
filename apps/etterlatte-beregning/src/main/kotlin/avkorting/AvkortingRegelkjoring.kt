@@ -1,11 +1,13 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.avkorting.regler.FaktiskInntektGrunnlag
 import no.nav.etterlatte.avkorting.regler.ForventetInntektGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.RestanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanseOgSanksjon
+import no.nav.etterlatte.avkorting.regler.faktiskInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.regler.forventetInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.restanse
@@ -44,7 +46,7 @@ object AvkortingRegelkjoring {
         kilde: Grunnlagsopplysning.Saksbehandler,
         periode: Periode,
     ): BenyttetInntektInnvilgetPeriode {
-        logger.info("Beregner inntekt innvilget periode")
+        logger.info("Beregner forventet inntekt innvilget periode")
 
         val resultat =
             forventetInntektInnvilgetPeriode.eksekver(
@@ -92,21 +94,50 @@ object AvkortingRegelkjoring {
         afp: Int,
         naeringsinntekt: Int,
         utland: Int,
+        periode: RegelPeriode,
         kilde: Grunnlagsopplysning.Saksbehandler,
     ): BenyttetInntektInnvilgetPeriode {
-        logger.info("Beregner inntekt innvilget periode")
+        logger.info("Beregner faktisk inntekt innvilget periode")
 
-        return BenyttetInntektInnvilgetPeriode(
-            verdi = loennsinntekt + naeringsinntekt + utland + afp,
-            tidspunkt = Tidspunkt.now(),
-            regelResultat = "".toJsonNode(),
-            kilde =
-                Grunnlagsopplysning.RegelKilde(
-                    navn = "",
-                    ts = Tidspunkt.now(),
-                    versjon = "",
-                ),
-        )
+        val resultat =
+            faktiskInntektInnvilgetPeriode.eksekver(
+                grunnlag =
+                    KonstantGrunnlag(
+                        FaktumNode(
+                            FaktiskInntektGrunnlag(
+                                loennsinntekt = Beregningstall(loennsinntekt),
+                                afp = Beregningstall(afp),
+                                naeringsinntekt = Beregningstall(naeringsinntekt),
+                                utland = Beregningstall(utland),
+                            ),
+                            kilde = kilde,
+                            beskrivelse = "Faktisk inntekt for innvilget periode",
+                        ),
+                    ),
+                periode = periode,
+            )
+
+        return when (resultat) {
+            is RegelkjoeringResultat.Suksess -> {
+                val tidspunkt = Tidspunkt.now()
+                resultat.periodiserteResultater
+                    .map { periodisertResultat ->
+                        BenyttetInntektInnvilgetPeriode(
+                            verdi = periodisertResultat.resultat.verdi.toInteger(),
+                            tidspunkt = tidspunkt,
+                            regelResultat = periodisertResultat.toJsonNode(),
+                            kilde =
+                                Grunnlagsopplysning.RegelKilde(
+                                    navn = faktiskInntektInnvilgetPeriode.regelReferanse.id,
+                                    ts = tidspunkt,
+                                    versjon = faktiskInntektInnvilgetPeriode.regelReferanse.versjon,
+                                ),
+                        )
+                    }.single()
+            }
+
+            is RegelkjoeringResultat.UgyldigPeriode -> throw InternfeilException("Ugyldig periode for regel for faktisk inntekt: $periode")
+        }
     }
 
     fun beregnInntektsavkorting(

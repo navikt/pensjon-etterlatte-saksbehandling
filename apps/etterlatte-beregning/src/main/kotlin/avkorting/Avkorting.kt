@@ -16,7 +16,9 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.sanksjon.Sanksjon
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -104,7 +106,10 @@ data class Avkorting(
                                             inntektsavkorting.grunnlag.periode.tom
                                                 ?: opphoerFom?.let {
                                                     if (opphoerFom.year > inntektsavkorting.grunnlag.periode.fom.year) {
-                                                        YearMonth.of(inntektsavkorting.grunnlag.periode.fom.year, Month.DECEMBER)
+                                                        YearMonth.of(
+                                                            inntektsavkorting.grunnlag.periode.fom.year,
+                                                            Month.DECEMBER,
+                                                        )
                                                     } else {
                                                         opphoerFom.minusMonths(1)
                                                     }
@@ -272,6 +277,11 @@ data class Avkorting(
                         afp = afp,
                         naeringsinntekt = naeringsinntekt,
                         utland = utland,
+                        periode =
+                            RegelPeriode(
+                                fraDato = LocalDate.of(aar, Month.JANUARY.value, 1),
+                                tilDato = LocalDate.of(aar, Month.DECEMBER, 31),
+                            ),
                         kilde = kilde,
                     ),
             )

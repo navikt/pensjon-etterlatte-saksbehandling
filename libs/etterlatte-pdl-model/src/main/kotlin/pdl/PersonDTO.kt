@@ -15,7 +15,7 @@ import java.time.LocalDate
 data class PersonDoedshendelseDto(
     val foedselsnummer: OpplysningDTO<Folkeregisteridentifikator>,
     val foedselsdato: OpplysningDTO<LocalDate>?,
-    val foedselsaar: OpplysningDTO<Int>,
+    val foedselsaar: OpplysningDTO<Int>?,
     val doedsdato: OpplysningDTO<LocalDate>?,
     var bostedsadresse: List<OpplysningDTO<Adresse>>?,
     var deltBostedsadresse: List<OpplysningDTO<Adresse>>?,

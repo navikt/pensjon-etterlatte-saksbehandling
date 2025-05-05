@@ -13,8 +13,12 @@ import java.time.temporal.Temporal
 import kotlin.math.absoluteValue
 
 fun PersonDoedshendelseDto.under18aarPaaDato(dato: LocalDate): Boolean {
+    if (foedselsdato == null && foedselsaar == null) {
+        // Vi er usikker så vi lander på "den sikre siden"
+        return true
+    }
     val aar18 = 18
-    val benyttetFoedselsdato = foedselsdato?.verdi ?: LocalDate.of(foedselsaar.verdi, 12, 31)
+    val benyttetFoedselsdato = foedselsdato?.verdi ?: LocalDate.of(foedselsaar!!.verdi, 12, 31)
 
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < aar18
 }

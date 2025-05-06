@@ -57,6 +57,9 @@ import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.EtteropppgjoerJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
+import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -868,6 +871,32 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(30, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.DAYS),
+        )
+    }
+
+    val sjekkAdressebeskyttelseJobDao: SjekkAdressebeskyttelseJobDao by lazy {
+        SjekkAdressebeskyttelseJobDao(autoClosingDatabase)
+    }
+
+    val sjekkAdressebeskyttelseJobService: SjekkAdressebeskyttelseJobService by lazy {
+        SjekkAdressebeskyttelseJobService(
+            sjekkAdressebeskyttelseJobDao = sjekkAdressebeskyttelseJobDao,
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            tilgangService = oppdaterTilgangService,
+            grunnlagService = grunnlagService,
+            featureToggleService = featureToggleService,
+            sakLesDao = sakLesDao,
+        )
+    }
+
+    val sjekkAdressebeskyttelseJob: SjekkAdressebeskyttelseJob by lazy {
+        SjekkAdressebeskyttelseJob(
+            service = sjekkAdressebeskyttelseJobService,
+            sakTilgangDao = sakTilgangDao,
+            dataSource = dataSource,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(10, ChronoUnit.MINUTES),
         )
     }
 

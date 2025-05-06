@@ -245,7 +245,7 @@ class BrevService(
                             "Kaster opprinnelig exception videre",
                         internException,
                     )
-                    throw internException
+                    throw responseException
                 }
             when (exceptionResponse.status) {
                 // ForespoerselException

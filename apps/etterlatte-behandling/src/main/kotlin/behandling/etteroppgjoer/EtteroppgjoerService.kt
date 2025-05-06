@@ -23,12 +23,7 @@ class EtteroppgjoerService(
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
         val etteroppgjoer = sak?.let { dao.hentEtteroppgjoer(it.id, inntektsaar) }
 
-        val skalHaEtteroppgjoer =
-            when (etteroppgjoer?.status) {
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER -> true
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER -> true
-                else -> false
-            }
+        val skalHaEtteroppgjoer = etteroppgjoer?.skalHaEtteroppgjoer() ?: false
 
         return SkalHaEtteroppgjoerResultat(
             skalHaEtteroppgjoer,

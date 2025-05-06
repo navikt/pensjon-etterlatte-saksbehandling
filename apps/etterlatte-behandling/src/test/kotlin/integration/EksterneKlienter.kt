@@ -5,9 +5,9 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
-import no.nav.etterlatte.behandling.etteroppgjoer.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient

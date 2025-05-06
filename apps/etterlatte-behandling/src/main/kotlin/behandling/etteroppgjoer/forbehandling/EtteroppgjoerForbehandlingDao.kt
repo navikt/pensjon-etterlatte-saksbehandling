@@ -2,10 +2,10 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing

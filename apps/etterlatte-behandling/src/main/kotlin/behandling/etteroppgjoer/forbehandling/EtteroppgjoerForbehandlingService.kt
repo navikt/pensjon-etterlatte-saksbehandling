@@ -3,10 +3,6 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.DetaljertForbehandlingDto
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOpplysninger
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt

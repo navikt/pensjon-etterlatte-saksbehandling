@@ -1,17 +1,13 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.Test
 
 class EtteroppgjoerServiceTest {
-    val sakService: SakService = mockk()
-
     @Test
     fun `skal ha etteroppgjoer hvis status`() {
-        // skal ha etteroppgjør, oppdater status
+        // skal ha etteroppgjør
         val statusSomSkalHaEtteroppgjoer =
             setOf(
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,

@@ -606,7 +606,7 @@ internal class ApplicationContext(
         )
 
     private val doedshendelseReminderJob =
-        DoedshendelseReminderService(doedshendelseDao, behandlingService, oppgaveService)
+        DoedshendelseReminderService(doedshendelseDao, behandlingService, oppgaveService, sakLesDao)
     private val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,

@@ -69,6 +69,7 @@ class DoedshendelseReminderService(
                     sakId = null,
                 ),
             )
+            return
         }
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }

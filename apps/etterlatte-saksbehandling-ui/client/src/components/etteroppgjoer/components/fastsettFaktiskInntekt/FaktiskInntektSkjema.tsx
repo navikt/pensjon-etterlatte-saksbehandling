@@ -1,8 +1,7 @@
 import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
 import { useForm } from 'react-hook-form'
 import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { BodyShort, Box, Button, Heading, HStack, Tag, Textarea, VStack } from '@navikt/ds-react'
-import { maanedNavn } from '~utils/formatering/dato'
+import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
 import { isPending } from '~shared/api/apiUtils'
@@ -91,16 +90,6 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
   return (
     <form>
       <VStack gap="4">
-        <Heading size="large">Fastsett faktisk inntekt</Heading>
-        <HStack gap="2" align="center">
-          <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
-        </HStack>
-        <div>
-          <Tag variant="neutral">
-            {maanedNavn(behandling.innvilgetPeriode.fom)} - {maanedNavn(behandling.innvilgetPeriode.tom)}
-          </Tag>
-        </div>
-
         <VStack gap="4" width="fit-content">
           <ControlledInntektTextField
             name="loennsinntekt"

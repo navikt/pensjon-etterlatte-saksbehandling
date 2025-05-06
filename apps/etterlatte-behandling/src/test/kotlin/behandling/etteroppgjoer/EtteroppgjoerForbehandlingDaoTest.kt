@@ -8,10 +8,10 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter

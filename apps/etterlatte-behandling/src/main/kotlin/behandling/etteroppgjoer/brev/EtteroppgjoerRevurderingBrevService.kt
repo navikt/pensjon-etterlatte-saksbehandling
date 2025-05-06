@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
+package no.nav.etterlatte.behandling.etteroppgjoer.brev
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

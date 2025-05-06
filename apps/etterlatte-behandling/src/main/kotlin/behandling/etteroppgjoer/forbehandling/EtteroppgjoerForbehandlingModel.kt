@@ -1,0 +1,102 @@
+package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
+
+import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.util.UUID
+
+data class EtteroppgjoerForbehandling(
+    val id: UUID,
+    val hendelseId: UUID,
+    val opprettet: Tidspunkt,
+    val status: EtteroppgjoerForbehandlingStatus,
+    val sak: Sak,
+    val aar: Int,
+    val innvilgetPeriode: Periode,
+    val brevId: Long?,
+    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
+    val kopiertFra: UUID? = null,
+) {
+    companion object {
+        fun opprett(
+            sak: Sak,
+            innvilgetPeriode: Periode,
+        ) = EtteroppgjoerForbehandling(
+            id = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            sak = sak,
+            status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+            aar = innvilgetPeriode.fom.year,
+            innvilgetPeriode = innvilgetPeriode,
+            opprettet = Tidspunkt.now(),
+            brevId = null,
+            kopiertFra = null,
+        )
+    }
+
+    fun tilBeregnet(): EtteroppgjoerForbehandling {
+        if (status in listOf(EtteroppgjoerForbehandlingStatus.OPPRETTET, EtteroppgjoerForbehandlingStatus.BEREGNET)) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.BEREGNET)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.BEREGNET}")
+        }
+    }
+
+    fun tilFerdigstilt(): EtteroppgjoerForbehandling {
+        if (status == EtteroppgjoerForbehandlingStatus.BEREGNET) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.FERDIGSTILT}")
+        }
+    }
+
+    fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+
+    fun erUnderBehandling() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                EtteroppgjoerForbehandlingStatus.BEREGNET,
+            )
+
+    fun erFerdigstilt() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+            )
+}
+
+data class DetaljertForbehandlingDto(
+    val behandling: EtteroppgjoerForbehandling,
+    val sisteIverksatteBehandling: UUID,
+    val opplysninger: EtteroppgjoerOpplysninger,
+    val faktiskInntekt: FaktiskInntekt?,
+    val avkortingFaktiskInntekt: AvkortingDto?,
+    val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
+)
+
+enum class EtteroppgjoerForbehandlingStatus {
+    OPPRETTET,
+    BEREGNET,
+    FERDIGSTILT,
+}
+
+data class EtteroppgjoerOpplysninger(
+    val skatt: PensjonsgivendeInntektFraSkatt,
+    val ainntekt: AInntekt,
+    val tidligereAvkorting: AvkortingDto,
+)
+
+data class FaktiskInntekt(
+    val loennsinntekt: Long,
+    val afp: Long,
+    val naeringsinntekt: Long,
+    val utland: Long,
+    val spesifikasjon: String,
+)

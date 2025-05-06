@@ -1,9 +1,10 @@
-package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
+package no.nav.etterlatte.behandling.etteroppgjoer.brev
 
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevDataMapper
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload

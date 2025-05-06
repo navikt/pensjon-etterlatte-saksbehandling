@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -21,6 +22,7 @@ class DoedshendelseReminderService(
     private val doedshendelseDao: DoedshendelseDao,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
+    private val sakLesDao: SakLesDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -53,6 +55,21 @@ class DoedshendelseReminderService(
             )
             return
         }
+        val sak = sakLesDao.hentSak(hendelse.sakId)
+        if (sak == null) {
+            logger.error(
+                "Hendelse med id ${hendelse.id} refererer til en sak med id=${hendelse.sakId} som ikke fins " +
+                    "i Gjenny. Vi kan dermed ikke følge opp om de har søkt. Setter sakId for hendelsen til null. " +
+                    "Dette bør i prinsippet ikke skje i produksjon, siden vi ikke sletter saker der uten videre. " +
+                    "Hvis dette har skjedd i produksjon bør det følges opp for å se om det er riktig.",
+            )
+            val doedshendelse = doedshendelseDao.hentDoedshendelseMedId(hendelse.id)
+            doedshendelseDao.oppdaterDoedshendelse(
+                doedshendelse.copy(
+                    sakId = null,
+                ),
+            )
+        }
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         logger.info("Doedshendelse har blitt søkt på $harSoekt")
@@ -75,7 +92,13 @@ class DoedshendelseReminderService(
 
     private fun hendelserErGamleNok(hendelser: List<DoedshendelseReminder>): List<DoedshendelseReminder> {
         val idag = LocalDateTime.now(norskTidssone)
-        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= fireMaaneder }
+        return hendelser.filter {
+            ChronoUnit.MONTHS
+                .between(
+                    it.endret.toLocalDatetimeNorskTid(),
+                    idag,
+                ).absoluteValue >= fireMaaneder
+        }
     }
 
     private fun hentAlleFerdigDoedsmeldingerMedBrevBp() = doedshendelseDao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp()

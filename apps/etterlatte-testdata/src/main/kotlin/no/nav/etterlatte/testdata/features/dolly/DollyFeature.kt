@@ -1,7 +1,6 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
@@ -21,7 +20,6 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
@@ -186,10 +184,6 @@ class DollyFeature(
             }
             post("api/v1/hent-ytelse") {
                 try {
-                    val request = call.receive<FoedselsnummerDTO>()
-                    // TODO hente faktisk vedtak
-                    val fnr = haandterUgyldigIdent(request.foedselsnummer)
-                    // val vedtak = vedtakService.hentVedtak(fnr)
                     val vedtak =
                         VedtakTilPerson(
                             vedtak =
@@ -217,7 +211,7 @@ class DollyFeature(
             }
         }
 
-    fun haandterUgyldigIdent(fnr: String): Folkeregisteridentifikator {
+    private fun haandterUgyldigIdent(fnr: String): Folkeregisteridentifikator {
         try {
             return Folkeregisteridentifikator.of(fnr)
         } catch (_: Exception) {

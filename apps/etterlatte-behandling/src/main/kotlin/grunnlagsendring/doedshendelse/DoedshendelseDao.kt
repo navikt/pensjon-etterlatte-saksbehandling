@@ -12,9 +12,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
+import java.util.UUID
 
 class DoedshendelseDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -102,6 +104,22 @@ class DoedshendelseDao(
                     setBoolean(2, migrertMellomAttenOgTjue)
                 }.executeQuery()
                     .toList { asDoedshendelse() }
+            }
+        }
+
+    fun hentDoedshendelseMedId(id: UUID): DoedshendelseInternal =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter, migrert_mellom_atten_og_tjue
+                    FROM doedshendelse
+                    WHERE id = ?
+                    """.trimIndent(),
+                ).apply {
+                    setObject(1, id)
+                }.executeQuery()
+                    .single { asDoedshendelse() }
             }
         }
 

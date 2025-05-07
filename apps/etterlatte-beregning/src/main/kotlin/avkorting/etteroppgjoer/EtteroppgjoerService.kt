@@ -102,7 +102,7 @@ class EtteroppgjoerService(
                     loennsinntekt = loennsinntekt,
                     afp = afp,
                     naeringsinntekt = naeringsinntekt,
-                    utland = utland,
+                    utland = utlandsinntekt,
                     sanksjoner = sanksjoner,
                     spesifikasjon = spesifikasjon,
                 )

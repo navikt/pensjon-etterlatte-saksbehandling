@@ -227,7 +227,7 @@ class EtteroppgjoerForbehandlingService(
                 loennsinntekt = request.loennsinntekt,
                 naeringsinntekt = request.naeringsinntekt,
                 afp = request.afp,
-                utland = request.utland,
+                utlandsinntekt = request.utland,
                 spesifikasjon = request.spesifikasjon,
             )
 

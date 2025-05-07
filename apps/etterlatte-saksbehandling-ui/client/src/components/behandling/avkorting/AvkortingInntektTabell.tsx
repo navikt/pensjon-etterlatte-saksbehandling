@@ -18,13 +18,17 @@ import { lastDayOfMonth } from 'date-fns'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
 
+interface Props {
+  avkortingGrunnlagListe: IAvkortingGrunnlag[]
+  fyller67: boolean
+  erEtteroppgjoerRevurdering?: boolean
+}
+
 export const AvkortingInntektTabell = ({
   avkortingGrunnlagListe,
   fyller67,
-}: {
-  avkortingGrunnlagListe: IAvkortingGrunnlag[]
-  fyller67: boolean
-}) => {
+  erEtteroppgjoerRevurdering = false,
+}: Props) => {
   return (
     <Table className="table" zebraStripes>
       <Table.Header>
@@ -83,7 +87,11 @@ export const AvkortingInntektTabell = ({
                 </HStack>
               </Table.DataCell>
               <Table.DataCell key="Aar">
-                <Tag variant="alt3">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
+                {erEtteroppgjoerRevurdering && aarFraDatoString(avkortingGrunnlag.fom) === 2024 ? (
+                  <Tag variant="success">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
+                ) : (
+                  <Tag variant="alt3">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
+                )}
               </Table.DataCell>
               <Table.DataCell key="Periode">
                 {avkortingGrunnlag.fom && formaterDato(avkortingGrunnlag.fom)} -{' '}

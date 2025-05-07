@@ -1,8 +1,7 @@
-import { Alert, Button, VStack } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import { Alert, VStack } from '@navikt/ds-react'
+import React from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { IAvkorting } from '~shared/types/IAvkorting'
-import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { AvkortingInntektTabell } from '~components/behandling/avkorting/AvkortingInntektTabell'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
@@ -21,9 +20,6 @@ export const AvkortingInntekt = ({
   redigerbar: boolean
   resetInntektsavkortingValidering: () => void
 }) => {
-  const [visHistorikk, setVisHistorikk] = useState(behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER)
-  const erFoerstegangsbehandling = behandling.revurderingsaarsak == null
-
   // TODO sjekke begge/alle?
   const personopplysning = usePersonopplysninger()
   const fyller67 =
@@ -38,19 +34,6 @@ export const AvkortingInntekt = ({
           personopplysning.soeker.opplysning.foedselsaar ===
           67))
 
-  const listeVisningAvkortingGrunnlag = () => {
-    if (visHistorikk) {
-      return avkorting.avkortingGrunnlag
-    }
-    if (erFoerstegangsbehandling) {
-      return [avkorting.redigerbarForventetInntekt ?? [], avkorting.redigerbarForventetInntektNesteAar ?? []].flat()
-    } else {
-      const siste =
-        avkorting.redigerbarForventetInntekt ?? avkorting.avkortingGrunnlag[avkorting.avkortingGrunnlag.length - 1]
-      return [siste]
-    }
-  }
-
   return (
     <VStack maxWidth="70rem">
       {avkorting && avkorting.avkortingGrunnlag.length > 0 && (
@@ -60,19 +43,12 @@ export const AvkortingInntekt = ({
               Bruker fyller 67 år i inntektsåret og antall innvilga måneder vil bli tilpasset deretter.
             </Alert>
           )}
-          <AvkortingInntektTabell avkortingGrunnlagListe={listeVisningAvkortingGrunnlag()} fyller67={fyller67} />
+          <AvkortingInntektTabell
+            avkortingGrunnlagListe={avkorting.avkortingGrunnlag}
+            fyller67={fyller67}
+            erEtteroppgjoerRevurdering={behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER}
+          />
         </VStack>
-      )}
-      {avkorting && !erFoerstegangsbehandling && avkorting.avkortingGrunnlag.length > 1 && (
-        <Button
-          variant="tertiary"
-          onClick={() => setVisHistorikk(!visHistorikk)}
-          icon={
-            visHistorikk ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />
-          }
-        >
-          Vis alle
-        </Button>
       )}
       <AvkortingInntektForm
         behandling={behandling}

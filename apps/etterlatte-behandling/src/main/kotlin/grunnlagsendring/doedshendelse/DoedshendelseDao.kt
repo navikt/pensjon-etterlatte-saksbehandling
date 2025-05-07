@@ -117,7 +117,7 @@ class DoedshendelseDao(
                     WHERE id = ?
                     """.trimIndent(),
                 ).apply {
-                    setObject(1, id)
+                    setString(1, id.toString())
                 }.executeQuery()
                     .single { asDoedshendelse() }
             }

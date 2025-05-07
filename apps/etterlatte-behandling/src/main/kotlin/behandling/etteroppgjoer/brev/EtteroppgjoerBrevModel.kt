@@ -5,7 +5,10 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbeha
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
+import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
@@ -25,7 +28,15 @@ object EtteroppgjoerBrevDataMapper {
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
         }
 
+        krevIkkeNull(data.avkortingFaktiskInntekt?.avkortingGrunnlag?.first()) {
+            "Beregnet etteroppgjoer mangler grunnlag faktisk inntekt"
+        }
+
         val bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND
+
+        val grunnlag =
+            data.avkortingFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto
+                ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
         // TODO: usikker om dette blir rett, følge opp ifm testing
         val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
@@ -45,6 +56,16 @@ object EtteroppgjoerBrevDataMapper {
                     inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
                     faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                     avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                    grunnlag =
+                        EtteroppgjoerBrevGrunnlag(
+                            fom = grunnlag.fom,
+                            tom = grunnlag.tom!!,
+                            innvilgetMaaneder = grunnlag.innvilgaMaaneder,
+                            loensinntekt = Kroner(grunnlag.loennsinntekt),
+                            naeringsinntekt = Kroner(grunnlag.naeringsinntekt),
+                            afp = Kroner(grunnlag.afp),
+                            utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
+                        ),
                 ),
             data = data,
         )

@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -129,16 +128,6 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        val faktiskInntekt =
-            runBlocking {
-                beregningKlient.hentAvkortingFaktiskInntekt(
-                    EtteroppgjoerFaktiskInntektRequest(
-                        forbehandlingId = forbehandlingId,
-                    ),
-                    brukerTokenInfo,
-                )
-            }
-
         val beregnetEtteroppgjoerResultat =
             runBlocking {
                 beregningKlient.hentBeregnetEtteroppgjoerResultat(
@@ -159,7 +148,6 @@ class EtteroppgjoerForbehandlingService(
                     ainntekt = aInntekt,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
-            faktiskInntekt = faktiskInntekt,
             avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
             sisteIverksatteBehandling = sisteIverksatteBehandling.id,
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,

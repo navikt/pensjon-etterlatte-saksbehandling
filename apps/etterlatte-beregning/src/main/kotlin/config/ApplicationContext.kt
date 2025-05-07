@@ -139,7 +139,6 @@ class ApplicationContext {
     val etteroppgjoerService =
         EtteroppgjoerService(
             avkortingRepository = avkortingRepository,
-            beregningService = beregningService,
             sanksjonService = sanksjonService,
             etteroppgjoerRepository = etteroppgjoerRepository,
             avkortingService = avkortingService,

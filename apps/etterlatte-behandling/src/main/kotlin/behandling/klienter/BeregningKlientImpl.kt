@@ -5,12 +5,10 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FaktiskInntekt
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
@@ -57,11 +55,6 @@ interface BeregningKlient {
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto
-
-    suspend fun hentAvkortingFaktiskInntekt(
-        request: EtteroppgjoerFaktiskInntektRequest,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): FaktiskInntekt?
 
     suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,
@@ -224,33 +217,6 @@ class BeregningKlientImpl(
         } catch (e: Exception) {
             throw InternfeilException(
                 "Beregning av avkorting for forbehandling med id=${request.forbehandlingId} feilet",
-                e,
-            )
-        }
-    }
-
-    override suspend fun hentAvkortingFaktiskInntekt(
-        request: EtteroppgjoerFaktiskInntektRequest,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): FaktiskInntekt? {
-        logger.info("Henter avkorting faktisk inntekt for etteroppgjør med forbehandling ${request.forbehandlingId}")
-        try {
-            return downstreamResourceClient
-                .post(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/api/beregning/avkorting/etteroppgjoer/faktisk-inntekt",
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                    postBody = request,
-                ).mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw InternfeilException(
-                "Henting av avkorting faktisk inntekt for forbehandling med id=${request.forbehandlingId} feilet",
                 e,
             )
         }

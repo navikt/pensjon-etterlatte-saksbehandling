@@ -76,7 +76,6 @@ data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
     val sisteIverksatteBehandling: UUID,
     val opplysninger: EtteroppgjoerOpplysninger,
-    val faktiskInntekt: FaktiskInntekt?,
     val avkortingFaktiskInntekt: AvkortingDto?,
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
 )
@@ -91,12 +90,4 @@ data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkatt,
     val ainntekt: AInntekt,
     val tidligereAvkorting: AvkortingDto,
-)
-
-data class FaktiskInntekt(
-    val loennsinntekt: Long,
-    val afp: Long,
-    val naeringsinntekt: Long,
-    val utland: Long,
-    val spesifikasjon: String,
 )

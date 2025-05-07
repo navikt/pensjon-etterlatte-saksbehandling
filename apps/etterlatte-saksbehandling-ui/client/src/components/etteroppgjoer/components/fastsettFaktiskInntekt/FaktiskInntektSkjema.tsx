@@ -9,6 +9,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { useAppDispatch } from '~store/Store'
+import { FaktiskInntektGrunnlag } from '~shared/types/IAvkorting'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -43,8 +44,12 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoer)
 
-  const { behandling, faktiskInntekt } = useEtteroppgjoer()
+  const { behandling, avkortingFaktiskInntekt } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
+
+  const grunnlag = avkortingFaktiskInntekt?.avkortingGrunnlag.pop()
+  const faktiskInntekt: FaktiskInntektGrunnlag | undefined =
+    grunnlag?.type === 'FAKTISK_INNTEKT' ? (grunnlag as FaktiskInntektGrunnlag) : undefined
 
   const {
     register,
@@ -58,7 +63,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
           loennsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt),
           afp: new Intl.NumberFormat('nb').format(faktiskInntekt.afp),
           naeringsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt),
-          utland: new Intl.NumberFormat('nb').format(faktiskInntekt.utland),
+          utland: new Intl.NumberFormat('nb').format(faktiskInntekt.utlandsinntekt),
           spesifikasjon: faktiskInntekt.spesifikasjon,
         }
       : {

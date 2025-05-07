@@ -9,7 +9,6 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { useAppDispatch } from '~store/Store'
-import { FaktiskInntektGrunnlag } from '~shared/types/IAvkorting'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -22,7 +21,7 @@ const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
     loennsinntekt: Number(loennsinntekt.replace(/[^0-9.]/g, '')),
     afp: Number(afp.replace(/[^0-9.]/g, '')),
     naeringsinntekt: Number(naeringsinntekt.replace(/[^0-9.]/g, '')),
-    utland: Number(utland.replace(/[^0-9.]/g, '')),
+    utlandsinntekt: Number(utland.replace(/[^0-9.]/g, '')),
     spesifikasjon,
   }
 }
@@ -44,12 +43,8 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoer)
 
-  const { behandling, avkortingFaktiskInntekt } = useEtteroppgjoer()
+  const { behandling, faktiskInntekt } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
-
-  const grunnlag = avkortingFaktiskInntekt?.avkortingGrunnlag.pop()
-  const faktiskInntekt: FaktiskInntektGrunnlag | undefined =
-    grunnlag?.type === 'FAKTISK_INNTEKT' ? (grunnlag as FaktiskInntektGrunnlag) : undefined
 
   const {
     register,

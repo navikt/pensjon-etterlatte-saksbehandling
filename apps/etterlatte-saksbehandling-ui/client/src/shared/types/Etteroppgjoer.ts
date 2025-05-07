@@ -5,7 +5,7 @@ import { GrunnlagKilde } from '~shared/types/grunnlag'
 export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
   opplysninger: EtteroppgjoerOpplysninger
-  avkortingFaktiskInntekt: Avkorting | undefined
+  faktiskInntekt?: FaktiskInntekt
   beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
 }
 
@@ -45,7 +45,7 @@ export interface FaktiskInntekt {
   loennsinntekt: number
   afp: number
   naeringsinntekt: number
-  utland: number
+  utlandsinntekt: number
   spesifikasjon: string
 }
 

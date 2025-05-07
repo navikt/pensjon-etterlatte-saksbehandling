@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -148,9 +149,9 @@ class EtteroppgjoerForbehandlingService(
                     ainntekt = aInntekt,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
-            avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
             sisteIverksatteBehandling = sisteIverksatteBehandling.id,
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
+            faktiskInntekt = avkorting.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
         )
     }
 

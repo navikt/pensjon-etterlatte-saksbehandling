@@ -14,8 +14,8 @@ export const SumAvFaktiskInntekt = ({ faktiskInntekt }: { faktiskInntekt: Faktis
     if (isNaN(faktiskInntekt.naeringsinntekt)) inntekt += 0
     else inntekt += faktiskInntekt.naeringsinntekt
 
-    if (isNaN(faktiskInntekt.utland)) inntekt += 0
-    else inntekt += faktiskInntekt.utland
+    if (isNaN(faktiskInntekt.utlandsinntekt)) inntekt += 0
+    else inntekt += faktiskInntekt.utlandsinntekt
 
     return `${new Intl.NumberFormat('nb').format(inntekt)} kr`
   }

@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -76,7 +77,7 @@ data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
     val sisteIverksatteBehandling: UUID,
     val opplysninger: EtteroppgjoerOpplysninger,
-    val avkortingFaktiskInntekt: AvkortingDto?,
+    val faktiskInntekt: FaktiskInntektDto?,
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
 )
 

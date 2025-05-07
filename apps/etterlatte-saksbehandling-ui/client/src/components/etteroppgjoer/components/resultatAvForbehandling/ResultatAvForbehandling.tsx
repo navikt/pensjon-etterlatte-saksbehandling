@@ -56,7 +56,7 @@ export const ResultatAvForbehandling = () => {
               </Table.HeaderCell>
               <Table.DataCell>
                 <HStack justify="end">
-                  {resultat.differanse > 0 ? NOK(resultat.grense.etterbetaling) : NOK(resultat.grense.tilbakekreving)}
+                  {resultat.differanse > 0 ? NOK(resultat.grense.tilbakekreving) : NOK(resultat.grense.etterbetaling)}
                 </HStack>
               </Table.DataCell>
             </Table.Row>

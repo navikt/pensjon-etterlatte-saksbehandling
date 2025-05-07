@@ -227,7 +227,7 @@ class EtteroppgjoerForbehandlingService(
                 loennsinntekt = request.loennsinntekt,
                 naeringsinntekt = request.naeringsinntekt,
                 afp = request.afp,
-                utlandsinntekt = request.utland,
+                utlandsinntekt = request.utlandsinntekt,
                 spesifikasjon = request.spesifikasjon,
             )
 
@@ -322,7 +322,7 @@ data class BeregnFaktiskInntektRequest(
     val loennsinntekt: Int,
     val afp: Int,
     val naeringsinntekt: Int,
-    val utland: Int,
+    val utlandsinntekt: Int,
     val spesifikasjon: String,
 )
 

@@ -5,6 +5,7 @@ import { IAvkorting } from '~shared/types/IAvkorting'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { AvkortingInntektTabell } from '~components/behandling/avkorting/AvkortingInntektTabell'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -42,7 +43,11 @@ export const AvkortingInntekt = ({
               Bruker fyller 67 år i inntektsåret og antall innvilga måneder vil bli tilpasset deretter.
             </Alert>
           )}
-          <AvkortingInntektTabell avkortingGrunnlagListe={avkorting.avkortingGrunnlag} fyller67={fyller67} />
+          <AvkortingInntektTabell
+            avkortingGrunnlagListe={avkorting.avkortingGrunnlag}
+            fyller67={fyller67}
+            erEtteroppgjoerRevurdering={behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER}
+          />
         </VStack>
       )}
       <AvkortingInntektForm

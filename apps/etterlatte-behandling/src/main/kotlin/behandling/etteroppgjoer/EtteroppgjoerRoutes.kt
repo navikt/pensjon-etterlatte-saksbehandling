@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInn
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -48,6 +49,7 @@ fun Route.etteroppgjoerRoutes(
     forbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     etteroppgjoerService: EtteroppgjoerService,
+    etteroppgjoerJobService: EtteroppgjoerJobService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer") {
@@ -129,7 +131,7 @@ fun Route.etteroppgjoerRoutes(
                         "Inntektsaar mangler"
                     }
                 inTransaction {
-                    etteroppgjoerService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                    etteroppgjoerJobService.finnOgOpprettEtteroppgjoer(inntektsaar)
                 }
                 call.respond(HttpStatusCode.OK)
             }
@@ -144,7 +146,7 @@ fun Route.etteroppgjoerRoutes(
                         "Inntektsaar mangler"
                     }
 
-                forbehandlingService.finnOgOpprettForbehandlinger(inntektsaar)
+                etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar)
             }
         }
 

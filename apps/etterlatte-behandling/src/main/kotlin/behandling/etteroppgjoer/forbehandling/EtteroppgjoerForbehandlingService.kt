@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
@@ -53,27 +52,6 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    // finn saker med etteroppgjoer og mottatt skatteoppgjoer som skal ha forbehandling
-    fun finnOgOpprettForbehandlinger(inntektsaar: Int) {
-        logger.info(
-            "Starter oppretting av forbehandling for etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar",
-        )
-        val etteroppgjoerListe =
-            etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
-
-        for (etteroppgjoer in etteroppgjoerListe) {
-            try {
-                opprettEtteroppgjoerForbehandling(
-                    etteroppgjoer.sakId,
-                    etteroppgjoer.inntektsaar,
-                    HardkodaSystembruker.etteroppgjoer,
-                )
-            } catch (e: Exception) {
-                logger.error("Kunne ikke opprette forbehandling for sakId=${etteroppgjoer.sakId} grunnen: ${e.message}")
-            }
-        }
-    }
-
     fun ferdigstillForbehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -89,8 +67,6 @@ class EtteroppgjoerForbehandlingService(
         )
         oppgaveService.ferdigStillOppgaveUnderBehandling(forbehandling.id.toString(), OppgaveType.ETTEROPPGJOER, brukerTokenInfo)
     }
-
-    fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
 
@@ -150,6 +126,8 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
+
+    fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlinger(sakId)
 

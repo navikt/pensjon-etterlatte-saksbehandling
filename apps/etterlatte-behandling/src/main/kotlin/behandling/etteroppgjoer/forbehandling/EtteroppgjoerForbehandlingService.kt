@@ -15,8 +15,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -129,16 +129,6 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        val faktiskInntekt =
-            runBlocking {
-                beregningKlient.hentAvkortingFaktiskInntekt(
-                    EtteroppgjoerFaktiskInntektRequest(
-                        forbehandlingId = forbehandlingId,
-                    ),
-                    brukerTokenInfo,
-                )
-            }
-
         val beregnetEtteroppgjoerResultat =
             runBlocking {
                 beregningKlient.hentBeregnetEtteroppgjoerResultat(
@@ -159,10 +149,9 @@ class EtteroppgjoerForbehandlingService(
                     ainntekt = aInntekt,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
-            faktiskInntekt = faktiskInntekt,
-            avkortingFaktiskInntekt = avkorting.avkortingMedFaktiskInntekt,
             sisteIverksatteBehandling = sisteIverksatteBehandling.id,
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
+            faktiskInntekt = avkorting.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
         )
     }
 
@@ -218,11 +207,10 @@ class EtteroppgjoerForbehandlingService(
     ): BeregnetEtteroppgjoerResultatDto {
         var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling som skal brukes av revurdering
+        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling
         if (forbehandling.erFerdigstilt()) {
             logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
             forbehandling = kopierOgLagreNyForbehandling(forbehandling)
-            // TODO: burde forbehandlingen indikere at den er for revurdering og ikke skal være synlig for sb?
         }
 
         val sisteIverksatteBehandling =
@@ -238,7 +226,7 @@ class EtteroppgjoerForbehandlingService(
                 loennsinntekt = request.loennsinntekt,
                 naeringsinntekt = request.naeringsinntekt,
                 afp = request.afp,
-                utland = request.utland,
+                utlandsinntekt = request.utlandsinntekt,
                 spesifikasjon = request.spesifikasjon,
             )
 
@@ -333,7 +321,7 @@ data class BeregnFaktiskInntektRequest(
     val loennsinntekt: Int,
     val afp: Int,
     val naeringsinntekt: Int,
-    val utland: Int,
+    val utlandsinntekt: Int,
     val spesifikasjon: String,
 )
 

@@ -6,7 +6,6 @@ export interface Etteroppgjoer {
   behandling: EtteroppgjoerBehandling
   opplysninger: EtteroppgjoerOpplysninger
   faktiskInntekt?: FaktiskInntekt
-  avkortingFaktiskInntekt: Avkorting | undefined
   beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
 }
 
@@ -46,7 +45,7 @@ export interface FaktiskInntekt {
   loennsinntekt: number
   afp: number
   naeringsinntekt: number
-  utland: number
+  utlandsinntekt: number
   spesifikasjon: string
 }
 

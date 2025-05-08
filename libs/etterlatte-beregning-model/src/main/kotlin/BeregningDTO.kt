@@ -207,18 +207,6 @@ data class EtteroppgjoerBeregnetAvkortingRequest(
     val sakId: SakId,
 )
 
-data class EtteroppgjoerFaktiskInntektRequest(
-    val forbehandlingId: UUID,
-)
-
-data class EtteroppgjoerFaktiskInntektResponse(
-    val loennsinntekt: Long,
-    val afp: Long,
-    val naeringsinntekt: Long,
-    val utland: Long,
-    val spesifikasjon: String,
-)
-
 data class EtteroppgjoerBeregnetAvkorting(
     val avkortingMedForventaInntekt: AvkortingDto,
     val avkortingMedFaktiskInntekt: AvkortingDto?,
@@ -232,7 +220,7 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val loennsinntekt: Int,
     val afp: Int,
     val naeringsinntekt: Int,
-    val utland: Int,
+    val utlandsinntekt: Int,
     val spesifikasjon: String,
 )
 

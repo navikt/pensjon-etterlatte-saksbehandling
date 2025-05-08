@@ -14,14 +14,14 @@ const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
   afp,
   naeringsinntekt,
-  utland,
+  utlandsinntekt,
   spesifikasjon,
 }: FastsettFaktiskInntektSkjema): FaktiskInntekt => {
   return {
     loennsinntekt: Number(loennsinntekt.replace(/[^0-9.]/g, '')),
     afp: Number(afp.replace(/[^0-9.]/g, '')),
     naeringsinntekt: Number(naeringsinntekt.replace(/[^0-9.]/g, '')),
-    utland: Number(utland.replace(/[^0-9.]/g, '')),
+    utlandsinntekt: Number(utlandsinntekt.replace(/[^0-9.]/g, '')),
     spesifikasjon,
   }
 }
@@ -30,7 +30,7 @@ interface FastsettFaktiskInntektSkjema {
   loennsinntekt: string
   afp: string
   naeringsinntekt: string
-  utland: string
+  utlandsinntekt: string
   spesifikasjon: string
 }
 
@@ -58,14 +58,14 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
           loennsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt),
           afp: new Intl.NumberFormat('nb').format(faktiskInntekt.afp),
           naeringsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt),
-          utland: new Intl.NumberFormat('nb').format(faktiskInntekt.utland),
+          utlandsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.utlandsinntekt),
           spesifikasjon: faktiskInntekt.spesifikasjon,
         }
       : {
           loennsinntekt: '0',
           afp: '0',
           naeringsinntekt: '0',
-          utland: '0',
+          utlandsinntekt: '0',
           spesifikasjon: '',
         },
   })
@@ -99,7 +99,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
           />
           <ControlledInntektTextField name="afp" control={control} label="Avtalefestet pensjon" />
           <ControlledInntektTextField name="naeringsinntekt" control={control} label="Næringsinntekt" />
-          <ControlledInntektTextField name="utland" control={control} label="Inntekt fra utland" />
+          <ControlledInntektTextField name="utlandsinntekt" control={control} label="Inntekt fra utland" />
         </VStack>
 
         <SumAvFaktiskInntekt faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch())} />

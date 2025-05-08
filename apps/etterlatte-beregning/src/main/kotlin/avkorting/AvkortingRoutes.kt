@@ -20,8 +20,6 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektResponse
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
@@ -162,26 +160,6 @@ fun Route.avkorting(
                         brukerTokenInfo = brukerTokenInfo,
                     )
                 call.respond(dto)
-            }
-
-            post("faktisk-inntekt") {
-                val request = call.receive<EtteroppgjoerFaktiskInntektRequest>()
-
-                val faktiskInntekt = etteroppgjoerService.hentAvkortingFaktiskInntekt(request)
-
-                if (faktiskInntekt == null) {
-                    call.respond(HttpStatusCode.NoContent)
-                } else {
-                    call.respond(
-                        EtteroppgjoerFaktiskInntektResponse(
-                            loennsinntekt = faktiskInntekt.loennsinntekt.toLong(),
-                            afp = faktiskInntekt.afp.toLong(),
-                            naeringsinntekt = faktiskInntekt.naeringsinntekt.toLong(),
-                            utland = faktiskInntekt.utlandsinntekt.toLong(),
-                            spesifikasjon = faktiskInntekt.spesifikasjon,
-                        ),
-                    )
-                }
             }
 
             post("beregn_faktisk_inntekt") {

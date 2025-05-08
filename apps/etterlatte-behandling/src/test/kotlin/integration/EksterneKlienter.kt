@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FaktiskInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
@@ -57,7 +56,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
@@ -152,11 +150,6 @@ class BeregningKlientTest :
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto = throw NotImplementedError("Ikke implementert for testklient")
-
-    override suspend fun hentAvkortingFaktiskInntekt(
-        request: EtteroppgjoerFaktiskInntektRequest,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): FaktiskInntekt? = mockk()
 
     override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,

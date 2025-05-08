@@ -21,7 +21,7 @@ export const FaktiskInntektVisning = () => {
       </VStack>
       <VStack gap="2">
         <Label>Inntekt fra utland</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.utland)}</BodyShort>
+        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.utlandsinntekt)}</BodyShort>
       </VStack>
 
       <SumAvFaktiskInntekt faktiskInntekt={faktiskInntekt} />

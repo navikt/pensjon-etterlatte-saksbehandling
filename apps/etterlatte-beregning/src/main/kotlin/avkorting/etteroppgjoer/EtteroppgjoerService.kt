@@ -8,17 +8,14 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.Etteroppgjoer
-import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
 import no.nav.etterlatte.avkorting.toDto
-import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -38,7 +35,6 @@ import java.util.UUID
 
 class EtteroppgjoerService(
     private val avkortingRepository: AvkortingRepository,
-    private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
     private val avkortingService: AvkortingService,
@@ -106,7 +102,7 @@ class EtteroppgjoerService(
                     loennsinntekt = loennsinntekt,
                     afp = afp,
                     naeringsinntekt = naeringsinntekt,
-                    utland = utland,
+                    utland = utlandsinntekt,
                     sanksjoner = sanksjoner,
                     spesifikasjon = spesifikasjon,
                 )
@@ -114,9 +110,6 @@ class EtteroppgjoerService(
 
         avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
-
-    fun hentAvkortingFaktiskInntekt(request: EtteroppgjoerFaktiskInntektRequest): FaktiskInntekt? =
-        avkortingRepository.hentAvkortingFaktiskInntekt(behandlingId = request.forbehandlingId)
 
     private fun beregnEtteroppgjoerResultat(
         aar: Int,
@@ -194,7 +187,7 @@ class EtteroppgjoerService(
 
             is Etteroppgjoer ->
                 AvkortingDto(
-                    avkortingGrunnlag = emptyList(),
+                    avkortingGrunnlag = listOf(aarsoppgjoer.inntekt.toDto()),
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
 

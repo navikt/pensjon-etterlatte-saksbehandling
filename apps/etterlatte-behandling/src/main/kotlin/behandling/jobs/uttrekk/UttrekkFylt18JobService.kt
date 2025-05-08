@@ -97,10 +97,10 @@ class UttrekkFylt18JobService(
 
     private fun hentMaaneder(): List<YearMonth> =
         listOf(
-            YearMonth.of(2007, Month.JANUARY),
-            YearMonth.of(2007, Month.FEBRUARY),
-            YearMonth.of(2007, Month.MARCH),
-            YearMonth.of(2007, Month.APRIL),
+//            YearMonth.of(2007, Month.JANUARY),
+//            YearMonth.of(2007, Month.FEBRUARY),
+//            YearMonth.of(2007, Month.MARCH),
+//            YearMonth.of(2007, Month.APRIL),
             YearMonth.of(2007, Month.MAY),
         )
 }

@@ -102,6 +102,7 @@ data class FaktiskInntektDto(
     override val innvilgaMaaneder: Int,
     override val inntektInnvilgetPeriode: Int?,
     override val kilde: AvkortingGrunnlagKildeDto,
+    val spesifikasjon: String,
     val loennsinntekt: Int,
     val naeringsinntekt: Int,
     val afp: Int,

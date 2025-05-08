@@ -20,11 +20,12 @@ interface ErrorResponse {
   documentation_url?: string
 }
 
-githubRouter.get('/releases', async (_: Request, res: Response) => {
+githubRouter.get('/releases', async (_: Request, res: Response): Promise<void> => {
   try {
     const cachedReleases: Release[] | undefined = cache.get(RELEASE_CACHE_KEY)
     if (cachedReleases?.length) {
-      return res.json(cachedReleases)
+      res.json(cachedReleases)
+      return
     }
 
     const data = await fetch(
@@ -38,16 +39,16 @@ githubRouter.get('/releases', async (_: Request, res: Response) => {
 
       if (releases.length) cache.set(RELEASE_CACHE_KEY, releases)
 
-      return res.json(releases)
+      res.json(releases)
     } else if (typeof data === 'object') {
       logger.warn((data as ErrorResponse)?.message || 'Data fra Github er ikke forventet type objekt')
-      return res.json([])
+      res.json([])
     } else {
       logger.warn('Ukjent respons fra Github')
-      return res.json([])
+      res.json([])
     }
   } catch (e) {
     logger.error('Feil oppsto ved henting av releases fra Github: ', e)
-    return res.sendStatus(500)
+    res.sendStatus(500)
   }
 })

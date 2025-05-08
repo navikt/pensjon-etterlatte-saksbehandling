@@ -8,25 +8,28 @@ interface OboResponse {
   expires_in: number
 }
 
-export const tokenMiddleware = (scope: string) => async (req: Request, res: Response, next: NextFunction) => {
-  const bearerToken = req.headers?.authorization?.split(' ')[1]
+export function tokenMiddleware(scope: string): (req: Request, res: Response, next: NextFunction) => Promise<void> {
+  return async (req, res, next) => {
+    const bearerToken = req.headers?.authorization?.split(' ')[1]
 
-  if (!bearerToken) {
-    const msg = 'Kunne ikke hente obo-token på grunn av manglende bearerToken'
-    logger.warn(msg)
-    return res.status(401).send(msg)
+    if (!bearerToken) {
+      const msg = 'Kunne ikke hente obo-token på grunn av manglende bearerToken'
+      logger.warn(msg)
+      res.status(401).send(msg)
+      return
+    }
+
+    getOboToken(bearerToken, scope)
+      .then((token) => {
+        res.locals.token = token
+        next()
+      })
+      .catch((error) => {
+        const msg = 'Kunne ikke hente obo-token'
+        logger.warn(msg, error)
+        res.status(401).send(msg)
+      })
   }
-
-  getOboToken(bearerToken, scope)
-    .then((token) => {
-      res.locals.token = token
-      return next()
-    })
-    .catch((error) => {
-      const msg = 'Kunne ikke hente obo-token'
-      logger.warn(msg, error)
-      return res.status(401).send(msg)
-    })
 }
 
 export const getOboToken = async (bearerToken: string, scope: string): Promise<string> => {

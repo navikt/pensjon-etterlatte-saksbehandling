@@ -9,6 +9,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakService
@@ -42,7 +43,7 @@ class UttrekkFylt18JobService(
         if (featureToggleService.isEnabled(UttrekkFylt18Toggles.UTTREKK_FYLT_18, false)) {
             // Henter ut alle fødselsmåneder fra reformtidspunkt og frem til nå, hvor personer har blitt 20 år
             val brukereFylt18 = hentMaaneder()
-            val resultat = mutableMapOf<YearMonth, List<SakId>>()
+            val resultat = mutableMapOf<YearMonth, List<Sak>>()
 
             brukereFylt18
                 .forEach { foedselsmaaned ->
@@ -52,7 +53,7 @@ class UttrekkFylt18JobService(
                             .hentSoekereFoedtIEnGittMaaned(
                                 foedselsmaaned,
                             ).map { SakId(it.toLong()) }
-                    val aktuelleSaker = mutableListOf<SakId>()
+                    val aktuelleSaker = mutableListOf<Sak>()
 
                     sakIder
                         .forEach { sakId ->
@@ -71,7 +72,7 @@ class UttrekkFylt18JobService(
                                         }
 
                                     if (ytelse.erLoepende) {
-                                        aktuelleSaker.add(sakId)
+                                        aktuelleSaker.add(sak)
                                     }
                                 }
                             } catch (e: Exception) {
@@ -85,7 +86,8 @@ class UttrekkFylt18JobService(
             if (resultat.isNotEmpty()) {
                 logger.info("Fant følgende antall saker:")
                 resultat.forEach {
-                    logger.info("Måned: ${it.key} - Saker: ${it.value.joinToString(", ") { it.toString() }}")
+                    val sakEnhet = it.value.map { it }.joinToString(", ") { "[${it.id}, ${it.enhet.enhetNr}]" }
+                    logger.info("Måned: ${it.key} - Saker: $sakEnhet")
                 }
             } else {
                 logger.info("Fant ingen saker hvor søker er over 18 år i de aktuelle månedene")
@@ -95,9 +97,10 @@ class UttrekkFylt18JobService(
 
     private fun hentMaaneder(): List<YearMonth> =
         listOf(
-            YearMonth.of(2007, Month.JANUARY),
-            YearMonth.of(2007, Month.FEBRUARY),
-            YearMonth.of(2007, Month.MARCH),
-            YearMonth.of(2007, Month.APRIL),
+//            YearMonth.of(2007, Month.JANUARY),
+//            YearMonth.of(2007, Month.FEBRUARY),
+//            YearMonth.of(2007, Month.MARCH),
+//            YearMonth.of(2007, Month.APRIL),
+            YearMonth.of(2007, Month.MAY),
         )
 }

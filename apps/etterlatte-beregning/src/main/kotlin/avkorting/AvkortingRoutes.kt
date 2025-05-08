@@ -236,6 +236,7 @@ fun FaktiskInntekt.toDto() =
         innvilgaMaaneder = innvilgaMaaneder,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
         inntektInnvilgetPeriode = inntektInnvilgetPeriode.verdi,
+        spesifikasjon = spesifikasjon,
     )
 
 fun AvkortetYtelse.toDto() =

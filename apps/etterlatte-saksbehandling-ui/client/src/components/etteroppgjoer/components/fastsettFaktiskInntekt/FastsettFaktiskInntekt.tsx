@@ -12,9 +12,9 @@ interface Props {
 }
 
 export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaErSkittent }: Props) => {
-  const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(false)
+  const { behandling, faktiskInntekt } = useEtteroppgjoer()
 
-  const { behandling } = useEtteroppgjoer()
+  const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(erRedigerbar && !faktiskInntekt)
 
   return (
     <VStack gap="4">

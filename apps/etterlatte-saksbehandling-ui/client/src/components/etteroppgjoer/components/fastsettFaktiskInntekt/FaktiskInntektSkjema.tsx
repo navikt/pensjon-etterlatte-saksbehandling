@@ -133,15 +133,17 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
           >
             Fastsett inntekt
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="small"
-            loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
-            onClick={() => setRedigerFaktiskInntekt(false)}
-          >
-            Avbryt
-          </Button>
+          {!!faktiskInntekt && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="small"
+              loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
+              onClick={() => setRedigerFaktiskInntekt(false)}
+            >
+              Avbryt
+            </Button>
+          )}
         </HStack>
       </VStack>
     </form>

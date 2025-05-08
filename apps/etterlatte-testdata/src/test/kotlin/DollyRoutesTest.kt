@@ -172,6 +172,28 @@ class DollyRoutesTest {
                 pensjonSaksbehandler = pensjonSaksbehandler,
             )
         val request = FoedselsnummerDTO("09437432993")
+        val forventetRetur =
+            VedtakTilPerson(
+                vedtak =
+                    listOf(
+                        Vedtak(
+                            sakId = 1,
+                            sakType = "BARNEPENSJON",
+                            virkningstidspunkt = LocalDate.now(),
+                            type = VedtakType.INNVILGELSE,
+                            utbetaling =
+                                listOf(
+                                    VedtakUtbetaling(
+                                        fraOgMed = LocalDate.now(),
+                                        tilOgMed = LocalDate.now(),
+                                        beloep = BigDecimal(1000),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        coEvery { vedtakService.hentVedtak(any()) } returns forventetRetur
 
         testApplication {
             val client =
@@ -179,26 +201,7 @@ class DollyRoutesTest {
                     applicationConfig = conff,
                     routes = DollyFeature(dollyService = dollyService, vedtakService = vedtakService).routes,
                 )
-            val forventetRetur =
-                VedtakTilPerson(
-                    vedtak =
-                        listOf(
-                            Vedtak(
-                                sakId = 1,
-                                sakType = "BARNEPENSJON",
-                                virkningstidspunkt = LocalDate.now(),
-                                type = VedtakType.INNVILGELSE,
-                                utbetaling =
-                                    listOf(
-                                        VedtakUtbetaling(
-                                            fraOgMed = LocalDate.now(),
-                                            tilOgMed = LocalDate.now(),
-                                            beloep = BigDecimal(1000),
-                                        ),
-                                    ),
-                            ),
-                        ),
-                )
+
             val response =
                 client.post("/api/v1/hent-ytelse") {
                     contentType(ContentType.Application.Json)

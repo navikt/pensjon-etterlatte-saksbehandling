@@ -842,7 +842,7 @@ internal class ApplicationContext(
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
             erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.DAYS),
         )
     }

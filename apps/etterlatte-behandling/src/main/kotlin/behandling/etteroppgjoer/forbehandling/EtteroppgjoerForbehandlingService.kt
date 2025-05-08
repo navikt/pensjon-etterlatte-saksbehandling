@@ -195,21 +195,17 @@ class EtteroppgjoerForbehandlingService(
     ): BeregnetEtteroppgjoerResultatDto {
         var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatte")
-
         // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling
         if (forbehandling.erFerdigstilt()) {
             logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
-            forbehandling = kopierOgLagreNyForbehandling(forbehandling, sisteIverksatteBehandling.id)
+            forbehandling = kopierOgLagreNyForbehandling(forbehandling)
         }
 
         val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
                 forbehandlingId = forbehandling.id,
-                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                sisteIverksatteBehandling = forbehandling.relatertBehandlingId,
                 aar = forbehandling.aar,
                 loennsinntekt = request.loennsinntekt,
                 naeringsinntekt = request.naeringsinntekt,
@@ -317,17 +313,18 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun kopierOgLagreNyForbehandling(
-        forbehandling: EtteroppgjoerForbehandling,
-        relatertBehandlingId: UUID,
-    ): EtteroppgjoerForbehandling {
+    private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatte behandling")
+
         val forbehandlingCopy =
             forbehandling.copy(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
-                relatertBehandlingId = relatertBehandlingId,
+                relatertBehandlingId = sisteIverksatteBehandling.id,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

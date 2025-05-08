@@ -35,7 +35,7 @@ export function getNAVident(authorizationHeader: string | undefined): string | u
   return parsedToken.NAVident
 }
 
-loggerRouter.post('/', express.json(), (req, res) => {
+loggerRouter.post('/', express.json(), (req, res): void => {
   const logEvent = req.body as LogEvent
   const user = getNAVident(req.headers.authorization)
   const errorData = logEvent.data
@@ -75,7 +75,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
       })
     }
   }
-  return res.sendStatus(200)
+  res.sendStatus(200)
 })
 
 // Er vel litt optimistisk

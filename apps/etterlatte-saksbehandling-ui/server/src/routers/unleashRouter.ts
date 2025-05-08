@@ -15,7 +15,7 @@ enum FeatureStatus {
   HENTING_FEILA = 'HENTING_FEILA',
 }
 
-unleashRouter.post('/', express.json(), (req: Request, res: Response) => {
+unleashRouter.post('/', express.json(), (req: Request, res: Response): void => {
   const toggles: string[] = req.body.features
 
   const isEnabled = (toggle: string): string => {
@@ -42,7 +42,7 @@ unleashRouter.post('/', express.json(), (req: Request, res: Response) => {
     }
   }
 
-  return res.json(
+  res.json(
     toggles.map((toggle) => {
       const enabled = isEnabled(toggle)
 

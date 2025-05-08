@@ -4,7 +4,7 @@ import { logger } from '../monitoring/logger'
 
 export const selftestRouter = express.Router()
 
-selftestRouter.get('/', express.json(), async (req, res) => {
+selftestRouter.get('/', express.json(), async (_, res) => {
   const results: Promise<IPingResult>[] = Object.entries(ApiConfig).map(async ([serviceName, urlscope]) => {
     const statuscode = await fetch(`${urlscope.url}/health/isready`)
       .then((res) => res.status)

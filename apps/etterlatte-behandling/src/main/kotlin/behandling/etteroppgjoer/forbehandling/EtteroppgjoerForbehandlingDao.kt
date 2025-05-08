@@ -339,7 +339,7 @@ class EtteroppgjoerForbehandlingDao(
                 ),
             brevId = getLongOrNull("brev_id"),
             kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
-            relatertBehandlingId = getString("relatert_behandling_id")!!.let { UUID.fromString(it) },
+            relatertBehandlingId = getString("relatert_behandling_id").let { UUID.fromString(it) },
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

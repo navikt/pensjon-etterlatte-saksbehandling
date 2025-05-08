@@ -78,13 +78,13 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertForbehandlingDto {
         val forbehandling = hentForbehandling(forbehandlingId)
-        val relatertBehandling =
-            behandlingService.hentBehandling(forbehandling.relatertBehandlingId)
+        val sisteIverksatteBehandling =
+            behandlingService.hentBehandling(forbehandling.sisteIverksatteBehandlingId)
                 ?: throw InternfeilException(
-                    "Fant ikke relatert behandling=${forbehandling.relatertBehandlingId} for forbehandling=$forbehandlingId",
+                    "Fant ikke relatert behandling=${forbehandling.sisteIverksatteBehandlingId} for forbehandling=$forbehandlingId",
                 )
 
-        val avkorting = hentAvkortingForForbehandling(forbehandling, relatertBehandling, brukerTokenInfo)
+        val avkorting = hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
         val aInntekt = dao.hentAInntekt(forbehandlingId)
 
@@ -100,7 +100,7 @@ class EtteroppgjoerForbehandlingService(
                     EtteroppgjoerHentBeregnetResultatRequest(
                         forbehandling.aar,
                         forbehandlingId,
-                        relatertBehandling.id,
+                        sisteIverksatteBehandling.id,
                     ),
                     brukerTokenInfo,
                 )
@@ -183,7 +183,7 @@ class EtteroppgjoerForbehandlingService(
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
                 forbehandlingId = forbehandling.id,
-                sisteIverksatteBehandling = forbehandling.relatertBehandlingId,
+                sisteIverksatteBehandling = forbehandling.sisteIverksatteBehandlingId,
                 aar = forbehandling.aar,
                 loennsinntekt = request.loennsinntekt,
                 naeringsinntekt = request.naeringsinntekt,
@@ -302,7 +302,7 @@ class EtteroppgjoerForbehandlingService(
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
-                relatertBehandlingId = sisteIverksatteBehandling.id,
+                sisteIverksatteBehandlingId = sisteIverksatteBehandling.id,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

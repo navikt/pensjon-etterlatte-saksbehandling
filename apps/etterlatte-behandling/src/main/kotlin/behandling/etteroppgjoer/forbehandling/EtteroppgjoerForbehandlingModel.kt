@@ -21,13 +21,14 @@ data class EtteroppgjoerForbehandling(
     val aar: Int,
     val innvilgetPeriode: Periode,
     val brevId: Long?,
-    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
-    val kopiertFra: UUID? = null,
+    val kopiertFra: UUID? = null, // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
+    val relatertBehandlingId: UUID, // siste iverksatte behandling når forbehandling ble opprettet
 ) {
     companion object {
         fun opprett(
             sak: Sak,
             innvilgetPeriode: Periode,
+            sisteIverksatteBehandling: UUID,
         ) = EtteroppgjoerForbehandling(
             id = UUID.randomUUID(),
             hendelseId = UUID.randomUUID(),
@@ -38,6 +39,7 @@ data class EtteroppgjoerForbehandling(
             opprettet = Tidspunkt.now(),
             brevId = null,
             kopiertFra = null,
+            relatertBehandlingId = sisteIverksatteBehandling,
         )
     }
 
@@ -75,7 +77,6 @@ data class EtteroppgjoerForbehandling(
 
 data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,
-    val sisteIverksatteBehandling: UUID,
     val opplysninger: EtteroppgjoerOpplysninger,
     val faktiskInntekt: FaktiskInntektDto?,
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
@@ -14,11 +15,13 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -99,27 +102,13 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertForbehandlingDto {
         val forbehandling = hentForbehandling(forbehandlingId)
-
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
-
-        val request =
-            EtteroppgjoerBeregnetAvkortingRequest(
-                forbehandling = forbehandlingId,
-                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                aar = forbehandling.aar,
-                sakId = sisteIverksatteBehandling.sak.id,
-            )
-        logger.info("Henter avkorting for forbehandling: $request")
-        val avkorting =
-            runBlocking {
-                beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                    request,
-                    brukerTokenInfo,
+        val relatertBehandling =
+            behandlingService.hentBehandling(forbehandling.relatertBehandlingId)
+                ?: throw InternfeilException(
+                    "Fant ikke relatert behandling=${forbehandling.relatertBehandlingId} for forbehandling=$forbehandlingId",
                 )
-            }
 
+        val avkorting = hentAvkortingForForbehandling(forbehandling, relatertBehandling, brukerTokenInfo)
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
         val aInntekt = dao.hentAInntekt(forbehandlingId)
 
@@ -135,7 +124,7 @@ class EtteroppgjoerForbehandlingService(
                     EtteroppgjoerHentBeregnetResultatRequest(
                         forbehandling.aar,
                         forbehandlingId,
-                        sisteIverksatteBehandling.id,
+                        relatertBehandling.id,
                     ),
                     brukerTokenInfo,
                 )
@@ -149,7 +138,6 @@ class EtteroppgjoerForbehandlingService(
                     ainntekt = aInntekt,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
-            sisteIverksatteBehandling = sisteIverksatteBehandling.id,
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
             faktiskInntekt = avkorting.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
         )
@@ -179,9 +167,9 @@ class EtteroppgjoerForbehandlingService(
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
         val virkOgOpphoer = runBlocking { vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
-        val nyForbehandling = EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode)
 
-        dao.lagreForbehandling(nyForbehandling)
+        val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
+
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 
@@ -207,15 +195,15 @@ class EtteroppgjoerForbehandlingService(
     ): BeregnetEtteroppgjoerResultatDto {
         var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling
-        if (forbehandling.erFerdigstilt()) {
-            logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
-            forbehandling = kopierOgLagreNyForbehandling(forbehandling)
-        }
-
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
                 ?: throw InternfeilException("Fant ikke siste iverksatte")
+
+        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling
+        if (forbehandling.erFerdigstilt()) {
+            logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
+            forbehandling = kopierOgLagreNyForbehandling(forbehandling, sisteIverksatteBehandling.id)
+        }
 
         val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
@@ -276,6 +264,20 @@ class EtteroppgjoerForbehandlingService(
         // TODO: flere sjekker?
     }
 
+    private fun opprettOgLagreNyForbehandling(
+        sak: Sak,
+        innvilgetPeriode: Periode,
+    ): EtteroppgjoerForbehandling {
+        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sak.id)
+        krevIkkeNull(sisteIverksatteBehandling) {
+            "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
+        }
+
+        return EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode, sisteIverksatteBehandling.id).also {
+            dao.lagreForbehandling(it)
+        }
+    }
+
     private fun utledInnvilgetPeriode(
         virkOgOpphoer: FoersteVirkOgOppoerTilSak,
         inntektsaar: Int,
@@ -294,13 +296,38 @@ class EtteroppgjoerForbehandlingService(
             },
     )
 
-    private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+    private fun hentAvkortingForForbehandling(
+        forbehandling: EtteroppgjoerForbehandling,
+        relatertBehandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): EtteroppgjoerBeregnetAvkorting {
+        val request =
+            EtteroppgjoerBeregnetAvkortingRequest(
+                forbehandling = forbehandling.id,
+                sisteIverksatteBehandling = relatertBehandling.id,
+                aar = forbehandling.aar,
+                sakId = relatertBehandling.sak.id,
+            )
+        logger.info("Henter avkorting for forbehandling: $request")
+        return runBlocking {
+            beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                request,
+                brukerTokenInfo,
+            )
+        }
+    }
+
+    private fun kopierOgLagreNyForbehandling(
+        forbehandling: EtteroppgjoerForbehandling,
+        relatertBehandlingId: UUID,
+    ): EtteroppgjoerForbehandling {
         val forbehandlingCopy =
             forbehandling.copy(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
+                relatertBehandlingId = relatertBehandlingId,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

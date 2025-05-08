@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { BodyShort, Box, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
@@ -14,7 +14,8 @@ import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottak
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
 import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
-import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
+import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export function EtteroppgjoerForbehandlingBrev() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -28,12 +29,12 @@ export function EtteroppgjoerForbehandlingBrev() {
   )
 
   const kanRedigeres = etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT
-  const navigate = useNavigate()
+
   const ferdigstillForbehandling = async () => {
     const forbehandlingId = etteroppgjoer.behandling.id
-    ferdigstillForbehandlingRequest({ forbehandlingId }, () =>
-      hentSakOgNavigerTilSaksoversikt(etteroppgjoer.behandling.sak.id, navigate)
-    )
+    ferdigstillForbehandlingRequest({ forbehandlingId }, () => {
+      navigerTilPersonOversikt(etteroppgjoer.behandling.sak.ident)
+    })
   }
 
   useEffect(() => {
@@ -64,8 +65,9 @@ export function EtteroppgjoerForbehandlingBrev() {
             Når forbehandlingen for etteroppgjøret ferdigstilles vil brevet sendes ut og forbehandlingen låses for
             endringer.
           </BodyShort>
-          {mapResult(ferdigstillForbehandlingResult, {
-            error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+          {isFailureHandler({
+            apiResult: ferdigstillForbehandlingResult,
+            errorMessage: 'Kunne ikke ferdigstille forbehandling',
           })}
         </Modal.Body>
         <Modal.Footer>

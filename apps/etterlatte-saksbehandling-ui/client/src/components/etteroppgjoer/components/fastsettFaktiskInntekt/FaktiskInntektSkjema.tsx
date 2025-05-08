@@ -137,7 +137,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
             type="button"
             variant="secondary"
             size="small"
-            loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
+            disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
             onClick={() => setRedigerFaktiskInntekt(false)}
           >
             Avbryt

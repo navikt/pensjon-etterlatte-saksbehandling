@@ -87,6 +87,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
                 kopiertFra = kopiertFra,
+                relatertBehandlingId = UUID.randomUUID(),
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -114,6 +115,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
                 kopiertFra = UUID.randomUUID(),
+                relatertBehandlingId = UUID.randomUUID(),
             ),
         )
         etteroppgjoerForbehandlingDao.lagreForbehandling(
@@ -127,6 +129,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 brevId = null,
                 innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
                 kopiertFra = null,
+                relatertBehandlingId = UUID.randomUUID(),
             ),
         )
 

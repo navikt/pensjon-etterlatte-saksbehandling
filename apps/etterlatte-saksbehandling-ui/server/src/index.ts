@@ -111,7 +111,9 @@ app.use(
   proxy(ApiConfig.brev.url)
 )
 
-app.get('/api/config', (_req: Request, res: Response) => res.send(ClientConfig))
+app.get('/api/config', (_, res) => {
+  res.send(ClientConfig)
+})
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (_req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)

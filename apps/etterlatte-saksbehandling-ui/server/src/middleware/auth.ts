@@ -8,7 +8,7 @@ import { sanitize } from '../utils/sanitize'
 export const hasBeenIssued = (issuedAtTime: number) => issuedAtTime < utcSecondsSinceEpoch() // sjekker at issued-date har vært
 export const hasExpired = (expires: number) => expires < utcSecondsSinceEpoch()
 
-export const authenticateUser = (req: Request, res: Response, next: NextFunction) => {
+export function authenticateUser(req: Request, res: Response, next: NextFunction): void {
   /* NAIS notes
         Token Validation
         Your application should also validate the claims and signature for the Azure AD JWT access_token attached by the sidecar.
@@ -18,7 +18,8 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
 
   const auth = req.headers.authorization
   if (!auth) {
-    return res.redirect('/oauth2/login')
+    res.redirect('/oauth2/login')
+    return
   }
   const bearerToken = auth.split(' ')[1]
   const parsedToken = parseJwt(bearerToken)
@@ -38,12 +39,13 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     }
   } catch (e) {
     logger.error('Feil ved validering av token', e)
-    return res.status(401).send('ugyldig token')
+    res.status(401).send('ugyldig token')
+    return
   }
 
   const NAVident = parsedToken.NAVident
   const cluster = process.env.NAIS_CLUSTER_NAME
   logger.info(`Navident logger på ${sanitize(NAVident)} cluster-name ${sanitize(cluster)}`)
 
-  return next()
+  next()
 }

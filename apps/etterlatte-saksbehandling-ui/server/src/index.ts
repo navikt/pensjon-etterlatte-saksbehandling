@@ -33,7 +33,7 @@ app.get('/metrics', async (_: Request, res: Response) => {
   res.end(await prometheus.register.metrics())
 })
 
-app.get('/api*splash', (req: Request, _: Response, next: NextFunction) => {
+app.get('/api*splat', (req: Request, _: Response, next: NextFunction) => {
   req.headers['X-Correlation-ID'] = randomUUID()
   next()
 })

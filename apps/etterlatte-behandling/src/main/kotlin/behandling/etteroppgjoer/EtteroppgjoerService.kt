@@ -1,10 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
@@ -29,23 +27,6 @@ class EtteroppgjoerService(
             skalHaEtteroppgjoer,
             etteroppgjoer,
         )
-    }
-
-    // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
-    fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
-        logger.info("Starter oppretting av etteroppgjør for inntektsår $inntektsaar")
-        val sakerMedUtbetaling =
-            runBlocking {
-                vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
-                    inntektsaar,
-                    HardkodaSystembruker.etteroppgjoer,
-                )
-            }
-
-        sakerMedUtbetaling
-            .forEach { sakId -> opprettEtteroppgjoer(sakId, inntektsaar) }
-
-        logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
     }
 
     fun hentEtteroppgjoer(

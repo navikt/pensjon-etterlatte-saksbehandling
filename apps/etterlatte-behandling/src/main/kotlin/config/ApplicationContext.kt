@@ -733,7 +733,7 @@ internal class ApplicationContext(
         EtteroppgjoerJobService(
             etteroppgjoerService,
             etteroppgjoerForbehandlingService,
-            skatteoppgjoerHendelserService,
+            vedtakKlient,
             featureToggleService,
         )
 

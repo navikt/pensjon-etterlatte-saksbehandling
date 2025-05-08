@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
@@ -14,11 +15,13 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -28,7 +31,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
@@ -50,27 +52,6 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    // finn saker med etteroppgjoer og mottatt skatteoppgjoer som skal ha forbehandling
-    fun finnOgOpprettForbehandlinger(inntektsaar: Int) {
-        logger.info(
-            "Starter oppretting av forbehandling for etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar",
-        )
-        val etteroppgjoerListe =
-            etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
-
-        for (etteroppgjoer in etteroppgjoerListe) {
-            try {
-                opprettEtteroppgjoerForbehandling(
-                    etteroppgjoer.sakId,
-                    etteroppgjoer.inntektsaar,
-                    HardkodaSystembruker.etteroppgjoer,
-                )
-            } catch (e: Exception) {
-                logger.error("Kunne ikke opprette forbehandling for sakId=${etteroppgjoer.sakId} grunnen: ${e.message}")
-            }
-        }
-    }
-
     fun ferdigstillForbehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -87,8 +68,6 @@ class EtteroppgjoerForbehandlingService(
         oppgaveService.ferdigStillOppgaveUnderBehandling(forbehandling.id.toString(), OppgaveType.ETTEROPPGJOER, brukerTokenInfo)
     }
 
-    fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
-
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
@@ -99,27 +78,13 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertForbehandlingDto {
         val forbehandling = hentForbehandling(forbehandlingId)
-
         val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatt behandling")
-
-        val request =
-            EtteroppgjoerBeregnetAvkortingRequest(
-                forbehandling = forbehandlingId,
-                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                aar = forbehandling.aar,
-                sakId = sisteIverksatteBehandling.sak.id,
-            )
-        logger.info("Henter avkorting for forbehandling: $request")
-        val avkorting =
-            runBlocking {
-                beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                    request,
-                    brukerTokenInfo,
+            behandlingService.hentBehandling(forbehandling.sisteIverksatteBehandlingId)
+                ?: throw InternfeilException(
+                    "Fant ikke relatert behandling=${forbehandling.sisteIverksatteBehandlingId} for forbehandling=$forbehandlingId",
                 )
-            }
 
+        val avkorting = hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
         val aInntekt = dao.hentAInntekt(forbehandlingId)
 
@@ -149,7 +114,6 @@ class EtteroppgjoerForbehandlingService(
                     ainntekt = aInntekt,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
-            sisteIverksatteBehandling = sisteIverksatteBehandling.id,
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
             faktiskInntekt = avkorting.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
         )
@@ -162,6 +126,8 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
+
+    fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlinger(sakId)
 
@@ -179,9 +145,9 @@ class EtteroppgjoerForbehandlingService(
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
         val virkOgOpphoer = runBlocking { vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
-        val nyForbehandling = EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode)
 
-        dao.lagreForbehandling(nyForbehandling)
+        val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
+
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 
@@ -213,15 +179,11 @@ class EtteroppgjoerForbehandlingService(
             forbehandling = kopierOgLagreNyForbehandling(forbehandling)
         }
 
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatte")
-
         val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
                 forbehandlingId = forbehandling.id,
-                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                sisteIverksatteBehandling = forbehandling.sisteIverksatteBehandlingId,
                 aar = forbehandling.aar,
                 loennsinntekt = request.loennsinntekt,
                 naeringsinntekt = request.naeringsinntekt,
@@ -276,6 +238,20 @@ class EtteroppgjoerForbehandlingService(
         // TODO: flere sjekker?
     }
 
+    private fun opprettOgLagreNyForbehandling(
+        sak: Sak,
+        innvilgetPeriode: Periode,
+    ): EtteroppgjoerForbehandling {
+        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sak.id)
+        krevIkkeNull(sisteIverksatteBehandling) {
+            "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
+        }
+
+        return EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode, sisteIverksatteBehandling.id).also {
+            dao.lagreForbehandling(it)
+        }
+    }
+
     private fun utledInnvilgetPeriode(
         virkOgOpphoer: FoersteVirkOgOppoerTilSak,
         inntektsaar: Int,
@@ -294,13 +270,39 @@ class EtteroppgjoerForbehandlingService(
             },
     )
 
+    private fun hentAvkortingForForbehandling(
+        forbehandling: EtteroppgjoerForbehandling,
+        sisteIverksatteBehandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): EtteroppgjoerBeregnetAvkorting {
+        val request =
+            EtteroppgjoerBeregnetAvkortingRequest(
+                forbehandling = forbehandling.id,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                aar = forbehandling.aar,
+                sakId = sisteIverksatteBehandling.sak.id,
+            )
+        logger.info("Henter avkorting for forbehandling: $request")
+        return runBlocking {
+            beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                request,
+                brukerTokenInfo,
+            )
+        }
+    }
+
     private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+                ?: throw InternfeilException("Fant ikke siste iverksatte")
+
         val forbehandlingCopy =
             forbehandling.copy(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
+                sisteIverksatteBehandlingId = sisteIverksatteBehandling.id,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

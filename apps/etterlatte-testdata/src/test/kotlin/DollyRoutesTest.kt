@@ -3,6 +3,7 @@ package no.nav.etterlatte.dolly
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -29,12 +30,18 @@ import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
+import no.nav.etterlatte.testdata.features.dolly.Vedtak
+import no.nav.etterlatte.testdata.features.dolly.VedtakTilPerson
+import no.nav.etterlatte.testdata.features.dolly.VedtakType
+import no.nav.etterlatte.testdata.features.dolly.VedtakUtbetaling
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -141,6 +148,83 @@ class DollyRoutesTest {
             response.status shouldBe HttpStatusCode.Created
 
             coVerify(exactly = 1) { dollyService.sendSoeknadFraDolly(any(), any(), any()) }
+        }
+    }
+
+    @Test
+    fun `kan hente vedtak`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff =
+            configMedRoller(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
+        val request = FoedselsnummerDTO("09437432993")
+
+        testApplication {
+            val client =
+                runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
+            val forventetRetur =
+                VedtakTilPerson(
+                    vedtak =
+                        listOf(
+                            Vedtak(
+                                sakId = 1,
+                                sakType = "BARNEPENSJON",
+                                virkningstidspunkt = LocalDate.now(),
+                                type = VedtakType.INNVILGELSE,
+                                utbetaling =
+                                    listOf(
+                                        VedtakUtbetaling(
+                                            fraOgMed = LocalDate.now(),
+                                            tilOgMed = LocalDate.now(),
+                                            beloep = BigDecimal(1000),
+                                        ),
+                                    ),
+                            ),
+                        ),
+                )
+            val response =
+                client.post("/api/v1/hent-ytelse") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request.toJson())
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.OK
+            val retur: VedtakTilPerson = response.body()
+            retur shouldBe forventetRetur
+        }
+    }
+
+    @Test
+    fun `kan ikke hente vedtak uten gyldig fnr`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff =
+            configMedRoller(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
+        val request = FoedselsnummerDTO("09512453653")
+
+        testApplication {
+            val client =
+                runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
+
+            val response =
+                client.post("/api/v1/hent-ytelse") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request.toJson())
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.BadRequest
         }
     }
 

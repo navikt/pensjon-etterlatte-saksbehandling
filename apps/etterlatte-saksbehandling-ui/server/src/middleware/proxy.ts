@@ -9,7 +9,7 @@ export const proxy = (host: string) =>
     target: host,
     changeOrigin: true,
     on: {
-      proxyReq: (proxyReq: ClientRequest, _: Request, res: Response) => {
+      proxyReq: (proxyReq: ClientRequest, req: Request, res: Response) => {
         logger.info(`proxying ${host}`)
         proxyReq.setHeader('Authorization', `Bearer ${res.locals.token}`)
         proxyReq.setHeader('X-Correlation-ID', randomUUID())

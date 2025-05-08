@@ -33,7 +33,7 @@ app.get('/metrics', async (_: Request, res: Response) => {
   res.end(await prometheus.register.metrics())
 })
 
-app.get('/api*', (req: Request, _: Response, next: NextFunction) => {
+app.get('/api*splat', (req: Request, _: Response, next: NextFunction) => {
   req.headers['X-Correlation-ID'] = randomUUID()
   next()
 })
@@ -111,7 +111,9 @@ app.use(
   proxy(ApiConfig.brev.url)
 )
 
-app.get('/api/config', (_req: Request, res: Response) => res.send(ClientConfig))
+app.get('/api/config', (_, res) => {
+  res.send(ClientConfig)
+})
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (_req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)

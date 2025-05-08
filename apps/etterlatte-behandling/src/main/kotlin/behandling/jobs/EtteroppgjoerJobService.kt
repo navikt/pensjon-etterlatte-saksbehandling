@@ -73,8 +73,7 @@ class EtteroppgjoerJobService(
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
     fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
-        no.nav.etterlatte.logger
-            .info("Starter oppretting av etteroppgjør for inntektsår $inntektsaar")
+        logger.info("Starter oppretting av etteroppgjør for inntektsår $inntektsaar")
         val sakerMedUtbetaling =
             runBlocking {
                 vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
@@ -86,7 +85,6 @@ class EtteroppgjoerJobService(
         sakerMedUtbetaling
             .forEach { sakId -> etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) }
 
-        no.nav.etterlatte.logger
-            .info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
+        logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
     }
 }

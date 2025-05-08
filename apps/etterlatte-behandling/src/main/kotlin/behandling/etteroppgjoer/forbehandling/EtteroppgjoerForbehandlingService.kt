@@ -272,15 +272,15 @@ class EtteroppgjoerForbehandlingService(
 
     private fun hentAvkortingForForbehandling(
         forbehandling: EtteroppgjoerForbehandling,
-        relatertBehandling: Behandling,
+        sisteIverksatteBehandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting {
         val request =
             EtteroppgjoerBeregnetAvkortingRequest(
                 forbehandling = forbehandling.id,
-                sisteIverksatteBehandling = relatertBehandling.id,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
                 aar = forbehandling.aar,
-                sakId = relatertBehandling.sak.id,
+                sakId = sisteIverksatteBehandling.sak.id,
             )
         logger.info("Henter avkorting for forbehandling: $request")
         return runBlocking {

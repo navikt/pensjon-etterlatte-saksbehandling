@@ -58,6 +58,8 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.OpprettOgBehandle
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk.Familieoppretter
+import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtakService
+import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtaksvurderingKlient
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.opprettFamilie.OpprettFamilie
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyMock
@@ -104,12 +106,13 @@ val dollyService =
         DollyClientImpl(config, httpClient),
         TestnavClient(config, httpClient),
     )
+val vedtakService = VedtakService(VedtaksvurderingKlient(config, httpClient))
 val features: List<TestDataFeature> =
     listOf(
         IndexFeature,
         EgendefinertMeldingFeature,
         OpprettSoeknadFeature,
-        DollyFeature(dollyService),
+        DollyFeature(dollyService, vedtakService),
         OpprettOgBehandle(dollyService, Familieoppretter(dollyService)),
         OpprettFamilie(
             dollyService =

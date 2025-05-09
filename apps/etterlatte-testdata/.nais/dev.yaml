@@ -31,8 +31,8 @@ spec:
     requests:
       cpu: 10m
   replicas:
-    max: 1
-    min: 1
+    max: 2
+    min: 2
   azure:
     application:
       enabled: true
@@ -62,9 +62,14 @@ spec:
       value: dev-gcp.dolly.testnav-person-service
     - name: TESTNAV_RESOURCE_URL
       value: http://testnav-person-service.dolly/api/v2
+    - name: ETTERLATTE_VEDTAKSVURDERING_URL
+      value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
   accessPolicy:
     outbound:
       rules:
+        - application: etterlatte-vedtaksvurdering
         - application: testnav-person-service
           namespace: dolly
           cluster: dev-gcp

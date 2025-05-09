@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtakService
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
@@ -34,6 +35,7 @@ import java.time.LocalDate
 
 class DollyFeature(
     private val dollyService: DollyService,
+    private val vedtakService: VedtakService,
 ) : TestDataFeature {
     private val logger: Logger = LoggerFactory.getLogger(DollyFeature::class.java)
     override val beskrivelse: String
@@ -187,29 +189,8 @@ class DollyFeature(
             post("api/v1/hent-ytelse") {
                 try {
                     val request = call.receive<FoedselsnummerDTO>()
-                    // TODO hente faktisk vedtak
                     val fnr = haandterUgyldigIdent(request.foedselsnummer)
-                    // val vedtak = vedtakService.hentVedtak(fnr)
-                    val vedtak =
-                        VedtakTilPerson(
-                            vedtak =
-                                listOf(
-                                    Vedtak(
-                                        sakId = 1,
-                                        sakType = "BARNEPENSJON",
-                                        virkningstidspunkt = LocalDate.now(),
-                                        type = VedtakType.INNVILGELSE,
-                                        utbetaling =
-                                            listOf(
-                                                VedtakUtbetaling(
-                                                    fraOgMed = LocalDate.now(),
-                                                    tilOgMed = LocalDate.now(),
-                                                    beloep = BigDecimal(1000),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        )
+                    val vedtak = vedtakService.hentVedtak(fnr)
                     call.respond(vedtak)
                 } catch (e: UgyldigFoedselsnummerException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.detail)

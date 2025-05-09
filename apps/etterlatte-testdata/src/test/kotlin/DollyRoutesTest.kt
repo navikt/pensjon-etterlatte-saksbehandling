@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
+import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtakService
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
@@ -49,6 +50,7 @@ class DollyRoutesTest {
     private val mockOAuth2Server =
         MockOAuth2Server()
     private val dollyService: DollyService = mockk<DollyService>()
+    private val vedtakService: VedtakService = mockk<VedtakService>()
 
     @BeforeAll
     fun before() {
@@ -75,7 +77,10 @@ class DollyRoutesTest {
                 Issuer.AZURE.issuerName,
             )
         testApplication {
-            runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
+            runServerWithConfig(
+                applicationConfig = conff,
+                routes = DollyFeature(dollyService = dollyService, vedtakService = vedtakService).routes,
+            )
 
             val response =
                 client.post("/api/v1/opprett-ytelse") {
@@ -96,7 +101,10 @@ class DollyRoutesTest {
                 pensjonSaksbehandler = pensjonSaksbehandler,
             )
         testApplication {
-            runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
+            runServerWithConfig(
+                applicationConfig = conff,
+                routes = DollyFeature(dollyService = dollyService, vedtakService = vedtakService).routes,
+            )
 
             val response =
                 client.post("/api/v1/opprett-ytelse") {
@@ -134,7 +142,10 @@ class DollyRoutesTest {
 
         testApplication {
             val client =
-                runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
+                runServerWithConfig(
+                    applicationConfig = conff,
+                    routes = DollyFeature(dollyService = dollyService, vedtakService = vedtakService).routes,
+                )
 
             val response =
                 client.post("/api/v1/opprett-ytelse") {
@@ -161,30 +172,36 @@ class DollyRoutesTest {
                 pensjonSaksbehandler = pensjonSaksbehandler,
             )
         val request = FoedselsnummerDTO("09437432993")
+        val forventetRetur =
+            VedtakTilPerson(
+                vedtak =
+                    listOf(
+                        Vedtak(
+                            sakId = 1,
+                            sakType = "BARNEPENSJON",
+                            virkningstidspunkt = LocalDate.now(),
+                            type = VedtakType.INNVILGELSE,
+                            utbetaling =
+                                listOf(
+                                    VedtakUtbetaling(
+                                        fraOgMed = LocalDate.now(),
+                                        tilOgMed = LocalDate.now(),
+                                        beloep = BigDecimal(1000),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        coEvery { vedtakService.hentVedtak(any()) } returns forventetRetur
 
         testApplication {
             val client =
-                runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
-            val forventetRetur =
-                VedtakTilPerson(
-                    vedtak =
-                        listOf(
-                            Vedtak(
-                                sakId = 1,
-                                sakType = "BARNEPENSJON",
-                                virkningstidspunkt = LocalDate.now(),
-                                type = VedtakType.INNVILGELSE,
-                                utbetaling =
-                                    listOf(
-                                        VedtakUtbetaling(
-                                            fraOgMed = LocalDate.now(),
-                                            tilOgMed = LocalDate.now(),
-                                            beloep = BigDecimal(1000),
-                                        ),
-                                    ),
-                            ),
-                        ),
+                runServerWithConfig(
+                    applicationConfig = conff,
+                    routes = DollyFeature(dollyService = dollyService, vedtakService = vedtakService).routes,
                 )
+
             val response =
                 client.post("/api/v1/hent-ytelse") {
                     contentType(ContentType.Application.Json)
@@ -213,7 +230,10 @@ class DollyRoutesTest {
 
         testApplication {
             val client =
-                runServerWithConfig(applicationConfig = conff, routes = DollyFeature(dollyService = dollyService).routes)
+                runServerWithConfig(
+                    applicationConfig = conff,
+                    routes = DollyFeature(dollyService = dollyService, vedtakService = vedtakService).routes,
+                )
 
             val response =
                 client.post("/api/v1/hent-ytelse") {

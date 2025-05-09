@@ -198,14 +198,35 @@ class BehandlingStatusServiceImpl(
 
         val merknad =
             when (brukerTokenInfo) {
-                is Saksbehandler -> genererMerknad(vedtak, "Behandlet av ${brukerTokenInfo.ident}")
-                is Systembruker -> {
-                    if (behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING) {
-                        "Inntektsendring - automatisk behandlet"
-                    } else {
-                        genererMerknad(vedtak, "Behandlet av systemet")
+                is Saksbehandler ->
+                    when (behandling.revurderingsaarsak()) {
+                        Revurderingaarsak.ETTEROPPGJOER -> {
+                            val etteroppgjoersAar =
+                                forbehandlingService
+                                    .hentForbehandling(
+                                        UUID.fromString(behandling.relatertBehandlingId!!),
+                                    ).aar
+
+                            genererMerknad(
+                                prefix = "Etteroppgjør $etteroppgjoersAar",
+                                vedtak = vedtak,
+                                merknad = "Behandlet av ${brukerTokenInfo.ident}",
+                            )
+                        }
+
+                        else -> genererMerknad(vedtak = vedtak, merknad = "Behandlet av ${brukerTokenInfo.ident}")
                     }
-                }
+
+                is Systembruker ->
+                    when (behandling.revurderingsaarsak()) {
+                        Revurderingaarsak.INNTEKTSENDRING ->
+                            genererMerknad(
+                                prefix = "Inntektsendring",
+                                merknad = "Automatisk behandlet",
+                            )
+
+                        else -> genererMerknad(vedtak = vedtak, merknad = "Behandlet av systemet")
+                    }
             }
 
         oppgaveService.tilAttestering(
@@ -238,9 +259,11 @@ class BehandlingStatusServiceImpl(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
             saksbehandler = brukerTokenInfo,
-            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}. Attestant: ${hentSaksbehandlerNavn(
-                brukerTokenInfo.ident(),
-            )}",
+            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}. Attestant: ${
+                hentSaksbehandlerNavn(
+                    brukerTokenInfo.ident(),
+                )
+            }",
         )
     }
 
@@ -332,7 +355,11 @@ class BehandlingStatusServiceImpl(
 
         // oppdater etteroppgjoer status til ferdigstilt
         if (behandling.type == BehandlingType.REVURDERING && behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
-            etteroppgjoerService.oppdaterEtteroppgjoerStatus(behandling.sak.id, virk.dato.year, EtteroppgjoerStatus.FERDIGSTILT_REVURDERING)
+            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                behandling.sak.id,
+                virk.dato.year,
+                EtteroppgjoerStatus.FERDIGSTILT_REVURDERING,
+            )
         }
     }
 
@@ -371,7 +398,10 @@ class BehandlingStatusServiceImpl(
                 val unntakIBehandling = aktivitetspliktService.hentVurderingForBehandlingNy(behandling.id).unntak
                 aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIBehandling, behandling.sak.id)
             } catch (e: Exception) {
-                logger.warn("Kunne ikke opprette oppfølgingsoppgaver for unntak i behandling med id ${behandling.id}", e)
+                logger.warn(
+                    "Kunne ikke opprette oppfølgingsoppgaver for unntak i behandling med id ${behandling.id}",
+                    e,
+                )
             }
         }
     }
@@ -456,9 +486,10 @@ class BehandlingStatusServiceImpl(
             ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
 
     private fun genererMerknad(
-        vedtak: VedtakEndringDTO,
+        prefix: String? = null,
+        vedtak: VedtakEndringDTO? = null,
         merknad: String,
     ): String =
-        listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknad, vedtak.vedtakHendelse.kommentar)
+        listOfNotNull(prefix, vedtak?.vedtakType?.tilLesbarString(), merknad, vedtak?.vedtakHendelse?.kommentar)
             .joinToString(separator = ": ")
 }

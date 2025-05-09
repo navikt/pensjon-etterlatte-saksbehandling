@@ -44,6 +44,7 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
+      tenant: trygdeetaten.no
       claims:
         groups:
           - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING

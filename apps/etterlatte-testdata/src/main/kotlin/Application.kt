@@ -92,7 +92,7 @@ val vedtakHttpClient =
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("vedtak.client_id"),
+        azureAppScope = config.getString("vedtak.outbound"),
     )
 val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 

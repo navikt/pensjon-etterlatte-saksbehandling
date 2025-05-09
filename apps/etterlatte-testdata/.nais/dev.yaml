@@ -70,6 +70,8 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
+          namespace: etterlatte
+          cluster: dev-gcp
         - application: testnav-person-service
           namespace: dolly
           cluster: dev-gcp
@@ -98,4 +100,7 @@ spec:
           cluster: dev-gcp
         - application: team-dolly-lokal-app
           namespace: dolly
+          cluster: dev-gcp
+        - application: etterlatte-behandling
+          namespace: etterlatte
           cluster: dev-gcp

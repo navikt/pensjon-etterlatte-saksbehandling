@@ -13,7 +13,25 @@ import java.sql.ResultSet
 class EtteroppgjoerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentEtteroppgjoer(
+    fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT e.sak_id, e.inntektsaar, e.status
+                        FROM etteroppgjoer e
+                        WHERE e.sak_id = ?
+                        AND e.status != ?
+                        """.trimIndent(),
+                    )
+                statement.setLong(1, sakId.sakId)
+                statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
+                statement.executeQuery().toList { toEtteroppgjoer() }
+            }
+        }
+
+    fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
     ): Etteroppgjoer? =

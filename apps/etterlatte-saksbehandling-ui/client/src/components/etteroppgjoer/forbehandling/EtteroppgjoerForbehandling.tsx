@@ -2,7 +2,7 @@ import { StatusBar } from '~shared/statusbar/Statusbar'
 import React, { useEffect } from 'react'
 import { Box, HStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
@@ -21,7 +21,7 @@ export function EtteroppgjoerForbehandling() {
   const { etteroppgjoerId } = useParams()
 
   const dispatch = useAppDispatch()
-  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
+  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
   const etteroppgjoerReducer = useAppSelector((state) => state.etteroppgjoerReducer)
 
   useEffect(() => {

@@ -14,6 +14,7 @@ import {
   EnvelopeClosedIcon,
   FileTextIcon,
   PersonIcon,
+  CurrencyExchangeIcon,
 } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
@@ -29,6 +30,7 @@ import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { AktivitetspliktSakoversikt } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
+import EtteroppgjoerSaksoversikt from '~components/person/etteroppgjoer/EtteroppgjoerSaksoversikt'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -39,6 +41,7 @@ export enum PersonOversiktFane {
   SAMORDNING = 'SAMORDNING',
   HENDELSER = 'HENDELSER',
   AKTIVITET = 'AKTIVITET',
+  ETTEROPPGJOER = 'ETTEROPPGJOER',
 }
 
 export const Person = () => {
@@ -109,6 +112,10 @@ export const Person = () => {
           {isOmstillingsstoenad(foretrukketSakResult) && (
             <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
           )}
+
+          {isOmstillingsstoenad(foretrukketSakResult) && (
+            <Tabs.Tab value={PersonOversiktFane.ETTEROPPGJOER} label="Etteroppgjør" icon={<CurrencyExchangeIcon />} />
+          )}
         </Tabs.List>
 
         <Tabs.Panel value={PersonOversiktFane.SAKER}>
@@ -134,6 +141,9 @@ export const Person = () => {
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
           <AktivitetspliktSakoversikt fnr={fnr} sakResult={foretrukketSakResult} />
+        </Tabs.Panel>
+        <Tabs.Panel value={PersonOversiktFane.ETTEROPPGJOER}>
+          <EtteroppgjoerSaksoversikt sakResult={foretrukketSakResult} />
         </Tabs.Panel>
       </Tabs>
     </>

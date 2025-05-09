@@ -9,7 +9,7 @@ import {
   EtteroppgjoerBehandling,
   EtteroppgjoerBehandlingStatus,
   teksterEtteroppgjoerBehandlingStatus,
-} from '~shared/types/Etteroppgjoer'
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
 

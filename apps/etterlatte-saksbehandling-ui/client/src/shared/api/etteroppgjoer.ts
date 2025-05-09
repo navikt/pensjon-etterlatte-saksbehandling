@@ -1,19 +1,27 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
-  Etteroppgjoer,
+  EtteroppgjoerForbehandling,
   EtteroppgjoerBehandling,
   FaktiskInntekt,
   BeregnetEtteroppgjoerResultatDto,
-} from '~shared/types/Etteroppgjoer'
+  Etteroppgjoer,
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
 interface EtteroppgjoerOgOppgave {
-  etteroppgjoerBehandling: Etteroppgjoer
+  etteroppgjoerBehandling: EtteroppgjoerForbehandling
   oppgave: OppgaveDTO
 }
 
-export const hentEtteroppgjoer = async (behandlingId: string): Promise<ApiResponse<Etteroppgjoer>> => {
-  return apiClient.get(`/etteroppgjoer/${behandlingId}`)
+export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer[]>> => {
+  return apiClient.get(`/etteroppgjoer/${sakId}`)
+}
+
+// TODO: change api etteroppgjoer/forbehandling/${behandlingId}
+export const hentEtteroppgjoerForbehandling = async (
+  behandlingId: string
+): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.get(`/etteroppgjoer/forbehandling/${behandlingId}`)
 }
 
 export const opprettEtteroppgjoerIDev = async (sakId: number): Promise<ApiResponse<EtteroppgjoerOgOppgave>> => {

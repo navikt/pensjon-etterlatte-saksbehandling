@@ -48,7 +48,7 @@ spec:
       autoLogin: true
       autoLoginIgnorePaths:
         - /dolly/api/**
-      #  - /dolly/swagger/**
+        - /dolly/swagger/**
   kafka:
     pool: nav-dev
   env:

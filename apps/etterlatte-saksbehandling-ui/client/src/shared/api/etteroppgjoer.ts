@@ -17,7 +17,6 @@ export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Ette
   return apiClient.get(`/etteroppgjoer/${sakId}`)
 }
 
-// TODO: change api etteroppgjoer/forbehandling/${behandlingId}
 export const hentEtteroppgjoerForbehandling = async (
   behandlingId: string
 ): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {

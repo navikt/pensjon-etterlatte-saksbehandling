@@ -66,6 +66,8 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: ETTERLATT_VEDTAKSVURDERING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
   accessPolicy:
     outbound:
       rules:

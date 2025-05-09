@@ -3,6 +3,7 @@ package no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.testdata.features.dolly.Vedtak
 import no.nav.etterlatte.testdata.features.dolly.VedtakTilPerson
 import no.nav.etterlatte.testdata.features.dolly.VedtakType
@@ -11,10 +12,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtakService(
-    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val vedtaksvurderingKlient: VedtaksvurderingOboKlient,
 ) {
     suspend fun hentVedtak(fnr: Folkeregisteridentifikator): VedtakTilPerson {
-        val vedtak = vedtaksvurderingKlient.hentVedtak(fnr)
+        val vedtak = vedtaksvurderingKlient.hentVedtak(fnr, HardkodaSystembruker.testdata)
         return VedtakTilPerson(
             vedtak = vedtak.filter { it.type.vanligBehandling }.map { it.fromDto() },
         )

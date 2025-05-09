@@ -189,31 +189,8 @@ class DollyFeature(
             post("api/v1/hent-ytelse") {
                 try {
                     val request = call.receive<FoedselsnummerDTO>()
-                    // TODO hente faktisk vedtak
                     val fnr = haandterUgyldigIdent(request.foedselsnummer)
                     val vedtak = vedtakService.hentVedtak(fnr)
-                    /*val vedtak =
-                        VedtakTilPerson(
-                            vedtak =
-                                listOf(
-                                    Vedtak(
-                                        sakId = 1,
-                                        sakType = "BARNEPENSJON",
-                                        virkningstidspunkt = LocalDate.now(),
-                                        type = VedtakType.INNVILGELSE,
-                                        utbetaling =
-                                            listOf(
-                                                VedtakUtbetaling(
-                                                    fraOgMed = LocalDate.now(),
-                                                    tilOgMed = LocalDate.now(),
-                                                    beloep = BigDecimal(1000),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                           )
-                     */
-
                     call.respond(vedtak)
                 } catch (e: UgyldigFoedselsnummerException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.detail)

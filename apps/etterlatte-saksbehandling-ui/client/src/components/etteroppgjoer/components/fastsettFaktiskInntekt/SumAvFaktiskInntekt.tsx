@@ -1,4 +1,4 @@
-import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
+import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
 import { Label, VStack } from '@navikt/ds-react'
 
 export const SumAvFaktiskInntekt = ({ faktiskInntekt }: { faktiskInntekt: FaktiskInntekt }) => {

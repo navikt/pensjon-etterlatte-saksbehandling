@@ -1,6 +1,6 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React from 'react'

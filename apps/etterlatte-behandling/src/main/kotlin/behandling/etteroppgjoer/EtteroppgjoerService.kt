@@ -19,7 +19,7 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): SkalHaEtteroppgjoerResultat {
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
-        val etteroppgjoer = sak?.let { dao.hentEtteroppgjoer(it.id, inntektsaar) }
+        val etteroppgjoer = sak?.let { dao.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
 
         val skalHaEtteroppgjoer = etteroppgjoer?.skalHaEtteroppgjoer() ?: false
 
@@ -29,10 +29,12 @@ class EtteroppgjoerService(
         )
     }
 
-    fun hentEtteroppgjoer(
+    fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentAlleAktiveEtteroppgjoerForSak(sakId)
+
+    fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? = dao.hentEtteroppgjoer(sakId, inntektsaar)
+    ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
     fun hentEtteroppgjoerForStatus(
         status: EtteroppgjoerStatus,
@@ -51,7 +53,7 @@ class EtteroppgjoerService(
         sakId: SakId,
         inntektsaar: Int,
     ) {
-        if (dao.hentEtteroppgjoer(sakId, inntektsaar) != null) {
+        if (dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) != null) {
             logger.error("Kan ikke opprette etteroppgjør for sak=$sakId for inntektsaar=$inntektsaar da det allerede eksisterer")
             return
         }

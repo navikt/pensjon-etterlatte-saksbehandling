@@ -1,5 +1,5 @@
 import { BodyShort, Heading, Table, VStack } from '@navikt/ds-react'
-import { AInntekt, AInntektMaaned } from '~shared/types/Etteroppgjoer'
+import { AInntekt, AInntektMaaned } from '~shared/types/EtteroppgjoerForbehandling'
 import { NOK } from '~utils/formatering/formatering'
 
 export const OpplysningerFraAInntekt = ({ ainntekt }: { ainntekt: AInntekt }) => {

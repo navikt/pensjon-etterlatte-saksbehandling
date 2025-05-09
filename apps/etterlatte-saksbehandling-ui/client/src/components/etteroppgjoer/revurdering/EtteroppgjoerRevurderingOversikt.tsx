@@ -1,7 +1,7 @@
 import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import React, { useContext, useEffect, useState } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -25,7 +25,7 @@ interface EtteroppgjoerRevurderingOversiktSkjema {
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const etteroppgjoerId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
-  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoer)
+  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
   const { next } = useContext(BehandlingRouteContext)
 
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)

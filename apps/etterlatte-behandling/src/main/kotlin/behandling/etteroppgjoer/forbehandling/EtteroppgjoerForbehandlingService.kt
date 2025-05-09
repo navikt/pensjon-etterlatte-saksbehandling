@@ -215,7 +215,7 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
         if (etteroppgjoer == null) {
             logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
             throw InternfeilException("Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør")

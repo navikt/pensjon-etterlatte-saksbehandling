@@ -1,6 +1,6 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Box, HStack, Label, VStack } from '@navikt/ds-react'
-import { EtteroppgjoerBehandlingStatus, EtteroppgjoerResultatType } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerBehandlingStatus, EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 
 export const BrevutfallAvForbehandling = () => {

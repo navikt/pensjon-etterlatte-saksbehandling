@@ -79,7 +79,7 @@ class ViderefoertOpphoerTest(
     }
 
     @Test
-    fun `lagrer viderefoert opphoer`() {
+    fun `lagrer viderefoert opphoer med svar ja`() {
         val sak =
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
@@ -104,6 +104,32 @@ class ViderefoertOpphoerTest(
         val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opprettBehandling.id)!!
         assertEquals(opprettBehandling.id, viderefoertOpphoer.behandlingId)
         assertEquals(opphoerstidspunkt, viderefoertOpphoer.dato)
+    }
+
+    @Test
+    fun `lagrer viderefoert opphoer med svar nei og ingen dato satt`() {
+        val sak =
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource))).opprettSak(
+                SOEKER_FOEDSELSNUMMER.value,
+                SakType.BARNEPENSJON,
+                Enheter.defaultEnhet.enhetNr,
+            )
+        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
+        behandlingDao.opprettBehandling(behandling = opprettBehandling)
+        runBlocking {
+            service.oppdaterViderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                viderefoertOpphoer =
+                    viderefoertOpphoer(
+                        skalViderefoere = JaNei.NEI,
+                        behandlingId = opprettBehandling.id,
+                        opphoersdato = null,
+                    ),
+                mockk(),
+            )
+        }
+        val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opprettBehandling.id)!!
+        assertEquals(opprettBehandling.id, viderefoertOpphoer.behandlingId)
     }
 
     @Test

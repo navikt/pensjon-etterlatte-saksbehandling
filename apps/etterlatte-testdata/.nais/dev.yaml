@@ -37,6 +37,7 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
+      tenant: nav.no
       claims:
         groups:
           # AD-gruppe for utviklere på Team Etterlatte (etterlatte@nav.no)

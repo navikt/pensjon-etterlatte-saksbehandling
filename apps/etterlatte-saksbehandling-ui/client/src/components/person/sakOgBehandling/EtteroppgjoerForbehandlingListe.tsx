@@ -66,7 +66,7 @@ function EtteroppgjoerForbehandlingTabell({
               {forbehandling.innvilgetPeriode.fom} - {forbehandling.innvilgetPeriode.tom}
             </Table.DataCell>
             <Table.DataCell>
-              <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Gå til behandling</Link>
+              <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Se behandling</Link>
             </Table.DataCell>
             <Table.DataCell>
               {forbehandling.status == EtteroppgjoerBehandlingStatus.FERDIGSTILT && (

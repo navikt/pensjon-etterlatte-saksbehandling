@@ -167,7 +167,7 @@ class DollyFeature(
                                 SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
                             }
                     }
-                    if (soeker == "" || barnListe.isEmpty() || avdoed == "") {
+                    if (soeker == "" || avdoed == "") {
                         call.respond(HttpStatusCode.BadRequest, "Påkrevde felter mangler")
                     }
                     val request =

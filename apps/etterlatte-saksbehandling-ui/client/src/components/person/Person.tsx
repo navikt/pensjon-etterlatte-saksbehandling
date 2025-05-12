@@ -116,7 +116,7 @@ export const Person = () => {
             <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
           )}
 
-          {isOmstillingsstoenad(foretrukketSakResult) && (
+          {etteroppgjoerEnabled && isOmstillingsstoenad(foretrukketSakResult) && (
             <Tabs.Tab value={PersonOversiktFane.ETTEROPPGJOER} label="Etteroppgjør" icon={<CurrencyExchangeIcon />} />
           )}
         </Tabs.List>
@@ -146,7 +146,7 @@ export const Person = () => {
           <AktivitetspliktSakoversikt fnr={fnr} sakResult={foretrukketSakResult} />
         </Tabs.Panel>
 
-        {etteroppgjoerEnabled && (
+        {etteroppgjoerEnabled && isOmstillingsstoenad(foretrukketSakResult) && (
           <Tabs.Panel value={PersonOversiktFane.ETTEROPPGJOER}>
             <EtteroppgjoerSaksoversikt sakResult={foretrukketSakResult} />
           </Tabs.Panel>

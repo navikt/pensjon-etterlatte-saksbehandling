@@ -71,7 +71,20 @@ fun Route.etteroppgjoerRoutes(
             }
         }
 
-        route("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
+        route("/{$SAKID_CALL_PARAMETER}") {
+            get {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    val etteroppgjoer =
+                        inTransaction {
+                            etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
+                        }
+                    call.respond(etteroppgjoer)
+                }
+            }
+        }
+
+        route("/forbehandling/{$ETTEROPPGJOER_CALL_PARAMETER}") {
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {

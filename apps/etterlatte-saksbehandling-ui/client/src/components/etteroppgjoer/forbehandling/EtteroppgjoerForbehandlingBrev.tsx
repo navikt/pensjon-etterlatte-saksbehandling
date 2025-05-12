@@ -13,7 +13,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
-import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 

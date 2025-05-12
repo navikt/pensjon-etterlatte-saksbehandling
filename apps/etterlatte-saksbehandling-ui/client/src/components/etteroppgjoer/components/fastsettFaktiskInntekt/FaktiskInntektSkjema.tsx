@@ -1,4 +1,4 @@
-import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
+import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
 import { useForm } from 'react-hook-form'
 import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
@@ -7,7 +7,7 @@ import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastse
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoer, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { useAppDispatch } from '~store/Store'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
@@ -41,7 +41,7 @@ interface Props {
 
 export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInntektSkjemaErSkittent }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
-  const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoer)
+  const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
 
   const { behandling, faktiskInntekt } = useEtteroppgjoer()
   const dispatch = useAppDispatch()

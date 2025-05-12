@@ -47,7 +47,7 @@ object EtteroppgjoerBrevData {
 data class EtteroppgjoerBrevGrunnlag(
     val fom: YearMonth,
     val tom: YearMonth,
-    val innvilgetMaaneder: Int,
+    val innvilgedeMaaneder: Int,
     val loensinntekt: Kroner,
     val naeringsinntekt: Kroner,
     val afp: Kroner,

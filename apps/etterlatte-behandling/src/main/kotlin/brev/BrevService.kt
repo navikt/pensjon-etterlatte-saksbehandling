@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -32,6 +33,7 @@ class BrevService(
     private val tilbakekrevingBrevService: TilbakekrevingBrevService,
     private val etteroppgjoerForbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     private val etteroppgjoerRevurderingBrevService: EtteroppgjoerRevurderingBrevService,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -90,7 +92,10 @@ class BrevService(
                     vedtakKlient.hentVedtak(behandlingId, bruker)
                         ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
                 val saksbehandlerident: String = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
-
+                val attesteringsOppgave =
+                    oppgaveService.hentOppgaverForReferanse(behandlingId.toString()).singleOrNull {
+                        it.erAttestering() && it.erIkkeAvsluttet()
+                    }
                 if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
                     logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (behandlingId=$behandlingId)")
                     false
@@ -98,6 +103,12 @@ class BrevService(
                     logger.warn(
                         "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerident)" +
                             " og attestant (${bruker.ident()}) er samme person.",
+                    )
+                    false
+                } else if (attesteringsOppgave != null && !bruker.erSammePerson(attesteringsOppgave.saksbehandler?.ident)) {
+                    logger.warn(
+                        "Saksbehandler har ikke attesteringsoppgaven til behandlingen. Ferdigstiller ikke brev med " +
+                            "nåværende ident.",
                     )
                     false
                 } else {

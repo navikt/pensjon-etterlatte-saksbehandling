@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
+import java.sql.Types
 import java.time.YearMonth
 import java.util.UUID
 
@@ -69,9 +70,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id
@@ -93,6 +94,11 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setLong(8, forbehandling.brevId)
                 statement.setObject(9, forbehandling.kopiertFra)
                 statement.setObject(10, forbehandling.sisteIverksatteBehandlingId)
+                if (forbehandling.harMottattNyInformasjon == null) {
+                    statement.setNull(11, Types.BOOLEAN)
+                } else {
+                    statement.setBoolean(11, forbehandling.harMottattNyInformasjon)
+                }
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -204,6 +210,27 @@ class EtteroppgjoerForbehandlingDao(
             statement.setString(2, forbehandlingId.toString())
             statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
             statement.setString(4, BehandlingStatus.IVERKSATT.name)
+
+            statement.executeUpdate()
+        }
+    }
+
+    fun oppdaterHarMottattNyInformasjon(
+        forbehandlingId: UUID,
+        harMottattNyInformasjon: Boolean,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE etterlatte_behandling b
+                    SET har_mottatt_ny_informasjon = ?
+                    WHERE b.id = ?
+                    """.trimIndent(),
+                )
+
+            statement.setBoolean(1, harMottattNyInformasjon)
+            statement.setObject(2, forbehandlingId)
 
             statement.executeUpdate()
         }
@@ -338,6 +365,7 @@ class EtteroppgjoerForbehandlingDao(
             brevId = getLongOrNull("brev_id"),
             kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
             sisteIverksatteBehandlingId = getString("siste_iverksatte_behandling").let { UUID.fromString(it) },
+            harMottattNyInformasjon = getBoolean("har_mottatt_ny_informasjon"),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

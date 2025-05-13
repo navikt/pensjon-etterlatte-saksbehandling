@@ -20,11 +20,7 @@ export const BrevutfallAvForbehandling = () => {
     >
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.TILBAKEKREVING && (
         <EtteroppgjoerResultatVisning
-          tekst={
-            behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
-              ? 'Forbehandlingen viste at det ble tilbakekreving'
-              : 'Forbehandlingen viser at det blir tilbakekreving'
-          }
+          tekst="Forbehandlingen viser at det blir tilbakekreving"
           body={
             behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
               ? 'Det skal ha blitt sendt varselbrev'
@@ -35,11 +31,7 @@ export const BrevutfallAvForbehandling = () => {
 
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.ETTERBETALING && (
         <EtteroppgjoerResultatVisning
-          tekst={
-            behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
-              ? 'Forbehandlingen viste at det ble etterbetaling'
-              : 'Forbehandlingen viser at det blir etterbetaling'
-          }
+          tekst="Forbehandlingen viser at det blir etterbetaling"
           body={
             behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
               ? 'Det skal ha blitt sendt varselbrev'
@@ -50,11 +42,7 @@ export const BrevutfallAvForbehandling = () => {
 
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER && (
         <EtteroppgjoerResultatVisning
-          tekst={
-            behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
-              ? 'Forbehandlingen viste at det ble ingen endring'
-              : 'Forbehandlingen viser at det blir ingen endring'
-          }
+          tekst="Forbehandlingen viser at det blir ingen endring"
           body={
             behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
               ? 'Det skal ha blitt sendt informasjonsbrev'

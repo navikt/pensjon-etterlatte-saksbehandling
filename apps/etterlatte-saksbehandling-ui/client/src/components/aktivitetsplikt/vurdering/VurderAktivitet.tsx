@@ -6,23 +6,25 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetspliktTidslinje'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
-import { velgDoedsdato } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
+import { velgDoedsdatoFraPersonopplysninger } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { AktivitetspliktVurderingOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingOversikt'
 import { AktivitetspliktOppgaveVurderingType } from '~shared/types/Aktivitetsplikt'
+import { hentSisteIverksattePersonopplysninger } from '~shared/api/sak'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
-  const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
+  const [sistIverksattPersonopplysningerResult, sistIverksattPersonopplysningerFetch] = useApiCall(
+    hentSisteIverksattePersonopplysninger
+  )
   const [avdoedesDoedsdato, setAvdoedesDoedsdato] = useState<Date | undefined>()
 
   useEffect(() => {
-    familieOpplysningerFetch({ ident: sak.ident, sakType: sak.sakType }, ({ avdoede }) => {
+    sistIverksattPersonopplysningerFetch({ sakId: sak.id, sakType: sak.sakType }, ({ avdoede }) => {
       if (avdoede) {
-        setAvdoedesDoedsdato(velgDoedsdato(avdoede))
+        setAvdoedesDoedsdato(velgDoedsdatoFraPersonopplysninger(avdoede))
       }
     })
   }, [])
@@ -32,7 +34,7 @@ export function VurderAktivitet() {
       <AktivitetspliktVurderingOversikt />
       <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
         <VStack gap="4">
-          {mapResult(familieOpplysningerResult, {
+          {mapResult(sistIverksattPersonopplysningerResult, {
             pending: <Spinner label="Henter opplysninger om avdød" />,
             error: (error) => (
               <ApiErrorAlert>

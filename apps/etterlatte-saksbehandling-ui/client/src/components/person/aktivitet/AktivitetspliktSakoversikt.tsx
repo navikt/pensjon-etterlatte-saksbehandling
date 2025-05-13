@@ -13,6 +13,7 @@ import { VurderingAvAktivitetspliktSak } from '~components/person/aktivitet/vurd
 import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
 import { AktivitetspliktOppgaveVurderingType, harVurdering } from '~shared/types/Aktivitetsplikt'
 import { ApiError } from '~shared/api/apiClient'
+import { Personopplysning } from '~shared/types/grunnlag'
 
 export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -21,6 +22,19 @@ export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
     return avdoede.reduce((foersteAvdoed, andreAvdoed) =>
       foersteAvdoed.doedsdato!! < andreAvdoed.doedsdato!! ? foersteAvdoed : andreAvdoed
     ).doedsdato!!
+}
+
+export const velgDoedsdatoFraPersonopplysninger = (avdoede: Personopplysning[]): Date | undefined => {
+  if (avdoede.length === 0) {
+    return undefined
+  } else if (avdoede.length === 1) {
+    return avdoede[0].opplysning.doedsdato
+  } else {
+    return avdoede
+      .map((person) => person.opplysning.doedsdato)
+      .filter((a) => !!a)
+      .sort()[0]
+  }
 }
 
 export const AktivitetspliktSakoversikt = ({

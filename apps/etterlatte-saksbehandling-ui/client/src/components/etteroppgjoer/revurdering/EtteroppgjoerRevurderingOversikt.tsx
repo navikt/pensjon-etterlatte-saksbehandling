@@ -1,4 +1,4 @@
-import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling, lagreHarMottattNyInformasjon } from '~shared/api/etteroppgjoer'
@@ -17,6 +17,23 @@ import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+
+const skalKunneRedigereFastsattInntektDefaultValue = (
+  etteroppgjoerForbehandling: EtteroppgjoerForbehandling
+): 'JA' | 'NEI' | '' => {
+  if (etteroppgjoerForbehandling) {
+    if (etteroppgjoerForbehandling.behandling) {
+      if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === true) {
+        return 'JA'
+      } else if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === false) {
+        return 'NEI'
+      }
+    }
+  }
+
+  return ''
+}
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
@@ -27,6 +44,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const etteroppgjoerId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
 
+  const etteroppgjoer = useEtteroppgjoer()
+
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
   const [harMottattNyInformasjonResult, harMottattNyInformasjonRequest] = useApiCall(lagreHarMottattNyInformasjon)
 
@@ -36,9 +55,10 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
 
-  // TODO: utlede default value her
-  const { control, handleSubmit, watch } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
-    defaultValues: { skalKunneRedigereFastsattInntekt: '' },
+  const { control, handleSubmit, watch, setValue } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+    defaultValues: {
+      skalKunneRedigereFastsattInntekt: skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer),
+    },
   })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
@@ -67,6 +87,10 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     })
   }, [etteroppgjoerId])
 
+  useEffect(() => {
+    setValue('skalKunneRedigereFastsattInntekt', skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer))
+  }, [etteroppgjoer])
+
   return mapResult(etteroppgjoerResult, {
     pending: <Spinner label="Henter forbehandling" />,
     error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandling for etteroppgjør: {error.detail}</ApiErrorAlert>,
@@ -80,7 +104,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
           </BodyShort>
           <Inntektsopplysninger />
-          {/* TODO: lagret resultatet her noen sted */}
+
           <ControlledRadioGruppe
             name="skalKunneRedigereFastsattInntekt"
             control={control}

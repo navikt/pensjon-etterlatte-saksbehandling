@@ -205,20 +205,9 @@ class AvkortingService(
         val opphoerFraOgMed = behandling.opphoerFraOgMed
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
 
-        val avkorting =
-            if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
-                val forbehandlingId =
-                    behandling.relatertBehandlingId.let { UUID.fromString(it) }
-                        ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
-
-                avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, kopiertAvkorting)
-            } else {
-                kopiertAvkorting
-            }
-
         return reberegnOgLagreAvkorting(
             behandling = behandling,
-            avkorting = avkorting,
+            eksisterendeAvkorting = kopiertAvkorting,
             brukerTokenInfo = brukerTokenInfo,
         )
     }
@@ -243,12 +232,25 @@ class AvkortingService(
 
     private suspend fun reberegnOgLagreAvkorting(
         behandling: DetaljertBehandling,
-        avkorting: Avkorting,
+        eksisterendeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
+
+        val avkorting =
+            when (behandling.revurderingsaarsak) {
+                Revurderingaarsak.ETTEROPPGJOER -> {
+                    val forbehandlingId =
+                        behandling.relatertBehandlingId.let { UUID.fromString(it) }
+                            ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
+
+                    avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, eksisterendeAvkorting)
+                }
+                else -> eksisterendeAvkorting
+            }
+
         val beregnetAvkorting = avkorting.beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)

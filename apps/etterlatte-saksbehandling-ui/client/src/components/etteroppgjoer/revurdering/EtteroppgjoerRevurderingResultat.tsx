@@ -28,13 +28,13 @@ export const EtteroppgjoerRevurderingResultat = () => {
       maxWidth="42.5rem"
     >
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.TILBAKEKREVING && (
-        <ResultatVisning tekst="Etteroppgjoeret viser at det blir tilbakekreving" />
+        <ResultatVisning tekst="Etteroppgjøret viser at det blir tilbakekreving" />
       )}
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.ETTERBETALING && (
-        <ResultatVisning tekst="Etteroppgjoeret viser at det blir etterbetaling" />
+        <ResultatVisning tekst="Etteroppgjøret viser at det blir etterbetaling" />
       )}
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER && (
-        <ResultatVisning tekst="Etteroppgjoeret viser ingen endring" />
+        <ResultatVisning tekst="Etteroppgjøret viser ingen endring" />
       )}
     </Box>
   )

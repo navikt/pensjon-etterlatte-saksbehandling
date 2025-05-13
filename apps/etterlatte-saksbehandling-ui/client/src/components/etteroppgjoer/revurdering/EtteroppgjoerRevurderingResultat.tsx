@@ -1,16 +1,7 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { Box, HStack, Label, VStack } from '@navikt/ds-react'
+import { Box } from '@navikt/ds-react'
 import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
-import { CurrencyExchangeIcon } from '@navikt/aksel-icons'
-
-const ResultatVisning = ({ tekst }: { tekst: string }) => (
-  <HStack gap="2" maxWidth="fit-content">
-    <CurrencyExchangeIcon fontSize="1.5rem" aria-hidden />
-    <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-      <Label>{tekst}</Label>
-    </VStack>
-  </HStack>
-)
+import EtteroppgjoerResultatVisning from '~components/etteroppgjoer/components/EtteroppgjoerResultatVisning'
 
 export const EtteroppgjoerRevurderingResultat = () => {
   const { beregnetEtteroppgjoerResultat } = useEtteroppgjoer()
@@ -28,13 +19,13 @@ export const EtteroppgjoerRevurderingResultat = () => {
       maxWidth="42.5rem"
     >
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.TILBAKEKREVING && (
-        <ResultatVisning tekst="Etteroppgjøret viser at det blir tilbakekreving" />
+        <EtteroppgjoerResultatVisning tekst="Etteroppgjøret viser at det blir tilbakekreving" />
       )}
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.ETTERBETALING && (
-        <ResultatVisning tekst="Etteroppgjøret viser at det blir etterbetaling" />
+        <EtteroppgjoerResultatVisning tekst="Etteroppgjøret viser at det blir etterbetaling" />
       )}
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER && (
-        <ResultatVisning tekst="Etteroppgjøret viser ingen endring" />
+        <EtteroppgjoerResultatVisning tekst="Etteroppgjøret viser ingen endring" />
       )}
     </Box>
   )

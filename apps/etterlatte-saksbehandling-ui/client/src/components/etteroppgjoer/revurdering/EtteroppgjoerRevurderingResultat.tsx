@@ -1,11 +1,11 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { Box, HStack, Label, VStack } from '@navikt/ds-react'
 import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
-import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { CurrencyExchangeIcon } from '@navikt/aksel-icons'
 
 const ResultatVisning = ({ tekst }: { tekst: string }) => (
   <HStack gap="2" maxWidth="fit-content">
-    <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
+    <CurrencyExchangeIcon fontSize="1.5rem" aria-hidden />
     <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
       <Label>{tekst}</Label>
     </VStack>

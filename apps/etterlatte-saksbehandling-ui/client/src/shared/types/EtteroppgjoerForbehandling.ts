@@ -26,6 +26,7 @@ export interface EtteroppgjoerBehandling {
   opprettet: string // Mottatt?
   brevId?: number
   kopiertFra?: string
+  harMottattNyInformasjon?: boolean
 }
 
 export enum EtteroppgjoerBehandlingStatus {

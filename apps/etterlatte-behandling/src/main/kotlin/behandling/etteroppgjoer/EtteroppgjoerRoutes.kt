@@ -106,7 +106,7 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(response)
             }
 
-            post("har_mottatt_ny_informasjon") {
+            post("har-mottatt-ny-informasjon") {
                 val request = call.receive<HarMottattNyInformasjonRequest>()
 
                 val response =

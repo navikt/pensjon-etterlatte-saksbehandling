@@ -17,10 +17,6 @@ export function EtteroppgjoerForbehandlingStegLenke({ path, description, enabled
   const match = useMatch('/etteroppgjoer/:etteroppgjoerId/:steg')
   const { etteroppgjoerId, steg } = match?.params || {}
 
-  if (!enabled) {
-    return <DisabledLabel>{description}</DisabledLabel>
-  }
-
   return (
     <>
       {!enabled ? (

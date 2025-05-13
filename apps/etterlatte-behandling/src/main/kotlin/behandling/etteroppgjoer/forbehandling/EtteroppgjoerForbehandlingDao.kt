@@ -223,7 +223,7 @@ class EtteroppgjoerForbehandlingDao(
             val statement =
                 prepareStatement(
                     """
-                    UPDATE etterlatte_behandling
+                    UPDATE etteroppgjoer_behandling
                     SET har_mottatt_ny_informasjon = ?
                     WHERE id = ?
                     """.trimIndent(),

@@ -16,6 +16,7 @@ import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
@@ -109,6 +110,11 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
               <Alert variant="error">{fastsettInntektSkjemaErSkittentFeilmelding}</Alert>
             </HStack>
           )}
+
+          {isFailureHandler({
+            apiResult: harMottattNyInformasjonResult,
+            errorMessage: 'Kunne ikke lagre om bruker har gitt ny informasjon',
+          })}
 
           <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
             <HStack width="100%" justify="center">

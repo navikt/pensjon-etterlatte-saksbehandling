@@ -16,6 +16,7 @@ import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { EtteroppgjoerRevurderingResultat } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingResultat'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 
@@ -128,6 +129,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           )}
 
           <ResultatAvForbehandling />
+
+          <EtteroppgjoerRevurderingResultat />
 
           {fastsettInntektSkjemaErSkittentFeilmelding && (
             <HStack width="100%" justify="center">

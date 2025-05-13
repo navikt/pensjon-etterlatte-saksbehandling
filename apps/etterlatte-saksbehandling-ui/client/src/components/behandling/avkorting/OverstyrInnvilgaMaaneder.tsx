@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Heading, HStack, Select, Textarea, TextField, VStack } from '@navikt/ds-react'
-import { useFormContext } from 'react-hook-form'
+import { UseFormRegister, UseFormStateReturn, UseFormWatch } from 'react-hook-form'
 import {
   hentLesbarTekstForInnvilgaMaanederType,
   IAvkortingGrunnlagLagre,
@@ -8,13 +8,13 @@ import {
   SystemOverstyrtInnvilgaMaanederAarsak,
 } from '~shared/types/IAvkorting'
 
-export default function OverstyrInnvilgaMaander() {
-  const {
-    register,
-    watch,
-    formState: { errors },
-  } = useFormContext<IAvkortingGrunnlagLagre>()
+interface Props {
+  register: UseFormRegister<IAvkortingGrunnlagLagre>
+  watch: UseFormWatch<IAvkortingGrunnlagLagre>
+  errors: UseFormStateReturn<IAvkortingGrunnlagLagre>['errors']
+}
 
+export default function OverstyrInnvilgaMaander({ register, watch, errors }: Props) {
   return (
     <HStack marginBlock="4" gap="1" align="start" wrap={false}>
       <VStack>

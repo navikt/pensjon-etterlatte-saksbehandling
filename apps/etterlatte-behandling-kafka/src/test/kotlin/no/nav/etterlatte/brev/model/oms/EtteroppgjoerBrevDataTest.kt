@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
+import java.time.Month
+import java.time.YearMonth
 
 class EtteroppgjoerBrevDataTest {
     @Test
@@ -22,6 +24,16 @@ class EtteroppgjoerBrevDataTest {
                 inntekt = Kroner(123),
                 faktiskInntekt = Kroner(123),
                 avviksBeloep = Kroner(123),
+                grunnlag =
+                    EtteroppgjoerBrevGrunnlag(
+                        fom = YearMonth.of(2024, Month.JANUARY),
+                        tom = YearMonth.of(2024, Month.DECEMBER),
+                        innvilgedeMaaneder = 12,
+                        loensinntekt = Kroner(4),
+                        naeringsinntekt = Kroner(40),
+                        afp = Kroner(400),
+                        utlandsinntekt = Kroner(4000),
+                    ),
             )
 
         val json = brevData.toJson()

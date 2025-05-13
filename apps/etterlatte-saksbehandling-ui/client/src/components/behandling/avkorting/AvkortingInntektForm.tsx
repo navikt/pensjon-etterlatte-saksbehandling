@@ -304,7 +304,7 @@ const InntektForm = ({
           </ReadMore>
         </VStack>
 
-        {skalOverstyreMaaneder && <OverstyrInnvilgaMaander />}
+        {skalOverstyreMaaneder && <OverstyrInnvilgaMaander register={register} watch={watch} errors={errors} />}
         <HStack gap="3" marginBlock="4">
           <Button size="medium" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
             Lagre
@@ -312,6 +312,7 @@ const InntektForm = ({
           <Button
             size="medium"
             variant="secondary"
+            type="button"
             onClick={toggleOverstyrtInnvilgaMaaneder}
             icon={skalOverstyreMaaneder ? <TrashIcon aria-hidden /> : <CogRotationIcon aria-hidden />}
           >

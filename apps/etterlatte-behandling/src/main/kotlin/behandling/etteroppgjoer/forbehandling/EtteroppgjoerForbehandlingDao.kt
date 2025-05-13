@@ -94,11 +94,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setLong(8, forbehandling.brevId)
                 statement.setObject(9, forbehandling.kopiertFra)
                 statement.setObject(10, forbehandling.sisteIverksatteBehandlingId)
-                if (forbehandling.harMottattNyInformasjon == null) {
-                    statement.setNull(11, Types.BOOLEAN)
-                } else {
-                    statement.setBoolean(11, forbehandling.harMottattNyInformasjon)
-                }
+                statement.setObject(11, forbehandling.harMottattNyInformasjon, Types.BOOLEAN)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {

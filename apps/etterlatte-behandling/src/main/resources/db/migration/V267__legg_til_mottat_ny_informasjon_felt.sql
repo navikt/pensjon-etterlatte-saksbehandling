@@ -1,0 +1,1 @@
+ALTER TABLE etteroppgjoer_behandling ADD COLUMN har_mottatt_ny_informasjon BOOLEAN;

@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.HarMottattNyInformasjonRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
@@ -102,6 +103,17 @@ fun Route.etteroppgjoerRoutes(
                     inTransaction {
                         forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
                     }
+                call.respond(response)
+            }
+
+            post("har-mottatt-ny-informasjon") {
+                val request = call.receive<HarMottattNyInformasjonRequest>()
+
+                val response =
+                    inTransaction {
+                        forbehandlingService.lagreHarMottattNyInformasjon(etteroppgjoerId, request.harMottattNyInformasjon)
+                    }
+
                 call.respond(response)
             }
         }

@@ -1,9 +1,9 @@
-import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling, lagreHarMottattNyInformasjon } from '~shared/api/etteroppgjoer'
 import React, { useContext, useEffect, useState } from 'react'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -17,6 +17,24 @@ import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { EtteroppgjoerRevurderingResultat } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingResultat'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+
+const skalKunneRedigereFastsattInntektDefaultValue = (
+  etteroppgjoerForbehandling: EtteroppgjoerForbehandling
+): 'JA' | 'NEI' | '' => {
+  if (etteroppgjoerForbehandling) {
+    if (etteroppgjoerForbehandling.behandling) {
+      if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === true) {
+        return 'JA'
+      } else if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === false) {
+        return 'NEI'
+      }
+    }
+  }
+
+  return ''
+}
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
@@ -26,27 +44,40 @@ interface EtteroppgjoerRevurderingOversiktSkjema {
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const etteroppgjoerId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
+
+  const etteroppgjoer = useEtteroppgjoer()
+
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
+  const [harMottattNyInformasjonResult, harMottattNyInformasjonRequest] = useApiCall(lagreHarMottattNyInformasjon)
+
   const { next } = useContext(BehandlingRouteContext)
 
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
 
-  const { control, handleSubmit, watch } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
-    defaultValues: { skalKunneRedigereFastsattInntekt: '' },
+  const { control, handleSubmit, watch, setValue } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+    defaultValues: {
+      skalKunneRedigereFastsattInntekt: skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer),
+    },
   })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
     if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
-      setFastsettInntektSkjemaErSkittentFeilmelding('')
-      next()
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
+        setFastsettInntektSkjemaErSkittentFeilmelding('')
+        next()
+      })
     } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
-      setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
+        setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+      })
       // Saksbehandler har trykket "Nei", da kan man gå videre
     } else {
-      setFastsettInntektSkjemaErSkittentFeilmelding('')
-      next()
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: false }, () => {
+        setFastsettInntektSkjemaErSkittentFeilmelding('')
+        next()
+      })
     }
   }
 
@@ -56,6 +87,10 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })
   }, [etteroppgjoerId])
+
+  useEffect(() => {
+    setValue('skalKunneRedigereFastsattInntekt', skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer))
+  }, [etteroppgjoer])
 
   return mapResult(etteroppgjoerResult, {
     pending: <Spinner label="Henter forbehandling" />,
@@ -70,7 +105,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
           </BodyShort>
           <Inntektsopplysninger />
-          {/* TODO: lagret resultatet her noen sted */}
+
           <ControlledRadioGruppe
             name="skalKunneRedigereFastsattInntekt"
             control={control}
@@ -103,12 +138,19 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             </HStack>
           )}
 
+          {isFailureHandler({
+            apiResult: harMottattNyInformasjonResult,
+            errorMessage: 'Kunne ikke lagre om bruker har gitt ny informasjon',
+          })}
+
           <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
             <HStack width="100%" justify="center">
-              <VStack gap="4">
-                <Button type="submit" variant="primary">
-                  Neste steg
-                </Button>
+              <VStack gap="4" align="center">
+                <div>
+                  <Button type="submit" variant="primary" loading={isPending(harMottattNyInformasjonResult)}>
+                    Neste steg
+                  </Button>
+                </div>
                 <AvbrytBehandling />
               </VStack>
             </HStack>

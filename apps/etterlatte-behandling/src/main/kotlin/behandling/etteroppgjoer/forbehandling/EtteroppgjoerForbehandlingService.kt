@@ -199,6 +199,11 @@ class EtteroppgjoerForbehandlingService(
         return beregnetEtteroppgjoerResultat
     }
 
+    fun lagreHarMottattNyInformasjon(
+        forbehandlingId: UUID,
+        harMottattNyInformasjon: Boolean,
+    ) = dao.oppdaterHarMottattNyInformasjon(forbehandlingId, harMottattNyInformasjon)
+
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
@@ -325,6 +330,10 @@ data class BeregnFaktiskInntektRequest(
     val naeringsinntekt: Int,
     val utlandsinntekt: Int,
     val spesifikasjon: String,
+)
+
+data class HarMottattNyInformasjonRequest(
+    val harMottattNyInformasjon: Boolean,
 )
 
 class FantIkkeForbehandling(

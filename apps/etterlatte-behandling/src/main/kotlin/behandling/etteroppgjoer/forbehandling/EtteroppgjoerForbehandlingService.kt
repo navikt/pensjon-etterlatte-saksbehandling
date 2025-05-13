@@ -195,6 +195,8 @@ class EtteroppgjoerForbehandlingService(
         val beregnetEtteroppgjoerResultat =
             runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(beregningRequest, brukerTokenInfo) }
 
+        behandlingService.settBeregnetForRevurderingTilForbehandling(forbehandling)
+
         dao.lagreForbehandling(forbehandling.tilBeregnet())
         return beregnetEtteroppgjoerResultat
     }

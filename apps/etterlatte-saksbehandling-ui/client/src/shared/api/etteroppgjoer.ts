@@ -37,7 +37,7 @@ export const lagreFaktiskInntekt = async (args: {
   forbehandlingId: string
   faktiskInntekt: FaktiskInntekt
 }): Promise<ApiResponse<BeregnetEtteroppgjoerResultatDto>> => {
-  return apiClient.post(`/etteroppgjoer/${args.forbehandlingId}/beregn_faktisk_inntekt`, {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/beregn-faktisk-inntekt`, {
     ...args.faktiskInntekt,
   })
 }
@@ -54,5 +54,5 @@ export const lagreHarMottattNyInformasjon = async (args: {
 export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
   forbehandlingId: string
 }): Promise<ApiResponse<any>> => {
-  return apiClient.post(`etteroppgjoer/${args.forbehandlingId}/ferdigstill-forbehandling`, {})
+  return apiClient.post(`etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill`, {})
 }

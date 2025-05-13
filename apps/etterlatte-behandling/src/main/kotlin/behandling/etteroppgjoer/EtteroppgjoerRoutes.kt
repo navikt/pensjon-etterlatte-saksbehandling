@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
-import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -97,7 +96,7 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("beregn_faktisk_inntekt") {
+            post("beregn-faktisk-inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
                 val response =
                     inTransaction {
@@ -106,12 +105,32 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(response)
             }
 
+            post("ferdigstill") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    runBlocking {
+                        forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
+                            behandlingId,
+                            brukerTokenInfo,
+                        )
+                        inTransaction {
+                            forbehandlingService.ferdigstillForbehandling(behandlingId, brukerTokenInfo)
+                        }
+                    }
+
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
             post("har-mottatt-ny-informasjon") {
                 val request = call.receive<HarMottattNyInformasjonRequest>()
 
                 val response =
                     inTransaction {
-                        forbehandlingService.lagreHarMottattNyInformasjon(etteroppgjoerId, request.harMottattNyInformasjon)
+                        forbehandlingService.lagreHarMottattNyInformasjon(
+                            etteroppgjoerId,
+                            request.harMottattNyInformasjon,
+                        )
                     }
 
                 call.respond(response)
@@ -172,23 +191,6 @@ fun Route.etteroppgjoerRoutes(
                     }
 
                 etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar)
-            }
-        }
-
-        post("/{$BEHANDLINGID_CALL_PARAMETER}/ferdigstill-forbehandling") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            kunSkrivetilgang {
-                runBlocking {
-                    forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
-                        behandlingId,
-                        brukerTokenInfo,
-                    )
-                    inTransaction {
-                        forbehandlingService.ferdigstillForbehandling(behandlingId, brukerTokenInfo)
-                    }
-                }
-
-                call.respond(HttpStatusCode.OK)
             }
         }
     }

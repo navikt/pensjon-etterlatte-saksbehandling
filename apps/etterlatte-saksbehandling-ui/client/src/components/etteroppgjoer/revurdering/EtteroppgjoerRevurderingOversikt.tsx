@@ -1,9 +1,9 @@
 import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling, lagreHarMottattNyInformasjon } from '~shared/api/etteroppgjoer'
 import React, { useContext, useEffect, useState } from 'react'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -25,27 +25,37 @@ interface EtteroppgjoerRevurderingOversiktSkjema {
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const etteroppgjoerId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
+
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
+  const [harMottattNyInformasjonResult, harMottattNyInformasjonRequest] = useApiCall(lagreHarMottattNyInformasjon)
+
   const { next } = useContext(BehandlingRouteContext)
 
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
 
+  // TODO: utlede default value her
   const { control, handleSubmit, watch } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
     defaultValues: { skalKunneRedigereFastsattInntekt: '' },
   })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
     if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
-      setFastsettInntektSkjemaErSkittentFeilmelding('')
-      next()
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
+        setFastsettInntektSkjemaErSkittentFeilmelding('')
+        next()
+      })
     } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
-      setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
+        setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+      })
       // Saksbehandler har trykket "Nei", da kan man gå videre
     } else {
-      setFastsettInntektSkjemaErSkittentFeilmelding('')
-      next()
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: false }, () => {
+        setFastsettInntektSkjemaErSkittentFeilmelding('')
+        next()
+      })
     }
   }
 
@@ -102,10 +112,12 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
           <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
             <HStack width="100%" justify="center">
-              <VStack gap="4">
-                <Button type="submit" variant="primary">
-                  Neste steg
-                </Button>
+              <VStack gap="4" align="center">
+                <div>
+                  <Button type="submit" variant="primary" loading={isPending(harMottattNyInformasjonResult)}>
+                    Neste steg
+                  </Button>
+                </div>
                 <AvbrytBehandling />
               </VStack>
             </HStack>

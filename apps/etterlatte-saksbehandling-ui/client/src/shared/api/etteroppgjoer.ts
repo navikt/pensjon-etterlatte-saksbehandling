@@ -42,6 +42,15 @@ export const lagreFaktiskInntekt = async (args: {
   })
 }
 
+export const lagreHarMottattNyInformasjon = async (args: {
+  forbehandlingId: string
+  harMottattNyInformasjon: boolean
+}) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/har_mottatt_ny_informasjon`, {
+    harMottattNyInformasjon: args.harMottattNyInformasjon,
+  })
+}
+
 export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
   forbehandlingId: string
 }): Promise<ApiResponse<any>> => {

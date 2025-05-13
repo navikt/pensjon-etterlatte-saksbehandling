@@ -61,7 +61,7 @@ data class TilbakekrevingBrevDTO(
                                 }
                             },
                         helTilbakekreving =
-                            tilbakekreving.perioder.any {
+                            tilbakekreving.perioder.all {
                                 it.tilbakekrevingsbeloep.kunYtelse().any { beloep ->
                                     beloep.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
                                 }

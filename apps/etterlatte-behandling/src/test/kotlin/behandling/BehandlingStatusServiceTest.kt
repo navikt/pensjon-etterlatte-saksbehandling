@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -74,6 +75,7 @@ internal class BehandlingStatusServiceTest {
     private val saksbehandlerService: SaksbehandlerService = mockk()
     private val etteroppgjoerService: EtteroppgjoerService = mockk()
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService = mockk()
+    private val grunnlagService: GrunnlagService = mockk()
 
     private val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
@@ -89,6 +91,7 @@ internal class BehandlingStatusServiceTest {
             saksbehandlerService,
             etteroppgjoerService,
             etteroppgjoerForbehandlingService,
+            grunnlagService,
         )
 
     @BeforeEach

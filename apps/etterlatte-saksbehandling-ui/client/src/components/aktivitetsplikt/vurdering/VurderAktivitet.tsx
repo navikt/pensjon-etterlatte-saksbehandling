@@ -17,9 +17,14 @@ import { AktivitetspliktOppgaveVurderingType } from '~shared/types/Aktivitetspli
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
   const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
+  const [avdoedesDoedsdato, setAvdoedesDoedsdato] = useState<Date | undefined>()
 
   useEffect(() => {
-    familieOpplysningerFetch({ ident: sak.ident, sakType: sak.sakType })
+    familieOpplysningerFetch({ ident: sak.ident, sakType: sak.sakType }, ({ avdoede }) => {
+      if (avdoede) {
+        setAvdoedesDoedsdato(velgDoedsdato(avdoede))
+      }
+    })
   }, [])
 
   return (
@@ -29,15 +34,15 @@ export function VurderAktivitet() {
         <VStack gap="4">
           {mapResult(familieOpplysningerResult, {
             pending: <Spinner label="Henter opplysninger om avdød" />,
-            error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger om avdød'}</ApiErrorAlert>,
-            success: ({ avdoede }) =>
-              avdoede && (
-                <>
-                  <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sak.id} />
-                  <Vurderinger doedsdato={velgDoedsdato(avdoede)} />
-                </>
-              ),
+            error: (error) => (
+              <ApiErrorAlert>
+                Kunne ikke hente avdødes dødsdato. Kan derfor ikke vise tidslinje for aktivitet. Feil: {error.detail}
+              </ApiErrorAlert>
+            ),
           })}
+
+          {avdoedesDoedsdato && <AktivitetspliktTidslinje doedsdato={avdoedesDoedsdato} sakId={sak.id} />}
+          <Vurderinger doedsdato={avdoedesDoedsdato} />
         </VStack>
       </Box>
       <NesteKnapp />

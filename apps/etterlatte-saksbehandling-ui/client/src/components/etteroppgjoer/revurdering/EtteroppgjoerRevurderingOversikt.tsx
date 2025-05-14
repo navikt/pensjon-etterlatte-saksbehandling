@@ -38,7 +38,6 @@ const skalKunneRedigereFastsattInntektDefaultValue = (
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
-  fastsettInntektSkjemaErSkittent: boolean
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
@@ -52,6 +51,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const { next } = useContext(BehandlingRouteContext)
 
+  const [erRedigerbar, setErRedigerbar] = useState<boolean>(true)
+  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
@@ -92,6 +93,22 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     setValue('skalKunneRedigereFastsattInntekt', skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer))
   }, [etteroppgjoer])
 
+  useEffect(() => {
+    if (fastsettInntektSkjemaErSkittent) {
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true })
+    }
+  }, [fastsettInntektSkjemaErSkittent])
+
+  useEffect(() => {
+    if (watch('skalKunneRedigereFastsattInntekt') === 'JA') {
+      setErRedigerbar(true)
+      setFaktiskInntektSkjemaErAapen(true)
+    } else {
+      setErRedigerbar(false)
+      setFaktiskInntektSkjemaErAapen(false)
+    }
+  }, [watch('skalKunneRedigereFastsattInntekt')])
+
   return mapResult(etteroppgjoerResult, {
     pending: <Spinner label="Henter forbehandling" />,
     error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandling for etteroppgjør: {error.detail}</ApiErrorAlert>,
@@ -121,11 +138,17 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
           {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? (
             <FastsettFaktiskInntekt
-              erRedigerbar
+              erRedigerbar={erRedigerbar}
+              faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
+              setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
               setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
             />
           ) : (
-            <FastsettFaktiskInntekt erRedigerbar={false} />
+            <FastsettFaktiskInntekt
+              erRedigerbar={erRedigerbar}
+              faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
+              setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+            />
           )}
 
           <ResultatAvForbehandling />

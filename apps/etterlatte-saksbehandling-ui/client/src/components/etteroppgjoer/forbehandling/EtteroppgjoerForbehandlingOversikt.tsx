@@ -30,6 +30,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
         <b>Skatteoppgjør mottatt:</b> {formaterDato(behandling.opprettet)}
       </BodyShort>
       <Inntektsopplysninger />
+
       <FastsettFaktiskInntekt erRedigerbar={erRedigerbar} />
 
       {!!beregnetEtteroppgjoerResultat && (

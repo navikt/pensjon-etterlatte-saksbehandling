@@ -1,20 +1,24 @@
 import { BodyShort, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
-import { useState } from 'react'
 import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
 
 interface Props {
   erRedigerbar: boolean
+  faktiskInntektSkjemaErAapen: boolean
+  setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
   setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaErSkittent }: Props) => {
-  const { behandling, faktiskInntekt } = useEtteroppgjoer()
-
-  const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(erRedigerbar && !faktiskInntekt)
+export const FastsettFaktiskInntekt = ({
+  erRedigerbar,
+  faktiskInntektSkjemaErAapen,
+  setFaktiskInntektSkjemaErAapen,
+  setFastsettInntektSkjemaErSkittent,
+}: Props) => {
+  const { behandling } = useEtteroppgjoer()
 
   return (
     <VStack gap="4">
@@ -28,9 +32,9 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaE
         </Tag>
       </div>
 
-      {redigerFaktiskInntekt && erRedigerbar ? (
+      {faktiskInntektSkjemaErAapen && erRedigerbar ? (
         <FaktiskInntektSkjema
-          setRedigerFaktiskInntekt={setRedigerFaktiskInntekt}
+          setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
           setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
         />
       ) : (
@@ -42,7 +46,7 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaE
                 size="small"
                 variant="secondary"
                 icon={<PencilIcon aria-hidden />}
-                onClick={() => setRedigerFaktiskInntekt(true)}
+                onClick={() => setFaktiskInntektSkjemaErAapen(true)}
               >
                 Rediger
               </Button>

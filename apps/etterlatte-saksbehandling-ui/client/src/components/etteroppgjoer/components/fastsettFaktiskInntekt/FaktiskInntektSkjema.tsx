@@ -35,11 +35,11 @@ interface FastsettFaktiskInntektSkjema {
 }
 
 interface Props {
-  setRedigerFaktiskInntekt: (redigerFaktiskInntekt: boolean) => void
+  setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
   setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInntektSkjemaErSkittent }: Props) => {
+export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastsettInntektSkjemaErSkittent }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
 
@@ -78,12 +78,12 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
         dispatch(addResultatEtteroppgjoer(resultat))
         hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
           dispatch(addEtteroppgjoer(etteroppgjoer))
-          setRedigerFaktiskInntekt(false)
+          setFaktiskInntektSkjemaErAapen(false)
         })
       })
     } else {
       if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(false)
-      setRedigerFaktiskInntekt(false)
+      setFaktiskInntektSkjemaErAapen(false)
     }
   }
 
@@ -139,7 +139,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
               variant="secondary"
               size="small"
               disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
-              onClick={() => setRedigerFaktiskInntekt(false)}
+              onClick={() => setFaktiskInntektSkjemaErAapen(false)}
             >
               Avbryt
             </Button>

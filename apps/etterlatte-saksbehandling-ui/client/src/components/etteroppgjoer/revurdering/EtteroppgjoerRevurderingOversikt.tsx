@@ -26,50 +26,51 @@ import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehand
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
-const harMottattNyInformasjonDefaultValue = (
+const etteroppgjoerRevurderingOversiktSkjemaDefaultValues = (
   etteroppgjoerForbehandling: EtteroppgjoerForbehandling
-): 'JA' | 'NEI' | '' => {
+): EtteroppgjoerRevurderingOversiktSkjema => {
+  let etteroppgjoerRevurderingOversiktSkjemaValues: EtteroppgjoerRevurderingOversiktSkjema = {
+    harMottattNyInformasjon: '',
+    endringErTilUgunstForBruker: '',
+    beskrivelseAvUgunst: '',
+  }
+
   if (etteroppgjoerForbehandling) {
     if (etteroppgjoerForbehandling.behandling) {
       if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === true) {
-        return 'JA'
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          harMottattNyInformasjon: 'JA',
+        }
       } else if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === false) {
-        return 'NEI'
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          harMottattNyInformasjon: 'NEI',
+        }
       }
-    }
-  }
 
-  return ''
-}
-
-const endringErTilUgunstForBrukerDefaultValue = (
-  etteroppgjoerForbehandling: EtteroppgjoerForbehandling
-): 'JA' | 'NEI' | '' => {
-  if (etteroppgjoerForbehandling) {
-    if (etteroppgjoerForbehandling.behandling) {
       if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === true) {
-        return 'JA'
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          endringErTilUgunstForBruker: 'JA',
+        }
       } else if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === false) {
-        return 'NEI'
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          endringErTilUgunstForBruker: 'NEI',
+        }
       }
-    }
-  }
 
-  return ''
-}
-
-const beskrivelseAvUgunstDefaultValue = (etteroppgjoerForbehandling: EtteroppgjoerForbehandling): string => {
-  if (etteroppgjoerForbehandling) {
-    if (etteroppgjoerForbehandling.behandling) {
       if (!!etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst) {
-        return etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst
-      } else {
-        return ''
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          beskrivelseAvUgunst: etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst,
+        }
       }
     }
   }
 
-  return ''
+  return etteroppgjoerRevurderingOversiktSkjemaValues
 }
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
@@ -107,6 +108,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
 
+  // TODO: bytte om til form context, dette begynner å bli riiiimelig messy
   const {
     control,
     register,
@@ -116,11 +118,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     getValues,
     formState: { errors },
   } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
-    defaultValues: {
-      harMottattNyInformasjon: harMottattNyInformasjonDefaultValue(etteroppgjoer),
-      endringErTilUgunstForBruker: endringErTilUgunstForBrukerDefaultValue(etteroppgjoer),
-      beskrivelseAvUgunst: beskrivelseAvUgunstDefaultValue(etteroppgjoer),
-    },
+    defaultValues: etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer),
   })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
@@ -168,9 +166,18 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   }, [etteroppgjoerForbehandlingId])
 
   useEffect(() => {
-    setValue('harMottattNyInformasjon', harMottattNyInformasjonDefaultValue(etteroppgjoer))
-    setValue('endringErTilUgunstForBruker', endringErTilUgunstForBrukerDefaultValue(etteroppgjoer))
-    setValue('beskrivelseAvUgunst', beskrivelseAvUgunstDefaultValue(etteroppgjoer))
+    setValue(
+      'harMottattNyInformasjon',
+      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).harMottattNyInformasjon
+    )
+    setValue(
+      'endringErTilUgunstForBruker',
+      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).endringErTilUgunstForBruker
+    )
+    setValue(
+      'beskrivelseAvUgunst',
+      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).beskrivelseAvUgunst
+    )
   }, [etteroppgjoer])
 
   useEffect(() => {

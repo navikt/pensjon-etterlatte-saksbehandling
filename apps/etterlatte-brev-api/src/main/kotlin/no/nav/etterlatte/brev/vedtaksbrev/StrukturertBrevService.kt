@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.vedtaksbrev
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
+import no.nav.etterlatte.brev.BrevDataRedigerbarNy
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevtype
@@ -64,16 +65,15 @@ class StrukturertBrevService(
         }
 
         val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest
-
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
-
         val brevKode = brevRequest.brevFastInnholdData.brevKode
+        val brevRedigerbarInnhold = utledBrevRedigerbartInnholdData(brevRequest)
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
                 BrevbakerRequest.fra(
                     brevKode = brevKode.redigering,
-                    brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
+                    brevData = brevRedigerbarInnhold ?: ManueltBrevData(),
                     avsender = avsender,
                     soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
                     sakId = sak.id,
@@ -265,6 +265,16 @@ class StrukturertBrevService(
             brevinnhold.payload ?: db.hentBrevPayload(brevId),
             emptyList(),
         )
+    }
+
+    private fun utledBrevRedigerbartInnholdData(brevRequest: BrevRequest): BrevDataRedigerbarNy? {
+        if (brevRequest.brevRedigerbarInnholdData != null) {
+            return BrevDataRedigerbarNy(
+                data = brevRequest.brevRedigerbarInnholdData,
+            )
+        } else {
+            return null
+        }
     }
 
     private fun utledBrevInnholdData(

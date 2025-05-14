@@ -1,7 +1,11 @@
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling, lagreHarMottattNyInformasjon } from '~shared/api/etteroppgjoer'
+import {
+  hentEtteroppgjoerForbehandling,
+  lagreEndringErTilUgunstForBruker,
+  lagreHarMottattNyInformasjon,
+} from '~shared/api/etteroppgjoer'
 import React, { useContext, useEffect, useState } from 'react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -38,8 +42,39 @@ const harMottattNyInformasjonDefaultValue = (
   return ''
 }
 
+const endringErTilUgunstForBrukerDefaultValue = (
+  etteroppgjoerForbehandling: EtteroppgjoerForbehandling
+): 'JA' | 'NEI' | '' => {
+  if (etteroppgjoerForbehandling) {
+    if (etteroppgjoerForbehandling.behandling) {
+      if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === true) {
+        return 'JA'
+      } else if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === false) {
+        return 'NEI'
+      }
+    }
+  }
+
+  return ''
+}
+
+const beskrivelseAvUgunstDefaultValue = (etteroppgjoerForbehandling: EtteroppgjoerForbehandling): string => {
+  if (etteroppgjoerForbehandling) {
+    if (etteroppgjoerForbehandling.behandling) {
+      if (!!etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst) {
+        return etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst
+      } else {
+        return ''
+      }
+    }
+  }
+
+  return ''
+}
+
 interface EtteroppgjoerRevurderingOversiktSkjema {
   harMottattNyInformasjon: 'JA' | 'NEI' | ''
+  // TODO: disse 2 feltene skal kun vises hvis svarfristen har gått ut på varselbrev etter forbehandling
   endringErTilUgunstForBruker: 'JA' | 'NEI' | ''
   beskrivelseAvUgunst: string
 }
@@ -61,6 +96,9 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
   const [harMottattNyInformasjonResult, harMottattNyInformasjonRequest] = useApiCall(lagreHarMottattNyInformasjon)
+  const [endringErTilUgunstForBrukerResult, endringErTilUgunstForBrukerRequest] = useApiCall(
+    lagreEndringErTilUgunstForBruker
+  )
 
   const { next } = useContext(BehandlingRouteContext)
 
@@ -79,8 +117,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
     defaultValues: {
       harMottattNyInformasjon: harMottattNyInformasjonDefaultValue(etteroppgjoer),
-      endringErTilUgunstForBruker: '',
-      beskrivelseAvUgunst: '',
+      endringErTilUgunstForBruker: endringErTilUgunstForBrukerDefaultValue(etteroppgjoer),
+      beskrivelseAvUgunst: beskrivelseAvUgunstDefaultValue(etteroppgjoer),
     },
   })
 
@@ -89,8 +127,18 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       harMottattNyInformasjonRequest(
         { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
         () => {
-          setFastsettInntektSkjemaErSkittentFeilmelding('')
-          next()
+          // TOOD: fikse at disse bruker skikkelig data
+          endringErTilUgunstForBrukerRequest(
+            {
+              forbehandlingId: etteroppgjoerForbehandlingId!,
+              endringErTilUgunstForBruker: data.endringErTilUgunstForBruker === 'JA',
+              beskrivelseAvUgunst: data.beskrivelseAvUgunst,
+            },
+            () => {
+              setFastsettInntektSkjemaErSkittentFeilmelding('')
+              next()
+            }
+          )
         }
       )
     } else if (data.harMottattNyInformasjon === 'JA' && !fastsettInntektSkjemaErSkittent) {
@@ -121,6 +169,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   useEffect(() => {
     setValue('harMottattNyInformasjon', harMottattNyInformasjonDefaultValue(etteroppgjoer))
+    setValue('endringErTilUgunstForBruker', endringErTilUgunstForBrukerDefaultValue(etteroppgjoer))
+    setValue('beskrivelseAvUgunst', beskrivelseAvUgunstDefaultValue(etteroppgjoer))
   }, [etteroppgjoer])
 
   useEffect(() => {
@@ -172,18 +222,20 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
                   </>
                 }
               />
-              <Box maxWidth="30rem">
-                <Textarea
-                  {...register('beskrivelseAvUgunst', {
-                    required: {
-                      value: true,
-                      message: 'Du må beskrive hvorfor endringen kommer til ugunst',
-                    },
-                  })}
-                  label="Beskrivelse av ugunst"
-                  error={errors.beskrivelseAvUgunst?.message}
-                />
-              </Box>
+              {watch('endringErTilUgunstForBruker') === 'JA' && (
+                <Box maxWidth="30rem">
+                  <Textarea
+                    {...register('beskrivelseAvUgunst', {
+                      required: {
+                        value: true,
+                        message: 'Du må beskrive hvorfor endringen kommer til ugunst',
+                      },
+                    })}
+                    label="Beskriv hvorfor det er til ugunst"
+                    error={errors.beskrivelseAvUgunst?.message}
+                  />
+                </Box>
+              )}
 
               <FastsettFaktiskInntekt
                 erRedigerbar={erRedigerbar}
@@ -215,11 +267,20 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             errorMessage: 'Kunne ikke lagre om bruker har gitt ny informasjon',
           })}
 
+          {isFailureHandler({
+            apiResult: endringErTilUgunstForBrukerResult,
+            errorMessage: 'Kunne ikke lagre om endring er til ugunst for bruker',
+          })}
+
           <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
             <HStack width="100%" justify="center">
               <VStack gap="4" align="center">
                 <div>
-                  <Button type="submit" variant="primary" loading={isPending(harMottattNyInformasjonResult)}>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    loading={isPending(harMottattNyInformasjonResult) || isPending(endringErTilUgunstForBrukerResult)}
+                  >
                     Neste steg
                   </Button>
                 </div>

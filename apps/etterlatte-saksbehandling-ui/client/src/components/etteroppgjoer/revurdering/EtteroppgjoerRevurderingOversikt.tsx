@@ -155,7 +155,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             />
           ) : (
             <FastsettFaktiskInntekt
-              erRedigerbar={erRedigerbar}
+              erRedigerbar={false}
               faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
               setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
             />

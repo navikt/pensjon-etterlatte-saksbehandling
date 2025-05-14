@@ -69,7 +69,14 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
 
-  const { control, register, handleSubmit, watch, setValue } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+  const {
+    control,
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
     defaultValues: {
       harMottattNyInformasjon: harMottattNyInformasjonDefaultValue(etteroppgjoer),
       endringErTilUgunstForBruker: '',
@@ -140,14 +147,14 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             name="harMottattNyInformasjon"
             control={control}
             legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
+            errorVedTomInput="Du må ta stilling til om bruker gitt ny informasjon"
+            readOnly={!erRedigerbar}
             radios={
               <>
                 <Radio value="JA">Ja</Radio>
                 <Radio value="NEI">Nei</Radio>
               </>
             }
-            errorVedTomInput="Du må ta stilling til om bruker gitt ny informasjon"
-            readOnly={!erRedigerbar}
           />
 
           {watch('harMottattNyInformasjon') === 'JA' ? (
@@ -156,25 +163,27 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
                 name="endringErTilUgunstForBruker"
                 control={control}
                 legend="Er endringen til ugunst for bruker?"
+                errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
+                readOnly={!erRedigerbar}
                 radios={
                   <>
                     <Radio value="JA">Ja</Radio>
                     <Radio value="NEI">Nei</Radio>
                   </>
                 }
-                errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
-                readOnly={!erRedigerbar}
               />
-
-              <Textarea
-                {...register('beskrivelseAvUgunst', {
-                  required: {
-                    value: true,
-                    message: 'Du må beskrive hvorfor endringen kommer til ugunst',
-                  },
-                })}
-                label="Beskrivelse av ugunst"
-              />
+              <Box maxWidth="30rem">
+                <Textarea
+                  {...register('beskrivelseAvUgunst', {
+                    required: {
+                      value: true,
+                      message: 'Du må beskrive hvorfor endringen kommer til ugunst',
+                    },
+                  })}
+                  label="Beskrivelse av ugunst"
+                  error={errors.beskrivelseAvUgunst?.message}
+                />
+              </Box>
 
               <FastsettFaktiskInntekt
                 erRedigerbar={erRedigerbar}

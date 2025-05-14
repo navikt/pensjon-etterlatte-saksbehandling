@@ -179,7 +179,7 @@ internal class BeregnTrygdetidTest {
                 Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 3, 4), true, false, Period.of(0, 2, 4)),
                 Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 3, 4), false, false, Period.of(0, 2, 4)),
                 // Justering poeng ut år gjør ingen forskjell hvis vi slutter perioden 31. desember
-                Arguments.of(LocalDate.of(2020, 6, 1), LocalDate.of(2020, 12, 31), false, false, Period.of(0, 7, 0)),
+                Arguments.of(LocalDate.of(2020, 6, 1), LocalDate.of(2020, 12, 31), false, true, Period.of(0, 7, 0)),
                 Arguments.of(LocalDate.of(2020, 6, 1), LocalDate.of(2020, 12, 31), false, false, Period.of(0, 7, 0)),
                 // Helt år har ingen ting å si hva du krysser av inn/ut
                 Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), false, false, Period.ofYears(1)),

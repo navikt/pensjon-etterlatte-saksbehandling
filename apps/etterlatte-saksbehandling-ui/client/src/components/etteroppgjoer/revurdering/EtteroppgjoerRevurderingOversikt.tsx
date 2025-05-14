@@ -102,10 +102,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   useEffect(() => {
     if (watch('skalKunneRedigereFastsattInntekt') === 'JA') {
       setErRedigerbar(true)
-      setFaktiskInntektSkjemaErAapen(true)
     } else {
       setErRedigerbar(false)
-      setFaktiskInntektSkjemaErAapen(false)
     }
   }, [watch('skalKunneRedigereFastsattInntekt')])
 

@@ -19,6 +19,8 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { EtteroppgjoerRevurderingResultat } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingResultat'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const skalKunneRedigereFastsattInntektDefaultValue = (
   etteroppgjoerForbehandling: EtteroppgjoerForbehandling
@@ -41,7 +43,16 @@ interface EtteroppgjoerRevurderingOversiktSkjema {
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
+  const erRedigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
+
   const etteroppgjoerForbehandlingId = behandling.relatertBehandlingId
+
   const dispatch = useAppDispatch()
 
   const etteroppgjoer = useEtteroppgjoer()
@@ -51,7 +62,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const { next } = useContext(BehandlingRouteContext)
 
-  const [erRedigerbar, setErRedigerbar] = useState<boolean>(true)
   const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
@@ -108,14 +118,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     }
   }, [fastsettInntektSkjemaErSkittent])
 
-  useEffect(() => {
-    if (watch('skalKunneRedigereFastsattInntekt') === 'JA') {
-      setErRedigerbar(true)
-    } else {
-      setErRedigerbar(false)
-    }
-  }, [watch('skalKunneRedigereFastsattInntekt')])
-
   return mapResult(etteroppgjoerResult, {
     pending: <Spinner label="Henter forbehandling" />,
     error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandling for etteroppgjør: {error.detail}</ApiErrorAlert>,
@@ -141,6 +143,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
               </>
             }
             errorVedTomInput="Du må ta stilling til om bruker gitt ny informasjon"
+            readOnly={!erRedigerbar}
           />
 
           {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? (

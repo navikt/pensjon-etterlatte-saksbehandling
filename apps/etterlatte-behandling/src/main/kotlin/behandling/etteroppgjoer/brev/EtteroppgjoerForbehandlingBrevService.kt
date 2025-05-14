@@ -139,7 +139,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 brukerTokenInfo,
             )
 
-        val sisteIverksatteBehandling = behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
+        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(detaljertForbehandling.behandling.sak.id)
         krevIkkeNull(sisteIverksatteBehandling) {
             "Fant ikke siste iverksatte behandling og kan ikke utlede brevdata"
         }

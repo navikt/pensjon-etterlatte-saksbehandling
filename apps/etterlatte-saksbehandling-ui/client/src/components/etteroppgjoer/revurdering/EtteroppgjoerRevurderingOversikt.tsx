@@ -41,7 +41,7 @@ interface EtteroppgjoerRevurderingOversiktSkjema {
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
-  const etteroppgjoerId = behandling.relatertBehandlingId
+  const etteroppgjoerForbehandlingId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
 
   const etteroppgjoer = useEtteroppgjoer()
@@ -65,29 +65,38 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
     if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
-        setFastsettInntektSkjemaErSkittentFeilmelding('')
-        next()
-      })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
+        () => {
+          setFastsettInntektSkjemaErSkittentFeilmelding('')
+          next()
+        }
+      )
     } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
-        setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
-      })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
+        () => {
+          setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+        }
+      )
       // Saksbehandler har trykket "Nei", da kan man gå videre
     } else {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: false }, () => {
-        setFastsettInntektSkjemaErSkittentFeilmelding('')
-        next()
-      })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: false },
+        () => {
+          setFastsettInntektSkjemaErSkittentFeilmelding('')
+          next()
+        }
+      )
     }
   }
 
   useEffect(() => {
-    if (!etteroppgjoerId) return
-    hentEtteroppgjoerRequest(etteroppgjoerId, (etteroppgjoer) => {
+    if (!etteroppgjoerForbehandlingId) return
+    hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })
-  }, [etteroppgjoerId])
+  }, [etteroppgjoerForbehandlingId])
 
   useEffect(() => {
     setValue('skalKunneRedigereFastsattInntekt', skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer))
@@ -95,7 +104,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   useEffect(() => {
     if (fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true })
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true })
     }
   }, [fastsettInntektSkjemaErSkittent])
 

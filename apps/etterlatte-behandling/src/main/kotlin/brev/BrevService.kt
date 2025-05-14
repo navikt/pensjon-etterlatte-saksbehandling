@@ -53,7 +53,7 @@ class BrevService(
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.opprettEtteroppgjoerBrev(behandlingId, sakId, bruker)
+                etteroppgjoerForbehandlingBrevService.opprettEtteroppgjoerBrev(behandlingId, bruker)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -113,7 +113,7 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, true)
+                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, bruker, true)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -202,8 +202,7 @@ class BrevService(
             BehandlingMedBrevType.ETTEROPPGJOER ->
                 etteroppgjoerForbehandlingBrevService.tilbakestillEtteroppgjoerBrev(
                     brevId = brevID,
-                    behandlingId = behandlingId,
-                    sakId = sakId,
+                    forbehandlingId = behandlingId,
                     brukerTokenInfo = bruker,
                 )
 

@@ -9,12 +9,13 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class EtteroppgjoerBrevRequestData(
     val redigerbar: BrevRedigerbarInnholdData,
     val innhold: BrevFastInnholdData,
-    val data: DetaljertForbehandlingDto,
+    val sak: Sak,
 )
 
 object EtteroppgjoerBrevDataMapper {
@@ -36,7 +37,13 @@ object EtteroppgjoerBrevDataMapper {
         return EtteroppgjoerBrevRequestData(
             redigerbar =
                 EtteroppgjoerBrevData.ForhaandsvarselInnhold(
-                    sak = data.behandling.sak,
+                    bosattUtland = bosattUtland,
+                    norskInntekt = norskInntekt,
+                    etteroppgjoersAar = data.behandling.aar,
+                    rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
+                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                    sak = sisteIverksatteBehandling.sak,
                 ),
             innhold =
                 EtteroppgjoerBrevData.Forhaandsvarsel(
@@ -53,13 +60,13 @@ object EtteroppgjoerBrevDataMapper {
                             fom = grunnlag.fom,
                             tom = grunnlag.tom!!,
                             innvilgedeMaaneder = grunnlag.innvilgaMaaneder,
-                            loensinntekt = Kroner(grunnlag.loennsinntekt),
+                            loennsinntekt = Kroner(grunnlag.loennsinntekt),
                             naeringsinntekt = Kroner(grunnlag.naeringsinntekt),
                             afp = Kroner(grunnlag.afp),
                             utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
                         ),
                 ),
-            data = data,
+            sak = sisteIverksatteBehandling.sak,
         )
     }
 }

@@ -26,6 +26,12 @@ object EtteroppgjoerBrevData {
 
     data class ForhaandsvarselInnhold(
         val sak: Sak,
+        val bosattUtland: Boolean,
+        val norskInntekt: Boolean,
+        val etteroppgjoersAar: Int,
+        val resultatType: EtteroppgjoerResultatType,
+        val rettsgebyrBeloep: Kroner,
+        val avviksBeloep: Kroner,
     ) : BrevRedigerbarInnholdData() {
         override val type: String = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR"
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_FORHAANDSVARSEL
@@ -48,7 +54,7 @@ data class EtteroppgjoerBrevGrunnlag(
     val fom: YearMonth,
     val tom: YearMonth,
     val innvilgedeMaaneder: Int,
-    val loensinntekt: Kroner,
+    val loennsinntekt: Kroner,
     val naeringsinntekt: Kroner,
     val afp: Kroner,
     val utlandsinntekt: Kroner,

@@ -29,7 +29,7 @@ class EtteroppgjoerBrevDataTest {
                         fom = YearMonth.of(2024, Month.JANUARY),
                         tom = YearMonth.of(2024, Month.DECEMBER),
                         innvilgedeMaaneder = 12,
-                        loensinntekt = Kroner(4),
+                        loennsinntekt = Kroner(4),
                         naeringsinntekt = Kroner(40),
                         afp = Kroner(400),
                         utlandsinntekt = Kroner(4000),

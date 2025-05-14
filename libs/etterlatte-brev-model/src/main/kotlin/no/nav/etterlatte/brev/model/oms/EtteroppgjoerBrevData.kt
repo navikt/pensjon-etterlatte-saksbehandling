@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
 
@@ -24,6 +25,7 @@ object EtteroppgjoerBrevData {
     }
 
     data class ForhaandsvarselInnhold(
+        val sak: Sak,
         val bosattUtland: Boolean,
         val norskInntekt: Boolean,
         val etteroppgjoersAar: Int,

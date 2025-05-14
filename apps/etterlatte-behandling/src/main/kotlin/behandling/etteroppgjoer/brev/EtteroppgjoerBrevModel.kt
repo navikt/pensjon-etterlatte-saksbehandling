@@ -43,6 +43,7 @@ object EtteroppgjoerBrevDataMapper {
                     rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
                     avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                    sak = sisteIverksatteBehandling.sak,
                 ),
             innhold =
                 EtteroppgjoerBrevData.Forhaandsvarsel(

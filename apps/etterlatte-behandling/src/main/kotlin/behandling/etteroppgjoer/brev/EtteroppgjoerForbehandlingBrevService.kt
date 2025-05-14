@@ -39,12 +39,12 @@ class EtteroppgjoerForbehandlingBrevService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
+        val (redigerbartInnhold, brevInnhold, sak) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
+                    sak = sak,
                     brevInnholdData = brevInnhold,
                     brevRedigerbarInnholdData = redigerbartInnhold,
                     skalLagres = false,
@@ -68,12 +68,12 @@ class EtteroppgjoerForbehandlingBrevService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
+        val (redigerbartInnhold, brevInnhold, sak) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
 
         val brevRequest =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
+                    sak = sak,
                     brevInnholdData = brevInnhold,
                     brevRedigerbarInnholdData = redigerbartInnhold,
                     skalLagres = false,
@@ -102,11 +102,11 @@ class EtteroppgjoerForbehandlingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
         skalLagres: Boolean,
     ): Pdf {
-        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
+        val (redigerbartInnhold, brevInnhold, sak) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
         val request =
             retryOgPakkUt {
                 utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
+                    sak = sak,
                     brevInnholdData = brevInnhold,
                     brevRedigerbarInnholdData = redigerbartInnhold,
                     skalLagres = skalLagres, // TODO: utlede dette for etteroppgjørbrev

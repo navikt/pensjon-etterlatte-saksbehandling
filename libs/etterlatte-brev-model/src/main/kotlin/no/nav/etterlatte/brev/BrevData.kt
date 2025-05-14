@@ -45,7 +45,7 @@ data class BrevDataFerdigstillingNy(
 
 data class BrevDataRedigerbarNy(
     val data: BrevRedigerbarInnholdData?,
-) : BrevData
+) : BrevDataRedigerbar
 
 data class BrevRequest(
     val spraak: Spraak, // TODO ?

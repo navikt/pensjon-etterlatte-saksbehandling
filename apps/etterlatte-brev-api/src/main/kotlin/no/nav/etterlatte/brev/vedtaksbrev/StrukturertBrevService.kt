@@ -67,6 +67,7 @@ class StrukturertBrevService(
         val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
         val brevKode = brevRequest.brevFastInnholdData.brevKode
+
         val brevRedigerbarInnhold = utledBrevRedigerbartInnholdData(brevRequest)
 
         val innhold =

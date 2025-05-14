@@ -38,11 +38,10 @@ const skalKunneRedigereFastsattInntektDefaultValue = (
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
   skalKunneRedigereFastsattInntekt: string
-  fastsettInntektSkjemaErSkittent: boolean
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
-  const etteroppgjoerId = behandling.relatertBehandlingId
+  const etteroppgjoerForbehandlingId = behandling.relatertBehandlingId
   const dispatch = useAppDispatch()
 
   const etteroppgjoer = useEtteroppgjoer()
@@ -52,6 +51,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const { next } = useContext(BehandlingRouteContext)
 
+  const [erRedigerbar, setErRedigerbar] = useState<boolean>(true)
+  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
@@ -64,33 +65,56 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
     if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
-        setFastsettInntektSkjemaErSkittentFeilmelding('')
-        next()
-      })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
+        () => {
+          setFastsettInntektSkjemaErSkittentFeilmelding('')
+          next()
+        }
+      )
     } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: true }, () => {
-        setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
-      })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
+        () => {
+          setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+        }
+      )
       // Saksbehandler har trykket "Nei", da kan man gå videre
     } else {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerId!, harMottattNyInformasjon: false }, () => {
-        setFastsettInntektSkjemaErSkittentFeilmelding('')
-        next()
-      })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: false },
+        () => {
+          setFastsettInntektSkjemaErSkittentFeilmelding('')
+          next()
+        }
+      )
     }
   }
 
   useEffect(() => {
-    if (!etteroppgjoerId) return
-    hentEtteroppgjoerRequest(etteroppgjoerId, (etteroppgjoer) => {
+    if (!etteroppgjoerForbehandlingId) return
+    hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })
-  }, [etteroppgjoerId])
+  }, [etteroppgjoerForbehandlingId])
 
   useEffect(() => {
     setValue('skalKunneRedigereFastsattInntekt', skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer))
   }, [etteroppgjoer])
+
+  useEffect(() => {
+    if (fastsettInntektSkjemaErSkittent) {
+      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true })
+    }
+  }, [fastsettInntektSkjemaErSkittent])
+
+  useEffect(() => {
+    if (watch('skalKunneRedigereFastsattInntekt') === 'JA') {
+      setErRedigerbar(true)
+    } else {
+      setErRedigerbar(false)
+    }
+  }, [watch('skalKunneRedigereFastsattInntekt')])
 
   return mapResult(etteroppgjoerResult, {
     pending: <Spinner label="Henter forbehandling" />,
@@ -121,11 +145,17 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
           {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? (
             <FastsettFaktiskInntekt
-              erRedigerbar
+              erRedigerbar={erRedigerbar}
+              faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
+              setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
               setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
             />
           ) : (
-            <FastsettFaktiskInntekt erRedigerbar={false} />
+            <FastsettFaktiskInntekt
+              erRedigerbar={erRedigerbar}
+              faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
+              setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+            />
           )}
 
           <ResultatAvForbehandling />

@@ -312,7 +312,7 @@ data class EndreStatusRequest(
 class GosysInternalFeil(
     override val cause: Throwable,
 ) : InternfeilException(
-        detail = "Feil ved henting av oppgaver fra Gosys. Melding ${cause.message}",
+        detail = "Feil ved henting av oppgaver fra Gosys",
         cause = cause,
     )
 

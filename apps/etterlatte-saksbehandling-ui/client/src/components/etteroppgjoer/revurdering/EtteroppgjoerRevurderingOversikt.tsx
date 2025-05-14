@@ -113,6 +113,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
     defaultValues: {
@@ -127,7 +128,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       harMottattNyInformasjonRequest(
         { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
         () => {
-          // TOOD: fikse at disse bruker skikkelig data
           endringErTilUgunstForBrukerRequest(
             {
               forbehandlingId: etteroppgjoerForbehandlingId!,
@@ -175,7 +175,16 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   useEffect(() => {
     if (fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
+        () => {
+          endringErTilUgunstForBrukerRequest({
+            forbehandlingId: etteroppgjoerForbehandlingId!,
+            endringErTilUgunstForBruker: getValues('endringErTilUgunstForBruker') === 'JA',
+            beskrivelseAvUgunst: getValues('beskrivelseAvUgunst'),
+          })
+        }
+      )
     }
   }, [fastsettInntektSkjemaErSkittent])
 

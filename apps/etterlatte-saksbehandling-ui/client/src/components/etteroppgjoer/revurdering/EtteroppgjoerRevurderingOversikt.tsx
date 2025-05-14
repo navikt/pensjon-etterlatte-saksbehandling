@@ -22,7 +22,7 @@ import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehand
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
-const skalKunneRedigereFastsattInntektDefaultValue = (
+const harMottattNyInformasjonDefaultValue = (
   etteroppgjoerForbehandling: EtteroppgjoerForbehandling
 ): 'JA' | 'NEI' | '' => {
   if (etteroppgjoerForbehandling) {
@@ -39,7 +39,7 @@ const skalKunneRedigereFastsattInntektDefaultValue = (
 }
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
-  skalKunneRedigereFastsattInntekt: string
+  harMottattNyInformasjon: string
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
@@ -69,12 +69,12 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const { control, handleSubmit, watch, setValue } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
     defaultValues: {
-      skalKunneRedigereFastsattInntekt: skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer),
+      harMottattNyInformasjon: harMottattNyInformasjonDefaultValue(etteroppgjoer),
     },
   })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
-    if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
+    if (data.harMottattNyInformasjon === 'JA' && fastsettInntektSkjemaErSkittent) {
       harMottattNyInformasjonRequest(
         { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
         () => {
@@ -82,7 +82,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           next()
         }
       )
-    } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
+    } else if (data.harMottattNyInformasjon === 'JA' && !fastsettInntektSkjemaErSkittent) {
       harMottattNyInformasjonRequest(
         { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
         () => {
@@ -109,7 +109,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   }, [etteroppgjoerForbehandlingId])
 
   useEffect(() => {
-    setValue('skalKunneRedigereFastsattInntekt', skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer))
+    setValue('harMottattNyInformasjon', harMottattNyInformasjonDefaultValue(etteroppgjoer))
   }, [etteroppgjoer])
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           <Inntektsopplysninger />
 
           <ControlledRadioGruppe
-            name="skalKunneRedigereFastsattInntekt"
+            name="harMottattNyInformasjon"
             control={control}
             legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
             radios={
@@ -146,7 +146,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             readOnly={!erRedigerbar}
           />
 
-          {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? (
+          {watch('harMottattNyInformasjon') === 'JA' ? (
             <FastsettFaktiskInntekt
               erRedigerbar={erRedigerbar}
               faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}

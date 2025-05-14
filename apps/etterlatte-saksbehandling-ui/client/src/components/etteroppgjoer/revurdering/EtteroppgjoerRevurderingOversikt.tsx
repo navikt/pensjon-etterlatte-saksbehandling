@@ -7,7 +7,7 @@ import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
@@ -39,7 +39,9 @@ const harMottattNyInformasjonDefaultValue = (
 }
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
-  harMottattNyInformasjon: string
+  harMottattNyInformasjon: 'JA' | 'NEI' | ''
+  endringErTilUgunstForBruker: 'JA' | 'NEI' | ''
+  beskrivelseAvUgunst: string
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
@@ -67,9 +69,11 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
 
-  const { control, handleSubmit, watch, setValue } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+  const { control, register, handleSubmit, watch, setValue } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
     defaultValues: {
       harMottattNyInformasjon: harMottattNyInformasjonDefaultValue(etteroppgjoer),
+      endringErTilUgunstForBruker: '',
+      beskrivelseAvUgunst: '',
     },
   })
 
@@ -147,12 +151,38 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           />
 
           {watch('harMottattNyInformasjon') === 'JA' ? (
-            <FastsettFaktiskInntekt
-              erRedigerbar={erRedigerbar}
-              faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-              setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
-              setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
-            />
+            <>
+              <ControlledRadioGruppe
+                name="endringErTilUgunstForBruker"
+                control={control}
+                legend="Er endringen til ugunst for bruker?"
+                radios={
+                  <>
+                    <Radio value="JA">Ja</Radio>
+                    <Radio value="NEI">Nei</Radio>
+                  </>
+                }
+                errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
+                readOnly={!erRedigerbar}
+              />
+
+              <Textarea
+                {...register('beskrivelseAvUgunst', {
+                  required: {
+                    value: true,
+                    message: 'Du må beskrive hvorfor endringen kommer til ugunst',
+                  },
+                })}
+                label="Beskrivelse av ugunst"
+              />
+
+              <FastsettFaktiskInntekt
+                erRedigerbar={erRedigerbar}
+                faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
+                setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+                setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
+              />
+            </>
           ) : (
             <FastsettFaktiskInntekt
               erRedigerbar={false}

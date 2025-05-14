@@ -32,7 +32,7 @@ export const velgDoedsdatoFraPersonopplysninger = (avdoede: Personopplysning[]):
   } else {
     return avdoede
       .map((person) => person.opplysning.doedsdato)
-      .filter((a) => !!a)
+      .filter((doedsdato) => !!doedsdato)
       .sort()[0]
   }
 }

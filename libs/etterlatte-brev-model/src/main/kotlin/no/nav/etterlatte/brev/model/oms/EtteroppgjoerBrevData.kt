@@ -54,7 +54,7 @@ data class EtteroppgjoerBrevGrunnlag(
     val fom: YearMonth,
     val tom: YearMonth,
     val innvilgedeMaaneder: Int,
-    val loensinntekt: Kroner,
+    val loennsinntekt: Kroner,
     val naeringsinntekt: Kroner,
     val afp: Kroner,
     val utlandsinntekt: Kroner,

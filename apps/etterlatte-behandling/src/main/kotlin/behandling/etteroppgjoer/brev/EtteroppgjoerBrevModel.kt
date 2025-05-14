@@ -60,7 +60,7 @@ object EtteroppgjoerBrevDataMapper {
                             fom = grunnlag.fom,
                             tom = grunnlag.tom!!,
                             innvilgedeMaaneder = grunnlag.innvilgaMaaneder,
-                            loensinntekt = Kroner(grunnlag.loennsinntekt),
+                            loennsinntekt = Kroner(grunnlag.loennsinntekt),
                             naeringsinntekt = Kroner(grunnlag.naeringsinntekt),
                             afp = Kroner(grunnlag.afp),
                             utlandsinntekt = Kroner(grunnlag.utlandsinntekt),

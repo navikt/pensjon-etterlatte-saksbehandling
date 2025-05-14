@@ -70,9 +70,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id
@@ -95,6 +95,8 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setObject(9, forbehandling.kopiertFra)
                 statement.setObject(10, forbehandling.sisteIverksatteBehandlingId)
                 statement.setObject(11, forbehandling.harMottattNyInformasjon, Types.BOOLEAN)
+                statement.setObject(12, forbehandling.endringErTilUgunstForBruker, Types.BOOLEAN)
+                statement.setString(13, forbehandling.beskrivelseAvUgunst)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -232,6 +234,29 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
+    fun oppdaterOmEndringErTilUgunstForBruker(
+        forbehandlingId: UUID,
+        endringErTilUgunstForBruker: Boolean,
+        beskrivelseAvUgunst: String,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE etteroppgjoer_behandling
+                    SET endring_er_til_ugunst_for_bruker = ?, beskrivelse_av_ugunst = ?
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
+
+            statement.setBoolean(1, endringErTilUgunstForBruker)
+            statement.setString(2, beskrivelseAvUgunst)
+            statement.setObject(3, forbehandlingId)
+
+            statement.executeUpdate()
+        }
+    }
+
     fun hentPensjonsgivendeInntekt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -362,6 +387,8 @@ class EtteroppgjoerForbehandlingDao(
             kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
             sisteIverksatteBehandlingId = getString("siste_iverksatte_behandling").let { UUID.fromString(it) },
             harMottattNyInformasjon = getBoolean("har_mottatt_ny_informasjon"),
+            endringErTilUgunstForBruker = getBoolean("endring_er_til_ugunst_for_bruker"),
+            beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

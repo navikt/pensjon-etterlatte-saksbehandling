@@ -24,6 +24,8 @@ data class EtteroppgjoerForbehandling(
     val kopiertFra: UUID? = null, // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val sisteIverksatteBehandlingId: UUID, // siste iverksatte behandling når forbehandling ble opprettet
     val harMottattNyInformasjon: Boolean?,
+    val endringErTilUgunstForBruker: Boolean?,
+    val beskrivelseAvUgunst: String?,
 ) {
     companion object {
         fun opprett(
@@ -42,6 +44,8 @@ data class EtteroppgjoerForbehandling(
             kopiertFra = null,
             sisteIverksatteBehandlingId = sisteIverksatteBehandling,
             harMottattNyInformasjon = null,
+            endringErTilUgunstForBruker = null,
+            beskrivelseAvUgunst = null,
         )
     }
 

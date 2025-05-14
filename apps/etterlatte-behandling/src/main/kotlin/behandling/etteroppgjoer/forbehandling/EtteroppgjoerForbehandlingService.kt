@@ -206,6 +206,12 @@ class EtteroppgjoerForbehandlingService(
         harMottattNyInformasjon: Boolean,
     ) = dao.oppdaterHarMottattNyInformasjon(forbehandlingId, harMottattNyInformasjon)
 
+    fun lagreEndringErTilUgunstForBruker(
+        forbehandlingId: UUID,
+        endringErTilUgunstForBruker: Boolean,
+        beskrivelseAvUgunst: String,
+    ) = dao.oppdaterOmEndringErTilUgunstForBruker(forbehandlingId, endringErTilUgunstForBruker, beskrivelseAvUgunst)
+
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
@@ -337,6 +343,11 @@ data class BeregnFaktiskInntektRequest(
 
 data class HarMottattNyInformasjonRequest(
     val harMottattNyInformasjon: Boolean,
+)
+
+data class EndringErTilUgunstForBrukerRequest(
+    val endringErTilUgunstForBruker: Boolean,
+    val beskrivelseAvUgunst: String,
 )
 
 class FantIkkeForbehandling(

@@ -2,8 +2,8 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.Slate
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.toFeilutbetalingType

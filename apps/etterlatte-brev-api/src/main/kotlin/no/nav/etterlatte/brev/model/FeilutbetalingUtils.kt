@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 
 fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =

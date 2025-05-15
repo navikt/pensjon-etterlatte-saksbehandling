@@ -4,6 +4,9 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
+import no.nav.etterlatte.brev.BrevVedleggKey
+import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
+import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -15,6 +18,7 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 data class EtteroppgjoerBrevRequestData(
     val redigerbar: BrevRedigerbarInnholdData,
     val innhold: BrevFastInnholdData,
+    val vedlegg: List<BrevVedleggRedigerbarNy>,
     val sak: Sak,
 )
 
@@ -29,7 +33,9 @@ object EtteroppgjoerBrevDataMapper {
         }
 
         val bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND
-        val grunnlag = data.faktiskInntekt ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
+        val grunnlag =
+            data.faktiskInntekt
+                ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
         // TODO: usikker om dette blir rett, følge opp ifm testing
         val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
@@ -65,6 +71,14 @@ object EtteroppgjoerBrevDataMapper {
                             afp = Kroner(grunnlag.afp),
                             utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
                         ),
+                ),
+            vedlegg =
+                listOf(
+                    BrevVedleggRedigerbarNy(
+                        data = EtteroppgjoerBrevData.BeregningsVedleggInnhold(data.behandling.aar),
+                        vedlegId = BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING,
+                        vedlegg = Vedlegg.OMS_EO_FORHANDSVARSEL_VEDLEGG_INNHOLD,
+                    ),
                 ),
             sak = sisteIverksatteBehandling.sak,
         )

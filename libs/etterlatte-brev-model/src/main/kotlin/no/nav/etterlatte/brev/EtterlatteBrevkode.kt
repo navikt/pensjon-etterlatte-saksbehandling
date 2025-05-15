@@ -100,4 +100,5 @@ enum class Vedlegg(
     BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL("Utfall ved forhåndsvarsel av feilutbetaling"),
     OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL("Utfall ved beregning av omstillingsstønad"),
     OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL("Utfall ved forhåndsvarsel av feilutbetaling"),
+    OMS_EO_FORHANDSVARSEL_VEDLEGG_INNHOLD("Utfall ved forhåndsvarsel etteroppgjør vedlegg"),
 }

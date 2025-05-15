@@ -1,8 +1,12 @@
 package no.nav.etterlatte.brev.model.oms
 
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.BrevFastInnholdData
+import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
+import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -10,6 +14,7 @@ import java.time.YearMonth
 
 object EtteroppgjoerBrevData {
     data class Forhaandsvarsel(
+        val vedleggInnhold: List<Slate.Element> = emptyList(),
         val bosattUtland: Boolean,
         val norskInntekt: Boolean,
         val etteroppgjoersAar: Int,
@@ -21,6 +26,18 @@ object EtteroppgjoerBrevData {
         val grunnlag: EtteroppgjoerBrevGrunnlag,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_FORHAANDSVARSEL"
+
+        // TODO: litt mer sjekker
+        override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData =
+            this.copy(
+                vedleggInnhold =
+                    innhold()
+                        .single {
+                            it.key == BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING
+                        }.payload!!
+                        .elements,
+            )
+
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_FORHAANDSVARSEL
     }
 
@@ -37,10 +54,17 @@ object EtteroppgjoerBrevData {
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_FORHAANDSVARSEL
     }
 
+    data class BeregningsVedleggInnhold(
+        val etteroppgjoersAar: Int,
+    ) : BrevDataRedigerbar
+
     data class Vedtak(
         val bosattUtland: Boolean,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_VEDTAK"
+
+        override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData = this
+
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }
 

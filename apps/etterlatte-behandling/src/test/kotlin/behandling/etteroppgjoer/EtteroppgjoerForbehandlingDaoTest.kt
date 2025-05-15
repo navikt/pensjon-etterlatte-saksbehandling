@@ -89,6 +89,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 kopiertFra = kopiertFra,
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -118,6 +120,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 kopiertFra = UUID.randomUUID(),
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
             ),
         )
         etteroppgjoerForbehandlingDao.lagreForbehandling(
@@ -133,6 +137,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 kopiertFra = null,
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
             ),
         )
 

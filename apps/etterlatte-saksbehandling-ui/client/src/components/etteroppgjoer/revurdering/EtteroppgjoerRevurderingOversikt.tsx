@@ -1,13 +1,17 @@
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling, lagreHarMottattNyInformasjon } from '~shared/api/etteroppgjoer'
+import {
+  hentEtteroppgjoerForbehandling,
+  lagreEndringErTilUgunstForBruker,
+  lagreHarMottattNyInformasjon,
+} from '~shared/api/etteroppgjoer'
 import React, { useContext, useEffect, useState } from 'react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
@@ -22,24 +26,58 @@ import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehand
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
-const skalKunneRedigereFastsattInntektDefaultValue = (
+const etteroppgjoerRevurderingOversiktSkjemaDefaultValues = (
   etteroppgjoerForbehandling: EtteroppgjoerForbehandling
-): 'JA' | 'NEI' | '' => {
+): EtteroppgjoerRevurderingOversiktSkjema => {
+  let etteroppgjoerRevurderingOversiktSkjemaValues: EtteroppgjoerRevurderingOversiktSkjema = {
+    harMottattNyInformasjon: '',
+    endringErTilUgunstForBruker: '',
+    beskrivelseAvUgunst: '',
+  }
+
   if (etteroppgjoerForbehandling) {
     if (etteroppgjoerForbehandling.behandling) {
       if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === true) {
-        return 'JA'
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          harMottattNyInformasjon: 'JA',
+        }
       } else if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === false) {
-        return 'NEI'
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          harMottattNyInformasjon: 'NEI',
+        }
+      }
+
+      if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === true) {
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          endringErTilUgunstForBruker: 'JA',
+        }
+      } else if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === false) {
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          endringErTilUgunstForBruker: 'NEI',
+        }
+      }
+
+      if (!!etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst) {
+        etteroppgjoerRevurderingOversiktSkjemaValues = {
+          ...etteroppgjoerRevurderingOversiktSkjemaValues,
+          beskrivelseAvUgunst: etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst,
+        }
       }
     }
   }
 
-  return ''
+  return etteroppgjoerRevurderingOversiktSkjemaValues
 }
 
 interface EtteroppgjoerRevurderingOversiktSkjema {
-  skalKunneRedigereFastsattInntekt: string
+  harMottattNyInformasjon: 'JA' | 'NEI' | ''
+  // TODO: disse 2 feltene skal kun vises hvis svarfristen har gått ut på varselbrev etter forbehandling
+  endringErTilUgunstForBruker: 'JA' | 'NEI' | ''
+  beskrivelseAvUgunst: string
 }
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
@@ -59,6 +97,9 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
   const [harMottattNyInformasjonResult, harMottattNyInformasjonRequest] = useApiCall(lagreHarMottattNyInformasjon)
+  const [endringErTilUgunstForBrukerResult, endringErTilUgunstForBrukerRequest] = useApiCall(
+    lagreEndringErTilUgunstForBruker
+  )
 
   const { next } = useContext(BehandlingRouteContext)
 
@@ -67,22 +108,38 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
 
-  const { control, handleSubmit, watch, setValue } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
-    defaultValues: {
-      skalKunneRedigereFastsattInntekt: skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer),
-    },
+  // TODO: bytte om til form context, dette begynner å bli riiiimelig messy
+  const {
+    control,
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
+    defaultValues: etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer),
   })
 
   const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
-    if (data.skalKunneRedigereFastsattInntekt === 'JA' && fastsettInntektSkjemaErSkittent) {
+    if (data.harMottattNyInformasjon === 'JA' && fastsettInntektSkjemaErSkittent) {
       harMottattNyInformasjonRequest(
         { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
         () => {
-          setFastsettInntektSkjemaErSkittentFeilmelding('')
-          next()
+          endringErTilUgunstForBrukerRequest(
+            {
+              forbehandlingId: etteroppgjoerForbehandlingId!,
+              endringErTilUgunstForBruker: data.endringErTilUgunstForBruker === 'JA',
+              beskrivelseAvUgunst: data.beskrivelseAvUgunst,
+            },
+            () => {
+              setFastsettInntektSkjemaErSkittentFeilmelding('')
+              next()
+            }
+          )
         }
       )
-    } else if (data.skalKunneRedigereFastsattInntekt === 'JA' && !fastsettInntektSkjemaErSkittent) {
+    } else if (data.harMottattNyInformasjon === 'JA' && !fastsettInntektSkjemaErSkittent) {
       harMottattNyInformasjonRequest(
         { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
         () => {
@@ -109,12 +166,32 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   }, [etteroppgjoerForbehandlingId])
 
   useEffect(() => {
-    setValue('skalKunneRedigereFastsattInntekt', skalKunneRedigereFastsattInntektDefaultValue(etteroppgjoer))
+    setValue(
+      'harMottattNyInformasjon',
+      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).harMottattNyInformasjon
+    )
+    setValue(
+      'endringErTilUgunstForBruker',
+      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).endringErTilUgunstForBruker
+    )
+    setValue(
+      'beskrivelseAvUgunst',
+      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).beskrivelseAvUgunst
+    )
   }, [etteroppgjoer])
 
   useEffect(() => {
     if (fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest({ forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true })
+      harMottattNyInformasjonRequest(
+        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
+        () => {
+          endringErTilUgunstForBrukerRequest({
+            forbehandlingId: etteroppgjoerForbehandlingId!,
+            endringErTilUgunstForBruker: getValues('endringErTilUgunstForBruker') === 'JA',
+            beskrivelseAvUgunst: getValues('beskrivelseAvUgunst'),
+          })
+        }
+      )
     }
   }, [fastsettInntektSkjemaErSkittent])
 
@@ -133,26 +210,56 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           <Inntektsopplysninger />
 
           <ControlledRadioGruppe
-            name="skalKunneRedigereFastsattInntekt"
+            name="harMottattNyInformasjon"
             control={control}
             legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
+            errorVedTomInput="Du må ta stilling til om bruker gitt ny informasjon"
+            readOnly={!erRedigerbar}
             radios={
               <>
                 <Radio value="JA">Ja</Radio>
                 <Radio value="NEI">Nei</Radio>
               </>
             }
-            errorVedTomInput="Du må ta stilling til om bruker gitt ny informasjon"
-            readOnly={!erRedigerbar}
           />
 
-          {watch('skalKunneRedigereFastsattInntekt') === 'JA' ? (
-            <FastsettFaktiskInntekt
-              erRedigerbar={erRedigerbar}
-              faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-              setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
-              setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
-            />
+          {watch('harMottattNyInformasjon') === 'JA' ? (
+            <>
+              <ControlledRadioGruppe
+                name="endringErTilUgunstForBruker"
+                control={control}
+                legend="Er endringen til ugunst for bruker?"
+                errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
+                readOnly={!erRedigerbar}
+                radios={
+                  <>
+                    <Radio value="JA">Ja</Radio>
+                    <Radio value="NEI">Nei</Radio>
+                  </>
+                }
+              />
+              {watch('endringErTilUgunstForBruker') === 'JA' && (
+                <Box maxWidth="30rem">
+                  <Textarea
+                    {...register('beskrivelseAvUgunst', {
+                      required: {
+                        value: true,
+                        message: 'Du må beskrive hvorfor endringen kommer til ugunst',
+                      },
+                    })}
+                    label="Beskriv hvorfor det er til ugunst"
+                    error={errors.beskrivelseAvUgunst?.message}
+                  />
+                </Box>
+              )}
+
+              <FastsettFaktiskInntekt
+                erRedigerbar={erRedigerbar}
+                faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
+                setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+                setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
+              />
+            </>
           ) : (
             <FastsettFaktiskInntekt
               erRedigerbar={false}
@@ -176,11 +283,20 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             errorMessage: 'Kunne ikke lagre om bruker har gitt ny informasjon',
           })}
 
+          {isFailureHandler({
+            apiResult: endringErTilUgunstForBrukerResult,
+            errorMessage: 'Kunne ikke lagre om endring er til ugunst for bruker',
+          })}
+
           <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
             <HStack width="100%" justify="center">
               <VStack gap="4" align="center">
                 <div>
-                  <Button type="submit" variant="primary" loading={isPending(harMottattNyInformasjonResult)}>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    loading={isPending(harMottattNyInformasjonResult) || isPending(endringErTilUgunstForBrukerResult)}
+                  >
                     Neste steg
                   </Button>
                 </div>

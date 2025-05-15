@@ -27,6 +27,8 @@ export interface EtteroppgjoerBehandling {
   brevId?: number
   kopiertFra?: string
   harMottattNyInformasjon?: boolean
+  endringErTilUgunstForBruker?: boolean
+  beskrivelseAvUgunst?: string
 }
 
 export enum EtteroppgjoerBehandlingStatus {

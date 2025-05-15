@@ -51,6 +51,17 @@ export const lagreHarMottattNyInformasjon = async (args: {
   })
 }
 
+export const lagreEndringErTilUgunstForBruker = async (args: {
+  forbehandlingId: string
+  endringErTilUgunstForBruker: boolean
+  beskrivelseAvUgunst: string
+}) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/endring-er-til-ugunst-for-bruker`, {
+    endringErTilUgunstForBruker: args.endringErTilUgunstForBruker,
+    beskrivelseAvUgunst: args.beskrivelseAvUgunst,
+  })
+}
+
 export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
   forbehandlingId: string
 }): Promise<ApiResponse<any>> => {

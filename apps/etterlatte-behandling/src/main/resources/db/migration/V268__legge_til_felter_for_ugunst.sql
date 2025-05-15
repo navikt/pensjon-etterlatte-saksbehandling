@@ -1,0 +1,2 @@
+ALTER TABLE etteroppgjoer_behandling ADD COLUMN endring_er_til_ugunst_for_bruker BOOLEAN;
+ALTER TABLE etteroppgjoer_behandling ADD COLUMN beskrivelse_av_ugunst TEXT;

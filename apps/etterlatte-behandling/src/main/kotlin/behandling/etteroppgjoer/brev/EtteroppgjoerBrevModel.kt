@@ -77,7 +77,7 @@ object EtteroppgjoerBrevDataMapper {
                     BrevVedleggRedigerbarNy(
                         data = EtteroppgjoerBrevData.BeregningsVedleggInnhold(data.behandling.aar),
                         vedlegId = BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING,
-                        vedlegg = Vedlegg.OMS_EO_FORHANDSVARSEL_VEDLEGG_INNHOLD,
+                        vedlegg = Vedlegg.OMS_EO_FORHANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD,
                     ),
                 ),
             sak = sisteIverksatteBehandling.sak,

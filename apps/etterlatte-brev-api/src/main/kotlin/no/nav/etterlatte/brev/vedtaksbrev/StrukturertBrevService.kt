@@ -349,7 +349,7 @@ class StrukturertBrevService(
             .map {
                 BrevInnholdVedlegg(
                     tittel = it.vedlegg.tittel,
-                    key = it.vedlegId,
+                    key = it.vedleggId,
                     payload =
                         brevbaker.hentRedigerbarTekstFraBrevbakeren(
                             BrevbakerRequest.fra(

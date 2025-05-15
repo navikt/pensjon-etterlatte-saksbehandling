@@ -50,7 +50,7 @@ data class BrevDataRedigerbarNy(
 
 data class BrevVedleggRedigerbarNy(
     val data: BrevDataRedigerbar?,
-    val vedlegId: BrevVedleggKey,
+    val vedleggId: BrevVedleggKey,
     val vedlegg: Vedlegg,
 )
 

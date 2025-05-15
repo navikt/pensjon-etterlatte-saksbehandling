@@ -76,7 +76,7 @@ object EtteroppgjoerBrevDataMapper {
                 listOf(
                     BrevVedleggRedigerbarNy(
                         data = EtteroppgjoerBrevData.BeregningsVedleggInnhold(data.behandling.aar),
-                        vedlegId = BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING,
+                        vedleggId = BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING,
                         vedlegg = Vedlegg.OMS_EO_FORHANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD,
                     ),
                 ),

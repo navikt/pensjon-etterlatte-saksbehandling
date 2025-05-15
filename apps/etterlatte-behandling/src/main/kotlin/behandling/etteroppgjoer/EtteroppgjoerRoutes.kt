@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -111,11 +110,11 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     runBlocking {
                         forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
-                            behandlingId,
+                            etteroppgjoerId,
                             brukerTokenInfo,
                         )
                         inTransaction {
-                            forbehandlingService.ferdigstillForbehandling(behandlingId, brukerTokenInfo)
+                            forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
                         }
                     }
 

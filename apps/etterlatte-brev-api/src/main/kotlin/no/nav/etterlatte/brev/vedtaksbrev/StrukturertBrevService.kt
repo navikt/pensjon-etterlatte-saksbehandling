@@ -104,7 +104,7 @@ class StrukturertBrevService(
                 opprettet = Tidspunkt.now(),
                 innhold =
                     BrevInnhold(
-                        brevKode.titlerPaaSpraak[spraak] ?: brevKode.tittel,
+                        brevKode.tittel(spraak),
                         spraak,
                         innhold,
                     ),
@@ -231,7 +231,7 @@ class StrukturertBrevService(
 
         val brevinnhold =
             BrevInnhold(
-                brevKode.titlerPaaSpraak[spraakIBrev] ?: brevKode.tittel,
+                brevKode.tittel(spraak),
                 spraakIBrev,
                 brevbaker.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(

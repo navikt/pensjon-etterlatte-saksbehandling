@@ -260,4 +260,6 @@ enum class Brevkoder(
             "Bruk forskjellige maler for redigering og ferdigstilling. $redigering og $ferdigstilling er like"
         }
     }
+
+    fun tittel(spraak: Spraak): String = titlerPaaSpraak[spraak] ?: tittel
 }

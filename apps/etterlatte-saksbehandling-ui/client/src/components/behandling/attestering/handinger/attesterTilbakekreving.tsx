@@ -26,7 +26,7 @@ export const AttesterTilbakekreving = ({
       { tilbakekrevingId: tilbakekreving.id, kommentar },
       () => navigate('/person', { state: { fnr: tilbakekreving.sak.ident } }),
       (error) => {
-        setError(`Ukjent feil oppsto ved attestering av vedtaket: ${error.detail}`)
+        setError(`Kunne ikke attestere tilbakekrevingen, på grunn av feil: ${error.detail}`)
         setModalisOpen(false)
       }
     )

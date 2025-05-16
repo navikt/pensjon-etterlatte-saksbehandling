@@ -110,7 +110,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
                     ?: throw InternfeilException("Fant ikke siste iverksatte behandling, kan ikke utlede brevinnhold")
 
-            val (redigerbartInnhold, brevInnhold, sak) =
+            val (redigerbartInnhold, brevInnhold, vedleggData, sak) =
                 EtteroppgjoerBrevDataMapper.fra(
                     detaljertForbehandling,
                     sisteIverksatteBehandling,
@@ -133,6 +133,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 skalLagre = true, // TODO: vurder riktig logikk for lagring
                 brevFastInnholdData = brevInnhold,
                 brevRedigerbarInnholdData = redigerbartInnhold,
+                brevVedleggData = vedleggData,
             )
         }
 }

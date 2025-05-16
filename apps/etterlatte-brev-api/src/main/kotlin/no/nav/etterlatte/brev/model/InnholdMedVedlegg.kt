@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import org.slf4j.LoggerFactory

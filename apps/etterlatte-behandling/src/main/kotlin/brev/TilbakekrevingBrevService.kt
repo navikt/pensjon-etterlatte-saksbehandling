@@ -153,6 +153,7 @@ class TilbakekrevingBrevService(
                         vedtak = vedtak,
                     ),
                 brevRedigerbarInnholdData = null,
+                brevVedleggData = emptyList(),
             )
         }
 }

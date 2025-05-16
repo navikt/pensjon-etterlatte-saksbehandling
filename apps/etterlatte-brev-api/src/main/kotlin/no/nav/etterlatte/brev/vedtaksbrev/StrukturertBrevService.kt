@@ -354,7 +354,7 @@ class StrukturertBrevService(
                         brevbaker.hentRedigerbarTekstFraBrevbakeren(
                             BrevbakerRequest.fra(
                                 brevKode = it.vedlegg,
-                                brevData = it,
+                                brevData = it.data ?: ManueltBrevData(),
                                 avsender = avsender,
                                 soekerOgEventuellVerge = soekerOgEventuellVerge,
                                 sakId = sak.id,

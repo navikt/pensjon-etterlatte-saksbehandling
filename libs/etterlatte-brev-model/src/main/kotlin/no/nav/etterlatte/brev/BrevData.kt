@@ -52,7 +52,7 @@ data class BrevVedleggRedigerbarNy(
     val data: BrevVedleggInnholdData?,
     val vedlegg: Vedlegg,
     val vedleggId: BrevVedleggKey,
-) : BrevDataRedigerbar
+)
 
 data class BrevRequest(
     val spraak: Spraak, // TODO ?
@@ -103,7 +103,10 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
         name = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD",
     ),
 )
-abstract class BrevVedleggInnholdData : BrevDataRedigerbar
+abstract class BrevVedleggInnholdData : BrevDataRedigerbar {
+    abstract val brevKode: Vedlegg
+    abstract val type: String
+}
 
 data class BrevInnholdVedlegg(
     val tittel: String,

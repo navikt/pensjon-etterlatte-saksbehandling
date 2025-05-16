@@ -4,9 +4,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
-import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
-import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -74,11 +72,7 @@ object EtteroppgjoerBrevDataMapper {
                 ),
             vedlegg =
                 listOf(
-                    BrevVedleggRedigerbarNy(
-                        data = EtteroppgjoerBrevData.BeregningsVedleggInnhold(data.behandling.aar),
-                        vedleggId = BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING,
-                        vedlegg = Vedlegg.OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD,
-                    ),
+                    EtteroppgjoerBrevData.beregningsVedlegg(data.behandling.aar),
                 ),
             sak = sisteIverksatteBehandling.sak,
         )

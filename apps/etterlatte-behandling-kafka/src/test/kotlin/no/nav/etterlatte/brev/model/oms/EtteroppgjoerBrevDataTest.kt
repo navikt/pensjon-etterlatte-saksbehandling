@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model.oms
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.brev.BrevFastInnholdData
+import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -39,5 +40,13 @@ class EtteroppgjoerBrevDataTest {
         val json = brevData.toJson()
         val gjenskapt = objectMapper.readValue<BrevFastInnholdData>(json)
         assertInstanceOf<EtteroppgjoerBrevData.Forhaandsvarsel>(gjenskapt)
+    }
+
+    @Test
+    fun `tester serialisering og deserialisering av brevVedleggData`() {
+        val vedleggData = EtteroppgjoerBrevData.beregningsVedlegg(2024)
+        val json = vedleggData.toJson()
+        val gjenskapt = objectMapper.readValue<BrevVedleggRedigerbarNy>(json)
+        assertInstanceOf<EtteroppgjoerBrevData.BeregningsVedleggInnhold>(gjenskapt.data)
     }
 }

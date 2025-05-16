@@ -41,4 +41,4 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 ### For Nav-ansatte
 
-Interne henvendelser kan sendes via Slack i kanalen #po-pensjon-team-etterlatte.
+Interne henvendelser kan sendes via Slack i kanalen #team-etterlatte.

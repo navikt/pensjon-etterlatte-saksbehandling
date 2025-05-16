@@ -195,9 +195,22 @@ class EtteroppgjoerForbehandlingService(
         val beregnetEtteroppgjoerResultat =
             runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(beregningRequest, brukerTokenInfo) }
 
+        behandlingService.settBeregnetForRevurderingTilForbehandling(forbehandling)
+
         dao.lagreForbehandling(forbehandling.tilBeregnet())
         return beregnetEtteroppgjoerResultat
     }
+
+    fun lagreHarMottattNyInformasjon(
+        forbehandlingId: UUID,
+        harMottattNyInformasjon: Boolean,
+    ) = dao.oppdaterHarMottattNyInformasjon(forbehandlingId, harMottattNyInformasjon)
+
+    fun lagreEndringErTilUgunstForBruker(
+        forbehandlingId: UUID,
+        endringErTilUgunstForBruker: Boolean,
+        beskrivelseAvUgunst: String,
+    ) = dao.oppdaterOmEndringErTilUgunstForBruker(forbehandlingId, endringErTilUgunstForBruker, beskrivelseAvUgunst)
 
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
@@ -215,13 +228,14 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoer(sak.id, inntektsaar)
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
         if (etteroppgjoer == null) {
             logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
             throw InternfeilException("Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør")
         }
 
-        if (etteroppgjoer.status != EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
+        // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
+        if (etteroppgjoer.status !in listOf(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
             throw InternfeilException(
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
@@ -325,6 +339,15 @@ data class BeregnFaktiskInntektRequest(
     val naeringsinntekt: Int,
     val utlandsinntekt: Int,
     val spesifikasjon: String,
+)
+
+data class HarMottattNyInformasjonRequest(
+    val harMottattNyInformasjon: Boolean,
+)
+
+data class EndringErTilUgunstForBrukerRequest(
+    val endringErTilUgunstForBruker: Boolean,
+    val beskrivelseAvUgunst: String,
 )
 
 class FantIkkeForbehandling(

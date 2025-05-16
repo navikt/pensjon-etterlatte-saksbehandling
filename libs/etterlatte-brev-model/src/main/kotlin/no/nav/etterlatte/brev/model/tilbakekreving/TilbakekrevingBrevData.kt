@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model.tilbakekreving
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.brev.BrevFastInnholdData
+import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
@@ -21,6 +22,9 @@ data class TilbakekrevingBrevInnholdDataNy(
     val tilbakekreving: TilbakekrevingDataNy,
 ) : BrevFastInnholdData() {
     override val type: String = "TILBAKEKREVING"
+
+    override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData = this
+
     override val brevKode: Brevkoder = Brevkoder.TILBAKEKREVING
 }
 

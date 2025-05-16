@@ -57,7 +57,7 @@ function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBeh
             <Table.DataCell>{formaterPeriode(tilbakekreving.tilbakekreving.perioder)}</Table.DataCell>
             <VedtakKolonner behandlingId={tilbakekreving.id} />
             <Table.DataCell>
-              <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>Gå til behandling</Link>
+              <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>Se behandling</Link>
             </Table.DataCell>
           </Table.Row>
         ))}

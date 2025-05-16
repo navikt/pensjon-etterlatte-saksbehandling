@@ -1,17 +1,17 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
-import { BeregnetEtteroppgjoerResultatDto, Etteroppgjoer } from '~shared/types/Etteroppgjoer'
+import { BeregnetEtteroppgjoerResultatDto, EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { useAppSelector } from '~store/Store'
 import { IBrev } from '~shared/types/Brev'
 
-export const addEtteroppgjoer = createAction<Etteroppgjoer>('etteroppgjoer/add')
+export const addEtteroppgjoer = createAction<EtteroppgjoerForbehandling>('etteroppgjoer/add')
 export const addEtteroppgjoerOppgave = createAction<OppgaveDTO>('etteroppgjoer/oppgave/add')
 export const addEtteroppgjoerBrev = createAction<IBrev>('etteroppgjoer/brev/add')
 export const resetEtteroppgjoer = createAction('etteroppgjoer/reset')
 export const addResultatEtteroppgjoer = createAction<BeregnetEtteroppgjoerResultatDto>('etteroppgjoer/resultat/add')
 
 const initialState: {
-  etteroppgjoer: Etteroppgjoer | null
+  etteroppgjoer: EtteroppgjoerForbehandling | null
   oppgave: OppgaveDTO | null
 } = {
   etteroppgjoer: null,

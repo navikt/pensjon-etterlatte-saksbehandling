@@ -1,6 +1,8 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { ISak, ISaksendring, SakType } from '~shared/types/sak'
 import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
+import { Personopplysninger } from '~shared/types/grunnlag'
+import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 
 export interface Navkontor {
   navn: string
@@ -27,6 +29,22 @@ export const hentSisteIverksatteBehandlingId = async (
   sakId: number
 ): Promise<ApiResponse<SisteIverksatteBehandling>> => {
   return apiClient.get(`/sak/${sakId}/behandlinger/sisteIverksatte`)
+}
+
+export const hentSisteIverksattePersonopplysninger = async (args: {
+  sakId: number
+  sakType: SakType
+}): Promise<ApiResponse<Personopplysninger>> => {
+  const sistIverksatteBehandling = await hentSisteIverksatteBehandlingId(args.sakId)
+  if (sistIverksatteBehandling.ok) {
+    return await hentPersonopplysningerForBehandling({
+      behandlingId: sistIverksatteBehandling.data.id,
+      sakType: args.sakType,
+    })
+  } else {
+    // Vi har en feil som vi kan propagere videre
+    return sistIverksatteBehandling
+  }
 }
 
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {

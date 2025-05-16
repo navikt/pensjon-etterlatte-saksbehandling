@@ -1,5 +1,5 @@
 import { Heading, Table, VStack } from '@navikt/ds-react'
-import { PensjonsgivendeInntektFraSkatteetaten } from '~shared/types/Etteroppgjoer'
+import { PensjonsgivendeInntektFraSkatteetaten } from '~shared/types/EtteroppgjoerForbehandling'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
 

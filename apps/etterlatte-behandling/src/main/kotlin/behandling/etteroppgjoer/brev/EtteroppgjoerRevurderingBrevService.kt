@@ -114,6 +114,7 @@ class EtteroppgjoerRevurderingBrevService(
                 skalLagre = skalLagres,
                 brevFastInnholdData = EtteroppgjoerBrevData.Vedtak(bosattUtland = false),
                 brevRedigerbarInnholdData = EtteroppgjoerBrevData.VedtakInnhold(),
+                brevVedleggData = emptyList(),
             )
         }
 }

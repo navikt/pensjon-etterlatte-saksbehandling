@@ -1,7 +1,7 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { BodyShort, Box, HStack, Label, VStack } from '@navikt/ds-react'
-import { EtteroppgjoerBehandlingStatus, EtteroppgjoerResultatType } from '~shared/types/Etteroppgjoer'
-import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { Box } from '@navikt/ds-react'
+import { EtteroppgjoerBehandlingStatus, EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
+import EtteroppgjoerResultatVisning from '~components/etteroppgjoer/components/EtteroppgjoerResultatVisning'
 
 export const BrevutfallAvForbehandling = () => {
   const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
@@ -19,58 +19,36 @@ export const BrevutfallAvForbehandling = () => {
       maxWidth="42.5rem"
     >
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.TILBAKEKREVING && (
-        <HStack gap="2" maxWidth="fit-content">
-          <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
-          <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-            {behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT ? (
-              <>
-                <Label>Forbehandlingen viste at det ble tilbakekreving</Label>
-                <BodyShort>Det skal ha blitt sendt varselbrev</BodyShort>
-              </>
-            ) : (
-              <>
-                <Label>Forbehandlingen viser at det blir tilbakekreving</Label>
-                <BodyShort>Du skal sende varselbrev.</BodyShort>
-              </>
-            )}
-          </VStack>
-        </HStack>
+        <EtteroppgjoerResultatVisning
+          tekst="Forbehandlingen viser at det blir tilbakekreving"
+          body={
+            behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
+              ? 'Det skal ha blitt sendt varselbrev'
+              : 'Du skal sende varselbrev.'
+          }
+        />
       )}
+
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.ETTERBETALING && (
-        <HStack gap="2" maxWidth="fit-content">
-          <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
-          <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-            {behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT ? (
-              <>
-                <Label>Forbehandlingen viste at det ble etterbetaling</Label>
-                <BodyShort>Det skal ha blitt sendt varselbrev</BodyShort>
-              </>
-            ) : (
-              <>
-                <Label>Forbehandlingen viser at det blir etterbetaling</Label>
-                <BodyShort>Du skal sende varselbrev.</BodyShort>
-              </>
-            )}
-          </VStack>
-        </HStack>
+        <EtteroppgjoerResultatVisning
+          tekst="Forbehandlingen viser at det blir etterbetaling"
+          body={
+            behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
+              ? 'Det skal ha blitt sendt varselbrev'
+              : 'Du skal sende varselbrev.'
+          }
+        />
       )}
+
       {beregnetEtteroppgjoerResultat.resultatType === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER && (
-        <HStack gap="2" maxWidth="fit-content">
-          <EnvelopeClosedIcon fontSize="1.5rem" aria-hidden />
-          <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
-            {behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT ? (
-              <>
-                <Label>Forbehandlingen viste at det ble ingen endring</Label>
-                <BodyShort>Det skal ha blitt sendt informasjonsbrev</BodyShort>
-              </>
-            ) : (
-              <>
-                <Label>Forbehandlingen viser at det blir ingen endring</Label>
-                <BodyShort>Du skal sende informasjonsbrev.</BodyShort>
-              </>
-            )}
-          </VStack>
-        </HStack>
+        <EtteroppgjoerResultatVisning
+          tekst="Forbehandlingen viser at det blir ingen endring"
+          body={
+            behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
+              ? 'Det skal ha blitt sendt informasjonsbrev'
+              : 'Du skal sende informasjonsbrev.'
+          }
+        />
       )}
     </Box>
   )

@@ -664,6 +664,7 @@ internal class ApplicationContext(
             saksbehandlerService,
             etteroppgjoerService,
             etteroppgjoerForbehandlingService,
+            grunnlagService,
         )
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)

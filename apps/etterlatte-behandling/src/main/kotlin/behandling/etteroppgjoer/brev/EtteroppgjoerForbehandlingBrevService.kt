@@ -3,12 +3,9 @@ package no.nav.etterlatte.behandling.etteroppgjoer.brev
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevDataMapper
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
-import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Pdf
@@ -21,10 +18,6 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
-import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -35,54 +28,31 @@ class EtteroppgjoerForbehandlingBrevService(
     private val behandlingService: BehandlingService,
 ) {
     suspend fun opprettEtteroppgjoerBrev(
-        behandlingId: UUID,
-        sakId: SakId,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
-
-        val brevRequest =
-            retryOgPakkUt {
-                utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
-                    brevInnholdData = brevInnhold,
-                    brevRedigerbarInnholdData = redigerbartInnhold,
-                    skalLagres = false,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            }
+        val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
 
         return brevKlient
             .opprettStrukturertBrev(
-                behandlingId,
+                forbehandlingId,
                 brevRequest,
                 brukerTokenInfo,
             ).also {
-                etteroppgjoerForbehandlingService.lagreBrevreferanse(behandlingId, it)
+                etteroppgjoerForbehandlingService.lagreBrevreferanse(forbehandlingId, it)
             }
     }
 
     suspend fun tilbakestillEtteroppgjoerBrev(
         brevId: BrevID,
-        behandlingId: UUID,
-        sakId: SakId,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
+        val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
 
-        val brevRequest =
-            retryOgPakkUt {
-                utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
-                    brevInnholdData = brevInnhold,
-                    brevRedigerbarInnholdData = redigerbartInnhold,
-                    skalLagres = false,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            }
         return brevKlient.tilbakestillStrukturertBrev(
             brevID = brevId,
-            behandlingId = behandlingId,
+            behandlingId = forbehandlingId,
             brevRequest = brevRequest,
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -92,97 +62,78 @@ class EtteroppgjoerForbehandlingBrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        brevKlient.ferdigstillJournalfoerStrukturertBrev(behandlingId, Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype, brukerTokenInfo)
+        brevKlient.ferdigstillJournalfoerStrukturertBrev(
+            behandlingId,
+            Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
+            brukerTokenInfo,
+        )
     }
 
     suspend fun genererPdf(
         brevID: BrevID,
-        behandlingId: UUID,
-        sakId: SakId,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        skalLagres: Boolean,
     ): Pdf {
-        val (redigerbartInnhold, brevInnhold, forbehandling) = hentBrevRequestData(behandlingId, sakId, brukerTokenInfo)
-        val request =
-            retryOgPakkUt {
-                utledBrevRequest(
-                    sak = forbehandling.behandling.sak,
-                    brevInnholdData = brevInnhold,
-                    brevRedigerbarInnholdData = redigerbartInnhold,
-                    skalLagres = skalLagres, // TODO: utlede dette for etteroppgjørbrev
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            }
+        val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
 
-        return brevKlient.genererPdf(brevID, behandlingId, request, brukerTokenInfo)
+        return brevKlient.genererPdf(brevID, forbehandlingId, brevRequest, brukerTokenInfo)
     }
 
-    suspend fun hentEtteroppgjoersbrev(
-        behandlingId: UUID,
+    suspend fun hentEtteroppgjoersBrev(
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev? {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(behandlingId)
-        if (forbehandling.brevId == null) {
-            return null
-        }
-
-        return brevKlient.hentBrev(
-            sakId = forbehandling.sak.id,
-            brevId = forbehandling.brevId,
-            brukerTokenInfo = brukerTokenInfo,
-        )
-    }
-
-    private fun hentBrevRequestData(
-        behandlingId: UUID,
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerBrevRequestData {
-        val detaljertForbehandling =
-            etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
-                behandlingId,
-                brukerTokenInfo,
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        return forbehandling.brevId?.let {
+            brevKlient.hentBrev(
+                sakId = forbehandling.sak.id,
+                brevId = it,
+                brukerTokenInfo = brukerTokenInfo,
             )
-
-        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
-        krevIkkeNull(sisteIverksatteBehandling) {
-            "Fant ikke siste iverksatte behandling og kan ikke stadfeste bosattUtland"
         }
-
-        val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(behandlingId)
-
-        return EtteroppgjoerBrevDataMapper.fra(detaljertForbehandling, sisteIverksatteBehandling, pensjonsgivendeInntekt)
     }
 
     private suspend fun utledBrevRequest(
-        sak: Sak,
-        brevInnholdData: BrevFastInnholdData,
-        brevRedigerbarInnholdData: BrevRedigerbarInnholdData?,
-        skalLagres: Boolean,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevRequest =
         coroutineScope {
+            val detaljertForbehandling =
+                etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
+                    forbehandlingId,
+                    brukerTokenInfo,
+                )
+
+            val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(forbehandlingId)
+
+            val sisteIverksatteBehandling =
+                behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
+                    ?: throw InternfeilException("Fant ikke siste iverksatte behandling, kan ikke utlede brevinnhold")
+
+            val (redigerbartInnhold, brevInnhold, vedleggData, sak) =
+                EtteroppgjoerBrevDataMapper.fra(
+                    detaljertForbehandling,
+                    sisteIverksatteBehandling,
+                    pensjonsgivendeInntekt,
+                )
+
             val grunnlag =
                 grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)
                     ?: throw InternfeilException("Fant ikke grunnlag med sakId=${sak.id}")
 
-            val verge = hentVergeForSak(sak.sakType, null, grunnlag)
-            val soeker = grunnlag.mapSoeker(null)
-
-            val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
-
-            BrevRequest(
+            return@coroutineScope BrevRequest(
                 sak = sak,
                 innsender = grunnlag.mapInnsender(),
-                soeker = soeker,
+                soeker = grunnlag.mapSoeker(null),
                 avdoede = grunnlag.mapAvdoede(),
-                verge = verge,
+                verge = hentVergeForSak(sak.sakType, null, grunnlag),
                 spraak = grunnlag.mapSpraak(),
-                saksbehandlerIdent = innloggetSaksbehandlerIdent,
+                saksbehandlerIdent = brukerTokenInfo.ident(),
                 attestantIdent = null,
-                skalLagre = skalLagres,
-                brevFastInnholdData = brevInnholdData,
-                brevRedigerbarInnholdData = brevRedigerbarInnholdData,
+                skalLagre = true, // TODO: vurder riktig logikk for lagring
+                brevFastInnholdData = brevInnhold,
+                brevRedigerbarInnholdData = redigerbartInnhold,
+                brevVedleggData = vedleggData,
             )
         }
 }

@@ -91,7 +91,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                     </Table.DataCell>
                     <VedtakKolonner behandlingId={behandling.id} />
                     <Table.DataCell>
-                      <Link href={`/behandling/${behandling.id}/`}>Gå til behandling</Link>
+                      <Link href={`/behandling/${behandling.id}/`}>Se behandling</Link>
                     </Table.DataCell>
                   </Table.Row>
                 )
@@ -106,7 +106,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                     <Table.DataCell>-</Table.DataCell>
                     <Table.DataCell>-</Table.DataCell>
                     <Table.DataCell>
-                      <Link href={`/generellbehandling/${behandling.id}`}>Gå til behandling</Link>
+                      <Link href={`/generellbehandling/${behandling.id}`}>Se behandling</Link>
                     </Table.DataCell>
                   </Table.Row>
                 )

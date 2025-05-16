@@ -59,7 +59,7 @@ class EtteroppgjoerDaoTest(
     @Test
     fun `lagre og oppdatere etteroppgjoer`() {
         etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
-        val lagret = etteroppgjoerDao.hentEtteroppgjoer(sak.id, 2024)
+        val lagret = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(lagret!!) {
             sakId shouldBe sakId
             inntektsaar shouldBe inntektsaar
@@ -67,7 +67,7 @@ class EtteroppgjoerDaoTest(
         }
 
         etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
-        val oppdatert = etteroppgjoerDao.hentEtteroppgjoer(sak.id, 2024)
+        val oppdatert = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(oppdatert!!) {
             sakId shouldBe sakId
             inntektsaar shouldBe inntektsaar

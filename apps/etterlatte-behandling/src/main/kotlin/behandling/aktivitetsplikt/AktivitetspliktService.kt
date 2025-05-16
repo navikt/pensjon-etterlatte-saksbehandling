@@ -154,6 +154,7 @@ class AktivitetspliktService(
     fun opprettOppfoelgingsoppgaveUnntak(
         unntak: List<AktivitetspliktUnntak>,
         sakId: SakId,
+        doedsdatoAvdoed: LocalDate? = null,
     ) {
         if (!featureToggleService.isEnabled(AktivitetspliktOppgaveToggles.UNNTAK_UTEN_FRIST, false)) {
             return
@@ -162,6 +163,11 @@ class AktivitetspliktService(
         try {
             // Hvis bruker har varig unntak er det ikke nødvendig å følge opp
             if (unntak.any { it.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT }) {
+                return
+            }
+            if (doedsdatoAvdoed != null && doedsdatoAvdoed.plusMonths(4L) >= LocalDate.now()) {
+                // unødvendig å lage oppfølgingsoppgave hvis det er under 4 måneder fra dødsfallet,
+                // siden vi uansett lager en oppgave for å sende ut informasjonsbrev om aktivitetsplikten
                 return
             }
 

@@ -1,4 +1,4 @@
-import { FaktiskInntekt } from '~shared/types/Etteroppgjoer'
+import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
 import { useForm } from 'react-hook-form'
 import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
@@ -7,7 +7,7 @@ import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastse
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoer, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { useAppDispatch } from '~store/Store'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
@@ -35,13 +35,13 @@ interface FastsettFaktiskInntektSkjema {
 }
 
 interface Props {
-  setRedigerFaktiskInntekt: (redigerFaktiskInntekt: boolean) => void
+  setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
   setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInntektSkjemaErSkittent }: Props) => {
+export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastsettInntektSkjemaErSkittent }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
-  const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoer)
+  const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
 
   const { behandling, faktiskInntekt } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
@@ -78,12 +78,12 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
         dispatch(addResultatEtteroppgjoer(resultat))
         hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
           dispatch(addEtteroppgjoer(etteroppgjoer))
-          setRedigerFaktiskInntekt(false)
+          setFaktiskInntektSkjemaErAapen(false)
         })
       })
     } else {
       if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(false)
-      setRedigerFaktiskInntekt(false)
+      setFaktiskInntektSkjemaErAapen(false)
     }
   }
 
@@ -139,7 +139,7 @@ export const FaktiskInntektSkjema = ({ setRedigerFaktiskInntekt, setFastsettInnt
               variant="secondary"
               size="small"
               disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
-              onClick={() => setRedigerFaktiskInntekt(false)}
+              onClick={() => setFaktiskInntektSkjemaErAapen(false)}
             >
               Avbryt
             </Button>

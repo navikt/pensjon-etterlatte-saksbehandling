@@ -7,7 +7,7 @@ import { AktivitetsgradOgUnntakIOppgave } from '~components/aktivitetsplikt/vurd
 import { LeggTilNyVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/LeggTilNyVurdering'
 import { InformasjonUnntakOppfoelging } from '~components/aktivitetsplikt/vurdering/InformasjonUnntakOppfoelging'
 
-export function Vurderinger(props: { doedsdato: Date }) {
+export function Vurderinger(props: { doedsdato?: Date }) {
   const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
   const { doedsdato } = props
   const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)

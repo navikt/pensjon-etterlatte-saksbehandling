@@ -3,6 +3,11 @@ import { IAvkortetYtelse, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
 
 export interface Etteroppgjoer {
+  inntektsaar: number
+  status: string
+}
+
+export interface EtteroppgjoerForbehandling {
   behandling: EtteroppgjoerBehandling
   opplysninger: EtteroppgjoerOpplysninger
   faktiskInntekt?: FaktiskInntekt
@@ -21,6 +26,9 @@ export interface EtteroppgjoerBehandling {
   opprettet: string // Mottatt?
   brevId?: number
   kopiertFra?: string
+  harMottattNyInformasjon?: boolean
+  endringErTilUgunstForBruker?: boolean
+  beskrivelseAvUgunst?: string
 }
 
 export enum EtteroppgjoerBehandlingStatus {

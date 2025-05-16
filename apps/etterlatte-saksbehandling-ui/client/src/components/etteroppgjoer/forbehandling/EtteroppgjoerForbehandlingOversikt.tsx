@@ -7,19 +7,24 @@ import { Link } from 'react-router-dom'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
 import { BrevutfallAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/BrevutfallAvForbehandling'
-import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { useState } from 'react'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
+  const { beregnetEtteroppgjoerResultat, behandling, faktiskInntekt } = useEtteroppgjoer()
 
   const erRedigerbar =
     (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
       behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
+
+  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
+    erRedigerbar && !faktiskInntekt
+  )
 
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
@@ -30,7 +35,12 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
         <b>Skatteoppgjør mottatt:</b> {formaterDato(behandling.opprettet)}
       </BodyShort>
       <Inntektsopplysninger />
-      <FastsettFaktiskInntekt erRedigerbar={erRedigerbar} />
+
+      <FastsettFaktiskInntekt
+        erRedigerbar={erRedigerbar}
+        faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
+        setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+      />
 
       {!!beregnetEtteroppgjoerResultat && (
         <VStack gap="4">

@@ -9,6 +9,7 @@ on:
       - apps/etterlatte-behandling-kafka/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-omregning-model/**
@@ -25,6 +26,7 @@ on:
       - apps/etterlatte-behandling-kafka/**
       - "!apps/etterlatte-behandling-kafka/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-inntektsjustering-model/**

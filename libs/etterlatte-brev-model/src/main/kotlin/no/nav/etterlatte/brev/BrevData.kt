@@ -49,7 +49,7 @@ data class BrevDataRedigerbarNy(
 ) : BrevDataRedigerbar
 
 data class BrevVedleggRedigerbarNy(
-    val data: BrevDataRedigerbar?,
+    val data: BrevVedleggInnholdData?,
     val vedlegg: Vedlegg,
     val vedleggId: BrevVedleggKey,
 )
@@ -96,7 +96,7 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val type: String
 }
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(
         value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,

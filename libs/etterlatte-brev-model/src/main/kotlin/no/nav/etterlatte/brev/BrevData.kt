@@ -52,7 +52,7 @@ data class BrevVedleggRedigerbarNy(
     val data: BrevVedleggInnholdData?,
     val vedlegg: Vedlegg,
     val vedleggId: BrevVedleggKey,
-)
+) : BrevDataRedigerbar
 
 data class BrevRequest(
     val spraak: Spraak, // TODO ?

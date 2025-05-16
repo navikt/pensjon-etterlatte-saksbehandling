@@ -12,6 +12,7 @@ on:
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
@@ -33,6 +34,7 @@ on:
       - "!apps/etterlatte-behandling/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**

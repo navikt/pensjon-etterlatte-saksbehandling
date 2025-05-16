@@ -90,6 +90,10 @@ abstract class BrevFastInnholdData : BrevData {
         name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR",
     ),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.VedtakInnhold::class, name = "OMS_EO_VEDTAK_UTFALL"),
+    JsonSubTypes.Type(
+        value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
+        name = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD",
+    ),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder

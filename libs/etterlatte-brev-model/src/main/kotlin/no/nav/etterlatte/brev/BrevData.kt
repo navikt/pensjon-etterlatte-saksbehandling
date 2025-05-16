@@ -74,6 +74,10 @@ data class BrevRequest(
     JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.Vedtak::class, name = "OMS_EO_VEDTAK"),
+    JsonSubTypes.Type(
+        value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
+        name = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD",
+    ),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder

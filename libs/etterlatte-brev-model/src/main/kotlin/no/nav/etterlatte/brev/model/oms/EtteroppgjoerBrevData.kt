@@ -1,18 +1,27 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
+import no.nav.etterlatte.brev.BrevVedleggInnholdData
 import no.nav.etterlatte.brev.BrevVedleggKey
+import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Slate
+import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
 
 object EtteroppgjoerBrevData {
+    fun beregningsVedlegg(etteroppgjoersAar: Int): BrevVedleggRedigerbarNy =
+        BrevVedleggRedigerbarNy(
+            data = BeregningsVedleggInnhold(etteroppgjoersAar),
+            vedlegg = Vedlegg.OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD,
+            vedleggId = BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING,
+        )
+
     data class Forhaandsvarsel(
         val vedleggInnhold: List<Slate.Element> = emptyList(),
         val bosattUtland: Boolean,
@@ -56,7 +65,7 @@ object EtteroppgjoerBrevData {
 
     data class BeregningsVedleggInnhold(
         val etteroppgjoersAar: Int,
-    ) : BrevDataRedigerbar
+    ) : BrevVedleggInnholdData()
 
     data class Vedtak(
         val bosattUtland: Boolean,

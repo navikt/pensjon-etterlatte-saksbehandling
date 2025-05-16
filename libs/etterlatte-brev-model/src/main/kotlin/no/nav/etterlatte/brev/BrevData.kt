@@ -50,8 +50,8 @@ data class BrevDataRedigerbarNy(
 
 data class BrevVedleggRedigerbarNy(
     val data: BrevDataRedigerbar?,
-    val vedleggId: BrevVedleggKey,
     val vedlegg: Vedlegg,
+    val vedleggId: BrevVedleggKey,
 )
 
 data class BrevRequest(
@@ -90,15 +90,20 @@ abstract class BrevFastInnholdData : BrevData {
         name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR",
     ),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.VedtakInnhold::class, name = "OMS_EO_VEDTAK_UTFALL"),
-    JsonSubTypes.Type(
-        value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
-        name = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD",
-    ),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder
     abstract val type: String
 }
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonSubTypes(
+    JsonSubTypes.Type(
+        value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
+        name = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD",
+    ),
+)
+abstract class BrevVedleggInnholdData : BrevDataRedigerbar
 
 data class BrevInnholdVedlegg(
     val tittel: String,

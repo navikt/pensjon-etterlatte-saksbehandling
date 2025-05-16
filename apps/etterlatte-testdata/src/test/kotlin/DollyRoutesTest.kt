@@ -163,6 +163,50 @@ class DollyRoutesTest {
     }
 
     @Test
+    fun `kan opprette soeknad uten gjenlevende`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff =
+            configMedRoller(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
+        val request =
+            NySoeknadRequest(
+                type = SoeknadType.BARNEPENSJON,
+                avdoed = "17518411810x",
+                gjenlevende = "",
+                barn =
+                    listOf(
+                        fnr,
+                        fnr,
+                    ),
+            )
+        coEvery { dollyService.sendSoeknadFraDolly(any(), any(), any()) } returns Unit
+
+        testApplication {
+            val client =
+                runServerWithConfig(
+                    applicationConfig = conff,
+                    routes = DollyFeature(dollyService = dollyService, vedtakService = vedtakService).routes,
+                )
+
+            val response =
+                client.post("/api/v1/opprett-ytelse") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request.toJson())
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.Created
+
+            coVerify(exactly = 1) { dollyService.sendSoeknadFraDolly(any(), any(), any()) }
+        }
+    }
+
+    @Test
     fun `kan hente vedtak`() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =

@@ -26,7 +26,6 @@ import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
-import no.nav.etterlatte.vedtaksvurdering.DollyService
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakSamordningService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
@@ -34,6 +33,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.config.VedtakKey.KAFKA_VEDTAKSHENDELSER_TOPIC
+import no.nav.etterlatte.vedtaksvurdering.dollybehandling.DollyService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingVilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
@@ -85,7 +85,6 @@ class ApplicationContext {
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
         )
-    val dollyService = DollyService(rapidService = vedtaksvurderingRapidService)
     val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
@@ -122,6 +121,8 @@ class ApplicationContext {
         } else {
             TestProdusent()
         }
+
+    val dollyService = DollyService(rapid)
 
     private fun publiser(
         key: UUID,

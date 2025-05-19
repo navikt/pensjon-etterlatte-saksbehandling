@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering.dollybehandling
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
@@ -35,7 +35,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
-object SoeknadMapper {
+object DollySoeknadMapper {
     fun opprettJsonMessage(
         type: SoeknadType,
         gjenlevendeFnr: String,
@@ -113,7 +113,7 @@ object SoeknadMapper {
                 opprettGjenlevendeForelder(gjenlevendeFnr),
                 opprettAvdoed(avdoedFnr),
             ),
-        soesken = soesken.map(::opprettBarn),
+        soesken = soesken.map(DollySoeknadMapper::opprettBarn),
     )
 
     private fun opprettOmstillingsstoenadSoeknad(
@@ -194,7 +194,7 @@ object SoeknadMapper {
                 omsorgForBarn = Opplysning(EnumSvar(JaNeiVetIkke.JA, ""), null),
             ),
         avdoed = opprettAvdoed(avdoedFnr),
-        barn = barn.map(::opprettBarn),
+        barn = barn.map(DollySoeknadMapper::opprettBarn),
     )
 
     private fun opprettGjenlevendeForelder(fnr: String) =

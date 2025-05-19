@@ -109,6 +109,10 @@ data class FaktiskInntektDto(
     val utlandsinntekt: Int,
 ) : AvkortingGrunnlagDto()
 
+data class AvkortingGrunnlagFlereInntekterDto(
+    val inntekter: List<AvkortingGrunnlagLagreDto>,
+)
+
 data class AvkortingGrunnlagLagreDto(
     val id: UUID = UUID.randomUUID(),
     val inntektTom: Int,

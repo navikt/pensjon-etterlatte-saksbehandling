@@ -2,7 +2,10 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.avkorting.AvkortingMapper.avkortingForFrontend
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
+import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekter
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -26,6 +29,15 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+enum class AvkortingToggles(
+    private val feature: String,
+) : FeatureToggle {
+    LEGGE_INN_FLERE_INNTEKTER("legge-inn-flere-inntekter"),
+    ;
+
+    override fun key(): String = feature
+}
+
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val avkortingRepository: AvkortingRepository,
@@ -34,6 +46,7 @@ class AvkortingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -115,11 +128,78 @@ class AvkortingService(
         return avkorting.toDto(behandling.virkningstidspunkt().dato)
     }
 
+    suspend fun beregnAvkortingMedNyeGrunnlag(
+        behandlingId: UUID,
+        nyeGrunnlag: List<AvkortingGrunnlagLagreDto>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingFrontend {
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
+        val beregning = beregningService.hentBeregningNonnull(behandlingId)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        validerInntekter(behandling, beregning, avkorting, nyeGrunnlag)
+        val aldersovergangMaaned =
+            when (behandling.opphoerFraOgMed) {
+                null -> {
+                    val aldersovergang =
+                        grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
+                    when (aldersovergang.year) {
+                        in nyeGrunnlag.map { it.fom.year } -> aldersovergang
+                        else -> null
+                    }
+                }
+
+                else -> null
+            }
+
+        val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
+        val oppdatert =
+            avkorting.beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag = nyeGrunnlag,
+                bruker = brukerTokenInfo,
+                beregning = beregning,
+                sanksjoner = sanksjoner ?: emptyList(),
+                opphoerFom = behandling.opphoerFraOgMed,
+                aldersovergang = aldersovergangMaaned,
+            )
+
+        avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)
+        val lagretAvkorting = hentAvkortingNonNull(behandling.id)
+        val avkortingFrontend =
+            if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                avkortingForFrontend(lagretAvkorting, behandling, skalHaInntektInnevaerendeOgNesteAar(behandling))
+            } else {
+                val forrigeAvkorting =
+                    hentAvkortingForrigeBehandling(
+                        behandling,
+                        brukerTokenInfo,
+                        behandling.virkningstidspunkt().dato,
+                    )
+                avkortingForFrontend(
+                    lagretAvkorting,
+                    behandling,
+                    skalHaInntektInnevaerendeOgNesteAar(behandling),
+                    forrigeAvkorting,
+                )
+            }
+
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
+        return avkortingFrontend
+    }
+
+    @Deprecated(
+        "Bruk heller beregn avkorting med nye grunnlag",
+        replaceWith = ReplaceWith("beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(lagreGrunnlag), brukerTokenInfo)"),
+    )
     suspend fun beregnAvkortingMedNyttGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         lagreGrunnlag: AvkortingGrunnlagLagreDto,
     ): AvkortingFrontend {
+        if (featureToggleService.isEnabled(AvkortingToggles.LEGGE_INN_FLERE_INNTEKTER, false)) {
+            return beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(lagreGrunnlag), brukerTokenInfo)
+        }
+
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 

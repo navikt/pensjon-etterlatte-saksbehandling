@@ -1318,6 +1318,12 @@ class BeregnAvkortingTest {
     }
 
     @Test
+    fun `kan beregne med to innsendte inntekter`() {
+        val avkorting = `Avkorting foerstegangsbehandling med to inntekter`()
+        println(avkorting.aarsoppgjoer.size)
+    }
+
+    @Test
     fun `Revurdering inntektsendring nytt år`() {
         val avkorting = `Revurdering ny inntekt for nytt år`()
         with(avkorting.aarsoppgjoer[0].avkortetYtelse) {
@@ -1933,6 +1939,44 @@ class BeregnAvkortingTest {
                                     datoFOM = YearMonth.of(2024, Month.MAY),
                                     utbetaltBeloep = 16682,
                                 ),
+                            ),
+                    ),
+                sanksjoner = emptyList(),
+                opphoerFom = null,
+            )
+
+    private fun `Avkorting foerstegangsbehandling med to inntekter`() =
+        Avkorting()
+            .beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag =
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.MARCH),
+                        ),
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 350000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                        ),
+                    ),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MARCH),
+                                    datoTOM = YearMonth.of(2024, Month.APRIL),
+                                    utbetaltBeloep = 15676,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MAY),
+                                    datoTOM = YearMonth.of(2025, Month.APRIL),
+                                    utbetaltBeloep = 16682,
+                                ),
+                                beregningsperiode(datoFOM = YearMonth.of(2025, Month.MAY), utbetaltBeloep = 18000),
                             ),
                     ),
                 sanksjoner = emptyList(),

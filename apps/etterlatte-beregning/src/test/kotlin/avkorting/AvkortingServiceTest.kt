@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import io.getunleash.UnleashContext
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -15,6 +16,8 @@ import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -42,6 +45,14 @@ internal class AvkortingServiceTest {
     private val sanksjonService: SanksjonService = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
+    private val featureToggleService: FeatureToggleService =
+        object : FeatureToggleService {
+            override fun isEnabled(
+                toggleId: FeatureToggle,
+                defaultValue: Boolean,
+                context: UnleashContext?,
+            ) = defaultValue
+        }
 
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret = mockk()
 
@@ -54,6 +65,7 @@ internal class AvkortingServiceTest {
             grunnlagKlient,
             vedtaksvurderingKlient,
             avkortingReparerAarsoppgjoeret,
+            featureToggleService,
         )
 
     @BeforeEach

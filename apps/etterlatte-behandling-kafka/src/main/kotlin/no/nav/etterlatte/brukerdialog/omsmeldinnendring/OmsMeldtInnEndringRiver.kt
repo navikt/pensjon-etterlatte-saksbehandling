@@ -110,7 +110,7 @@ internal class OmsMeldtInnEndringRiver(
         when (omsEndring) {
             OmsEndring.INNTEKT -> "Inntekt"
             OmsEndring.AKTIVITET_OG_INNTEKT -> "Aktivitet og inntekt"
-            OmsEndring.SVAR_PAA_ETTEROPPGJEOR -> "Svar på etteroppgjør"
+            OmsEndring.SVAR_PAA_ETTEROPPGJOER -> "Svar på etteroppgjør"
             OmsEndring.ANNET -> "Annet"
         }
 }

@@ -66,14 +66,9 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
-    - name: ETTERLATT_VEDTAKSVURDERING_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
-          namespace: etterlatte
-          cluster: dev-gcp
         - application: testnav-person-service
           namespace: dolly
           cluster: dev-gcp
@@ -102,7 +97,4 @@ spec:
           cluster: dev-gcp
         - application: team-dolly-lokal-app
           namespace: dolly
-          cluster: dev-gcp
-        - application: etterlatte-behandling
-          namespace: etterlatte
           cluster: dev-gcp

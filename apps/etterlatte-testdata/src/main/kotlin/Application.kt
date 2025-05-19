@@ -28,7 +28,6 @@ import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
@@ -58,8 +57,6 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.OpprettOgBehandle
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk.Familieoppretter
-import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtakService
-import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtaksvurderingOboKlient
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.opprettFamilie.OpprettFamilie
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyMock
@@ -108,14 +105,12 @@ val dollyService =
         DollyClientImpl(config, httpClient),
         TestnavClient(config, httpClient),
     )
-val vedtaksvurderingOboKlient = VedtaksvurderingOboKlient(config, httpClient)
-val vedtakService = VedtakService(vedtaksvurderingOboKlient)
 val features: List<TestDataFeature> =
     listOf(
         IndexFeature,
         EgendefinertMeldingFeature,
         OpprettSoeknadFeature,
-        DollyFeature(dollyService, vedtakService),
+        DollyFeature(dollyService),
         OpprettOgBehandle(dollyService, Familieoppretter(dollyService)),
         OpprettFamilie(
             dollyService =
@@ -165,7 +160,6 @@ fun main() {
                 if (localDevelopment) {
                     routing {
                         staticResources("/static", "static")
-                        swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
                         api()
                     }
                 } else {
@@ -176,7 +170,6 @@ fun main() {
                     routing {
                         get("/health/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/health/isready") { call.respondText("READY", ContentType.Text.Plain) }
-                        swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
                         staticResources("/static", "static")
 
                         authenticate {

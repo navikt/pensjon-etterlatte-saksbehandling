@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+  title: Etterlatte opprett ytelse API
+  description:
+    API for legge til Barnepensjon eller Omstillingsstønad på dollybrukere <br>
+    Det kreves tilganger for å bruke APIet. Ta kontakt med Team Etterlatte for tilgang.
+  version: 1.0.0
+
+servers:
+  - url: https://etterlatte-vedtaksvurdering.intern.dev.nav.no/dolly
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/v1/opprett-ytelse:
+    post:
+      summary: Opprette BP eller OMS for et sett med dollybrukere
+      description: Oppretter ytelsen BARNEPENSJON eller OMSTILLINGSSTOENAD for et sett med dollybrukere
+      requestBody:
+        description: Request objekt med type søknad, avdoed, gjennlenvede og liste med barn.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NySoeknadRequestDTO"
+      responses:
+        "201": # status code
+          description: Response
+  /api/v1/hent-ytelse:
+    post:
+      summary: Hente vedtaket til en bruker basert på fnr
+      description: Henter en liste med alle vedtak for en gitt bruker
+      requestBody:
+        description: Request objekt med fnr for bruker.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoedselsnummerDTO"
+      responses:
+        "200": # status code
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VedtakDTO'
+components:
+  schemas:
+
+    NySoeknadRequestDTO:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/SoeknadType'
+        avdoed:
+          type: string
+        gjenlevende:
+          type: string
+        barn:
+          type: array
+          items:
+            type: string
+        soeker:
+          type: string
+
+    FoedselsnummerDTO:
+      type: object
+      properties:
+        foedselsnummer:
+          type: string
+
+    SoeknadType:
+      type: string
+      enum:
+        - BARNEPENSJON
+        - OMSTILLINGSSTOENAD
+
+    VedtakDTO:
+      type: object
+      properties:
+        vedtak:
+          type: array
+          items:
+              $ref: '#/components/schemas/Vedtak'
+
+    Vedtak:
+      type: object
+      properties:
+        sakId:
+          type: integer
+        sakType:
+          type: string
+        virkningstidspunkt:
+          type: string
+        type:
+            type: string
+        utbetaling:
+          type: array
+          items:
+              $ref: '#/components/schemas/VedtakUtbetaling'
+
+    VedtakUtbetaling:
+      type: object
+      properties:
+        fraOgMed:
+          type: string
+        tilOgMed:
+          type: string
+        beloep:
+          type: number
+
+
+
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: "Legg til token uten Bearer prefiks"
+      name: bearerAuth
+      in: header
+      scheme: bearer
+      bearerFormat: JWT

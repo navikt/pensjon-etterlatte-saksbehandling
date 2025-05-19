@@ -26,6 +26,7 @@ import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
+import no.nav.etterlatte.vedtaksvurdering.DollyService
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakSamordningService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
@@ -84,7 +85,7 @@ class ApplicationContext {
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
         )
-
+    val dollyService = DollyService(rapidService = vedtaksvurderingRapidService)
     val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),

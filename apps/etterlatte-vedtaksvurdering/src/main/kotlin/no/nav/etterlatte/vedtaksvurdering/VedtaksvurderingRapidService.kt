@@ -55,4 +55,13 @@ class VedtaksvurderingRapidService(
                     hendelsestype.lagParMedEventNameKey(),
             ).toJson(),
     )
+
+    fun sendTestVedtakToRapid(
+        noekkel: UUID,
+        melding: String,
+        navIdent: Map<String, ByteArray>,
+    ) = publiser(
+        noekkel,
+        melding,
+    )
 }

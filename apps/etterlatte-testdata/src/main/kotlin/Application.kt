@@ -49,7 +49,6 @@ import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.metricsRoute
@@ -87,13 +86,6 @@ val httpClient = httpClient(forventSuksess = true)
 
 val config: Config = ConfigFactory.load()
 
-val vedtakHttpClient =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("vedtak.outbound"),
-    )
 val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
 val producer =

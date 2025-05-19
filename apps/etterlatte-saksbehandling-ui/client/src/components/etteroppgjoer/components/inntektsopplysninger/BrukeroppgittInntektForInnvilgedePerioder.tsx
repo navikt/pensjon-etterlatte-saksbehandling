@@ -1,5 +1,5 @@
 import { BodyShort, Detail, Heading, HStack, Label, Table, VStack } from '@navikt/ds-react'
-import { ForventetInntektGrunnlag, IAvkortingGrunnlag, isForventetInntekt } from '~shared/types/IAvkorting'
+import { ForventetInntektGrunnlag, IAvkortingGrunnlag, erForventetInntekt } from '~shared/types/IAvkorting'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import { lastDayOfMonth } from 'date-fns'
@@ -35,7 +35,7 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
         <Table.Body>
           {!!avkortingGrunnlag?.length ? (
             avkortingGrunnlag.map((grunnlag, i) => {
-              if (isForventetInntekt(grunnlag)) {
+              if (erForventetInntekt(grunnlag)) {
                 return (
                   <Table.ExpandableRow
                     key={i}

@@ -9,7 +9,7 @@ import {
   FaktiskInntektGrunnlag,
   ForventetInntektGrunnlag,
   IAvkortingGrunnlag,
-  isForventetInntekt,
+  erForventetInntekt,
   SystemOverstyrtInnvilgaMaanederAarsak,
 } from '~shared/types/IAvkorting'
 import { ArrowCirclepathIcon, HeadCloudIcon } from '@navikt/aksel-icons'
@@ -17,6 +17,7 @@ import { aarFraDatoString, formaterDato } from '~utils/formatering/dato'
 import { lastDayOfMonth } from 'date-fns'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 interface Props {
   avkortingGrunnlagListe: IAvkortingGrunnlag[]
@@ -29,6 +30,13 @@ export const AvkortingInntektTabell = ({
   fyller67,
   erEtteroppgjoerRevurdering = false,
 }: Props) => {
+  const behandling = useBehandling()
+
+  const erEtteroppgjoersAar = (avkortingGrunnlag: IAvkortingGrunnlag) =>
+    erEtteroppgjoerRevurdering &&
+    !!behandling?.virkningstidspunkt?.dato &&
+    aarFraDatoString(avkortingGrunnlag.fom) === aarFraDatoString(behandling?.virkningstidspunkt?.dato)
+
   return (
     <Table className="table" zebraStripes>
       <Table.Header>
@@ -60,10 +68,14 @@ export const AvkortingInntektTabell = ({
           return (
             <Table.ExpandableRow key={index} content={<InntektDetaljer avkortingGrunnlag={avkortingGrunnlag} />}>
               <Table.DataCell key="InntektType">
-                {isForventetInntekt(avkortingGrunnlag) ? (
-                  <Tag variant="alt2">Forventet inntekt</Tag>
+                {erEtteroppgjoersAar(avkortingGrunnlag) ? (
+                  <Tag variant="success">
+                    {erForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
+                  </Tag>
                 ) : (
-                  <Tag variant="alt1">Faktisk inntekt</Tag>
+                  <Tag variant="alt3">
+                    {erForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
+                  </Tag>
                 )}
               </Table.DataCell>
               <Table.DataCell key="InntektTotalt">{NOK(avkortingGrunnlag.inntektInnvilgetPeriode)}</Table.DataCell>
@@ -71,7 +83,7 @@ export const AvkortingInntektTabell = ({
                 <HStack gap="4" align="center">
                   <BodyShort>{avkortingGrunnlag.innvilgaMaaneder}</BodyShort>
                   {fyller67 &&
-                    isForventetInntekt(avkortingGrunnlag) &&
+                    erForventetInntekt(avkortingGrunnlag) &&
                     (!avkortingGrunnlag.overstyrtInnvilgaMaaneder ||
                       avkortingGrunnlag.overstyrtInnvilgaMaaneder.aarsak ===
                         SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67) && (
@@ -79,7 +91,7 @@ export const AvkortingInntektTabell = ({
                         <HeadCloudIcon aria-hidden fontSize="1.5rem" />
                       </Tooltip>
                     )}
-                  {isForventetInntekt(avkortingGrunnlag) && !!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
+                  {erForventetInntekt(avkortingGrunnlag) && !!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
                     <Tooltip content="Antall innvilga måneder er overstyrt">
                       <ArrowCirclepathIcon aria-hidden fontSize="1.5rem" />
                     </Tooltip>
@@ -87,7 +99,7 @@ export const AvkortingInntektTabell = ({
                 </HStack>
               </Table.DataCell>
               <Table.DataCell key="Aar">
-                {erEtteroppgjoerRevurdering && aarFraDatoString(avkortingGrunnlag.fom) === 2024 ? (
+                {erEtteroppgjoersAar(avkortingGrunnlag) ? (
                   <Tag variant="success">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
                 ) : (
                   <Tag variant="alt3">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
@@ -229,7 +241,7 @@ const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrun
 }
 
 const InntektDetaljer = ({ avkortingGrunnlag }: { avkortingGrunnlag: IAvkortingGrunnlag }) => {
-  if (isForventetInntekt(avkortingGrunnlag))
+  if (erForventetInntekt(avkortingGrunnlag))
     return <ForventetInntektDetaljer forventetInntektGrunnlag={avkortingGrunnlag} />
   else return <FaktiskInntektDetaljer faktiskInntektGrunnlag={avkortingGrunnlag} />
 }

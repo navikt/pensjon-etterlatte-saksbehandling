@@ -52,7 +52,7 @@ export interface FaktiskInntektGrunnlag {
   }
 }
 
-export function isForventetInntekt(
+export function erForventetInntekt(
   avkortingGrunnlag: IAvkortingGrunnlag
 ): avkortingGrunnlag is ForventetInntektGrunnlag {
   return avkortingGrunnlag.type === 'FORVENTET_INNTEKT'

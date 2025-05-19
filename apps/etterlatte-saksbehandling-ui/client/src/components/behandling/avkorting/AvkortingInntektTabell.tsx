@@ -9,7 +9,7 @@ import {
   FaktiskInntektGrunnlag,
   ForventetInntektGrunnlag,
   IAvkortingGrunnlag,
-  isForventetInntekt,
+  erForventetInntekt,
   SystemOverstyrtInnvilgaMaanederAarsak,
 } from '~shared/types/IAvkorting'
 import { ArrowCirclepathIcon, HeadCloudIcon } from '@navikt/aksel-icons'
@@ -70,11 +70,11 @@ export const AvkortingInntektTabell = ({
               <Table.DataCell key="InntektType">
                 {erEtteroppgjoersAar(avkortingGrunnlag) ? (
                   <Tag variant="success">
-                    {isForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
+                    {erForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
                   </Tag>
                 ) : (
                   <Tag variant="alt3">
-                    {isForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
+                    {erForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
                   </Tag>
                 )}
               </Table.DataCell>
@@ -83,7 +83,7 @@ export const AvkortingInntektTabell = ({
                 <HStack gap="4" align="center">
                   <BodyShort>{avkortingGrunnlag.innvilgaMaaneder}</BodyShort>
                   {fyller67 &&
-                    isForventetInntekt(avkortingGrunnlag) &&
+                    erForventetInntekt(avkortingGrunnlag) &&
                     (!avkortingGrunnlag.overstyrtInnvilgaMaaneder ||
                       avkortingGrunnlag.overstyrtInnvilgaMaaneder.aarsak ===
                         SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67) && (
@@ -91,7 +91,7 @@ export const AvkortingInntektTabell = ({
                         <HeadCloudIcon aria-hidden fontSize="1.5rem" />
                       </Tooltip>
                     )}
-                  {isForventetInntekt(avkortingGrunnlag) && !!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
+                  {erForventetInntekt(avkortingGrunnlag) && !!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
                     <Tooltip content="Antall innvilga måneder er overstyrt">
                       <ArrowCirclepathIcon aria-hidden fontSize="1.5rem" />
                     </Tooltip>
@@ -241,7 +241,7 @@ const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrun
 }
 
 const InntektDetaljer = ({ avkortingGrunnlag }: { avkortingGrunnlag: IAvkortingGrunnlag }) => {
-  if (isForventetInntekt(avkortingGrunnlag))
+  if (erForventetInntekt(avkortingGrunnlag))
     return <ForventetInntektDetaljer forventetInntektGrunnlag={avkortingGrunnlag} />
   else return <FaktiskInntektDetaljer faktiskInntektGrunnlag={avkortingGrunnlag} />
 }

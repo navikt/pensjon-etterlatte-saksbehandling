@@ -68,10 +68,14 @@ export const AvkortingInntektTabell = ({
           return (
             <Table.ExpandableRow key={index} content={<InntektDetaljer avkortingGrunnlag={avkortingGrunnlag} />}>
               <Table.DataCell key="InntektType">
-                {isForventetInntekt(avkortingGrunnlag) ? (
-                  <Tag variant="alt2">Forventet inntekt</Tag>
+                {erEtteroppgjoersAar(avkortingGrunnlag) ? (
+                  <Tag variant="success">
+                    {isForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
+                  </Tag>
                 ) : (
-                  <Tag variant="alt1">Faktisk inntekt</Tag>
+                  <Tag variant="alt3">
+                    {isForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
+                  </Tag>
                 )}
               </Table.DataCell>
               <Table.DataCell key="InntektTotalt">{NOK(avkortingGrunnlag.inntektInnvilgetPeriode)}</Table.DataCell>

@@ -17,6 +17,7 @@ import { aarFraDatoString, formaterDato } from '~utils/formatering/dato'
 import { lastDayOfMonth } from 'date-fns'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 interface Props {
   avkortingGrunnlagListe: IAvkortingGrunnlag[]
@@ -29,6 +30,13 @@ export const AvkortingInntektTabell = ({
   fyller67,
   erEtteroppgjoerRevurdering = false,
 }: Props) => {
+  const behandling = useBehandling()
+
+  const erEtteroppgjoersAar = (avkortingGrunnlag: IAvkortingGrunnlag) =>
+    erEtteroppgjoerRevurdering &&
+    !!behandling?.virkningstidspunkt?.dato &&
+    aarFraDatoString(avkortingGrunnlag.fom) === aarFraDatoString(behandling?.virkningstidspunkt?.dato)
+
   return (
     <Table className="table" zebraStripes>
       <Table.Header>
@@ -87,7 +95,7 @@ export const AvkortingInntektTabell = ({
                 </HStack>
               </Table.DataCell>
               <Table.DataCell key="Aar">
-                {erEtteroppgjoerRevurdering && aarFraDatoString(avkortingGrunnlag.fom) === 2024 ? (
+                {erEtteroppgjoersAar(avkortingGrunnlag) ? (
                   <Tag variant="success">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
                 ) : (
                   <Tag variant="alt3">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>

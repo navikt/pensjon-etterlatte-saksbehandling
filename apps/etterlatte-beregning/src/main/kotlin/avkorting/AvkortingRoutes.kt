@@ -60,6 +60,14 @@ fun Route.avkorting(
             }
         }
 
+        get("manglende-inntektsaar") {
+            withBehandlingId(behandlingKlient, skrivetilgang = false) { behandlingId ->
+                logger.info("Henter manglende påkrevde inntektsår for behandling=$behandlingId")
+                val paakrevdeInntekter = avkortingService.paakrevdeInntektsaar(behandlingId, brukerTokenInfo)
+                call.respond(paakrevdeInntekter)
+            }
+        }
+
         get("skalHaInntektNesteAar") {
             withBehandlingId(behandlingKlient) {
                 val behandling = behandlingKlient.hentBehandling(it, brukerTokenInfo)

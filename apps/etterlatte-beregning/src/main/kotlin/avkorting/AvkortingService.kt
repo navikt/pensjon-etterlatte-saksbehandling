@@ -50,6 +50,20 @@ class AvkortingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    suspend fun paakrevdeInntektsaar(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Int> {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val eksisterendeAvkorting = hentAvkorting(behandlingId)
+        val beregning = beregningService.hentBeregningNonnull(behandlingId)
+        return AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+            avkorting = eksisterendeAvkorting ?: Avkorting(),
+            beregning = beregning,
+            behandlingType = behandling.behandlingType,
+        )
+    }
+
     suspend fun hentOpprettEllerReberegnAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -473,7 +487,6 @@ object AvkortingMapper {
         forrigeAvkorting: Avkorting? = null,
     ): AvkortingFrontend {
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
-
         val redigerbarForventetInntekt =
             (
                 avkorting.aarsoppgjoer

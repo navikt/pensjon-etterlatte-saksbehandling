@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
@@ -68,11 +69,27 @@ object EtteroppgjoerBrevData {
     ) : BrevVedleggInnholdData()
 
     data class Vedtak(
+        val vedleggInnhold: List<Slate.Element> = emptyList(),
         val bosattUtland: Boolean,
+        val etteroppgjoersAar: Int,
+        val avviksBeloep: Kroner,
+        val stoenadsBeloep: Kroner,
+        val resultatType: EtteroppgjoerResultatType,
+        val inntekt: Kroner,
+        val faktiskInntekt: Kroner,
+        val grunnlag: EtteroppgjoerBrevGrunnlag,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_VEDTAK"
 
-        override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData = this
+        override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData =
+            this.copy(
+                vedleggInnhold =
+                    innhold()
+                        .single {
+                            it.key == BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING
+                        }.payload!!
+                        .elements,
+            )
 
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }
@@ -91,4 +108,17 @@ data class EtteroppgjoerBrevGrunnlag(
     val naeringsinntekt: Kroner,
     val afp: Kroner,
     val utlandsinntekt: Kroner,
-)
+) {
+    companion object {
+        fun fra(grunnlag: FaktiskInntektDto) =
+            EtteroppgjoerBrevGrunnlag(
+                fom = grunnlag.fom,
+                tom = grunnlag.tom!!,
+                innvilgedeMaaneder = grunnlag.innvilgaMaaneder,
+                loennsinntekt = Kroner(grunnlag.loennsinntekt),
+                naeringsinntekt = Kroner(grunnlag.naeringsinntekt),
+                afp = Kroner(grunnlag.afp),
+                utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
+            )
+    }
+}

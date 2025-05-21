@@ -147,7 +147,7 @@ class InnholdTilRedigerbartBrevHenter(
                 personerISak = generellBrevData.personerISak,
                 innhold =
                     BrevInnhold(
-                        brevKode.titlerPaaSpraak[generellBrevData.spraak] ?: brevKode.tittel,
+                        brevKode.tittel(generellBrevData.spraak),
                         generellBrevData.spraak,
                         innhold.await(),
                     ),

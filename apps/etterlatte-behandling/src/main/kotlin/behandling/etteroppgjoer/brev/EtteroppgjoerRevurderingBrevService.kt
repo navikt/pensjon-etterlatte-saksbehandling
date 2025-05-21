@@ -154,7 +154,12 @@ class EtteroppgjoerRevurderingBrevService(
                         faktiskInntekt = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                         grunnlag = EtteroppgjoerBrevGrunnlag.fra(faktiskInntekt),
                     ),
-                brevRedigerbarInnholdData = EtteroppgjoerBrevData.VedtakInnhold(),
+                brevRedigerbarInnholdData =
+                    EtteroppgjoerBrevData.VedtakInnhold(
+                        etteroppgjoersAar = detaljertForbehandling.behandling.aar,
+                        forhaandsvarselSendtDato = detaljertForbehandling.behandling.opprettet.toLocalDate(), // TODO: annen dato?
+                        mottattSvarDato = null, // TODO: legg til dato for mottatt journalpost
+                    ),
                 brevVedleggData =
                     listOf(
                         EtteroppgjoerBrevData.beregningsVedlegg(detaljertForbehandling.behandling.aar),

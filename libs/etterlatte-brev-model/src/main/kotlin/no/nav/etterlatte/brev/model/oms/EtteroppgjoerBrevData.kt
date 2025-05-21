@@ -68,7 +68,10 @@ object EtteroppgjoerBrevData {
 
     data class BeregningsVedleggInnhold(
         val etteroppgjoersAar: Int,
-    ) : BrevVedleggInnholdData()
+    ) : BrevVedleggInnholdData() {
+        override val type: String = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD"
+        override val brevKode: Vedlegg = Vedlegg.OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD
+    }
 
     data class Vedtak(
         val vedleggInnhold: List<Slate.Element> = emptyList(),

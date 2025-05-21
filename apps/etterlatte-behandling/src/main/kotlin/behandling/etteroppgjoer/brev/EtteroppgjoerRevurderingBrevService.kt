@@ -147,12 +147,12 @@ class EtteroppgjoerRevurderingBrevService(
                     EtteroppgjoerBrevData.Vedtak(
                         bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                         etteroppgjoersAar = detaljertForbehandling.behandling.aar,
+                        avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
+                        utbetaltBeloep = Kroner(sisteUtbetaltBeloep),
                         resultatType = beregnetEtteroppgjoerResultat.resultatType,
                         inntekt = Kroner(beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
                         faktiskInntekt = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
-                        avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
                         grunnlag = EtteroppgjoerBrevGrunnlag.fra(faktiskInntekt),
-                        utbetaltBeloep = Kroner(sisteUtbetaltBeloep),
                     ),
                 brevRedigerbarInnholdData = EtteroppgjoerBrevData.VedtakInnhold(),
                 brevVedleggData =

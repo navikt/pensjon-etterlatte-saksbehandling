@@ -73,13 +73,18 @@ data class AvkortingFrontendGammelDto(
 
 // Ny dto for avkorting til frontend, som setter redigerbare inntekter som en liste i stedet
 data class AvkortingFrontendDto(
-    val redigerbareInntekter: List<AvkortingGrunnlagDto>,
+    val redigerbareInntekter: List<ForventetInntektDto>,
     override val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     override val avkortetYtelse: List<AvkortetYtelseDto>,
     override val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
 ) : AvkortingFrontend {
-    override val redigerbarForventetInntekt: ForventetInntektDto? = null
-    override val redigerbarForventetInntektNesteAar: ForventetInntektDto? = null
+    // Disse feltene skal fjernes, men er bygd inn med kompatabilitet for gammel håndtering i frontend
+    override val redigerbarForventetInntekt: ForventetInntektDto? = redigerbareInntekter.minByOrNull { it.fom }
+    override val redigerbarForventetInntektNesteAar: ForventetInntektDto? =
+        when (redigerbareInntekter.size) {
+            2 -> redigerbareInntekter.maxBy { it.fom }
+            else -> null
+        }
 }
 
 // Inneholder alle perioder med beregnet ytelse etter avkorting på tvers av alle år

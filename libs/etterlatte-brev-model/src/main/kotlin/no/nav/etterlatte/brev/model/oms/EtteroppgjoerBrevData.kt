@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
@@ -84,11 +85,14 @@ object EtteroppgjoerBrevData {
         override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData =
             this.copy(
                 vedleggInnhold =
-                    innhold()
-                        .single {
-                            it.key == BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING
-                        }.payload!!
-                        .elements,
+                    krevIkkeNull(
+                        innhold()
+                            .singleOrNull {
+                                it.key == BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING
+                            }?.payload,
+                    ) {
+                        "Mangler påkrevd vedlegg for etteroppgjør beregningsvedlegg"
+                    }.elements,
             )
 
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK

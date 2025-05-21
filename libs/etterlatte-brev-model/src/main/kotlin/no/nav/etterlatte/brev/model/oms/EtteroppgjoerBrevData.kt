@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.time.LocalDate
 import java.time.YearMonth
 
 object EtteroppgjoerBrevData {
@@ -98,7 +99,11 @@ object EtteroppgjoerBrevData {
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }
 
-    class VedtakInnhold : BrevRedigerbarInnholdData() {
+    class VedtakInnhold(
+        val etteroppgjoersAar: Int,
+        val forhaandsvarselSendtDato: LocalDate,
+        val mottattSvarDato: LocalDate?,
+    ) : BrevRedigerbarInnholdData() {
         override val type: String = "OMS_EO_VEDTAK_UTFALL"
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }

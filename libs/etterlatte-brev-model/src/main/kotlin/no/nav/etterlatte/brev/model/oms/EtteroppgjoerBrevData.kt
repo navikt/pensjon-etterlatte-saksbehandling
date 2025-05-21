@@ -99,7 +99,7 @@ object EtteroppgjoerBrevData {
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }
 
-    class VedtakInnhold(
+    data class VedtakInnhold(
         val etteroppgjoersAar: Int,
         val forhaandsvarselSendtDato: LocalDate,
         val mottattSvarDato: LocalDate?,

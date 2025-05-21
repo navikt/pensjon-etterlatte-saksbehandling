@@ -689,10 +689,12 @@ internal class ApplicationContext(
 
     private val etteroppgjoerRevurderingBrevService =
         EtteroppgjoerRevurderingBrevService(
-            sakService = sakService,
             grunnlagService = grunnlagService,
             vedtakKlient = vedtakKlient,
             brevKlient = brevKlient,
+            behandlingService = behandlingService,
+            etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
+            beregningKlient = beregningsKlient,
         )
 
     val etteroppgjoerForbehandlingBrevService =

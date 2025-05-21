@@ -85,6 +85,7 @@ class EtteroppgjoerForbehandlingService(
                 )
 
         val avkorting = hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
+
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
         val aInntekt = dao.hentAInntekt(forbehandlingId)
 

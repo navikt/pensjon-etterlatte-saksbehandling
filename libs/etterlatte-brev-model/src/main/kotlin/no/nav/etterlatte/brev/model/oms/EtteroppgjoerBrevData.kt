@@ -73,7 +73,7 @@ object EtteroppgjoerBrevData {
         val bosattUtland: Boolean,
         val etteroppgjoersAar: Int,
         val avviksBeloep: Kroner,
-        val stoenadsBeloep: Kroner,
+        val utbetaltBeloep: Kroner,
         val resultatType: EtteroppgjoerResultatType,
         val inntekt: Kroner,
         val faktiskInntekt: Kroner,

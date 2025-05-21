@@ -694,6 +694,7 @@ internal class ApplicationContext(
             brevKlient = brevKlient,
             behandlingService = behandlingService,
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
+            beregningKlient = beregningsKlient,
         )
 
     val etteroppgjoerForbehandlingBrevService =

@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
@@ -34,6 +35,7 @@ class EtteroppgjoerRevurderingBrevService(
     private val brevKlient: BrevKlient,
     private val behandlingService: BehandlingService,
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
+    private val beregningKlient: BeregningKlient,
 ) {
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
@@ -105,6 +107,9 @@ class EtteroppgjoerRevurderingBrevService(
             val behandling =
                 behandlingService.hentBehandling(behandlingId) ?: throw InternfeilException("Fant ikke behandlingId=$behandlingId")
 
+            val avkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
+            val sisteUtbetaltBeloep = avkorting.perioder.maxBy { it.periode.fom }.ytelseEtterAvkorting
+
             val detaljertForbehandling =
                 etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
                     UUID.fromString(behandling.relatertBehandlingId),
@@ -119,7 +124,6 @@ class EtteroppgjoerRevurderingBrevService(
                 grunnlagService.hentOpplysningsgrunnlagForSak(detaljertForbehandling.behandling.sak.id)
                     ?: throw InternfeilException("Fant ikke grunnlag med sakId=$sakId")
 
-            val stoenadsBeloep = Kroner(12345) // TODO Ytelse etter avkorting for oms
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
             val beregnetEtteroppgjoerResultat =
                 detaljertForbehandling.beregnetEtteroppgjoerResultat
@@ -148,7 +152,7 @@ class EtteroppgjoerRevurderingBrevService(
                         faktiskInntekt = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                         avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
                         grunnlag = EtteroppgjoerBrevGrunnlag.fra(faktiskInntekt),
-                        stoenadsBeloep = stoenadsBeloep,
+                        utbetaltBeloep = Kroner(sisteUtbetaltBeloep),
                     ),
                 brevRedigerbarInnholdData = EtteroppgjoerBrevData.VedtakInnhold(),
                 brevVedleggData =

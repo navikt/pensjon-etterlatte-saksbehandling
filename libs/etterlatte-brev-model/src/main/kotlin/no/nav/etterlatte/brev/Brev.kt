@@ -117,6 +117,8 @@ data class Brev(
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 
     fun erFerdigstilt() = status in listOf(Status.FERDIGSTILT)
+
+    fun erDistribuert() = status in listOf(Status.DISTRIBUERT)
 }
 
 enum class BrevProsessType {

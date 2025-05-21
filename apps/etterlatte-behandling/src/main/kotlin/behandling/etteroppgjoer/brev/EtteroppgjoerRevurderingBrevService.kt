@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
@@ -23,6 +24,7 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -36,6 +38,7 @@ class EtteroppgjoerRevurderingBrevService(
     private val behandlingService: BehandlingService,
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val beregningKlient: BeregningKlient,
+    private val brevApiKlient: BrevApiKlient,
 ) {
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
@@ -124,14 +127,23 @@ class EtteroppgjoerRevurderingBrevService(
                 grunnlagService.hentOpplysningsgrunnlagForSak(detaljertForbehandling.behandling.sak.id)
                     ?: throw InternfeilException("Fant ikke grunnlag med sakId=$sakId")
 
-            val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
             val beregnetEtteroppgjoerResultat =
                 detaljertForbehandling.beregnetEtteroppgjoerResultat
                     ?: throw InternfeilException("Fant ikke etteroppgjoerResultat for behandlingId=$behandlingId")
+
             val faktiskInntekt =
                 detaljertForbehandling.faktiskInntekt
                     ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
+
             val sak = detaljertForbehandling.behandling.sak
+
+            val forhaandsvarselBrev =
+                brevApiKlient
+                    .hentBrev(sak.id, detaljertForbehandling.behandling.brevId!!, brukerTokenInfo)
+
+            krev(forhaandsvarselBrev.erDistribuert()) {
+                "Finner ingen distribuerte forhåndsvarsel om etteroppgjør"
+            }
 
             BrevRequest(
                 sak = sak,
@@ -140,8 +152,8 @@ class EtteroppgjoerRevurderingBrevService(
                 avdoede = grunnlag.mapAvdoede(),
                 verge = hentVergeForSak(sak.sakType, null, grunnlag),
                 spraak = grunnlag.mapSpraak(),
-                saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent,
-                attestantIdent = vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
+                saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
+                attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
                 skalLagre = skalLagres,
                 brevFastInnholdData =
                     EtteroppgjoerBrevData.Vedtak(
@@ -157,7 +169,7 @@ class EtteroppgjoerRevurderingBrevService(
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(
                         etteroppgjoersAar = detaljertForbehandling.behandling.aar,
-                        forhaandsvarselSendtDato = detaljertForbehandling.behandling.opprettet.toLocalDate(), // TODO: annen dato?
+                        forhaandsvarselSendtDato = forhaandsvarselBrev.statusEndret.toLocalDate(),
                         mottattSvarDato = null, // TODO: legg til dato for mottatt journalpost
                     ),
                 brevVedleggData =

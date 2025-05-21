@@ -16,7 +16,7 @@ import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringSer
 import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.bruker
-import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendGammelDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -63,7 +63,7 @@ class MottattInntektsjusteringServiceTest {
         val inntektSomLagres = slot<AvkortingGrunnlagLagreDto>()
 
         coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(request.behandlingId, bruker) } returns
-            AvkortingFrontend(
+            AvkortingFrontendGammelDto(
                 redigerbarForventetInntekt = eksisterendeInntekt.toDto(),
                 redigerbarForventetInntektNesteAar = null,
                 avkortingGrunnlag = emptyList(),
@@ -135,7 +135,7 @@ class MottattInntektsjusteringServiceTest {
                 bruker,
             )
         } returns
-            AvkortingFrontend(
+            AvkortingFrontendGammelDto(
                 redigerbarForventetInntekt = eksisterendeInntekt.toDto(),
                 redigerbarForventetInntektNesteAar = null,
                 avkortingGrunnlag = emptyList(),

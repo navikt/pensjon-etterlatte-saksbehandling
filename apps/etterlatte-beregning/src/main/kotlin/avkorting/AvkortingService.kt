@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendGammelDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -485,7 +486,7 @@ object AvkortingMapper {
         behandling: DetaljertBehandling,
         skalHaInntektInnevaerendeOgNesteAar: Boolean,
         forrigeAvkorting: Avkorting? = null,
-    ): AvkortingFrontend {
+    ): AvkortingFrontendGammelDto {
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val redigerbarForventetInntekt =
             (
@@ -525,7 +526,7 @@ object AvkortingMapper {
 
         val dto = avkorting.toDto(virkningstidspunkt)
 
-        return AvkortingFrontend(
+        return AvkortingFrontendGammelDto(
             redigerbarForventetInntekt = redigerbarForventetInntekt,
             redigerbarForventetInntektNesteAar = redigerbarForventetInntektNesteAar,
             avkortingGrunnlag = dto.avkortingGrunnlag.sortedByDescending { it.fom },

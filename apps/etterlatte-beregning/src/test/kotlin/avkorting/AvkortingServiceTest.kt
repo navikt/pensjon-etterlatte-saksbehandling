@@ -24,7 +24,7 @@ import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendGammelDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -80,7 +80,7 @@ internal class AvkortingServiceTest {
     }
 
     @Nested
-    inner class HentAvkortingFrontend {
+    inner class HentAvkortingFrontendGammelDto {
         @Test
         fun `Foerstegangsbehandling skal returnere null hvis avkorting ikke finnes`() {
             val behandlingId = UUID.randomUUID()
@@ -114,7 +114,7 @@ internal class AvkortingServiceTest {
                     status = BehandlingStatus.AVKORTET,
                 )
             val avkorting = mockk<Avkorting>()
-            val avkortingFrontend = mockk<AvkortingFrontend>()
+            val avkortingFrontend = mockk<AvkortingFrontendGammelDto>()
 
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             every { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
@@ -153,7 +153,7 @@ internal class AvkortingServiceTest {
             val beregning = mockk<Beregning>()
             val reberegnetAvkorting = mockk<Avkorting>()
             val lagretAvkorting = mockk<Avkorting>()
-            val avkortingFrontend = mockk<AvkortingFrontend>()
+            val avkortingFrontend = mockk<AvkortingFrontendGammelDto>()
 
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
@@ -198,7 +198,7 @@ internal class AvkortingServiceTest {
             val forrigeBehandlingId = UUID.randomUUID()
             val eksisterendeAvkorting = mockk<Avkorting>()
             val forrigeAvkorting = mockk<Avkorting>()
-            val avkortingFrontend = mockk<AvkortingFrontend>()
+            val avkortingFrontend = mockk<AvkortingFrontendGammelDto>()
             val alleVedtak =
                 listOf(
                     vedtakSammendragDto(behandlingId = forrigeBehandlingId),
@@ -256,7 +256,7 @@ internal class AvkortingServiceTest {
             val beregning = mockk<Beregning>()
             val beregnetAvkorting = mockk<Avkorting>()
             val lagretAvkorting = mockk<Avkorting>()
-            val avkortingFrontend = mockk<AvkortingFrontend>()
+            val avkortingFrontend = mockk<AvkortingFrontendGammelDto>()
             val alleVedtak =
                 listOf(
                     vedtakSammendragDto(behandlingId = forrigeBehandlingId),
@@ -330,7 +330,7 @@ internal class AvkortingServiceTest {
             val beregning = mockk<Beregning>()
             val reberegnetAvkorting = mockk<Avkorting>()
             val lagretAvkorting = mockk<Avkorting>()
-            val avkortingFrontend = mockk<AvkortingFrontend>()
+            val avkortingFrontend = mockk<AvkortingFrontendGammelDto>()
             val alleVedtak =
                 listOf(
                     vedtakSammendragDto(behandlingId = forrigeBehandlingId),
@@ -394,7 +394,7 @@ internal class AvkortingServiceTest {
         val eksisterendeAvkorting = mockk<Avkorting>()
         val beregnetAvkorting = mockk<Avkorting>()
         val lagretAvkorting = mockk<Avkorting>()
-        val avkortingFrontend = mockk<AvkortingFrontend>()
+        val avkortingFrontend = mockk<AvkortingFrontendGammelDto>()
 
         @Test
         fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {

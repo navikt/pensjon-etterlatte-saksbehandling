@@ -125,7 +125,7 @@ data class EtteroppgjoerBrevGrunnlag(
     companion object {
         fun fra(grunnlag: FaktiskInntektDto): EtteroppgjoerBrevGrunnlag {
             krevIkkeNull(grunnlag.inntektInnvilgetPeriode) {
-                "Kan ikke vise beregningstabell uten summer faktisk inntekt"
+                "Kan ikke vise beregningstabell uten summert faktisk inntekt"
             }
 
             return EtteroppgjoerBrevGrunnlag(

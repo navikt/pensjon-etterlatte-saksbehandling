@@ -96,7 +96,7 @@ export function AvkortingInntektForm({
           alleInntektsgrunnlag.some(
             (inntekt) => aarFraDatoString(inntekt.fom) === inntektsAar && maanedFraDatoString(inntekt.fom) === 0
           )
-        const kanOverstyreInnvilgedeMaaneder = index === watch('inntekter').length - 1
+        const kanOverstyreInnvilgedeMaaneder = index === inntekterForRedigering.length - 1
 
         return (
           <React.Fragment key={item.id}>

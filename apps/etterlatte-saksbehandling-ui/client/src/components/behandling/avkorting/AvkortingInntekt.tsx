@@ -24,6 +24,7 @@ function tomInntektForRedigering(aar: number, virkAar: number, virk: Virkningsti
     fom: aar === virkAar ? virk.dato : `${aar}-01`,
   }
 }
+
 function redigerbareInntekterForAvkorting(avkorting?: IAvkorting): IAvkortingGrunnlag[] {
   if (!avkorting) {
     return []
@@ -31,6 +32,7 @@ function redigerbareInntekterForAvkorting(avkorting?: IAvkorting): IAvkortingGru
   if (avkorting.redigerbareInntekter) {
     return avkorting.redigerbareInntekter
   }
+  // Håndtering for gammel dto for avkorting
   return [avkorting.redigerbarForventetInntekt, avkorting.redigerbarForventetInntektNesteAar].filter(
     (inntekt) => !!inntekt
   )
@@ -60,6 +62,7 @@ export const AvkortingInntekt = ({ redigerbar }: { redigerbar: boolean }) => {
 
   const paakrevdeAar = mapSuccess(statusHentManglendeInntektsaar, (aar) => aar) ?? []
 
+  // Vi kan kun avbryte hvis vi ikke har noen påkrevde år som ikke er utfylt enda
   const avbrytRedigering = paakrevdeAar.length > 0 ? undefined : () => setInntekterForRedigering([])
   const fyller67 =
     paakrevdeAar.some((aar) => personopplysning?.soeker?.opplysning.foedselsaar === aar) ||

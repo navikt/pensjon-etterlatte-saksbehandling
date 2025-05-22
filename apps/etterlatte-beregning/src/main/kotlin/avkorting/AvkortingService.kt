@@ -53,18 +53,23 @@ class AvkortingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun paakrevdeInntektsaar(
+    suspend fun manglendeInntektsaar(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Int> {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val eksisterendeAvkorting = hentAvkorting(behandlingId)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        return AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
-            avkorting = eksisterendeAvkorting ?: Avkorting(),
-            beregning = beregning,
-            behandlingType = behandling.behandlingType,
-        )
+        val aarMedAvkorting = eksisterendeAvkorting?.aarsoppgjoer?.map { it.aar }?.toSet() ?: emptySet()
+        val paakrevdeAar =
+            AvkortingValider
+                .paakrevdeInntekterForBeregningAvAvkorting(
+                    avkorting = eksisterendeAvkorting ?: Avkorting(),
+                    beregning = beregning,
+                    behandlingType = behandling.behandlingType,
+                ).toSet()
+        val manglendeAar = paakrevdeAar - aarMedAvkorting
+        return manglendeAar.sorted()
     }
 
     suspend fun hentOpprettEllerReberegnAvkorting(

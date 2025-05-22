@@ -51,6 +51,7 @@ export const AvkortingInntekt = ({ redigerbar }: { redigerbar: boolean }) => {
   }, [avkorting])
 
   function vedLagring() {
+    fetchHentManglendeInntektsaar(behandling.id)
     setInntekterForRedigering([])
   }
 

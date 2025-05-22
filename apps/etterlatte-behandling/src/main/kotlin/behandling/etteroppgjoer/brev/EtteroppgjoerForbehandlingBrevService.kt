@@ -156,6 +156,8 @@ class EtteroppgjoerForbehandlingBrevService(
 
         val bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND
         val grunnlag = data.faktiskInntekt ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
+
+        grunnlag.inntektInnvilgetPeriode
         // TODO: usikker om dette blir rett, følge opp ifm testing
         val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
 
@@ -177,8 +179,8 @@ class EtteroppgjoerForbehandlingBrevService(
                     etteroppgjoersAar = data.behandling.aar,
                     rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
-                    inntekt = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
-                    faktiskInntekt = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                    stoenad = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                    faktiskStoenad = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                     avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
                     grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag),
                 ),

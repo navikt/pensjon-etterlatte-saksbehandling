@@ -16,3 +16,12 @@ export const lagreAvkortingGrunnlag = async (args: {
   avkortingGrunnlag: IAvkortingGrunnlagLagre
 }): Promise<ApiResponse<IAvkorting>> =>
   apiClient.post(`/beregning/avkorting/${args.behandlingId}`, { ...args.avkortingGrunnlag })
+
+export const lagreInntektListe = async (args: {
+  behandlingId: string
+  inntekter: IAvkortingGrunnlagLagre[]
+}): Promise<ApiResponse<IAvkorting>> =>
+  apiClient.post(`/beregning/avkorting/${args.behandlingId}/liste`, { inntekter: args.inntekter })
+
+export const hentManglendeInntektsaar = async (behandlingId: string): Promise<ApiResponse<number[]>> =>
+  apiClient.get(`/beregning/avkorting/${behandlingId}/manglende-inntektsaar`)

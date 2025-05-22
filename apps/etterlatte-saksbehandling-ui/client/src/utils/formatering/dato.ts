@@ -39,6 +39,8 @@ export const aarFraDatoString = (dato: string) => new Date(dato).getFullYear()
 
 export const maanedFraDatoString = (dato: string) => new Date(dato).getMonth()
 
+export const kanskjeMaanedFraDatoString = (dato?: string) => (dato ? maanedFraDatoString(dato) : undefined)
+
 export const datoIMorgen = (): Date => {
   return add(new Date(), { days: 1 })
 }

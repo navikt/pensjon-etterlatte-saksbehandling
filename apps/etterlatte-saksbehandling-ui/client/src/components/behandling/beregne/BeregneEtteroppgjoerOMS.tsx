@@ -73,11 +73,7 @@ export const BeregneEtteroppgjoerOMS = () => {
             <VStack gap="10">
               <OmstillingsstoenadSammendrag beregning={beregning} />
               {/* TODO må vurdere om denne komponenten skal brukes eller om man skal klare å dra enkelt-deler ut */}
-              <Avkorting
-                behandling={behandling}
-                resetInntektsavkortingValidering={() => {}}
-                skalHaInntektNesteAar={false}
-              />
+              <Avkorting />
             </VStack>
             {erAvkortet() && <SimulerUtbetaling behandling={behandling} />}
           </Box>

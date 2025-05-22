@@ -24,7 +24,6 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { avkortingSkalHaToInntekter } from '~shared/api/avkorting'
 
 export const BeregneOMS = () => {
   const behandling = useBehandling()
@@ -35,9 +34,6 @@ export const BeregneOMS = () => {
   const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
-
-  const [, avkortingSkalHaToInntekterRequest] = useApiCall(avkortingSkalHaToInntekter)
-  const [skalHaInntektNesteAar, setSkalHaInntektNesteAar] = useState(false)
 
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
@@ -53,41 +49,27 @@ export const BeregneOMS = () => {
     (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
   )
 
-  const behandlingsstatus = useAppSelector((state) => state.behandlingReducer.behandling?.status)
-
   const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
-  const [manglerAvkorting, setManglerAvkorting] = useState(false)
 
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   useEffect(() => {
     if (!erOpphoer) {
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
-      avkortingSkalHaToInntekterRequest(behandling.id, (response) =>
-        setSkalHaInntektNesteAar(response.skalHaInntektNesteAar)
-      )
     }
   }, [])
 
-  const erAvkortet = () =>
-    !(
-      [
-        IBehandlingStatus.OPPRETTET,
-        IBehandlingStatus.VILKAARSVURDERT,
-        IBehandlingStatus.TRYGDETID_OPPDATERT,
-        IBehandlingStatus.BEREGNET,
-      ] as IBehandlingStatus[]
-    ).includes(behandling.status)
+  const erAvkortet = !(
+    [
+      IBehandlingStatus.OPPRETTET,
+      IBehandlingStatus.VILKAARSVURDERT,
+      IBehandlingStatus.TRYGDETID_OPPDATERT,
+      IBehandlingStatus.BEREGNET,
+    ] as IBehandlingStatus[]
+  ).includes(behandling.status)
 
   const opprettEllerOppdaterVedtak = () => {
     const skalSendeBrev = behandling.sendeBrev
-
-    if (behandlingsstatus == IBehandlingStatus.BEREGNET) {
-      setManglerAvkorting(true)
-      return
-    }
-    setManglerAvkorting(false)
-
     if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
       return
@@ -122,26 +104,15 @@ export const BeregneOMS = () => {
               <Box paddingInline="18" paddingBlock="4">
                 <>
                   <OmstillingsstoenadSammendrag beregning={beregning} />
-                  <Avkorting
-                    behandling={behandling}
-                    resetInntektsavkortingValidering={() => setManglerAvkorting(false)}
-                    skalHaInntektNesteAar={skalHaInntektNesteAar}
-                  />
+                  <Avkorting />
                 </>
-                {erAvkortet() && <SimulerUtbetaling behandling={behandling} />}
-                {erAvkortet() && (
+                {erAvkortet && <SimulerUtbetaling behandling={behandling} />}
+                {erAvkortet && (
                   <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
                 )}
                 {manglerBrevutfall && (
                   <Alert style={{ maxWidth: '16em' }} variant="error">
                     Du må fylle ut utfall i brev
-                  </Alert>
-                )}
-                {manglerAvkorting && (
-                  <Alert style={{ maxWidth: '16em' }} variant="error">
-                    {skalHaInntektNesteAar
-                      ? 'Du må legge til inntektsavkorting for inneværende og neste år, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'
-                      : 'Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'}
                   </Alert>
                 )}
               </Box>

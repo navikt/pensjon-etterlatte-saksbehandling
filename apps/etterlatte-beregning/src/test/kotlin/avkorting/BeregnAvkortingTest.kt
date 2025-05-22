@@ -1992,12 +1992,14 @@ class BeregnAvkortingTest {
 
     private fun `Avkorting foerstegangsbehandling`() =
         Avkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 300000,
-                        fratrekkInnAar = 50000,
-                        fom = YearMonth.of(2024, Month.MARCH),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.MARCH),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =
@@ -2059,12 +2061,14 @@ class BeregnAvkortingTest {
 
     private fun `Avkorting foerstegangsbehandling med sanksjon`() =
         Avkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 300000,
-                        fratrekkInnAar = 50000,
-                        fom = YearMonth.of(2024, Month.MARCH),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.MARCH),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =
@@ -2129,13 +2133,15 @@ class BeregnAvkortingTest {
     private fun `Avkorting ny inntekt en`() =
         `Avkorting foerstegangsbehandling`()
             .kopierAvkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        id = UUID.randomUUID(),
-                        aarsinntekt = 400000,
-                        fratrekkInnAar = 50000,
-                        fom = YearMonth.of(2024, Month.JULY),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 400000,
+                            fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.JULY),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =
@@ -2219,13 +2225,15 @@ class BeregnAvkortingTest {
     private fun `Avkorting ny lavere inntekt to etter sanksjon`() =
         `Sanksjon etter inntektsendring lukkes`()
             .kopierAvkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        id = UUID.randomUUID(),
-                        aarsinntekt = 300000,
-                        fratrekkInnAar = 50000,
-                        fom = YearMonth.of(2024, Month.SEPTEMBER),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.SEPTEMBER),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =
@@ -2252,13 +2260,15 @@ class BeregnAvkortingTest {
     private fun `Avkorting ny inntekt to`() =
         `Avkorting ny inntekt en`()
             .kopierAvkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        id = UUID.randomUUID(),
-                        aarsinntekt = 450000,
-                        fratrekkInnAar = 50000,
-                        fom = YearMonth.of(2024, Month.SEPTEMBER),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 450000,
+                            fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.SEPTEMBER),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =
@@ -2301,8 +2311,8 @@ class BeregnAvkortingTest {
         `Avkorting revurdert beregning`()
             .kopierAvkorting()
             .let {
-                it.beregnAvkortingMedNyttGrunnlag(
-                    nyttGrunnlag =
+                it.beregnAvkortingMedNyeGrunnlag(
+                    listOf(
                         avkortinggrunnlagLagreDto(
                             id =
                                 it.aarsoppgjoer
@@ -2314,16 +2324,18 @@ class BeregnAvkortingTest {
                             fratrekkInnAar = 50000,
                             fom = YearMonth.of(2024, Month.SEPTEMBER),
                         ),
-                    bruker = bruker,
-                    beregning(
-                        beregninger =
-                            listOf(
-                                beregningsperiode(
-                                    datoFOM = YearMonth.of(2024, Month.SEPTEMBER),
-                                    utbetaltBeloep = 22241,
-                                ),
-                            ),
                     ),
+                    bruker = bruker,
+                    beregning =
+                        beregning(
+                            beregninger =
+                                listOf(
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2024, Month.SEPTEMBER),
+                                        utbetaltBeloep = 22241,
+                                    ),
+                                ),
+                        ),
                     sanksjoner = emptyList(),
                     opphoerFom = null,
                 )
@@ -2354,13 +2366,15 @@ class BeregnAvkortingTest {
     private fun `Revurdering ny inntekt for nytt år`() =
         `Revurdering med virk mellom inntektsperioder`()
             .kopierAvkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        id = UUID.randomUUID(),
-                        aarsinntekt = 500000,
-                        fratrekkInnAar = 0,
-                        fom = YearMonth.of(2025, Month.JANUARY),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 500000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =
@@ -2397,14 +2411,16 @@ class BeregnAvkortingTest {
     private fun `Revurdering ny inntekt nytt år med opphør`() =
         `Revurdering med virk tilbake i tidligere år`()
             .kopierAvkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        id = UUID.randomUUID(),
-                        aarsinntekt = 262500,
-                        fratrekkInnAar = 0,
-                        // TODO Legge til fratrekk ut år når det kommer
-                        fom = YearMonth.of(2026, Month.JANUARY),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 262500,
+                            fratrekkInnAar = 0,
+                            // TODO Legge til fratrekk ut år når det kommer
+                            fom = YearMonth.of(2026, Month.JANUARY),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =

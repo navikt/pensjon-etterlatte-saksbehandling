@@ -96,6 +96,7 @@ export function AvkortingInntektForm({
           alleInntektsgrunnlag.some(
             (inntekt) => aarFraDatoString(inntekt.fom) === inntektsAar && maanedFraDatoString(inntekt.fom) === 0
           )
+        // Det er kun det siste inntektsåret som kan overstyre innvilgede måneder
         const kanOverstyreInnvilgedeMaaneder = index === inntekterForRedigering.length - 1
 
         return (

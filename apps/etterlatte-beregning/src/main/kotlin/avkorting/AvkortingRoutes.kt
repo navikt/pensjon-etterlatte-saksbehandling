@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingR
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFlereInntekterDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -68,14 +67,6 @@ fun Route.avkorting(
             }
         }
 
-        get("skalHaInntektNesteAar") {
-            withBehandlingId(behandlingKlient) {
-                val behandling = behandlingKlient.hentBehandling(it, brukerTokenInfo)
-                val skalHaInntektNesteAar = avkortingService.skalHaInntektInnevaerendeOgNesteAar(behandling)
-                call.respond(AvkortingSkalHaInntektNesteAarDTO(skalHaInntektNesteAar))
-            }
-        }
-
         /*
         Brukes når behandling er ferdig med avkorting slik at det kan hentes uten at det gjøres nye beregninger og
         endringer på behandlingstatus.
@@ -84,20 +75,6 @@ fun Route.avkorting(
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
                 call.respond(avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo))
-            }
-        }
-
-        post {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Lagre avkorting for behandlingId=$it")
-                val avkortingGrunnlag = call.receive<AvkortingGrunnlagLagreDto>()
-                val avkorting =
-                    avkortingService.beregnAvkortingMedNyttGrunnlag(
-                        it,
-                        brukerTokenInfo,
-                        avkortingGrunnlag,
-                    )
-                call.respond(avkorting)
             }
         }
 

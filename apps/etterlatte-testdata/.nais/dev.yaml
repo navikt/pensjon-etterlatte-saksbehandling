@@ -69,7 +69,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
         - application: testnav-person-service
           namespace: dolly
           cluster: dev-gcp

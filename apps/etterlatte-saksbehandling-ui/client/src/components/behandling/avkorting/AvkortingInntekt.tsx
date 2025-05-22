@@ -4,18 +4,19 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { AvkortingInntektTabell } from '~components/behandling/avkorting/AvkortingInntektTabell'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { aarFraDatoString } from '~utils/formatering/dato'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { IAvkorting, IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
-import { Virkningstidspunkt, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, Virkningstidspunkt, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentManglendeInntektsaar } from '~shared/api/avkorting'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
 import { ogSeparertListe } from '../felles/utils'
+import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 
 function tomInntektForRedigering(aar: number, virkAar: number, virk: Virkningstidspunkt): IAvkortingGrunnlagLagre {
   return {
@@ -43,6 +44,7 @@ export const AvkortingInntekt = ({ redigerbar }: { redigerbar: boolean }) => {
   const personopplysning = usePersonopplysninger()
   const [inntekterForRedigering, setInntekterForRedigering] = useState<IAvkortingGrunnlagLagre[]>([])
   const [statusHentManglendeInntektsaar, fetchHentManglendeInntektsaar] = useApiCall(hentManglendeInntektsaar)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     fetchHentManglendeInntektsaar(behandling.id, (paakrevdeAar) => {
@@ -53,6 +55,7 @@ export const AvkortingInntekt = ({ redigerbar }: { redigerbar: boolean }) => {
   function vedLagring() {
     fetchHentManglendeInntektsaar(behandling.id)
     setInntekterForRedigering([])
+    dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
   }
 
   const paakrevdeAar = mapSuccess(statusHentManglendeInntektsaar, (aar) => aar) ?? []

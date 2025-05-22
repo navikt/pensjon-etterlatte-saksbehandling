@@ -32,8 +32,8 @@ object EtteroppgjoerBrevData {
         val etteroppgjoersAar: Int,
         val rettsgebyrBeloep: Kroner,
         val resultatType: EtteroppgjoerResultatType,
-        val inntekt: Kroner,
-        val faktiskInntekt: Kroner,
+        val stoenad: Kroner,
+        val faktiskStoenad: Kroner,
         val avviksBeloep: Kroner,
         val grunnlag: EtteroppgjoerBrevGrunnlag,
     ) : BrevFastInnholdData() {
@@ -80,8 +80,8 @@ object EtteroppgjoerBrevData {
         val avviksBeloep: Kroner,
         val utbetaltBeloep: Kroner,
         val resultatType: EtteroppgjoerResultatType,
-        val inntekt: Kroner,
-        val faktiskInntekt: Kroner,
+        val stoenad: Kroner,
+        val faktiskStoenad: Kroner,
         val grunnlag: EtteroppgjoerBrevGrunnlag,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_VEDTAK"
@@ -120,10 +120,15 @@ data class EtteroppgjoerBrevGrunnlag(
     val naeringsinntekt: Kroner,
     val afp: Kroner,
     val utlandsinntekt: Kroner,
+    val inntekt: Kroner,
 ) {
     companion object {
-        fun fra(grunnlag: FaktiskInntektDto) =
-            EtteroppgjoerBrevGrunnlag(
+        fun fra(grunnlag: FaktiskInntektDto): EtteroppgjoerBrevGrunnlag {
+            krevIkkeNull(grunnlag.inntektInnvilgetPeriode) {
+                "Kan ikke vise beregningstabell uten summert faktisk inntekt"
+            }
+
+            return EtteroppgjoerBrevGrunnlag(
                 fom = grunnlag.fom,
                 tom = grunnlag.tom!!,
                 innvilgedeMaaneder = grunnlag.innvilgaMaaneder,
@@ -131,6 +136,8 @@ data class EtteroppgjoerBrevGrunnlag(
                 naeringsinntekt = Kroner(grunnlag.naeringsinntekt),
                 afp = Kroner(grunnlag.afp),
                 utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
+                inntekt = Kroner(grunnlag.inntektInnvilgetPeriode!!),
             )
+        }
     }
 }

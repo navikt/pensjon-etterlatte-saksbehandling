@@ -1,6 +1,8 @@
 package avkorting
 
+import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingValider
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.avkorting.FoersteRevurderingSenereEnnJanuar
 import no.nav.etterlatte.avkorting.HarFratrekkInnAarForFulltAar
@@ -9,12 +11,16 @@ import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.beregning
+import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.etteroppgjoer
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Month
 import java.time.YearMonth
 
 class AvkortingValiderTest {
@@ -312,5 +318,28 @@ class AvkortingValiderTest {
             false,
             naa = YearMonth.of(2024, 1),
         )
+    }
+
+    @Test
+    fun `påkrevde inntekter henter nødvendige inntekter med beregning over to år`() {
+        val avkorting = Avkorting()
+        val beregning =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2024, Month.JULY),
+                            datoTOM = YearMonth.of(2025, Month.APRIL),
+                        ),
+                        beregningsperiode(datoFOM = YearMonth.of(2025, Month.MAY)),
+                    ),
+            )
+        val krav =
+            AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                avkorting,
+                beregning,
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+            )
+        krav shouldContainExactly listOf(2024, 2025)
     }
 }

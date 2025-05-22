@@ -1318,6 +1318,86 @@ class BeregnAvkortingTest {
     }
 
     @Test
+    fun `kan beregne med to innsendte inntekter`() {
+        val avkorting = `Avkorting foerstegangsbehandling med to inntekter`()
+        avkorting.aarsoppgjoer.size shouldBe 2
+        with(avkorting.aarsoppgjoer[0].avkortetYtelse) {
+            size shouldBe 2
+            get(0).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MARCH),
+                                tom = YearMonth.of(2024, Month.APRIL),
+                            ),
+                        ytelseEtterAvkorting = 6650,
+                        ytelseEtterAvkortingFoerRestanse = 6650,
+                        avkortingsbeloep = 9026,
+                        ytelseFoerAvkorting = 15676,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+            get(1).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MAY),
+                                tom = YearMonth.of(2024, Month.DECEMBER),
+                            ),
+                        ytelseEtterAvkorting = 7758,
+                        ytelseEtterAvkortingFoerRestanse = 7758,
+                        avkortingsbeloep = 8924,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+            }
+        }
+        with(avkorting.aarsoppgjoer[1].avkortetYtelse) {
+            size shouldBe 2
+            get(0).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2025, Month.JANUARY),
+                                tom = YearMonth.of(2025, Month.APRIL),
+                            ),
+                        ytelseEtterAvkorting = 5883,
+                        ytelseEtterAvkortingFoerRestanse = 5883,
+                        avkortingsbeloep = 10799,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+        }
+    }
+
+    @Test
     fun `Revurdering inntektsendring nytt år`() {
         val avkorting = `Revurdering ny inntekt for nytt år`()
         with(avkorting.aarsoppgjoer[0].avkortetYtelse) {
@@ -1933,6 +2013,44 @@ class BeregnAvkortingTest {
                                     datoFOM = YearMonth.of(2024, Month.MAY),
                                     utbetaltBeloep = 16682,
                                 ),
+                            ),
+                    ),
+                sanksjoner = emptyList(),
+                opphoerFom = null,
+            )
+
+    private fun `Avkorting foerstegangsbehandling med to inntekter`() =
+        Avkorting()
+            .beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag =
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.MARCH),
+                        ),
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 350000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                        ),
+                    ),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MARCH),
+                                    datoTOM = YearMonth.of(2024, Month.APRIL),
+                                    utbetaltBeloep = 15676,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MAY),
+                                    datoTOM = YearMonth.of(2025, Month.APRIL),
+                                    utbetaltBeloep = 16682,
+                                ),
+                                beregningsperiode(datoFOM = YearMonth.of(2025, Month.MAY), utbetaltBeloep = 18000),
                             ),
                     ),
                 sanksjoner = emptyList(),

@@ -3,7 +3,6 @@ import SlateEditor from '~components/behandling/brev/SlateEditor'
 import React, { useEffect, useState } from 'react'
 import { FilePdfIcon, PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { Brevtype, IBrev } from '~shared/types/Brev'
 import { hentManuellPayload, lagreManuellPayload, tilbakestillManuellPayload } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -114,7 +113,6 @@ export default function RedigerbartBrev({
     })
     setVedlegg(oppdatertVedlegg)
   }
-  const kanTilbakestille = brev.brevtype === Brevtype.VEDTAK && kanRedigeres
 
   return (
     <Container>
@@ -191,7 +189,7 @@ export default function RedigerbartBrev({
                   ))}
               </Accordion>
 
-              {kanTilbakestille && (
+              {kanRedigeres && (
                 <TilbakestillOgLagreRad
                   lagretStatus={lagretStatus}
                   lagre={lagre}

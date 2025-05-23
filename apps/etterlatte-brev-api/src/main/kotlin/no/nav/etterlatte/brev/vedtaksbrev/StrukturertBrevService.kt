@@ -127,12 +127,8 @@ class StrukturertBrevService(
         brevRequest: BrevRequest,
     ): Pdf {
         val brev = db.hentBrev(brevId)
-
         val brevInnholdData = utledBrevInnholdData(brev, brevRequest)
-
-        val avsender =
-            utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
-
+        val avsender = utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
         val pdf = opprettPdf(brev, brevRequest, brevInnholdData, avsender)
 
         logger.info("PDF generert ok. ${if (brevRequest.skalLagre) "Skal lagres" else "Skal ikke lagres"}")
@@ -145,6 +141,7 @@ class StrukturertBrevService(
         return pdf
     }
 
+    // TODO burde denne kaste exception i stede?
     suspend fun ferdigstillJournalfoerOgDistribuerStrukturertBrev(
         behandlingId: UUID,
         brevType: Brevtype,
@@ -267,7 +264,7 @@ class StrukturertBrevService(
 
         return BrevService.BrevPayload(
             brevinnhold.payload ?: db.hentBrevPayload(brevId),
-            emptyList(),
+            innholdVedlegg,
         )
     }
 

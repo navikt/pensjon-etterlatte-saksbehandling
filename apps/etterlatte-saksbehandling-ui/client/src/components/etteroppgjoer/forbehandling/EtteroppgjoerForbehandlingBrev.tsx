@@ -29,6 +29,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   )
 
   const kanRedigeres = etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const ferdigstillForbehandling = async () => {
     const forbehandlingId = etteroppgjoer.behandling.id
@@ -49,7 +50,7 @@ export function EtteroppgjoerForbehandlingBrev() {
         (brev) => dispatch(addEtteroppgjoerBrev(brev))
       )
     }
-  }, [etteroppgjoer.behandling.brevId])
+  }, [etteroppgjoer.behandling.brevId, tilbakestilt])
 
   return (
     <HStack height="100%" minHeight="100%" wrap={false}>
@@ -112,7 +113,9 @@ export function EtteroppgjoerForbehandlingBrev() {
               brev={brev}
               kanRedigeres={kanRedigeres}
               skalGaaViaBehandling
-              tilbakestillingsaction={() => alert('Not supported')}
+              tilbakestillingsaction={() => {
+                setTilbakestilt(true)
+              }}
             />
           ),
           error: (error) => (

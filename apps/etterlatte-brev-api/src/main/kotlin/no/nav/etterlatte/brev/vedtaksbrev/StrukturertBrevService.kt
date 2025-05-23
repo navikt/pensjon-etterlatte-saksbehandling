@@ -230,6 +230,7 @@ class StrukturertBrevService(
 
         val brevKode = brevInnholdData.brevKode
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
+        val soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge)
 
         val spraakIBrev = db.hentBrevInnhold(brevId)?.spraak ?: spraak
 
@@ -240,9 +241,9 @@ class StrukturertBrevService(
                 brevbaker.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(
                         brevKode = brevKode.redigering,
-                        brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
+                        brevData = utledBrevRedigerbartInnholdData(brevRequest) ?: ManueltBrevData(),
                         avsender = avsender,
-                        soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
+                        soekerOgEventuellVerge = soekerOgEventuellVerge,
                         sakId = sak.id,
                         spraak = spraakIBrev,
                         sakType = sak.sakType,
@@ -254,11 +255,10 @@ class StrukturertBrevService(
             db.oppdaterPayload(brevId, brevinnhold.payload, bruker)
         }
 
-        /* TODO Ta stilling til disse ved implementasjon av ny tilfeller enn tilbakekreving
-        if (innholdVedlegg != null) {
+        val innholdVedlegg = hentInnholdForVedlegg(brevRequest.brevVedleggData, avsender, soekerOgEventuellVerge, spraak, sak)
+        if (innholdVedlegg.isNotEmpty()) {
             db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
         }
-         */
 
         if (brev.brevkoder != brevInnholdData.brevKode) {
             db.oppdaterBrevkoder(brevId, brevInnholdData.brevKode)

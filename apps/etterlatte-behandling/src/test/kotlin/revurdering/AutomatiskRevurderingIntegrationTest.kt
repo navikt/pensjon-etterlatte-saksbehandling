@@ -183,7 +183,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(AutomatiskRevurderingRequest(sak.id, LocalDate.now(), Revurderingaarsak.REGULERING))
                 }.also {
-                    Assertions.assertEquals(HttpStatusCode.InternalServerError, it.status)
+                    Assertions.assertEquals(HttpStatusCode.BadRequest, it.status)
                 }
         }
     }

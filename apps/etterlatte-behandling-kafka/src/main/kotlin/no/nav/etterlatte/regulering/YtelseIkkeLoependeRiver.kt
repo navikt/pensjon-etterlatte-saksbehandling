@@ -7,6 +7,7 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -23,6 +24,7 @@ internal class YtelseIkkeLoependeRiver(
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.YTELSE_IKKE_LOEPENDE) {
             validate { it.requireKey(KJOERING) }
+            validate { it.interestedIn(SAK_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
     }

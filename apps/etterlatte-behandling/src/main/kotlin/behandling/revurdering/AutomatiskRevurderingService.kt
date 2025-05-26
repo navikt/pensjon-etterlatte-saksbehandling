@@ -57,8 +57,6 @@ class AutomatiskRevurderingService(
             inTransaction { behandlingService.hentSisteIverksatte(request.sakId) }
                 ?: throw RevurderingManglerIverksattBehandling(request.sakId)
 
-        //
-
         gyldigForAutomatiskRevurdering(request, loepende, systembruker)
 
         val persongalleri =

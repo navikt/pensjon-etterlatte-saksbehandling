@@ -174,7 +174,7 @@ internal class OmregningHendelserBeregningRiver(
                 packet[ReguleringEvents.BEREGNING_G_ETTER] = it.second
             }
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
-            BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
+            BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first), 14, RoundingMode.HALF_UP)
 
         beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(dato)?.let {
             packet[AVKORTING_FOER] = it.avkortingsbeloep

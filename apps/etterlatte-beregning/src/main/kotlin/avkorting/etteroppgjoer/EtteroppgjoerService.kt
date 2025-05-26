@@ -200,7 +200,6 @@ class EtteroppgjoerService(
         behandlingId: UUID,
     ): Aarsoppgjoer {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw GenerellIkkeFunnetException()
-
         val aarsoppgjoer = avkorting.aarsoppgjoer.filter { it.aar == aar }
         return when (aarsoppgjoer.size) {
             1 -> aarsoppgjoer.single()

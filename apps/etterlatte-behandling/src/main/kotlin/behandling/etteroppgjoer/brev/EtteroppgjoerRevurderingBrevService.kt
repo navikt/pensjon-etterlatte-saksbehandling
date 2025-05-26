@@ -162,8 +162,8 @@ class EtteroppgjoerRevurderingBrevService(
                         avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
                         utbetaltBeloep = Kroner(sisteUtbetaltBeloep),
                         resultatType = beregnetEtteroppgjoerResultat.resultatType,
-                        inntekt = Kroner(beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
-                        faktiskInntekt = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                        stoenad = Kroner(beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                        faktiskStoenad = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                         grunnlag = EtteroppgjoerBrevGrunnlag.fra(faktiskInntekt),
                     ),
                 brevRedigerbarInnholdData =

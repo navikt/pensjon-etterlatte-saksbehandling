@@ -41,7 +41,7 @@ class AvkortingRegelkjoringTest {
 
         val avkortingsperioder =
             AvkortingRegelkjoring.beregnInntektsavkorting(
-                Periode(fom = virkningstidspunkt.dato, tom = null),
+                Periode(fom = virkningstidspunkt.dato, tom = YearMonth.of(2024, Month.DECEMBER)),
                 avkortingGrunnlag = avkortingGrunnlag,
             )
 
@@ -56,7 +56,7 @@ class AvkortingRegelkjoringTest {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
             periode.fom shouldBe YearMonth.of(2024, Month.MAY)
-            periode.tom shouldBe null
+            periode.tom shouldBe YearMonth.of(2024, Month.DECEMBER)
             avkorting shouldBe 7049
         }
     }

@@ -10,21 +10,16 @@ import { BrevutfallAvForbehandling } from '~components/etteroppgjoer/components/
 import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { useState } from 'react'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const { beregnetEtteroppgjoerResultat, behandling, faktiskInntekt } = useEtteroppgjoer()
+  const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
 
   const erRedigerbar =
     (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
       behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
-
-  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
-    erRedigerbar && !faktiskInntekt
-  )
 
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
@@ -36,11 +31,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
 
-      <FastsettFaktiskInntekt
-        erRedigerbar={erRedigerbar}
-        faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-        setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
-      />
+      <FastsettFaktiskInntekt erRedigerbar={erRedigerbar} />
 
       {!!beregnetEtteroppgjoerResultat && (
         <VStack gap="4">

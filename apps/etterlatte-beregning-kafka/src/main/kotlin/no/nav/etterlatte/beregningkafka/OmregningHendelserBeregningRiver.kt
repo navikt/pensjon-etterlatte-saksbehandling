@@ -150,37 +150,60 @@ internal class OmregningHendelserBeregningRiver(
         }
     }
 
-    private fun sendMedInformasjonTilKontrollsjekking(
+    fun sendMedInformasjonTilKontrollsjekking(
         beregning: BeregningOgAvkorting,
         packet: JsonMessage,
     ) {
         val dato = packet.omregningData.hentFraDato()
+        val forrigeBeregning =
+            when (val forrigePeriode = beregning.forrigeBeregning.beregningsperioder.paaDato(dato)) {
+                null ->
+                    beregning.forrigeBeregning.beregningsperioder
+                        .minByOrNull { it.datoFOM }
+                        ?.takeIf { it.datoFOM.atDay(1) > dato }
+                else -> forrigePeriode
+            }
         val forrige =
-            krevIkkeNull(beregning.forrigeBeregning.beregningsperioder.paaDato(dato)) {
-                "Forrige beregning mangler beregningsperiode på dato $dato"
+            krevIkkeNull(forrigeBeregning) {
+                "Forrige beregning mangler beregningsperiode på dato $dato, og har heller ikke en senere beregningsperiode"
             }.let {
-                Pair(it.utbetaltBeloep, it.grunnbelop)
+                UtbetaltbeloepOgGrunnbeloep(utbetaltBeloep = it.utbetaltBeloep, grunnbeloep = it.grunnbelop)
             }.also {
-                packet[ReguleringEvents.BEREGNING_BELOEP_FOER] = it.first
-                packet[ReguleringEvents.BEREGNING_G_FOER] = it.second
+                packet[ReguleringEvents.BEREGNING_BELOEP_FOER] = it.utbetaltBeloep
+                packet[ReguleringEvents.BEREGNING_G_FOER] = it.grunnbeloep
             }
         val naavaerende =
             krevIkkeNull(beregning.beregning.beregningsperioder.paaDato(dato)) {
                 "Beregning mangler beregningsperiode på dato $dato"
             }.let {
-                Pair(it.utbetaltBeloep, it.grunnbelop)
+                UtbetaltbeloepOgGrunnbeloep(utbetaltBeloep = it.utbetaltBeloep, grunnbeloep = it.grunnbelop)
             }.also {
-                packet[ReguleringEvents.BEREGNING_BELOEP_ETTER] = it.first
-                packet[ReguleringEvents.BEREGNING_G_ETTER] = it.second
+                packet[ReguleringEvents.BEREGNING_BELOEP_ETTER] = it.utbetaltBeloep
+                packet[ReguleringEvents.BEREGNING_G_ETTER] = it.grunnbeloep
             }
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
-            BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first), 14, RoundingMode.HALF_UP)
+            BigDecimal(naavaerende.utbetaltBeloep).divide(BigDecimal(forrige.utbetaltBeloep), 14, RoundingMode.HALF_UP)
 
-        beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(dato)?.let {
-            packet[AVKORTING_FOER] = it.avkortingsbeloep
-        }
-        beregning.avkorting?.avkortetYtelse?.paaDato(dato)?.let {
-            packet[AVKORTING_ETTER] = it.avkortingsbeloep
+        if (beregning.forrigeAvkorting != null) {
+            val forrigeAvkortingBeloep =
+                when (val forrigePeriode = beregning.forrigeAvkorting.avkortetYtelse.paaDato(dato)) {
+                    null ->
+                        beregning.forrigeAvkorting.avkortetYtelse
+                            .minByOrNull { it.fom }
+                            ?.takeIf { it.fom.atDay(1) > dato }
+                    else -> forrigePeriode.avkortingsbeloep
+                }
+            krevIkkeNull(forrigeAvkortingBeloep) {
+                "Forrige beregning mangler avkortingsperiode på dato $dato, og har heller ikke en senere avkortingsperiode"
+            }.let { beloep ->
+                packet[AVKORTING_FOER] = beloep
+            }
+
+            krevIkkeNull(beregning.avkorting?.avkortetYtelse?.paaDato(dato)) {
+                "Vi har en tidligere avkorting men har ikke nåværende avkorting"
+            }.let {
+                packet[AVKORTING_ETTER] = it.avkortingsbeloep
+            }
         }
     }
 
@@ -276,4 +299,9 @@ data class BeregningOgAvkorting(
     val forrigeBeregning: BeregningDTO,
     val avkorting: AvkortingDto?,
     val forrigeAvkorting: AvkortingDto?,
+)
+
+data class UtbetaltbeloepOgGrunnbeloep(
+    val utbetaltBeloep: Int,
+    val grunnbeloep: Int,
 )

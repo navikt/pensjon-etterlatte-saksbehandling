@@ -638,7 +638,12 @@ class TrygdetidServiceImpl(
 
         if (featureToggleService.isEnabled(TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING, false)) {
             alleTrygdetider.forEach { trygdetid ->
-                oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
+                val erOverstyrt = trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true
+                if (!erOverstyrt && behandling.revurderingsaarsak != Revurderingaarsak.REGULERING) {
+                    oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
+                } else {
+                    behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+                }
             }
         }
         return alleTrygdetider
@@ -1200,12 +1205,6 @@ class TrygdetidServiceImpl(
                 trygdetidIdenter.containsAll(avdoede.map { it.value })
         )
     }
-
-    private fun oppdaterBeregnetTrygdetidVedKopieringEnabled() =
-        featureToggleService.isEnabled(
-            TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING,
-            false,
-        )
 }
 
 class ManglerForrigeTrygdetidMaaReguleresManuelt :

@@ -19,8 +19,15 @@ import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.omregningData
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_FOER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -191,6 +198,60 @@ class OmregningHendelserBeregningRiverTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `skal hente beregningsperiode i framtiden fra forrige beregning hvis vi ikke har en naavaerende`() {
+        val (beregningService, river) = initialiserRiver()
+
+        val nyBehandling = UUID.randomUUID()
+        val gammelBehandling = UUID.randomUUID()
+        val omregningFom = YearMonth.of(2024, Month.MAY)
+
+        every {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                nyBehandling,
+                gammelBehandling,
+            )
+        } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
+        every { beregningService.hentBeregning(gammelBehandling) } returns
+            beregningDTO(
+                gammelBehandling,
+                1000,
+                1000,
+                beregningsperiodeFom = omregningFom.plusMonths(1),
+            )
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1100, 1100)
+        coEvery { beregningService.hentGrunnbeloep() } returns
+            Grunnbeloep(
+                YearMonth.now(),
+                1000,
+                100,
+                BigDecimal("1.2"),
+            )
+        val omregningData =
+            OmregningData(
+                kjoering = "",
+                sakId = SakId(123L),
+                sakType = SakType.BARNEPENSJON,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
+                behandlingId = nyBehandling,
+                forrigeBehandlingId = gammelBehandling,
+                fradato = omregningFom.atDay(1),
+            )
+        val beregningOgAvkorting =
+            runBlocking {
+                river.beregn(omregningData)
+            }
+        val jsonMessage = JsonMessage.newMessage()
+        jsonMessage.omregningData = omregningData
+        river.sendMedInformasjonTilKontrollsjekking(beregningOgAvkorting, jsonMessage)
+
+        assertEquals(1000, jsonMessage[BEREGNING_BELOEP_FOER].intValue())
+        assertEquals(1100, jsonMessage[BEREGNING_BELOEP_ETTER].intValue())
+        assertEquals(1000, jsonMessage[BEREGNING_G_FOER].intValue())
+        assertEquals(1100, jsonMessage[BEREGNING_G_ETTER].intValue())
     }
 
     @Test

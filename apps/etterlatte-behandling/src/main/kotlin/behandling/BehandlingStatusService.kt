@@ -401,6 +401,10 @@ class BehandlingStatusServiceImpl(
         if (behandling.type !in listOf(BehandlingType.REVURDERING, BehandlingType.FØRSTEGANGSBEHANDLING)) {
             return
         }
+        // Regulering skal ikke lage oppfølgingsoppgaver
+        if (behandling.revurderingsaarsak() == Revurderingaarsak.REGULERING) {
+            return
+        }
 
         try {
             val doedsdato =

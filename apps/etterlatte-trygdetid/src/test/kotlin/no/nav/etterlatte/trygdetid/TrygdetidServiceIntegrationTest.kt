@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -22,6 +23,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
@@ -290,6 +292,7 @@ internal class TrygdetidServiceIntegrationTest(
                 every { sak } returns randomSakId()
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
+                every { revurderingsaarsak } returns null
             }
 
         repository.opprettTrygdetid(
@@ -340,6 +343,137 @@ internal class TrygdetidServiceIntegrationTest(
             avtaleService.hentAvtaleForBehandling(kildeBehandlingId)
             avtaleService.opprettAvtale(any())
         }
+    }
+
+    @Test
+    fun `skal kopiere uten reberegning av trygdetid fra annen behandling hvis vi er regulering`() {
+        val behandlingId = UUID.randomUUID()
+        val kildeBehandlingId = UUID.randomUUID()
+        val grunnlagTestData = GrunnlagTestData()
+
+        val opplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
+        coEvery {
+            grunnlagKlient.hentGrunnlag(any(), any())
+        } returns opplysningsgrunnlag
+
+        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        every { avtaleService.hentAvtaleForBehandling(any()) } returns opprettTrygdeavtale(kildeBehandlingId)
+        justRun { avtaleService.opprettAvtale(any()) }
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns randomSakId()
+                every { behandlingType } returns BehandlingType.REVURDERING
+                every { tidligereFamiliepleier } returns null
+                every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
+            }
+        val detaljertResultat =
+            DetaljertBeregnetTrygdetidResultat(
+                faktiskTrygdetidNorge = null,
+                faktiskTrygdetidTeoretisk = null,
+                fremtidigTrygdetidNorge = null,
+                fremtidigTrygdetidTeoretisk = null,
+                samletTrygdetidNorge = 40,
+                samletTrygdetidTeoretisk = 40,
+                prorataBroek = null,
+                overstyrt = false,
+                yrkesskade = false,
+                beregnetSamletTrygdetidNorge = null,
+                overstyrtBegrunnelse = null,
+            )
+        repository
+            .opprettTrygdetid(
+                trygdetid(
+                    behandlingId = kildeBehandlingId,
+                    sakId = randomSakId(),
+                    trygdetidGrunnlag = listOf(),
+                    overstyrtNorskPoengaar = null,
+                    yrkesskade = true,
+                    beregnetTrygdetid =
+                        DetaljertBeregnetTrygdetid(
+                            resultat = detaljertResultat,
+                            tidspunkt = Tidspunkt.now(),
+                            regelResultat = "".toJsonNode(),
+                        ),
+                ),
+            )
+
+        runBlocking { trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, kildeBehandlingId, saksbehandler) }
+
+        val trygdetidList = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
+        trygdetidList.size shouldBe 1
+
+        val trygdetid = trygdetidList.first()
+        trygdetid.kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
+        trygdetid.beregnetTrygdetid shouldNotBe null
+        trygdetid.beregnetTrygdetid?.resultat shouldBe detaljertResultat
+    }
+
+    @Test
+    fun `skal kopiere uten reberegning av trygdetid fra annen behandling hvis trygdetid er overstyrt`() {
+        val behandlingId = UUID.randomUUID()
+        val kildeBehandlingId = UUID.randomUUID()
+        val grunnlagTestData = GrunnlagTestData()
+
+        val opplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
+        coEvery {
+            grunnlagKlient.hentGrunnlag(any(), any())
+        } returns opplysningsgrunnlag
+
+        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        every { avtaleService.hentAvtaleForBehandling(any()) } returns opprettTrygdeavtale(kildeBehandlingId)
+        justRun { avtaleService.opprettAvtale(any()) }
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns randomSakId()
+                every { behandlingType } returns BehandlingType.REVURDERING
+                every { tidligereFamiliepleier } returns null
+                every { revurderingsaarsak } returns Revurderingaarsak.ANNEN
+            }
+
+        val detaljertResultat =
+            DetaljertBeregnetTrygdetidResultat(
+                faktiskTrygdetidNorge = null,
+                faktiskTrygdetidTeoretisk = null,
+                fremtidigTrygdetidNorge = null,
+                fremtidigTrygdetidTeoretisk = null,
+                samletTrygdetidNorge = 40,
+                samletTrygdetidTeoretisk = 40,
+                prorataBroek = null,
+                overstyrt = true,
+                yrkesskade = false,
+                beregnetSamletTrygdetidNorge = null,
+                overstyrtBegrunnelse = "Overstyrt for moro skyld",
+            )
+        repository
+            .opprettTrygdetid(
+                trygdetid(
+                    behandlingId = kildeBehandlingId,
+                    sakId = randomSakId(),
+                    trygdetidGrunnlag = listOf(),
+                    overstyrtNorskPoengaar = null,
+                    yrkesskade = true,
+                    beregnetTrygdetid =
+                        DetaljertBeregnetTrygdetid(
+                            resultat = detaljertResultat,
+                            tidspunkt = Tidspunkt.now(),
+                            regelResultat = "".toJsonNode(),
+                        ),
+                ),
+            )
+
+        runBlocking { trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, kildeBehandlingId, saksbehandler) }
+
+        val trygdetidList = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
+        trygdetidList.size shouldBe 1
+
+        val trygdetid = trygdetidList.first()
+        trygdetid.kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
+        trygdetid.beregnetTrygdetid shouldNotBe null
+        trygdetid.beregnetTrygdetid?.resultat shouldBe detaljertResultat
     }
 
     @Test

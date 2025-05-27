@@ -35,7 +35,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
-  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
@@ -62,16 +61,10 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       {!!etteroppgjoer.behandling.harMottattNyInformasjon ? (
         <FastsettFaktiskInntekt
           erRedigerbar={erRedigerbar}
-          faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-          setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
           setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
         />
       ) : (
-        <FastsettFaktiskInntekt
-          erRedigerbar={false}
-          faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-          setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
-        />
+        <FastsettFaktiskInntekt erRedigerbar={false} />
       )}
 
       <ResultatAvForbehandling />

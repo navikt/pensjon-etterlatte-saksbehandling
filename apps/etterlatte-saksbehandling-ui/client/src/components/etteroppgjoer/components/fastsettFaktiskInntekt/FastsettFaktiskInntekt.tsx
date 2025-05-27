@@ -4,21 +4,17 @@ import { maanedNavn } from '~utils/formatering/dato'
 import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { useState } from 'react'
 
 interface Props {
   erRedigerbar: boolean
-  faktiskInntektSkjemaErAapen: boolean
-  setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
   setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FastsettFaktiskInntekt = ({
-  erRedigerbar,
-  faktiskInntektSkjemaErAapen,
-  setFaktiskInntektSkjemaErAapen,
-  setFastsettInntektSkjemaErSkittent,
-}: Props) => {
+export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaErSkittent }: Props) => {
   const { behandling } = useEtteroppgjoer()
+
+  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(false)
 
   return (
     <VStack gap="4">

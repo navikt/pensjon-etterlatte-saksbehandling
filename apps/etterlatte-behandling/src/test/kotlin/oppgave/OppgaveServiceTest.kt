@@ -1555,6 +1555,42 @@ internal class OppgaveServiceTest(
     }
 
     @Test
+    fun `attesteringsoppgave satt på vent beholder status og merknad men når tas av vent blir under behandling`() {
+        val saksbehandler = "Z123456"
+        val attestant = "Z987654"
+        val ident = KONTANT_FOT
+        val sak =
+            sakSkrivDao.opprettSak(
+                fnr = ident.value,
+                type = SakType.OMSTILLINGSSTOENAD,
+                enhet = Enheter.defaultEnhet.enhetNr,
+            )
+        val behandlingId = UUID.randomUUID()
+
+        val oppgave =
+            opprettOppgave(sakId = sak.id, referanse = behandlingId.toString(), type = OppgaveType.REVURDERING, status = Status.NY)
+        oppgaveService.tildelSaksbehandler(oppgaveId = oppgave.id, saksbehandler = saksbehandler)
+        oppgaveService.tilAttestering(referanse = behandlingId.toString(), type = OppgaveType.REVURDERING, merknad = null)
+        oppgaveService.tildelSaksbehandler(oppgaveId = oppgave.id, saksbehandler = attestant)
+        oppgaveService.endrePaaVent(
+            oppgaveId = oppgave.id,
+            paavent = true,
+            merknad = "Viktig merknad om hva vi venter på",
+            aarsak = PaaVentAarsak.ANNET,
+        )
+        // Dette er oppgaven vi vil bevare tilstanden på
+        val oppgavePaaVent = oppgaveService.hentOppgave(oppgave.id)
+
+        // Tilbakestiller for saken
+        oppgaveService.tilbakestillOppgaverUnderAttestering(listOf(sak.id))
+        val oppgaveOppdatert = oppgaveService.hentOppgave(oppgave.id)
+        assertEquals(oppgavePaaVent, oppgaveOppdatert)
+        oppgaveService.endrePaaVent(oppgave.id, false, "", null)
+        val oppgaveAvVent = oppgaveService.hentOppgave(oppgave.id)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveAvVent.status)
+    }
+
+    @Test
     fun `Oppdater ident på oppgaver tilknyttet sak`() {
         val opprinneligIdent = KONTANT_FOT
 

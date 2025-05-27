@@ -1,4 +1,4 @@
-import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
@@ -15,6 +15,9 @@ import { EtteroppgjoerRevurderingResultat } from '~components/etteroppgjoer/revu
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { EndringFraBruker } from '~components/etteroppgjoer/revurdering/endringFraBruker/EndringFraBruker'
+import { mapResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useContext(BehandlingRouteContext)
@@ -31,10 +34,9 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const dispatch = useAppDispatch()
 
-  const etteroppgjoer = useEtteroppgjoer()
+  const [hentEtteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
-  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
-
+  // TODO: flytte logikk for å sjekke om fastsatt inntekt er endret til backend
   const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
   const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
     useState<string>('')
@@ -46,49 +48,53 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     })
   }, [etteroppgjoerForbehandlingId])
 
-  return (
-    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
-      <Heading size="xlarge" level="1">
-        Etteroppgjør for {etteroppgjoer.behandling.aar}
-      </Heading>
-      <BodyShort>
-        <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
-      </BodyShort>
-      <Inntektsopplysninger />
+  return mapResult(hentEtteroppgjoerResult, {
+    pending: <Spinner label="Henter etteroppgjør..." />,
+    error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandling for etteroppgjør: {error.detail}</ApiErrorAlert>,
+    success: (etteroppgjoer) => (
+      <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+        <Heading size="xlarge" level="1">
+          Etteroppgjør for {etteroppgjoer.behandling.aar}
+        </Heading>
+        <BodyShort>
+          <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
+        </BodyShort>
+        <Inntektsopplysninger />
 
-      <EndringFraBruker behandling={behandling} />
+        <EndringFraBruker behandling={behandling} />
 
-      {!!etteroppgjoer.behandling.harMottattNyInformasjon ? (
-        <FastsettFaktiskInntekt
-          erRedigerbar={erRedigerbar}
-          setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
-        />
-      ) : (
-        <FastsettFaktiskInntekt erRedigerbar={false} />
-      )}
+        {!!etteroppgjoer.behandling.harMottattNyInformasjon ? (
+          <FastsettFaktiskInntekt
+            erRedigerbar={erRedigerbar}
+            setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
+          />
+        ) : (
+          <FastsettFaktiskInntekt erRedigerbar={false} />
+        )}
 
-      <ResultatAvForbehandling />
+        <ResultatAvForbehandling />
 
-      <EtteroppgjoerRevurderingResultat />
+        <EtteroppgjoerRevurderingResultat />
 
-      {fastsettInntektSkjemaErSkittentFeilmelding && (
-        <HStack width="100%" justify="center">
-          <Alert variant="error">{fastsettInntektSkjemaErSkittentFeilmelding}</Alert>
-        </HStack>
-      )}
+        {fastsettInntektSkjemaErSkittentFeilmelding && (
+          <HStack width="100%" justify="center">
+            <Alert variant="error">{fastsettInntektSkjemaErSkittentFeilmelding}</Alert>
+          </HStack>
+        )}
 
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
-        <HStack width="100%" justify="center">
-          <VStack gap="4" align="center">
-            <div>
-              <Button type="button" variant="primary">
-                Neste steg
-              </Button>
-            </div>
-            <AvbrytBehandling />
-          </VStack>
-        </HStack>
-      </Box>
-    </VStack>
-  )
+        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+          <HStack width="100%" justify="center">
+            <VStack gap="4" align="center">
+              <div>
+                <Button type="button" variant="primary">
+                  Neste steg
+                </Button>
+              </div>
+              <AvbrytBehandling />
+            </VStack>
+          </HStack>
+        </Box>
+      </VStack>
+    ),
+  })
 }

@@ -102,11 +102,14 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
       harMottattNyInformasjonRequest(
         { forbehandlingId: behandling.relatertBehandlingId!, harMottattNyInformasjon },
         () => {
+          const endringErTilUgunstForBruker: boolean = data.endringErTilUgunstForBruker === 'JA'
+
           endringErTilUgunstForBrukerRequest(
             {
               forbehandlingId: behandling.relatertBehandlingId!,
-              endringErTilUgunstForBruker: data.endringErTilUgunstForBruker === 'JA',
-              beskrivelseAvUgunst: data.beskrivelseAvUgunst,
+              endringErTilUgunstForBruker: endringErTilUgunstForBruker,
+              // Hvis saksbehandler allerede har satt beskrivelse, må denne overskrives hvis saksbehandler senere velger 'Nei' til om endring er til ugunst for bruker
+              beskrivelseAvUgunst: endringErTilUgunstForBruker ? data.beskrivelseAvUgunst : '',
             },
             () => {
               hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
@@ -196,7 +199,15 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
         })}
 
         <HStack gap="4">
-          <Button size="small" onClick={handleSubmit(submitEndringFraBruker)}>
+          <Button
+            size="small"
+            loading={
+              isPending(harMottattNyInformasjonResult) ||
+              isPending(endringErTilUgunstForBrukerResult) ||
+              isPending(hentEtteroppgjoerResult)
+            }
+            onClick={handleSubmit(submitEndringFraBruker)}
+          >
             Lagre
           </Button>
 
@@ -205,7 +216,11 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
               type="button"
               variant="secondary"
               size="small"
-              disabled={isPending(harMottattNyInformasjonResult) || isPending(endringErTilUgunstForBrukerResult)}
+              disabled={
+                isPending(harMottattNyInformasjonResult) ||
+                isPending(endringErTilUgunstForBrukerResult) ||
+                isPending(hentEtteroppgjoerResult)
+              }
               onClick={() => setEndringFraBrukerSkjemaErAapen(false)}
             >
               Avbryt

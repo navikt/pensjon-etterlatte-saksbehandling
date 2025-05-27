@@ -6,9 +6,12 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { EndringFraBrukerVisning } from '~components/etteroppgjoer/revurdering/endringFraBruker/EndringFraBrukerVisning'
 import { EndringFraBrukerSkjema } from '~components/etteroppgjoer/revurdering/endringFraBruker/EndringFraBrukerSkjema'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
 export const EndringFraBruker = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
+  const etteroppgjoer = useEtteroppgjoer()
 
   const erRedigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -16,24 +19,31 @@ export const EndringFraBruker = ({ behandling }: { behandling: IDetaljertBehandl
     innloggetSaksbehandler.skriveEnheter
   )
 
-  const [endringFraBrukerSkjemaErAapen, setEndringFraBrukerSkjemaErAapen] = useState<boolean>(false)
+  const [endringFraBrukerSkjemaErAapen, setEndringFraBrukerSkjemaErAapen] = useState<boolean>(
+    erRedigerbar && !etteroppgjoer.behandling.harMottattNyInformasjon
+  )
 
   return (
-    <VStack gap="4" paddingInline="16" paddingBlock="16 4">
+    <VStack gap="4">
       <Heading size="large">Endring fra bruker</Heading>
 
       {endringFraBrukerSkjemaErAapen && erRedigerbar ? (
-        <EndringFraBrukerVisning />
+        <EndringFraBrukerSkjema
+          behandling={behandling}
+          setEndringFraBrukerSkjemaErAapen={setEndringFraBrukerSkjemaErAapen}
+          erRedigerbar={erRedigerbar}
+        />
       ) : (
         <VStack gap="4">
-          <EndringFraBrukerSkjema
-            behandling={behandling}
-            setEndringFraBrukerSkjemaErAapen={setEndringFraBrukerSkjemaErAapen}
-            erRedigerbar={erRedigerbar}
-          />
+          <EndringFraBrukerVisning />
           {erRedigerbar && (
             <div>
-              <Button size="small" variant="secondary" icon={<PencilIcon aria-hidden />}>
+              <Button
+                size="small"
+                variant="secondary"
+                icon={<PencilIcon aria-hidden />}
+                onClick={() => setEndringFraBrukerSkjemaErAapen(true)}
+              >
                 Rediger
               </Button>
             </div>

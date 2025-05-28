@@ -230,8 +230,8 @@ class EtteroppgjoerForbehandlingDao(
                     """.trimIndent(),
                 )
 
-            statement.setObject(1, harMottattNyInformasjon)
-            statement.setObject(2, endringErTilUgunstForBruker)
+            statement.setObject(1, harMottattNyInformasjon.toString())
+            statement.setString(2, endringErTilUgunstForBruker.toString())
             statement.setString(3, beskrivelseAvUgunst)
             statement.setObject(4, forbehandlingId)
 

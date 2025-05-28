@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
@@ -23,8 +24,8 @@ data class EtteroppgjoerForbehandling(
     val brevId: Long?,
     val kopiertFra: UUID? = null, // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val sisteIverksatteBehandlingId: UUID, // siste iverksatte behandling når forbehandling ble opprettet
-    val harMottattNyInformasjon: Boolean?,
-    val endringErTilUgunstForBruker: Boolean?,
+    val harMottattNyInformasjon: JaNei?,
+    val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
 ) {
     companion object {

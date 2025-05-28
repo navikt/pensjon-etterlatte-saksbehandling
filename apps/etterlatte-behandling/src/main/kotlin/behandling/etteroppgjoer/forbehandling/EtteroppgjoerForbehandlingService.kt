@@ -203,6 +203,7 @@ class EtteroppgjoerForbehandlingService(
         return beregnetEtteroppgjoerResultat
     }
 
+    // TOOD: resette verdiene for ugunst og beskrivelse av ugunst utifra valgene
     fun lagreEndringFraBruker(
         forbehandlingId: UUID,
         harMottattNyInformasjon: JaNei,

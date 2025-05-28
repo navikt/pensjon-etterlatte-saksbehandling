@@ -1,66 +1,16 @@
 import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { IEndringFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  hentEtteroppgjoerForbehandling,
-  lagreEndringErTilUgunstForBruker,
-  lagreHarMottattNyInformasjon,
-} from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling, lagreEndringFraBruker } from '~shared/api/etteroppgjoer'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
-
-const endringFraBrukerSkjemaDefaultValues = (
-  etteroppgjoerForbehandling: EtteroppgjoerForbehandling
-): EndringFraBrukerSkjemaVerdier => {
-  let endringFraBrukerSkjemaValues: EndringFraBrukerSkjemaVerdier = {
-    harMottattNyInformasjon: '',
-    endringErTilUgunstForBruker: '',
-    beskrivelseAvUgunst: '',
-  }
-
-  if (etteroppgjoerForbehandling) {
-    if (etteroppgjoerForbehandling.behandling) {
-      if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === true) {
-        endringFraBrukerSkjemaValues = {
-          ...endringFraBrukerSkjemaValues,
-          harMottattNyInformasjon: 'JA',
-        }
-      } else if (!!etteroppgjoerForbehandling.behandling.harMottattNyInformasjon) {
-        endringFraBrukerSkjemaValues = {
-          ...endringFraBrukerSkjemaValues,
-          harMottattNyInformasjon: 'NEI',
-        }
-      }
-
-      if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === true) {
-        endringFraBrukerSkjemaValues = {
-          ...endringFraBrukerSkjemaValues,
-          endringErTilUgunstForBruker: 'JA',
-        }
-      } else if (!!etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker) {
-        endringFraBrukerSkjemaValues = {
-          ...endringFraBrukerSkjemaValues,
-          endringErTilUgunstForBruker: 'NEI',
-        }
-      }
-
-      if (!!etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst) {
-        endringFraBrukerSkjemaValues = {
-          ...endringFraBrukerSkjemaValues,
-          beskrivelseAvUgunst: etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst,
-        }
-      }
-    }
-  }
-
-  return endringFraBrukerSkjemaValues
-}
+import { JaNei } from '~shared/types/ISvar'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -68,22 +18,13 @@ interface Props {
   erRedigerbar: boolean
 }
 
-interface EndringFraBrukerSkjemaVerdier {
-  harMottattNyInformasjon: 'JA' | 'NEI' | ''
-  endringErTilUgunstForBruker: 'JA' | 'NEI' | ''
-  beskrivelseAvUgunst: string
-}
-
 export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaErAapen, erRedigerbar }: Props) => {
   const etteroppgjoer = useEtteroppgjoer()
 
   const dispatch = useAppDispatch()
 
+  const [endringFraBrukerResult, endringFraBrukerRequest] = useApiCall(lagreEndringFraBruker)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
-  const [harMottattNyInformasjonResult, harMottattNyInformasjonRequest] = useApiCall(lagreHarMottattNyInformasjon)
-  const [endringErTilUgunstForBrukerResult, endringErTilUgunstForBrukerRequest] = useApiCall(
-    lagreEndringErTilUgunstForBruker
-  )
 
   const {
     register,
@@ -91,46 +32,21 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
     watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<EndringFraBrukerSkjemaVerdier>({
-    defaultValues: endringFraBrukerSkjemaDefaultValues(etteroppgjoer),
+  } = useForm<IEndringFraBruker>({
+    defaultValues: {
+      harMottattNyInformasjon: etteroppgjoer.behandling.harMottattNyInformasjon,
+      endringErTilUgunstForBruker: etteroppgjoer.behandling.endringErTilUgunstForBruker,
+      beskrivelseAvUgunst: etteroppgjoer.behandling.beskrivelseAvUgunst,
+    },
   })
 
-  const submitEndringFraBruker = (data: EndringFraBrukerSkjemaVerdier) => {
-    const harMottattNyInformasjon: boolean = data.harMottattNyInformasjon === 'JA'
-
-    if (harMottattNyInformasjon) {
-      harMottattNyInformasjonRequest(
-        { forbehandlingId: behandling.relatertBehandlingId!, harMottattNyInformasjon },
-        () => {
-          const endringErTilUgunstForBruker: boolean = data.endringErTilUgunstForBruker === 'JA'
-
-          endringErTilUgunstForBrukerRequest(
-            {
-              forbehandlingId: behandling.relatertBehandlingId!,
-              endringErTilUgunstForBruker: endringErTilUgunstForBruker,
-              // Hvis saksbehandler allerede har satt beskrivelse, må denne overskrives hvis saksbehandler senere velger 'Nei' til om endring er til ugunst for bruker
-              beskrivelseAvUgunst: endringErTilUgunstForBruker ? data.beskrivelseAvUgunst : '',
-            },
-            () => {
-              hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
-                dispatch(addEtteroppgjoer(etteroppgjoer))
-                setEndringFraBrukerSkjemaErAapen(false)
-              })
-            }
-          )
-        }
-      )
-    } else {
-      harMottattNyInformasjonRequest(
-        { forbehandlingId: behandling.relatertBehandlingId!, harMottattNyInformasjon },
-        () => {
-          hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
-            dispatch(addEtteroppgjoer(etteroppgjoer))
-            setEndringFraBrukerSkjemaErAapen(false)
-          })
-        }
-      )
-    }
+  const submitEndringFraBruker = (data: IEndringFraBruker) => {
+    endringFraBrukerRequest({ forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data }, () => {
+      hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
+        dispatch(addEtteroppgjoer(etteroppgjoer))
+        setEndringFraBrukerSkjemaErAapen(false)
+      })
+    })
   }
 
   return (
@@ -150,7 +66,7 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
           }
         />
 
-        {watch('harMottattNyInformasjon') === 'JA' && (
+        {watch('harMottattNyInformasjon') === JaNei.JA && (
           <>
             <ControlledRadioGruppe
               name="endringErTilUgunstForBruker"
@@ -160,12 +76,12 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
               readOnly={!erRedigerbar}
               radios={
                 <>
-                  <Radio value="JA">Ja</Radio>
-                  <Radio value="NEI">Nei</Radio>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
                 </>
               }
             />
-            {watch('endringErTilUgunstForBruker') === 'JA' && (
+            {watch('endringErTilUgunstForBruker') === JaNei.JA && (
               <Box maxWidth="30rem">
                 <Textarea
                   {...register('beskrivelseAvUgunst', {
@@ -184,13 +100,8 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
         )}
 
         {isFailureHandler({
-          apiResult: harMottattNyInformasjonResult,
-          errorMessage: 'Kunne ikke lagre om det er mottatt ny informasjon',
-        })}
-
-        {isFailureHandler({
-          apiResult: endringErTilUgunstForBrukerResult,
-          errorMessage: 'Kunne ikke lagre om det er til ugunst for bruker',
+          apiResult: endringFraBrukerResult,
+          errorMessage: 'Kunne ikke lagre oppgitt svar om endring fra bruker',
         })}
 
         {isFailureHandler({
@@ -201,11 +112,7 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
         <HStack gap="4">
           <Button
             size="small"
-            loading={
-              isPending(harMottattNyInformasjonResult) ||
-              isPending(endringErTilUgunstForBrukerResult) ||
-              isPending(hentEtteroppgjoerResult)
-            }
+            loading={isPending(endringFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
             onClick={handleSubmit(submitEndringFraBruker)}
           >
             Lagre
@@ -216,11 +123,7 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
               type="button"
               variant="secondary"
               size="small"
-              disabled={
-                isPending(harMottattNyInformasjonResult) ||
-                isPending(endringErTilUgunstForBrukerResult) ||
-                isPending(hentEtteroppgjoerResult)
-              }
+              disabled={isPending(endringFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
               onClick={() => setEndringFraBrukerSkjemaErAapen(false)}
             >
               Avbryt

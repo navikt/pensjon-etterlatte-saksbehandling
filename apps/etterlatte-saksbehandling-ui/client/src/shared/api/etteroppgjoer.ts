@@ -5,7 +5,7 @@ import {
   FaktiskInntekt,
   BeregnetEtteroppgjoerResultatDto,
   Etteroppgjoer,
-  IEndringFraBruker,
+  IInformasjonFraBruker,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
@@ -43,8 +43,11 @@ export const lagreFaktiskInntekt = async (args: {
   })
 }
 
-export const lagreEndringFraBruker = async (args: { forbehandlingId: string; endringFraBruker: IEndringFraBruker }) => {
-  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/endring-fra-bruker`, {
+export const lagreInformasjonFraBruker = async (args: {
+  forbehandlingId: string
+  endringFraBruker: IInformasjonFraBruker
+}) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/informasjon-fra-bruker`, {
     ...args.endringFraBruker,
   })
 }

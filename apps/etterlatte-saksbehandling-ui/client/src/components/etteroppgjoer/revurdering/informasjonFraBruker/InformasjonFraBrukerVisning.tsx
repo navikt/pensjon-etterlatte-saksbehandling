@@ -2,7 +2,7 @@ import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { JaNei } from '~shared/types/ISvar'
 
-export const EndringFraBrukerVisning = () => {
+export const InformasjonFraBrukerVisning = () => {
   const { behandling } = useEtteroppgjoer()
 
   return !!behandling.harMottattNyInformasjon ? (

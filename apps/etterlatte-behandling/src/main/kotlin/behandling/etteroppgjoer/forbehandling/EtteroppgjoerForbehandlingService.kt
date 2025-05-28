@@ -203,14 +203,14 @@ class EtteroppgjoerForbehandlingService(
         return beregnetEtteroppgjoerResultat
     }
 
-    fun lagreEndringFraBruker(
+    fun lagreInformasjonFraBruker(
         forbehandlingId: UUID,
         harMottattNyInformasjon: JaNei,
         endringErTilUgunstForBruker: JaNei?,
         beskrivelseAvUgunst: String?,
     ) {
         if (harMottattNyInformasjon == JaNei.NEI) {
-            dao.oppdaterEndringFraBruker(
+            dao.oppdaterInformasjonFraBruker(
                 forbehandlingId = forbehandlingId,
                 harMottattNyInformasjon = harMottattNyInformasjon,
                 endringErTilUgunstForBruker = null,
@@ -218,14 +218,14 @@ class EtteroppgjoerForbehandlingService(
             )
         } else {
             if (endringErTilUgunstForBruker == JaNei.NEI) {
-                dao.oppdaterEndringFraBruker(
+                dao.oppdaterInformasjonFraBruker(
                     forbehandlingId = forbehandlingId,
                     harMottattNyInformasjon = harMottattNyInformasjon,
                     endringErTilUgunstForBruker = endringErTilUgunstForBruker,
                     beskrivelseAvUgunst = null,
                 )
             } else {
-                dao.oppdaterEndringFraBruker(
+                dao.oppdaterInformasjonFraBruker(
                     forbehandlingId = forbehandlingId,
                     harMottattNyInformasjon = harMottattNyInformasjon,
                     endringErTilUgunstForBruker = endringErTilUgunstForBruker,
@@ -364,7 +364,7 @@ data class BeregnFaktiskInntektRequest(
     val spesifikasjon: String,
 )
 
-data class EndringFraBrukerRequest(
+data class InformasjonFraBrukerRequest(
     val harMottattNyInformasjon: JaNei,
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,

@@ -11,8 +11,8 @@ import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EndringFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
@@ -121,12 +121,12 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("endring-fra-bruker") {
-                val request = call.receive<EndringFraBrukerRequest>()
+            post("informasjon-fra-bruker") {
+                val request = call.receive<InformasjonFraBrukerRequest>()
 
                 val response =
                     inTransaction {
-                        forbehandlingService.lagreEndringFraBruker(
+                        forbehandlingService.lagreInformasjonFraBruker(
                             forbehandlingId = etteroppgjoerId,
                             harMottattNyInformasjon = request.harMottattNyInformasjon,
                             endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,

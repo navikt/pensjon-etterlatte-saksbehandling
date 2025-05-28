@@ -36,10 +36,9 @@ interface FastsettFaktiskInntektSkjema {
 
 interface Props {
   setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
-  setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastsettInntektSkjemaErSkittent }: Props) => {
+export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
 
@@ -51,7 +50,7 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastse
     control,
     watch,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: faktiskInntekt
       ? {
@@ -71,20 +70,13 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastse
   })
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    if (isDirty) {
-      if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(true)
-
-      lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
-        dispatch(addResultatEtteroppgjoer(resultat))
-        hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
-          dispatch(addEtteroppgjoer(etteroppgjoer))
-          setFaktiskInntektSkjemaErAapen(false)
-        })
+    lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
+      dispatch(addResultatEtteroppgjoer(resultat))
+      hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
+        dispatch(addEtteroppgjoer(etteroppgjoer))
+        setFaktiskInntektSkjemaErAapen(false)
       })
-    } else {
-      if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(false)
-      setFaktiskInntektSkjemaErAapen(false)
-    }
+    })
   }
 
   return (

@@ -4,11 +4,11 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { EndringFraBrukerVisning } from '~components/etteroppgjoer/revurdering/endringFraBruker/EndringFraBrukerVisning'
-import { EndringFraBrukerSkjema } from '~components/etteroppgjoer/revurdering/endringFraBruker/EndringFraBrukerSkjema'
+import { InformasjonFraBrukerVisning } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerVisning'
+import { InformasjonFraBrukerSkjema } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerSkjema'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
-export const EndringFraBruker = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+export const InformasjonFraBruker = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const etteroppgjoer = useEtteroppgjoer()
@@ -19,30 +19,30 @@ export const EndringFraBruker = ({ behandling }: { behandling: IDetaljertBehandl
     innloggetSaksbehandler.skriveEnheter
   )
 
-  const [endringFraBrukerSkjemaErAapen, setEndringFraBrukerSkjemaErAapen] = useState<boolean>(
+  const [informasjonFraBrukerSkjemaErAapen, setInformasjonFraBrukerSkjemaErAapen] = useState<boolean>(
     erRedigerbar && !etteroppgjoer.behandling.harMottattNyInformasjon
   )
 
   return (
     <VStack gap="4">
-      <Heading size="large">Endring fra bruker</Heading>
+      <Heading size="large">Informasjon fra bruker</Heading>
 
-      {endringFraBrukerSkjemaErAapen && erRedigerbar ? (
-        <EndringFraBrukerSkjema
+      {informasjonFraBrukerSkjemaErAapen && erRedigerbar ? (
+        <InformasjonFraBrukerSkjema
           behandling={behandling}
-          setEndringFraBrukerSkjemaErAapen={setEndringFraBrukerSkjemaErAapen}
+          setInformasjonFraBrukerSkjemaErAapen={setInformasjonFraBrukerSkjemaErAapen}
           erRedigerbar={erRedigerbar}
         />
       ) : (
         <VStack gap="4">
-          <EndringFraBrukerVisning />
+          <InformasjonFraBrukerVisning />
           {erRedigerbar && (
             <div>
               <Button
                 size="small"
                 variant="secondary"
                 icon={<PencilIcon aria-hidden />}
-                onClick={() => setEndringFraBrukerSkjemaErAapen(true)}
+                onClick={() => setInformasjonFraBrukerSkjemaErAapen(true)}
               >
                 Rediger
               </Button>

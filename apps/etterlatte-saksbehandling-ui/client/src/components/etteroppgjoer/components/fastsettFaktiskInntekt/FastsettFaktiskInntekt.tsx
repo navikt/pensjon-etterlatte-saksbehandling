@@ -8,10 +8,9 @@ import { useState } from 'react'
 
 interface Props {
   erRedigerbar: boolean
-  setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaErSkittent }: Props) => {
+export const FastsettFaktiskInntekt = ({ erRedigerbar }: Props) => {
   const { behandling, faktiskInntekt } = useEtteroppgjoer()
 
   const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
@@ -31,10 +30,7 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaE
       </div>
 
       {faktiskInntektSkjemaErAapen && erRedigerbar ? (
-        <FaktiskInntektSkjema
-          setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
-          setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
-        />
+        <FaktiskInntektSkjema setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen} />
       ) : (
         <VStack gap="4">
           <FaktiskInntektVisning />

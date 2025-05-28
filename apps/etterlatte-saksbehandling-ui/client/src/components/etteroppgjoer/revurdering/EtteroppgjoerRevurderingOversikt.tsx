@@ -2,25 +2,25 @@ import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
-import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 import { EtteroppgjoerRevurderingResultat } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingResultat'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { EndringFraBruker } from '~components/etteroppgjoer/revurdering/endringFraBruker/EndringFraBruker'
+import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
-  const { next } = useContext(BehandlingRouteContext)
+  // TODO: ny routing fikses i neste PR
+  //const { next } = useContext(BehandlingRouteContext)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -35,11 +35,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const dispatch = useAppDispatch()
 
   const [hentEtteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
-
-  // TODO: flytte logikk for å sjekke om fastsatt inntekt er endret til backend
-  const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
-  const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
-    useState<string>('')
 
   useEffect(() => {
     if (!etteroppgjoerForbehandlingId) return
@@ -61,13 +56,10 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </BodyShort>
         <Inntektsopplysninger />
 
-        <EndringFraBruker behandling={behandling} />
+        <InformasjonFraBruker behandling={behandling} />
 
         {!!etteroppgjoer.behandling.harMottattNyInformasjon ? (
-          <FastsettFaktiskInntekt
-            erRedigerbar={erRedigerbar}
-            setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
-          />
+          <FastsettFaktiskInntekt erRedigerbar={erRedigerbar} />
         ) : (
           <FastsettFaktiskInntekt erRedigerbar={false} />
         )}
@@ -75,12 +67,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         <ResultatAvForbehandling />
 
         <EtteroppgjoerRevurderingResultat />
-
-        {fastsettInntektSkjemaErSkittentFeilmelding && (
-          <HStack width="100%" justify="center">
-            <Alert variant="error">{fastsettInntektSkjemaErSkittentFeilmelding}</Alert>
-          </HStack>
-        )}
 
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">

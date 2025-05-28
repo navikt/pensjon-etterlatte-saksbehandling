@@ -1,11 +1,11 @@
 import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { IEndringFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
+import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling, lagreEndringFraBruker } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerForbehandling, lagreInformasjonFraBruker } from '~shared/api/etteroppgjoer'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -14,16 +14,20 @@ import { JaNei } from '~shared/types/ISvar'
 
 interface Props {
   behandling: IDetaljertBehandling
-  setEndringFraBrukerSkjemaErAapen: (erAapen: boolean) => void
+  setInformasjonFraBrukerSkjemaErAapen: (erAapen: boolean) => void
   erRedigerbar: boolean
 }
 
-export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaErAapen, erRedigerbar }: Props) => {
+export const InformasjonFraBrukerSkjema = ({
+  behandling,
+  setInformasjonFraBrukerSkjemaErAapen,
+  erRedigerbar,
+}: Props) => {
   const etteroppgjoer = useEtteroppgjoer()
 
   const dispatch = useAppDispatch()
 
-  const [endringFraBrukerResult, endringFraBrukerRequest] = useApiCall(lagreEndringFraBruker)
+  const [informasjonFraBrukerResult, informasjonFraBrukerRequest] = useApiCall(lagreInformasjonFraBruker)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
   const {
@@ -32,7 +36,7 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
     watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<IEndringFraBruker>({
+  } = useForm<IInformasjonFraBruker>({
     defaultValues: {
       harMottattNyInformasjon: etteroppgjoer.behandling.harMottattNyInformasjon,
       endringErTilUgunstForBruker: etteroppgjoer.behandling.endringErTilUgunstForBruker,
@@ -40,11 +44,11 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
     },
   })
 
-  const submitEndringFraBruker = (data: IEndringFraBruker) => {
-    endringFraBrukerRequest({ forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data }, () => {
+  const submitEndringFraBruker = (data: IInformasjonFraBruker) => {
+    informasjonFraBrukerRequest({ forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data }, () => {
       hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
         dispatch(addEtteroppgjoer(etteroppgjoer))
-        setEndringFraBrukerSkjemaErAapen(false)
+        setInformasjonFraBrukerSkjemaErAapen(false)
       })
     })
   }
@@ -100,7 +104,7 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
         )}
 
         {isFailureHandler({
-          apiResult: endringFraBrukerResult,
+          apiResult: informasjonFraBrukerResult,
           errorMessage: 'Kunne ikke lagre oppgitt svar om endring fra bruker',
         })}
 
@@ -112,7 +116,7 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
         <HStack gap="4">
           <Button
             size="small"
-            loading={isPending(endringFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
+            loading={isPending(informasjonFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
             onClick={handleSubmit(submitEndringFraBruker)}
           >
             Lagre
@@ -123,8 +127,8 @@ export const EndringFraBrukerSkjema = ({ behandling, setEndringFraBrukerSkjemaEr
               type="button"
               variant="secondary"
               size="small"
-              disabled={isPending(endringFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
-              onClick={() => setEndringFraBrukerSkjemaErAapen(false)}
+              disabled={isPending(informasjonFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
+              onClick={() => setInformasjonFraBrukerSkjemaErAapen(false)}
             >
               Avbryt
             </Button>

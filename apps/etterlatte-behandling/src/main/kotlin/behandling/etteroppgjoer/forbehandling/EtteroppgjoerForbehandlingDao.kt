@@ -214,7 +214,7 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
-    fun oppdaterEndringFraBruker(
+    fun oppdaterInformasjonFraBruker(
         forbehandlingId: UUID,
         harMottattNyInformasjon: JaNei,
         endringErTilUgunstForBruker: JaNei?,

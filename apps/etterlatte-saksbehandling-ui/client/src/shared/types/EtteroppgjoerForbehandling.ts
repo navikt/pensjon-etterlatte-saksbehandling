@@ -50,7 +50,7 @@ export interface EtteroppgjoerOpplysninger {
   tidligereAvkorting: Avkorting
 }
 
-export interface IEndringFraBruker {
+export interface IInformasjonFraBruker {
   harMottattNyInformasjon: JaNei
   endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string

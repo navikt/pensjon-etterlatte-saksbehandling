@@ -368,8 +368,8 @@ class EtteroppgjoerForbehandlingDao(
             brevId = getLongOrNull("brev_id"),
             kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
             sisteIverksatteBehandlingId = getString("siste_iverksatte_behandling").let { UUID.fromString(it) },
-            harMottattNyInformasjon = JaNei.valueOf(getString("har_mottatt_ny_informasjon")),
-            endringErTilUgunstForBruker = JaNei.valueOf(getString("endring_er_til_ugunst_for_bruker")),
+            harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { JaNei.valueOf(it) },
+            endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { JaNei.valueOf(it) },
             beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
         )
 

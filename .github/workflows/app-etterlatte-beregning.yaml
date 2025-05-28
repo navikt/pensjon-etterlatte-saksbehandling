@@ -17,6 +17,9 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-inntektsjustering-model/**
+      - libs/etterlatte-beregning-model/**
+      - libs/etterlatte-jobs/**
+      - libs/etterlatte-oppgave-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -35,6 +38,9 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-inntektsjustering-model/**
+      - libs/etterlatte-beregning-model/**
+      - libs/etterlatte-jobs/**
+      - libs/etterlatte-oppgave-model/**
       - gradle/libs.versions.toml
 
 permissions:

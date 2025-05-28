@@ -14,6 +14,10 @@ on:
       - libs/etterlatte-mq/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -29,6 +33,10 @@ on:
       - libs/etterlatte-mq/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
 permissions:

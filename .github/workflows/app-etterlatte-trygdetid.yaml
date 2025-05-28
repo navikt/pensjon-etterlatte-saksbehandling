@@ -12,6 +12,9 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-regler/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -25,6 +28,9 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-regler/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
 
 permissions:

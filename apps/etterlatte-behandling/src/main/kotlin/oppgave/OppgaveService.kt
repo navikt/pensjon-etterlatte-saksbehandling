@@ -705,45 +705,38 @@ class OppgaveService(
                 .hentOppgaverTilSaker(
                     saker,
                     listOf(Status.ATTESTERING.name),
-                ).filter {
-                    when (it.type) {
-                        OppgaveType.FOERSTEGANGSBEHANDLING,
-                        OppgaveType.REVURDERING,
-                        OppgaveType.VURDER_KONSEKVENS,
-                        OppgaveType.GOSYS,
-                        OppgaveType.TILBAKEKREVING,
-                        OppgaveType.OMGJOERING,
-                        OppgaveType.JOURNALFOERING,
-                        OppgaveType.TILLEGGSINFORMASJON,
-                        OppgaveType.GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
-                        OppgaveType.AKTIVITETSPLIKT,
-                        OppgaveType.AKTIVITETSPLIKT_12MND,
-                        OppgaveType.AKTIVITETSPLIKT_REVURDERING,
-                        OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
-                        -> true
-                        OppgaveType.OPPFOELGING,
-                        OppgaveType.KLAGE,
-                        OppgaveType.KRAVPAKKE_UTLAND,
-                        OppgaveType.MANGLER_SOEKNAD,
-                        OppgaveType.GENERELL_OPPGAVE,
-                        OppgaveType.AARLIG_INNTEKTSJUSTERING,
-                        OppgaveType.INNTEKTSOPPLYSNING,
-                        OppgaveType.MANUELL_UTSENDING_BREV,
-                        OppgaveType.MELDT_INN_ENDRING,
-                        OppgaveType.ETTEROPPGJOER,
-                        -> {
-                            logger.info(
-                                "Tilbakestiller ikke oppgave av type ${it.type} " +
-                                    "fra attestering for oppgave ${it.id}",
-                            )
-                            false
-                        }
-                    }
-                }
+                ).filter { it.type.skalTilbakestillesUnderAttestering() }
         oppgaverTilAttestering.forEach { oppgave ->
             oppgaveDao.tilbakestillOppgaveUnderAttestering(oppgave)
             saksbehandlerSomFattetVedtak(oppgave)?.let { saksbehandlerIdent ->
                 oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandlerIdent)
+            }
+        }
+
+        val oppgaverPaaVent =
+            oppgaveDao
+                .hentOppgaverTilSaker(saker, listOf(Status.PAA_VENT.name))
+                .filter { it.type.skalTilbakestillesUnderAttestering() }
+        oppgaverPaaVent.forEach { oppgave ->
+            val forrigeStatus = hentForrigeStatus(oppgave.id)
+            // Vi må ta ekstra steg for å passe på at oppgaven blir satt til under behandling etter den tas av vent
+            // Siden vi ser på forrige status når vi tar en oppgave av vent, kan vi oppnå dette ved å tilbakestille
+            // oppgaven som over, og så sette den på vent igjen
+            if (forrigeStatus == Status.ATTESTERING) {
+                oppgaveDao.tilbakestillOppgaveUnderAttestering(oppgave)
+                oppgaveDao.settNySaksbehandler(oppgave.id, Fagsaksystem.EY.navn)
+                oppgaveDao.oppdaterPaaVent(
+                    oppgaveId = oppgave.id,
+                    merknad = oppgave.merknad ?: "",
+                    aarsak = null,
+                    oppgaveStatus = Status.PAA_VENT,
+                )
+                val originalSaksbehandler = oppgave.saksbehandler
+                if (originalSaksbehandler != null) {
+                    oppgaveDao.settNySaksbehandler(oppgave.id, originalSaksbehandler.ident)
+                } else {
+                    oppgaveDao.fjernSaksbehandler(oppgave.id)
+                }
             }
         }
     }
@@ -755,6 +748,16 @@ class OppgaveService(
             null
         }
 }
+
+private fun OppgaveType.skalTilbakestillesUnderAttestering(): Boolean =
+    when (this) {
+        OppgaveType.FOERSTEGANGSBEHANDLING,
+        OppgaveType.REVURDERING,
+        OppgaveType.TILBAKEKREVING,
+        -> true
+
+        else -> false
+    }
 
 class BrukerManglerAttestantRolleException(
     ident: String,

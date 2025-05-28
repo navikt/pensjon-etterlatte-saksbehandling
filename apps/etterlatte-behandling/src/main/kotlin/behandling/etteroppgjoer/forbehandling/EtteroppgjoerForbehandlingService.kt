@@ -203,18 +203,37 @@ class EtteroppgjoerForbehandlingService(
         return beregnetEtteroppgjoerResultat
     }
 
-    // TOOD: resette verdiene for ugunst og beskrivelse av ugunst utifra valgene
     fun lagreEndringFraBruker(
         forbehandlingId: UUID,
         harMottattNyInformasjon: JaNei,
         endringErTilUgunstForBruker: JaNei?,
         beskrivelseAvUgunst: String?,
-    ) = dao.oppdaterEndringFraBruker(
-        forbehandlingId = forbehandlingId,
-        harMottattNyInformasjon = harMottattNyInformasjon,
-        endringErTilUgunstForBruker = endringErTilUgunstForBruker,
-        beskrivelseAvUgunst = beskrivelseAvUgunst,
-    )
+    ) {
+        if (harMottattNyInformasjon == JaNei.NEI) {
+            dao.oppdaterEndringFraBruker(
+                forbehandlingId = forbehandlingId,
+                harMottattNyInformasjon = harMottattNyInformasjon,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+            )
+        } else {
+            if (endringErTilUgunstForBruker == JaNei.NEI) {
+                dao.oppdaterEndringFraBruker(
+                    forbehandlingId = forbehandlingId,
+                    harMottattNyInformasjon = harMottattNyInformasjon,
+                    endringErTilUgunstForBruker = endringErTilUgunstForBruker,
+                    beskrivelseAvUgunst = null,
+                )
+            } else {
+                dao.oppdaterEndringFraBruker(
+                    forbehandlingId = forbehandlingId,
+                    harMottattNyInformasjon = harMottattNyInformasjon,
+                    endringErTilUgunstForBruker = endringErTilUgunstForBruker,
+                    beskrivelseAvUgunst = beskrivelseAvUgunst,
+                )
+            }
+        }
+    }
 
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,

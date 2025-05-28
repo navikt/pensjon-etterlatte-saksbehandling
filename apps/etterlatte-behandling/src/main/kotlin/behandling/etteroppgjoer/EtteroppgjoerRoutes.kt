@@ -11,9 +11,8 @@ import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EndringErTilUgunstForBrukerRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EndringFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.HarMottattNyInformasjonRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
@@ -122,29 +121,16 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("har-mottatt-ny-informasjon") {
-                val request = call.receive<HarMottattNyInformasjonRequest>()
+            post("endring-fra-bruker") {
+                val request = call.receive<EndringFraBrukerRequest>()
 
                 val response =
                     inTransaction {
-                        forbehandlingService.lagreHarMottattNyInformasjon(
-                            etteroppgjoerId,
-                            request.harMottattNyInformasjon,
-                        )
-                    }
-
-                call.respond(response)
-            }
-
-            post("endring-er-til-ugunst-for-bruker") {
-                val request = call.receive<EndringErTilUgunstForBrukerRequest>()
-
-                val response =
-                    inTransaction {
-                        forbehandlingService.lagreEndringErTilUgunstForBruker(
-                            etteroppgjoerId,
-                            request.endringErTilUgunstForBruker,
-                            request.beskrivelseAvUgunst,
+                        forbehandlingService.lagreEndringFraBruker(
+                            forbehandlingId = etteroppgjoerId,
+                            harMottattNyInformasjon = request.harMottattNyInformasjon,
+                            endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
+                            beskrivelseAvUgunst = request.beskrivelseAvUgunst,
                         )
                     }
 

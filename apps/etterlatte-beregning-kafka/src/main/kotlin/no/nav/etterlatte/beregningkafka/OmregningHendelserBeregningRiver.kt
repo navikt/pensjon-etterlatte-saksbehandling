@@ -182,7 +182,11 @@ internal class OmregningHendelserBeregningRiver(
                 packet[ReguleringEvents.BEREGNING_G_ETTER] = it.grunnbeloep
             }
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
-            BigDecimal(naavaerende.utbetaltBeloep).divide(BigDecimal(forrige.utbetaltBeloep), 14, RoundingMode.HALF_UP)
+            if (forrige.utbetaltBeloep > 0) {
+                BigDecimal(naavaerende.utbetaltBeloep).divide(BigDecimal(forrige.utbetaltBeloep), 14, RoundingMode.HALF_UP)
+            } else {
+                BigDecimal.ONE
+            }
 
         if (beregning.forrigeAvkorting != null) {
             val forrigeAvkortingBeloep =
@@ -240,7 +244,12 @@ internal class OmregningHendelserBeregningRiver(
             logger.warn("Gammelt beløp er 0. Nytt beløp er $nyttBeloep for behandling $behandlingId")
             return
         }
-        val endring = BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep), 2, RoundingMode.HALF_UP)
+        val endring =
+            if (gammeltBeloep > 0) {
+                BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep), 2, RoundingMode.HALF_UP)
+            } else {
+                BigDecimal.ONE
+            }
         if (endring >= BigDecimal(1.50)) {
             throw ForStorOekning(ny.behandlingId, endring)
         }

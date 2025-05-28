@@ -209,30 +209,12 @@ class EtteroppgjoerForbehandlingService(
         endringErTilUgunstForBruker: JaNei?,
         beskrivelseAvUgunst: String?,
     ) {
-        if (harMottattNyInformasjon == JaNei.NEI) {
-            dao.oppdaterInformasjonFraBruker(
-                forbehandlingId = forbehandlingId,
-                harMottattNyInformasjon = harMottattNyInformasjon,
-                endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
-            )
-        } else {
-            if (endringErTilUgunstForBruker == JaNei.NEI) {
-                dao.oppdaterInformasjonFraBruker(
-                    forbehandlingId = forbehandlingId,
-                    harMottattNyInformasjon = harMottattNyInformasjon,
-                    endringErTilUgunstForBruker = endringErTilUgunstForBruker,
-                    beskrivelseAvUgunst = null,
-                )
-            } else {
-                dao.oppdaterInformasjonFraBruker(
-                    forbehandlingId = forbehandlingId,
-                    harMottattNyInformasjon = harMottattNyInformasjon,
-                    endringErTilUgunstForBruker = endringErTilUgunstForBruker,
-                    beskrivelseAvUgunst = beskrivelseAvUgunst,
-                )
-            }
-        }
+        dao.oppdaterInformasjonFraBruker(
+            forbehandlingId = forbehandlingId,
+            harMottattNyInformasjon = harMottattNyInformasjon,
+            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon != JaNei.NEI },
+            beskrivelseAvUgunst = beskrivelseAvUgunst?.takeIf { endringErTilUgunstForBruker == JaNei.JA },
+        )
     }
 
     private fun kanOppretteForbehandlingForEtteroppgjoer(

@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -202,16 +203,19 @@ class EtteroppgjoerForbehandlingService(
         return beregnetEtteroppgjoerResultat
     }
 
-    fun lagreHarMottattNyInformasjon(
+    fun lagreInformasjonFraBruker(
         forbehandlingId: UUID,
-        harMottattNyInformasjon: Boolean,
-    ) = dao.oppdaterHarMottattNyInformasjon(forbehandlingId, harMottattNyInformasjon)
-
-    fun lagreEndringErTilUgunstForBruker(
-        forbehandlingId: UUID,
-        endringErTilUgunstForBruker: Boolean,
-        beskrivelseAvUgunst: String,
-    ) = dao.oppdaterOmEndringErTilUgunstForBruker(forbehandlingId, endringErTilUgunstForBruker, beskrivelseAvUgunst)
+        harMottattNyInformasjon: JaNei,
+        endringErTilUgunstForBruker: JaNei?,
+        beskrivelseAvUgunst: String?,
+    ) {
+        dao.oppdaterInformasjonFraBruker(
+            forbehandlingId = forbehandlingId,
+            harMottattNyInformasjon = harMottattNyInformasjon,
+            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon != JaNei.NEI },
+            beskrivelseAvUgunst = beskrivelseAvUgunst?.takeIf { endringErTilUgunstForBruker == JaNei.JA },
+        )
+    }
 
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
@@ -342,13 +346,10 @@ data class BeregnFaktiskInntektRequest(
     val spesifikasjon: String,
 )
 
-data class HarMottattNyInformasjonRequest(
-    val harMottattNyInformasjon: Boolean,
-)
-
-data class EndringErTilUgunstForBrukerRequest(
-    val endringErTilUgunstForBruker: Boolean,
-    val beskrivelseAvUgunst: String,
+data class InformasjonFraBrukerRequest(
+    val harMottattNyInformasjon: JaNei,
+    val endringErTilUgunstForBruker: JaNei?,
+    val beskrivelseAvUgunst: String?,
 )
 
 class FantIkkeForbehandling(

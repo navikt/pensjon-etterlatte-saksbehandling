@@ -4,21 +4,18 @@ import { maanedNavn } from '~utils/formatering/dato'
 import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { useState } from 'react'
 
 interface Props {
   erRedigerbar: boolean
-  faktiskInntektSkjemaErAapen: boolean
-  setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
-  setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
 }
 
-export const FastsettFaktiskInntekt = ({
-  erRedigerbar,
-  faktiskInntektSkjemaErAapen,
-  setFaktiskInntektSkjemaErAapen,
-  setFastsettInntektSkjemaErSkittent,
-}: Props) => {
-  const { behandling } = useEtteroppgjoer()
+export const FastsettFaktiskInntekt = ({ erRedigerbar }: Props) => {
+  const { behandling, faktiskInntekt } = useEtteroppgjoer()
+
+  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
+    erRedigerbar && !faktiskInntekt
+  )
 
   return (
     <VStack gap="4">
@@ -33,10 +30,7 @@ export const FastsettFaktiskInntekt = ({
       </div>
 
       {faktiskInntektSkjemaErAapen && erRedigerbar ? (
-        <FaktiskInntektSkjema
-          setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
-          setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
-        />
+        <FaktiskInntektSkjema setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen} />
       ) : (
         <VStack gap="4">
           <FaktiskInntektVisning />

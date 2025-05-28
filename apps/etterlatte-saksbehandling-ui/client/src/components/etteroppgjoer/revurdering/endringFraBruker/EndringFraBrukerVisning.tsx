@@ -1,5 +1,6 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
+import { JaNei } from '~shared/types/ISvar'
 
 export const EndringFraBrukerVisning = () => {
   const { behandling } = useEtteroppgjoer()
@@ -8,12 +9,12 @@ export const EndringFraBrukerVisning = () => {
     <VStack gap="4">
       <VStack gap="2">
         <Label>Har mottatt ny informasjon</Label>
-        <BodyShort>{behandling.harMottattNyInformasjon ? 'Ja' : 'Nei'}</BodyShort>
+        <BodyShort>{behandling.harMottattNyInformasjon === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
       </VStack>
       {!!behandling.endringErTilUgunstForBruker && (
         <VStack gap="2">
           <Label>Endring er til ugunst</Label>
-          <BodyShort>{behandling.endringErTilUgunstForBruker ? 'Ja' : 'Nei'}</BodyShort>
+          <BodyShort>{behandling.endringErTilUgunstForBruker === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
         </VStack>
       )}
       {!!behandling.beskrivelseAvUgunst && (

@@ -1,0 +1,2 @@
+ALTER TABLE etteroppgjoer_behandling ALTER COLUMN har_mottatt_ny_informasjon TYPE TEXT;
+ALTER TABLE etteroppgjoer_behandling ALTER COLUMN endring_er_til_ugunst_for_bruker TYPE TEXT;

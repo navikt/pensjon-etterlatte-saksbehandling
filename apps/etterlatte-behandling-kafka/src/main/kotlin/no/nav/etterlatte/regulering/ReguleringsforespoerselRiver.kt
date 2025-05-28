@@ -33,6 +33,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
@@ -89,6 +91,8 @@ internal class ReguleringsforespoerselRiver(
                     publiserSak(sakId, kjoering, packet, sakListe, context)
                 }
             },
+            batchStoerrelse = 25,
+            venteperiode = Duration.of(5L, ChronoUnit.SECONDS),
         )
     }
 

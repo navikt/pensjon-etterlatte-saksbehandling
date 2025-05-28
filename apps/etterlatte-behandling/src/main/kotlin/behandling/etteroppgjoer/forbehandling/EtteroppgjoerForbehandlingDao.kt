@@ -230,8 +230,8 @@ class EtteroppgjoerForbehandlingDao(
                     """.trimIndent(),
                 )
 
-            statement.setObject(1, harMottattNyInformasjon.toString())
-            statement.setString(2, endringErTilUgunstForBruker.toString())
+            statement.setString(1, harMottattNyInformasjon.name)
+            statement.setString(2, endringErTilUgunstForBruker?.name)
             statement.setString(3, beskrivelseAvUgunst)
             statement.setObject(4, forbehandlingId)
 
@@ -368,8 +368,8 @@ class EtteroppgjoerForbehandlingDao(
             brevId = getLongOrNull("brev_id"),
             kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
             sisteIverksatteBehandlingId = getString("siste_iverksatte_behandling").let { UUID.fromString(it) },
-            harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { JaNei.valueOf(it) },
-            endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { JaNei.valueOf(it) },
+            harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { enumValueOf<JaNei>(it) },
+            endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { enumValueOf<JaNei>(it) },
             beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
         )
 

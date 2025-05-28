@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -213,45 +214,26 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
-    fun oppdaterHarMottattNyInformasjon(
+    fun oppdaterInformasjonFraBruker(
         forbehandlingId: UUID,
-        harMottattNyInformasjon: Boolean,
+        harMottattNyInformasjon: JaNei,
+        endringErTilUgunstForBruker: JaNei?,
+        beskrivelseAvUgunst: String?,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
                 prepareStatement(
                     """
                     UPDATE etteroppgjoer_behandling
-                    SET har_mottatt_ny_informasjon = ?
+                    SET har_mottatt_ny_informasjon = ?, endring_er_til_ugunst_for_bruker = ?, beskrivelse_av_ugunst = ?
                     WHERE id = ?
                     """.trimIndent(),
                 )
 
-            statement.setBoolean(1, harMottattNyInformasjon)
-            statement.setObject(2, forbehandlingId)
-
-            statement.executeUpdate()
-        }
-    }
-
-    fun oppdaterOmEndringErTilUgunstForBruker(
-        forbehandlingId: UUID,
-        endringErTilUgunstForBruker: Boolean,
-        beskrivelseAvUgunst: String,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE etteroppgjoer_behandling
-                    SET endring_er_til_ugunst_for_bruker = ?, beskrivelse_av_ugunst = ?
-                    WHERE id = ?
-                    """.trimIndent(),
-                )
-
-            statement.setBoolean(1, endringErTilUgunstForBruker)
-            statement.setString(2, beskrivelseAvUgunst)
-            statement.setObject(3, forbehandlingId)
+            statement.setString(1, harMottattNyInformasjon.name)
+            statement.setString(2, endringErTilUgunstForBruker?.name)
+            statement.setString(3, beskrivelseAvUgunst)
+            statement.setObject(4, forbehandlingId)
 
             statement.executeUpdate()
         }
@@ -386,8 +368,8 @@ class EtteroppgjoerForbehandlingDao(
             brevId = getLongOrNull("brev_id"),
             kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
             sisteIverksatteBehandlingId = getString("siste_iverksatte_behandling").let { UUID.fromString(it) },
-            harMottattNyInformasjon = getBoolean("har_mottatt_ny_informasjon"),
-            endringErTilUgunstForBruker = getBoolean("endring_er_til_ugunst_for_bruker"),
+            harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { enumValueOf<JaNei>(it) },
+            endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { enumValueOf<JaNei>(it) },
             beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
         )
 

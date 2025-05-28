@@ -724,7 +724,7 @@ class OppgaveService(
             // oppgaven som over, og så sette den på vent igjen
             if (forrigeStatus == Status.ATTESTERING) {
                 oppgaveDao.tilbakestillOppgaveUnderAttestering(oppgave)
-                oppgaveDao.settNySaksbehandler(oppgave.id, "EY")
+                oppgaveDao.settNySaksbehandler(oppgave.id, Fagsaksystem.EY.navn)
                 oppgaveDao.oppdaterPaaVent(
                     oppgaveId = oppgave.id,
                     merknad = oppgave.merknad ?: "",

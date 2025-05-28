@@ -58,11 +58,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
         <InformasjonFraBruker behandling={behandling} />
 
-        {!!etteroppgjoer.behandling.harMottattNyInformasjon ? (
-          <FastsettFaktiskInntekt erRedigerbar={erRedigerbar} />
-        ) : (
-          <FastsettFaktiskInntekt erRedigerbar={false} />
-        )}
+        <FastsettFaktiskInntekt erRedigerbar={!!etteroppgjoer.behandling.harMottattNyInformasjon && erRedigerbar} />
 
         <ResultatAvForbehandling />
 

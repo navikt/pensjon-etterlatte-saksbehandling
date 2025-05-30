@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
-import java.sql.Types
 import java.time.YearMonth
 import java.util.UUID
 
@@ -95,8 +94,8 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setLong(8, forbehandling.brevId)
                 statement.setObject(9, forbehandling.kopiertFra)
                 statement.setObject(10, forbehandling.sisteIverksatteBehandlingId)
-                statement.setObject(11, forbehandling.harMottattNyInformasjon, Types.BOOLEAN)
-                statement.setObject(12, forbehandling.endringErTilUgunstForBruker, Types.BOOLEAN)
+                statement.setString(11, forbehandling.harMottattNyInformasjon?.name)
+                statement.setString(12, forbehandling.endringErTilUgunstForBruker?.name)
                 statement.setString(13, forbehandling.beskrivelseAvUgunst)
 
                 statement.executeUpdate().also {

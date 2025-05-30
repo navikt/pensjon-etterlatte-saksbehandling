@@ -141,26 +141,6 @@ data class Avkorting(
         )
 
     /**
-     * Brukes til å beregne avkoring med [ForventetInntekt]
-     */
-    fun beregnAvkortingMedNyttGrunnlag(
-        nyttGrunnlag: AvkortingGrunnlagLagreDto,
-        bruker: BrukerTokenInfo,
-        beregning: Beregning,
-        sanksjoner: List<Sanksjon>,
-        opphoerFom: YearMonth?,
-        aldersovergang: YearMonth? = null,
-    ): Avkorting =
-        beregnAvkortingMedNyeGrunnlag(
-            nyttGrunnlag = listOf(nyttGrunnlag),
-            bruker = bruker,
-            beregning = beregning,
-            sanksjoner = sanksjoner,
-            opphoerFom = opphoerFom,
-            aldersovergang = aldersovergang,
-        )
-
-    /**
      * Brukes til å beregne avkoring med flere forventede inntekter [ForventetInntekt]
      */
     fun beregnAvkortingMedNyeGrunnlag(

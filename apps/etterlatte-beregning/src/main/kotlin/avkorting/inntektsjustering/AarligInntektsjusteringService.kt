@@ -67,7 +67,7 @@ class AarligInntektsjusteringService(
         // Avkorting opprettes her med tidligere årsoppgjør
         avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, brukerTokenInfo)
 
-        avkortingService.beregnAvkortingMedNyttGrunnlag(behandlingId, brukerTokenInfo, nyttGrunnlag)
+        avkortingService.beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(nyttGrunnlag), brukerTokenInfo)
         return avkortingRepository.hentAvkorting(behandlingId)
             ?: throw AvkortingFinnesIkkeException(behandlingId)
     }

@@ -26,7 +26,7 @@ class MottattInntektsjusteringService(
         val eksisterende =
             avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, brukerTokenInfo)
                 ?: throw InternfeilException("Fant ikke og klarte opprette avkorting under inntektsjustering")
-        val eksisterendeInntekt = eksisterende.redigerbarForventetInntekt
+        val eksisterendeInntekt = eksisterende.redigerbareInntekter.firstOrNull { it.fom == request.virkningstidspunkt }
 
         val nyttGrunnlag =
             AvkortingGrunnlagLagreDto(
@@ -47,7 +47,7 @@ class MottattInntektsjusteringService(
                         )
                     },
             )
-        avkortingService.beregnAvkortingMedNyttGrunnlag(behandlingId, brukerTokenInfo, nyttGrunnlag)
+        avkortingService.beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(nyttGrunnlag), brukerTokenInfo)
 
         return avkortingService.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
     }

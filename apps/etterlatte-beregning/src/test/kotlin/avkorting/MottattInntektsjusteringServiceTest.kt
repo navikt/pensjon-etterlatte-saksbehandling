@@ -16,7 +16,7 @@ import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringSer
 import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.bruker
-import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendGammelDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -60,21 +60,20 @@ class MottattInntektsjusteringServiceTest {
                 inntektTom = 300,
             )
 
-        val inntektSomLagres = slot<AvkortingGrunnlagLagreDto>()
+        val inntektSomLagres = slot<List<AvkortingGrunnlagLagreDto>>()
 
         coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(request.behandlingId, bruker) } returns
-            AvkortingFrontendGammelDto(
-                redigerbarForventetInntekt = eksisterendeInntekt.toDto(),
-                redigerbarForventetInntektNesteAar = null,
+            AvkortingFrontendDto(
+                redigerbareInntekter = listOf(eksisterendeInntekt.toDto()),
                 avkortingGrunnlag = emptyList(),
                 avkortetYtelse = emptyList(),
             )
 
         coEvery {
-            avkortingService.beregnAvkortingMedNyttGrunnlag(
-                any(),
+            avkortingService.beregnAvkortingMedNyeGrunnlag(
                 any(),
                 capture(inntektSomLagres),
+                any(),
             )
         } returns mockk()
         every { avkortingService.hentAvkorting(any()) } returns mockk()
@@ -84,11 +83,11 @@ class MottattInntektsjusteringServiceTest {
         }
 
         coVerify {
-            avkortingService.beregnAvkortingMedNyttGrunnlag(request.behandlingId, bruker, inntektSomLagres.captured)
+            avkortingService.beregnAvkortingMedNyeGrunnlag(request.behandlingId, inntektSomLagres.captured, bruker)
         }
         verify { avkortingService.hentAvkorting(request.behandlingId) }
 
-        with(inntektSomLagres.captured) {
+        with(inntektSomLagres.captured[0]) {
             id shouldBe eksisterendeInntekt.id
             inntektTom shouldBe 300
             fratrekkInnAar shouldBe 0
@@ -127,7 +126,7 @@ class MottattInntektsjusteringServiceTest {
                 innvilgaMaaneder = 12,
             )
 
-        val inntektSomLagres = slot<AvkortingGrunnlagLagreDto>()
+        val inntektSomLagres = slot<List<AvkortingGrunnlagLagreDto>>()
 
         coEvery {
             avkortingService.hentOpprettEllerReberegnAvkorting(
@@ -135,17 +134,16 @@ class MottattInntektsjusteringServiceTest {
                 bruker,
             )
         } returns
-            AvkortingFrontendGammelDto(
-                redigerbarForventetInntekt = eksisterendeInntekt.toDto(),
-                redigerbarForventetInntektNesteAar = null,
+            AvkortingFrontendDto(
+                redigerbareInntekter = listOf(eksisterendeInntekt.toDto()),
                 avkortingGrunnlag = emptyList(),
                 avkortetYtelse = emptyList(),
             )
         coEvery {
-            avkortingService.beregnAvkortingMedNyttGrunnlag(
-                any(),
+            avkortingService.beregnAvkortingMedNyeGrunnlag(
                 any(),
                 capture(inntektSomLagres),
+                any(),
             )
         } returns mockk()
         every { avkortingService.hentAvkorting(any()) } returns mockk()
@@ -155,11 +153,11 @@ class MottattInntektsjusteringServiceTest {
         }
 
         coVerify {
-            avkortingService.beregnAvkortingMedNyttGrunnlag(request.behandlingId, bruker, inntektSomLagres.captured)
+            avkortingService.beregnAvkortingMedNyeGrunnlag(request.behandlingId, inntektSomLagres.captured, bruker)
         }
         verify { avkortingService.hentAvkorting(request.behandlingId) }
 
-        with(inntektSomLagres.captured) {
+        with(inntektSomLagres.captured[0]) {
             overstyrtInnvilgaMaaneder?.antall shouldBe 5
             overstyrtInnvilgaMaaneder?.begrunnelse shouldBe "Bruker har oppgitt tidlig alderspensjon i inntektsjusteringskjema"
             overstyrtInnvilgaMaaneder?.aarsak shouldBe OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG.name

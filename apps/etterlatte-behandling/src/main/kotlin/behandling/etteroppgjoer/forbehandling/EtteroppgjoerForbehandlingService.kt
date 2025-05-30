@@ -66,7 +66,11 @@ class EtteroppgjoerForbehandlingService(
             forbehandling.aar,
             EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
         )
-        oppgaveService.ferdigStillOppgaveUnderBehandling(forbehandling.id.toString(), OppgaveType.ETTEROPPGJOER, brukerTokenInfo)
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            forbehandling.id.toString(),
+            OppgaveType.ETTEROPPGJOER,
+            brukerTokenInfo,
+        )
     }
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
@@ -212,8 +216,12 @@ class EtteroppgjoerForbehandlingService(
         dao.oppdaterInformasjonFraBruker(
             forbehandlingId = forbehandlingId,
             harMottattNyInformasjon = harMottattNyInformasjon,
-            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon != JaNei.NEI },
-            beskrivelseAvUgunst = beskrivelseAvUgunst?.takeIf { endringErTilUgunstForBruker == JaNei.JA },
+            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon == JaNei.JA },
+            beskrivelseAvUgunst =
+                beskrivelseAvUgunst?.takeIf {
+                    harMottattNyInformasjon == JaNei.JA &&
+                        endringErTilUgunstForBruker == JaNei.JA
+                },
         )
     }
 
@@ -240,7 +248,12 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
-        if (etteroppgjoer.status !in listOf(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)) {
+        if (etteroppgjoer.status !in
+            listOf(
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+            )
+        ) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
             throw InternfeilException(
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",

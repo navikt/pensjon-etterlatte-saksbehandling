@@ -92,7 +92,7 @@ internal class ReguleringsforespoerselRiver(
                 }
             },
             batchStoerrelse = 25,
-            venteperiode = Duration.of(5L, ChronoUnit.SECONDS),
+            venteperiode = Duration.of(2L, ChronoUnit.SECONDS),
         )
     }
 

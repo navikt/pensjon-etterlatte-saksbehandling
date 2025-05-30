@@ -123,13 +123,15 @@ class BeregnAvkortingMedToInntektsTest {
 
     private fun `Avkorting førstegangsbehandling neste år`(eksisterende: Avkorting) =
         eksisterende
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 325000,
-                        fratrekkInnAar = 0,
-                        fom = YearMonth.of(2025, Month.JANUARY),
-                    ),
+            .beregnAvkortingMedNyeGrunnlag(
+                listOf(
+                    element =
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 325000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                        ),
+                ),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -147,13 +149,15 @@ class BeregnAvkortingMedToInntektsTest {
 
     private fun `Avkorting revurdering inneværende år`(eksisterende: Avkorting) =
         eksisterende
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 350000,
-                        fratrekkInnAar = 150000,
-                        fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar, Month.OCTOBER),
-                    ),
+            .beregnAvkortingMedNyeGrunnlag(
+                listOf(
+                    element =
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 350000,
+                            fratrekkInnAar = 150000,
+                            fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar, Month.OCTOBER),
+                        ),
+                ),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -171,19 +175,21 @@ class BeregnAvkortingMedToInntektsTest {
 
     private fun `Avkorting revurdering neste år`(eksisterende: Avkorting) =
         eksisterende
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        id =
-                            eksisterende.aarsoppgjoer
-                                .last()
-                                .inntektsavkorting()
-                                .first()
-                                .grunnlag.id,
-                        aarsinntekt = 375000,
-                        fratrekkInnAar = 0,
-                        fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar + 1, Month.JANUARY),
-                    ),
+            .beregnAvkortingMedNyeGrunnlag(
+                listOf(
+                    element =
+                        avkortinggrunnlagLagreDto(
+                            id =
+                                eksisterende.aarsoppgjoer
+                                    .last()
+                                    .inntektsavkorting()
+                                    .first()
+                                    .grunnlag.id,
+                            aarsinntekt = 375000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar + 1, Month.JANUARY),
+                        ),
+                ),
                 bruker = bruker,
                 beregning =
                     beregning(

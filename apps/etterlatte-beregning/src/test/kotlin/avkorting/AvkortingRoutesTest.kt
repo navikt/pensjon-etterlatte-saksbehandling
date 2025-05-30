@@ -22,7 +22,8 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendGammelDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFlereInntekterDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
@@ -89,26 +90,27 @@ class AvkortingRoutesTest {
             )
         val avkortetYtelseId = UUID.randomUUID()
         val avkorting =
-            AvkortingFrontendGammelDto(
-                redigerbarForventetInntekt =
-                    ForventetInntektDto(
-                        id = avkortingsgrunnlagId,
-                        fom = dato,
-                        tom = dato,
-                        inntektTom = 100000,
-                        fratrekkInnAar = 10000,
-                        spesifikasjon = "Spesifikasjon",
-                        inntektUtlandTom = 0,
-                        fratrekkInnAarUtland = 0,
-                        innvilgaMaaneder = 12,
-                        inntektInnvilgetPeriode = 90000,
-                        kilde =
-                            AvkortingGrunnlagKildeDto(
-                                tidspunkt = tidspunkt.toString(),
-                                ident = "Saksbehandler01",
-                            ),
+            AvkortingFrontendDto(
+                redigerbareInntekter =
+                    listOf(
+                        ForventetInntektDto(
+                            id = avkortingsgrunnlagId,
+                            fom = dato,
+                            tom = dato,
+                            inntektTom = 100000,
+                            fratrekkInnAar = 10000,
+                            spesifikasjon = "Spesifikasjon",
+                            inntektUtlandTom = 0,
+                            fratrekkInnAarUtland = 0,
+                            innvilgaMaaneder = 12,
+                            inntektInnvilgetPeriode = 90000,
+                            kilde =
+                                AvkortingGrunnlagKildeDto(
+                                    tidspunkt = tidspunkt.toString(),
+                                    ident = "Saksbehandler01",
+                                ),
+                        ),
                     ),
-                redigerbarForventetInntektNesteAar = null,
                 avkortingGrunnlag =
                     listOf(
                         ForventetInntektDto(
@@ -158,21 +160,26 @@ class AvkortingRoutesTest {
                         ),
                     ),
             )
-        coEvery { avkortingService.beregnAvkortingMedNyttGrunnlag(any(), any(), any()) } returns avkorting
+        coEvery { avkortingService.beregnAvkortingMedNyeGrunnlag(any(), any(), any()) } returns avkorting
 
         testApplication {
             val response =
-                client.post("/api/beregning/avkorting/$behandlingsId") {
+                client.post("/api/beregning/avkorting/$behandlingsId/liste") {
                     val request =
-                        with(avkorting.redigerbarForventetInntekt!!) {
-                            AvkortingGrunnlagLagreDto(
-                                id = id,
-                                inntektTom = inntektTom,
-                                fratrekkInnAar = fratrekkInnAar,
-                                inntektUtlandTom = inntektUtlandTom,
-                                fratrekkInnAarUtland = fratrekkInnAarUtland,
-                                spesifikasjon = spesifikasjon,
-                                fom = dato,
+                        with(avkorting.redigerbareInntekter.singleOrNull()!!) {
+                            AvkortingGrunnlagFlereInntekterDto(
+                                inntekter =
+                                    listOf(
+                                        AvkortingGrunnlagLagreDto(
+                                            id = id,
+                                            inntektTom = inntektTom,
+                                            fratrekkInnAar = fratrekkInnAar,
+                                            inntektUtlandTom = inntektUtlandTom,
+                                            fratrekkInnAarUtland = fratrekkInnAarUtland,
+                                            spesifikasjon = spesifikasjon,
+                                            fom = dato,
+                                        ),
+                                    ),
                             )
                         }
                     setBody(request.toJson())
@@ -181,17 +188,18 @@ class AvkortingRoutesTest {
                 }
 
             response.status shouldBe HttpStatusCode.OK
-            val result = objectMapper.readValue(response.bodyAsText(), AvkortingFrontendGammelDto::class.java)
+            val result = objectMapper.readValue(response.bodyAsText(), AvkortingFrontendDto::class.java)
             result shouldBe avkorting
             coVerify {
-                avkortingService.beregnAvkortingMedNyttGrunnlag(
+                avkortingService.beregnAvkortingMedNyeGrunnlag(
                     behandlingsId,
-                    any(),
                     withArg {
-                        it.inntektTom shouldBe avkortingsgrunnlag.inntektTom
-                        it.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
-                        it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
+                        it.size shouldBe 1
+                        it[0].inntektTom shouldBe avkortingsgrunnlag.inntektTom
+                        it[0].fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
+                        it[0].spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
                     },
+                    any(),
                 )
             }
         }

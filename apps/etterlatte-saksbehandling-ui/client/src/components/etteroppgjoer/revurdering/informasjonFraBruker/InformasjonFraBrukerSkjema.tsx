@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import React from 'react'
+import React, { Dispatch, SetStateAction, useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling, lagreInformasjonFraBruker } from '~shared/api/etteroppgjoer'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -16,12 +16,14 @@ interface Props {
   behandling: IDetaljertBehandling
   setInformasjonFraBrukerSkjemaErAapen: (erAapen: boolean) => void
   erRedigerbar: boolean
+  setValiderSkjema: Dispatch<SetStateAction<() => void>>
 }
 
 export const InformasjonFraBrukerSkjema = ({
   behandling,
   setInformasjonFraBrukerSkjemaErAapen,
   erRedigerbar,
+  setValiderSkjema,
 }: Props) => {
   const etteroppgjoer = useEtteroppgjoer()
 
@@ -35,6 +37,7 @@ export const InformasjonFraBrukerSkjema = ({
     control,
     watch,
     handleSubmit,
+    trigger,
     formState: { errors },
   } = useForm<IInformasjonFraBruker>({
     defaultValues: {
@@ -43,6 +46,10 @@ export const InformasjonFraBrukerSkjema = ({
       beskrivelseAvUgunst: etteroppgjoer.behandling.beskrivelseAvUgunst,
     },
   })
+
+  useEffect(() => {
+    setValiderSkjema(() => trigger)
+  }, [])
 
   const submitEndringFraBruker = (data: IInformasjonFraBruker) => {
     informasjonFraBrukerRequest({ forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data }, () => {

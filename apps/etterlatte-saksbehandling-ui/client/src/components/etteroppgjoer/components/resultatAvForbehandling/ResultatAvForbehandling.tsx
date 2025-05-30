@@ -32,10 +32,12 @@ export const ResultatAvForbehandling = () => {
       <Box maxWidth="25rem">
         <Table>
           <Table.Header>
-            <Table.HeaderCell scope="col">Utregning</Table.HeaderCell>
-            <Table.HeaderCell scope="col">
-              <HStack justify="center">Beløp</HStack>
-            </Table.HeaderCell>
+            <Table.Row>
+              <Table.HeaderCell scope="col">Utregning</Table.HeaderCell>
+              <Table.HeaderCell scope="col">
+                <HStack justify="center">Beløp</HStack>
+              </Table.HeaderCell>
+            </Table.Row>
           </Table.Header>
           <Table.Body>
             <Table.Row>

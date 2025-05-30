@@ -18,6 +18,9 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-tidshendelser-model/**
       - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-beregning-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -37,6 +40,9 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-tidshendelser-model/**
       - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-beregning-model/**
       - gradle/libs.versions.toml
 
 permissions:

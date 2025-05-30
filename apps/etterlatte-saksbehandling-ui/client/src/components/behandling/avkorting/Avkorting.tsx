@@ -47,7 +47,7 @@ export const Avkorting = () => {
         })
       })
     }
-  }, [])
+  }, [avkorting])
 
   const avkortingGrunnlagInnevaerendeAar = () => {
     return avkorting?.avkortingGrunnlag.find(

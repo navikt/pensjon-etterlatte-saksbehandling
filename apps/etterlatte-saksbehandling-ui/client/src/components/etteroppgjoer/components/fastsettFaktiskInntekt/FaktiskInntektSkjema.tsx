@@ -9,6 +9,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { useAppDispatch } from '~store/Store'
+import { resetAvkorting } from '~store/reducers/BehandlingReducer'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -74,6 +75,7 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) 
       dispatch(addResultatEtteroppgjoer(resultat))
       hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
         dispatch(addEtteroppgjoer(etteroppgjoer))
+        dispatch(resetAvkorting())
         setFaktiskInntektSkjemaErAapen(false)
       })
     })

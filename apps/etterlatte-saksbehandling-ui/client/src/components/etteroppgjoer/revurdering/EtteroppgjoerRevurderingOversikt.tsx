@@ -4,7 +4,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import React, { useEffect, useState } from 'react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
@@ -20,6 +20,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { FieldErrors } from 'react-hook-form'
 import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
+import { isEmpty } from 'lodash'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
@@ -46,16 +47,31 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     FieldErrors<FastsettFaktiskInntektSkjema> | undefined
   >()
 
+  const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
+
   function nesteSteg() {
-    // if (!!feilmeldingEtteroppgjoer) {
-    //   validerSkjema()
-    //   if (feilmeldingEtteroppgjoer !== EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST) {
-    //     document.getElementById(INFORMASJON_FRA_BRUKER_ID)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    //   }
-    //   setVisFeilmelding(true)
-    //   return
-    // }
-    next()
+    console.log(informasjonFraBrukerSkjemaErrors)
+    console.log(fastsettFaktiskInntektSkjemaErrors)
+
+    if (
+      (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
+      (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
+    ) {
+      if (
+        etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+        etteroppgjoer.behandling.kopiertFra === undefined
+      ) {
+        setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+        return
+      } else if (etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+        setOversiktValideringFeilmelding(
+          'Endringen er til ugunst for bruker, revurderingen er ugyldig og varselbrev må sendes'
+        )
+        return
+      }
+      setOversiktValideringFeilmelding('')
+      next()
+    }
   }
 
   useEffect(() => {
@@ -101,6 +117,12 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         {!!fastsettFaktiskInntektSkjemaErrors && (
           <Box maxWidth="42.5rem">
             <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
+          </Box>
+        )}
+
+        {!!oversiktValideringFeilmelding && (
+          <Box maxWidth="42.5rem">
+            <Alert variant="error">{oversiktValideringFeilmelding}</Alert>
           </Box>
         )}
 

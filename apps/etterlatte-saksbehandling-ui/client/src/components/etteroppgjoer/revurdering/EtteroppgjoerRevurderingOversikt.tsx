@@ -8,9 +8,8 @@ import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
-import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
+import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
-import { EtteroppgjoerRevurderingResultat } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingResultat'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import {
@@ -23,6 +22,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { EtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { JaNei } from '~shared/types/ISvar'
+import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
 
 enum EtteroppgjoerFeil {
   MANGLER_ETTEROPPGJOER = 'MANGLER_ETTEROPPGJOER',
@@ -117,8 +117,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         {feilmeldingEtteroppgjoer !== EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST && (
           <>
             <FastsettFaktiskInntekt erRedigerbar={!!etteroppgjoer.behandling.harMottattNyInformasjon && erRedigerbar} />
+            <TabellForBeregnetEtteroppgjoerResultat />
             <ResultatAvForbehandling />
-            <EtteroppgjoerRevurderingResultat />
           </>
         )}
 

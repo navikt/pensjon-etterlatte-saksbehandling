@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-sporingslogg"))
 
-    implementation("io.ktor:ktor-server-swagger:2.3.13")
+    implementation("io.ktor:ktor-server-swagger:3.1.3")
 
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.jackson)

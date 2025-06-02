@@ -50,9 +50,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
   function nesteSteg() {
-    console.log(informasjonFraBrukerSkjemaErrors)
-    console.log(fastsettFaktiskInntektSkjemaErrors)
-
     if (
       (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
       (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
@@ -64,6 +61,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
         return
       } else if (etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+        // TODO: tror vi må se litt mer på visningen av denne samme med design
         setOversiktValideringFeilmelding(
           'Endringen er til ugunst for bruker, revurderingen er ugyldig og varselbrev må sendes'
         )
@@ -108,6 +106,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           </>
         )}
 
+        {/* TODO: prøve å se og merge disse 2 sammen */}
         {!!informasjonFraBrukerSkjemaErrors && (
           <Box maxWidth="42.5rem">
             <SammendragAvSkjemaFeil errors={informasjonFraBrukerSkjemaErrors} />

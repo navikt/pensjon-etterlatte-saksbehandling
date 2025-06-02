@@ -1,14 +1,14 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Box, HStack, Label, VStack } from '@navikt/ds-react'
-import { NOK } from '~utils/formatering/formatering'
 import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
+import { NOK } from '~utils/formatering/formatering'
 
 export const ResultatAvForbehandling = () => {
   const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
   if (!beregnetEtteroppgjoerResultat) return null
 
   const { resultatType, differanse } = beregnetEtteroppgjoerResultat
-  const absoluttBeloep = NOK(Math.abs(differanse))
+  const absoluttBeloep = Math.abs(differanse)
 
   const resultatTekst: Record<EtteroppgjoerResultatType, string> = {
     TILBAKEKREVING: 'Tilbakekreving',
@@ -18,20 +18,20 @@ export const ResultatAvForbehandling = () => {
 
   const beskrivelse = (() => {
     if (resultatType === EtteroppgjoerResultatType.TILBAKEKREVING) {
-      return `Resultatet viser at det er utbetalt ${absoluttBeloep} for mye stønad i ${behandling.aar}. Beløpet blir derfor krevd tilbake.`
+      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}. Beløpet blir derfor krevd tilbake.`
     }
 
     if (resultatType === EtteroppgjoerResultatType.ETTERBETALING) {
-      return `Resultatet viser at det er utbetalt ${absoluttBeloep} for lite stønad i ${behandling.aar}. Beløpet blir derfor etterbetalt.`
+      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}. Beløpet blir derfor etterbetalt.`
     }
 
     if (resultatType === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER) {
       if (differanse > 0) {
-        return `Resultatet viser at det er utbetalt ${absoluttBeloep} for mye stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
       }
 
       if (differanse < 0) {
-        return `Resultatet viser at det er utbetalt ${absoluttBeloep} for lite stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for etterbetaling, og det blir derfor ikke utbetalt.`
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for etterbetaling, og det blir derfor ikke utbetalt.`
       }
 
       return `Resultatet viser ingen endring, bruker fikk utbetalt rett stønad i ${behandling.aar}.`

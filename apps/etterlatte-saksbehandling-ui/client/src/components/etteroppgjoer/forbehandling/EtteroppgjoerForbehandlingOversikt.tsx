@@ -5,7 +5,7 @@ import { Inntektsopplysninger } from '~components/etteroppgjoer/components/innte
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { Link } from 'react-router-dom'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
-import { TabellResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellResultatAvForbehandling'
+import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
 import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
@@ -35,7 +35,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
       {!!beregnetEtteroppgjoerResultat && (
         <VStack gap="4">
-          <TabellResultatAvForbehandling />
+          <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </VStack>
       )}

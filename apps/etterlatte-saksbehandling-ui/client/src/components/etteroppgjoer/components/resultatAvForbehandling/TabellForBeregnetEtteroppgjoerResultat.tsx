@@ -2,7 +2,7 @@ import { Box, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
-export const TabellResultatAvForbehandling = () => {
+export const TabellForBeregnetEtteroppgjoerResultat = () => {
   const etteroppgjoer = useEtteroppgjoer()
 
   if (!etteroppgjoer || !etteroppgjoer.beregnetEtteroppgjoerResultat) {

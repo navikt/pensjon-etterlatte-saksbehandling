@@ -8,7 +8,7 @@ import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
-import { TabellResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellResultatAvForbehandling'
+import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
@@ -117,7 +117,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         {feilmeldingEtteroppgjoer !== EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST && (
           <>
             <FastsettFaktiskInntekt erRedigerbar={!!etteroppgjoer.behandling.harMottattNyInformasjon && erRedigerbar} />
-            <TabellResultatAvForbehandling />
+            <TabellForBeregnetEtteroppgjoerResultat />
             <ResultatAvForbehandling />
           </>
         )}

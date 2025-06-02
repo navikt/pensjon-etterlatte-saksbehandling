@@ -171,7 +171,7 @@ class RevurderingService(
             virkningstidspunkt = virkningstidspunkt,
             utlandstilknytning = forrigeBehandling.utlandstilknytning,
             boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-            kilde = kilde,
+            vedtaksloesning = kilde,
             prosesstype = prosessType,
             begrunnelse = begrunnelse,
             relatertBehandlingId = relatertBehandlingId,

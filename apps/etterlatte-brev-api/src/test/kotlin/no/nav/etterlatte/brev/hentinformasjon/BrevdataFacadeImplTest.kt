@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -269,11 +270,12 @@ internal class BrevdataFacadeImplTest {
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             sendeBrev = true,
             opphoerFraOgMed = null,
             relatertBehandlingId = null,
             tidligereFamiliepleier = null,
+            opprinnelse = BehandlingOpprinnelse.UKJENT,
         )
 
     private fun hentBrevutfall() = null

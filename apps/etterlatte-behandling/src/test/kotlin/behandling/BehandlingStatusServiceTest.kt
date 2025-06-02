@@ -129,7 +129,7 @@ internal class BehandlingStatusServiceTest {
                 soeknadMottattDato = null,
                 revurderingsaarsak = Revurderingaarsak.INNTEKTSENDRING,
                 revurderingInfo = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 begrunnelse = "",
                 relatertBehandlingId = null,
                 opphoerFraOgMed = null,

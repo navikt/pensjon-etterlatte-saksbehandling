@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.domain
 import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
@@ -58,12 +59,13 @@ sealed class Behandling {
     abstract val sistEndret: LocalDateTime
     abstract val status: BehandlingStatus
     abstract val type: BehandlingType
+    abstract val opprinnelse: BehandlingOpprinnelse
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
     abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val soeknadMottattDato: LocalDateTime?
-    abstract val kilde: Vedtaksloesning
+    abstract val vedtaksloesning: Vedtaksloesning
     abstract val sendeBrev: Boolean
     abstract val opphoerFraOgMed: YearMonth?
     abstract val tidligereFamiliepleier: TidligereFamiliepleier?
@@ -233,7 +235,7 @@ internal fun Behandling.toStatistikkBehandling(
         prosesstype = prosesstype,
         revurderingInfo = revurderingInfo()?.revurderingInfo,
         enhet = sak.enhet,
-        kilde = kilde,
+        kilde = vedtaksloesning,
         pesysId = pesysId,
         relatertBehandlingId = relatertBehandlingId,
         utlandstilknytning = utlandstilknytning,
@@ -253,7 +255,8 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,
         revurderingInfo = revurderingInfo()?.revurderingInfo,
-        kilde = kilde,
+        vedtaksloesning = vedtaksloesning,
+        opprinnelse = opprinnelse,
         sendeBrev = sendeBrev,
         opphoerFraOgMed = opphoerFraOgMed,
         relatertBehandlingId = relatertBehandlingId,
@@ -278,7 +281,7 @@ fun Behandling.toBehandlingSammendrag() =
             },
         virkningstidspunkt = this.virkningstidspunkt,
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
-        kilde = this.kilde,
+        kilde = this.vedtaksloesning,
     )
 
 internal fun List<Behandling>.hentUtlandstilknytning(): Utlandstilknytning? =

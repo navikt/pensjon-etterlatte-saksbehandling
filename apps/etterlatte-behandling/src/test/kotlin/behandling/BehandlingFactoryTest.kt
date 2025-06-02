@@ -218,7 +218,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -334,7 +334,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -437,7 +437,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -908,7 +908,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -996,7 +996,7 @@ internal class BehandlingFactoryTest {
                         Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
                         iverksattBehandlingId,
                     ),
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -1092,7 +1092,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -1181,7 +1181,7 @@ internal class BehandlingFactoryTest {
                         Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
                         iverksattBehandlingId,
                     ),
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -1287,7 +1287,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
         every { sakTilgang.hentGraderingForSak(any(), any()) } returns
@@ -1392,7 +1392,7 @@ internal class BehandlingFactoryTest {
             revurderingsaarsak = revurderingAarsak,
             revurderingInfo = null,
             prosesstype = Prosesstype.MANUELL,
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             begrunnelse = null,
             relatertBehandlingId = null,
             opphoerFraOgMed = null,
@@ -1430,7 +1430,7 @@ internal class BehandlingFactoryTest {
                     Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
                     id,
                 ),
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             sendeBrev = true,
         )
 }

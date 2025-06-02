@@ -495,7 +495,7 @@ class BehandlingFactory(
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-            kilde = kilde,
+            vedtaksloesning = kilde,
             prosesstype = prosessType,
             sendeBrev = true,
             relatertBehandlingId = relatertBehandlingsId,

@@ -26,6 +26,7 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -404,11 +405,12 @@ fun behandling(
     boddEllerArbeidetUtlandet = null,
     utlandstilknytning = null,
     revurderingInfo = null,
-    kilde = Vedtaksloesning.GJENNY,
+    vedtaksloesning = Vedtaksloesning.GJENNY,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
     relatertBehandlingId = null,
     tidligereFamiliepleier = null,
+    opprinnelse = BehandlingOpprinnelse.UKJENT,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)

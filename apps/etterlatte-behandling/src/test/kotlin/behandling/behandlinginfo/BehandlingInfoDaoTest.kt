@@ -224,7 +224,7 @@ internal class BehandlingInfoDaoTest(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             sendeBrev = true,
         )
 }

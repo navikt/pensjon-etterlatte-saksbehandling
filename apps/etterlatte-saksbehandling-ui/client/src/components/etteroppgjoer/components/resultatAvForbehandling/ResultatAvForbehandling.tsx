@@ -97,7 +97,7 @@ export const ResultatAvForbehandling = () => {
               return `Resultatet viser at det er utbetalt ${diffBeloep} for lite stønad i ${etteroppgjoer.behandling.aar}. Beløpet blir derfor etterbetalt.`
             }
 
-            return 'Resultatet viser ingen endring.'
+            return `Resultatet viser ingen endring, bruker fikk utbetalt rett stønad i ${etteroppgjoer.behandling.aar}.`
           })()}
         </p>
       </Box>

@@ -4,7 +4,7 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
-jackson-version = "2.19.0"
+jackson-version = "2.18.3"
 jupiter-version = "5.13.0"
 ktor2-version = "2.3.13"
 navfelles-token-version = "5.0.29"

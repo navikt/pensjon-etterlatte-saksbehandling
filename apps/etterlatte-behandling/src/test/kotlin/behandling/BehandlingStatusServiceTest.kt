@@ -22,6 +22,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -137,6 +138,7 @@ internal class BehandlingStatusServiceTest {
                 sendeBrev = true,
                 sistEndret = LocalDateTime.now(),
                 utlandstilknytning = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
         val vedtaksendring =
             VedtakEndringDTO(

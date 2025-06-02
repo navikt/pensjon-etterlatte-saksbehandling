@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -56,6 +57,7 @@ internal class RevurderingTest {
                 sendeBrev = true,
                 opphoerFraOgMed = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             ).tilVilkaarsvurdert()
             .tilTrygdetidOppdatert()
             .tilBeregnet()
@@ -246,5 +248,6 @@ private fun opprettetRevurdering(
         sendeBrev = true,
         opphoerFraOgMed = null,
         tidligereFamiliepleier = null,
+        opprinnelse = BehandlingOpprinnelse.UKJENT,
     )
 }

@@ -5,12 +5,15 @@ import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fasts
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { useState } from 'react'
+import { FieldErrors } from 'react-hook-form'
+import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 
 interface Props {
   erRedigerbar: boolean
+  setFastsettFaktiskInntektSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
 }
 
-export const FastsettFaktiskInntekt = ({ erRedigerbar }: Props) => {
+export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntektSkjemaErrors }: Props) => {
   const { behandling, faktiskInntekt } = useEtteroppgjoer()
 
   const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
@@ -30,7 +33,10 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar }: Props) => {
       </div>
 
       {faktiskInntektSkjemaErAapen && erRedigerbar ? (
-        <FaktiskInntektSkjema setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen} />
+        <FaktiskInntektSkjema
+          setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+          setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+        />
       ) : (
         <VStack gap="4">
           <FaktiskInntektVisning />

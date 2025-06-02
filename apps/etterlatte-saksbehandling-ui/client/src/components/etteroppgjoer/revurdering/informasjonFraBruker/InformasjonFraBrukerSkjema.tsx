@@ -67,7 +67,7 @@ export const InformasjonFraBrukerSkjema = ({
           name="harMottattNyInformasjon"
           control={control}
           legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
-          errorVedTomInput="Du må ta stilling til om bruker gitt ny informasjon"
+          errorVedTomInput="Du må ta stilling til om bruker har gitt ny informasjon"
           readOnly={!erRedigerbar}
           radios={
             <>
@@ -98,10 +98,10 @@ export const InformasjonFraBrukerSkjema = ({
                   {...register('beskrivelseAvUgunst', {
                     required: {
                       value: true,
-                      message: 'Du må beskrive hvorfor endringen kommer til ugunst',
+                      message: 'Du må beskrive hvorfor endringen har kommet til ugunst for bruker',
                     },
                   })}
-                  label="Beskriv hvorfor det er til ugunst"
+                  label="Beskriv hvorfor endringen er til ugunst for bruker"
                   readOnly={!erRedigerbar}
                   error={errors.beskrivelseAvUgunst?.message}
                 />

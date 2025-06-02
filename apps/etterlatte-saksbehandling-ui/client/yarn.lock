@@ -373,35 +373,21 @@
     "@floating-ui/core" "^1.6.0"
     "@floating-ui/utils" "^0.2.9"
 
-"@floating-ui/react-dom@^2.0.2", "@floating-ui/react-dom@^2.0.9", "@floating-ui/react-dom@^2.1.2":
+"@floating-ui/react-dom@^2.0.9", "@floating-ui/react-dom@^2.1.2":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-2.1.2.tgz#a1349bbf6a0e5cb5ded55d023766f20a4d439a31"
   integrity sha512-06okr5cgPzMNBy+Ycse2A6udMi4bqwW/zgBF/rwjcNqWkyr82Mcg8b0vjX8OJpZFy/FKjJmw6wV7t44kK6kW7A==
   dependencies:
     "@floating-ui/dom" "^1.0.0"
 
-"@floating-ui/react@0.25.4":
-  version "0.25.4"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.25.4.tgz#82507e14460aee70f435ad2fd717ea182b6d5c61"
-  integrity sha512-lWRQ/UiTvSIBxohn0/2HFHEmnmOVRjl7j6XcRJuLH0ls6f/9AyHMWVzkAJFuwx0n9gaEeCmg9VccCSCJzbEJig==
-  dependencies:
-    "@floating-ui/react-dom" "^2.0.2"
-    "@floating-ui/utils" "^0.1.1"
-    tabbable "^6.0.1"
-
-"@floating-ui/react@^0.27.3":
-  version "0.27.5"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.27.5.tgz#27a6e63a8ef35eb8712ef304a154ea706da26814"
-  integrity sha512-BX3jKxo39Ba05pflcQmqPPwc0qdNsdNi/eweAFtoIdrJWNen2sVEWMEac3i6jU55Qfx+lOcdMNKYn2CtWmlnOQ==
+"@floating-ui/react@0.27.8", "@floating-ui/react@^0.27.3":
+  version "0.27.8"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.27.8.tgz#6d7f4bf7bfe2065934ba18d54f7383b777f87dd5"
+  integrity sha512-EQJ4Th328y2wyHR3KzOUOoTW2UKjFk53fmyahfwExnFQ8vnsMYqKc+fFPOkeYtj5tcp1DUMiNJ7BFhed7e9ONw==
   dependencies:
     "@floating-ui/react-dom" "^2.1.2"
     "@floating-ui/utils" "^0.2.9"
     tabbable "^6.0.0"
-
-"@floating-ui/utils@^0.1.1":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.1.6.tgz#22958c042e10b67463997bd6ea7115fe28cbcaf9"
-  integrity sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==
 
 "@floating-ui/utils@^0.2.9":
   version "0.2.9"
@@ -474,33 +460,33 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
-"@navikt/aksel-icons@^7.21.0":
-  version "7.21.0"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.21.0.tgz#9cfc7982634a0f4f6c304ca015e4403057e2f04e"
-  integrity sha512-SczkvgMbFQSEX9IAm3mkwVqx29zxyqO94B9m/ekP4vbqKvrttWs+QTlHAKHWHghjZ3KOlqqiQbY8vMdFqhtBRQ==
+"@navikt/aksel-icons@^7.22.0":
+  version "7.22.0"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.22.0.tgz#8cd947078332dbbc5f48e32d10746fd876acb581"
+  integrity sha512-1hCTk4/zKjYD0pfvrHYOqQmP0r+8XyRG8tenSSVAtnOlyEYvWfUdQwczfGv0VbjYp/UPaSQbkWhpj5z48KF3SA==
 
-"@navikt/ds-css@~7.21.0":
-  version "7.21.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.21.0.tgz#a83ba7f943f8da6e7aea70c699bd079f3027413c"
-  integrity sha512-/6LNK/563gG2vSaN2EqGFdRKVUELF1OX3JREfFWLbiFZbMky/DGiVuwiUNhq8EJeUffp2menoPOAewul5SKs+Q==
+"@navikt/ds-css@~7.22.0":
+  version "7.22.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.22.0.tgz#b82a26d41583e5484f0f426a5fdfe2a43de140f9"
+  integrity sha512-DI2/iyY/pZmuYjVi5TuQWvBXRKCph4PPcHzkuUDJb52q8WRcG6x29ZMOe3+ipIOu70m+veXARv2wl5pE0k8HrA==
 
-"@navikt/ds-react@~7.21.0":
-  version "7.21.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.21.0.tgz#5b7ee015384297033e7ee09ee2d204e517f20a31"
-  integrity sha512-oh/WEZ1bWC9l0ChOQp3w9YfCRAx5YA0/XoPjYebVEbGWTgclsZs8CvKuiIAwf0mRluaFWT3bk8oEyZ6I+S7FDA==
+"@navikt/ds-react@~7.22.0":
+  version "7.22.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.22.0.tgz#cb6df10ed26fd8cb288c302e44e17370e5be90da"
+  integrity sha512-4fhSc5nxRy5ZgL46k1okqgkVwAnglyIiK1ucsPFI3znHCO9zOYyeYmc2HaE/X+fw8XF3AoSksJzISpL0bgVuAQ==
   dependencies:
-    "@floating-ui/react" "0.25.4"
+    "@floating-ui/react" "0.27.8"
     "@floating-ui/react-dom" "^2.0.9"
-    "@navikt/aksel-icons" "^7.21.0"
-    "@navikt/ds-tokens" "^7.21.0"
+    "@navikt/aksel-icons" "^7.22.0"
+    "@navikt/ds-tokens" "^7.22.0"
     clsx "^2.1.0"
     date-fns "^4.0.0"
     react-day-picker "9.6.1"
 
-"@navikt/ds-tokens@^7.21.0", "@navikt/ds-tokens@~7.21.0":
-  version "7.21.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.21.0.tgz#406f2638550015ec493249f6ca09df67a91e8c7d"
-  integrity sha512-yG8AYCzwXGgLlXCjo1uvOM28uZeov5Rry5E0RQYXDJ0qgcWHFo7g0EO0AMAUbgzM/UGY5SqsvIfb1IkZloT5Sw==
+"@navikt/ds-tokens@^7.22.0", "@navikt/ds-tokens@~7.22.0":
+  version "7.22.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.22.0.tgz#793c4e3da6051e5e6f3400dac9fbc27caf02864a"
+  integrity sha512-FiE3bzpKg2U0ESAre5I2WDMFaN/xcpBDyViecjiNZZeJfTqRbSiKQpLADzZlhZj3tbcwz4aughCBVkZScNG0sQ==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"
@@ -3836,7 +3822,7 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-tabbable@^6.0.0, tabbable@^6.0.1:
+tabbable@^6.0.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-6.2.0.tgz#732fb62bc0175cfcec257330be187dcfba1f3b97"
   integrity sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew==

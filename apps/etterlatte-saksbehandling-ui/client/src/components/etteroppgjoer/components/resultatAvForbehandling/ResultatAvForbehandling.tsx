@@ -14,20 +14,7 @@ export const ResultatAvForbehandling = () => {
   return (
     <VStack gap="4">
       <Heading size="large">
-        <HStack gap="2">
-          Resultat
-          <HelpText>
-            {resultat.differanse > 0
-              ? resultat.differanse <= resultat.grense.tilbakekreving
-                ? `Etteroppgjøret viser at det er utbetalt ${NOK(resultat.differanse)} for mye stønad, men beløpet er innenfor toleransegrense for tilbakekreving, og det kreves derfor ikke tilbake.`
-                : `Etteroppgjøret viser at det er utbetalt ${NOK(resultat.differanse)} for mye stønad. Beløpet blir derfor krevd tilbake.`
-              : resultat.differanse < 0
-                ? resultat.differanse >= -resultat.grense.etterbetaling
-                  ? `Etteroppgjøret viser at det er utbetalt ${NOK(resultat.differanse)} for lite stønad, men beløpet er innenfor toleransegrense for etterbetaling, og det blir derfor ikke utbetalt.`
-                  : `Etteroppgjøret viser at det er utbetalt ${NOK(resultat.differanse)} for lite stønad. Beløpet blir derfor etterbetalt.`
-                : 'Etteroppgjøret viser ingen endring.'}
-          </HelpText>
-        </HStack>
+        <HStack gap="2">Resultat</HStack>
       </Heading>
       <Box maxWidth="25rem">
         <Table>
@@ -90,6 +77,29 @@ export const ResultatAvForbehandling = () => {
             </Table.Row>
           </Table.Body>
         </Table>
+
+        <p>
+          {(() => {
+            const diff = resultat.differanse
+            const diffBeloep = NOK(Math.abs(diff))
+
+            if (diff > 0) {
+              if (diff <= resultat.grense.tilbakekreving) {
+                return `Resultatet viser at det er utbetalt ${diffBeloep} for mye stønad i ${etteroppgjoer.behandling.aar}, men beløpet er innenfor toleransegrense for tilbakekreving, og det kreves derfor ikke tilbake.`
+              }
+              return `Resultatet viser at det er utbetalt ${diffBeloep} for mye stønad i ${etteroppgjoer.behandling.aar}. Beløpet blir derfor krevd tilbake.`
+            }
+
+            if (diff < 0) {
+              if (diff >= -resultat.grense.etterbetaling) {
+                return `Resultatet viser at det er utbetalt ${diffBeloep} for lite stønad i${etteroppgjoer.behandling.aar}, men beløpet er innenfor toleransegrense for etterbetaling, og det blir derfor ikke utbetalt.`
+              }
+              return `Resultatet viser at det er utbetalt ${diffBeloep} for lite stønad i ${etteroppgjoer.behandling.aar}. Beløpet blir derfor etterbetalt.`
+            }
+
+            return 'Resultatet viser ingen endring.'
+          })()}
+        </p>
       </Box>
     </VStack>
   )

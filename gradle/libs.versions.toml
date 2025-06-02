@@ -5,20 +5,20 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
 jackson-version = "2.18.3"
-jupiter-version = "5.12.2"
+jupiter-version = "5.13.0"
 ktor2-version = "2.3.13"
-navfelles-token-version = "5.0.25"
+navfelles-token-version = "5.0.29"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.21.0"
+testcontainer-version = "1.21.1"
 tjenestespesifikasjoner-version = "1.1436e29"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.8.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.8.0" }
-database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.8.2" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.8.2" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.6" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }

@@ -8,7 +8,7 @@ installert.
 
 # Lokal utvikling
 
-## Hvordan kjøre en eller flere apper
+## Hvordan kjøre en eller flere apper 
 
 Forutsetning: Man må installere pluginen [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ.
 

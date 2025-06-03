@@ -42,10 +42,8 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf

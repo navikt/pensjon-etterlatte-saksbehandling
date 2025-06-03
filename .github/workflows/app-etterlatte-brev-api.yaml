@@ -19,6 +19,7 @@ on:
       - libs/etterlatte-brev-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-tilbakekreving-model/**
+      - libs/etterlatte-funksjonsbrytere/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -39,6 +40,7 @@ on:
       - libs/etterlatte-brev-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-tilbakekreving-model/**
+      - libs/etterlatte-funksjonsbrytere/**
       - gradle/libs.versions.toml
 
 permissions:

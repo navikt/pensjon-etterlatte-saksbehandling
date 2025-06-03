@@ -1,19 +1,27 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
-  Etteroppgjoer,
+  EtteroppgjoerForbehandling,
   EtteroppgjoerBehandling,
   FaktiskInntekt,
   BeregnetEtteroppgjoerResultatDto,
-} from '~shared/types/Etteroppgjoer'
+  Etteroppgjoer,
+  IInformasjonFraBruker,
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
 interface EtteroppgjoerOgOppgave {
-  etteroppgjoerBehandling: Etteroppgjoer
+  etteroppgjoerBehandling: EtteroppgjoerForbehandling
   oppgave: OppgaveDTO
 }
 
-export const hentEtteroppgjoer = async (behandlingId: string): Promise<ApiResponse<Etteroppgjoer>> => {
-  return apiClient.get(`/etteroppgjoer/${behandlingId}`)
+export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer[]>> => {
+  return apiClient.get(`/etteroppgjoer/${sakId}`)
+}
+
+export const hentEtteroppgjoerForbehandling = async (
+  behandlingId: string
+): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.get(`/etteroppgjoer/forbehandling/${behandlingId}`)
 }
 
 export const opprettEtteroppgjoerIDev = async (sakId: number): Promise<ApiResponse<EtteroppgjoerOgOppgave>> => {
@@ -30,13 +38,22 @@ export const lagreFaktiskInntekt = async (args: {
   forbehandlingId: string
   faktiskInntekt: FaktiskInntekt
 }): Promise<ApiResponse<BeregnetEtteroppgjoerResultatDto>> => {
-  return apiClient.post(`/etteroppgjoer/${args.forbehandlingId}/beregn_faktisk_inntekt`, {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/beregn-faktisk-inntekt`, {
     ...args.faktiskInntekt,
+  })
+}
+
+export const lagreInformasjonFraBruker = async (args: {
+  forbehandlingId: string
+  endringFraBruker: IInformasjonFraBruker
+}) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/informasjon-fra-bruker`, {
+    ...args.endringFraBruker,
   })
 }
 
 export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
   forbehandlingId: string
 }): Promise<ApiResponse<any>> => {
-  return apiClient.post(`etteroppgjoer/${args.forbehandlingId}/ferdigstill-forbehandling`, {})
+  return apiClient.post(`etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill`, {})
 }

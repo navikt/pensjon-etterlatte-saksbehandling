@@ -40,13 +40,14 @@ export const BegrunnelseForTrygdetid = ({
         </HStack>
         {!redigerBegrunnelse && (
           <>
-            {redigerbar && (
-              <VStack gap="4">
-                {getValues().begrunnelse ? (
-                  <BodyLong style={{ whiteSpace: 'pre-line' }}>{getValues().begrunnelse}</BodyLong>
-                ) : (
-                  <BodyShort>Ingen begrunnelse oppgitt</BodyShort>
-                )}
+            <VStack gap="4">
+              {getValues().begrunnelse ? (
+                <BodyLong style={{ whiteSpace: 'pre-line' }}>{getValues().begrunnelse}</BodyLong>
+              ) : (
+                <BodyShort>Ingen begrunnelse oppgitt</BodyShort>
+              )}
+
+              {redigerbar && (
                 <HStack gap="4">
                   <Button
                     type="button"
@@ -72,8 +73,8 @@ export const BegrunnelseForTrygdetid = ({
                     </Button>
                   )}
                 </HStack>
-              </VStack>
-            )}
+              )}
+            </VStack>
           </>
         )}
         {redigerbar && redigerBegrunnelse && (

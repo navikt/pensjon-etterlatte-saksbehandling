@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
@@ -22,10 +23,8 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
-import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -71,7 +70,20 @@ fun Route.etteroppgjoerRoutes(
             }
         }
 
-        route("/{$ETTEROPPGJOER_CALL_PARAMETER}") {
+        route("/{$SAKID_CALL_PARAMETER}") {
+            get {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    val etteroppgjoer =
+                        inTransaction {
+                            etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
+                        }
+                    call.respond(etteroppgjoer)
+                }
+            }
+        }
+
+        route("/forbehandling/{$ETTEROPPGJOER_CALL_PARAMETER}") {
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
@@ -83,12 +95,45 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("beregn_faktisk_inntekt") {
+            post("beregn-faktisk-inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
                 val response =
                     inTransaction {
                         forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
                     }
+                call.respond(response)
+            }
+
+            post("ferdigstill") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    runBlocking {
+                        forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
+                            etteroppgjoerId,
+                            brukerTokenInfo,
+                        )
+                        inTransaction {
+                            forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
+                        }
+                    }
+
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("informasjon-fra-bruker") {
+                val request = call.receive<InformasjonFraBrukerRequest>()
+
+                val response =
+                    inTransaction {
+                        forbehandlingService.lagreInformasjonFraBruker(
+                            forbehandlingId = etteroppgjoerId,
+                            harMottattNyInformasjon = request.harMottattNyInformasjon,
+                            endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
+                            beskrivelseAvUgunst = request.beskrivelseAvUgunst,
+                        )
+                    }
+
                 call.respond(response)
             }
         }
@@ -147,23 +192,6 @@ fun Route.etteroppgjoerRoutes(
                     }
 
                 etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar)
-            }
-        }
-
-        post("/{$BEHANDLINGID_CALL_PARAMETER}/ferdigstill-forbehandling") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            kunSkrivetilgang {
-                runBlocking {
-                    forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
-                        behandlingId,
-                        brukerTokenInfo,
-                    )
-                    inTransaction {
-                        forbehandlingService.ferdigstillForbehandling(behandlingId, brukerTokenInfo)
-                    }
-                }
-
-                call.respond(HttpStatusCode.OK)
             }
         }
     }

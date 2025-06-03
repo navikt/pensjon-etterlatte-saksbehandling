@@ -1,3 +1,17 @@
+import { AvkortingFlereInntekter, IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { useAppDispatch } from '~store/Store'
+import { useBehandling } from '~components/behandling/useBehandling'
+import React, { useEffect, useState } from 'react'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { lagreInntektListe } from '~shared/api/avkorting'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
+import {
+  aarFraDatoString,
+  formaterKanskjeStringDato,
+  kanskjeMaanedFraDatoString,
+  maanedFraDatoString,
+} from '~utils/formatering/dato'
 import {
   BodyShort,
   Box,
@@ -11,327 +25,229 @@ import {
   TextField,
   VStack,
 } from '@navikt/ds-react'
-import { useForm } from 'react-hook-form'
-import { IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
-import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
-import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { aarFraDatoString, formaterDato, maanedFraDatoString } from '~utils/formatering/dato'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppDispatch } from '~store/Store'
-import { isPending } from '@reduxjs/toolkit'
 import OverstyrInnvilgaMaander from '~components/behandling/avkorting/OverstyrInnvilgaMaaneder'
-import React, { Dispatch, SetStateAction, useState } from 'react'
-import { CogRotationIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import { hentBehandlingstatus } from '~shared/api/behandling'
-import { enhetErSkrivbar } from '~components/behandling/felles/utils'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { CogRotationIcon, TrashIcon } from '@navikt/aksel-icons'
 
-export const AvkortingInntektForm = ({
-  behandling,
-  erInnevaerendeAar,
-  redigerbartGrunnlag,
-  historikk,
-  redigerbar,
-  resetInntektsavkortingValidering,
+export function AvkortingInntektForm({
+  inntekterForRedigering,
+  vedLagring,
+  avbrytRedigering,
+  alleInntektsgrunnlag,
 }: {
-  behandling: IBehandlingReducer
-  redigerbartGrunnlag: IAvkortingGrunnlag | undefined
-  historikk: IAvkortingGrunnlag[]
-  erInnevaerendeAar: boolean
-  redigerbar: boolean
-  resetInntektsavkortingValidering: () => void
-}) => {
-  const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, useInnloggetSaksbehandler().skriveEnheter)
-  const [visForm, setVisForm] = useState(false)
-
-  const knappTekst = () => {
-    if (erInnevaerendeAar) {
-      if (redigerbartGrunnlag != null) {
-        return 'Rediger'
-      }
-      return 'Legg til'
-    } else {
-      if (redigerbartGrunnlag != null) {
-        return 'Rediger for neste år'
-      }
-      return 'Legg til for neste år'
-    }
-  }
-
-  return (
-    <>
-      {erRedigerbar && visForm && (
-        <InntektForm
-          behandling={behandling}
-          redigerbartGrunnlag={redigerbartGrunnlag}
-          alleGrunnlag={historikk}
-          erInnevaerendeAar={erInnevaerendeAar}
-          setVisForm={setVisForm}
-        />
-      )}
-      {erRedigerbar && !visForm && (
-        <HStack marginBlock="4 0">
-          <Button
-            size="small"
-            variant="secondary"
-            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
-            onClick={(e) => {
-              e.preventDefault()
-              setVisForm(true)
-              resetInntektsavkortingValidering()
-            }}
-          >
-            {knappTekst()}
-          </Button>
-        </HStack>
-      )}
-    </>
-  )
-}
-
-const InntektForm = ({
-  behandling,
-  erInnevaerendeAar,
-  redigerbartGrunnlag,
-  alleGrunnlag,
-  setVisForm,
-}: {
-  behandling: IBehandlingReducer
-  redigerbartGrunnlag: IAvkortingGrunnlag | undefined
-  alleGrunnlag: IAvkortingGrunnlag[]
-  erInnevaerendeAar: boolean
-  setVisForm: Dispatch<SetStateAction<boolean>>
-}) => {
+  inntekterForRedigering: IAvkortingGrunnlagLagre[]
+  vedLagring: (inntekter: IAvkortingGrunnlagLagre[]) => void
+  alleInntektsgrunnlag: IAvkortingGrunnlag[]
+  avbrytRedigering?: () => void
+}) {
   const dispatch = useAppDispatch()
-
-  const [lagreAvkortingGrunnlagResult, lagreAvkortingGrunnlagRequest] = useApiCall(lagreAvkortingGrunnlag)
-  const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
-
-  const virk = virkningstidspunkt(behandling).dato
-  const aar = erInnevaerendeAar ? aarFraDatoString(virk) : aarFraDatoString(virk) + 1
-  const inntektFom = erInnevaerendeAar ? virk : `${aar}-01`
-
-  /*
-   * Utlede om opptjent før innvilgelse er relevant.
-   * Hvis alle måneder i året er innvilget er det ikke det.
-   * Det er kun innvilgelsesåret som kan være færre enn 12 måneder.
-   * Vi tar ikke stilling til opphør.
-   */
-  const alleMaanederIAaretErInnvilget = () => {
-    if (!erInnevaerendeAar) {
-      return true
-    }
-
-    const fomJanuar = maanedFraDatoString(inntektFom) === 0
-    if (fomJanuar) {
-      return true
-    }
-
-    if (!!redigerbartGrunnlag) {
-      return redigerbartGrunnlag.innvilgaMaaneder === 12
-    }
-
-    if (behandling.revurderingsaarsak != null && new Date(virk).getFullYear() === new Date().getFullYear()) {
-      return alleGrunnlag[0].innvilgaMaaneder === 12
-    }
-    return false
-  }
-
-  /*
-   * Hvis det finnes avkortingGrunnlag med fom samme som virkningstidspunkt fylles den i form med id for å kunne oppdatere.
-   * Hvis det er førstegangsbehandling og avkortingGrunnlag for neste år og det allerede finens avkortingGrunnlag fylles den i form med id for å kunne oppdatere.
-   */
-  const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
-    if (!!redigerbartGrunnlag) {
-      return redigerbartGrunnlag
-    }
-
-    return {
-      spesifikasjon: '',
-    }
-  }
-
+  const behandling = useBehandling()!
+  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(false)
+  const [statusLagreInntektListe, fetchLagreInntektListe] = useApiCall(lagreInntektListe)
   const {
     register,
-    reset,
-    handleSubmit,
-    formState: { errors },
     watch,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
     setValue,
-    getValues,
-  } = useForm<IAvkortingGrunnlagLagre>({
-    defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
+  } = useForm<AvkortingFlereInntekter>({
+    defaultValues: {
+      inntekter: inntekterForRedigering,
+    },
   })
+  const { fields } = useFieldArray({ control, name: 'inntekter' })
 
-  const onSubmit = (data: IAvkortingGrunnlagLagre) => {
-    lagreAvkortingGrunnlagRequest(
+  useEffect(() => {
+    reset({
+      inntekter: inntekterForRedigering,
+    })
+  }, [inntekterForRedigering])
+
+  function lagreInntekter(formdata: AvkortingFlereInntekter) {
+    fetchLagreInntektListe(
       {
         behandlingId: behandling.id,
-        avkortingGrunnlag: {
-          ...data,
-          fratrekkInnAar: data.fratrekkInnAar ?? 0,
-          fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
-          fom: inntektFom,
-        },
+        inntekter: formdata.inntekter,
       },
-      (nyAvkorting) => {
-        hentBehandlingstatusRequest(behandling.id, (status) => {
-          dispatch(oppdaterBehandlingsstatus(status))
-          const nyttAvkortingGrunnlag = nyAvkorting.avkortingGrunnlag[nyAvkorting.avkortingGrunnlag.length - 1]
-          if (nyttAvkortingGrunnlag) reset(nyttAvkortingGrunnlag)
-          dispatch(oppdaterAvkorting(nyAvkorting))
-          setVisForm(false)
-        })
+      (avkorting) => {
+        dispatch(oppdaterAvkorting(avkorting))
+        vedLagring(formdata.inntekter)
       }
     )
   }
-
-  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(!!getValues('overstyrtInnvilgaMaaneder'))
-  const toggleOverstyrtInnvilgaMaaneder = () => {
-    if (skalOverstyreMaaneder) {
-      setValue('overstyrtInnvilgaMaaneder', undefined)
-    }
-    setSkalOverstyreMaaneder(!skalOverstyreMaaneder)
+  function toggleOverstyrMaaneder() {
+    setSkalOverstyreMaaneder((verdi) => !verdi)
+    setValue(`inntekter.${inntekterForRedigering.length - 1}.overstyrtInnvilgaMaaneder`, undefined)
   }
 
   return (
-    <form>
-      <Heading spacing size="small" level="2">
-        {aar}
-      </Heading>
-      <VStack>
-        <HStack marginBlock="8" gap="2" align="start" wrap={false}>
-          <Box maxWidth="14rem">
-            <TextField
-              {...register('inntektTom', {
-                pattern: { value: /^\d+$/, message: 'Kun tall' },
-                required: { value: true, message: 'Må fylles ut' },
-              })}
-              label={
-                <HStack>
-                  Forventet inntekt Norge
-                  <HelpText title="Hva innebærer forventet inntekt totalt">
-                    Registrer forventet norsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
-                    året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder
-                    stemmer.
-                  </HelpText>
-                </HStack>
-              }
-              name="inntektTom"
-            />
-          </Box>
-          <Box maxWidth="14rem">
-            <TextField
-              {...register('fratrekkInnAar', {
-                required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
-                max: {
-                  value: watch('inntektTom') || 0,
-                  message: 'Kan ikke være høyere enn årsinntekt',
-                },
-                pattern: { value: /^\d+$/, message: 'Kun tall' },
-              })}
-              label="Fratrekk inn-år"
-              size="medium"
-              type="tel"
-              inputMode="numeric"
-              disabled={alleMaanederIAaretErInnvilget()}
-              defaultValue={alleMaanederIAaretErInnvilget() ? 0 : undefined}
-              error={errors.fratrekkInnAar?.message}
-            />
-          </Box>
-          <Box maxWidth="14rem">
-            <TextField
-              {...register('inntektUtlandTom', {
-                required: { value: true, message: 'Må fylles ut' },
-                pattern: { value: /^\d+$/, message: 'Kun tall' },
-              })}
-              label={
-                <HStack>
-                  Forventet inntekt utland
-                  <HelpText title="Hva innebærer forventet inntekt totalt">
-                    Registrer forventet utenlandsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for
-                    dette året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder
-                    stemmer.
-                  </HelpText>
-                </HStack>
-              }
-              size="medium"
-              type="tel"
-              inputMode="numeric"
-              error={errors.inntektUtlandTom?.message}
-            />
-          </Box>
-          <Box maxWidth="14rem">
-            <TextField
-              {...register('fratrekkInnAarUtland', {
-                required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
-                max: {
-                  value: watch('inntektUtlandTom') || 0,
-                  message: 'Kan ikke være høyere enn årsinntekt utland',
-                },
-                pattern: { value: /^\d+$/, message: 'Kun tall' },
-              })}
-              label="Fratrekk inn-år"
-              size="medium"
-              type="tel"
-              disabled={alleMaanederIAaretErInnvilget()}
-              defaultValue={alleMaanederIAaretErInnvilget() ? 0 : undefined}
-              inputMode="numeric"
-              error={errors.fratrekkInnAarUtland?.message}
-            />
-          </Box>
-          <VStack gap="4">
-            <Label>Fra og med dato</Label>
-            <BodyShort>{formaterDato(inntektFom)}</BodyShort>
-          </VStack>
-        </HStack>
-        <Box width="39rem">
-          <Textarea {...register('spesifikasjon')} resize="vertical" label="Spesifikasjon av inntekt" />
-        </Box>
+    <form onSubmit={handleSubmit(lagreInntekter)}>
+      {fields.map((item, index) => {
+        const inntektsAar = !!item.fom && aarFraDatoString(item.fom)
+        const inntektGjelderFraStartAvAaret = kanskjeMaanedFraDatoString(item.fom) === 0
 
-        <VStack marginBlock="2" gap="1">
-          <ReadMore header="Hva regnes som inntekt?">
-            Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-            arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
-            sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og foreldrepenger etter kap 14
-            og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-          </ReadMore>
-          <ReadMore header="Når du skal overstyre innvilga måneder">
-            Fyll inn riktig antall måneder med innvilget stønad i tilfeller der automatisk registrerte innvilgede
-            måneder ikke stemmer, for eksempel ved uforutsette opphør som tidlig uttak av alderspensjon.
-          </ReadMore>
-        </VStack>
+        // Vi har ikke fratrekk innår hvis inntekten gjelder fra januar, eller vi allerede har inntekt lagt inn
+        // som gjelder for januar dette året
+        const harIkkeFratrekkInnaar =
+          inntektGjelderFraStartAvAaret ||
+          alleInntektsgrunnlag.some(
+            (inntekt) => aarFraDatoString(inntekt.fom) === inntektsAar && maanedFraDatoString(inntekt.fom) === 0
+          )
+        const kanOverstyreInnvilgedeMaaneder = index === inntekterForRedigering.length - 1
 
-        {skalOverstyreMaaneder && <OverstyrInnvilgaMaander />}
-        <HStack gap="3" marginBlock="4">
-          <Button size="medium" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
-            Lagre
-          </Button>
+        return (
+          <React.Fragment key={item.id}>
+            <Heading spacing size="small" level="3">
+              Inntekt for {inntektsAar}
+            </Heading>
+            <VStack>
+              <HStack marginBlock="0 8" gap="2" align="start" wrap={false}>
+                <Box maxWidth="14rem">
+                  <TextField
+                    {...register(`inntekter.${index}.inntektTom`, {
+                      pattern: { value: /^\d+$/, message: 'Kun tall' },
+                      required: { value: true, message: 'Må fylles ut' },
+                    })}
+                    label={
+                      <HStack>
+                        Forventet inntekt Norge
+                        <HelpText title="Hva innebærer forventet inntekt totalt">
+                          Registrer forventet norsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for
+                          dette året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede
+                          måneder stemmer.
+                        </HelpText>
+                      </HStack>
+                    }
+                    error={errors.inntekter?.[index]?.inntektTom?.message}
+                  />
+                </Box>
+                <Box maxWidth="14rem">
+                  <TextField
+                    {...register(`inntekter.${index}.fratrekkInnAar`, {
+                      required: { value: !harIkkeFratrekkInnaar, message: 'Må fylles ut' },
+                      max: {
+                        value: watch(`inntekter.${index}.inntektTom`) || 0,
+                        message: 'Kan ikke være høyere enn årsinntekt',
+                      },
+                      pattern: { value: /^\d+$/, message: 'Kun tall' },
+                    })}
+                    label="Fratrekk inn-år"
+                    size="medium"
+                    type="tel"
+                    inputMode="numeric"
+                    disabled={harIkkeFratrekkInnaar}
+                    defaultValue={harIkkeFratrekkInnaar ? 0 : ''}
+                    error={errors.inntekter?.[index]?.fratrekkInnAar?.message}
+                  />
+                </Box>
+                <Box maxWidth="14rem">
+                  <TextField
+                    {...register(`inntekter.${index}.inntektUtlandTom`, {
+                      required: { value: true, message: 'Må fylles ut' },
+                      pattern: { value: /^\d+$/, message: 'Kun tall' },
+                    })}
+                    label={
+                      <HStack>
+                        Forventet inntekt utland
+                        <HelpText title="Hva innebærer forventet inntekt totalt">
+                          Registrer forventet utenlandsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent
+                          for dette året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede
+                          måneder stemmer.
+                        </HelpText>
+                      </HStack>
+                    }
+                    size="medium"
+                    type="tel"
+                    inputMode="numeric"
+                    error={errors.inntekter?.[index]?.inntektUtlandTom?.message}
+                  />
+                </Box>
+                <Box maxWidth="14rem">
+                  <TextField
+                    {...register(`inntekter.${index}.fratrekkInnAarUtland`, {
+                      required: { value: !harIkkeFratrekkInnaar, message: 'Må fylles ut' },
+                      max: {
+                        value: watch(`inntekter.${index}.inntektUtlandTom`) || 0,
+                        message: 'Kan ikke være høyere enn årsinntekt utland',
+                      },
+                      pattern: { value: /^\d+$/, message: 'Kun tall' },
+                    })}
+                    label="Fratrekk inn-år"
+                    size="medium"
+                    type="tel"
+                    disabled={harIkkeFratrekkInnaar}
+                    defaultValue={harIkkeFratrekkInnaar ? 0 : ''}
+                    inputMode="numeric"
+                    error={errors.inntekter?.[index]?.fratrekkInnAarUtland?.message}
+                  />
+                </Box>
+                <VStack gap="4">
+                  <Label>Fra og med dato</Label>
+                  <BodyShort>{formaterKanskjeStringDato(item.fom)}</BodyShort>
+                </VStack>
+              </HStack>
+              <Box width="39rem">
+                <Textarea
+                  {...register(`inntekter.${index}.spesifikasjon`)}
+                  resize="vertical"
+                  label="Spesifikasjon av inntekt"
+                />
+              </Box>
+
+              <VStack marginBlock="2" gap="1">
+                <ReadMore header="Hva regnes som inntekt?">
+                  Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
+                  arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
+                  sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og foreldrepenger etter
+                  kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+                </ReadMore>
+                {kanOverstyreInnvilgedeMaaneder && (
+                  <ReadMore header="Når du skal overstyre innvilga måneder">
+                    Fyll inn riktig antall måneder med innvilget stønad i tilfeller der automatisk registrerte
+                    innvilgede måneder ikke stemmer, for eksempel ved uforutsette opphør som tidlig uttak av
+                    alderspensjon.
+                  </ReadMore>
+                )}
+              </VStack>
+
+              {skalOverstyreMaaneder && kanOverstyreInnvilgedeMaaneder && (
+                <OverstyrInnvilgaMaander register={register} watch={watch} errors={errors} index={index} />
+              )}
+            </VStack>
+          </React.Fragment>
+        )
+      })}
+      {mapFailure(statusLagreInntektListe, (error) => (
+        <ApiErrorAlert>Kunne ikke lagre inntekt(er), på grunn av feil: {error.detail}</ApiErrorAlert>
+      ))}
+      <HStack gap="3" marginBlock="4">
+        <Button size="medium" type="submit" loading={isPending(statusLagreInntektListe)}>
+          Lagre
+        </Button>
+        <Button
+          size="medium"
+          variant="secondary"
+          type="button"
+          onClick={toggleOverstyrMaaneder}
+          disabled={isPending(statusLagreInntektListe)}
+          icon={skalOverstyreMaaneder ? <TrashIcon aria-hidden /> : <CogRotationIcon aria-hidden />}
+        >
+          {skalOverstyreMaaneder ? 'Fjern overstyrt innvilga måneder' : 'Overstyr innvilga måneder'}
+        </Button>
+        {avbrytRedigering && (
           <Button
-            size="medium"
-            variant="secondary"
-            onClick={toggleOverstyrtInnvilgaMaaneder}
-            icon={skalOverstyreMaaneder ? <TrashIcon aria-hidden /> : <CogRotationIcon aria-hidden />}
-          >
-            {skalOverstyreMaaneder ? 'Fjern overstyrt innvilga måneder' : 'Overstyr innvilga måneder'}
-          </Button>
-          <Button
-            size="medium"
+            type="button"
             variant="tertiary"
-            onClick={() => {
-              setVisForm(false)
-            }}
+            disabled={isPending(statusLagreInntektListe)}
+            onClick={avbrytRedigering}
           >
             Avbryt
           </Button>
-        </HStack>
-      </VStack>
-      {isFailureHandler({
-        apiResult: lagreAvkortingGrunnlagResult,
-        errorMessage: 'En feil har oppstått',
-      })}
+        )}
+      </HStack>
     </form>
   )
 }

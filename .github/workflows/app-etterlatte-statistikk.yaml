@@ -15,6 +15,9 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-tilbakekreving-model/**
+      - libs/etterlatte-jobs/**
+      - libs/etterlatte-omregning-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -30,6 +33,9 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-tilbakekreving-model/**
+      - libs/etterlatte-jobs/**
+      - libs/etterlatte-omregning-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
 permissions:

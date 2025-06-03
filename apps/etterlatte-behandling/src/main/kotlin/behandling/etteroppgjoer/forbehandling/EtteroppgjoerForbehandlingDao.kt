@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -69,9 +70,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id
@@ -93,6 +94,9 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setLong(8, forbehandling.brevId)
                 statement.setObject(9, forbehandling.kopiertFra)
                 statement.setObject(10, forbehandling.sisteIverksatteBehandlingId)
+                statement.setString(11, forbehandling.harMottattNyInformasjon?.name)
+                statement.setString(12, forbehandling.endringErTilUgunstForBruker?.name)
+                statement.setString(13, forbehandling.beskrivelseAvUgunst)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -204,6 +208,31 @@ class EtteroppgjoerForbehandlingDao(
             statement.setString(2, forbehandlingId.toString())
             statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
             statement.setString(4, BehandlingStatus.IVERKSATT.name)
+
+            statement.executeUpdate()
+        }
+    }
+
+    fun oppdaterInformasjonFraBruker(
+        forbehandlingId: UUID,
+        harMottattNyInformasjon: JaNei,
+        endringErTilUgunstForBruker: JaNei?,
+        beskrivelseAvUgunst: String?,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE etteroppgjoer_behandling
+                    SET har_mottatt_ny_informasjon = ?, endring_er_til_ugunst_for_bruker = ?, beskrivelse_av_ugunst = ?
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
+
+            statement.setString(1, harMottattNyInformasjon.name)
+            statement.setString(2, endringErTilUgunstForBruker?.name)
+            statement.setString(3, beskrivelseAvUgunst)
+            statement.setObject(4, forbehandlingId)
 
             statement.executeUpdate()
         }
@@ -338,6 +367,9 @@ class EtteroppgjoerForbehandlingDao(
             brevId = getLongOrNull("brev_id"),
             kopiertFra = getString("kopiert_fra")?.let { UUID.fromString(it) },
             sisteIverksatteBehandlingId = getString("siste_iverksatte_behandling").let { UUID.fromString(it) },
+            harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { enumValueOf<JaNei>(it) },
+            endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { enumValueOf<JaNei>(it) },
+            beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

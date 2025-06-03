@@ -12,6 +12,8 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-brev-model/**
+      - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -23,6 +25,8 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-brev-model/**
+      - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 
 permissions:

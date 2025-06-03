@@ -15,6 +15,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -29,6 +30,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 
 permissions:

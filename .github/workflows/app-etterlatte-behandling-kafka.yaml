@@ -9,6 +9,7 @@ on:
       - apps/etterlatte-behandling-kafka/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-omregning-model/**
@@ -16,6 +17,10 @@ on:
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-tidshendelser-model/**
+      - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-beregning-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -25,6 +30,7 @@ on:
       - apps/etterlatte-behandling-kafka/**
       - "!apps/etterlatte-behandling-kafka/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-inntektsjustering-model/**
@@ -33,6 +39,10 @@ on:
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-tidshendelser-model/**
+      - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-beregning-model/**
       - gradle/libs.versions.toml
 
 permissions:

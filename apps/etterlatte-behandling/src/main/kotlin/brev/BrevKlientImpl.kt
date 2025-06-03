@@ -230,10 +230,3 @@ data class BrevInnholdVedlegg(
     val key: BrevVedleggKey,
     val payload: Slate? = null,
 )
-
-enum class BrevVedleggKey {
-    OMS_BEREGNING,
-    OMS_FORHAANDSVARSEL_FEILUTBETALING,
-    BP_BEREGNING_TRYGDETID,
-    BP_FORHAANDSVARSEL_FEILUTBETALING,
-}

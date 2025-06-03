@@ -105,3 +105,15 @@ export const sisteBehandlingHendelse = (hendelser: IHendelse[]): IHendelse => {
 export function hasValue<T>(value?: T | null): value is T {
   return value !== undefined && value !== null
 }
+
+export const ogSeparertListe = (liste: unknown[]): string => {
+  if (liste.length === 0) {
+    return ''
+  }
+  if (liste.length === 1) {
+    return `${liste[0]}`
+  }
+  const kopi = [...liste]
+  const sisteElement = kopi.pop()
+  return `${kopi.join(', ')} og ${sisteElement}`
+}

@@ -1,8 +1,12 @@
 package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.avkorting.AvkortingMapper.avkortingForFrontend
+import no.nav.etterlatte.avkorting.AvkortingMapper.nyAvkortingForFrontend
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
+import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekter
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -13,6 +17,8 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendGammelDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -26,6 +32,15 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+enum class AvkortingToggles(
+    private val feature: String,
+) : FeatureToggle {
+    LEGGE_INN_FLERE_INNTEKTER("legge-inn-flere-inntekter"),
+    ;
+
+    override fun key(): String = feature
+}
+
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val avkortingRepository: AvkortingRepository,
@@ -34,8 +49,28 @@ class AvkortingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    suspend fun manglendeInntektsaar(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Int> {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val eksisterendeAvkorting = hentAvkorting(behandlingId)
+        val beregning = beregningService.hentBeregningNonnull(behandlingId)
+        val aarMedAvkorting = eksisterendeAvkorting?.aarsoppgjoer?.map { it.aar }?.toSet() ?: emptySet()
+        val paakrevdeAar =
+            AvkortingValider
+                .paakrevdeInntekterForBeregningAvAvkorting(
+                    avkorting = eksisterendeAvkorting ?: Avkorting(),
+                    beregning = beregning,
+                    behandlingType = behandling.behandlingType,
+                ).toSet()
+        val manglendeAar = paakrevdeAar - aarMedAvkorting
+        return manglendeAar.sorted()
+    }
 
     suspend fun hentOpprettEllerReberegnAvkorting(
         behandlingId: UUID,
@@ -115,11 +150,77 @@ class AvkortingService(
         return avkorting.toDto(behandling.virkningstidspunkt().dato)
     }
 
+    suspend fun beregnAvkortingMedNyeGrunnlag(
+        behandlingId: UUID,
+        nyeGrunnlag: List<AvkortingGrunnlagLagreDto>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingFrontend {
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
+        val beregning = beregningService.hentBeregningNonnull(behandlingId)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        validerInntekter(behandling, beregning, avkorting, nyeGrunnlag)
+        val aldersovergangMaaned =
+            when (behandling.opphoerFraOgMed) {
+                null -> {
+                    val aldersovergang =
+                        grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
+                    when (aldersovergang.year) {
+                        in nyeGrunnlag.map { it.fom.year } -> aldersovergang
+                        else -> null
+                    }
+                }
+
+                else -> null
+            }
+
+        val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
+        val oppdatert =
+            avkorting.beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag = nyeGrunnlag,
+                bruker = brukerTokenInfo,
+                beregning = beregning,
+                sanksjoner = sanksjoner ?: emptyList(),
+                opphoerFom = behandling.opphoerFraOgMed,
+                aldersovergang = aldersovergangMaaned,
+            )
+
+        avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)
+        val lagretAvkorting = hentAvkortingNonNull(behandling.id)
+        val avkortingFrontend =
+            if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                nyAvkortingForFrontend(lagretAvkorting, behandling)
+            } else {
+                val forrigeAvkorting =
+                    hentAvkortingForrigeBehandling(
+                        behandling,
+                        brukerTokenInfo,
+                        behandling.virkningstidspunkt().dato,
+                    )
+                nyAvkortingForFrontend(
+                    lagretAvkorting,
+                    behandling,
+                    forrigeAvkorting,
+                )
+            }
+
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
+        return avkortingFrontend
+    }
+
+    @Deprecated(
+        "Bruk heller beregn avkorting med nye grunnlag når frontend støtter det",
+        replaceWith = ReplaceWith("beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(lagreGrunnlag), brukerTokenInfo)"),
+    )
     suspend fun beregnAvkortingMedNyttGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         lagreGrunnlag: AvkortingGrunnlagLagreDto,
     ): AvkortingFrontend {
+        if (featureToggleService.isEnabled(AvkortingToggles.LEGGE_INN_FLERE_INNTEKTER, false)) {
+            return beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(lagreGrunnlag), brukerTokenInfo)
+        }
+
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
@@ -142,7 +243,6 @@ class AvkortingService(
                         else -> null
                     }
                 }
-
                 else -> null
             }
 
@@ -205,20 +305,9 @@ class AvkortingService(
         val opphoerFraOgMed = behandling.opphoerFraOgMed
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
 
-        val avkorting =
-            if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
-                val forbehandlingId =
-                    behandling.relatertBehandlingId.let { UUID.fromString(it) }
-                        ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
-
-                avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, kopiertAvkorting)
-            } else {
-                kopiertAvkorting
-            }
-
         return reberegnOgLagreAvkorting(
             behandling = behandling,
-            avkorting = avkorting,
+            eksisterendeAvkorting = kopiertAvkorting,
             brukerTokenInfo = brukerTokenInfo,
         )
     }
@@ -243,12 +332,26 @@ class AvkortingService(
 
     private suspend fun reberegnOgLagreAvkorting(
         behandling: DetaljertBehandling,
-        avkorting: Avkorting,
+        eksisterendeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
+
+        val avkorting =
+            when (behandling.revurderingsaarsak) {
+                Revurderingaarsak.ETTEROPPGJOER -> {
+                    val forbehandlingId =
+                        behandling.relatertBehandlingId.let { UUID.fromString(it) }
+                            ?: throw InternfeilException("Mangler relatertBehandlingId for revurdering")
+
+                    avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, eksisterendeAvkorting)
+                }
+
+                else -> eksisterendeAvkorting
+            }
+
         val beregnetAvkorting = avkorting.beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
@@ -384,14 +487,66 @@ class AvkortingBehandlingFeilStatus(
     )
 
 object AvkortingMapper {
+    fun nyAvkortingForFrontend(
+        avkorting: Avkorting,
+        behandling: DetaljertBehandling,
+        forrigeAvkorting: Avkorting? = null,
+    ): AvkortingFrontendDto {
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val redigerbareInntekter =
+            if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                // vi kan avkorte alle
+                avkorting.aarsoppgjoer.map {
+                    (it as? AarsoppgjoerLoepende)
+                        ?.inntektsavkorting
+                        ?.singleOrNull()
+                        ?.grunnlag
+                        ?.toDto()
+                        ?: throw InternfeilException(
+                            "Har en førstegangsbehandling med avkorting som mangler " +
+                                "årsoppgjør med forventet inntekt, behandlingId=${behandling.id}",
+                        )
+                }
+            } else {
+                listOfNotNull(
+                    avkorting.aarsoppgjoer
+                        .singleOrNull { it.aar == virkningstidspunkt.year }
+                        ?.let {
+                            when (it) {
+                                is AarsoppgjoerLoepende -> it
+                                else -> null
+                            }
+                        }?.inntektsavkorting
+                        ?.singleOrNull {
+                            it.grunnlag.periode.fom == virkningstidspunkt
+                        }?.grunnlag
+                        ?.toDto(),
+                )
+            }
+        val dto = avkorting.toDto(virkningstidspunkt)
+
+        return AvkortingFrontendDto(
+            redigerbareInntekter = redigerbareInntekter,
+            avkortingGrunnlag = dto.avkortingGrunnlag.sortedByDescending { it.fom },
+            avkortetYtelse = dto.avkortetYtelse,
+            tidligereAvkortetYtelse =
+                if (forrigeAvkorting != null && behandling.status != BehandlingStatus.IVERKSATT) {
+                    forrigeAvkorting.aarsoppgjoer
+                        .flatMap { it.avkortetYtelse }
+                        .map { it.toDto() }
+                } else {
+                    emptyList()
+                },
+        )
+    }
+
     fun avkortingForFrontend(
         avkorting: Avkorting,
         behandling: DetaljertBehandling,
         skalHaInntektInnevaerendeOgNesteAar: Boolean,
         forrigeAvkorting: Avkorting? = null,
-    ): AvkortingFrontend {
+    ): AvkortingFrontendGammelDto {
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
-
         val redigerbarForventetInntekt =
             (
                 avkorting.aarsoppgjoer
@@ -430,7 +585,7 @@ object AvkortingMapper {
 
         val dto = avkorting.toDto(virkningstidspunkt)
 
-        return AvkortingFrontend(
+        return AvkortingFrontendGammelDto(
             redigerbarForventetInntekt = redigerbarForventetInntekt,
             redigerbarForventetInntektNesteAar = redigerbarForventetInntektNesteAar,
             avkortingGrunnlag = dto.avkortingGrunnlag.sortedByDescending { it.fom },

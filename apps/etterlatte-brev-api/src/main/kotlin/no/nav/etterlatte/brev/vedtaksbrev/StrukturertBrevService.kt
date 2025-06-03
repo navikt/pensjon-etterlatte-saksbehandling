@@ -3,8 +3,11 @@ package no.nav.etterlatte.brev.vedtaksbrev
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
+import no.nav.etterlatte.brev.BrevDataRedigerbarNy
+import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.ManueltBrevData
@@ -24,11 +27,13 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -64,23 +69,24 @@ class StrukturertBrevService(
         }
 
         val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest
-
-        val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
-
         val brevKode = brevRequest.brevFastInnholdData.brevKode
+        val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
+        val soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge)
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
                 BrevbakerRequest.fra(
                     brevKode = brevKode.redigering,
-                    brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
+                    brevData = utledBrevRedigerbartInnholdData(brevRequest) ?: ManueltBrevData(),
                     avsender = avsender,
-                    soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
+                    soekerOgEventuellVerge = soekerOgEventuellVerge,
                     sakId = sak.id,
                     spraak = spraak,
                     sakType = sak.sakType,
                 ),
             )
+
+        val innholdVedlegg = hentInnholdForVedlegg(brevRequest.brevVedleggData, avsender, soekerOgEventuellVerge, spraak, sak)
 
         val nyttBrev =
             OpprettNyttBrev(
@@ -103,11 +109,11 @@ class StrukturertBrevService(
                 opprettet = Tidspunkt.now(),
                 innhold =
                     BrevInnhold(
-                        brevKode.titlerPaaSpraak[spraak] ?: brevKode.tittel,
+                        brevKode.tittel(spraak),
                         spraak,
                         innhold,
                     ),
-                innholdVedlegg = emptyList(),
+                innholdVedlegg = innholdVedlegg,
                 brevtype = brevKode.brevtype,
                 brevkoder = brevKode,
             )
@@ -121,16 +127,11 @@ class StrukturertBrevService(
         brevRequest: BrevRequest,
     ): Pdf {
         val brev = db.hentBrev(brevId)
-
         val brevInnholdData = utledBrevInnholdData(brev, brevRequest)
-
-        val avsender =
-            utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
-
+        val avsender = utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
         val pdf = opprettPdf(brev, brevRequest, brevInnholdData, avsender)
 
-        // TODO ferdigstilles vel aldri her?
-        logger.info("PDF generert ok. Sjekker om den skal lagres og ferdigstilles")
+        logger.info("PDF generert ok. ${if (brevRequest.skalLagre) "Skal lagres" else "Skal ikke lagres"}")
         brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
         if (brevRequest.skalLagre) {
             logger.info("Lagrer PDF for brev med id=$brevId")
@@ -140,6 +141,7 @@ class StrukturertBrevService(
         return pdf
     }
 
+    // TODO burde denne kaste exception i stede?
     suspend fun ferdigstillJournalfoerOgDistribuerStrukturertBrev(
         behandlingId: UUID,
         brevType: Brevtype,
@@ -225,19 +227,20 @@ class StrukturertBrevService(
 
         val brevKode = brevInnholdData.brevKode
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
+        val soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge)
 
         val spraakIBrev = db.hentBrevInnhold(brevId)?.spraak ?: spraak
 
         val brevinnhold =
             BrevInnhold(
-                brevKode.titlerPaaSpraak[spraakIBrev] ?: brevKode.tittel,
+                brevKode.tittel(spraak),
                 spraakIBrev,
                 brevbaker.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(
                         brevKode = brevKode.redigering,
-                        brevData = brevRequest.brevRedigerbarInnholdData ?: ManueltBrevData(),
+                        brevData = utledBrevRedigerbartInnholdData(brevRequest) ?: ManueltBrevData(),
                         avsender = avsender,
-                        soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge),
+                        soekerOgEventuellVerge = soekerOgEventuellVerge,
                         sakId = sak.id,
                         spraak = spraakIBrev,
                         sakType = sak.sakType,
@@ -249,12 +252,10 @@ class StrukturertBrevService(
             db.oppdaterPayload(brevId, brevinnhold.payload, bruker)
         }
 
-        /* TODO Ta stilling til disse ved implementasjon av ny tilfeller enn tilbakekreving
-        if (innholdVedlegg != null) {
+        val innholdVedlegg = hentInnholdForVedlegg(brevRequest.brevVedleggData, avsender, soekerOgEventuellVerge, spraak, sak)
+        if (innholdVedlegg.isNotEmpty()) {
             db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
         }
-
-         */
 
         if (brev.brevkoder != brevInnholdData.brevKode) {
             db.oppdaterBrevkoder(brevId, brevInnholdData.brevKode)
@@ -263,9 +264,14 @@ class StrukturertBrevService(
 
         return BrevService.BrevPayload(
             brevinnhold.payload ?: db.hentBrevPayload(brevId),
-            emptyList(),
+            innholdVedlegg,
         )
     }
+
+    private fun utledBrevRedigerbartInnholdData(brevRequest: BrevRequest): BrevDataRedigerbarNy? =
+        brevRequest.brevRedigerbarInnholdData?.let {
+            BrevDataRedigerbarNy(data = it)
+        }
 
     private fun utledBrevInnholdData(
         brev: Brev,
@@ -287,7 +293,7 @@ class StrukturertBrevService(
 
         return BrevDataFerdigstillingNy(
             innhold = innholdMedVedlegg.innhold(),
-            data = brevRequest.brevFastInnholdData,
+            data = brevRequest.brevFastInnholdData.medVedleggInnhold(innholdMedVedlegg.innholdVedlegg),
         )
     }
 
@@ -328,4 +334,31 @@ class StrukturertBrevService(
             )
         return brevbaker.genererPdf(brev.id, brevbakerRequest)
     }
+
+    private suspend fun hentInnholdForVedlegg(
+        brevVedleggData: List<BrevVedleggRedigerbarNy>,
+        avsender: Avsender,
+        soekerOgEventuellVerge: SoekerOgEventuellVerge,
+        spraak: Spraak,
+        sak: Sak,
+    ): List<BrevInnholdVedlegg> =
+        brevVedleggData
+            .map {
+                BrevInnholdVedlegg(
+                    tittel = it.vedlegg.tittel,
+                    key = it.vedleggId,
+                    payload =
+                        brevbaker.hentRedigerbarTekstFraBrevbakeren(
+                            BrevbakerRequest.fra(
+                                brevKode = it.vedlegg,
+                                brevData = it,
+                                avsender = avsender,
+                                soekerOgEventuellVerge = soekerOgEventuellVerge,
+                                sakId = sak.id,
+                                spraak = spraak,
+                                sakType = sak.sakType,
+                            ),
+                        ),
+                )
+            }.toList()
 }

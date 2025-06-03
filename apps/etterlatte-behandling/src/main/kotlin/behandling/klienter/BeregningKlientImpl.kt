@@ -5,7 +5,9 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -13,6 +15,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultat
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -24,6 +27,11 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface BeregningKlient {
+    suspend fun hentBeregningOgAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningOgAvkortingDto
+
     suspend fun slettAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -79,6 +87,35 @@ class BeregningKlientImpl(
 
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
+
+    override suspend fun hentBeregningOgAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningOgAvkortingDto {
+        try {
+            logger.info("Henter beregning og avkorting for behandlingId=$behandlingId")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/ytelse-med-grunnlag/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (re: ResponseException) {
+            logger.error(
+                "Henting av beregning og avkorting for behandling med behandlingId=$behandlingId feilet",
+                re,
+            )
+
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "FEIL_HENT_BEREGNING_AVKORTING",
+                detail = "Henting av beregning og avkorting for behandling med behandlingId=$behandlingId feilet",
+            )
+        }
+    }
 
     override suspend fun slettAvkorting(
         behandlingId: UUID,

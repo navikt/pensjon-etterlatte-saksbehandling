@@ -22,7 +22,7 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendGammelDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
@@ -89,7 +89,7 @@ class AvkortingRoutesTest {
             )
         val avkortetYtelseId = UUID.randomUUID()
         val avkorting =
-            AvkortingFrontend(
+            AvkortingFrontendGammelDto(
                 redigerbarForventetInntekt =
                     ForventetInntektDto(
                         id = avkortingsgrunnlagId,
@@ -181,7 +181,7 @@ class AvkortingRoutesTest {
                 }
 
             response.status shouldBe HttpStatusCode.OK
-            val result = objectMapper.readValue(response.bodyAsText(), AvkortingFrontend::class.java)
+            val result = objectMapper.readValue(response.bodyAsText(), AvkortingFrontendGammelDto::class.java)
             result shouldBe avkorting
             coVerify {
                 avkortingService.beregnAvkortingMedNyttGrunnlag(

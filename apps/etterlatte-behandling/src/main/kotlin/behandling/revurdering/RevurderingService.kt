@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.Locale
 import java.util.UUID
 
@@ -159,6 +160,7 @@ class RevurderingService(
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
+        opphoerFraOgMed: YearMonth? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -174,7 +176,7 @@ class RevurderingService(
             begrunnelse = begrunnelse,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
-            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+            opphoerFraOgMed = opphoerFraOgMed ?: forrigeBehandling.opphoerFraOgMed,
             tidligereFamiliepleier = forrigeBehandling.tidligereFamiliepleier,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)

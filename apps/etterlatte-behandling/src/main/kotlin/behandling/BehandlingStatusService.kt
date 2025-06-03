@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -120,6 +121,7 @@ class BehandlingStatusServiceImpl(
     private val saksbehandlerService: SaksbehandlerService,
     private val etteroppgjoerService: EtteroppgjoerService,
     private val forbehandlingService: EtteroppgjoerForbehandlingService,
+    private val grunnlagService: GrunnlagService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -393,16 +395,35 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterAktivitetspliktOppgave(behandling: Behandling) {
-        if (behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            try {
-                val unntakIBehandling = aktivitetspliktService.hentVurderingForBehandlingNy(behandling.id).unntak
-                aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIBehandling, behandling.sak.id)
-            } catch (e: Exception) {
-                logger.warn(
-                    "Kunne ikke opprette oppfølgingsoppgaver for unntak i behandling med id ${behandling.id}",
-                    e,
-                )
-            }
+        if (behandling.sak.sakType != SakType.OMSTILLINGSSTOENAD) {
+            return
+        }
+        if (behandling.type !in listOf(BehandlingType.REVURDERING, BehandlingType.FØRSTEGANGSBEHANDLING)) {
+            return
+        }
+        // Regulering skal ikke lage oppfølgingsoppgaver
+        if (behandling.revurderingsaarsak() == Revurderingaarsak.REGULERING) {
+            return
+        }
+
+        try {
+            val doedsdato =
+                grunnlagService
+                    .hentPersonopplysninger(
+                        behandling.id,
+                        behandling.sak.sakType,
+                    ).avdoede
+                    .singleOrNull()
+                    ?.opplysning
+                    ?.doedsdato
+
+            val unntakIBehandling = aktivitetspliktService.hentVurderingForBehandlingNy(behandling.id).unntak
+            aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(unntakIBehandling, behandling.sak.id, doedsdato)
+        } catch (e: Exception) {
+            logger.warn(
+                "Kunne ikke opprette oppfølgingsoppgaver for unntak i behandling med id ${behandling.id}",
+                e,
+            )
         }
     }
 

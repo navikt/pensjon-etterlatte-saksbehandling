@@ -53,7 +53,7 @@ class BrevService(
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.opprettEtteroppgjoerBrev(behandlingId, sakId, bruker)
+                etteroppgjoerForbehandlingBrevService.opprettVarselBrev(behandlingId, bruker)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -113,7 +113,7 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, true)
+                etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, bruker)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -200,10 +200,9 @@ class BrevService(
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.tilbakestillEtteroppgjoerBrev(
+                etteroppgjoerForbehandlingBrevService.tilbakestillVarselBrev(
                     brevId = brevID,
-                    behandlingId = behandlingId,
-                    sakId = sakId,
+                    forbehandlingId = behandlingId,
                     brukerTokenInfo = bruker,
                 )
 
@@ -291,7 +290,7 @@ class BrevService(
                 tilbakekrevingBrevService.hentVedtaksbrev(behandlingId, bruker)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.hentEtteroppgjoersbrev(behandlingId, bruker)
+                etteroppgjoerForbehandlingBrevService.hentVarselBrev(behandlingId, bruker)
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {

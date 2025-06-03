@@ -1,11 +1,11 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.FantIkkeIdentTilTrygdetidBlantAvdoede
 import no.nav.etterlatte.brev.model.ForskjelligTrygdetid
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg

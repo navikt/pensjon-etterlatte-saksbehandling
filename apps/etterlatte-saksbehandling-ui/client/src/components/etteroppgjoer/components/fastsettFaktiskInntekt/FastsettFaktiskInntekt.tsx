@@ -1,20 +1,24 @@
 import { BodyShort, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
-import { useState } from 'react'
 import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { useState } from 'react'
+import { FieldErrors } from 'react-hook-form'
+import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 
 interface Props {
   erRedigerbar: boolean
-  setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
+  setFastsettFaktiskInntektSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
 }
 
-export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaErSkittent }: Props) => {
+export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntektSkjemaErrors }: Props) => {
   const { behandling, faktiskInntekt } = useEtteroppgjoer()
 
-  const [redigerFaktiskInntekt, setRedigerFaktiskInntekt] = useState<boolean>(erRedigerbar && !faktiskInntekt)
+  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
+    erRedigerbar && !faktiskInntekt
+  )
 
   return (
     <VStack gap="4">
@@ -28,10 +32,10 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaE
         </Tag>
       </div>
 
-      {redigerFaktiskInntekt && erRedigerbar ? (
+      {faktiskInntektSkjemaErAapen && erRedigerbar ? (
         <FaktiskInntektSkjema
-          setRedigerFaktiskInntekt={setRedigerFaktiskInntekt}
-          setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
+          setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+          setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
         />
       ) : (
         <VStack gap="4">
@@ -42,7 +46,7 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettInntektSkjemaE
                 size="small"
                 variant="secondary"
                 icon={<PencilIcon aria-hidden />}
-                onClick={() => setRedigerFaktiskInntekt(true)}
+                onClick={() => setFaktiskInntektSkjemaErAapen(true)}
               >
                 Rediger
               </Button>

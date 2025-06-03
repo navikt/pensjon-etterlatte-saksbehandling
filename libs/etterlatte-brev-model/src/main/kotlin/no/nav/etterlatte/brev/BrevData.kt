@@ -40,8 +40,19 @@ data class ManueltBrevMedTittelData(
 
 data class BrevDataFerdigstillingNy(
     override val innhold: List<Slate.Element>,
+    // TODO: få inn vedleggInnhold?
     val data: BrevFastInnholdData,
 ) : BrevDataFerdigstilling
+
+data class BrevDataRedigerbarNy(
+    val data: BrevRedigerbarInnholdData?,
+) : BrevDataRedigerbar
+
+data class BrevVedleggRedigerbarNy(
+    val data: BrevVedleggInnholdData?,
+    val vedlegg: Vedlegg,
+    val vedleggId: BrevVedleggKey,
+) : BrevDataRedigerbar
 
 data class BrevRequest(
     val spraak: Spraak, // TODO ?
@@ -55,6 +66,7 @@ data class BrevRequest(
     val skalLagre: Boolean,
     val brevFastInnholdData: BrevFastInnholdData,
     val brevRedigerbarInnholdData: BrevRedigerbarInnholdData?,
+    val brevVedleggData: List<BrevVedleggRedigerbarNy>,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
@@ -66,6 +78,9 @@ data class BrevRequest(
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
     abstract val type: String
+
+    // TODO: finn bedre måte senere
+    abstract fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
@@ -79,4 +94,30 @@ abstract class BrevFastInnholdData : BrevData {
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder
     abstract val type: String
+}
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes(
+    JsonSubTypes.Type(
+        value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
+        name = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD",
+    ),
+)
+abstract class BrevVedleggInnholdData : BrevDataRedigerbar {
+    abstract val brevKode: Vedlegg
+    abstract val type: String
+}
+
+data class BrevInnholdVedlegg(
+    val tittel: String,
+    val key: BrevVedleggKey,
+    val payload: Slate? = null,
+)
+
+enum class BrevVedleggKey {
+    OMS_BEREGNING,
+    OMS_FORHAANDSVARSEL_FEILUTBETALING,
+    BP_BEREGNING_TRYGDETID,
+    BP_FORHAANDSVARSEL_FEILUTBETALING,
+    OMS_EO_FORHAANDSVARSEL_BEREGNING,
 }

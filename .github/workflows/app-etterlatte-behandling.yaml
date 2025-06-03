@@ -12,6 +12,7 @@ on:
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
@@ -23,6 +24,10 @@ on:
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-tilbakekreving-model/**
+      - libs/etterlatte-tidshendelser-model/**
+      - libs/etterlatte-trygdetid-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -33,6 +38,7 @@ on:
       - "!apps/etterlatte-behandling/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
+      - libs/etterlatte-brev-model/**
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
@@ -45,6 +51,10 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/rapidsandrivers-extras/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-tilbakekreving-model/**
+      - libs/etterlatte-tidshendelser-model/**
+      - libs/etterlatte-trygdetid-model/**
       - gradle/libs.versions.toml
 
 permissions:

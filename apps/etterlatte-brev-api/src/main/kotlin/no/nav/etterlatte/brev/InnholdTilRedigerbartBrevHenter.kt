@@ -12,7 +12,6 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -148,7 +147,7 @@ class InnholdTilRedigerbartBrevHenter(
                 personerISak = generellBrevData.personerISak,
                 innhold =
                     BrevInnhold(
-                        brevKode.titlerPaaSpraak[generellBrevData.spraak] ?: brevKode.tittel,
+                        brevKode.tittel(generellBrevData.spraak),
                         generellBrevData.spraak,
                         innhold.await(),
                     ),

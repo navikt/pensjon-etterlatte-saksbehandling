@@ -1,0 +1,27 @@
+{
+  "@event_name": "REGULERING:YTELSE_IKKE_LOEPENDE",
+  "dato": "2025-05-01",
+  "kjoering": "Regulering-test-2025",
+  "antall": 1,
+  "spesifikke_saker": "1005147",
+  "@id": "b6fdd38f-02a8-4f37-8ac1-0a313c5216bc",
+  "@opprettet": "2025-05-27T15:38:19.054358284",
+  "tilbakestilte_behandlinger": "",
+  "aapne_behandlinger": "",
+  "hendelse_data": {
+    "kjoering": "Regulering-test-2025",
+    "sakId": 1005147,
+    "revurderingaarsak": "REGULERING",
+    "fradato": "2025-05-01",
+    "sakType": null,
+    "behandlingId": null,
+    "forrigeBehandlingId": null,
+    "utbetalingVerifikasjon": "INGEN",
+    "inntektsjustering": null
+  },
+  "@forårsaket_av": {
+    "id": "26d4c975-f3a3-4caa-b770-afa2a664756d",
+    "opprettet": "2025-05-27T15:38:19.032352363",
+    "event_name": "REGULERING:SAK_FUNNET"
+  }
+}

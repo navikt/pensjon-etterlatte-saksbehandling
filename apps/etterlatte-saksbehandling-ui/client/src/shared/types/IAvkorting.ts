@@ -1,11 +1,12 @@
 import { SanksjonType } from '~shared/types/sanksjon'
 
 export interface IAvkorting {
-  redigerbarForventetInntekt: IAvkortingGrunnlag | undefined // Holder med id?
-  redigerbarForventetInntektNesteAar: IAvkortingGrunnlag | undefined
+  redigerbarForventetInntekt: IAvkortingGrunnlag | undefined // TODO: Feltet fjernes i ny DTO
+  redigerbarForventetInntektNesteAar: IAvkortingGrunnlag | undefined // TODO: Feltet fjernes i ny DTO
   avkortingGrunnlag: IAvkortingGrunnlag[]
   avkortetYtelse: IAvkortetYtelse[]
   tidligereAvkortetYtelse: IAvkortetYtelse[]
+  redigerbareInntekter?: IAvkortingGrunnlag[] // TODO: vi kan garantere dette feltet i ny DTO
 }
 
 export interface IAvkortingSkalHaInntektNesteAar {
@@ -52,7 +53,7 @@ export interface FaktiskInntektGrunnlag {
   }
 }
 
-export function isForventetInntekt(
+export function erForventetInntekt(
   avkortingGrunnlag: IAvkortingGrunnlag
 ): avkortingGrunnlag is ForventetInntektGrunnlag {
   return avkortingGrunnlag.type === 'FORVENTET_INNTEKT'
@@ -67,6 +68,10 @@ export interface IAvkortingGrunnlagLagre {
   spesifikasjon: string
   fom?: string
   overstyrtInnvilgaMaaneder?: IOverstyrtInnvilgaMaaneder
+}
+
+export interface AvkortingFlereInntekter {
+  inntekter: IAvkortingGrunnlagLagre[]
 }
 
 export interface IOverstyrtInnvilgaMaaneder {

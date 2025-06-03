@@ -8,7 +8,7 @@ installert.
 
 # Lokal utvikling
 
-## Hvordan kjøre en eller flere apper
+## Hvordan kjøre en eller flere apper 
 
 Forutsetning: Man må installere pluginen [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ.
 
@@ -114,7 +114,7 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 ## For Nav-ansatte
 
-Interne henvendelser kan sendes via Slack i kanalen #po-pensjon-team-etterlatte.
+Interne henvendelser kan sendes via Slack i kanalen #team-etterlatte.
 
 # Feature toggling
 

@@ -1,7 +1,7 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'
-import { BodyShort, Box, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
@@ -13,9 +13,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
-import { EtteroppgjoerBehandlingStatus } from '~shared/types/Etteroppgjoer'
+import { EtteroppgjoerBehandlingStatus, EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { IBrev } from '~shared/types/Brev'
 
 export function EtteroppgjoerForbehandlingBrev() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -29,6 +30,22 @@ export function EtteroppgjoerForbehandlingBrev() {
   )
 
   const kanRedigeres = etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT
+  const [tilbakestilt, setTilbakestilt] = useState(false)
+  const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
+
+  const lukkAdvarselBehandlingEndret = () => {
+    setVisAdvarselBehandlingEndret(false)
+  }
+
+  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: EtteroppgjoerForbehandling) => {
+    if (etteroppgjoer.beregnetEtteroppgjoerResultat != undefined) {
+      return (
+        new Date(etteroppgjoer.beregnetEtteroppgjoerResultat?.tidspunkt).getTime() >
+        new Date(brev.statusEndret).getTime()
+      )
+    }
+    return false
+  }
 
   const ferdigstillForbehandling = async () => {
     const forbehandlingId = etteroppgjoer.behandling.id
@@ -39,7 +56,9 @@ export function EtteroppgjoerForbehandlingBrev() {
 
   useEffect(() => {
     if (etteroppgjoer.behandling.brevId) {
-      fetchBrev(etteroppgjoer.behandling.id)
+      fetchBrev(etteroppgjoer.behandling.id, (brev) => {
+        setVisAdvarselBehandlingEndret(etteroppgjoerBeregnetEtterOpprettetBrev(brev, etteroppgjoer))
+      })
     } else {
       opprettBrevApi(
         {
@@ -49,7 +68,7 @@ export function EtteroppgjoerForbehandlingBrev() {
         (brev) => dispatch(addEtteroppgjoerBrev(brev))
       )
     }
-  }, [etteroppgjoer.behandling.brevId])
+  }, [etteroppgjoer.behandling.brevId, tilbakestilt])
 
   return (
     <HStack height="100%" minHeight="100%" wrap={false}>
@@ -90,8 +109,16 @@ export function EtteroppgjoerForbehandlingBrev() {
       <Box minWidth="30rem" maxWidth="40rem" borderColor="border-subtle" borderWidth="0 1 0 0">
         <VStack gap="4" margin="16">
           <Heading level="1" size="large">
-            Brev
+            Forhåndsvarsel
           </Heading>
+
+          {visAdvarselBehandlingEndret && (
+            <Alert variant="warning">
+              Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles
+              for å få oppdaterte verdier fra behandlingen.
+            </Alert>
+          )}
+
           {mapSuccess(brevResult, (brev) => (
             <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
           ))}
@@ -112,7 +139,10 @@ export function EtteroppgjoerForbehandlingBrev() {
               brev={brev}
               kanRedigeres={kanRedigeres}
               skalGaaViaBehandling
-              tilbakestillingsaction={() => alert('Not supported')}
+              lukkAdvarselBehandlingEndret={lukkAdvarselBehandlingEndret}
+              tilbakestillingsaction={() => {
+                setTilbakestilt(true)
+              }}
             />
           ),
           error: (error) => (

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.Slate
@@ -78,19 +79,6 @@ data class BrevInnhold(
     val spraak: Spraak,
     val payload: Slate? = null,
 )
-
-data class BrevInnholdVedlegg(
-    val tittel: String,
-    val key: BrevVedleggKey,
-    val payload: Slate? = null,
-)
-
-enum class BrevVedleggKey {
-    OMS_BEREGNING,
-    OMS_FORHAANDSVARSEL_FEILUTBETALING,
-    BP_BEREGNING_TRYGDETID,
-    BP_FORHAANDSVARSEL_FEILUTBETALING,
-}
 
 data class OpprettNyttBrev(
     val sakId: SakId,

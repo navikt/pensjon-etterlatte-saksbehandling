@@ -9,6 +9,8 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.brev.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
@@ -17,9 +19,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.OpprettNyttBrev

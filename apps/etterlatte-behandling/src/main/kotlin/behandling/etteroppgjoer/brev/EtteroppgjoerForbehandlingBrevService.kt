@@ -157,7 +157,6 @@ class EtteroppgjoerForbehandlingBrevService(
         val bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND
         val grunnlag = data.faktiskInntekt ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
-        grunnlag.inntektInnvilgetPeriode
         // TODO: usikker om dette blir rett, følge opp ifm testing
         val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
 

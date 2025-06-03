@@ -98,10 +98,10 @@ export const InformasjonFraBrukerSkjema = ({
                   {...register('beskrivelseAvUgunst', {
                     required: {
                       value: true,
-                      message: 'Du må beskrive hvorfor endringen kommer til ugunst',
+                      message: 'Du må beskrive hvorfor endringen har kommet til ugunst for bruker',
                     },
                   })}
-                  label="Beskriv hvorfor det er til ugunst"
+                  label="Beskriv hvorfor endringen er til ugunst for bruker"
                   readOnly={!erRedigerbar}
                   error={errors.beskrivelseAvUgunst?.message}
                 />

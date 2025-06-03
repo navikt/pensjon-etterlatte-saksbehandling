@@ -10,6 +10,10 @@ import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/re
 import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
+import React, { useState } from 'react'
+import { FieldErrors } from 'react-hook-form'
+import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -21,6 +25,10 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
+  const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
+    FieldErrors<FastsettFaktiskInntektSkjema> | undefined
+  >()
+
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
       <Heading size="xlarge" level="1">
@@ -31,13 +39,22 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
 
-      <FastsettFaktiskInntekt erRedigerbar={erRedigerbar} />
+      <FastsettFaktiskInntekt
+        erRedigerbar={erRedigerbar}
+        setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+      />
 
       {!!beregnetEtteroppgjoerResultat && (
         <VStack gap="4">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </VStack>
+      )}
+
+      {!!fastsettFaktiskInntektSkjemaErrors && (
+        <Box maxWidth="42.5rem">
+          <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
+        </Box>
       )}
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">

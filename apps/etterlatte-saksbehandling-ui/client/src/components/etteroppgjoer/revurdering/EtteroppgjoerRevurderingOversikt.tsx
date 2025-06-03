@@ -1,5 +1,5 @@
-import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import React, { useEffect, useState } from 'react'
@@ -12,55 +12,18 @@ import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoe
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import {
-  INFORMASJON_FRA_BRUKER_ID,
-  InformasjonFraBruker,
-} from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
-import { mapResult } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
-import { EtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 import { JaNei } from '~shared/types/ISvar'
+import { FieldErrors } from 'react-hook-form'
+import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
+import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
+import { isEmpty } from 'lodash'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
-
-enum EtteroppgjoerFeil {
-  MANGLER_ETTEROPPGJOER = 'MANGLER_ETTEROPPGJOER',
-  MANGLER_SVAR_NY_INFO = 'MANGLER_SVAR_NY_INFO',
-  MANGLER_SVAR_UGUNST = 'MANGLER_SVAR_UGUNST',
-  ETTEROPPGJOER_TIL_UGUNST = 'ETTEROPPGJOER_TIL_UGUNST',
-}
-
-const feilmeldingerEtteroppgjoer: Record<EtteroppgjoerFeil, string> = {
-  [EtteroppgjoerFeil.MANGLER_ETTEROPPGJOER]: 'Har ikke lastet etteroppgjør.',
-  [EtteroppgjoerFeil.MANGLER_SVAR_NY_INFO]: 'Obligatorisk å svare på om det har kommet ny informasjon.',
-  [EtteroppgjoerFeil.MANGLER_SVAR_UGUNST]:
-    'Obligatorisk å svare på om det er til ugunst for bruker hvis det har kommet ny informasjon.',
-  [EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST]: 'Endringen skal varsles bruker, revurederingen må avbrytes.',
-}
-
-function erRevurderingGyldigAaFerdigstille(
-  etteroppgjoer?: EtteroppgjoerBehandling | null
-): EtteroppgjoerFeil | undefined {
-  // Vi må ha svar på informasjon fra bruker
-  if (!etteroppgjoer) {
-    return EtteroppgjoerFeil.MANGLER_ETTEROPPGJOER
-  }
-  if (!etteroppgjoer.harMottattNyInformasjon) {
-    return EtteroppgjoerFeil.MANGLER_SVAR_NY_INFO
-  }
-  if (etteroppgjoer.harMottattNyInformasjon === JaNei.JA && !etteroppgjoer.endringErTilUgunstForBruker) {
-    return EtteroppgjoerFeil.MANGLER_SVAR_UGUNST
-  }
-  if (etteroppgjoer.harMottattNyInformasjon === JaNei.JA && etteroppgjoer.endringErTilUgunstForBruker === JaNei.JA) {
-    return EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST
-  }
-}
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
-  const [visFeilmelding, setVisFeilmelding] = useState(false)
-  const [validerSkjema, setValiderSkjema] = useState<() => void>(() => undefined)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -71,25 +34,42 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   )
 
   const etteroppgjoerForbehandlingId = behandling.relatertBehandlingId
-  const etteroppgjoer = useAppSelector((state) => state.etteroppgjoerReducer?.etteroppgjoer)
+  const etteroppgjoer = useEtteroppgjoer()
 
   const dispatch = useAppDispatch()
 
-  const [hentEtteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
+  const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
-  const feilmeldingEtteroppgjoer = erRevurderingGyldigAaFerdigstille(etteroppgjoer?.behandling)
+  const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
+    FieldErrors<IInformasjonFraBruker> | undefined
+  >()
+  const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
+    FieldErrors<FastsettFaktiskInntektSkjema> | undefined
+  >()
+
+  const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
   function nesteSteg() {
-    setVisFeilmelding(false)
-    if (!!feilmeldingEtteroppgjoer) {
-      validerSkjema()
-      if (feilmeldingEtteroppgjoer !== EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST) {
-        document.getElementById(INFORMASJON_FRA_BRUKER_ID)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    if (
+      (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
+      (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
+    ) {
+      if (
+        etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+        etteroppgjoer.behandling.kopiertFra === undefined
+      ) {
+        setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+        return
+      } else if (etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+        // TODO: tror vi må se litt mer på visningen av denne samme med design
+        setOversiktValideringFeilmelding(
+          'Endringen er til ugunst for bruker, revurderingen er ugyldig og varselbrev må sendes'
+        )
+        return
       }
-      setVisFeilmelding(true)
-      return
+      setOversiktValideringFeilmelding('')
+      next()
     }
-    next()
   }
 
   useEffect(() => {
@@ -99,10 +79,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     })
   }, [etteroppgjoerForbehandlingId])
 
-  return mapResult(hentEtteroppgjoerResult, {
-    pending: <Spinner label="Henter etteroppgjør..." />,
-    error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandling for etteroppgjør: {error.detail}</ApiErrorAlert>,
-    success: (etteroppgjoer) => (
+  return (
+    !!etteroppgjoer && (
       <VStack gap="10" paddingInline="16" paddingBlock="16 4">
         <Heading size="xlarge" level="1">
           Etteroppgjør for {etteroppgjoer.behandling.aar}
@@ -112,26 +90,40 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </BodyShort>
         <Inntektsopplysninger />
 
-        <InformasjonFraBruker setValiderSkjema={setValiderSkjema} behandling={behandling} />
+        <InformasjonFraBruker
+          behandling={behandling}
+          setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
+        />
 
-        {feilmeldingEtteroppgjoer !== EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST && (
+        {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
           <>
-            <FastsettFaktiskInntekt erRedigerbar={!!etteroppgjoer.behandling.harMottattNyInformasjon && erRedigerbar} />
+            <FastsettFaktiskInntekt
+              erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+              setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+            />
             <TabellForBeregnetEtteroppgjoerResultat />
             <ResultatAvForbehandling />
           </>
         )}
 
-        {(visFeilmelding || feilmeldingEtteroppgjoer === EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST) &&
-          feilmeldingEtteroppgjoer && (
-            <Box maxWidth="42.5rem">
-              <Alert
-                variant={feilmeldingEtteroppgjoer === EtteroppgjoerFeil.ETTEROPPGJOER_TIL_UGUNST ? 'error' : 'warning'}
-              >
-                {feilmeldingerEtteroppgjoer[feilmeldingEtteroppgjoer]}
-              </Alert>
-            </Box>
-          )}
+        {/* TODO: prøve å se og merge disse 2 sammen */}
+        {!!informasjonFraBrukerSkjemaErrors && (
+          <Box maxWidth="42.5rem">
+            <SammendragAvSkjemaFeil errors={informasjonFraBrukerSkjemaErrors} />
+          </Box>
+        )}
+
+        {!!fastsettFaktiskInntektSkjemaErrors && (
+          <Box maxWidth="42.5rem">
+            <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
+          </Box>
+        )}
+
+        {!!oversiktValideringFeilmelding && (
+          <Box maxWidth="42.5rem">
+            <Alert variant="error">{oversiktValideringFeilmelding}</Alert>
+          </Box>
+        )}
 
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">
@@ -146,6 +138,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           </HStack>
         </Box>
       </VStack>
-    ),
-  })
+    )
+  )
 }

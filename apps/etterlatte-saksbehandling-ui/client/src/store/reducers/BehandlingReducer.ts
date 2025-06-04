@@ -78,60 +78,98 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
     state.behandling = null
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
-    state.behandling!!.vilkaarsvurdering = action.payload
+    if (state.behandling) {
+      state.behandling.vilkaarsvurdering = action.payload
+    }
   })
   builder.addCase(updateBrevutfallOgEtterbetaling, (state, action) => {
-    state.behandling!!.brevutfallOgEtterbetaling = action.payload
+    if (state.behandling) {
+      state.behandling.brevutfallOgEtterbetaling = action.payload
+    }
   })
   builder.addCase(oppdaterGyldighetsproeving, (state, action) => {
-    state.behandling!!.gyldighetsprøving = action.payload
+    if (state.behandling) {
+      state.behandling.gyldighetsprøving = action.payload
+    }
   })
   builder.addCase(oppdaterVirkningstidspunkt, (state, action) => {
-    state.behandling!!.virkningstidspunkt = action.payload
+    if (state.behandling) {
+      state.behandling.virkningstidspunkt = action.payload
+    }
   })
   builder.addCase(oppdaterKommerBarnetTilgode, (state, action) => {
-    state.behandling!!.kommerBarnetTilgode = action.payload
+    if (state.behandling) {
+      state.behandling.kommerBarnetTilgode = action.payload
+    }
   })
   builder.addCase(oppdaterBoddEllerArbeidetUtlandet, (state, action) => {
-    state.behandling!!.boddEllerArbeidetUtlandet = action.payload
+    if (state.behandling) {
+      state.behandling.boddEllerArbeidetUtlandet = action.payload
+    }
   })
   builder.addCase(oppdaterSendeBrev, (state, action) => {
-    state.behandling!!.sendeBrev = action.payload.sendBrev
+    if (state.behandling) {
+      state.behandling.sendeBrev = action.payload.sendBrev
+    }
   })
   builder.addCase(oppdaterBeregning, (state, action) => {
-    state.behandling!!.beregning = action.payload
+    if (state.behandling) {
+      state.behandling.beregning = action.payload
+    }
   })
   builder.addCase(oppdaterBehandlingsstatus, (state, action) => {
-    state.behandling!!.status = action.payload
+    if (state.behandling) {
+      state.behandling.status = action.payload
+    }
   })
   builder.addCase(oppdaterBeregningsGrunnlag, (state, action) => {
-    state.behandling!!.beregningsGrunnlag = action.payload
+    if (state.behandling) {
+      state.behandling.beregningsGrunnlag = action.payload
+    }
   })
   builder.addCase(oppdaterUtlandstilknytning, (state, action) => {
-    state.behandling!!.utlandstilknytning = action.payload
+    if (state.behandling) {
+      state.behandling.utlandstilknytning = action.payload
+    }
   })
   builder.addCase(oppdaterViderefoertOpphoer, (state, action) => {
-    state.behandling!!.viderefoertOpphoer = action.payload
+    if (state.behandling) {
+      state.behandling.viderefoertOpphoer = action.payload
+    }
   })
   builder.addCase(oppdaterOverstyrBeregningsGrunnlag, (state, action) => {
-    state.behandling!!.overstyrBeregning = action.payload
+    if (state.behandling) {
+      state.behandling.overstyrBeregning = action.payload
+    }
   })
   builder.addCase(resetBeregning, (state) => {
-    state.behandling!!.beregning = undefined
+    if (state.behandling) {
+      state.behandling.beregning = undefined
+    }
   })
   builder.addCase(oppdaterRevurderingInfo, (state, action) => {
-    state.behandling!!.revurderinginfo = action.payload
+    if (state.behandling) {
+      state.behandling.revurderinginfo = action.payload
+    }
   })
   builder.addCase(oppdaterAvkorting, (state, action) => {
-    state.behandling!!.avkorting = action.payload
+    if (state.behandling) {
+      state.behandling.avkorting = action.payload
+    }
   })
   builder.addCase(resetAvkorting, (state) => {
-    state.behandling!!.avkorting = undefined
+    if (state.behandling) {
+      state.behandling.avkorting = undefined
+    }
   })
   builder.addCase(resetViderefoertOpphoer, (state) => {
-    state.behandling!!.viderefoertOpphoer = null
+    if (state.behandling) {
+      state.behandling.viderefoertOpphoer = null
+    }
   })
   builder.addCase(oppdaterTidligereFamiliepleier, (state, action) => {
-    state.behandling!!.tidligereFamiliepleier = action.payload
+    if (state.behandling) {
+      state.behandling.tidligereFamiliepleier = action.payload
+    }
   })
 })

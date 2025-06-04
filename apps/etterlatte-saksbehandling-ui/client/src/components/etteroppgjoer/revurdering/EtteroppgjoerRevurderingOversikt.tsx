@@ -1,86 +1,30 @@
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  hentEtteroppgjoerForbehandling,
-  lagreEndringErTilUgunstForBruker,
-  lagreHarMottattNyInformasjon,
-} from '~shared/api/etteroppgjoer'
-import React, { useContext, useEffect, useState } from 'react'
-import { isPending, mapResult } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
+import React, { useEffect, useState } from 'react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
-import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
-import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
+import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
-import { useForm } from 'react-hook-form'
-import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { EtteroppgjoerRevurderingResultat } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingResultat'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-
-const etteroppgjoerRevurderingOversiktSkjemaDefaultValues = (
-  etteroppgjoerForbehandling: EtteroppgjoerForbehandling
-): EtteroppgjoerRevurderingOversiktSkjema => {
-  let etteroppgjoerRevurderingOversiktSkjemaValues: EtteroppgjoerRevurderingOversiktSkjema = {
-    harMottattNyInformasjon: '',
-    endringErTilUgunstForBruker: '',
-    beskrivelseAvUgunst: '',
-  }
-
-  if (etteroppgjoerForbehandling) {
-    if (etteroppgjoerForbehandling.behandling) {
-      if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === true) {
-        etteroppgjoerRevurderingOversiktSkjemaValues = {
-          ...etteroppgjoerRevurderingOversiktSkjemaValues,
-          harMottattNyInformasjon: 'JA',
-        }
-      } else if (etteroppgjoerForbehandling.behandling.harMottattNyInformasjon === false) {
-        etteroppgjoerRevurderingOversiktSkjemaValues = {
-          ...etteroppgjoerRevurderingOversiktSkjemaValues,
-          harMottattNyInformasjon: 'NEI',
-        }
-      }
-
-      if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === true) {
-        etteroppgjoerRevurderingOversiktSkjemaValues = {
-          ...etteroppgjoerRevurderingOversiktSkjemaValues,
-          endringErTilUgunstForBruker: 'JA',
-        }
-      } else if (etteroppgjoerForbehandling.behandling.endringErTilUgunstForBruker === false) {
-        etteroppgjoerRevurderingOversiktSkjemaValues = {
-          ...etteroppgjoerRevurderingOversiktSkjemaValues,
-          endringErTilUgunstForBruker: 'NEI',
-        }
-      }
-
-      if (!!etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst) {
-        etteroppgjoerRevurderingOversiktSkjemaValues = {
-          ...etteroppgjoerRevurderingOversiktSkjemaValues,
-          beskrivelseAvUgunst: etteroppgjoerForbehandling.behandling.beskrivelseAvUgunst,
-        }
-      }
-    }
-  }
-
-  return etteroppgjoerRevurderingOversiktSkjemaValues
-}
-
-interface EtteroppgjoerRevurderingOversiktSkjema {
-  harMottattNyInformasjon: 'JA' | 'NEI' | ''
-  // TODO: disse 2 feltene skal kun vises hvis svarfristen har gått ut på varselbrev etter forbehandling
-  endringErTilUgunstForBruker: 'JA' | 'NEI' | ''
-  beskrivelseAvUgunst: string
-}
+import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
+import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
+import { JaNei } from '~shared/types/ISvar'
+import { FieldErrors } from 'react-hook-form'
+import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
+import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
+import { isEmpty } from 'lodash'
+import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+  const { next } = useBehandlingRoutes()
+
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const erRedigerbar = behandlingErRedigerbar(
@@ -90,71 +34,41 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   )
 
   const etteroppgjoerForbehandlingId = behandling.relatertBehandlingId
+  const etteroppgjoer = useEtteroppgjoer()
 
   const dispatch = useAppDispatch()
 
-  const etteroppgjoer = useEtteroppgjoer()
+  const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
-  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
-  const [harMottattNyInformasjonResult, harMottattNyInformasjonRequest] = useApiCall(lagreHarMottattNyInformasjon)
-  const [endringErTilUgunstForBrukerResult, endringErTilUgunstForBrukerRequest] = useApiCall(
-    lagreEndringErTilUgunstForBruker
-  )
+  const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
+    FieldErrors<IInformasjonFraBruker> | undefined
+  >()
+  const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
+    FieldErrors<FastsettFaktiskInntektSkjema> | undefined
+  >()
 
-  const { next } = useContext(BehandlingRouteContext)
+  const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
-  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(false)
-  const [fastsettInntektSkjemaErSkittent, setFastsettInntektSkjemaErSkittent] = useState<boolean>(false)
-  const [fastsettInntektSkjemaErSkittentFeilmelding, setFastsettInntektSkjemaErSkittentFeilmelding] =
-    useState<string>('')
-
-  // TODO: bytte om til form context, dette begynner å bli riiiimelig messy
-  const {
-    control,
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    getValues,
-    formState: { errors },
-  } = useForm<EtteroppgjoerRevurderingOversiktSkjema>({
-    defaultValues: etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer),
-  })
-
-  const paaSubmit = (data: EtteroppgjoerRevurderingOversiktSkjema) => {
-    if (data.harMottattNyInformasjon === 'JA' && fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest(
-        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
-        () => {
-          endringErTilUgunstForBrukerRequest(
-            {
-              forbehandlingId: etteroppgjoerForbehandlingId!,
-              endringErTilUgunstForBruker: data.endringErTilUgunstForBruker === 'JA',
-              beskrivelseAvUgunst: data.beskrivelseAvUgunst,
-            },
-            () => {
-              setFastsettInntektSkjemaErSkittentFeilmelding('')
-              next()
-            }
-          )
-        }
-      )
-    } else if (data.harMottattNyInformasjon === 'JA' && !fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest(
-        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
-        () => {
-          setFastsettInntektSkjemaErSkittentFeilmelding('Du må gjøre en endring i fastsatt inntekt')
-        }
-      )
-      // Saksbehandler har trykket "Nei", da kan man gå videre
-    } else {
-      harMottattNyInformasjonRequest(
-        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: false },
-        () => {
-          setFastsettInntektSkjemaErSkittentFeilmelding('')
-          next()
-        }
-      )
+  function nesteSteg() {
+    if (
+      (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
+      (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
+    ) {
+      if (
+        etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+        etteroppgjoer.behandling.kopiertFra === undefined
+      ) {
+        setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+        return
+      } else if (etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+        // TODO: tror vi må se litt mer på visningen av denne samme med design
+        setOversiktValideringFeilmelding(
+          'Endringen er til ugunst for bruker, revurderingen er ugyldig og varselbrev må sendes'
+        )
+        return
+      }
+      setOversiktValideringFeilmelding('')
+      next()
     }
   }
 
@@ -165,147 +79,65 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     })
   }, [etteroppgjoerForbehandlingId])
 
-  useEffect(() => {
-    setValue(
-      'harMottattNyInformasjon',
-      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).harMottattNyInformasjon
-    )
-    setValue(
-      'endringErTilUgunstForBruker',
-      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).endringErTilUgunstForBruker
-    )
-    setValue(
-      'beskrivelseAvUgunst',
-      etteroppgjoerRevurderingOversiktSkjemaDefaultValues(etteroppgjoer).beskrivelseAvUgunst
-    )
-  }, [etteroppgjoer])
+  return (
+    !!etteroppgjoer && (
+      <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+        <Heading size="xlarge" level="1">
+          Etteroppgjør for {etteroppgjoer.behandling.aar}
+        </Heading>
+        <BodyShort>
+          <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
+        </BodyShort>
+        <Inntektsopplysninger />
 
-  useEffect(() => {
-    if (fastsettInntektSkjemaErSkittent) {
-      harMottattNyInformasjonRequest(
-        { forbehandlingId: etteroppgjoerForbehandlingId!, harMottattNyInformasjon: true },
-        () => {
-          endringErTilUgunstForBrukerRequest({
-            forbehandlingId: etteroppgjoerForbehandlingId!,
-            endringErTilUgunstForBruker: getValues('endringErTilUgunstForBruker') === 'JA',
-            beskrivelseAvUgunst: getValues('beskrivelseAvUgunst'),
-          })
-        }
-      )
-    }
-  }, [fastsettInntektSkjemaErSkittent])
+        <InformasjonFraBruker
+          behandling={behandling}
+          setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
+        />
 
-  return mapResult(etteroppgjoerResult, {
-    pending: <Spinner label="Henter forbehandling" />,
-    error: (error) => <ApiErrorAlert>Kunne ikke hente forbehandling for etteroppgjør: {error.detail}</ApiErrorAlert>,
-    success: (etteroppgjoer) => (
-      <form onSubmit={handleSubmit(paaSubmit)}>
-        <VStack gap="10" paddingInline="16" paddingBlock="16 4">
-          <Heading size="xlarge" level="1">
-            Etteroppgjør for {etteroppgjoer.behandling.aar}
-          </Heading>
-          <BodyShort>
-            <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
-          </BodyShort>
-          <Inntektsopplysninger />
-
-          <ControlledRadioGruppe
-            name="harMottattNyInformasjon"
-            control={control}
-            legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
-            errorVedTomInput="Du må ta stilling til om bruker gitt ny informasjon"
-            readOnly={!erRedigerbar}
-            radios={
-              <>
-                <Radio value="JA">Ja</Radio>
-                <Radio value="NEI">Nei</Radio>
-              </>
-            }
-          />
-
-          {watch('harMottattNyInformasjon') === 'JA' ? (
-            <>
-              <ControlledRadioGruppe
-                name="endringErTilUgunstForBruker"
-                control={control}
-                legend="Er endringen til ugunst for bruker?"
-                errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
-                readOnly={!erRedigerbar}
-                radios={
-                  <>
-                    <Radio value="JA">Ja</Radio>
-                    <Radio value="NEI">Nei</Radio>
-                  </>
-                }
-              />
-              {watch('endringErTilUgunstForBruker') === 'JA' && (
-                <Box maxWidth="30rem">
-                  <Textarea
-                    {...register('beskrivelseAvUgunst', {
-                      required: {
-                        value: true,
-                        message: 'Du må beskrive hvorfor endringen kommer til ugunst',
-                      },
-                    })}
-                    label="Beskriv hvorfor det er til ugunst"
-                    error={errors.beskrivelseAvUgunst?.message}
-                  />
-                </Box>
-              )}
-
-              <FastsettFaktiskInntekt
-                erRedigerbar={erRedigerbar}
-                faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-                setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
-                setFastsettInntektSkjemaErSkittent={setFastsettInntektSkjemaErSkittent}
-              />
-            </>
-          ) : (
+        {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
+          <>
             <FastsettFaktiskInntekt
-              erRedigerbar={false}
-              faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-              setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+              erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+              setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
             />
-          )}
+            <TabellForBeregnetEtteroppgjoerResultat />
+            <ResultatAvForbehandling />
+          </>
+        )}
 
-          <ResultatAvForbehandling />
-
-          <EtteroppgjoerRevurderingResultat />
-
-          {fastsettInntektSkjemaErSkittentFeilmelding && (
-            <HStack width="100%" justify="center">
-              <Alert variant="error">{fastsettInntektSkjemaErSkittentFeilmelding}</Alert>
-            </HStack>
-          )}
-
-          {isFailureHandler({
-            apiResult: harMottattNyInformasjonResult,
-            errorMessage: 'Kunne ikke lagre om bruker har gitt ny informasjon',
-          })}
-
-          {isFailureHandler({
-            apiResult: endringErTilUgunstForBrukerResult,
-            errorMessage: 'Kunne ikke lagre om endring er til ugunst for bruker',
-          })}
-
-          <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
-            <HStack width="100%" justify="center">
-              <VStack gap="4" align="center">
-                <div>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    loading={isPending(harMottattNyInformasjonResult) || isPending(endringErTilUgunstForBrukerResult)}
-                  >
-                    Neste steg
-                  </Button>
-                </div>
-                <AvbrytBehandling />
-              </VStack>
-            </HStack>
+        {/* TODO: prøve å se og merge disse 2 sammen */}
+        {!!informasjonFraBrukerSkjemaErrors && (
+          <Box maxWidth="42.5rem">
+            <SammendragAvSkjemaFeil errors={informasjonFraBrukerSkjemaErrors} />
           </Box>
-        </VStack>
-      </form>
-    ),
-  })
+        )}
+
+        {!!fastsettFaktiskInntektSkjemaErrors && (
+          <Box maxWidth="42.5rem">
+            <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
+          </Box>
+        )}
+
+        {!!oversiktValideringFeilmelding && (
+          <Box maxWidth="42.5rem">
+            <Alert variant="error">{oversiktValideringFeilmelding}</Alert>
+          </Box>
+        )}
+
+        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+          <HStack width="100%" justify="center">
+            <VStack gap="4" align="center">
+              <div>
+                <Button type="button" onClick={nesteSteg} variant="primary">
+                  Neste side
+                </Button>
+              </div>
+              <AvbrytBehandling />
+            </VStack>
+          </HStack>
+        </Box>
+      </VStack>
+    )
+  )
 }

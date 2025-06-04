@@ -9,6 +9,11 @@ on:
       - apps/etterlatte-testdata/**
       - libs/etterlatte-omregning-model/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-kafka/**
+      - libs/saksbehandling-common/**
+      - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -19,6 +24,11 @@ on:
       - libs/etterlatte-omregning-model/**
       - "!apps/etterlatte-testdata/.nais/*"
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-kafka/**
+      - libs/saksbehandling-common/**
+      - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
 permissions:

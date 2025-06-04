@@ -13,13 +13,13 @@ fun kjoerIBatch(
     finnSaker: (Int) -> SakslisteDTO,
     antall: Int,
     haandterSaker: (SakslisteDTO) -> Unit,
+    batchStoerrelse: Int = MAKS_BATCHSTOERRELSE,
     venteperiode: Duration = Duration.ofSeconds(5),
 ) {
-    val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
     var tatt = 0
 
     while (tatt < antall) {
-        val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
+        val antallIDenneRunden = max(0, min(batchStoerrelse, antall - tatt))
         logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
 
         val sakerTilOmregning = finnSaker(antallIDenneRunden)
@@ -35,7 +35,7 @@ fun kjoerIBatch(
 
         tatt += sakerTilOmregning.sakIdListe.size
         logger.info("Ferdig med $tatt av totalt $antall saker")
-        if (sakerTilOmregning.sakIdListe.size < maksBatchstoerrelse) {
+        if (sakerTilOmregning.sakIdListe.size < batchStoerrelse) {
             return
         }
         logger.info("Venter $venteperiode før neste runde.")

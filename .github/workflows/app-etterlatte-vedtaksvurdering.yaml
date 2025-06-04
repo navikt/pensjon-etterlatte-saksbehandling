@@ -17,6 +17,11 @@ on:
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-tilbakekreving-model/**
       - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-jobs/**
+      - libs/etterlatte-trygdetid-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -35,6 +40,11 @@ on:
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-tilbakekreving-model/**
       - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-jobs/**
+      - libs/etterlatte-trygdetid-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
 permissions:

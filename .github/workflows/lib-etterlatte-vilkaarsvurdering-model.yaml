@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -14,6 +15,7 @@ on:
       - main
     paths:
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 
 jobs:

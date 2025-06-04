@@ -5,26 +5,29 @@ import { Inntektsopplysninger } from '~components/etteroppgjoer/components/innte
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { Link } from 'react-router-dom'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
+import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
-import { BrevutfallAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/BrevutfallAvForbehandling'
 import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { useState } from 'react'
+import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
+import React, { useState } from 'react'
+import { FieldErrors } from 'react-hook-form'
+import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const { beregnetEtteroppgjoerResultat, behandling, faktiskInntekt } = useEtteroppgjoer()
+  const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
 
   const erRedigerbar =
     (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
       behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
-  const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
-    erRedigerbar && !faktiskInntekt
-  )
+  const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
+    FieldErrors<FastsettFaktiskInntektSkjema> | undefined
+  >()
 
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
@@ -38,15 +41,20 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
       <FastsettFaktiskInntekt
         erRedigerbar={erRedigerbar}
-        faktiskInntektSkjemaErAapen={faktiskInntektSkjemaErAapen}
-        setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
+        setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
       />
 
       {!!beregnetEtteroppgjoerResultat && (
         <VStack gap="4">
+          <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
-          <BrevutfallAvForbehandling />
         </VStack>
+      )}
+
+      {!!fastsettFaktiskInntektSkjemaErrors && (
+        <Box maxWidth="42.5rem">
+          <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
+        </Box>
       )}
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">

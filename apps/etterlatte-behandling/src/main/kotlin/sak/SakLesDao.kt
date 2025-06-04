@@ -44,6 +44,21 @@ class SakLesDao(
                         AND k.kjoering='$kjoering' 
                         AND k.status!='${KjoeringStatus.KLAR_TIL_REGULERING.name}'
                     )
+                    OR EXISTS(
+                        -- nyeste kjøring har feila eller har satt til manuell uten oppgave (hvis bryter er på)
+                        SELECT 1 FROM omregningskjoering k
+                            WHERE k.sak_id=s.id 
+                            AND k.kjoering='$kjoering' 
+                            AND k.status in ${
+                            rekjoereManuellUtenOppgave.let {
+                                when (it) {
+                                    true -> "('${KjoeringStatus.FEILA.name}', '${KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE.name}')"
+                                    false -> "('${KjoeringStatus.FEILA.name}')"
+                                }
+                            }
+                        }
+                            AND k.tidspunkt >= (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering)
+                    )
                     )
                     AND EXISTS(SELECT 1 FROM behandling b WHERE b.sak_id= s.id)
                     ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}

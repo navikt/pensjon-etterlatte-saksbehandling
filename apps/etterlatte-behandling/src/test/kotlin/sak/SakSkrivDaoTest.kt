@@ -19,6 +19,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -344,6 +345,7 @@ internal class SakSkrivDaoTest(
             saker.size shouldBe 0
         }
 
+        @Test
         fun `Hvis kjoering er starta, og saa feila det, skal vi hente ut`() {
             val sakid = sakSkrivDao.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
             behandlingRepo.opprettBehandling(

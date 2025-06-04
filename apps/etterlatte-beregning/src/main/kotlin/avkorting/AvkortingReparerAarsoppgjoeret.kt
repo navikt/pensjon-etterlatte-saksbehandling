@@ -42,7 +42,7 @@ class AvkortingReparerAarsoppgjoeret(
             val sisteAarsoppgjoer = forrigeAvkorting.aarsoppgjoer.maxBy { it.aar }
             if (sisteAarsoppgjoer.aar < virkningstidspunkt.year) {
                 if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
-                    throw FoersteRevurderingSenereEnnJanuar()
+                    throw NyeAarMedInntektMaaStarteIJanuar()
                 }
                 return forrigeAvkorting
             }

@@ -14,6 +14,7 @@ export enum AarsakTilAvsluttingRevurdering {
   FEILREGISTRERT = 'FEILREGISTRERT',
   AVBRUTT_PAA_GRUNN_AV_FEIL = 'AVBRUTT_PAA_GRUNN_AV_FEIL',
   ANNET = 'ANNET',
+  ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST = 'ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST',
 }
 
 export const teksterAarsakTilAvsluttingFoerstegangsbehandling: Record<
@@ -29,5 +30,6 @@ export const teksterAarsakTilAvsluttingRevurdering: Record<AarsakTilAvsluttingRe
   IKKE_LENGER_AKTUELL: 'Revurderingen er ikke lengre aktuell',
   FEILREGISTRERT: 'Revurderingen er feilregistrert',
   AVBRUTT_PAA_GRUNN_AV_FEIL: 'Revurderingen er avbrutt på grunn av feil i Gjenny',
+  ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST: 'Endring i etteroppgjør er til ugunst',
   ANNET: 'Annet',
 }

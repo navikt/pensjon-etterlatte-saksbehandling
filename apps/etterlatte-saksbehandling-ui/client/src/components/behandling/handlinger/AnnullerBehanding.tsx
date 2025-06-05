@@ -50,7 +50,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
     return null
   }
 
-  const avbryt = (data: AvbrytBehandlingRequest) => {
+  const annuller = (data: AvbrytBehandlingRequest) => {
     avbrytBehandlingen({ id: behandling!!.id, avbrytBehandlingRequest: data }, () => {
       if (soeker?.foedselsnummer) {
         navigate('/person', { state: { fnr: soeker?.foedselsnummer } })
@@ -177,7 +177,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
               Nei, fortsett behandling
             </Button>
-            <Button variant="danger" onClick={handleSubmit(avbryt)} loading={isPending(status)}>
+            <Button variant="danger" onClick={handleSubmit(annuller)} loading={isPending(status)}>
               Ja, annuller behandling
             </Button>
           </HStack>

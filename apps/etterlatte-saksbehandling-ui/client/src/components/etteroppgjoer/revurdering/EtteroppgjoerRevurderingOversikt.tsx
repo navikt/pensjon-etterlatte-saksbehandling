@@ -10,7 +10,7 @@ import { Inntektsopplysninger } from '~components/etteroppgjoer/components/innte
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
@@ -21,6 +21,7 @@ import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/componen
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
 import { isEmpty } from 'lodash'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
+import { AvsluttEtteroppgjoerRevurderingModal } from '~components/etteroppgjoer/revurdering/AvsluttEtteroppgjoerRevurderingModal'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
@@ -49,7 +50,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
-  function nesteSteg() {
+  const nesteSteg = () => {
     if (
       (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
       (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
@@ -59,12 +60,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         etteroppgjoer.behandling.kopiertFra === undefined
       ) {
         setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
-        return
-      } else if (etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
-        // TODO: tror vi må se litt mer på visningen av denne samme med design
-        setOversiktValideringFeilmelding(
-          'Endringen er til ugunst for bruker, revurderingen er ugyldig og varselbrev må sendes'
-        )
         return
       }
       setOversiktValideringFeilmelding('')
@@ -125,14 +120,33 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           </Box>
         )}
 
+        {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA && !erFerdigBehandlet(behandling.status) && (
+          <Box maxWidth="42.5rem">
+            <Alert variant="info">
+              <Heading spacing size="small" level="3">
+                Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+              </Heading>
+              Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en ny
+              forbehandling for etteroppgjøret skal opprettes.
+            </Alert>
+          </Box>
+        )}
+
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">
             <VStack gap="4" align="center">
-              <div>
-                <Button type="button" onClick={nesteSteg} variant="primary">
-                  Neste side
-                </Button>
-              </div>
+              {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA ? (
+                <AvsluttEtteroppgjoerRevurderingModal
+                  behandling={behandling}
+                  beskrivelseAvUgunst={etteroppgjoer.behandling.beskrivelseAvUgunst}
+                />
+              ) : (
+                <div>
+                  <Button type="button" onClick={nesteSteg}>
+                    Neste side
+                  </Button>
+                </div>
+              )}
               <AvbrytBehandling />
             </VStack>
           </HStack>

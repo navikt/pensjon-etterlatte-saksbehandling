@@ -1,13 +1,16 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import { BodyShort, Button, Heading, HStack, Modal } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import { AarsakTilAvsluttingRevurdering } from '~shared/types/AnnullerBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { avbrytBehandling } from '~shared/api/behandling'
-import { isPending } from '~shared/api/apiUtils'
+import { avbrytBehandling, hentSak } from '~shared/api/behandling'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
+import { PersonOversiktFane } from '~components/person/Person'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const AvsluttEtteroppgjoerRevurderingModal = ({
   behandling,
@@ -16,13 +19,13 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
   behandling: IDetaljertBehandling
   beskrivelseAvUgunst: string | undefined
 }) => {
-  const navigate = useNavigate()
-
   const [erAapen, setErAapen] = useState<boolean>(false)
+
+  const [sakResult, sakRequest] = useApiCall(hentSak)
 
   const [avbrytBehandlingResult, avbrytBehandlingRequest] = useApiCall(avbrytBehandling)
 
-  const avsluttEtteroppgjoerRevurdering = () => {
+  const avsluttEtteroppgjoerRevurdering = (ident: string) => {
     avbrytBehandlingRequest(
       {
         id: behandling.id,
@@ -32,10 +35,14 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
         },
       },
       () => {
-        navigate('/')
+        navigerTilPersonOversikt(ident, PersonOversiktFane.SAKER)
       }
     )
   }
+
+  useEffect(() => {
+    if (erAapen) sakRequest(behandling.sakId.toString())
+  }, [erAapen])
 
   return (
     !erFerdigBehandlet(behandling.status) && (
@@ -44,42 +51,52 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
           Avslutt revurdering
         </Button>
 
-        <Modal
-          open={erAapen}
-          onClose={() => setErAapen(false)}
-          aria-labelledby="Modal for avslutting av etteroppgjør revurdering"
-        >
-          <Modal.Header>
-            <Heading level="1" size="medium" spacing>
-              Er du sikker på at du vil avslutte revurderingen?
-            </Heading>
-          </Modal.Header>
-          <Modal.Body>
-            <BodyShort>Husk å opprette ny forbehandling når du har avsluttet revurderingen.</BodyShort>
+        {mapResult(sakResult, {
+          pending: <Spinner label="Henter sak..." />,
+          error: (error) => <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente sak'}</ApiErrorAlert>,
+          success: ({ ident }) => (
+            <Modal
+              open={erAapen}
+              onClose={() => setErAapen(false)}
+              aria-labelledby="Modal for avslutting av etteroppgjør revurdering"
+              width={600}
+            >
+              <Modal.Header>
+                <Heading level="1" size="medium" spacing>
+                  Er du sikker på at du vil avslutte revurderingen?
+                </Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <VStack gap="4">
+                  <BodyShort>Husk å opprette ny forbehandling når du har avsluttet revurderingen.</BodyShort>
 
-            {isFailureHandler({
-              apiResult: avbrytBehandlingResult,
-              errorMessage: 'Kunne ikke avslutte revurdering',
-            })}
-
-            <HStack gap="4" justify="end">
-              <Button
-                variant="secondary"
-                onClick={() => setErAapen(false)}
-                disabled={isPending(avbrytBehandlingResult)}
-              >
-                Nei, fortsett revurderingen
-              </Button>
-              <Button
-                variant="danger"
-                onClick={avsluttEtteroppgjoerRevurdering}
-                loading={isPending(avbrytBehandlingResult)}
-              >
-                Ja, avslutt
-              </Button>
-            </HStack>
-          </Modal.Body>
-        </Modal>
+                  {isFailureHandler({
+                    apiResult: avbrytBehandlingResult,
+                    errorMessage: 'Kunne ikke avslutte revurdering',
+                  })}
+                </VStack>
+              </Modal.Body>
+              <Modal.Footer>
+                <HStack gap="4" justify="end">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setErAapen(false)}
+                    disabled={isPending(avbrytBehandlingResult)}
+                  >
+                    Nei, fortsett revurderingen
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => avsluttEtteroppgjoerRevurdering(ident)}
+                    loading={isPending(avbrytBehandlingResult)}
+                  >
+                    Ja, avslutt
+                  </Button>
+                </HStack>
+              </Modal.Footer>
+            </Modal>
+          ),
+        })}
       </>
     )
   )

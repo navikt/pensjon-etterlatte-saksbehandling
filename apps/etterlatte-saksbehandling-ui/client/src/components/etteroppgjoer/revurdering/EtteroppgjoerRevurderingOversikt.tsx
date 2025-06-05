@@ -61,12 +61,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       ) {
         setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
         return
-      } else if (etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
-        // TODO: tror vi må se litt mer på visningen av denne samme med design
-        setOversiktValideringFeilmelding(
-          'Endringen er til ugunst for bruker, revurderingen er ugyldig og varselbrev må sendes'
-        )
-        return
       }
       setOversiktValideringFeilmelding('')
       next()

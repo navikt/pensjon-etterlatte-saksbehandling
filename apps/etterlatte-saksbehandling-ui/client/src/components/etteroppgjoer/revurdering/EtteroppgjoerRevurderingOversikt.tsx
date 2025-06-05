@@ -10,7 +10,7 @@ import { Inntektsopplysninger } from '~components/etteroppgjoer/components/innte
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
@@ -126,7 +126,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           </Box>
         )}
 
-        {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA && (
+        {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA && !erFerdigBehandlet(behandling.status) && (
           <Box maxWidth="42.5rem">
             <Alert variant="info">
               <Heading spacing size="small" level="3">

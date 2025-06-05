@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -48,6 +49,7 @@ import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.YearMonth
 import java.util.UUID
 
@@ -258,6 +260,10 @@ class BehandlingServiceImpl(
                     .post("$url/saker/$kjoering/$antall") {
                         contentType(ContentType.Application.Json)
                         setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType, loependeFom))
+                        timeout {
+                            socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                            requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                        }
                     }.body()
             }
         }

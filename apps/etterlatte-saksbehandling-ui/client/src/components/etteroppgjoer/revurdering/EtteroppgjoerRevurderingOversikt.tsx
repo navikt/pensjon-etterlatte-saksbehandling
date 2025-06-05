@@ -10,7 +10,7 @@ import { Inntektsopplysninger } from '~components/etteroppgjoer/components/innte
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
@@ -21,9 +21,16 @@ import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/componen
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
 import { isEmpty } from 'lodash'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
+import { avbrytBehandling } from '~shared/api/behandling'
+import { AarsakTilAvsluttingRevurdering } from '~shared/types/AnnullerBehandling'
+import { useNavigate } from 'react-router-dom'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
+
+  const navigate = useNavigate()
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -39,6 +46,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const dispatch = useAppDispatch()
 
   const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
+  const [avbrytBehandlingResult, avbrytBehandlingRequest] = useApiCall(avbrytBehandling)
 
   const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
     FieldErrors<IInformasjonFraBruker> | undefined
@@ -49,7 +57,20 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
-  const avsluttEtteroppgjoerRevurdering = () => {}
+  const avsluttEtteroppgjoerRevurdering = () => {
+    avbrytBehandlingRequest(
+      {
+        id: behandling.id,
+        avbrytBehandlingRequest: {
+          aarsakTilAvbrytelse: AarsakTilAvsluttingRevurdering.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
+          kommentar: etteroppgjoer.behandling.beskrivelseAvUgunst ?? '',
+        },
+      },
+      () => {
+        navigate('/')
+      }
+    )
+  }
 
   const nesteSteg = () => {
     if (
@@ -128,27 +149,39 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         )}
 
         {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA && (
-          <Alert variant="info">
-            <Heading spacing size="small" level="3">
-              Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
-            </Heading>
-            Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en ny
-            forbehandling for etteroppgjøret skal opprettes.
-          </Alert>
+          <Box maxWidth="42.5rem">
+            <Alert variant="info">
+              <Heading spacing size="small" level="3">
+                Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+              </Heading>
+              Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en ny
+              forbehandling for etteroppgjøret skal opprettes.
+            </Alert>
+          </Box>
         )}
+
+        {isFailureHandler({
+          apiResult: avbrytBehandlingResult,
+          errorMessage: 'Kunne ikke avslutte revurdering',
+        })}
 
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">
             <VStack gap="4" align="center">
-              {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA ? (
+              {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
+              !erFerdigBehandlet(behandling.status) ? (
                 <div>
-                  <Button type="button" onClick={avsluttEtteroppgjoerRevurdering}>
+                  <Button
+                    type="button"
+                    onClick={avsluttEtteroppgjoerRevurdering}
+                    loading={isPending(avbrytBehandlingResult)}
+                  >
                     Avslutt revurdering
                   </Button>
                 </div>
               ) : (
                 <div>
-                  <Button type="button" onClick={nesteSteg}>
+                  <Button type="button" onClick={nesteSteg} disabled={isPending(avbrytBehandlingResult)}>
                     Neste side
                   </Button>
                 </div>

@@ -49,7 +49,9 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
-  function nesteSteg() {
+  const avsluttEtteroppgjoerRevurdering = () => {}
+
+  const nesteSteg = () => {
     if (
       (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
       (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
@@ -125,14 +127,32 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           </Box>
         )}
 
+        {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA && (
+          <Alert variant="info">
+            <Heading spacing size="small" level="3">
+              Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+            </Heading>
+            Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en ny
+            forbehandling for etteroppgjøret skal opprettes.
+          </Alert>
+        )}
+
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
           <HStack width="100%" justify="center">
             <VStack gap="4" align="center">
-              <div>
-                <Button type="button" onClick={nesteSteg} variant="primary">
-                  Neste side
-                </Button>
-              </div>
+              {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA ? (
+                <div>
+                  <Button type="button" onClick={avsluttEtteroppgjoerRevurdering}>
+                    Avslutt revurdering
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <Button type="button" onClick={nesteSteg}>
+                    Neste side
+                  </Button>
+                </div>
+              )}
               <AvbrytBehandling />
             </VStack>
           </HStack>

@@ -32,6 +32,7 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -218,7 +219,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -334,7 +335,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -437,7 +438,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -908,7 +909,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -996,7 +997,7 @@ internal class BehandlingFactoryTest {
                         Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
                         iverksattBehandlingId,
                     ),
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -1092,7 +1093,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -1181,7 +1182,7 @@ internal class BehandlingFactoryTest {
                         Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
                         iverksattBehandlingId,
                     ),
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
 
@@ -1287,7 +1288,7 @@ internal class BehandlingFactoryTest {
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
         every { sakTilgang.hentGraderingForSak(any(), any()) } returns
@@ -1392,13 +1393,14 @@ internal class BehandlingFactoryTest {
             revurderingsaarsak = revurderingAarsak,
             revurderingInfo = null,
             prosesstype = Prosesstype.MANUELL,
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             begrunnelse = null,
             relatertBehandlingId = null,
             opphoerFraOgMed = null,
             utlandstilknytning = null,
             sendeBrev = true,
             tidligereFamiliepleier = null,
+            opprinnelse = BehandlingOpprinnelse.UKJENT,
         )
 
     private fun foerstegangsbehandling(
@@ -1430,7 +1432,7 @@ internal class BehandlingFactoryTest {
                     Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
                     id,
                 ),
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             sendeBrev = true,
         )
 }

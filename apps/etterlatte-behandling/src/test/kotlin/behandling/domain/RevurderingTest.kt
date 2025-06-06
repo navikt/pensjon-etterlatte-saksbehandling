@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -49,13 +50,14 @@ internal class RevurderingTest {
                 boddEllerArbeidetUtlandet = null,
                 revurderingsaarsak = Revurderingaarsak.REGULERING,
                 prosesstype = Prosesstype.MANUELL,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 revurderingInfo = null,
                 begrunnelse = null,
                 relatertBehandlingId = null,
                 sendeBrev = true,
                 opphoerFraOgMed = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             ).tilVilkaarsvurdert()
             .tilTrygdetidOppdatert()
             .tilBeregnet()
@@ -239,12 +241,13 @@ private fun opprettetRevurdering(
         boddEllerArbeidetUtlandet = null,
         revurderingsaarsak = revurderingsaarsak,
         prosesstype = prosesstype,
-        kilde = Vedtaksloesning.GJENNY,
+        vedtaksloesning = Vedtaksloesning.GJENNY,
         revurderingInfo = null,
         begrunnelse = null,
         relatertBehandlingId = null,
         sendeBrev = true,
         opphoerFraOgMed = null,
         tidligereFamiliepleier = null,
+        opprinnelse = BehandlingOpprinnelse.UKJENT,
     )
 }

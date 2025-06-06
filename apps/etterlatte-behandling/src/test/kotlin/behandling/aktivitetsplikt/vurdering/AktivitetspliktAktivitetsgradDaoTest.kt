@@ -218,7 +218,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 boddEllerArbeidetUtlandet = null,
                 revurderingsAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 begrunnelse = null,
                 relatertBehandlingId = null,
                 sendeBrev = true,

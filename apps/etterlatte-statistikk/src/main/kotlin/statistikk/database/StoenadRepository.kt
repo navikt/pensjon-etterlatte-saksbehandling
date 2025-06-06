@@ -260,7 +260,7 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
         setString(21, stoenadsrad.sakUtland?.toString())
         setDate(22, Date.valueOf(stoenadsrad.virkningstidspunkt?.atDay(1)))
         setDate(23, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
-        setString(24, stoenadsrad.kilde.name)
+        setString(24, stoenadsrad.vedtaksloesning.name)
         stoenadsrad.pesysId?.let { setLong(25, it) } ?: setNull(25, Types.BIGINT)
         setString(26, stoenadsrad.sakYtelsesgruppe?.name)
         setDate(27, stoenadsrad.opphoerFom?.let { Date.valueOf(it.atDay(1)) })
@@ -293,7 +293,9 @@ private fun ResultSet.asStoenadRad(): StoenadRad =
         sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
         virkningstidspunkt = getDate("virkningstidspunkt")?.toLocalDate()?.let { YearMonth.of(it.year, it.monthValue) },
         utbetalingsdato = getDate("utbetalingsdato")?.toLocalDate(),
-        kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
+        // Feltet er renamet i intern modell, men databasen beholder kilde-navnet for å bevare eksternt
+        // grensesnitt til dataprodukt
+        vedtaksloesning = getString("kilde").let { Vedtaksloesning.valueOf(it) },
         pesysId = getLong("pesysid"),
         sakYtelsesgruppe = getString("sakYtelsesgruppe")?.let { enumValueOf<SakYtelsesgruppe>(it) },
         opphoerFom =

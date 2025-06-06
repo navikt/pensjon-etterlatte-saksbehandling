@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.somLocalDateTimeUTC
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -97,13 +98,14 @@ class RevurderingDao(
                     objectMapper.readValue(it)
                 },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
+            vedtaksloesning = rs.getString("vedtaksloesning").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,
             begrunnelse = rs.getString("begrunnelse"),
             relatertBehandlingId = rs.getString("relatert_behandling"),
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
             soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),
+            opprinnelse = rs.getString("opprinnelse").let { BehandlingOpprinnelse.valueOf(it) },
         )
     }
 }

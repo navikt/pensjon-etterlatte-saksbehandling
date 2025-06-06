@@ -1011,7 +1011,7 @@ internal class VilkaarsvurderingServiceTest(
             soeknadMottattDato = LocalDateTime.now(),
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             boddEllerArbeidetUtlandet = null,
             sendeBrev = true,
             gyldighetsproeving = null,

@@ -174,7 +174,7 @@ fun stoenadRad(
         sakUtland = sakUtland,
         virkningstidspunkt = virknigstidspunkt,
         utbetalingsdato = utbetalingsdato,
-        kilde = kilde,
+        vedtaksloesning = kilde,
         pesysId = pesysId,
         sakYtelsesgruppe = sakYtelsesgruppe,
         opphoerFom = opphoerFom,

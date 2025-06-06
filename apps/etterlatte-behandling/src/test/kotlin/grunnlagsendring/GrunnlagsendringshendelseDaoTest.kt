@@ -335,7 +335,7 @@ internal class GrunnlagsendringshendelseDaoTest(
                 virkningstidspunkt = null,
                 revurderingsAarsak = Revurderingaarsak.SOESKENJUSTERING,
                 prosesstype = Prosesstype.MANUELL,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
             )
         val behandling2 = behandling1.copy(sakId = sak2)

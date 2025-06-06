@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -29,7 +30,8 @@ sealed class Revurdering(
     open val revurderingsaarsak: Revurderingaarsak?,
     open val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val prosesstype: Prosesstype,
-    override val kilde: Vedtaksloesning,
+    override val opprinnelse: BehandlingOpprinnelse,
+    override val vedtaksloesning: Vedtaksloesning,
     open val begrunnelse: String?,
     override val relatertBehandlingId: String?,
     override val opphoerFraOgMed: YearMonth?,
@@ -56,8 +58,9 @@ sealed class Revurdering(
             boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
             soeknadMottattDato: LocalDateTime? = null,
             revurderingsaarsak: Revurderingaarsak,
+            opprinnelse: BehandlingOpprinnelse,
             prosesstype: Prosesstype,
-            kilde: Vedtaksloesning,
+            vedtaksloesning: Vedtaksloesning,
             revurderingInfo: RevurderingInfoMedBegrunnelse?,
             relatertBehandlingId: String?,
             begrunnelse: String?,
@@ -79,7 +82,8 @@ sealed class Revurdering(
                     soeknadMottattDato = soeknadMottattDato,
                     revurderingsaarsak = revurderingsaarsak,
                     revurderingInfo = revurderingInfo,
-                    kilde = kilde,
+                    opprinnelse = opprinnelse,
+                    vedtaksloesning = vedtaksloesning,
                     begrunnelse = begrunnelse,
                     relatertBehandlingId = relatertBehandlingId,
                     sendeBrev = sendeBrev,
@@ -101,7 +105,8 @@ sealed class Revurdering(
                     soeknadMottattDato = soeknadMottattDato,
                     revurderingsaarsak = revurderingsaarsak,
                     revurderingInfo = revurderingInfo,
-                    kilde = kilde,
+                    opprinnelse = opprinnelse,
+                    vedtaksloesning = vedtaksloesning,
                     begrunnelse = begrunnelse,
                     relatertBehandlingId = relatertBehandlingId,
                     sendeBrev = sendeBrev,

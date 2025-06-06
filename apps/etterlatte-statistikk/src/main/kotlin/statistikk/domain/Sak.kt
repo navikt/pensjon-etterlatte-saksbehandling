@@ -96,7 +96,7 @@ data class SakRad(
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?,
     val avkorting: Avkorting?,
-    val kilde: Vedtaksloesning,
+    val vedtaksloesning: Vedtaksloesning,
     val pesysId: Long?,
     val relatertTil: String?,
     val paaVentAarsak: PaaVentAarsak? = null,

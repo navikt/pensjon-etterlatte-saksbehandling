@@ -226,7 +226,7 @@ class ReguleringTest {
         every { sak } returns sakId1
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
-        every { kilde } returns vedtaksloesning
+        every { this@apply.vedtaksloesning } returns vedtaksloesning
         every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
     }
 }

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -76,6 +77,23 @@ class AvkortingService(
         if (eksisterendeAvkorting == null && forrigeAvkorting == null) {
             return null
         }
+
+        // TODO: Vi trenger her å sjekke om den mangler år i nåværende hvis fins, eller forrige avkorting (hvis fins)
+        val manglendeInntektsaar = manglendeInntektsaar(behandlingId, brukerTokenInfo)
+        if (manglendeInntektsaar.isNotEmpty()) {
+            logger.warn(
+                "Vi har en omsstillingsstønad ${behandling.behandlingType} som mangler " +
+                    "inntekt påkrevd(e) år: $manglendeInntektsaar i sak=${behandling.sak}, " +
+                    "behandlingId=${behandling.id}. Denne saken må sees på, fordi den kan ha " +
+                    "løpt feil.",
+            )
+            val avkorting =
+                krevIkkeNull(eksisterendeAvkorting ?: forrigeAvkorting) {
+                    "Både eksisterende og forrige avkorting er null, men da skulle vi returnert null fra metoden"
+                }
+            return avkortingForFrontend(avkorting, behandling, forrigeAvkorting)
+        }
+
         if (behandling.status == BehandlingStatus.BEREGNET && eksisterendeAvkorting != null) {
             val reberegnetAvkorting =
                 reberegnOgLagreAvkorting(
@@ -89,8 +107,7 @@ class AvkortingService(
                 forrigeAvkorting,
             )
         } else if (eksisterendeAvkorting == null && forrigeAvkorting != null) {
-            val nyAvkorting =
-                kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
+            val nyAvkorting = kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
             return avkortingForFrontend(
                 nyAvkorting,
                 behandling,

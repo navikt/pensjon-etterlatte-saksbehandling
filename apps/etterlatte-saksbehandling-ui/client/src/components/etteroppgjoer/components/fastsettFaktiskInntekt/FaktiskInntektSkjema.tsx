@@ -1,5 +1,5 @@
-import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
-import { useForm } from 'react-hook-form'
+import { FaktiskInntekt, IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
+import { FieldErrors, useForm } from 'react-hook-form'
 import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
@@ -27,7 +27,7 @@ const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   }
 }
 
-interface FastsettFaktiskInntektSkjema {
+export interface FastsettFaktiskInntektSkjema {
   loennsinntekt: string
   afp: string
   naeringsinntekt: string
@@ -37,9 +37,13 @@ interface FastsettFaktiskInntektSkjema {
 
 interface Props {
   setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
+  setFastsettFaktiskInntektSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
 }
 
-export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) => {
+export const FaktiskInntektSkjema = ({
+  setFaktiskInntektSkjemaErAapen,
+  setFastsettFaktiskInntektSkjemaErrors,
+}: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
 
@@ -70,7 +74,13 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) 
         },
   })
 
+  const avbryt = () => {
+    setFastsettFaktiskInntektSkjemaErrors(errors)
+    setFaktiskInntektSkjemaErAapen(false)
+  }
+
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
+    setFastsettFaktiskInntektSkjemaErrors(errors)
     lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
       dispatch(addResultatEtteroppgjoer(resultat))
       hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
@@ -119,8 +129,11 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) 
 
         <HStack gap="4">
           <Button
-            onClick={handleSubmit((data) =>
-              submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data))
+            onClick={handleSubmit(
+              (data) => {
+                submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data))
+              },
+              () => setFastsettFaktiskInntektSkjemaErrors(errors)
             )}
             size="small"
             loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
@@ -133,7 +146,7 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) 
               variant="secondary"
               size="small"
               disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
-              onClick={() => setFaktiskInntektSkjemaErAapen(false)}
+              onClick={avbryt}
             >
               Avbryt
             </Button>

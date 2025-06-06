@@ -59,9 +59,14 @@ inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
 
 inline val PipelineContext<*, ApplicationCall>.sakId: SakId
     get() =
-        call.parameters[SAKID_CALL_PARAMETER]?.tilSakId() ?: throw NullPointerException(
-            "SakId er ikke i path params",
-        )
+        try {
+            call.parameters[SAKID_CALL_PARAMETER]?.tilSakId()!!
+        } catch (e: Exception) {
+            when (call.parameters[SAKID_CALL_PARAMETER]) {
+                null -> throw UgyldigForespoerselException("MANGLER_SAKID", "SakId er ikke i path parameters")
+                else -> throw UgyldigForespoerselException("IKKE_GYLDIG_SAKID", "SakId er ikke gyldig")
+            }
+        }
 
 inline val PipelineContext<*, ApplicationCall>.oppgaveId: UUID
     get() =

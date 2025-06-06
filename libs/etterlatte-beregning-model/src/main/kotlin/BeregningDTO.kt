@@ -54,38 +54,12 @@ data class OverstyrBeregningDTO(
     val kategori: OverstyrtBeregningKategori,
 )
 
-// Adapter-interface for å støtte ny flyt frontend, skal fjernes når gammel dto kan fjernes
-interface AvkortingFrontend {
-    val redigerbarForventetInntekt: ForventetInntektDto?
-    val redigerbarForventetInntektNesteAar: ForventetInntektDto?
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>
-    val avkortetYtelse: List<AvkortetYtelseDto>
-    val tidligereAvkortetYtelse: List<AvkortetYtelseDto>
-}
-
-data class AvkortingFrontendGammelDto(
-    override val redigerbarForventetInntekt: ForventetInntektDto?,
-    override val redigerbarForventetInntektNesteAar: ForventetInntektDto?,
-    override val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
-    override val avkortetYtelse: List<AvkortetYtelseDto>,
-    override val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
-) : AvkortingFrontend
-
-// Ny dto for avkorting til frontend, som setter redigerbare inntekter som en liste i stedet
 data class AvkortingFrontendDto(
     val redigerbareInntekter: List<ForventetInntektDto>,
-    override val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
-    override val avkortetYtelse: List<AvkortetYtelseDto>,
-    override val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
-) : AvkortingFrontend {
-    // Disse feltene skal fjernes, men er bygd inn med kompatabilitet for gammel håndtering i frontend
-    override val redigerbarForventetInntekt: ForventetInntektDto? = redigerbareInntekter.minByOrNull { it.fom }
-    override val redigerbarForventetInntektNesteAar: ForventetInntektDto? =
-        when (redigerbareInntekter.size) {
-            2 -> redigerbareInntekter.maxBy { it.fom }
-            else -> null
-        }
-}
+    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
+    val avkortetYtelse: List<AvkortetYtelseDto>,
+    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
+)
 
 // Inneholder alle perioder med beregnet ytelse etter avkorting på tvers av alle år
 data class AvkortingDto(

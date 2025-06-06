@@ -155,7 +155,10 @@ internal class BeregnTrygdetidTest {
         val trygdetidGrunnlagMedAvdoedGrunnlag = TrygdetidGrunnlagMedAvdoedGrunnlag(grunnlag)
 
         val resultat =
-            beregnDetaljertBeregnetTrygdetidMedYrkesskade.anvend(trygdetidGrunnlagMedAvdoedGrunnlag, RegelPeriode(LocalDate.now()))
+            beregnDetaljertBeregnetTrygdetidMedYrkesskade.anvend(
+                trygdetidGrunnlagMedAvdoedGrunnlag,
+                RegelPeriode(LocalDate.now()),
+            )
 
         resultat.verdi shouldBe forventet
     }
@@ -165,13 +168,24 @@ internal class BeregnTrygdetidTest {
         fun verdierForPoengaarTest(): Stream<Arguments> =
             Stream.of(
                 Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), false, false, Period.ofDays(21)),
-                Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), false, true, Period.ofYears(1)),
-                Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), true, false, Period.ofYears(1)),
+                Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), false, true, Period.of(0, 7, 22)),
+                Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), true, false, Period.of(0, 4, 30)),
                 Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), true, true, Period.ofYears(1)),
                 Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), false, false, Period.of(3, 3, 21)),
                 Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), false, true, Period.of(3, 10, 22)),
                 Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), true, false, Period.of(3, 4, 30)),
                 Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), true, true, Period.ofYears(4)),
+                // Justering poeng inn år gjør ingen forskjell hvis vi starter perioden 1.januar
+                Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 3, 4), true, false, Period.of(0, 2, 4)),
+                Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 3, 4), false, false, Period.of(0, 2, 4)),
+                // Justering poeng ut år gjør ingen forskjell hvis vi slutter perioden 31. desember
+                Arguments.of(LocalDate.of(2020, 6, 1), LocalDate.of(2020, 12, 31), false, true, Period.of(0, 7, 0)),
+                Arguments.of(LocalDate.of(2020, 6, 1), LocalDate.of(2020, 12, 31), false, false, Period.of(0, 7, 0)),
+                // Helt år har ingen ting å si hva du krysser av inn/ut
+                Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), false, false, Period.ofYears(1)),
+                Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), true, false, Period.ofYears(1)),
+                Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), false, true, Period.ofYears(1)),
+                Arguments.of(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), true, true, Period.ofYears(1)),
             )
 
         @JvmStatic

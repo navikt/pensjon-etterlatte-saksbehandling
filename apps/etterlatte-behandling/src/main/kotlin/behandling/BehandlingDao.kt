@@ -469,7 +469,7 @@ class BehandlingDao(
                 statement.executeQuery().singleOrNull {
                     ViderefoertOpphoer(
                         skalViderefoere = JaNei.valueOf(getString("skalViderefoere")),
-                        dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
+                        dato = getString("dato").let { objectMapper.readValue<YearMonth?>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
                         behandlingId = behandlingId,

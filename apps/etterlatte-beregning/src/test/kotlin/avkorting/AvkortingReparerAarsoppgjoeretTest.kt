@@ -6,7 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
-import no.nav.etterlatte.avkorting.FoersteRevurderingSenereEnnJanuar
+import no.nav.etterlatte.avkorting.NyeAarMedInntektMaaStarteIJanuar
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
@@ -102,7 +102,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 aarsoppgjoer(aar = 2025),
             )
 
-        assertThrows<FoersteRevurderingSenereEnnJanuar> {
+        assertThrows<NyeAarMedInntektMaaStarteIJanuar> {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,

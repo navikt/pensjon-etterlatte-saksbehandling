@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
@@ -392,8 +393,11 @@ class BeregnBarnepensjonService(
             throw BPKunEnJuridiskForelderManglerIBeregningsgrunnlag(behandlingId = behandling.id)
         }
         val startdatoKunEnJuridisk = beregningsGrunnlag.kunEnJuridiskForelder?.fom
-        val virkningstidspunkt = behandling.virkningstidspunkt?.dato
-        if (startdatoKunEnJuridisk != null && startdatoKunEnJuridisk != virkningstidspunkt?.atDay(1)) {
+        val virkningstidspunkt =
+            krevIkkeNull(behandling.virkningstidspunkt) {
+                "Behandling mangler virkningstidspunkt, kan ikke beregne (sakId=${behandling.sak}, behandlingId=${behandling.id})"
+            }.dato
+        if (startdatoKunEnJuridisk != null && startdatoKunEnJuridisk.isAfter(virkningstidspunkt.atDay(1))) {
             throw BPKunEnJuridiskForelderMaaGjeldeFraVirkningstidspunkt(behandlingId = behandling.id)
         }
     }
@@ -423,6 +427,6 @@ class BPKunEnJuridiskForelderMaaGjeldeFraVirkningstidspunkt(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
         code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_MAA_GJELDE_FRA_VIRKNINGSTIDSPUNKT",
-        detail = "Dato fom på kun en juridisk forelder i beregningsgrunnlaget må være lik virkningstidspunkt",
+        detail = "Dato fom på kun en juridisk forelder i beregningsgrunnlaget må være lik eller etter virkningstidspunkt",
         meta = mapOf("behandlingId" to behandlingId),
     )

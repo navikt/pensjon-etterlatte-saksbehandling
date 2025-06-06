@@ -7,7 +7,6 @@ import { Folkeregisteridentifikatorsamsvar, Grunnlagsendringshendelse } from '~c
 import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
@@ -25,17 +24,13 @@ export const OppdaterIdentModal = ({
   const [isOpen, setIsOpen] = useState(false)
 
   const [oppdaterIdentResult, apiOppdaterIdentPaaSak] = useApiCall(oppdaterIdentPaaSak)
-  const kanOppdatereIdentPaaSak = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak)
 
   const oppdaterIdent = () => {
     apiOppdaterIdentPaaSak({ sakId: sak.id, hendelseId: hendelse?.id, utenHendelse: hendelse === null }, (sak) => {
       setTimeout(() => navigate('/person', { state: { fnr: sak.ident } }), 3000)
     })
   }
-
-  if (!kanOppdatereIdentPaaSak) {
-    return null
-  } else if (!!person?.foedselsnummer && person.foedselsnummer === sak.ident) {
+  if (!!person?.foedselsnummer && person.foedselsnummer === sak.ident) {
     return (
       <Alert variant="warning" size="small">
         Saken ser ut til å være koblet til siste gjeldende fødselsnummer. Hendelsen kan arkiveres.

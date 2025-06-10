@@ -17,7 +17,17 @@ data class Grunnlagsendringshendelse(
     val samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag? = null,
     val kommentar: String? = null,
 ) {
-    fun beskrivelse(): String = listOfNotNull(type.beskrivelse(), kommentar).joinToString(separator = ": ")
+    fun beskrivelse(): String =
+        when (this.samsvarMellomKildeOgGrunnlag) {
+            is SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD -> {
+                listOfNotNull(
+                    "Institusjonsopphold",
+                    this.samsvarMellomKildeOgGrunnlag.oppholdBeriket?.institusjonsType,
+                ).joinToString(separator = ": ")
+            }
+
+            else -> listOfNotNull(type.beskrivelse(), kommentar).joinToString(separator = ": ")
+        }
 }
 
 enum class GrunnlagsendringsType {

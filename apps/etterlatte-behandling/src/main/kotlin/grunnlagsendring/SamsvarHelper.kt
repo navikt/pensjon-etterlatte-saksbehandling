@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Utland
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal fun finnSamsvarForHendelse(
     hendelse: Grunnlagsendringshendelse,
@@ -89,6 +90,11 @@ internal fun finnSamsvarForHendelse(
         }
 
         GrunnlagsendringsType.BOSTED -> {
+            // Ikke interessant med hendelser på søsken
+            if (personRolle == PersonRolle.TILKNYTTET_BARN && sakType == SakType.BARNEPENSJON) {
+                return SamsvarMellomKildeOgGrunnlag.Adresse(samsvar = true, fraPdl = null, fraGrunnlag = null)
+            }
+
             val pdlBosted = pdlData.hentBostedsadresse()
             val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)?.verdi
             samsvarBostedsadresse(pdlBosted, grunnlagBosted)
@@ -170,7 +176,21 @@ fun samsvarBostedsadresse(
 ) = SamsvarMellomKildeOgGrunnlag.Adresse(
     fraPdl = adressePdl,
     fraGrunnlag = adresseGrunnlag,
-    samsvar = adressePdl erLikRekkefoelgeIgnorert adresseGrunnlag,
+    samsvar = erNaavaerendeAdresseLik(adressePdl ?: emptyList(), adresseGrunnlag ?: emptyList()),
 )
+
+fun erNaavaerendeAdresseLik(
+    adressePdl: List<Adresse>,
+    adresseGrunnlag: List<Adresse>,
+): Boolean {
+    val naavaerendePdl = adressePdl.naavaerende()
+    val naavaerendGrunnlag = adresseGrunnlag.naavaerende()
+    return naavaerendGrunnlag == naavaerendePdl
+}
+
+fun List<Adresse>.naavaerende(): Adresse? =
+    this.filter { it.aktiv }.maxByOrNull {
+        it.gyldigFraOgMed ?: LocalDateTime.of(1900, 1, 1, 0, 0)
+    } ?: this.maxByOrNull { it.gyldigFraOgMed ?: LocalDateTime.of(1900, 1, 1, 0, 0) }
 
 infix fun <T> List<T>?.erLikRekkefoelgeIgnorert(other: List<T>?): Boolean = this?.size == other?.size && this?.toSet() == other?.toSet()

@@ -1,5 +1,5 @@
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
-import { Alert, BodyShort, Box, Button, Checkbox, Heading, Modal, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Checkbox, Heading, Label, Modal, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
@@ -11,6 +11,7 @@ import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ClickEvent, trackClick } from '~utils/amplitude'
+import { OppgaveKommentarer } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppgaveKommentarer'
 
 interface OppfoegingsOppgaveSkjema {
   hvaSomErFulgtOpp: string
@@ -133,6 +134,8 @@ export function OppfoelgingAvOppgaveModal({
                     <PersonLink fnr={oppgave.fnr!!} target="_blank" rel="noreferrer noopener">
                       Gå til saksoversikten <ExternalLinkIcon title="a11y-title" fontSize="1.3rem" />
                     </PersonLink>
+                    <Label>Historikk</Label>
+                    <OppgaveKommentarer />
                   </VStack>
 
                   {erRedigerbar &&

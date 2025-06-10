@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.oppgave.AvbrytAktivitetspliktoppgaveRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKommentarDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -32,6 +33,7 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
@@ -67,7 +69,10 @@ inline val PipelineContext<*, ApplicationCall>.minOppgavelisteidentQueryParam: S
         }
     }
 
-internal fun Route.oppgaveRoutes(service: OppgaveService) {
+internal fun Route.oppgaveRoutes(
+    service: OppgaveService,
+    kommentarService: OppgaveKommentarService,
+) {
     route("/api/oppgaver") {
         get {
             kunSaksbehandler {
@@ -94,6 +99,25 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     },
                 )
             }
+        }
+
+        get("/kommentar/{oppgaveId}") {
+            kunSaksbehandler {
+                call.respond(
+                    inTransaction {
+                        kommentarService.hentOppgaveKommentarer(oppgaveId)
+                    },
+                )
+            }
+        }
+
+        post("/kommentar/opprett") {
+            val request = call.receive<OppgaveKommentarDto>()
+
+            inTransaction {
+                kommentarService.opprettKommentar(request)
+            }
+            call.respond(HttpStatusCode.OK)
         }
 
         get("/gruppe/{gruppeId}") {

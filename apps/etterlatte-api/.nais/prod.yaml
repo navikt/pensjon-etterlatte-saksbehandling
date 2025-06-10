@@ -12,7 +12,6 @@ spec:
   port: 8080
   ingresses:
     - "https://etterlatte-samordning-vedtak.nav.no"   # For TP-leverandører
-    - "https://etterlatte-samordning-vedtak.intern.nav.no"
   liveness:
     path: /health/isalive
     initialDelay: 5

@@ -101,7 +101,7 @@ internal fun Route.oppgaveRoutes(
             }
         }
 
-        get("/kommentar/{oppgaveId}") {
+        get("/kommentarliste/{oppgaveId}") {
             kunSaksbehandler {
                 call.respond(
                     inTransaction {

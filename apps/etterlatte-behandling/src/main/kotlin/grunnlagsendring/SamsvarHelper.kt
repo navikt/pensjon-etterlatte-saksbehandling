@@ -95,6 +95,14 @@ internal fun finnSamsvarForHendelse(
                 return SamsvarMellomKildeOgGrunnlag.Adresse(samsvar = true, fraPdl = null, fraGrunnlag = null)
             }
 
+            if (personRolle == PersonRolle.BARN && sakType == SakType.BARNEPENSJON) {
+                val foedselsdato = pdlData.foedselsdato?.verdi
+                val erOver18Aar = foedselsdato?.plusYears(18)?.plusDays(1)?.isAfter(LocalDate.now())
+                if (erOver18Aar == true) {
+                    return SamsvarMellomKildeOgGrunnlag.Adresse(samsvar = true, fraPdl = null, fraGrunnlag = null)
+                }
+            }
+
             val pdlBosted = pdlData.hentBostedsadresse()
             val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)?.verdi
             samsvarBostedsadresse(pdlBosted, grunnlagBosted)

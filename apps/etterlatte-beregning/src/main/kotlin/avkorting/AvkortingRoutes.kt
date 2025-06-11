@@ -62,7 +62,11 @@ fun Route.avkorting(
         get("manglende-inntektsaar") {
             withBehandlingId(behandlingKlient, skrivetilgang = false) { behandlingId ->
                 logger.info("Henter manglende påkrevde inntektsår for behandling=$behandlingId")
-                val paakrevdeInntekter = avkortingService.manglendeInntektsaar(behandlingId, brukerTokenInfo)
+                val paakrevdeInntekter =
+                    avkortingService.manglendeInntektsaar(
+                        behandlingId = behandlingId,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
                 call.respond(paakrevdeInntekter)
             }
         }
@@ -143,7 +147,8 @@ fun Route.avkorting(
         post("mottatt-inntektsjustering") {
             val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
             logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
-            val respons = mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
+            val respons =
+                mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
             call.respond(respons.toDto())
         }
 

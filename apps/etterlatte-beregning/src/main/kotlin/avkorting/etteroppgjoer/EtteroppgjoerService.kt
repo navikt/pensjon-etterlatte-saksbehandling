@@ -116,10 +116,10 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
     ): BeregnetEtteroppgjoerResultat {
-        // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer,
-        // setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
-        val kjoeringAar = aar + 1 // Etteroppgjøret kjøres året etter det året vi utfører etteroppgjøret for.
-        val regelPeriode = RegelPeriode(LocalDate.of(kjoeringAar, 1, 1), LocalDate.of(kjoeringAar, 12, 31))
+        // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer, setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
+        // vi skal og bruke siste gjeldene rettsgebyr for etteroppgjoersAaret dvs det som er gjeldende 31. Desember
+        val fomTom = LocalDate.of(aar, 12, 31)
+        val regelPeriode = RegelPeriode(fomTom, fomTom)
 
         val sisteIverksatteAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, sisteIverksatteBehandlingId)
         val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, forbehandlingId)

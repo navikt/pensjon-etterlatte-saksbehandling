@@ -15,26 +15,22 @@ export const OppgaveKommentarer = ({ oppgaveId }: { oppgaveId: string }) => {
     hentOppgaveKommentarerRequest({ oppgaveId })
   }, [])
 
-  return (
-    <EndringListe>
-      {mapResult(hentOppgaveKommentarerResult, {
-        pending: <Spinner label="Henter kommentarer..." />,
-        error: <ApiErrorAlert>Kunne ikke hente kommentarer</ApiErrorAlert>,
-        success: (kommentarer) =>
-          !!kommentarer?.length ? (
-            <>
-              {kommentarer.map((kommentar, index) => (
-                <EndringElement key={index}>
-                  <BodyShort size="small">{kommentar.kommentar}</BodyShort>
-                  <Detail>utført av {kommentar.saksbehandler.navn}</Detail>
-                  <Detail>{formaterDatoMedKlokkeslett(kommentar.tidspunkt)}</Detail>
-                </EndringElement>
-              ))}
-            </>
-          ) : (
-            <BodyShort>Ingen historikk</BodyShort>
-          ),
-      })}
-    </EndringListe>
-  )
+  return mapResult(hentOppgaveKommentarerResult, {
+    pending: <Spinner label="Henter kommentarer..." />,
+    error: <ApiErrorAlert>Kunne ikke hente kommentarer</ApiErrorAlert>,
+    success: (kommentarer) =>
+      !!kommentarer?.length ? (
+        <EndringListe>
+          {kommentarer.map((kommentar, index) => (
+            <EndringElement key={index}>
+              <BodyShort size="small">{kommentar.kommentar}</BodyShort>
+              <Detail>utført av {kommentar.saksbehandler.navn}</Detail>
+              <Detail>{formaterDatoMedKlokkeslett(kommentar.tidspunkt)}</Detail>
+            </EndringElement>
+          ))}
+        </EndringListe>
+      ) : (
+        <BodyShort>Ingen historikk</BodyShort>
+      ),
+  })
 }

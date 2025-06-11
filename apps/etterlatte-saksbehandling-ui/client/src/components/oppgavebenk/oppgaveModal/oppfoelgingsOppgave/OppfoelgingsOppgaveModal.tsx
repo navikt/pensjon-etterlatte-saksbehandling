@@ -1,4 +1,4 @@
-import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { Alert, BodyShort, Box, Button, Heading, Label, Modal, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'

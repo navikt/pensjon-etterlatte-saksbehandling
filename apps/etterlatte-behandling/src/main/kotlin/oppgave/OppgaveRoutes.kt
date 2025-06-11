@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.oppgave.AvbrytAktivitetspliktoppgaveRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKommentarDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKommentarRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -99,25 +99,6 @@ internal fun Route.oppgaveRoutes(
                     },
                 )
             }
-        }
-
-        get("/kommentarliste/{oppgaveId}") {
-            kunSaksbehandler {
-                call.respond(
-                    inTransaction {
-                        kommentarService.hentOppgaveKommentarer(oppgaveId)
-                    },
-                )
-            }
-        }
-
-        post("/kommentar/opprett") {
-            val request = call.receive<OppgaveKommentarDto>()
-
-            inTransaction {
-                kommentarService.opprettKommentar(request)
-            }
-            call.respond(HttpStatusCode.OK)
         }
 
         get("/gruppe/{gruppeId}") {
@@ -219,6 +200,29 @@ internal fun Route.oppgaveRoutes(
         }
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
+            route("/kommentar") {
+                get {
+                    kunSaksbehandler {
+                        call.respond(
+                            inTransaction {
+                                kommentarService.hentOppgaveKommentarer(oppgaveId)
+                            },
+                        )
+                    }
+                }
+
+                post("/opprett") {
+                    val request = call.receive<OppgaveKommentarRequest>()
+
+                    kunSaksbehandler {
+                        inTransaction {
+                            kommentarService.opprettKommentar(request, oppgaveId, brukerTokenInfo)
+                        }
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
+
             get {
                 val oppgave =
                     inTransaction {

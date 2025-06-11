@@ -12,3 +12,7 @@ data class OppgaveKommentarDto(
     val kommentar: String,
     val tidspunkt: Tidspunkt? = null,
 )
+
+data class OppgaveKommentarRequest(
+    val kommentar: String,
+)

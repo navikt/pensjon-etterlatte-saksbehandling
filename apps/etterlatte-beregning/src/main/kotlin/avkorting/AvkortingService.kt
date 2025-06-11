@@ -45,7 +45,7 @@ class AvkortingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val avkorting = avkortingSomSjekkes ?: hentAvkorting(behandlingId)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val aarMedAvkorting = avkorting?.aarsoppgjoer?.map { it.aar }?.toSet() ?: emptySet()
+        val aarMedAvkorting = avkorting?.aarsoppgjoer.orEmpty().map { it.aar }.toSet()
         val paakrevdeAar =
             AvkortingValider
                 .paakrevdeInntekterForBeregningAvAvkorting(

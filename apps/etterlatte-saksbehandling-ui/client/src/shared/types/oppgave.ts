@@ -19,10 +19,14 @@ export interface OppgaveDTO {
 }
 
 export interface OppgaveKommentar {
+  id: string
+  sakId: number
   oppgaveId: string
   kommentar: string
-  ident: string
-  navn: string
+  saksbehandler: {
+    ident: string
+    navn: string
+  }
   tidspunkt: string
 }
 

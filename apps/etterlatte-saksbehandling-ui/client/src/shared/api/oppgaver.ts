@@ -7,6 +7,7 @@ import {
   GenerellOppgaveDto,
   NyOppgaveDto,
   OppgaveDTO,
+  OppgaveKommentar,
   Oppgavetype,
 } from '~shared/types/oppgave'
 
@@ -98,6 +99,12 @@ export const fjernSaksbehandlerApi = async (args: { oppgaveId: string }): Promis
 
 export const redigerFristApi = async (args: { oppgaveId: string; frist: Date }): Promise<ApiResponse<void>> => {
   return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { frist: args.frist })
+}
+
+export const hentOppgaveKommentarer = async (args: {
+  oppgaveId: string
+}): Promise<ApiResponse<Array<OppgaveKommentar>>> => {
+  return apiClient.get(`/oppgaver/${args.oppgaveId}/kommentarer`)
 }
 
 export interface EndrePaaVentRequest {

@@ -21,6 +21,7 @@ export enum IReturTypeTilbakekreving {
   feil_i_beregning = 'Feil i beregning',
   feil_i_brev = 'Feil i brev',
   hent_nytt_grunnlag = 'Hent nytt grunnlag',
+  annet = 'Annet',
 }
 
 export enum IReturTypeKlage {

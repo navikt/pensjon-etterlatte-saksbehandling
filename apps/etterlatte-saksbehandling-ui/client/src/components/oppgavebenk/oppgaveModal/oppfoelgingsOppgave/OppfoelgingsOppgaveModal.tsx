@@ -128,14 +128,18 @@ export function OppfoelgingAvOppgaveModal({
                     apiResult: tildelSaksbehandlerResult,
                     errorMessage: 'Kunne ikke tildele oppgaven til deg.',
                   })}
-                  <VStack gap="2">
-                    <Heading size="xsmall">{erRedigerbar ? 'Hva skal følges opp?' : 'Hva ble fulgt opp'}</Heading>
-                    <BodyShort>{oppgave.merknad}</BodyShort>
+                  <VStack gap="4">
+                    <VStack gap="2">
+                      <Heading size="xsmall">{erRedigerbar ? 'Hva skal følges opp?' : 'Hva ble fulgt opp'}</Heading>
+                      <BodyShort>{oppgave.merknad}</BodyShort>
+                    </VStack>
                     <PersonLink fnr={oppgave.fnr!!} target="_blank" rel="noreferrer noopener">
                       Gå til saksoversikten <ExternalLinkIcon title="a11y-title" fontSize="1.3rem" />
                     </PersonLink>
-                    <Label>Historikk</Label>
-                    <OppgaveKommentarer />
+                    <VStack gap="2">
+                      <Label>Historikk</Label>
+                      <OppgaveKommentarer />
+                    </VStack>
                   </VStack>
 
                   {erRedigerbar &&

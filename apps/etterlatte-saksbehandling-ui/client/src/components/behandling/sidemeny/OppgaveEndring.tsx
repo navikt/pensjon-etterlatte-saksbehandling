@@ -65,7 +65,7 @@ export const EndringElement = styled.li`
   }
 
   &:last-child {
-    border: 0px;
+    border: 0;
     padding-bottom: 0;
   }
 

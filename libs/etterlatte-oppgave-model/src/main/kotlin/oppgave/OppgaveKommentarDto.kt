@@ -10,7 +10,7 @@ data class OppgaveKommentarDto(
     val oppgaveId: UUID,
     val saksbehandler: OppgaveSaksbehandler,
     val kommentar: String,
-    val tidspunkt: Tidspunkt? = null,
+    val tidspunkt: Tidspunkt,
 )
 
 data class OppgaveKommentarRequest(

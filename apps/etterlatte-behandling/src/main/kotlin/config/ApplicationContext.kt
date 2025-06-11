@@ -395,7 +395,7 @@ internal class ApplicationContext(
     private val klageHendelser = KlageHendelserServiceImpl(rapid)
     private val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
-    val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao)
+    val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
     private val aldersovergangDao = AldersovergangDao(dataSource)
 

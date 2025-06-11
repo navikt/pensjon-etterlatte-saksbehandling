@@ -117,7 +117,6 @@ val beregneEtteroppgjoerRegel =
         beskrivelse = "",
         regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-RESULTAT"),
     ) benytter etteroppgjoerDifferanse og etteroppgjoerGrense med { differanse, grenser ->
-
         val status =
             when {
                 Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKEKREVING

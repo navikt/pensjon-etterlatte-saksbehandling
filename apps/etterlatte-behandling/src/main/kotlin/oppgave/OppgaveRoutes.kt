@@ -200,7 +200,7 @@ internal fun Route.oppgaveRoutes(
         }
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
-            route("/kommentar") {
+            route("/kommentarer") {
                 get {
                     kunSaksbehandler {
                         call.respond(

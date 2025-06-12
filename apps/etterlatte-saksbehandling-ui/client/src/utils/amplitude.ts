@@ -44,6 +44,7 @@ export enum ClickEvent {
   // Oppgave
   OPPRETT_GENERELL_OPPGAVE = 'opprett generell oppgave',
   OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
+  OPPRETT_FRIKOBLET_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave frikoblet',
   TILDEL_TILKNYTTEDE_OPPGAVER = 'tildel tilknyttede oppgaver',
   AAPNE_OPPFOELGINGSOPPGAVE_MODAL = 'åpne opprett oppfølgingsoppgave modal',
   OPPRETT_OPPFOELGINGSOPPGAVE = 'opprett oppfølgingsoppgave',

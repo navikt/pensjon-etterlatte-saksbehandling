@@ -3,12 +3,13 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettOppgave } from '~shared/api/oppgaver'
-import { Oppgavetype } from '~shared/types/oppgave'
+import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { Alert, BodyShort, Box, Button, Modal, TextField, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 interface OpprettJournalpostForm {
   journalpostId: string
@@ -20,11 +21,14 @@ export function OpprettOppgaveTilJournalpost({ sak }: { sak: ISak }) {
   const [opprettOppgaveStatus, opprettOppgaveFetch, resetOpprettOppgaveStatus] = useApiCall(opprettOppgave)
 
   function sendInn(skjemadata: OpprettJournalpostForm) {
+    trackClick(ClickEvent.OPPRETT_FRIKOBLET_JOURNALFOERINGSOPPGAVE)
     opprettOppgaveFetch({
       sakId: sak.id,
       request: {
         oppgaveType: Oppgavetype.JOURNALFOERING,
         referanse: skjemadata.journalpostId,
+        merknad: 'Manuelt opprettet journalføringsoppgave',
+        oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
       },
     })
   }

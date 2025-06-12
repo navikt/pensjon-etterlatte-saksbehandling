@@ -2,7 +2,7 @@ import { Box, Button, Detail, Heading, HStack, Table, VStack } from '@navikt/ds-
 import Spinner from '~shared/Spinner'
 import { Journalpost, SideInfo, Tema } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { isPending, mapResult, Result } from '~shared/api/apiUtils'
+import { isPending, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -10,6 +10,8 @@ import { DokumentFilter } from '~components/person/dokumenter/DokumentFilter'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { DokumentRad } from './DokumentRad'
 import { ArrowDownIcon } from '@navikt/aksel-icons'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { OpprettOppgaveTilJournalpost } from '~components/person/dokumenter/OpprettOppgaveTilJournalpost'
 
 export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Result<SakMedBehandlinger> }) => {
   const [filter, setFilter] = useState<DokumentFilter>({
@@ -22,6 +24,7 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
   const [sideInfo, setSideInfo] = useState<SideInfo>()
 
   const [dokumenter, hentDokumenterForBruker] = useApiCall(hentDokumenter)
+  const opprettOppgaveTilJournalpostEnabled = useFeaturetoggle(FeatureToggle.oppgave_til_journalpost)
 
   useEffect(() => void hent(), [fnr, filter])
 
@@ -112,6 +115,9 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
             </Button>
           )}
         </HStack>
+
+        {opprettOppgaveTilJournalpostEnabled &&
+          mapSuccess(sakResult, (sakOgBehandlinger) => <OpprettOppgaveTilJournalpost sak={sakOgBehandlinger.sak} />)}
       </VStack>
     </Box>
   )

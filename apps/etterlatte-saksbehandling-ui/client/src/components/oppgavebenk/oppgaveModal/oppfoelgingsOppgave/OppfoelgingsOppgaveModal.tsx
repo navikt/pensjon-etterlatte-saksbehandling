@@ -82,7 +82,7 @@ export function OppfoelgingAvOppgaveModal({
       )}
       {visModal && (
         <Modal open={visModal} onClose={lukkModal} header={{ heading: 'Oppfølging av sak' }}>
-          <Box minWidth="41.5rem">
+          <Box minWidth="42.5rem">
             <form onSubmit={handleSubmit(ferdigstill)}>
               <Modal.Body>
                 <VStack gap="4">

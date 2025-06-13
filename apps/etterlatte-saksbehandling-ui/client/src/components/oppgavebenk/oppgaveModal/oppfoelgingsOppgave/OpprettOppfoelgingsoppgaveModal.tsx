@@ -7,14 +7,13 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { useForm } from 'react-hook-form'
 import { ClickEvent, trackClick } from '~utils/amplitude'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
-import { BodyShort, Box, Button, Checkbox, CheckboxGroup, Modal, Textarea, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { isPending } from '~shared/api/apiUtils'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
 interface OppfoelgingsOpppgaveForm {
   merknad: string
   frist: Date
-  tildelMeg: boolean
 }
 
 export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettelse?: () => void }) {
@@ -50,7 +49,7 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
           oppgaveType: Oppgavetype.OPPFOELGING,
           merknad: formdata.merknad,
           frist: justertFrist.toISOString(),
-          saksbehandler: formdata.tildelMeg ? saksbehandler.ident : undefined,
+          saksbehandler: saksbehandler.ident,
         },
       },
       () => {
@@ -105,10 +104,6 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
                   error={errors.merknad?.message}
                   disabled={isPending(opprettOppgaveStatus)}
                 />
-
-                <CheckboxGroup legend="Tildel meg" description="Skal oppfølgingsoppgaven være tildelt deg?">
-                  <Checkbox {...register('tildelMeg')}>Tildel oppgaven til meg</Checkbox>
-                </CheckboxGroup>
               </VStack>
             </Modal.Body>
             <Modal.Footer>

@@ -55,7 +55,9 @@ export function OppfoelgingAvOppgaveModal({
 
   const lagreOppfoelging = (data: OppfoegingsOppgaveSkjema) => {
     opprettOppgaveKommentarRequest({ oppgaveId: oppgave.id, kommentar: data.hvaSomErFulgtOpp }, () => {
-      hentOppgaveKommentarerRequest({ oppgaveId: oppgave.id })
+      hentOppgaveKommentarerRequest({ oppgaveId: oppgave.id }, () => {
+        reset()
+      })
     })
   }
 

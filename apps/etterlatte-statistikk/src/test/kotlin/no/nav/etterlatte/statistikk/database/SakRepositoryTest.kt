@@ -168,7 +168,7 @@ fun lagSak(
     sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
     avdoedeForeldre = emptyList(),
     revurderingAarsak = "MIGRERING",
-    kilde = Vedtaksloesning.GJENNY,
+    vedtaksloesning = Vedtaksloesning.GJENNY,
     pesysId = 123L,
     relatertTil = relatertId,
     sakUtlandEnhet = sakUtlandEnhet,

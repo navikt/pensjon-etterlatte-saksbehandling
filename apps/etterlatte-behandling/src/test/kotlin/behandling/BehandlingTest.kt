@@ -231,7 +231,7 @@ internal class BehandlingTest {
             boddEllerArbeidetUtlandet = null,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
             gyldighetsproeving = null,
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             sendeBrev = true,
             erSluttbehandling = erSluttbehandling,
         )

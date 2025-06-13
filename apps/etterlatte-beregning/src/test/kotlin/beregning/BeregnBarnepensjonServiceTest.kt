@@ -1058,7 +1058,7 @@ internal class BeregnBarnepensjonServiceTest {
             every { sak } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
-            every { kilde } returns vedtaksloesning
+            every { this@mockk.vedtaksloesning } returns vedtaksloesning
             every { revurderingsaarsak } returns null
         }
 

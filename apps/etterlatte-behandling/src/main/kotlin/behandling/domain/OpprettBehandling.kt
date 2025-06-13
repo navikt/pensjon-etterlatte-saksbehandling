@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -25,12 +26,13 @@ data class OpprettBehandling(
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     val revurderingsAarsak: Revurderingaarsak? = null,
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
-    val kilde: Vedtaksloesning,
+    val vedtaksloesning: Vedtaksloesning,
     val begrunnelse: String? = null,
     val relatertBehandlingId: String? = null,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth? = null,
     val tidligereFamiliepleier: TidligereFamiliepleier? = null,
+    val opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.UKJENT,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: Tidspunkt = Tidspunkt.now()

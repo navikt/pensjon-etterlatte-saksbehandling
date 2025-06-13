@@ -41,10 +41,10 @@ class GjenopprettingMetrikkerDao(
                     """
                     select count(distinct b.sak_id) antall from behandling b
                     join oppgave o on b.id::text = o.referanse
-                    where b.status = 'AVBRUTT' and b.kilde = 'GJENOPPRETTA'
+                    where b.status = 'AVBRUTT' and b.vedtaksloesning = 'GJENOPPRETTA'
                     and exists (
                         select 1 from behandling b2
-                        where b2.sak_id = b.sak_id and b2.kilde = 'GJENNY' and b2.status != 'AVBRUTT'
+                        where b2.sak_id = b.sak_id and b2.vedtaksloesning = 'GJENNY' and b2.status != 'AVBRUTT'
                     );
                     """.trimIndent(),
                 )

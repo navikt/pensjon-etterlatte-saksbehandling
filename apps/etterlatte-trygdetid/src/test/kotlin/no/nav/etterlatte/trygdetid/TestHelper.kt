@@ -3,6 +3,7 @@ package no.nav.etterlatte.trygdetid
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -48,11 +49,12 @@ fun behandling(
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.AUTOMATISK,
-    kilde = Vedtaksloesning.GJENNY,
+    vedtaksloesning = Vedtaksloesning.GJENNY,
     sendeBrev = true,
     opphoerFraOgMed = null,
     relatertBehandlingId = null,
     tidligereFamiliepleier = null,
+    opprinnelse = BehandlingOpprinnelse.UKJENT,
 )
 
 fun trygdetid(

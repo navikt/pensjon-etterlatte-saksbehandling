@@ -121,7 +121,7 @@ class BrevdataFacade(
                 } else {
                     null
                 }
-            val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
+            val systemkilde = behandling?.vedtaksloesning ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
             val spraak = overstyrSpraak ?: grunnlag.mapSpraak()
             val relatertBehandlingId = behandling?.relatertBehandlingId
 

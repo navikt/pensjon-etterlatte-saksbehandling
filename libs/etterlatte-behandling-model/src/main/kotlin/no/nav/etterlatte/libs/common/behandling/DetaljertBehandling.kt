@@ -20,14 +20,28 @@ data class DetaljertBehandling(
     val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,
-    val kilde: Vedtaksloesning,
+    val vedtaksloesning: Vedtaksloesning,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth?,
     val relatertBehandlingId: String?,
     val tidligereFamiliepleier: TidligereFamiliepleier?,
     val erSluttbehandling: Boolean = false,
     val mottattDato: LocalDateTime? = null,
-)
+    val opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.UKJENT,
+) {
+    fun erBrukermeldtEtteroppgjoer(): Boolean =
+        revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER && opprinnelse != BehandlingOpprinnelse.AUTOMATISK_JOBB
+}
+
+enum class BehandlingOpprinnelse {
+    @Deprecated("Pls ikke bruk ukjent :(")
+    UKJENT,
+    MELD_INN_ENDRING_SKJEMA,
+    BARNEPENSJON_SOEKNAD,
+    OMSTILLINGSSTOENAD_SOEKNAD,
+    JOURNALFOERING,
+    AUTOMATISK_JOBB,
+}
 
 fun DetaljertBehandling.virkningstidspunkt() =
     krevIkkeNull(virkningstidspunkt) {

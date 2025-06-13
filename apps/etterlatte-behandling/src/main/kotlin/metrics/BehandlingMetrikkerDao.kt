@@ -17,13 +17,13 @@ class BehandlingMetrikkerDao(
             val statement =
                 it.prepareStatement(
                     """
-                    select count(*) antall, saktype, behandlingstype, revurdering_aarsak, kilde, status,
+                    select count(*) antall, saktype, behandlingstype, revurdering_aarsak, vedtaksloesning, status,
                        CASE virkningstidspunkt::JSONB -> 'kilde' ->> 'ident'
                            WHEN 'PESYS' THEN 'true'
                            ELSE 'false'
                        END automatisk
                     from behandling b join sak s on b.sak_id = s.id
-                    group by saktype, behandlingstype, revurdering_aarsak, kilde, status, automatisk;
+                    group by saktype, behandlingstype, revurdering_aarsak, vedtaksloesning, status, automatisk;
                     """.trimIndent(),
                 )
             return statement.executeQuery().toList {
@@ -39,7 +39,9 @@ class BehandlingMetrikkerDao(
             behandlingstype = BehandlingType.valueOf(getString("behandlingstype")),
             revurderingsaarsak = getString("revurdering_aarsak")?.let { Revurderingaarsak.valueOf(it) },
             status = BehandlingStatus.valueOf(getString("status")),
-            kilde = Vedtaksloesning.valueOf(getString("kilde")),
+            // Feltet er renamet i intern modell, men metrikken beholder kilde-navnet for å bevare eksternt
+            // grensesnitt til grafana
+            kilde = Vedtaksloesning.valueOf(getString("vedtaksloesning")),
             automatiskMigrering = getString("automatisk"),
         )
 }

@@ -232,7 +232,7 @@ class VedtakBehandlingService(
                 extraParams =
                     mapOf(
                         SKAL_SENDE_BREV to behandling.sendeBrev,
-                        KILDE_KEY to behandling.kilde,
+                        KILDE_KEY to behandling.vedtaksloesning,
                         REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
                     ),
             ),

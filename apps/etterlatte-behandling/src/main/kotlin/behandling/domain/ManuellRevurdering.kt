@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.domain
 import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -32,7 +33,8 @@ data class ManuellRevurdering(
     override val soeknadMottattDato: LocalDateTime?,
     override val revurderingsaarsak: Revurderingaarsak,
     override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
-    override val kilde: Vedtaksloesning,
+    override val vedtaksloesning: Vedtaksloesning,
+    override val opprinnelse: BehandlingOpprinnelse,
     override val begrunnelse: String?,
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
@@ -51,7 +53,8 @@ data class ManuellRevurdering(
         revurderingsaarsak = revurderingsaarsak,
         revurderingInfo = revurderingInfo,
         prosesstype = Prosesstype.MANUELL,
-        kilde = kilde,
+        vedtaksloesning = vedtaksloesning,
+        opprinnelse = opprinnelse,
         begrunnelse = begrunnelse,
         relatertBehandlingId = relatertBehandlingId,
         opphoerFraOgMed = opphoerFraOgMed,

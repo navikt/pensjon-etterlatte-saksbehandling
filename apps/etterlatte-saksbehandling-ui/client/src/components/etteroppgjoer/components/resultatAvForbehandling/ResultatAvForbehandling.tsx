@@ -13,7 +13,7 @@ export const ResultatAvForbehandling = () => {
   const resultatTekst: Record<EtteroppgjoerResultatType, string> = {
     TILBAKEKREVING: 'Tilbakekreving',
     ETTERBETALING: 'Etterbetaling',
-    IKKE_ETTEROPPGJOER: 'Ikke etteroppgjør',
+    IKKE_ETTEROPPGJOER: 'Ingen endring',
   }
 
   const beskrivelse = (() => {

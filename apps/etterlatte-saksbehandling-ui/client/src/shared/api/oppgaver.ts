@@ -101,6 +101,10 @@ export const redigerFristApi = async (args: { oppgaveId: string; frist: Date }):
   return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { frist: args.frist })
 }
 
+export const opprettOppgaveKommentar = async (args: { oppgaveId: string; kommentar: string }) => {
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/kommentarer/opprett`, { kommentar: args.kommentar })
+}
+
 export const hentOppgaveKommentarer = async (args: {
   oppgaveId: string
 }): Promise<ApiResponse<Array<OppgaveKommentar>>> => {

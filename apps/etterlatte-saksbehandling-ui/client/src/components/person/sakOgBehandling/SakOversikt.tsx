@@ -19,7 +19,7 @@ import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAv
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
-import { OpprettOppfoelgingsoppgaveModal } from '~components/person/sakOgBehandling/OpprettOppfoelgingsoppgaveModal'
+import { OpprettOppfoelgingsoppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OpprettOppfoelgingsoppgaveModal'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'

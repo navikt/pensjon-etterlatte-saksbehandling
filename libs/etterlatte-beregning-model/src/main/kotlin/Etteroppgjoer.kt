@@ -31,5 +31,5 @@ data class EtteroppgjoerGrenseDto(
 enum class EtteroppgjoerResultatType {
     TILBAKEKREVING,
     ETTERBETALING,
-    IKKE_ETTEROPPGJOER,
+    INGEN_ENDRING,
 }

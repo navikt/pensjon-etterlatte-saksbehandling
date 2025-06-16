@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-samordning-vedtak
+  name: etterlatte-api
   namespace: etterlatte
   labels:
     team: etterlatte
@@ -11,8 +11,8 @@ spec:
   image: "{{image}}"
   port: 8080
   ingresses:
-    - "https://etterlatte-samordning-vedtak.nav.no"   # For TP-leverandører
-    - "https://etterlatte-samordning-vedtak.intern.nav.no"
+    - "https://etterlatte-api.nav.no"   # For TP-leverandører
+    - "https://etterlatte-api.intern.nav.no"
   liveness:
     path: /health/isalive
     initialDelay: 5
@@ -36,21 +36,20 @@ spec:
     limits:
       memory: 640Mi
     requests:
-      cpu: 20m
-      memory: 448Mi
+      cpu: 10m
+      memory: 320Mi
   replicas:
     min: 2
     max: 4
-    scalingStrategy:
-      cpu:
-        thresholdPercentage: 80
   maskinporten:
     enabled: true
     scopes:
       exposes:
         - name: "vedtaksinformasjon.read"
+          delegationSource: "altinn"
           enabled: true
           product: "etterlatteytelser"
+          separator: "/"
           allowedIntegrations:
             - maskinporten
           atMaxAge: 60
@@ -109,6 +108,21 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: innsendt-soeknad
+          namespace: etterlatte
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+        - application: selvbetjening-backend
+          namespace: etterlatte
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+        - application: arbeid-og-inntekt
+          namespace: team-inntekt
+          cluster: prod-fss
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss
@@ -146,6 +160,28 @@ spec:
             roles:
               - les-oms-samordning-vedtak
               - les-oms-vedtak
+        - application: eessi-pensjon-journalforing
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+              - les-bp-sak
+        - application: eessi-pensjon-prefill
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: eessi-pensjon-journalforing
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+              - opprett-jfr-oppgave
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

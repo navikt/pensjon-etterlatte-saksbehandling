@@ -18,6 +18,18 @@ export interface OppgaveDTO {
   saksbehandler: OppgaveSaksbehandler | null
 }
 
+export interface OppgaveKommentar {
+  id: string
+  sakId: number
+  oppgaveId: string
+  kommentar: string
+  saksbehandler: {
+    ident: string
+    navn: string
+  }
+  tidspunkt: string
+}
+
 export interface GenerellEndringshendelse {
   tidspunkt: string
   saksbehandler?: string

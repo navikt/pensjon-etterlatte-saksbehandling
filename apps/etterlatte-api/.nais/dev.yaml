@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-samordning-vedtak
+  name: etterlatte-api
   namespace: etterlatte
   labels:
     team: etterlatte
@@ -11,8 +11,8 @@ spec:
   image: "{{image}}"
   port: 8080
   ingresses:
-    - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"  # For TP-leverandører
-    - "https://etterlatte-samordning-vedtak.intern.dev.nav.no"
+    - "https://etterlatte-api.ekstern.dev.nav.no"  # For TP-leverandører
+    - "https://etterlatte-api.intern.dev.nav.no"
   liveness:
     path: /health/isalive
     initialDelay: 5
@@ -36,14 +36,11 @@ spec:
     limits:
       memory: 640Mi
     requests:
-      cpu: 20m
-      memory: 448Mi
+      cpu: 10m
+      memory: 320Mi
   replicas:
     min: 2
     max: 4
-    scalingStrategy:
-      cpu:
-        thresholdPercentage: 80
   maskinporten:
     enabled: true
     scopes:
@@ -51,6 +48,8 @@ spec:
         - name: "vedtaksinformasjon.read"
           enabled: true
           product: "etterlatteytelser"
+          separator: "/"
+          delegationSource: "altinn"
           allowedIntegrations:
             - maskinporten
           atMaxAge: 120
@@ -111,6 +110,33 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: innsendt-soeknad
+          namespace: etterlatte
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+        - application: selvbetjening-backend
+          namespace: etterlatte
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+        - application: arbeid-og-inntekt
+          namespace: team-inntekt
+          cluster: dev-fss
+        - application: arbeid-og-inntekt-q1
+          namespace: team-inntekt
+          cluster: dev-fss
+        - application: arbeid-og-inntekt-q2
+          namespace: team-inntekt
+          cluster: dev-fss
+        - application: arbeid-og-inntekt-q4
+          namespace: team-inntekt
+          cluster: dev-fss
+        - application: arbeid-og-inntekt-ascension
+          namespace: team-inntekt
+          cluster: dev-fss
         - application: pensjon-pen-q0
           namespace: pensjon-q0
           cluster: dev-fss
@@ -170,9 +196,46 @@ spec:
             roles:
               - les-oms-samordning-vedtak
               - les-bp-samordning-vedtak
+              - les-oms-vedtak
+              - les-bp-vedtak
+              - opprett-jfr-oppgave
+              - les-oms-sak
+              - les-bp-sak
         - application: tokenx-token-generator
           namespace: nais
           cluster: dev-gcp
+        - application: eessi-pensjon-journalforing-q2
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+              - les-bp-sak
+              - les-oms-vedtak
+              - les-bp-vedtak
+              - opprett-jfr-oppgave
+        - application: eessi-pensjon-prefill-q1
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: eessi-pensjon-journalforing-q1
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+              - opprett-jfr-oppgave
+        - application: eessi-pensjon-prefill-q2
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

@@ -46,13 +46,13 @@ const EndringLinje = ({ endring }: { endring: GenerellEndringshendelse }) => {
   )
 }
 
-const EndringListe = styled.ul`
+export const EndringListe = styled.ul`
   list-style: none;
   padding: 0;
   margin-top: 1rem;
 `
 
-const EndringElement = styled.li`
+export const EndringElement = styled.li`
   padding-bottom: 1rem;
   border-left: 1px solid #abaaed;
   position: relative;
@@ -65,7 +65,7 @@ const EndringElement = styled.li`
   }
 
   &:last-child {
-    border: 0px;
+    border: 0;
     padding-bottom: 0;
   }
 

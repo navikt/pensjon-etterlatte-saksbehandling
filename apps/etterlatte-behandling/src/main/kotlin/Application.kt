@@ -223,7 +223,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
     behandlingInfoRoutes(applicationContext.behandlingInfoService)
     gosysOppgaveRoute(applicationContext.gosysOppgaveService)
-    oppgaveRoutes(applicationContext.oppgaveService)
+    oppgaveRoutes(applicationContext.oppgaveService, applicationContext.oppgaveKommentarService)
     grunnlagsendringshendelseRoute(
         grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
     )

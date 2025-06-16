@@ -13,7 +13,7 @@ export const ResultatAvForbehandling = () => {
   const resultatTekst: Record<EtteroppgjoerResultatType, string> = {
     TILBAKEKREVING: 'Tilbakekreving',
     ETTERBETALING: 'Etterbetaling',
-    IKKE_ETTEROPPGJOER: 'Ingen endring',
+    INGEN_ENDRING: 'Ingen endring',
   }
 
   const beskrivelse = (() => {
@@ -25,7 +25,7 @@ export const ResultatAvForbehandling = () => {
       return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}. Beløpet blir derfor etterbetalt.`
     }
 
-    if (resultatType === EtteroppgjoerResultatType.IKKE_ETTEROPPGJOER) {
+    if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING) {
       if (differanse > 0) {
         return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
       }

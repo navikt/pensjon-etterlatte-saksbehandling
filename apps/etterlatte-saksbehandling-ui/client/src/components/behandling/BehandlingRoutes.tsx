@@ -114,14 +114,7 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     element: (behandling: IBehandlingReducer) => <Varselbrev behandling={behandling} />,
     kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
   },
-  brevBp: {
-    path: 'brev',
-    element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
-    description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
-      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.BEREGNET,
-  },
-  brevOms: {
+  brev: {
     path: 'brev',
     element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
@@ -301,7 +294,7 @@ function revurderingRoutes(
   boddEllerArbeidetUtlandet: boolean
 ): Array<BehandlingRouteType> {
   if (behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER) {
-    return [behandlingroutes.etteroppgjoeroversikt, behandlingroutes.beregning, behandlingroutes.brevOms]
+    return [behandlingroutes.etteroppgjoeroversikt, behandlingroutes.beregning, behandlingroutes.brev]
   }
 
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
@@ -340,10 +333,7 @@ const leggTilBrevHvisKrevesAvBehandling = (
   behandling: IBehandlingReducer
 ): Array<BehandlingRouteType> => {
   if (behandling.sendeBrev) {
-    return [
-      ...routes,
-      behandling.sakType == SakType.OMSTILLINGSSTOENAD ? behandlingroutes.brevOms : behandlingroutes.brevBp,
-    ]
+    return [...routes, behandlingroutes.brev]
   }
   return routes
 }

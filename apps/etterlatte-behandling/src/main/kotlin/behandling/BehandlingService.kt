@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.AnnenSakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -53,6 +54,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -289,6 +291,14 @@ interface BehandlingService {
     fun settBeregnetForRevurderingTilForbehandling(forbehandling: EtteroppgjoerForbehandling)
 }
 
+data class SakMedBehandlingerOgOppgaver(
+    val sak: SakMedUtlandstilknytning,
+    val behandlinger: List<BehandlingSammendrag>,
+    val oppgaver: List<OppgaveIntern>,
+) {
+    fun somSakMedBehandlinger(): SakMedBehandlinger = SakMedBehandlinger(sak, behandlinger)
+}
+
 internal class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
@@ -329,13 +339,14 @@ internal class BehandlingServiceImpl(
         val sakerMedBehandlinger =
             saker.map { sak ->
                 val behandlinger = hentBehandlingerForSak(sak.id)
+                val oppgaver = oppgaveService.hentOppgaverForSak(sak.id)
 
                 val utlandstilknytning = behandlinger.hentUtlandstilknytning()
                 val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
 
                 behandlinger
                     .map { it.toBehandlingSammendrag() }
-                    .let { SakMedBehandlinger(sakMedUtlandstilknytning, it) }
+                    .let { SakMedBehandlingerOgOppgaver(sakMedUtlandstilknytning, it, oppgaver) }
             }
 
         return if (sakerMedBehandlinger.size > 1) {
@@ -345,13 +356,13 @@ internal class BehandlingServiceImpl(
                         .count { behandling -> behandling.status != BehandlingStatus.AVBRUTT }
                 }!!
             // Har bruker en annen sak på en annen saktype er det relevant å få informasjon om den saken også
-            // hvis begge sakene mangler behandlinger eller begge sakene har behandlinger
+            // hvis begge sakene mangler oppgaver eller hvis den andre saken har oppgaver
             val annenSak =
                 sakerMedBehandlinger.firstOrNull {
                     it.sak.id != hovedsak.sak.id &&
-                        (it.behandlinger.isNotEmpty() || hovedsak.behandlinger.isEmpty())
+                        (it.oppgaver.isNotEmpty() || hovedsak.oppgaver.isEmpty())
                 }
-            hovedsak.copy(
+            hovedsak.somSakMedBehandlinger().copy(
                 ekstraSak =
                     annenSak?.let {
                         AnnenSakMedBehandlinger(
@@ -361,7 +372,7 @@ internal class BehandlingServiceImpl(
                     },
             )
         } else {
-            sakerMedBehandlinger.single()
+            sakerMedBehandlinger.single().somSakMedBehandlinger()
         }
     }
 

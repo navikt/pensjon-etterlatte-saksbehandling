@@ -20,7 +20,7 @@ import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
-import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/OppfoelgingsOppgaveModal'
+import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,

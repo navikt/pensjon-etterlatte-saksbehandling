@@ -89,7 +89,7 @@ export function OppfoelgingAvOppgaveModal({
               <Modal.Body>
                 <VStack gap="4">
                   {erRedigerbar && (
-                    <BodyShort>Når oppfølgingen er gjort kan oppgaven ferdigstilles med en beskrivelse.</BodyShort>
+                   <BodyShort>Når oppfølgingen er gjennomført, kan oppgaven ferdigstilles med en beskrivelse.</BodyShort>
                   )}
 
                   {isFailureHandler({

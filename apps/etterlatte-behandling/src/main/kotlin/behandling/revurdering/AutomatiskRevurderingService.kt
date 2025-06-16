@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -185,6 +186,7 @@ class AutomatiskRevurderingService(
             saksbehandlerIdent = Fagsaksystem.EY.navn,
             frist = frist,
             opphoerFraOgMed = opphoerFraMed,
+            opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
         )
     }
 }

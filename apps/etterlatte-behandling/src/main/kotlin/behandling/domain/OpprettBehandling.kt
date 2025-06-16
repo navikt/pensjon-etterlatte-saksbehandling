@@ -32,7 +32,7 @@ data class OpprettBehandling(
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth? = null,
     val tidligereFamiliepleier: TidligereFamiliepleier? = null,
-    val opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.UKJENT,
+    val opprinnelse: BehandlingOpprinnelse,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: Tidspunkt = Tidspunkt.now()

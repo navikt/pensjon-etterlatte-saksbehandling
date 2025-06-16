@@ -66,6 +66,7 @@ class AutomatiskRevurderingServiceTest {
                             begrunnelse = any(),
                             saksbehandlerIdent = any(),
                             frist = any(),
+                            opprinnelse = any(),
                         )
                     } returns
                         mockk {

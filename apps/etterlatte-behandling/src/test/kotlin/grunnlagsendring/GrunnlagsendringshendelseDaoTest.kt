@@ -16,6 +16,7 @@ import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
 import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.ikkeSamsvarMellomPdlOgGrunnlagDoed
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -337,6 +338,7 @@ internal class GrunnlagsendringshendelseDaoTest(
                 prosesstype = Prosesstype.MANUELL,
                 vedtaksloesning = Vedtaksloesning.GJENNY,
                 sendeBrev = true,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
         val behandling2 = behandling1.copy(sakId = sak2)
         assertNotEquals(behandling1.id, behandling2.id)

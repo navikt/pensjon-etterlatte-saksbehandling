@@ -31,6 +31,7 @@ import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -110,6 +111,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
 
         every { repository.finnBeregningsGrunnlag(any()) } returns null
@@ -164,6 +166,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
         coEvery {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
@@ -321,6 +324,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
 
         testApplication {
@@ -382,6 +386,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
 
         testApplication {
@@ -662,6 +667,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
 
         every { repository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs

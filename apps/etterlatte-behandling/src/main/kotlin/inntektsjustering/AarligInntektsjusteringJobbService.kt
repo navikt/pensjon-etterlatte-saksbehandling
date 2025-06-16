@@ -26,6 +26,7 @@ import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -341,6 +342,7 @@ class AarligInntektsjusteringJobbService(
                     begrunnelse = begrunnelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
+                    opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
                 ).oppdater()
                 .also {
                     revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)

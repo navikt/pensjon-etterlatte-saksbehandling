@@ -17,6 +17,7 @@ import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -157,6 +158,7 @@ class RevurderingService(
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?,
         saksbehandlerIdent: String?,
+        opprinnelse: BehandlingOpprinnelse,
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
@@ -178,6 +180,7 @@ class RevurderingService(
             sendeBrev = revurderingAarsak.skalSendeBrev,
             opphoerFraOgMed = opphoerFraOgMed ?: forrigeBehandling.opphoerFraOgMed,
             tidligereFamiliepleier = forrigeBehandling.tidligereFamiliepleier,
+            opprinnelse = opprinnelse,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 

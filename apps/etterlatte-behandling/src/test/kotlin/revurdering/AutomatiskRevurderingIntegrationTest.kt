@@ -19,6 +19,7 @@ import no.nav.etterlatte.gyldighetsresultatVurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -70,6 +71,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         request = applicationContext.behandlingFactory.hentDataForOpprettBehandling(sak.id),
+                        BehandlingOpprinnelse.UKJENT,
                     ).behandling
             Pair(sak, behandling as Foerstegangsbehandling)
         }

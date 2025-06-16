@@ -264,6 +264,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -377,6 +378,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -486,6 +488,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -503,6 +506,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 )
         }
         verify(exactly = 2) {
@@ -961,6 +965,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -1021,6 +1026,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -1146,6 +1152,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -1207,6 +1214,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    BehandlingOpprinnelse.UKJENT,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)

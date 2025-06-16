@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -851,6 +852,7 @@ internal class VedtakBehandlingServiceTest(
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
                 tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -1944,6 +1946,7 @@ internal class VedtakBehandlingServiceTest(
             opphoerFraOgMed = opphoerFom,
             relatertBehandlingId = null,
             tidligereFamiliepleier = null,
+            opprinnelse = BehandlingOpprinnelse.UKJENT,
         )
 
     private companion object {

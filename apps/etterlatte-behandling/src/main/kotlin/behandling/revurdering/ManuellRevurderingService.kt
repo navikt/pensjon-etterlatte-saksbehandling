@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -85,6 +86,14 @@ class ManuellRevurderingService(
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             saksbehandler = saksbehandler,
+            opprinnelse =
+                if (paaGrunnAvHendelseUuid != null) {
+                    BehandlingOpprinnelse.HENDELSE
+                } else if (paaGrunnAvOppgaveUuid != null) {
+                    BehandlingOpprinnelse.MELD_INN_ENDRING_SKJEMA
+                } else {
+                    BehandlingOpprinnelse.SAKSBEHANDLER
+                },
         )
     }
 
@@ -106,6 +115,7 @@ class ManuellRevurderingService(
         begrunnelse: String?,
         fritekstAarsak: String?,
         saksbehandler: Saksbehandler,
+        opprinnelse: BehandlingOpprinnelse,
     ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
@@ -125,6 +135,7 @@ class ManuellRevurderingService(
                     saksbehandlerIdent = saksbehandler.ident,
                     frist = triggendeOppgave?.frist,
                     paaGrunnAvOppgave = paaGrunnAvOppgave,
+                    opprinnelse = opprinnelse,
                 ).oppdater()
                 .also { revurdering ->
                     if (!fritekstAarsak.isNullOrEmpty() && revurdering.revurderingsaarsak!!.kanLagreFritekstFeltForManuellRevurdering()) {

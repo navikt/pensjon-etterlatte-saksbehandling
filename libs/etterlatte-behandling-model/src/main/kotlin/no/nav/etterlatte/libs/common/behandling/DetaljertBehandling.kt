@@ -25,22 +25,24 @@ data class DetaljertBehandling(
     val opphoerFraOgMed: YearMonth?,
     val relatertBehandlingId: String?,
     val tidligereFamiliepleier: TidligereFamiliepleier?,
+    val opprinnelse: BehandlingOpprinnelse,
     val erSluttbehandling: Boolean = false,
     val mottattDato: LocalDateTime? = null,
-    val opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.UKJENT,
 ) {
     fun erBrukermeldtEtteroppgjoer(): Boolean =
         revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER && opprinnelse != BehandlingOpprinnelse.AUTOMATISK_JOBB
 }
 
 enum class BehandlingOpprinnelse {
-    @Deprecated("Pls ikke bruk ukjent :(")
+    @Deprecated("Ukjent skal kun brukes i tester eller som en verdi hentet ut for gamle behandlinger")
     UKJENT,
+    SAKSBEHANDLER,
     MELD_INN_ENDRING_SKJEMA,
     BARNEPENSJON_SOEKNAD,
     OMSTILLINGSSTOENAD_SOEKNAD,
     JOURNALFOERING,
     AUTOMATISK_JOBB,
+    HENDELSE,
 }
 
 fun DetaljertBehandling.virkningstidspunkt() =

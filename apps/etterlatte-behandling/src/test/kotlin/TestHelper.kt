@@ -243,6 +243,7 @@ fun opprettBehandling(
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
     relatertBehandlingId = relatertBehandlingId,
+    opprinnelse = BehandlingOpprinnelse.UKJENT,
 )
 
 fun foerstegangsbehandling(

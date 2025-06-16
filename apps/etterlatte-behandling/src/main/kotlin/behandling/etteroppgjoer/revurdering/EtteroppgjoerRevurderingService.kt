@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -104,6 +105,8 @@ class EtteroppgjoerRevurderingService(
                             mottattDato = null,
                             frist = null,
                             paaGrunnAvOppgave = null,
+                            // TODO: sett opprinnelse riktig avhengig av hvorfor vi lager revurderingen
+                            opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
                         ).oppdater()
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(

@@ -15,7 +15,6 @@ import no.nav.etterlatte.hentFnrBody
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
-import no.nav.etterlatte.logger
 
 fun Route.barnepensjonVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -26,30 +25,6 @@ fun Route.barnepensjonVedtakRoute(
             accessPolicyRolesEllerAdGrupper =
                 setOf("les-bp-vedtak", "les-bp-samordning-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
-        }
-
-        get {
-            val paaDato = call.dato("paaDato") ?: throw ManglerFomDatoException()
-            val fnr = call.fnr
-            logger.info("GETTILPOST: sjekker om løpende barnepensjon på gammel løsning")
-
-            val harLoependeBarnepensjonYtelsePaaDato =
-                try {
-                    samordningVedtakService.harLoependeYtelsePaaDato(
-                        dato = paaDato,
-                        fnr = haandterUgyldigIdent(fnr),
-                        sakType = SakType.BARNEPENSJON,
-                        context = PensjonContext,
-                    )
-                } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
-                }
-
-            call.respond(
-                mapOf(
-                    "barnepensjon" to harLoependeBarnepensjonYtelsePaaDato,
-                ),
-            )
         }
 
         post {

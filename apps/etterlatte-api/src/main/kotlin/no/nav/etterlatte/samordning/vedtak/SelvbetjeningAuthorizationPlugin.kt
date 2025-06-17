@@ -31,7 +31,13 @@ fun selvbetjeningAuthorizationPlugin(appname: String) =
                     // TODO: kan fjernes når etterlatte-samordning-vedtak er borte
                     val fnr =
                         when (appname.lowercase()) {
-                            "etterlatte-samordning-vedtak" -> call.fnr
+                            "etterlatte-samordning-vedtak" -> {
+                                try {
+                                    call.receive<FoedselsnummerDTO>().foedselsnummer
+                                } catch (_: Exception) {
+                                    throw ManglerFoedselsnummerException()
+                                }
+                            }
                             "etterlatte-api" -> {
                                 try {
                                     call.receive<FoedselsnummerDTO>().foedselsnummer

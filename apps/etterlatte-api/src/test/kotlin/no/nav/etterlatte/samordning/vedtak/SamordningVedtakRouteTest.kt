@@ -193,49 +193,6 @@ class SamordningVedtakRouteTest {
             }
         }
 
-        @Test
-        fun `skal gi 200 med gyldig token inkl scope - hent vedtaksliste med virkfom og fnr`() {
-            val virkFom = LocalDate.now()
-            val fnr = "01448203510"
-
-            coEvery {
-                samordningVedtakService.hentVedtaksliste(
-                    fomDato = virkFom,
-                    fnr = Folkeregisteridentifikator.of(fnr),
-                    context =
-                        MaskinportenTpContext(
-                            tpnr = Tjenestepensjonnummer("3010"),
-                            organisasjonsnr = "0123456789",
-                        ),
-                )
-            } returns
-                listOf(opprettSamordningVedtakDto())
-
-            testApplication {
-                val client = samordningVedtakApi()
-                val response =
-                    client.get("/api/vedtak") {
-                        parameter("fomDato", virkFom)
-                        header("fnr", fnr)
-                        header("tpnr", "3010")
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(
-                            HttpHeaders.Authorization,
-                            "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
-                        )
-                    }
-
-                response.status shouldBe HttpStatusCode.OK
-                coVerify {
-                    samordningVedtakService.hentVedtaksliste(
-                        fomDato = virkFom,
-                        fnr = Folkeregisteridentifikator.of(fnr),
-                        context = any<MaskinportenTpContext>(),
-                    )
-                }
-            }
-        }
-
         private fun token(maskinportenScope: String? = null): String {
             val claims = mutableMapOf<String, Any>()
             claims["consumer"] = mapOf("ID" to "0192:0123456789")
@@ -257,69 +214,6 @@ class SamordningVedtakRouteTest {
         @BeforeEach
         fun before() {
             config = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
-        }
-
-        @Test
-        fun `skal gi 401 når token mangler`() {
-            testApplication {
-                val client = samordningVedtakApi()
-                val response =
-                    client.get("/api/pensjon/vedtak") {
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        parameter("fomDato", virkFom)
-                        header("fnr", fnr)
-                    }
-
-                response.status shouldBe HttpStatusCode.Unauthorized
-            }
-        }
-
-        @Test
-        fun `skal gi 401 med token hvor rolle mangler`() {
-            testApplication {
-                val client = samordningVedtakApi()
-                val response =
-                    client.get("/api/pensjon/vedtak") {
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken()}")
-                        parameter("fomDato", virkFom)
-                        header("fnr", fnr)
-                    }
-
-                response.status shouldBe HttpStatusCode.Unauthorized
-            }
-        }
-
-        @Test
-        fun `skal gi 200 med gyldig token inkl rolle`() {
-            coEvery {
-                samordningVedtakService.hentVedtaksliste(
-                    fomDato = virkFom,
-                    fnr = Folkeregisteridentifikator.of(fnr),
-                    context = PensjonContext,
-                )
-            } returns
-                listOf(opprettSamordningVedtakDto())
-
-            testApplication {
-                val client = samordningVedtakApi()
-                val response =
-                    client.get("/api/pensjon/vedtak") {
-                        parameter("fomDato", virkFom)
-                        header("fnr", fnr)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken("les-oms-samordning-vedtak")}")
-                    }
-
-                response.status shouldBe HttpStatusCode.OK
-                coVerify {
-                    samordningVedtakService.hentVedtaksliste(
-                        fomDato = virkFom,
-                        fnr = Folkeregisteridentifikator.of(fnr),
-                        context = PensjonContext,
-                    )
-                }
-            }
         }
 
         private fun systembrukerToken(role: String? = null): String {
@@ -348,38 +242,6 @@ class SamordningVedtakRouteTest {
         @BeforeEach
         fun before() {
             config = config(mockOAuth2Server.config.httpServer.port(), Issuer.TOKENX.issuerName)
-        }
-
-        @Test
-        fun `Skal gi bad request hvis appnavn er etterlatte-samordning-vedtak`() {
-            coEvery {
-                samordningVedtakService.hentVedtaksliste(
-                    fomDato = virkFom,
-                    fnr = Folkeregisteridentifikator.of(fnr),
-                    context = PensjonContext,
-                )
-            } returns
-                listOf(opprettSamordningVedtakDto())
-
-            testApplication {
-                val client = samordningVedtakApi("etterlatte-samordning-vedtak")
-                val response =
-                    client.post("/api/pensjon/vedtak") {
-                        parameter("fomDato", virkFom)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer ${tokenxtoken(fnr)}")
-                        setBody(FoedselsnummerDTO(fnr))
-                    }
-
-                response.status shouldBe HttpStatusCode.BadRequest
-                coVerify(exactly = 0) {
-                    samordningVedtakService.hentVedtaksliste(
-                        fomDato = virkFom,
-                        fnr = Folkeregisteridentifikator.of(fnr),
-                        context = PensjonContext,
-                    )
-                }
-            }
         }
 
         @Test

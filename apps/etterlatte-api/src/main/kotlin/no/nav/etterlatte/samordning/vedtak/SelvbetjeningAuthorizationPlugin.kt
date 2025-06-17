@@ -28,18 +28,12 @@ fun selvbetjeningAuthorizationPlugin(appname: String) =
 
                 if (principal.context.issuers.contains(issuer)) {
                     val subject = principal.context.getClaims(pluginConfig.issuer).subject
-                    // TODO: kan fjernes når etterlatte-samordning-vedtak er borte
+
                     val fnr =
-                        when (appname.lowercase()) {
-                            "etterlatte-samordning-vedtak" -> call.fnr
-                            "etterlatte-api" -> {
-                                try {
-                                    call.receive<FoedselsnummerDTO>().foedselsnummer
-                                } catch (_: Exception) {
-                                    throw ManglerFoedselsnummerException()
-                                }
-                            }
-                            else -> throw ManglerFoedselsnummerException()
+                        try {
+                            call.receive<FoedselsnummerDTO>().foedselsnummer
+                        } catch (_: Exception) {
+                            throw ManglerFoedselsnummerException()
                         }
 
                     if (!validator.invoke(Folkeregisteridentifikator.of(fnr), Folkeregisteridentifikator.of(subject))) {

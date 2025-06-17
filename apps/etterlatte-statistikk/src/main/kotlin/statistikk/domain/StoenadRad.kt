@@ -36,7 +36,7 @@ data class StoenadRad(
     val sakUtland: SakUtland?,
     val virkningstidspunkt: YearMonth?,
     val utbetalingsdato: LocalDate?,
-    val kilde: Vedtaksloesning,
+    val vedtaksloesning: Vedtaksloesning,
     val pesysId: Long?,
     val sakYtelsesgruppe: SakYtelsesgruppe?,
     val opphoerFom: YearMonth?,

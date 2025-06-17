@@ -31,6 +31,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
@@ -760,6 +761,7 @@ class AktivitetspliktServiceTest {
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
                     mottattDato = null,
+                    opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
                 )
             } returns
                 mockk { every { oppdater() } returns revurdering }
@@ -813,6 +815,7 @@ class AktivitetspliktServiceTest {
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
                     mottattDato = null,
+                    opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
                 )
             } returns
                 mockk { every { oppdater() } returns revurdering }
@@ -869,6 +872,7 @@ class AktivitetspliktServiceTest {
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
                     mottattDato = null,
+                    opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
                 )
             } returns
                 mockk { every { oppdater() } returns revurdering }
@@ -941,6 +945,7 @@ class AktivitetspliktServiceTest {
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
                     mottattDato = null,
+                    opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
                 )
             } returns
                 mockk { every { oppdater() } returns revurdering }
@@ -1013,6 +1018,7 @@ class AktivitetspliktServiceTest {
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
                     mottattDato = null,
+                    opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
                 )
             } returns
                 mockk { every { oppdater() } returns revurdering }

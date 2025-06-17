@@ -94,7 +94,9 @@ class SakRepository(
             avdoedeForeldre = getString("avdoede_foreldre")?.let { objectMapper.readValue(it) },
             revurderingAarsak = getString("revurdering_aarsak"),
             avkorting = getString("avkorting")?.let { objectMapper.readValue(it) },
-            kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
+            // Feltet er renamet i intern modell, men databasen beholder kilde-navnet for å bevare eksternt
+            // grensesnitt til dataprodukt
+            vedtaksloesning = getString("kilde").let { Vedtaksloesning.valueOf(it) },
             pesysId = getLong("pesysid"),
             relatertTil = getString("relatert_til"),
             paaVentAarsak = getString("paa_vent_aarsak")?.let { enumValueOf<PaaVentAarsak>(it) },
@@ -184,7 +186,7 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
         setJsonb(26, sakRad.avdoedeForeldre)
         setString(27, sakRad.revurderingAarsak)
         setJsonb(28, sakRad.avkorting)
-        setString(29, sakRad.kilde.name)
+        setString(29, sakRad.vedtaksloesning.name)
         sakRad.pesysId?.let { setLong(30, it) } ?: setNull(30, Types.BIGINT)
         sakRad.relatertTil?.let { setString(31, it) } ?: setNull(31, Types.CHAR)
         sakRad.paaVentAarsak?.let { setString(32, it.name) } ?: setString(32, null)

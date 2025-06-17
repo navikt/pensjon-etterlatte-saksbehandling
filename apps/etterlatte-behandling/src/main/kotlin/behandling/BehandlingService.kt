@@ -532,7 +532,7 @@ internal class BehandlingServiceImpl(
         if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
             throw VirkningstidspunktKanIkkeVaereEtterOpphoer(virkningstidspunkt, behandling.opphoerFraOgMed)
         }
-        if (behandling.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
+        if (behandling.vedtaksloesning in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             return true
         }
 
@@ -601,7 +601,7 @@ internal class BehandlingServiceImpl(
                 ?: throw KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling()
 
         return if (virkningstidspunkt.isBefore(foersteVirkDato)) {
-            if (foerstegangsbehandling.kilde == Vedtaksloesning.PESYS) {
+            if (foerstegangsbehandling.vedtaksloesning == Vedtaksloesning.PESYS) {
                 throw VirkFoerOmsKildePesys()
             }
             // Vi tillater virkningstidspunkt før første virk dersom saksbehandler vil overstyre
@@ -748,7 +748,7 @@ internal class BehandlingServiceImpl(
             revurderingsaarsak = behandling.revurderingsaarsak(),
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
-            kilde = behandling.kilde,
+            kilde = behandling.vedtaksloesning,
             sendeBrev = behandling.sendeBrev,
             viderefoertOpphoer = viderefoertOpphoer,
             tidligereFamiliepleier = behandling.tidligereFamiliepleier,

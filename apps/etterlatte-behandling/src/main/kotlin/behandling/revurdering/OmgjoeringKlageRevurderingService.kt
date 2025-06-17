@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -82,6 +83,7 @@ class OmgjoeringKlageRevurderingService(
                 begrunnelse = "Omgjøring på grunn av klage",
                 saksbehandlerIdent = saksbehandler.ident,
                 relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id.toString(),
+                opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
             ).oppdater()
             .also {
                 oppgaveService.ferdigStillOppgaveUnderBehandling(

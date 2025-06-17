@@ -214,6 +214,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 relatertBehandlingId = any(),
                 frist = any(),
                 paaGrunnAvOppgave = any(),
+                opprinnelse = any(),
             )
 
             oppgaveService.ferdigstillOppgave(oppgaveId, any())

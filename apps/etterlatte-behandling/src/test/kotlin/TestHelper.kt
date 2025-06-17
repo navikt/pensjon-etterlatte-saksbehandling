@@ -23,6 +23,7 @@ import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -238,10 +239,11 @@ fun opprettBehandling(
     virkningstidspunkt = virkningstidspunkt,
     revurderingsAarsak = revurderingAarsak,
     prosesstype = prosesstype,
-    kilde = kilde,
+    vedtaksloesning = kilde,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
     relatertBehandlingId = relatertBehandlingId,
+    opprinnelse = BehandlingOpprinnelse.UKJENT,
 )
 
 fun foerstegangsbehandling(
@@ -280,10 +282,11 @@ fun foerstegangsbehandling(
     utlandstilknytning = utlandstilknytning,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    kilde = kilde,
+    vedtaksloesning = kilde,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
     relatertBehandlingId = relatertBehandlingId,
+    opprinnelse = BehandlingOpprinnelse.UKJENT,
 )
 
 fun revurdering(
@@ -325,13 +328,14 @@ fun revurdering(
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     revurderingsaarsak = revurderingAarsak,
     prosesstype = prosesstype,
-    kilde = kilde,
+    vedtaksloesning = kilde,
     revurderingInfo = revurderingInfo,
     begrunnelse = begrunnelse,
     relatertBehandlingId = relatertBehandlingId,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
     tidligereFamiliepleier = tidligereFamiliepleier,
+    opprinnelse = BehandlingOpprinnelse.UKJENT,
 )
 
 val soeker = "11057523044"

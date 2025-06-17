@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -218,11 +219,12 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 boddEllerArbeidetUtlandet = null,
                 revurderingsAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
-                kilde = Vedtaksloesning.GJENNY,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
                 begrunnelse = null,
                 relatertBehandlingId = null,
                 sendeBrev = true,
                 opphoerFraOgMed = null,
+                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
             )
         behandlingDao.opprettBehandling(behandling)
         val oppgave =

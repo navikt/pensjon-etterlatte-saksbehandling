@@ -15,6 +15,7 @@ import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
@@ -103,6 +104,7 @@ class BehandlingFactory(
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
                     request = hentDataForOpprettBehandling(sak.id),
+                    opprinnelse = BehandlingOpprinnelse.JOURNALFOERING,
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService
@@ -153,6 +155,7 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         request: DataHentetForOpprettBehandling,
+        opprinnelse: BehandlingOpprinnelse,
     ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
         val prosessType = Prosesstype.MANUELL
@@ -185,6 +188,7 @@ class BehandlingFactory(
                     begrunnelse = null,
                     saksbehandlerIdent = null,
                     frist = null,
+                    opprinnelse = opprinnelse,
                 ).oppdater()
                 .let { BehandlingOgOppgave(it, null) }
         } else {
@@ -195,6 +199,7 @@ class BehandlingFactory(
                     mottattDato,
                     kilde,
                     prosessType,
+                    opprinnelse = opprinnelse,
                 )
             runBlocking {
                 grunnlagService.opprettGrunnlag(
@@ -303,6 +308,7 @@ class BehandlingFactory(
                         kilde = Vedtaksloesning.GJENNY,
                         prosessType = Prosesstype.MANUELL,
                         relatertBehandlingsId = klageId,
+                        opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
                     )
 
                 if (omgjoeringRequest.erSluttbehandlingUtland) {
@@ -481,6 +487,7 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
+        opprinnelse: BehandlingOpprinnelse,
         relatertBehandlingsId: String? = null,
     ): Behandling {
         if (behandlingerUnderBehandling.isNotEmpty()) {
@@ -495,10 +502,11 @@ class BehandlingFactory(
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-            kilde = kilde,
+            vedtaksloesning = kilde,
             prosesstype = prosessType,
             sendeBrev = true,
             relatertBehandlingId = relatertBehandlingsId,
+            opprinnelse = opprinnelse,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())

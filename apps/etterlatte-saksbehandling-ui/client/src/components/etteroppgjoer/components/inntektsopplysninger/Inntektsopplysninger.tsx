@@ -1,5 +1,5 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { BodyShort, Box, Heading, Label, VStack } from '@navikt/ds-react'
+import { Box, Heading, VStack } from '@navikt/ds-react'
 import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraSkatteetaten'
 import { OpplysningerFraAInntekt } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraAInntekt'
 import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/components/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
@@ -16,16 +16,9 @@ export const Inntektsopplysninger = () => {
       borderWidth="0 0 0 4"
     >
       <VStack gap="8">
-        <VStack gap="4">
-          <Heading size="large" level="2">
-            Inntektsopplysninger
-          </Heading>
-          <VStack gap="1">
-            <Heading size="small">Pensjonsgivende inntekt (PGI) for 2024</Heading>
-            <BodyShort>Inntekten er ekskludert omstillingsstønaden</BodyShort>
-            <Label>2000 kr</Label>
-          </VStack>
-        </VStack>
+        <Heading size="large" level="2">
+          Inntektsopplysninger
+        </Heading>
         <OpplysningerFraSkatteetaten pensjonsgivendeInntektFraSkatteetaten={etteroppgjoer.opplysninger.skatt} />
         <OpplysningerFraAInntekt ainntekt={etteroppgjoer.opplysninger.ainntekt} />
         <BrukeroppgittInntektForInnvilgedePerioder

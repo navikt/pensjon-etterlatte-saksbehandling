@@ -421,6 +421,11 @@ class GrunnlagsendringshendelseService(
             hendelse.copy(
                 samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
                 status = GrunnlagsendringStatus.FORKASTET,
+                kommentar =
+                    when (samsvarMellomKildeOgGrunnlag) {
+                        is SamsvarMellomKildeOgGrunnlag.Adresse -> samsvarMellomKildeOgGrunnlag.aarsakIgnorert
+                        else -> null
+                    },
             ),
         )
     }

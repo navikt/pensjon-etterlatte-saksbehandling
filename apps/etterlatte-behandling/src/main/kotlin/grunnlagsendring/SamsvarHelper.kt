@@ -92,14 +92,23 @@ internal fun finnSamsvarForHendelse(
         GrunnlagsendringsType.BOSTED -> {
             // Ikke interessant med hendelser på søsken
             if (personRolle == PersonRolle.TILKNYTTET_BARN && sakType == SakType.BARNEPENSJON) {
-                return SamsvarMellomKildeOgGrunnlag.Adresse(samsvar = true, fraPdl = null, fraGrunnlag = null)
+                return SamsvarMellomKildeOgGrunnlag.Adresse(
+                    samsvar = true,
+                    fraPdl = null,
+                    aarsakIgnorert = "HENDELSE_SOESKEN",
+                    fraGrunnlag = null,
+                )
             }
-
-            if (personRolle == PersonRolle.BARN && sakType == SakType.BARNEPENSJON) {
+            if (personRolle == PersonRolle.TILKNYTTET_BARN && sakType == SakType.OMSTILLINGSSTOENAD) {
                 val foedselsdato = pdlData.foedselsdato?.verdi
                 val erOver18Aar = foedselsdato?.plusYears(18)?.plusDays(1)?.isAfter(LocalDate.now())
                 if (erOver18Aar == true) {
-                    return SamsvarMellomKildeOgGrunnlag.Adresse(samsvar = true, fraPdl = null, fraGrunnlag = null)
+                    return SamsvarMellomKildeOgGrunnlag.Adresse(
+                        samsvar = true,
+                        fraPdl = null,
+                        aarsakIgnorert = "BARN_OVER_18AAR",
+                        fraGrunnlag = null,
+                    )
                 }
             }
 
@@ -181,11 +190,17 @@ fun samsvarSivilstandBP() =
 fun samsvarBostedsadresse(
     adressePdl: List<Adresse>?,
     adresseGrunnlag: List<Adresse>?,
-) = SamsvarMellomKildeOgGrunnlag.Adresse(
-    fraPdl = adressePdl,
-    fraGrunnlag = adresseGrunnlag,
-    samsvar = erNaavaerendeAdresseLik(adressePdl ?: emptyList(), adresseGrunnlag ?: emptyList()),
-)
+): SamsvarMellomKildeOgGrunnlag.Adresse {
+    val naavaerendeAdresseLik = erNaavaerendeAdresseLik(adressePdl ?: emptyList(), adresseGrunnlag ?: emptyList())
+    val alleAdresserLike = adressePdl erLikRekkefoelgeIgnorert adresseGrunnlag
+
+    return SamsvarMellomKildeOgGrunnlag.Adresse(
+        fraPdl = adressePdl,
+        fraGrunnlag = adresseGrunnlag,
+        samsvar = naavaerendeAdresseLik,
+        aarsakIgnorert = "FORSKJELL_KUN_HISTORISK".takeIf { !alleAdresserLike },
+    )
+}
 
 fun erNaavaerendeAdresseLik(
     adressePdl: List<Adresse>,

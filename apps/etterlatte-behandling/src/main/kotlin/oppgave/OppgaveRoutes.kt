@@ -102,12 +102,12 @@ internal fun Route.oppgaveRoutes(
         }
 
         get("/gruppe/{gruppeId}") {
-            kunSaksbehandler {
+            kunSaksbehandler { saksbehandler ->
                 val type = OppgaveType.valueOf(call.request.queryParameters["type"]!!)
 
                 val oppgaver =
                     inTransaction {
-                        service.hentOppgaverForGruppeId(gruppeId, type)
+                        service.hentOppgaverForGruppeId(gruppeId, type, saksbehandler)
                     }
 
                 call.respond(oppgaver)
@@ -139,7 +139,7 @@ internal fun Route.oppgaveRoutes(
 
         route("/bulk") {
             post("/opprett") {
-                kunSaksbehandler {
+                kunSaksbehandler { saksbehandler ->
                     val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
                     inTransaction {
                         service.opprettOppgaveBulk(
@@ -148,6 +148,7 @@ internal fun Route.oppgaveRoutes(
                             oppgaveBulkDto.kilde,
                             oppgaveBulkDto.type,
                             oppgaveBulkDto.merknad,
+                            saksbehandler = saksbehandler,
                         )
                     }
                     call.respond(HttpStatusCode.OK)
@@ -155,14 +156,15 @@ internal fun Route.oppgaveRoutes(
             }
 
             post("/tildel") {
-                kunSaksbehandler {
+                kunSaksbehandler { saksbehandler ->
                     val request = call.receive<TildelingBulkRequest>()
 
                     inTransaction {
-                        request.oppgaver
-                            .forEach { oppgaveId ->
-                                service.tildelSaksbehandler(oppgaveId, request.saksbehandler)
-                            }
+                        service.tildelSaksbehandlerBulk(
+                            oppgaveIds = request.oppgaver,
+                            nyTildeling = request.saksbehandler,
+                            saksbehandler = saksbehandler,
+                        )
                     }
 
                     call.respond(HttpStatusCode.OK)

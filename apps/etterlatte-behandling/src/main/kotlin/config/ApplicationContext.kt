@@ -394,7 +394,9 @@ internal class ApplicationContext(
     // Service
     private val klageHendelser = KlageHendelserServiceImpl(rapid)
     private val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
+    val saksbehandlerService: SaksbehandlerService =
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
     val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
     private val aldersovergangDao = AldersovergangDao(dataSource)
@@ -633,9 +635,6 @@ internal class ApplicationContext(
             pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
-
-    val saksbehandlerService: SaksbehandlerService =
-        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
 
     private val inntektskomponentService =
         InntektskomponentService(

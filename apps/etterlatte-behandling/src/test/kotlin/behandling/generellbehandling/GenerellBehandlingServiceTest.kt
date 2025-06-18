@@ -51,6 +51,7 @@ import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -84,6 +85,7 @@ internal class GenerellBehandlingServiceTest(
     private val grunnlagKlient = mockk<GrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
     private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
+    private val saksbehandlerService = mockk<SaksbehandlerService>()
     private val saksbehandlerNavn = "Ola Nordmann"
     private lateinit var saksbehandler: SaksbehandlerMedEnheterOgRoller
 
@@ -107,6 +109,7 @@ internal class GenerellBehandlingServiceTest(
                     sakLesDao,
                     hendelseDao,
                     hendelser,
+                    saksbehandlerService,
                 ),
             )
 

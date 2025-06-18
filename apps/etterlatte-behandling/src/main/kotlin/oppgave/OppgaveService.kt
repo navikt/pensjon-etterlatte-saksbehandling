@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -28,7 +29,9 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.SakLesDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
@@ -39,6 +42,7 @@ class OppgaveService(
     private val sakDao: SakLesDao,
     private val hendelseDao: HendelseDao,
     private val hendelser: BehandlingHendelserKafkaProducer,
+    private val saksbehandlerService: SaksbehandlerService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -98,6 +102,24 @@ class OppgaveService(
         // Må ha denne for å ikke overskride attesteringstatus på oppgaver
         if (hentetOppgave.status == Status.NY) {
             oppgaveDao.endreStatusPaaOppgave(oppgaveId, Status.UNDER_BEHANDLING)
+        }
+    }
+
+    fun tildelSaksbehandlerBulk(
+        oppgaveIds: List<UUID>,
+        nyTildeling: String,
+        saksbehandler: Saksbehandler,
+    ) {
+        val enheterForSaksbehandler =
+            saksbehandlerService
+                .hentEnheterForSaksbehandlerIdentWrapper(saksbehandler.ident)
+                .map { it.enhetsNummer }
+        oppgaveIds.forEach {
+            val oppgave = oppgaveDao.hentOppgave(it) ?: throw OppgaveIkkeFunnet(it)
+            if (oppgave.enhet !in enheterForSaksbehandler) {
+                throw IkkeTillattException("HAR_IKKE_TILGANG_TIL_SAK", "Kan ikke tildele saksbehandler i en sak man ikke har tilgang i.")
+            }
+            tildelSaksbehandler(it, nyTildeling)
         }
     }
 
@@ -517,7 +539,15 @@ class OppgaveService(
     fun hentOppgaverForGruppeId(
         gruppeId: String,
         type: OppgaveType,
-    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForGruppeId(gruppeId, type)
+        saksbehandler: Saksbehandler,
+    ): List<OppgaveIntern> {
+        val oppgaver = oppgaveDao.hentOppgaverForGruppeId(gruppeId, type)
+        val enheterForSaksbehandler =
+            saksbehandlerService
+                .hentEnheterForSaksbehandlerIdentWrapper(saksbehandler.ident)
+                .map { it.enhetsNummer }
+        return oppgaver.filter { enheterForSaksbehandler.contains(it.enhet) }
+    }
 
     fun hentForrigeStatus(oppgaveId: UUID): Status {
         val oppgave = hentOppgave(oppgaveId)
@@ -611,9 +641,21 @@ class OppgaveService(
         type: OppgaveType,
         merknad: String?,
         frist: Tidspunkt? = null,
-        saksbehandler: String? = null,
+        saksbehandler: Saksbehandler,
     ) {
         val saker: List<Sak> = sakDao.hentSaker("", 1000, sakIds, emptyList())
+        val enheterForSaksbehandler =
+            saksbehandlerService
+                .hentEnheterForSaksbehandlerIdentWrapper(saksbehandler.ident)
+                .map { it.enhetsNummer }
+        if (saker.any { it.enhet !in enheterForSaksbehandler }) {
+            throw IkkeTillattException(
+                code = "HAR_IKKE_SKRIVETILGANG_TIL_SAK",
+                detail =
+                    "Har ikke skrivetilgang til en eller flere saker, kan ikke opprette oppgaver " +
+                        "på saker man ikke har skrivetilgang til.",
+            )
+        }
 
         if (!saker.map { it.id }.containsAll(sakIds)) {
             val finnesIkke = sakIds.filterNot { it in saker.map { sak -> sak.id } }
@@ -629,7 +671,7 @@ class OppgaveService(
                     type = type,
                     merknad = merknad,
                     frist = frist,
-                    saksbehandler = saksbehandler,
+                    saksbehandler = null,
                 )
             }
 

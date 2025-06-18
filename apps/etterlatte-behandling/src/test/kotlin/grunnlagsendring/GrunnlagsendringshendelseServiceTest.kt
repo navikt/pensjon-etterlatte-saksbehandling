@@ -150,6 +150,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvar = false,
                 fraPdl = listOf(adresse),
                 fraGrunnlag = null,
+                aarsakIgnorert = null,
             )
 
         every {
@@ -211,6 +212,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvar = false,
                 fraPdl = listOf(adresse),
                 fraGrunnlag = null,
+                aarsakIgnorert = null,
             )
         val grlhendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -272,6 +274,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvar = false,
                 fraPdl = listOf(adresse),
                 fraGrunnlag = null,
+                aarsakIgnorert = null,
             )
         val grlhendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -577,6 +580,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvar = false,
                 fraPdl = listOf(bostedAdresse),
                 fraGrunnlag = null,
+                aarsakIgnorert = null,
             )
 
         val grlhendelse =

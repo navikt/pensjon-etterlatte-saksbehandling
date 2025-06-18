@@ -198,7 +198,7 @@ fun samsvarBostedsadresse(
         fraPdl = adressePdl,
         fraGrunnlag = adresseGrunnlag,
         samsvar = naavaerendeAdresseLik,
-        aarsakIgnorert = "FORSKJELL_KUN_HISTORISK".takeIf { !alleAdresserLike },
+        aarsakIgnorert = "FORSKJELL_KUN_HISTORISK".takeIf { naavaerendeAdresseLik && !alleAdresserLike },
     )
 }
 

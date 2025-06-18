@@ -47,7 +47,8 @@ class ManuellRevurderingService(
             try {
                 paaGrunnAvHendelseId?.let { UUID.fromString(it) }
             } catch (_: Exception) {
-                throw BadRequestException(
+                throw UgyldigForespoerselException(
+                    "UGYLDIG_HENDELSE_ID",
                     "$aarsak har en ugyldig hendelse id for sakid" +
                         " $sakId. " +
                         "Hendelsesid: $paaGrunnAvHendelseId",
@@ -67,8 +68,11 @@ class ManuellRevurderingService(
                 ?: throw RevurderingManglerIverksattBehandling(sakId)
 
         if (forrigeIverksatteBehandling.status != BehandlingStatus.IVERKSATT) {
-            throw BadRequestException(
-                "Kan ikke opprette ny revurdering når forrige behandling har status ${forrigeIverksatteBehandling.status}, id=${forrigeIverksatteBehandling.id}",
+            throw UgyldigForespoerselException(
+                code = "BEHANDLING_BLOKKERER_REVURDERING",
+                detail =
+                    "Kan ikke opprette ny revurdering når forrige behandling har status " +
+                        "${forrigeIverksatteBehandling.status}, id=${forrigeIverksatteBehandling.id}",
             )
         }
 

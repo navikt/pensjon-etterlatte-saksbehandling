@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import io.kotest.matchers.shouldBe
-import io.ktor.server.plugins.BadRequestException
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -38,6 +37,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -487,7 +487,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err =
-            assertThrows<BadRequestException> {
+            assertThrows<UgyldigForespoerselException> {
                 manuellRevurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
                     aarsak = Revurderingaarsak.REGULERING,

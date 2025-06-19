@@ -18,6 +18,7 @@ import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
 import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
+import no.nav.etterlatte.tidshendelser.oppgave.OppfoelgingBpFylt18Service
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,6 +42,7 @@ class JobbPollerIntegrationTest(
     private val omstillingsstoenadService = mockk<OmstillingsstoenadService>()
     private val reguleringService = mockk<ReguleringService>()
     private val inntektsjusteringService = mockk<AarligInntektsjusteringService>()
+    private val oppfoelgingBpFylt18Service = mockk<OppfoelgingBpFylt18Service>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val jobbPoller =
@@ -50,6 +52,7 @@ class JobbPollerIntegrationTest(
             omstillingsstoenadService,
             reguleringService,
             inntektsjusteringService,
+            oppfoelgingBpFylt18Service,
         )
 
     @BeforeEach

@@ -125,6 +125,8 @@ internal class EgenAnsattServiceTest(
                     featureToggleService,
                     oppdaterTilgangService,
                     sakTilgang,
+                    mockk(),
+                    mockk(),
                 ),
             )
         oppgaveService =

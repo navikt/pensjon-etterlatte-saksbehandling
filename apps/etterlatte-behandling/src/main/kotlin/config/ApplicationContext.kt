@@ -835,13 +835,6 @@ internal class ApplicationContext(
         )
     }
 
-    private val uttrekkFylt18JobService =
-        UttrekkFylt18JobService(
-            vedtakKlient,
-            sakService,
-            nyAldersovergangService,
-        )
-
     val doedsmeldingerJob: DoedsmeldingJob by lazy {
         DoedsmeldingJob(
             doedshendelseJobService,

@@ -100,6 +100,8 @@ internal class SakServiceTest {
             featureToggleService,
             oppdaterTilgangService,
             saktilgang,
+            mockk(),
+            mockk(),
         )
 
     @BeforeEach

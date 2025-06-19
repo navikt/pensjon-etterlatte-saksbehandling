@@ -122,13 +122,15 @@ export function BrevMottakerPanel({
 
       <HStack gap="2" justify="space-between">
         <Heading spacing level="2" size="medium">
-          {flereMottakere ? formaterMottakerType(mottaker.type) : 'Mottaker'}
+          <HStack gap="2">
+            {flereMottakere ? formaterMottakerType(mottaker.type) : 'Mottaker'}
 
-          {mottaker.adresse.adresseType === AdresseType.UTENLANDSKPOSTADRESSE && (
-            <Tag variant="alt1" size="small">
-              Utenlandsk adresse
-            </Tag>
-          )}
+            {mottaker.adresse.adresseType === AdresseType.UTENLANDSKPOSTADRESSE && (
+              <Tag variant="alt1" size="small">
+                Utenlandsk adresse
+              </Tag>
+            )}
+          </HStack>
         </Heading>
 
         {kanRedigeres && (

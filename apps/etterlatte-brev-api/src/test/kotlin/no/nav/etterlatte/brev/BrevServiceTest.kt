@@ -335,8 +335,8 @@ internal class BrevServiceTest {
                         Adresse(
                             adresseType = "UTENLANDSKPOSTADRESSE",
                             adresselinje1 = "NY ADRESSELINJE",
-                            postnummer = "12124",
-                            poststed = "STOCKHOLM",
+                            postnummer = "",
+                            poststed = "",
                             landkode = "SE",
                             land = "SVERIGE",
                         ),
@@ -346,6 +346,43 @@ internal class BrevServiceTest {
 
             verify {
                 db.hentBrev(brev.id)
+                db.oppdaterMottaker(brev.id, nyMottaker, bruker)
+            }
+        }
+
+        @Test
+        fun `Validere postnummer og poststed på utenlandskpostadresse`() {
+            val brev = opprettBrev(Status.OPPDATERT, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+
+            val nyMottaker =
+                Mottaker(
+                    id = brev.mottakere.single().id,
+                    navn = "NYTT NAVN",
+                    foedselsnummer = MottakerFoedselsnummer(VERGE_FOEDSELSNUMMER.value),
+                    adresse =
+                        Adresse(
+                            adresseType = "UTENLANDSKPOSTADRESSE",
+                            adresselinje1 = "NY ADRESSELINJE",
+                            postnummer = "6899",
+                            poststed = "DANMARK",
+                            landkode = "SE",
+                            land = "SVERIGE",
+                        ),
+                )
+
+            val exception =
+                assertThrows<UgyldigForespoerselException> {
+                    brevService.oppdaterMottaker(brev.id, nyMottaker, bruker)
+                }
+
+            exception.message shouldBe "Postnummer og poststed skal ikke brukes på utenlandsk adresse"
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+            verify(exactly = 0) {
                 db.oppdaterMottaker(brev.id, nyMottaker, bruker)
             }
         }

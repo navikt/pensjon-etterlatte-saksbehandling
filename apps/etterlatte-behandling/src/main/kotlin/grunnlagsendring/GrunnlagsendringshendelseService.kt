@@ -333,32 +333,6 @@ class GrunnlagsendringshendelseService(
             }
     }
 
-    private fun opprettHendelseAvTypeForSak(
-        sakId: SakId,
-        grunnlagendringType: GrunnlagsendringsType,
-    ): List<Grunnlagsendringshendelse> {
-        val hendelseId = UUID.randomUUID()
-        logger.info(
-            "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                "type $grunnlagendringType på sak med id=$sakId",
-        )
-
-        val sak = sakService.finnSak(sakId)
-        val hendelse =
-            Grunnlagsendringshendelse(
-                id = hendelseId,
-                sakId = sakId,
-                type = grunnlagendringType,
-                opprettet = now().toLocalDatetimeUTC(),
-                hendelseGjelderRolle = Saksrolle.SOEKER,
-                gjelderPerson = sak?.ident!!,
-            )
-        return listOf(hendelse to sak)
-            .onEach {
-                verifiserOgHaandterHendelse(it.first, it.second)
-            }.map { it.first }
-    }
-
     private fun verifiserOgHaandterHendelse(
         grunnlagsendringshendelse: Grunnlagsendringshendelse,
         sak: Sak,
@@ -447,6 +421,11 @@ class GrunnlagsendringshendelseService(
             hendelse.copy(
                 samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
                 status = GrunnlagsendringStatus.FORKASTET,
+                kommentar =
+                    when (samsvarMellomKildeOgGrunnlag) {
+                        is SamsvarMellomKildeOgGrunnlag.Adresse -> samsvarMellomKildeOgGrunnlag.aarsakIgnorert
+                        else -> null
+                    },
             ),
         )
     }

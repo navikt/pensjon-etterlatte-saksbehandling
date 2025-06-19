@@ -93,6 +93,7 @@ sealed class SamsvarMellomKildeOgGrunnlag {
     @JsonTypeName("ADRESSE")
     data class Adresse(
         override val samsvar: Boolean,
+        val aarsakIgnorert: String?,
         val fraPdl: List<no.nav.etterlatte.libs.common.person.Adresse>?,
         val fraGrunnlag: List<no.nav.etterlatte.libs.common.person.Adresse>?,
     ) : SamsvarMellomKildeOgGrunnlag()

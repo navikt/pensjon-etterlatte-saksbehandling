@@ -192,7 +192,7 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
               {erUtenlanskAdresse && (
                 <Alert variant="warning" size="small">
                   OBS: På utenlandske adresser må du kun bruke adresselinjer, land og landkode. Postnummer og poststed
-                  er ikke tillatt
+                  er ikke gyldig
                 </Alert>
               )}
 

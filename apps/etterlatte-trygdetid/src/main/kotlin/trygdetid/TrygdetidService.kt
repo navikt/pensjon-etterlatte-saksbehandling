@@ -693,6 +693,7 @@ class TrygdetidServiceImpl(
                             yrkesskade = forrigeTrygdetid.yrkesskade,
                             overstyrtNorskPoengaar = forrigeTrygdetid.overstyrtNorskPoengaar,
                             kopiertGrunnlagFraBehandling = forrigeTrygdetid.behandlingId,
+                            begrunnelse = forrigeTrygdetid.begrunnelse,
                         )
 
                     trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)

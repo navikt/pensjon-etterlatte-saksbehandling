@@ -404,7 +404,7 @@ class GenerellBehandlingService(
 
             return KravPakkeMedAvdoed(kravpakke, objectMapper.readValue(avdoed.opplysning.toJson(), Person::class.java))
         } else {
-            throw RuntimeException("Kravpakken for sak $sakId har ikke blitt attestert, status: ${kravpakke.status}")
+            throw KravpakkeIkkeAttestertException("Kravpakken for sak $sakId har ikke blitt attestert, status: ${kravpakke.status}")
         }
     }
 
@@ -420,6 +420,10 @@ class GenerellBehandlingService(
         }
     }
 }
+
+class KravpakkeIkkeAttestertException(
+    detail: String,
+) : UgyldigForespoerselException(code = "KRAVPAKKE_IKKE_ATTESTERT", detail = detail)
 
 class FantIkkeAvdoedException(
     msg: String,

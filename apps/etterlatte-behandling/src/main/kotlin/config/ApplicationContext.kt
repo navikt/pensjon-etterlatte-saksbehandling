@@ -60,8 +60,6 @@ import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18Job
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18JobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -561,6 +559,8 @@ internal class ApplicationContext(
             featureToggleService,
             oppdaterTilgangService,
             sakTilgang,
+            vedtakKlient,
+            nyAldersovergangService,
         )
 
     val etteroppgjoerService =
@@ -840,19 +840,7 @@ internal class ApplicationContext(
             vedtakKlient,
             sakService,
             nyAldersovergangService,
-            featureToggleService,
         )
-
-    val uttrekkFylt18Job: UttrekkFylt18Job by lazy {
-        UttrekkFylt18Job(
-            service = uttrekkFylt18JobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.DAYS),
-        )
-    }
 
     val doedsmeldingerJob: DoedsmeldingJob by lazy {
         DoedsmeldingJob(

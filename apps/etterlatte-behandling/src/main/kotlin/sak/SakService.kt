@@ -6,6 +6,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -14,6 +15,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -38,6 +40,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
@@ -99,6 +102,8 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
+    fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId>
+
     fun hentSaksendringer(sakId: SakId): List<Saksendring>
 
     fun oppdaterEnhet(
@@ -138,6 +143,8 @@ class SakServiceImpl(
     private val featureToggle: FeatureToggleService,
     private val tilgangsService: OppdaterTilgangService,
     private val sakTilgang: SakTilgang,
+    private val vedtakKlient: VedtakKlient,
+    private val aldersovergangService: AldersovergangService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -339,6 +346,40 @@ class SakServiceImpl(
             .also {
                 logger.info("Fant ${it.size} saker der pleieforholdet opphørte i $maanedOpphoerte")
             }
+    }
+
+    override fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId> {
+        logger.info("Henter saker der bruker har fylt 18 år i $maaned")
+
+        val aktuelleSaker =
+            aldersovergangService
+                .hentSoekereFoedtIEnGittMaaned(maaned)
+                .map { SakId(it.toLong()) }
+
+        return aktuelleSaker.mapNotNull { sakId ->
+            try {
+                val sak = inTransaction { finnSak(sakId) }
+
+                if (sak?.sakType == SakType.BARNEPENSJON) {
+                    val ytelse =
+                        runBlocking {
+                            vedtakKlient.sakHarLopendeVedtakPaaDato(
+                                sakId,
+                                maaned.atDay(1),
+                                HardkodaSystembruker.uttrekk,
+                            )
+                        }
+
+                    if (ytelse.erLoepende) {
+                        return@mapNotNull sakId
+                    }
+                }
+                null
+            } catch (e: Exception) {
+                logger.info("En feil oppstod ved behandling av sak $sakId", e)
+                null
+            }
+        }
     }
 
     private suspend fun hentSpraak(fnr: String): Spraak {

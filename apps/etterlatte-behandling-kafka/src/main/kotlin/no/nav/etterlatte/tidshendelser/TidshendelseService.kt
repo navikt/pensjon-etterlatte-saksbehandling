@@ -186,11 +186,14 @@ class TidshendelseService(
             JobbType.AO_OMS67 -> true
             JobbType.OMS_DOED_3AAR -> true
             JobbType.OMS_DOED_5AAR -> true
+
             JobbType.OMS_DOED_4MND -> false
             JobbType.OMS_DOED_6MND -> false
             JobbType.OMS_DOED_10MND -> false
             JobbType.OMS_DOED_12MND -> false
+            JobbType.OP_BP_FYLT_18 -> false
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> false
+
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
@@ -209,6 +212,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_10MND -> AKTIVITETSPLIKT_12MND
             JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> AKTIVITETSPLIKT_REVURDERING
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
+            JobbType.OP_BP_FYLT_18 -> OppgaveType.OPPFOELGING
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,

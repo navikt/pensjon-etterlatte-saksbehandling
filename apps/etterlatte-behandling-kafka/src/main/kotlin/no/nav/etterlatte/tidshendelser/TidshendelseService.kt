@@ -47,6 +47,7 @@ class TidshendelseService(
                 JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
                 JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
+                JobbType.OP_BP_FYLT_18 -> opprettOppgaveForBpFylt18Aar(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
             }
         }
@@ -155,6 +156,20 @@ class TidshendelseService(
                 TidshendelseResult.Skipped
             }
         }
+    }
+
+    private fun opprettOppgaveForBpFylt18Aar(hendelse: TidshendelsePacket): TidshendelseResult {
+        val oppgaveId =
+            behandlingService.opprettOppgave(
+                hendelse.sakId,
+                oppgaveTypeFor(hendelse.jobbtype),
+                referanse = null,
+                merknad = hendelse.jobbtype.beskrivelse,
+                // TODO finne rett frist
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+            )
+        logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
+        return TidshendelseResult.OpprettetOppgave(oppgaveId)
     }
 
     private fun opprettOppgaveForAktivitetspliktVarigUnntak(hendelse: TidshendelsePacket): TidshendelseResult {

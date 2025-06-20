@@ -53,6 +53,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -103,6 +104,13 @@ import java.util.UUID
 class BeregningKlientTest :
     BeregningKlient,
     SakTilgangsSjekk {
+    override suspend fun hentBeregningOgAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningOgAvkortingDto {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun slettAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

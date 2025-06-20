@@ -1,5 +1,5 @@
-import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
-import { useForm } from 'react-hook-form'
+import { FaktiskInntekt, IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
+import { FieldErrors, useForm } from 'react-hook-form'
 import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
@@ -9,6 +9,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling, lagreFaktiskInntekt } from '~shared/api/etteroppgjoer'
 import { useAppDispatch } from '~store/Store'
+import { resetAvkorting } from '~store/reducers/BehandlingReducer'
 
 const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   loennsinntekt,
@@ -26,7 +27,7 @@ const fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt = ({
   }
 }
 
-interface FastsettFaktiskInntektSkjema {
+export interface FastsettFaktiskInntektSkjema {
   loennsinntekt: string
   afp: string
   naeringsinntekt: string
@@ -36,10 +37,13 @@ interface FastsettFaktiskInntektSkjema {
 
 interface Props {
   setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
-  setFastsettInntektSkjemaErSkittent?: (erSkittent: boolean) => void
+  setFastsettFaktiskInntektSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
 }
 
-export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastsettInntektSkjemaErSkittent }: Props) => {
+export const FaktiskInntektSkjema = ({
+  setFaktiskInntektSkjemaErAapen,
+  setFastsettFaktiskInntektSkjemaErrors,
+}: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
 
@@ -51,7 +55,7 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastse
     control,
     watch,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<FastsettFaktiskInntektSkjema>({
     defaultValues: faktiskInntekt
       ? {
@@ -70,21 +74,21 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastse
         },
   })
 
-  const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    if (isDirty) {
-      if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(true)
+  const avbryt = () => {
+    setFastsettFaktiskInntektSkjemaErrors(errors)
+    setFaktiskInntektSkjemaErAapen(false)
+  }
 
-      lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
-        dispatch(addResultatEtteroppgjoer(resultat))
-        hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
-          dispatch(addEtteroppgjoer(etteroppgjoer))
-          setFaktiskInntektSkjemaErAapen(false)
-        })
+  const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
+    setFastsettFaktiskInntektSkjemaErrors(errors)
+    lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
+      dispatch(addResultatEtteroppgjoer(resultat))
+      hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
+        dispatch(addEtteroppgjoer(etteroppgjoer))
+        dispatch(resetAvkorting())
+        setFaktiskInntektSkjemaErAapen(false)
       })
-    } else {
-      if (!!setFastsettInntektSkjemaErSkittent) setFastsettInntektSkjemaErSkittent(false)
-      setFaktiskInntektSkjemaErAapen(false)
-    }
+    })
   }
 
   return (
@@ -125,8 +129,11 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastse
 
         <HStack gap="4">
           <Button
-            onClick={handleSubmit((data) =>
-              submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data))
+            onClick={handleSubmit(
+              (data) => {
+                submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data))
+              },
+              () => setFastsettFaktiskInntektSkjemaErrors(errors)
             )}
             size="small"
             loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
@@ -139,7 +146,7 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen, setFastse
               variant="secondary"
               size="small"
               disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
-              onClick={() => setFaktiskInntektSkjemaErAapen(false)}
+              onClick={avbryt}
             >
               Avbryt
             </Button>

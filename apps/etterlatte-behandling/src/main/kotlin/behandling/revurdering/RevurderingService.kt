@@ -17,6 +17,7 @@ import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -38,6 +39,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.Locale
 import java.util.UUID
 
@@ -117,7 +119,7 @@ class RevurderingService(
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
         if (oppgaverForSak
                 .filter {
-                    it.kilde == OppgaveKilde.BEHANDLING
+                    it.kilde == OppgaveKilde.BEHANDLING && it.type != OppgaveType.OMGJOERING
                 }.any { !it.erAvsluttet() }
         ) {
             throw MaksEnAktivOppgavePaaBehandling(sakId)
@@ -156,9 +158,11 @@ class RevurderingService(
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?,
         saksbehandlerIdent: String?,
+        opprinnelse: BehandlingOpprinnelse,
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
+        opphoerFraOgMed: YearMonth? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -169,13 +173,14 @@ class RevurderingService(
             virkningstidspunkt = virkningstidspunkt,
             utlandstilknytning = forrigeBehandling.utlandstilknytning,
             boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-            kilde = kilde,
+            vedtaksloesning = kilde,
             prosesstype = prosessType,
             begrunnelse = begrunnelse,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
-            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+            opphoerFraOgMed = opphoerFraOgMed ?: forrigeBehandling.opphoerFraOgMed,
             tidligereFamiliepleier = forrigeBehandling.tidligereFamiliepleier,
+            opprinnelse = opprinnelse,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 

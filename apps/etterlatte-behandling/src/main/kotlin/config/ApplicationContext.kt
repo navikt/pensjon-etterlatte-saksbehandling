@@ -60,8 +60,6 @@ import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18Job
-import no.nav.etterlatte.behandling.jobs.sjekkloependeover20.UttrekkFylt18JobService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -162,6 +160,8 @@ import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarDaoImpl
+import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
@@ -354,6 +354,7 @@ internal class ApplicationContext(
     private val behandlingMedBrevDao = BehandlingMedBrevDao(autoClosingDatabase)
     private val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
     private val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
+    private val oppgaveKommentarDao = OppgaveKommentarDaoImpl(autoClosingDatabase)
     val sakLesDao = SakLesDao(autoClosingDatabase)
     private val sakendringerDao = SakendringerDao(autoClosingDatabase)
     val sakSkrivDao = SakSkrivDao(sakendringerDao)
@@ -391,7 +392,10 @@ internal class ApplicationContext(
     // Service
     private val klageHendelser = KlageHendelserServiceImpl(rapid)
     private val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
+    val saksbehandlerService: SaksbehandlerService =
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
+    val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
     private val aldersovergangDao = AldersovergangDao(dataSource)
 
@@ -555,6 +559,7 @@ internal class ApplicationContext(
             featureToggleService,
             oppdaterTilgangService,
             sakTilgang,
+            nyAldersovergangService,
         )
 
     val etteroppgjoerService =
@@ -630,9 +635,6 @@ internal class ApplicationContext(
             krrKlient = krrKlient,
         )
 
-    val saksbehandlerService: SaksbehandlerService =
-        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
-
     private val inntektskomponentService =
         InntektskomponentService(
             klient = inntektskomponentKlient,
@@ -689,10 +691,13 @@ internal class ApplicationContext(
 
     private val etteroppgjoerRevurderingBrevService =
         EtteroppgjoerRevurderingBrevService(
-            sakService = sakService,
             grunnlagService = grunnlagService,
             vedtakKlient = vedtakKlient,
             brevKlient = brevKlient,
+            behandlingService = behandlingService,
+            etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
+            beregningKlient = beregningsKlient,
+            brevApiKlient = brevApiKlient,
         )
 
     val etteroppgjoerForbehandlingBrevService =
@@ -826,25 +831,6 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),
-        )
-    }
-
-    private val uttrekkFylt18JobService =
-        UttrekkFylt18JobService(
-            vedtakKlient,
-            sakService,
-            nyAldersovergangService,
-            featureToggleService,
-        )
-
-    val uttrekkFylt18Job: UttrekkFylt18Job by lazy {
-        UttrekkFylt18Job(
-            service = uttrekkFylt18JobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.DAYS),
         )
     }
 

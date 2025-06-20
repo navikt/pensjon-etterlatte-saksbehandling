@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 
 class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
@@ -52,7 +54,11 @@ class AutomatiskRevurderingService(
             )
         val forrigeBehandling = hentForrigeBehandling(loepende, request.sakId)
 
-        gyldigForAutomatiskRevurdering(request, loepende, forrigeBehandling, systembruker)
+        val forrigeIverksatteBehandling =
+            inTransaction { behandlingService.hentSisteIverksatte(request.sakId) }
+                ?: throw RevurderingManglerIverksattBehandling(request.sakId)
+
+        gyldigForAutomatiskRevurdering(request, loepende, systembruker)
 
         val persongalleri =
             krevIkkeNull(grunnlagService.hentPersongalleri(request.sakId)) {
@@ -70,6 +76,7 @@ class AutomatiskRevurderingService(
                     persongalleri = persongalleri,
                     frist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
                     mottattDato = request.mottattDato?.toString(),
+                    opphoerFraMed = forrigeIverksatteBehandling.opphoerFraOgMed,
                 )
             }
 
@@ -95,7 +102,6 @@ class AutomatiskRevurderingService(
     private suspend fun gyldigForAutomatiskRevurdering(
         request: AutomatiskRevurderingRequest,
         vedtak: LoependeYtelseDTO,
-        forrigeBehandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         when (request.revurderingAarsak) {
@@ -109,6 +115,9 @@ class AutomatiskRevurderingService(
              */
             Revurderingaarsak.REGULERING -> {
                 // TODO utfører per nå sjekkene i egne Rivers før dette gjør derfor ingenting her
+                if (vedtak.underSamordning) {
+                    throw OmregningAvSakUnderSamordning()
+                }
             }
 
             Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {}
@@ -120,6 +129,12 @@ class AutomatiskRevurderingService(
              * Sak har aktivt overstyrt beregning
              */
             else -> {
+                val sisteLoependeBehandlingId =
+                    krevIkkeNull(vedtak.sisteLoependeBehandlingId) {
+                        "Saken må ha en behandling som var sist løpende på ytelsesperioden vi omregner fra, " +
+                            "sakId=${request.sakId}, fom=${request.fraDato}"
+                    }
+
                 if (!vedtak.erLoepende) {
                     throw OmregningKreverLoependeVedtak()
                 }
@@ -127,7 +142,7 @@ class AutomatiskRevurderingService(
                     throw OmregningAvSakUnderSamordning()
                 }
 
-                val overstyrtBeregning = beregningKlient.harOverstyrt(forrigeBehandling.id, brukerTokenInfo)
+                val overstyrtBeregning = beregningKlient.harOverstyrt(sisteLoependeBehandlingId, brukerTokenInfo)
                 if (overstyrtBeregning) {
                     throw OmregningOverstyrtBeregning()
                 }
@@ -142,7 +157,10 @@ class AutomatiskRevurderingService(
         inTransaction {
             behandlingService.hentBehandling(it)
         }
-    } ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
+    } ?: throw UgyldigForespoerselException(
+        code = "MANGLER_LOEPENDE_BEHANDLING",
+        detail = "Fant ikke løpende behandling på omregningstidspunkt i sak $sakId",
+    )
 
     private fun opprettAutomatiskRevurdering(
         sakId: SakId,
@@ -153,6 +171,7 @@ class AutomatiskRevurderingService(
         persongalleri: Persongalleri,
         frist: Tidspunkt? = null,
         mottattDato: String? = null,
+        opphoerFraMed: YearMonth? = null,
     ) = forrigeBehandling.let {
         revurderingService.opprettRevurdering(
             sakId = sakId,
@@ -166,6 +185,8 @@ class AutomatiskRevurderingService(
             begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
             frist = frist,
+            opphoerFraOgMed = opphoerFraMed,
+            opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
         )
     }
 }

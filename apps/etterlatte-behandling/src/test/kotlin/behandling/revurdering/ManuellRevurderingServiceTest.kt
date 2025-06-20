@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import io.kotest.matchers.shouldBe
-import io.ktor.server.plugins.BadRequestException
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -32,11 +31,13 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -111,6 +112,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
+                        BehandlingOpprinnelse.UKJENT,
                     )
             }.also { it.sendMeldingForHendelse() }.behandling
 
@@ -485,7 +487,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err =
-            assertThrows<BadRequestException> {
+            assertThrows<UgyldigForespoerselException> {
                 manuellRevurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
                     aarsak = Revurderingaarsak.REGULERING,

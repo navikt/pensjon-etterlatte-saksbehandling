@@ -8,6 +8,7 @@ import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -111,11 +112,12 @@ internal class AvkortingMapperTest {
     fun `fyller ut alle felter til avkortingsgrunnlag med `() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.AVKORTET,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2025, 1)),
             )
 
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).avkortingGrunnlag.first().asClue {
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling).avkortingGrunnlag.first().asClue {
             val avkortingGrunnlag = it as ForventetInntektDto
             avkortingGrunnlag.fom shouldBe inntektFraJan25.periode.fom
             avkortingGrunnlag.tom shouldBe YearMonth.of(2025, Month.DECEMBER)
@@ -132,10 +134,11 @@ internal class AvkortingMapperTest {
     fun `fyller ut alle avkortingsgrunnlag i rekkefølge nyligste flørst og legger til tom ved årskifte`() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.AVKORTET,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
             )
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).asClue {
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling).asClue {
             it.avkortingGrunnlag.size shouldBe 3
             val avkortingGrunnlag0 = it.avkortingGrunnlag[0] as ForventetInntektDto
             avkortingGrunnlag0.fom shouldBe inntektFraJan25.periode.fom
@@ -158,10 +161,11 @@ internal class AvkortingMapperTest {
     fun `fyller ut alle perioder med avkortet ytelse`() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.AVKORTET,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.JANUARY)),
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.MARCH)),
             )
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).asClue {
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling).asClue {
             it.avkortetYtelse.size shouldBe 4
 
             it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[0].toDto()
@@ -175,10 +179,11 @@ internal class AvkortingMapperTest {
     fun `fyller ut avkortet ytelse fra virkningstidspunkt`() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.AVKORTET,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.MAY)),
             )
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).asClue {
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling).asClue {
             it.avkortetYtelse.size shouldBe 3
 
             it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[1].toDto()
@@ -193,10 +198,10 @@ internal class AvkortingMapperTest {
             .avkortingForFrontend(
                 avkorting,
                 behandling(
+                    behandlingType = BehandlingType.REVURDERING,
                     status = BehandlingStatus.AVKORTET,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.APRIL)),
                 ),
-                false,
             ).asClue {
                 it.avkortetYtelse.size shouldBe 4
                 with(it.avkortetYtelse[0]) {
@@ -216,10 +221,10 @@ internal class AvkortingMapperTest {
             .avkortingForFrontend(
                 avkorting,
                 behandling(
+                    behandlingType = BehandlingType.REVURDERING,
                     status = BehandlingStatus.AVKORTET,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.JUNE)),
                 ),
-                false,
             ).asClue {
                 it.avkortetYtelse.size shouldBe 3
                 with(it.avkortetYtelse[0]) {
@@ -238,10 +243,10 @@ internal class AvkortingMapperTest {
             .avkortingForFrontend(
                 avkorting,
                 behandling(
+                    behandlingType = BehandlingType.REVURDERING,
                     status = BehandlingStatus.AVKORTET,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.SEPTEMBER)),
                 ),
-                false,
             ).asClue {
                 it.avkortetYtelse.size shouldBe 2
                 with(it.avkortetYtelse[0]) {
@@ -259,10 +264,10 @@ internal class AvkortingMapperTest {
             .avkortingForFrontend(
                 avkorting,
                 behandling(
+                    behandlingType = BehandlingType.REVURDERING,
                     status = BehandlingStatus.AVKORTET,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2025, Month.JANUARY)),
                 ),
-                false,
             ).asClue {
                 it.avkortetYtelse.size shouldBe 1
                 with(it.avkortetYtelse[0]) {
@@ -281,11 +286,12 @@ internal class AvkortingMapperTest {
     fun `fyller ut tidligereAvkortetYtelse hvis finnes`() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.AVKORTET,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.MAY)),
             )
         val forrige = avkorting.copy()
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, false, forrige).asClue {
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling, forrige).asClue {
             it.tidligereAvkortetYtelse.size shouldBe 4
 
             it.tidligereAvkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelse[0].toDto()
@@ -300,11 +306,12 @@ internal class AvkortingMapperTest {
     fun `fyller ikke ut tidligereAvkortetYtelse hvis status iverksatt `() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.IVERKSATT,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.MAY)),
             )
         val forrige = avkorting.copy()
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, false, forrige).asClue {
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling, forrige).asClue {
             it.tidligereAvkortetYtelse.size shouldBe 0
         }
     }
@@ -313,12 +320,12 @@ internal class AvkortingMapperTest {
     fun `legger ikke til redigerbar inntekt hvis ikke finnes`() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.AVKORTET,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.APRIL)),
             )
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, false).asClue {
-            it.redigerbarForventetInntekt shouldBe null
-            it.redigerbarForventetInntektNesteAar shouldBe null
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling).asClue {
+            it.redigerbareInntekter shouldBe emptyList()
         }
     }
 
@@ -326,18 +333,18 @@ internal class AvkortingMapperTest {
     fun `legger til redigerbar inntekt hvis finnes`() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.REVURDERING,
                 status = BehandlingStatus.AVKORTET,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2025, Month.JANUARY)),
             )
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, true).asClue {
-            it.redigerbarForventetInntekt shouldBe
+        AvkortingMapper.avkortingForFrontend(avkorting, behandling).asClue {
+            it.redigerbareInntekter.singleOrNull() shouldBe
                 avkorting.aarsoppgjoer
                     .last()
                     .inntektsavkorting()
                     .single()
                     .grunnlag
                     .toDto()
-            it.redigerbarForventetInntektNesteAar shouldBe null
         }
     }
 
@@ -345,24 +352,37 @@ internal class AvkortingMapperTest {
     fun `legger til redigerbar inntekt neste aar hvis finnes`() {
         val behandling =
             behandling(
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 status = BehandlingStatus.AVKORTET,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.AUGUST)),
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.MARCH)),
             )
-        AvkortingMapper.avkortingForFrontend(avkorting, behandling, true).asClue {
-            it.redigerbarForventetInntekt shouldBe
-                avkorting.aarsoppgjoer
-                    .first()
-                    .inntektsavkorting()
-                    .last()
-                    .grunnlag
-                    .toDto()
-            it.redigerbarForventetInntektNesteAar shouldBe
-                avkorting.aarsoppgjoer
-                    .last()
-                    .inntektsavkorting()
-                    .single()
-                    .grunnlag
-                    .toDto()
-        }
+        // Avkortingen vi bruker i testen er en ugyldig avkorting for en førstegangsbehandling (den har to inntekter
+        // i innvilgelsesåret), så vi tilpasser den ved å begrense antall inntekter
+        AvkortingMapper
+            .avkortingForFrontend(
+                avkorting.copy(
+                    aarsoppgjoer =
+                        avkorting.aarsoppgjoer.map {
+                            (it as AarsoppgjoerLoepende).copy(inntektsavkorting = listOf(it.inntektsavkorting.first()))
+                        },
+                ),
+                behandling,
+            ).asClue {
+                it.redigerbareInntekter.size shouldBe 2
+                it.redigerbareInntekter[0] shouldBe
+                    avkorting.aarsoppgjoer
+                        .first()
+                        .inntektsavkorting()
+                        .first()
+                        .grunnlag
+                        .toDto()
+                it.redigerbareInntekter[1] shouldBe
+                    avkorting.aarsoppgjoer
+                        .last()
+                        .inntektsavkorting()
+                        .single()
+                        .grunnlag
+                        .toDto()
+            }
     }
 }

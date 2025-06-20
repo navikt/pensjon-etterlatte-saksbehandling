@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -35,6 +36,19 @@ class AutomatiskRevurderingServiceTest {
             coEvery { harOverstyrt(any(), any()) } returns false
         }
 
+    val mockBehandling =
+        mockk<Behandling> {
+            every { id } returns forrigeBehandlingId
+            every { utlandstilknytning } returns mockk()
+            every { boddEllerArbeidetUtlandet } returns mockk()
+            every { opphoerFraOgMed } returns null
+        }
+
+    val behandlingService =
+        mockk<BehandlingService> {
+            every { hentBehandling(any()) } returns mockBehandling
+        }
+
     val service =
         AutomatiskRevurderingService(
             revurderingService =
@@ -52,6 +66,7 @@ class AutomatiskRevurderingServiceTest {
                             begrunnelse = any(),
                             saksbehandlerIdent = any(),
                             frist = any(),
+                            opprinnelse = any(),
                         )
                     } returns
                         mockk {
@@ -62,16 +77,7 @@ class AutomatiskRevurderingServiceTest {
                             every { sakType() } returns mockk()
                         }
                 },
-            behandlingService =
-                mockk {
-                    every { hentBehandling(any()) } returns
-                        mockk<Behandling> {
-                            every { id } returns forrigeBehandlingId
-                            every { utlandstilknytning } returns mockk()
-                            every { boddEllerArbeidetUtlandet } returns mockk()
-                            every { opphoerFraOgMed } returns mockk()
-                        }
-                },
+            behandlingService = behandlingService,
             grunnlagService =
                 mockk {
                     every { hentPersongalleri(any<SakId>()) } returns mockk()
@@ -101,6 +107,7 @@ class AutomatiskRevurderingServiceTest {
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
+        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(
@@ -123,6 +130,7 @@ class AutomatiskRevurderingServiceTest {
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
+        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(
@@ -147,6 +155,7 @@ class AutomatiskRevurderingServiceTest {
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
+        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(
@@ -172,6 +181,7 @@ class AutomatiskRevurderingServiceTest {
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
         coEvery { beregningKlient.harOverstyrt(any(), any()) } returns true
+        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(

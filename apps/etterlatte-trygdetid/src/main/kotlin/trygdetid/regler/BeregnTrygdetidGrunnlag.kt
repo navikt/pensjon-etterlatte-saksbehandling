@@ -22,9 +22,8 @@ val beregnTrygdetidForPeriode =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Beregner trygdetid fra og med periodeFra til og med periodeTil i år, måneder og dager",
-        regelReferanse = RegelReferanse(id = "REGEL-TRYGDETID-BEREGNE-PERIODE"),
+        regelReferanse = RegelReferanse(id = "REGEL-TRYGDETID-BEREGNE-PERIODE", versjon = "1.1"),
     ) benytter periode med { periode ->
-        fun TrygdetidPeriodeMedPoengaar.erEttPoengaar() = fra.year == til.year && (poengInnAar || poengUtAar)
 
         fun TrygdetidPeriodeMedPoengaar.poengJustertFra() =
             if (poengInnAar) {
@@ -40,9 +39,5 @@ val beregnTrygdetidForPeriode =
                 til
             }
 
-        if (periode.erEttPoengaar()) {
-            Period.ofYears(1)
-        } else {
-            Period.between(periode.poengJustertFra(), periode.poengJustertTil().plusDays(1))
-        }
+        Period.between(periode.poengJustertFra(), periode.poengJustertTil().plusDays(1))
     }

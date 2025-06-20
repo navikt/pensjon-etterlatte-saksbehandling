@@ -20,14 +20,30 @@ data class DetaljertBehandling(
     val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,
-    val kilde: Vedtaksloesning,
+    val vedtaksloesning: Vedtaksloesning,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth?,
     val relatertBehandlingId: String?,
     val tidligereFamiliepleier: TidligereFamiliepleier?,
+    val opprinnelse: BehandlingOpprinnelse,
     val erSluttbehandling: Boolean = false,
     val mottattDato: LocalDateTime? = null,
-)
+) {
+    fun erBrukermeldtEtteroppgjoer(): Boolean =
+        revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER && opprinnelse != BehandlingOpprinnelse.AUTOMATISK_JOBB
+}
+
+enum class BehandlingOpprinnelse {
+    @Deprecated("Ukjent skal kun brukes i tester eller som en verdi hentet ut for gamle behandlinger")
+    UKJENT,
+    SAKSBEHANDLER,
+    MELD_INN_ENDRING_SKJEMA,
+    BARNEPENSJON_SOEKNAD,
+    OMSTILLINGSSTOENAD_SOEKNAD,
+    JOURNALFOERING,
+    AUTOMATISK_JOBB,
+    HENDELSE,
+}
 
 fun DetaljertBehandling.virkningstidspunkt() =
     krevIkkeNull(virkningstidspunkt) {

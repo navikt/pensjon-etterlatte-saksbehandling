@@ -49,6 +49,7 @@ import java.util.UUID
 const val KJOERING = "kjoering"
 const val ANTALL = "antall"
 const val PLEIEFORHOLDET_OPPHOERTE_PARAMETER = "opphoerte"
+const val BP_FYLT_18_I_MAANED_PARAMETER = "aar_maaned"
 
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangServiceSjekker,
@@ -84,6 +85,28 @@ internal fun Route.sakSystemRoutes(
                         },
                     ),
                 )
+            }
+        }
+
+        get("bp-fyller-18-i-maaned/{${BP_FYLT_18_I_MAANED_PARAMETER}}") {
+            kunSystembruker {
+                val maaned =
+                    call.parameters[BP_FYLT_18_I_MAANED_PARAMETER]?.let { param ->
+                        try {
+                            YearMonth.parse(param)
+                        } catch (e: DateTimeParseException) {
+                            throw UgyldigForespoerselException(
+                                "FEIL_FORMAT_MAANED",
+                                "Kunne ikke parse ut YearMonth fra angitt parameter $param",
+                            )
+                        }
+                    } ?: throw UgyldigForespoerselException(
+                        "MANGLER_PARAMETER_MAANED",
+                        "Fikk ikke med nødvendig parameter for måned",
+                    )
+
+                val saker = inTransaction { sakService.hentSakerBpFylt18AarIMaaned(maaned) }
+                call.respond(saker)
             }
         }
 

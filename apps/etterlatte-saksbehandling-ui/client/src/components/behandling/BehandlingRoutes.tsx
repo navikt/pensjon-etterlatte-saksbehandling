@@ -24,6 +24,9 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { EtteroppgjoerRevurderingOversikt } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingOversikt'
+import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { useAppSelector } from '~store/Store'
+import { JaNei } from '~shared/types/ISvar'
 
 type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
@@ -41,7 +44,10 @@ export interface BehandlingRouteType {
   path: BehandlingRouteTypesPath
   element: (behandling: IBehandlingReducer) => React.JSX.Element
   description: string
-  kreverBehandlingsstatus?: (behandling: IBehandlingReducer) => IBehandlingStatus
+  kreverBehandlingsstatus?: (
+    behandling: IBehandlingReducer,
+    etteroppgjoer?: EtteroppgjoerForbehandling | null
+  ) => IBehandlingStatus
   sakstype?: SakType
 }
 
@@ -91,7 +97,16 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'beregne',
     description: 'Beregning',
     element: (behandling: IBehandlingReducer) => <Beregne behandling={behandling} />,
-    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: (behandling, etteroppgjoer) => {
+      if (behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER) {
+        return IBehandlingStatus.BEREGNET
+      }
+      if (!etteroppgjoer || etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+        return IBehandlingStatus.FATTET_VEDTAK
+      } else {
+        return IBehandlingStatus.BEREGNET
+      }
+    },
   },
   varselbrev: {
     path: 'varselbrev',
@@ -99,25 +114,27 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     element: (behandling: IBehandlingReducer) => <Varselbrev behandling={behandling} />,
     kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
   },
-  brevBp: {
+  brev: {
     path: 'brev',
     element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
-      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.BEREGNET,
-  },
-  brevOms: {
-    path: 'brev',
-    element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
-    description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
-      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET,
+    kreverBehandlingsstatus: (behandling: IBehandlingReducer, etteroppgjoer) => {
+      if (behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER) {
+        return behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET
+      }
+      if (!etteroppgjoer || etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+        return IBehandlingStatus.FATTET_VEDTAK
+      } else {
+        return behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET
+      }
+    },
   },
 }
 // skal kun brukes av Behandling som laster behandling, å newe opp denne kan få utilsiktede konsekvenser andre steder
 export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
+  const etteroppgjoer = useAppSelector((state) => state.etteroppgjoerReducer.etteroppgjoer)
   const personopplysninger = usePersonopplysninger()
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)
@@ -131,15 +148,14 @@ export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
     const valgtRoute = alleRoutes.filter((value) => value.path === route)
     if (valgtRoute.length) {
       const pathInfo = valgtRoute[0]
-      if (pathInfo.kreverBehandlingsstatus) {
-        return (
-          !!pathInfo.kreverBehandlingsstatus &&
-          !!behandling &&
-          hentGyldigeNavigeringsStatuser(behandling.status).includes(pathInfo.kreverBehandlingsstatus(behandling))
-        )
-      } else {
-        return true
-      }
+
+      return (
+        !pathInfo.kreverBehandlingsstatus ||
+        (!!behandling &&
+          hentGyldigeNavigeringsStatuser(behandling.status).includes(
+            pathInfo.kreverBehandlingsstatus(behandling, etteroppgjoer)
+          ))
+      )
     } else {
       return false
     }
@@ -278,7 +294,7 @@ function revurderingRoutes(
   boddEllerArbeidetUtlandet: boolean
 ): Array<BehandlingRouteType> {
   if (behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER) {
-    return [behandlingroutes.etteroppgjoeroversikt, behandlingroutes.beregning, behandlingroutes.brevOms]
+    return [behandlingroutes.etteroppgjoeroversikt, behandlingroutes.beregning, behandlingroutes.brev]
   }
 
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
@@ -317,10 +333,7 @@ const leggTilBrevHvisKrevesAvBehandling = (
   behandling: IBehandlingReducer
 ): Array<BehandlingRouteType> => {
   if (behandling.sendeBrev) {
-    return [
-      ...routes,
-      behandling.sakType == SakType.OMSTILLINGSSTOENAD ? behandlingroutes.brevOms : behandlingroutes.brevBp,
-    ]
+    return [...routes, behandlingroutes.brev]
   }
   return routes
 }

@@ -22,8 +22,8 @@ class EtteroppgjoerBrevDataTest {
                 etteroppgjoersAar = 2024,
                 rettsgebyrBeloep = Kroner(1234),
                 resultatType = EtteroppgjoerResultatType.ETTERBETALING,
-                inntekt = Kroner(123),
-                faktiskInntekt = Kroner(123),
+                stoenad = Kroner(123),
+                faktiskStoenad = Kroner(123),
                 avviksBeloep = Kroner(123),
                 grunnlag =
                     EtteroppgjoerBrevGrunnlag(
@@ -34,6 +34,7 @@ class EtteroppgjoerBrevDataTest {
                         naeringsinntekt = Kroner(40),
                         afp = Kroner(400),
                         utlandsinntekt = Kroner(4000),
+                        inntekt = Kroner(4444),
                     ),
             )
 

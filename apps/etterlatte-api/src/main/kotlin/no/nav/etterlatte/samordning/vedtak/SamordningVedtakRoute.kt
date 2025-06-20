@@ -11,7 +11,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.hentFnrBody
@@ -21,8 +20,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
-import no.nav.etterlatte.logger
-import no.nav.etterlatte.samordning.X_ORGNR
 
 fun haandterUgyldigIdent(fnr: String): Folkeregisteridentifikator {
     try {
@@ -69,38 +66,6 @@ fun Route.samordningVedtakRoute(
             call.respond(samordningVedtakDto)
         }
 
-        get {
-            val fomDato =
-                call.dato("fomDato")
-                    ?: call.dato("virkFom")
-                    ?: throw ManglerFomDatoException()
-
-            val fnr = call.fnr
-
-            val tpnummer =
-                call.request.headers["tpnr"]
-                    ?: throw ManglerTpNrException()
-            val tpnr = Tjenestepensjonnummer(tpnummer)
-            val organisasjonsnr = call.orgNummer
-            logger.info("GETTILPOST: Henter vedtak på gammel løsning for {}", kv(X_ORGNR, organisasjonsnr))
-            val samordningVedtakDtos =
-                try {
-                    samordningVedtakService.hentVedtaksliste(
-                        fomDato = fomDato,
-                        fnr = haandterUgyldigIdent(fnr),
-                        context =
-                            MaskinportenTpContext(
-                                tpnr = tpnr,
-                                organisasjonsnr = organisasjonsnr,
-                            ),
-                    )
-                } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
-                }
-
-            call.respond(samordningVedtakDtos)
-        }
-
         post {
             val fomDato =
                 call.dato("fomDato")
@@ -141,29 +106,6 @@ fun Route.samordningVedtakRoute(
             issuer = Issuer.TOKENX.issuerName
         }
 
-        get {
-            val fomDato =
-                call.dato("fomDato")
-                    ?: call.dato("virkFom")
-                    ?: throw ManglerFomDatoException()
-
-            val fnr = call.fnr
-
-            logger.info("GETTILPOST: Henter vedtak på gammel løsning med fnr i header.")
-            val samordningVedtakDtos =
-                try {
-                    samordningVedtakService.hentVedtaksliste(
-                        fomDato = fomDato,
-                        fnr = haandterUgyldigIdent(fnr),
-                        context = PensjonContext,
-                    )
-                } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
-                }
-
-            call.respond(samordningVedtakDtos)
-        }
-
         post {
             val fomDato =
                 call.dato("fomDato")
@@ -184,29 +126,6 @@ fun Route.samordningVedtakRoute(
                 }
 
             call.respond(samordningVedtakDtos)
-        }
-
-        get("/har-loepende-oms") {
-            val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
-            val fnr = call.fnr
-
-            val harLoependeOmsPaaDato =
-                try {
-                    samordningVedtakService.harLoependeYtelsePaaDato(
-                        dato = paaDato,
-                        fnr = haandterUgyldigIdent(fnr),
-                        sakType = SakType.OMSTILLINGSSTOENAD,
-                        context = PensjonContext,
-                    )
-                } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
-                }
-
-            call.respond(
-                mapOf(
-                    "omstillingsstoenad" to harLoependeOmsPaaDato,
-                ),
-            )
         }
 
         post("/har-loepende-oms") {
@@ -248,10 +167,4 @@ inline val ApplicationCall.orgNummer: String
                 ?.get("consumer") as Map<*, *>?
                 ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
         return (claims["ID"] as String).split(":")[1]
-    }
-
-inline val ApplicationCall.fnr: String
-    get() {
-        return this.request.headers["fnr"]
-            ?: throw ManglerFoedselsnummerException()
     }

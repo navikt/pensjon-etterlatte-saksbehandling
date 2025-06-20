@@ -1,6 +1,7 @@
 import { ISak } from '~shared/types/sak'
 import { IAvkortetYtelse, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
+import { JaNei } from '~shared/types/ISvar'
 
 export interface Etteroppgjoer {
   inntektsaar: number
@@ -26,8 +27,8 @@ export interface EtteroppgjoerBehandling {
   opprettet: string // Mottatt?
   brevId?: number
   kopiertFra?: string
-  harMottattNyInformasjon?: boolean
-  endringErTilUgunstForBruker?: boolean
+  harMottattNyInformasjon?: JaNei
+  endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string
 }
 
@@ -47,6 +48,12 @@ export interface EtteroppgjoerOpplysninger {
   skatt: PensjonsgivendeInntektFraSkatteetaten
   ainntekt: AInntekt
   tidligereAvkorting: Avkorting
+}
+
+export interface IInformasjonFraBruker {
+  harMottattNyInformasjon: JaNei
+  endringErTilUgunstForBruker?: JaNei
+  beskrivelseAvUgunst?: string
 }
 
 export interface FaktiskInntekt {
@@ -85,7 +92,7 @@ export interface Avkorting {
 export enum EtteroppgjoerResultatType {
   TILBAKEKREVING = 'TILBAKEKREVING',
   ETTERBETALING = 'ETTERBETALING',
-  IKKE_ETTEROPPGJOER = 'IKKE_ETTEROPPGJOER',
+  INGEN_ENDRING = 'INGEN_ENDRING',
 }
 
 export interface BeregnetEtteroppgjoerResultatDto {

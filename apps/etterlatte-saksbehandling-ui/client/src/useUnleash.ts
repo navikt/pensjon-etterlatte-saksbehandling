@@ -18,13 +18,13 @@ export const enum FeatureToggle {
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
-  pensjon_etterlatte_oppdater_ident_paa_sak = 'pensjon-etterlatte.oppdater-ident-paa-sak',
   trygdetid_fra_pesys = 'trygdetid-fra-pesys',
   opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
   aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
   aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
   etteroppgjoer = 'etteroppgjoer',
   bytt_til_annen_sak = 'bytt-til-annen-sak',
+  oppgave_til_journalpost = 'oppgave-til-journalpost',
 }
 
 export interface Toggle {
@@ -34,6 +34,11 @@ export interface Toggle {
 
 const trygdetid_fra_pesys: Toggle = {
   togglename: FeatureToggle.trygdetid_fra_pesys,
+  enabled: false,
+}
+
+const oppgave_til_journalpost: Toggle = {
+  togglename: FeatureToggle.oppgave_til_journalpost,
   enabled: false,
 }
 
@@ -70,10 +75,6 @@ const pensjon_etterlatte_klage_delvis_omgjoering: Toggle = {
 }
 const pensjon_etterlatte_kan_opprette_vedtak_avvist_klage: Toggle = {
   togglename: FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
-  enabled: false,
-}
-const pensjon_etterlatte_oppdater_ident_paa_sak: Toggle = {
-  togglename: FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak,
   enabled: false,
 }
 const opprette_oppfoelgingsoppgave: Toggle = {
@@ -114,12 +115,12 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:
     pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   [FeatureToggle.overstyr_beregning_knapp]: overstyr_beregning_knapp,
-  [FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak]: pensjon_etterlatte_oppdater_ident_paa_sak,
   [FeatureToggle.opprette_oppfoelgingsoppgave]: opprette_oppfoelgingsoppgave,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist]: aktivitetsplikt_oppgave_unntak_med_frist,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist]: aktivitetsplikt_oppgave_unntak_uten_frist,
   [FeatureToggle.etteroppgjoer]: etteroppgjoer,
   [FeatureToggle.bytt_til_annen_sak]: bytt_til_annen_sak,
+  [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
 }
 
 export const Unleashcontext = createContext<{

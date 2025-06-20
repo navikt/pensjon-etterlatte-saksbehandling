@@ -16,6 +16,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -201,7 +202,8 @@ class BehandlingDao(
                     ?.let { objectMapper.readValue(it) },
             kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
+            opprinnelse = rs.getString("opprinnelse").let { BehandlingOpprinnelse.valueOf(it) },
+            vedtaksloesning = rs.getString("vedtaksloesning").let { Vedtaksloesning.valueOf(it) },
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
             tidligereFamiliepleier =
@@ -235,9 +237,9 @@ class BehandlingDao(
                         """
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
-                        revurdering_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
-                        sende_brev, opphoer_fom, tidligere_familiepleier)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        revurdering_aarsak, prosesstype, vedtaksloesning, begrunnelse, relatert_behandling,
+                        sende_brev, opphoer_fom, tidligere_familiepleier, opprinnelse)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -254,12 +256,13 @@ class BehandlingDao(
                     stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
                     stmt.setString(11, revurderingsAarsak?.name)
                     stmt.setString(12, prosesstype.toString())
-                    stmt.setString(13, kilde.toString())
+                    stmt.setString(13, vedtaksloesning.toString())
                     stmt.setString(14, begrunnelse)
                     stmt.setString(15, relatertBehandlingId)
                     stmt.setBoolean(16, sendeBrev)
                     stmt.setString(17, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
                     stmt.setJsonb(18, tidligereFamiliepleier)
+                    stmt.setString(19, opprinnelse.name)
                 }
                 krev(stmt.executeUpdate() == 1) {
                     "Kunne ikke opprette behandling for ${behandling.id}"
@@ -466,7 +469,7 @@ class BehandlingDao(
                 statement.executeQuery().singleOrNull {
                     ViderefoertOpphoer(
                         skalViderefoere = JaNei.valueOf(getString("skalViderefoere")),
-                        dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
+                        dato = getString("dato").let { objectMapper.readValue<YearMonth?>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
                         behandlingId = behandlingId,

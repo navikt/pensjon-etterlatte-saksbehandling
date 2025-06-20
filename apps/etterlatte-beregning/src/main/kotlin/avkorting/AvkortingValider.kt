@@ -1,86 +1,148 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.beregning.Beregning
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import java.time.Month
 import java.time.YearMonth
 
+val MAANED_FOR_INNTEKT_NESTE_AAR = Month.OCTOBER
+
 object AvkortingValider {
-    fun validerInntekt(
-        nyInntekt: AvkortingGrunnlagLagreDto,
+    fun paakrevdeInntekterForBeregningAvAvkorting(
         avkorting: Avkorting,
-        erFoerstegangsbehandling: Boolean,
+        beregning: Beregning,
+        behandlingType: BehandlingType,
+        naa: YearMonth = YearMonth.now(),
+    ): List<Int> {
+        val sortertePerioder = beregning.beregningsperioder.sortedBy { it.datoFOM }
+
+        // Vi trenger inntekter fram til der behandlingen løper, eller i år og potensielt neste i førstegangsbehandlinger
+        val foersteAar = (avkorting.aarsoppgjoer.map { it.aar } + listOf(sortertePerioder.first().datoFOM.year)).min()
+        val sisteAar =
+            when (val sisteAarIBeregning = sortertePerioder.last().datoTOM?.year) {
+                null ->
+                    if (naa.month >= MAANED_FOR_INNTEKT_NESTE_AAR && behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                        naa.year + 1
+                    } else {
+                        naa.year
+                    }
+
+                else -> sisteAarIBeregning
+            }
+        val aarViMaaHaInntekterFor = (foersteAar..sisteAar).toList()
+        return aarViMaaHaInntekterFor
+    }
+
+    fun validerInntekter(
+        behandling: DetaljertBehandling,
+        beregning: Beregning,
+        eksisterendeAvkorting: Avkorting,
+        nyeGrunnlag: List<AvkortingGrunnlagLagreDto>,
         naa: YearMonth = YearMonth.now(),
     ) {
-        skalIkkeKunneEndreInntektITidligereAarHvisAarsoppgjoerErEtteroppgjoer(erFoerstegangsbehandling, nyInntekt.fom, avkorting, naa)
+        val inntekterViHar =
+            eksisterendeAvkorting.aarsoppgjoer.map { it.aar }.toSet() + nyeGrunnlag.map { it.fom.year }.toSet()
+        val inntekterViTrenger =
+            paakrevdeInntekterForBeregningAvAvkorting(
+                eksisterendeAvkorting,
+                beregning,
+                behandling.behandlingType,
+                naa,
+            ).toSet()
+        if (!inntekterViHar.containsAll(inntekterViTrenger)) {
+            throw UgyldigForespoerselException(
+                "MANGLER_INNTEKTER_FOR_AVKORTING",
+                "Mangler inntektsgrunnlag for år(ene) ${inntekterViTrenger - inntekterViHar}",
+            )
+        }
+        val virk =
+            krevIkkeNull(behandling.virkningstidspunkt?.dato) {
+                "Behandling mangler virkningstidspunkt, kan ikke legge inn nye inntekter. " +
+                    "Sak: ${behandling.sak.sakId}, id:${behandling.id}"
+            }
+        val virkFoerstegangsbehandling =
+            virk.takeIf { behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING }
 
-        foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
-            nyInntekt,
-            avkorting,
-            erFoerstegangsbehandling,
-        )
+        // Nye år:
+        val nyeAarMedInntekt =
+            nyeGrunnlag.map { it.fom.year }.toSet() - eksisterendeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
 
-        skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(
-            nyInntekt,
-            nyInntekt.fom,
-        )
+        val alleNyeAarHarInntektFraStart =
+            nyeAarMedInntekt.all { aar ->
+                // Start på et år er enten 1. januar eller virk i førstegangsbehandlinger
+                nyeGrunnlag.find {
+                    it.fom ==
+                        YearMonth.of(
+                            aar,
+                            Month.JANUARY,
+                        ) ||
+                        it.fom == virkFoerstegangsbehandling
+                } != null
+            }
+        if (!alleNyeAarHarInntektFraStart) {
+            // kast feil vi må ha kontinuerlige inntekter
+            throw NyeAarMedInntektMaaStarteIJanuar()
+        }
 
-        // TODO valider at virk tidligere enn forrige innvilgelse ikke støttes enda
-    }
-
-    private fun skalIkkeKunneEndreInntektITidligereAarHvisAarsoppgjoerErEtteroppgjoer(
-        erFoerstegangsbehandling: Boolean,
-        nyInntektFom: YearMonth,
-        avkorting: Avkorting,
-        naa: YearMonth,
-    ) {
-        if (!erFoerstegangsbehandling && nyInntektFom.year < naa.year) {
-            val gjeldendeAar = avkorting.aarsoppgjoer.single { it.aar == nyInntektFom.year }
-            if (gjeldendeAar is Etteroppgjoer) {
-                throw InntektForTidligereAar()
+        if (behandling.behandlingType == BehandlingType.REVURDERING && nyeAarMedInntekt.isNotEmpty()) {
+            if (YearMonth.of(nyeAarMedInntekt.min(), Month.JANUARY) < virk) {
+                throw UgyldigForespoerselException(
+                    "NYTT_INNTEKTSAAR_IKKE_FRA_START",
+                    "Revurdering med ny inntekt må ha virkningstidspunkt før det nye inntektsåret",
+                )
             }
         }
-    }
 
-    private fun foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
-        nyInntekt: AvkortingGrunnlagLagreDto,
-        avkorting: Avkorting,
-        erFoerstegangsbehandling: Boolean,
-    ) {
-        if (!erFoerstegangsbehandling) {
-            if (avkorting.aarsoppgjoer.none { it.aar == nyInntekt.fom.year }) {
-                if (nyInntekt.fom.month != Month.JANUARY) {
-                    throw FoersteRevurderingSenereEnnJanuar()
-                }
-            }
+        if (nyeGrunnlag.map { it.fom }.toSet().size < nyeGrunnlag.size) {
+            throw UgyldigForespoerselException(
+                "DUPLIKAT_INNTEKT",
+                "Kan ikke registrere flere inntekter med samme fra-dato",
+            )
         }
-    }
 
-    private fun skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(
-        nyInntekt: AvkortingGrunnlagLagreDto,
-        fom: YearMonth,
-    ) {
-        val fratrekkLagtTil = nyInntekt.fratrekkInnAar > 0 || nyInntekt.fratrekkInnAarUtland > 0
-        if (fratrekkLagtTil && fom.month == Month.JANUARY) {
+        val fulleInntektsaarAvkorting =
+            eksisterendeAvkorting.aarsoppgjoer
+                .map { it.fom }
+                .filter { it.month == Month.JANUARY }
+                .map { it.year }
+        val fulleInntektsaarNyeGrunnlag =
+            nyeGrunnlag
+                .map { it.fom }
+                .filter { it.month == Month.JANUARY }
+                .map { it.year }
+        val fulleInntektsAar = fulleInntektsaarAvkorting + fulleInntektsaarNyeGrunnlag
+        if (nyeGrunnlag.any { it.fom.year in fulleInntektsAar && (it.fratrekkInnAarUtland != 0 || it.fratrekkInnAar != 0) }) {
             throw HarFratrekkInnAarForFulltAar()
+        }
+
+        val etteroppgjorteAar =
+            eksisterendeAvkorting.aarsoppgjoer
+                .filterIsInstance<Etteroppgjoer>()
+                .map { it.aar }
+        if (nyeGrunnlag.any { it.fom.year in etteroppgjorteAar }) {
+            throw InntektForTidligereAar()
         }
     }
 }
 
-class FoersteRevurderingSenereEnnJanuar :
-    IkkeTillattException(
-        code = "FOERSTE_REVURDERING_I_NYTT_AAR_SENERE_ENN_JANUAR",
-        detail = "Første revurdering i årene etter innvilgelsesår må være fom januar.",
+class NyeAarMedInntektMaaStarteIJanuar :
+    UgyldigForespoerselException(
+        code = "INNTEKT_I_NYTT_AAR_SENERE_ENN_JANUAR",
+        detail = "Inntekt i nytt år må starte i januar, med mindre det er første virkningstidspunkt i saken.",
     )
 
 class HarFratrekkInnAarForFulltAar :
-    IkkeTillattException(
+    UgyldigForespoerselException(
         code = "NY_INNTEKT_FRATREKK_INN_AAR_FULLT_AAR",
         detail = "Kan ikke legge til fratrekk inn år når det er innvilga måned fra og med januar",
     )
 
 class InntektForTidligereAar :
-    IkkeTillattException(
+    UgyldigForespoerselException(
         "ENDRE_INNTEKT_TIDLIGERE_AAR",
-        "Det er ikke mulig å endre inntekt for tidligere år",
+        "Det er ikke mulig å endre inntekt for tidligere år som er etteroppgjort",
     )

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -32,12 +33,13 @@ data class Foerstegangsbehandling(
     override val soeknadMottattDato: LocalDateTime?,
     val gyldighetsproeving: GyldighetsResultat?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
-    override val kilde: Vedtaksloesning,
+    override val vedtaksloesning: Vedtaksloesning,
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth? = null,
     override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
     val erSluttbehandling: Boolean = false,
     override val relatertBehandlingId: String? = null,
+    override val opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.UKJENT,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 

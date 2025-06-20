@@ -54,9 +54,8 @@ data class OverstyrBeregningDTO(
     val kategori: OverstyrtBeregningKategori,
 )
 
-data class AvkortingFrontend(
-    val redigerbarForventetInntekt: ForventetInntektDto?,
-    val redigerbarForventetInntektNesteAar: ForventetInntektDto?,
+data class AvkortingFrontendDto(
+    val redigerbareInntekter: List<ForventetInntektDto>,
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
     val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
@@ -108,6 +107,10 @@ data class FaktiskInntektDto(
     val afp: Int,
     val utlandsinntekt: Int,
 ) : AvkortingGrunnlagDto()
+
+data class AvkortingGrunnlagFlereInntekterDto(
+    val inntekter: List<AvkortingGrunnlagLagreDto>,
+)
 
 data class AvkortingGrunnlagLagreDto(
     val id: UUID = UUID.randomUUID(),

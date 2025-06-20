@@ -141,18 +141,20 @@ data class Avkorting(
         )
 
     /**
-     * Brukes til å beregne avkoring med [ForventetInntekt]
+     * Brukes til å beregne avkoring med flere forventede inntekter [ForventetInntekt]
      */
-    fun beregnAvkortingMedNyttGrunnlag(
-        nyttGrunnlag: AvkortingGrunnlagLagreDto,
+    fun beregnAvkortingMedNyeGrunnlag(
+        nyttGrunnlag: List<AvkortingGrunnlagLagreDto>,
         bruker: BrukerTokenInfo,
-        beregning: Beregning?,
+        beregning: Beregning,
         sanksjoner: List<Sanksjon>,
         opphoerFom: YearMonth?,
         aldersovergang: YearMonth? = null,
     ): Avkorting {
-        val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, bruker, opphoerFom, aldersovergang)
-        return oppdatertMedNyInntekt.beregnAvkorting(nyttGrunnlag.fom, beregning, sanksjoner)
+        var oppdatertAvkorting = this
+        nyttGrunnlag.forEach { oppdatertAvkorting = oppdatertAvkorting.oppdaterMedInntektsgrunnlag(it, bruker, opphoerFom, aldersovergang) }
+
+        return oppdatertAvkorting.beregnAvkorting(beregning.beregningsperioder.minOf { it.datoFOM }, beregning, sanksjoner)
     }
 
     /**

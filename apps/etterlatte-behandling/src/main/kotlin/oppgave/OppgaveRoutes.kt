@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.oppgave.AvbrytAktivitetspliktoppgaveRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKommentarRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -32,6 +33,7 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
@@ -67,7 +69,10 @@ inline val PipelineContext<*, ApplicationCall>.minOppgavelisteidentQueryParam: S
         }
     }
 
-internal fun Route.oppgaveRoutes(service: OppgaveService) {
+internal fun Route.oppgaveRoutes(
+    service: OppgaveService,
+    kommentarService: OppgaveKommentarService,
+) {
     route("/api/oppgaver") {
         get {
             kunSaksbehandler {
@@ -97,12 +102,12 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
         }
 
         get("/gruppe/{gruppeId}") {
-            kunSaksbehandler {
+            kunSaksbehandler { saksbehandler ->
                 val type = OppgaveType.valueOf(call.request.queryParameters["type"]!!)
 
                 val oppgaver =
                     inTransaction {
-                        service.hentOppgaverForGruppeId(gruppeId, type)
+                        service.hentOppgaverForGruppeId(gruppeId, type, saksbehandler)
                     }
 
                 call.respond(oppgaver)
@@ -134,7 +139,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 
         route("/bulk") {
             post("/opprett") {
-                kunSaksbehandler {
+                kunSaksbehandler { saksbehandler ->
                     val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
                     inTransaction {
                         service.opprettOppgaveBulk(
@@ -143,6 +148,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                             oppgaveBulkDto.kilde,
                             oppgaveBulkDto.type,
                             oppgaveBulkDto.merknad,
+                            saksbehandler = saksbehandler,
                         )
                     }
                     call.respond(HttpStatusCode.OK)
@@ -150,14 +156,15 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
 
             post("/tildel") {
-                kunSaksbehandler {
+                kunSaksbehandler { saksbehandler ->
                     val request = call.receive<TildelingBulkRequest>()
 
                     inTransaction {
-                        request.oppgaver
-                            .forEach { oppgaveId ->
-                                service.tildelSaksbehandler(oppgaveId, request.saksbehandler)
-                            }
+                        service.tildelSaksbehandlerBulk(
+                            oppgaveIds = request.oppgaver,
+                            nyTildeling = request.saksbehandler,
+                            saksbehandler = saksbehandler,
+                        )
                     }
 
                     call.respond(HttpStatusCode.OK)
@@ -195,6 +202,29 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
         }
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
+            route("/kommentarer") {
+                get {
+                    kunSaksbehandler {
+                        call.respond(
+                            inTransaction {
+                                kommentarService.hentOppgaveKommentarer(oppgaveId)
+                            },
+                        )
+                    }
+                }
+
+                post("/opprett") {
+                    val request = call.receive<OppgaveKommentarRequest>()
+
+                    kunSaksbehandler {
+                        inTransaction {
+                            kommentarService.opprettKommentar(request, oppgaveId, brukerTokenInfo)
+                        }
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
+
             get {
                 val oppgave =
                     inTransaction {

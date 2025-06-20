@@ -15,6 +15,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-tidshendelser-model/**
       - libs/etterlatte-inntektsjustering-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -31,6 +32,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-tidshendelser-model/**
       - libs/etterlatte-inntektsjustering-model/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
 permissions:

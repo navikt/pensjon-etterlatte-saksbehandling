@@ -954,6 +954,8 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = sak2.id, status = BehandlingStatus.IVERKSATT),
             )
 
+        every { oppgaveServiceMock.hentOppgaverForSak(any()) } returns listOf(mockk())
+
         val sakMedBehandlinger = behandlingService.hentSakMedBehandlinger(listOf(sak1, sak2))
 
         assertEquals(sak2.id, sakMedBehandlinger.sak.id)
@@ -1051,6 +1053,7 @@ internal class BehandlingServiceImplTest {
                     status = BehandlingStatus.IVERKSATT,
                 ),
             )
+        every { oppgaveServiceMock.hentOppgaverForSak(any()) } returns listOf(mockk())
 
         val sakMedBehandlinger = behandlingService.hentSakMedBehandlinger(listOf(sak))
 

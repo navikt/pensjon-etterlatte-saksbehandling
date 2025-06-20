@@ -10,8 +10,11 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.time.LocalDate
 import java.time.YearMonth
 
 object EtteroppgjoerBrevData {
@@ -29,8 +32,8 @@ object EtteroppgjoerBrevData {
         val etteroppgjoersAar: Int,
         val rettsgebyrBeloep: Kroner,
         val resultatType: EtteroppgjoerResultatType,
-        val inntekt: Kroner,
-        val faktiskInntekt: Kroner,
+        val stoenad: Kroner,
+        val faktiskStoenad: Kroner,
         val avviksBeloep: Kroner,
         val grunnlag: EtteroppgjoerBrevGrunnlag,
     ) : BrevFastInnholdData() {
@@ -65,19 +68,45 @@ object EtteroppgjoerBrevData {
 
     data class BeregningsVedleggInnhold(
         val etteroppgjoersAar: Int,
-    ) : BrevVedleggInnholdData()
+    ) : BrevVedleggInnholdData() {
+        override val type: String = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD"
+        override val brevKode: Vedlegg = Vedlegg.OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD
+    }
 
     data class Vedtak(
+        val vedleggInnhold: List<Slate.Element> = emptyList(),
         val bosattUtland: Boolean,
+        val etteroppgjoersAar: Int,
+        val avviksBeloep: Kroner,
+        val utbetaltBeloep: Kroner,
+        val resultatType: EtteroppgjoerResultatType,
+        val stoenad: Kroner,
+        val faktiskStoenad: Kroner,
+        val grunnlag: EtteroppgjoerBrevGrunnlag,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_VEDTAK"
 
-        override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData = this
+        override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData =
+            this.copy(
+                vedleggInnhold =
+                    krevIkkeNull(
+                        innhold()
+                            .singleOrNull {
+                                it.key == BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING
+                            }?.payload,
+                    ) {
+                        "Mangler påkrevd vedlegg for etteroppgjør beregningsvedlegg"
+                    }.elements,
+            )
 
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }
 
-    class VedtakInnhold : BrevRedigerbarInnholdData() {
+    data class VedtakInnhold(
+        val etteroppgjoersAar: Int,
+        val forhaandsvarselSendtDato: LocalDate,
+        val mottattSvarDato: LocalDate?,
+    ) : BrevRedigerbarInnholdData() {
         override val type: String = "OMS_EO_VEDTAK_UTFALL"
         override val brevKode: Brevkoder = Brevkoder.OMS_EO_VEDTAK
     }
@@ -91,4 +120,24 @@ data class EtteroppgjoerBrevGrunnlag(
     val naeringsinntekt: Kroner,
     val afp: Kroner,
     val utlandsinntekt: Kroner,
-)
+    val inntekt: Kroner,
+) {
+    companion object {
+        fun fra(grunnlag: FaktiskInntektDto): EtteroppgjoerBrevGrunnlag {
+            krevIkkeNull(grunnlag.inntektInnvilgetPeriode) {
+                "Kan ikke vise beregningstabell uten summert faktisk inntekt"
+            }
+
+            return EtteroppgjoerBrevGrunnlag(
+                fom = grunnlag.fom,
+                tom = grunnlag.tom!!,
+                innvilgedeMaaneder = grunnlag.innvilgaMaaneder,
+                loennsinntekt = Kroner(grunnlag.loennsinntekt),
+                naeringsinntekt = Kroner(grunnlag.naeringsinntekt),
+                afp = Kroner(grunnlag.afp),
+                utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
+                inntekt = Kroner(grunnlag.inntektInnvilgetPeriode!!),
+            )
+        }
+    }
+}

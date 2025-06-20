@@ -20,6 +20,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SendBrev
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
@@ -440,6 +442,11 @@ internal fun Route.behandlingRoutes(
                                 behandlingsBehov.mottattDato,
                                 Vedtaksloesning.GJENNY,
                                 request = request,
+                                opprinnelse =
+                                    when (request.sak.sakType) {
+                                        SakType.BARNEPENSJON -> BehandlingOpprinnelse.BARNEPENSJON_SOEKNAD
+                                        SakType.OMSTILLINGSSTOENAD -> BehandlingOpprinnelse.OMSTILLINGSSTOENAD_SOEKNAD
+                                    },
                             )
                         }
                     behandlingOgOppgave.sendMeldingForHendelse()

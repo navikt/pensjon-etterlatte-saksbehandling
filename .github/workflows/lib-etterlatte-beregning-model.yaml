@@ -7,6 +7,9 @@ on:
       - main
     paths:
       - libs/etterlatte-beregning-model/**
+      - libs/saksbehandling-common/**
+      - libs/etterlatte-regler/**
+      - libs/etterlatte-inntektsjustering-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -14,6 +17,9 @@ on:
       - main
     paths:
       - libs/etterlatte-beregning-model/**
+      - libs/saksbehandling-common/**
+      - libs/etterlatte-regler/**
+      - libs/etterlatte-inntektsjustering-model/**
       - gradle/libs.versions.toml
 
 jobs:

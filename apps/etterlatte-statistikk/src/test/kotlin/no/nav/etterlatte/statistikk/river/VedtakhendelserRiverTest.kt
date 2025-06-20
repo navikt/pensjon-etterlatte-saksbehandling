@@ -62,7 +62,7 @@ internal class VedtakhendelserRiverTest {
             sakUtland = SakUtland.NASJONAL,
             virkningstidspunkt = YearMonth.of(2023, 6),
             utbetalingsdato = LocalDate.of(2023, 7, 20),
-            kilde = Vedtaksloesning.GJENNY,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
             pesysId = 123L,
             sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
             opphoerFom = null,

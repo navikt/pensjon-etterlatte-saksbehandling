@@ -158,7 +158,7 @@ class MaanedStatistikk(
                     sakUtland = sisteVedtak.sakUtland,
                     virkningstidspunkt = sisteVedtak.virkningstidspunkt,
                     utbetalingsdato = sisteVedtak.utbetalingsdato,
-                    kilde = sisteVedtak.kilde,
+                    kilde = sisteVedtak.vedtaksloesning,
                     pesysId = sisteVedtak.pesysId,
                     sakYtelsesgruppe = sakYtelsesgruppe,
                     harAktivitetsplikt = aktivitetForMaaned?.harAktivitetsplikt?.name,

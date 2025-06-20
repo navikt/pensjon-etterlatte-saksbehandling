@@ -95,7 +95,7 @@ class StatistikkService(
                                 vedtakTilStoenadsrad(
                                     vedtak,
                                     tekniskTid,
-                                    sakRad!!.kilde,
+                                    sakRad!!.vedtaksloesning,
                                     sakRad.pesysId,
                                 ),
                             ).also {
@@ -229,7 +229,7 @@ class StatistikkService(
                 ),
             avdoedeForeldre = statistikkBehandling.avdoed,
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
-            kilde = statistikkBehandling.kilde,
+            vedtaksloesning = statistikkBehandling.kilde,
             pesysId = statistikkBehandling.pesysId,
             relatertTil = statistikkBehandling.relatertBehandlingId,
         )
@@ -294,7 +294,7 @@ class StatistikkService(
             sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
             virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
             utbetalingsdato = utbetalingsdato,
-            kilde = vedtaksloesning,
+            vedtaksloesning = vedtaksloesning,
             pesysId = pesysid,
             sakYtelsesgruppe = hentSakYtelsesgruppe(sakType = vedtak.sak.sakType, avdoede = persongalleri.avdoed),
             opphoerFom = vedtakInnhold.opphoerFraOgMed,
@@ -340,7 +340,7 @@ class StatistikkService(
         soeknadFormat = null,
         vedtakLoependeTom = null,
         aktorId = statistikkTilbakekreving.tilbakekreving.sak.ident,
-        kilde = Vedtaksloesning.GJENNY,
+        vedtaksloesning = Vedtaksloesning.GJENNY,
         ansvarligBeslutter = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
         ferdigbehandletTidspunkt =
             statistikkTilbakekreving.tidspunkt.takeIf {
@@ -397,7 +397,7 @@ class StatistikkService(
         vedtakTidspunkt = null,
         beregning = null,
         avkorting = null,
-        kilde = Vedtaksloesning.GJENNY,
+        vedtaksloesning = Vedtaksloesning.GJENNY,
         ferdigbehandletTidspunkt =
             statistikkKlage.tidspunkt.takeIf {
                 statistikkKlage.klage.status in listOf(KlageStatus.AVBRUTT, KlageStatus.FERDIGSTILT)
@@ -500,7 +500,7 @@ class StatistikkService(
                         null
                     },
                 revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
-                kilde = statistikkBehandling.kilde,
+                vedtaksloesning = statistikkBehandling.kilde,
                 pesysId = statistikkBehandling.pesysId,
                 relatertTil = null,
             )

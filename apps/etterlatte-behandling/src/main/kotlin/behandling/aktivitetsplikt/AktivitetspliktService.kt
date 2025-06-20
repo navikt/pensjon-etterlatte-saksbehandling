@@ -22,6 +22,7 @@ import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktResponse
@@ -758,6 +759,7 @@ class AktivitetspliktService(
                 begrunnelse = request.jobbType.beskrivelse,
                 saksbehandlerIdent = Fagsaksystem.EY.navn,
                 frist = request.frist,
+                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
             ).oppdater()
             .let { revurdering ->
                 revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(revurdering)

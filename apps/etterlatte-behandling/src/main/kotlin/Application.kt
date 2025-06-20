@@ -104,7 +104,6 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.etteroppgjoerJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.sjekkAdressebeskyttelseJob,
-        context.uttrekkFylt18Job,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -223,7 +222,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
     behandlingInfoRoutes(applicationContext.behandlingInfoService)
     gosysOppgaveRoute(applicationContext.gosysOppgaveService)
-    oppgaveRoutes(applicationContext.oppgaveService)
+    oppgaveRoutes(applicationContext.oppgaveService, applicationContext.oppgaveKommentarService)
     grunnlagsendringshendelseRoute(
         grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
     )

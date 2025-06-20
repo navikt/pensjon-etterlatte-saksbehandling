@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -31,6 +32,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.DisttribuertEllerIverksatt
@@ -47,6 +49,7 @@ import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.YearMonth
 import java.util.UUID
 
@@ -252,11 +255,17 @@ class BehandlingServiceImpl(
         loependeFom: YearMonth?,
     ): SakslisteDTO =
         runBlocking {
-            behandlingKlient
-                .post("$url/saker/$kjoering/$antall") {
-                    contentType(ContentType.Application.Json)
-                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType, loependeFom))
-                }.body()
+            retryOgPakkUt {
+                behandlingKlient
+                    .post("$url/saker/$kjoering/$antall") {
+                        contentType(ContentType.Application.Json)
+                        setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType, loependeFom))
+                        timeout {
+                            socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                            requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                        }
+                    }.body()
+            }
         }
 
     override fun avbryt(behandlingId: UUID) =

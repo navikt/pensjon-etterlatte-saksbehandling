@@ -45,6 +45,7 @@ import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgang
 import no.nav.etterlatte.sak.SakTilgangImpl
 import no.nav.etterlatte.sak.SakendringerDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -75,6 +76,7 @@ internal class EgenAnsattServiceTest(
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val persongalleri = persongalleri()
+    private val saksbehandlerService = mockk<SaksbehandlerService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -123,11 +125,12 @@ internal class EgenAnsattServiceTest(
                     featureToggleService,
                     oppdaterTilgangService,
                     sakTilgang,
+                    mockk(),
                 ),
             )
         oppgaveService =
             spyk(
-                OppgaveService(oppgaveRepoMedSporing, sakLesDao, mockk(), hendelser),
+                OppgaveService(oppgaveRepoMedSporing, sakLesDao, mockk(), hendelser, saksbehandlerService),
             )
         egenAnsattService = EgenAnsattService(sakService, grunnlagService, oppdaterTilgangService)
 

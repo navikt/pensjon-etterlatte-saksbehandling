@@ -59,6 +59,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -862,7 +863,7 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal ikke tillate kun en juridisk forelder med startdato forskjellig fra virk`() {
+    fun `skal ikke tillate kun en juridisk forelder med startdato etter virk`() {
         val virk = YearMonth.of(2024, Month.JANUARY)
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
 
@@ -887,6 +888,49 @@ internal class BeregnBarnepensjonServiceTest {
                     ),
             )
         assertThrows<BPKunEnJuridiskForelderMaaGjeldeFraVirkningstidspunkt> {
+            runBlocking {
+                beregnBarnepensjonService().beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
+    fun `tillater kun en juridisk forelder med virk etter startdato`() {
+        val virk = YearMonth.of(2025, Month.MAY)
+        val behandling = mockBehandling(BehandlingType.REVURDERING, virk = virk)
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+            GrunnlagTestData(
+                annenForelder = AnnenForelder(KUN_EN_REGISTRERT_JURIDISK_FORELDER),
+            ).hentOpplysningsgrunnlag()
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandlingId = behandling.id,
+                soesken = emptyList(),
+                kunEnJuridiskForelder =
+                    GrunnlagMedPeriode(
+                        TomVerdi,
+                        virk.minusMonths(2).atDay(1),
+                        null,
+                    ),
+            )
+        coEvery {
+            trygdetidKlient.hentTrygdetid(
+                any(),
+                any(),
+            )
+        } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+            mockk {
+                every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+            }
+
+        assertDoesNotThrow {
             runBlocking {
                 beregnBarnepensjonService().beregn(behandling, bruker)
             }
@@ -1014,7 +1058,7 @@ internal class BeregnBarnepensjonServiceTest {
             every { sak } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
-            every { kilde } returns vedtaksloesning
+            every { this@mockk.vedtaksloesning } returns vedtaksloesning
             every { revurderingsaarsak } returns null
         }
 

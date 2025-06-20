@@ -2,13 +2,13 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.kjoering
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -34,7 +34,8 @@ internal class YtelseIkkeLoependeRiver(
         context: MessageContext,
     ) {
         val kjoering = packet.kjoering
-        val sakId = packet.sakId
+        val hendelsesdata = packet.omregningData
+        val sakId = hendelsesdata.sakId
         logger.info("Sak $sakId har ikke løpende ytelse, regulerer derfor ikke")
         behandlingService.lagreKjoering(sakId, KjoeringStatus.IKKE_LOEPENDE, kjoering)
         logger.info("Lagra kjøringsstatus som ikke løpende for sak $sakId")

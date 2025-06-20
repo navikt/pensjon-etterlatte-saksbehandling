@@ -344,6 +344,11 @@ class BrevService(
             throw InternfeilException("Kan ikke sette hoved-/kopimottaker på vanlig oppdatering av mottaker")
         }
 
+        val harUgyldigAdresse = mottaker.adresse.erGyldig()
+        if (harUgyldigAdresse.isNotEmpty()) {
+            throw UgyldigForespoerselException("MOTTAKER_ADRESSE_IKKE_GYLDIG", harUgyldigAdresse.joinToString())
+        }
+
         logger.info("Oppdaterer mottaker for brev=$brevId (id=${mottaker.id})")
 
         return db

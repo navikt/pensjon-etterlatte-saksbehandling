@@ -29,26 +29,34 @@ class TidshendelseService(
             """Løpende ytelse: oppretter behandling/oppgave for sak ${hendelse.sakId} 
                     behandlingsmåned=${hendelse.behandlingsmaaned}""",
         )
-        if (skalLageOmregning(hendelse)) {
-            try {
-                return behandlingService.opprettAutomatiskRevurdering(revurderingRequest(hendelse)).let { response ->
-                    TidshendelseResult.OpprettetOmregning(
-                        response.behandlingId,
-                        response.forrigeBehandlingId,
-                    )
-                }
-            } catch (e: Exception) {
-                logger.error("Kunne ikke opprette omregning [sak=${hendelse.sakId}]", e)
-                return opprettOppgaveOpphoerYtelse(hendelse)
-                    .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
+
+        return when (hendelse.jobbtype) {
+            JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
+            JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
+            JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
+            JobbType.OP_BP_FYLT_18 -> opprettOppgaveForBpFylt18Aar(hendelse)
+
+            JobbType.AO_BP20, JobbType.AO_BP21, JobbType.AO_OMS67, JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR ->
+                opprettAutomatiskRevurdering(
+                    hendelse,
+                )
+
+            else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
+        }
+    }
+
+    private fun opprettAutomatiskRevurdering(hendelse: TidshendelsePacket): TidshendelseResult {
+        try {
+            return behandlingService.opprettAutomatiskRevurdering(revurderingRequest(hendelse)).let { response ->
+                TidshendelseResult.OpprettetOmregning(
+                    response.behandlingId,
+                    response.forrigeBehandlingId,
+                )
             }
-        } else {
-            return when (hendelse.jobbtype) {
-                JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
-                JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
-                JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
-                else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
-            }
+        } catch (e: Exception) {
+            logger.error("Kunne ikke opprette omregning [sak=${hendelse.sakId}]", e)
+            return opprettOppgaveOpphoerYtelse(hendelse)
+                .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
         }
     }
 
@@ -157,6 +165,20 @@ class TidshendelseService(
         }
     }
 
+    private fun opprettOppgaveForBpFylt18Aar(hendelse: TidshendelsePacket): TidshendelseResult {
+        val oppgaveId =
+            behandlingService.opprettOppgave(
+                hendelse.sakId,
+                oppgaveTypeFor(hendelse.jobbtype),
+                referanse = null,
+                merknad = hendelse.jobbtype.beskrivelse,
+                // TODO finne rett frist
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+            )
+        logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
+        return TidshendelseResult.OpprettetOppgave(oppgaveId)
+    }
+
     private fun opprettOppgaveForAktivitetspliktVarigUnntak(hendelse: TidshendelsePacket): TidshendelseResult {
         val response =
             behandlingService.opprettOppgaveAktivitetspliktVarigUnntak(
@@ -179,25 +201,6 @@ class TidshendelseService(
         }
     }
 
-    private fun skalLageOmregning(hendelse: TidshendelsePacket) =
-        when (hendelse.jobbtype) {
-            JobbType.AO_BP20 -> true
-            JobbType.AO_BP21 -> true
-            JobbType.AO_OMS67 -> true
-            JobbType.OMS_DOED_3AAR -> true
-            JobbType.OMS_DOED_5AAR -> true
-            JobbType.OMS_DOED_4MND -> false
-            JobbType.OMS_DOED_6MND -> false
-            JobbType.OMS_DOED_10MND -> false
-            JobbType.OMS_DOED_12MND -> false
-            JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> false
-            JobbType.REGULERING,
-            JobbType.FINN_SAKER_TIL_REGULERING,
-            JobbType.AARLIG_INNTEKTSJUSTERING,
-
-            -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: ${hendelse.jobbtype}")
-        }
-
     private fun oppgaveTypeFor(type: JobbType): OppgaveType =
         when (type) {
             JobbType.AO_BP20 -> REVURDERING
@@ -209,6 +212,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_10MND -> AKTIVITETSPLIKT_12MND
             JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> AKTIVITETSPLIKT_REVURDERING
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
+            JobbType.OP_BP_FYLT_18 -> OppgaveType.OPPFOELGING
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,

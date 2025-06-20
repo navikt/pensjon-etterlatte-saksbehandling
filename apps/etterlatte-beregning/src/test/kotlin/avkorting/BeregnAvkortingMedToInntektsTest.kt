@@ -44,14 +44,30 @@ class BeregnAvkortingMedToInntektsTest {
             )
         }
         with(foerstegangsbehandlingNesteInntekt.aarsoppgjoer[1].avkortetYtelse) {
-            size shouldBe 1
+            size shouldBe 2
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
-                    periode = Periode(fom = YearMonth.of(2025, Month.JANUARY), tom = null),
+                    periode = Periode(fom = YearMonth.of(2025, Month.JANUARY), tom = YearMonth.of(2025, Month.APRIL)),
                     ytelseEtterAvkorting = 6820,
                     ytelseEtterAvkortingFoerRestanse = 6820,
                     restanse = null,
                     avkortingsbeloep = 9862,
+                    ytelseFoerAvkorting = 16682,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+            get(1).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2025, Month.MAY), tom = null),
+                    ytelseEtterAvkorting = 6935,
+                    ytelseEtterAvkortingFoerRestanse = 6935,
+                    restanse = null,
+                    avkortingsbeloep = 9747,
                     ytelseFoerAvkorting = 16682,
                     type = AvkortetYtelseType.AARSOPPGJOER,
                     inntektsgrunnlag = null,
@@ -76,12 +92,19 @@ class BeregnAvkortingMedToInntektsTest {
 
     private fun `Avkorting førstegangsbehandling inneværende år`() =
         Avkorting()
-            .beregnAvkortingMedNyttGrunnlag(
+            .beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 300000,
-                        fratrekkInnAar = 150000,
-                        fom = YearMonth.of(2024, Month.JULY),
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 150000,
+                            fom = YearMonth.of(2024, Month.JULY),
+                        ),
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 350000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                        ),
                     ),
                 bruker = bruker,
                 beregning =
@@ -100,13 +123,15 @@ class BeregnAvkortingMedToInntektsTest {
 
     private fun `Avkorting førstegangsbehandling neste år`(eksisterende: Avkorting) =
         eksisterende
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 325000,
-                        fratrekkInnAar = 0,
-                        fom = YearMonth.of(2025, Month.JANUARY),
-                    ),
+            .beregnAvkortingMedNyeGrunnlag(
+                listOf(
+                    element =
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 325000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                        ),
+                ),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -124,13 +149,15 @@ class BeregnAvkortingMedToInntektsTest {
 
     private fun `Avkorting revurdering inneværende år`(eksisterende: Avkorting) =
         eksisterende
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        aarsinntekt = 350000,
-                        fratrekkInnAar = 150000,
-                        fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar, Month.OCTOBER),
-                    ),
+            .beregnAvkortingMedNyeGrunnlag(
+                listOf(
+                    element =
+                        avkortinggrunnlagLagreDto(
+                            aarsinntekt = 350000,
+                            fratrekkInnAar = 150000,
+                            fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar, Month.OCTOBER),
+                        ),
+                ),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -148,19 +175,21 @@ class BeregnAvkortingMedToInntektsTest {
 
     private fun `Avkorting revurdering neste år`(eksisterende: Avkorting) =
         eksisterende
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag =
-                    avkortinggrunnlagLagreDto(
-                        id =
-                            eksisterende.aarsoppgjoer
-                                .last()
-                                .inntektsavkorting()
-                                .first()
-                                .grunnlag.id,
-                        aarsinntekt = 375000,
-                        fratrekkInnAar = 0,
-                        fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar + 1, Month.JANUARY),
-                    ),
+            .beregnAvkortingMedNyeGrunnlag(
+                listOf(
+                    element =
+                        avkortinggrunnlagLagreDto(
+                            id =
+                                eksisterende.aarsoppgjoer
+                                    .last()
+                                    .inntektsavkorting()
+                                    .first()
+                                    .grunnlag.id,
+                            aarsinntekt = 375000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar + 1, Month.JANUARY),
+                        ),
+                ),
                 bruker = bruker,
                 beregning =
                     beregning(

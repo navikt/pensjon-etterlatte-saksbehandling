@@ -1,68 +1,59 @@
-import { Box, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
-import { NOK } from '~utils/formatering/formatering'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { BodyShort, Box, HStack, Label, VStack } from '@navikt/ds-react'
+import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
+import { NOK } from '~utils/formatering/formatering'
 
 export const ResultatAvForbehandling = () => {
-  const etteroppgjoer = useEtteroppgjoer()
+  const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
+  if (!beregnetEtteroppgjoerResultat) return null
 
-  if (!etteroppgjoer || !etteroppgjoer.beregnetEtteroppgjoerResultat) {
-    return null
+  const { resultatType, differanse } = beregnetEtteroppgjoerResultat
+  const absoluttBeloep = Math.abs(differanse)
+
+  const resultatTekst: Record<EtteroppgjoerResultatType, string> = {
+    TILBAKEKREVING: 'Tilbakekreving',
+    ETTERBETALING: 'Etterbetaling',
+    INGEN_ENDRING: 'Ingen endring',
   }
 
-  const resultat = etteroppgjoer?.beregnetEtteroppgjoerResultat
+  const beskrivelse = (() => {
+    if (resultatType === EtteroppgjoerResultatType.TILBAKEKREVING) {
+      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}. Beløpet blir derfor krevd tilbake.`
+    }
+
+    if (resultatType === EtteroppgjoerResultatType.ETTERBETALING) {
+      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}. Beløpet blir derfor etterbetalt.`
+    }
+
+    if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING) {
+      if (differanse > 0) {
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
+      }
+
+      if (differanse < 0) {
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for etterbetaling, og det blir derfor ikke utbetalt.`
+      }
+
+      return `Resultatet viser ingen endring, bruker fikk utbetalt rett stønad i ${behandling.aar}.`
+    }
+  })()
 
   return (
-    <VStack gap="4">
-      <Heading size="large">Resultat</Heading>
-      <Box maxWidth="25rem">
-        <Table>
-          <Table.Header>
-            <Table.HeaderCell scope="col">Utregning</Table.HeaderCell>
-            <Table.HeaderCell scope="col">
-              <HStack justify="center">Beløp</HStack>
-            </Table.HeaderCell>
-          </Table.Header>
-          <Table.Body>
-            <Table.Row>
-              <Table.HeaderCell scope="row">Brutto utbetalt stønad</Table.HeaderCell>
-              <Table.DataCell>
-                <HStack justify="end">{NOK(resultat.utbetaltStoenad)}</HStack>
-              </Table.DataCell>
-            </Table.Row>
-            <Table.Row>
-              <Table.HeaderCell scope="row">Ny brutto stønad</Table.HeaderCell>
-              <Table.DataCell>
-                <HStack justify="end">{NOK(resultat.nyBruttoStoenad)}</HStack>
-              </Table.DataCell>
-            </Table.Row>
-            <Table.Row>
-              <Table.HeaderCell scope="row">Avviksbeløp +/-</Table.HeaderCell>
-              <Table.DataCell>
-                <HStack justify="end">
-                  {resultat.differanse > 0 && '+'}
-                  {NOK(resultat.differanse)}
-                </HStack>
-              </Table.DataCell>
-            </Table.Row>
-            <Table.Row>
-              <Table.HeaderCell scope="row">
-                <HStack gap="2">
-                  Toleransegrense
-                  <HelpText>
-                    Etteroppgjør skal unnlates hvis for lite utbetalt er mindre enn 25 prosent av rettsgebyret, eller
-                    hvis for mye utbetalt er mindre enn ett rettsgebyr. Jf. forskriftens § 9.
-                  </HelpText>
-                </HStack>
-              </Table.HeaderCell>
-              <Table.DataCell>
-                <HStack justify="end">
-                  {resultat.differanse > 0 ? NOK(resultat.grense.tilbakekreving) : NOK(resultat.grense.etterbetaling)}
-                </HStack>
-              </Table.DataCell>
-            </Table.Row>
-          </Table.Body>
-        </Table>
-      </Box>
-    </VStack>
+    <Box
+      marginBlock="8 0"
+      paddingInline="6"
+      paddingBlock="8"
+      background="surface-action-subtle"
+      borderColor="border-action"
+      borderWidth="0 0 0 4"
+      maxWidth="42.5rem"
+    >
+      <HStack gap="2" maxWidth="fit-content">
+        <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
+          <Label>{resultatTekst[resultatType]}</Label>
+          <BodyShort>{beskrivelse}</BodyShort>
+        </VStack>
+      </HStack>
+    </Box>
   )
 }

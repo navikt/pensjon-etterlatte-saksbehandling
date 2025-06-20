@@ -32,7 +32,7 @@ class AldersovergangerService(
         val saker =
             runBlocking {
                 retryOgPakkUt {
-                    behandlingKlient.hentSaker(foedselsmaaned = foedselsmaaned)
+                    behandlingKlient.hentSakerForFoedselsmaaned(foedselsmaaned = foedselsmaaned)
                 }
             }
 

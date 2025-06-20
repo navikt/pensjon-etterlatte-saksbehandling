@@ -44,7 +44,7 @@ class AldersovergangerIntegrationTest(
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
-        every { behandlingKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns emptyList()
+        every { behandlingKlient.hentSakerForFoedselsmaaned(behandlingsmaaned.minusYears(20)) } returns emptyList()
         every { behandlingKlient.hentSaker(emptyList()) } returns emptyMap()
 
         aldersovergangerService.execute(jobb)
@@ -65,7 +65,7 @@ class AldersovergangerIntegrationTest(
                     sak(it, sakType)
                 }.associateBy { it.id }
 
-        every { behandlingKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
+        every { behandlingKlient.hentSakerForFoedselsmaaned(behandlingsmaaned.minusYears(21)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
         aldersovergangerService.execute(jobb)
@@ -85,7 +85,7 @@ class AldersovergangerIntegrationTest(
                     sak(it, SakType.BARNEPENSJON)
                 }.associateBy { it.id }
 
-        every { behandlingKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
+        every { behandlingKlient.hentSakerForFoedselsmaaned(behandlingsmaaned.minusYears(21)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
         aldersovergangerService.execute(jobb)

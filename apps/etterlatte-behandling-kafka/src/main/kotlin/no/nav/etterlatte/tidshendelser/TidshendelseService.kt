@@ -47,6 +47,7 @@ class TidshendelseService(
                 JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
                 JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
+                JobbType.OP_BP_FYLT_18 -> opprettOppgaveForBpFylt18Aar(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
             }
         }
@@ -157,6 +158,20 @@ class TidshendelseService(
         }
     }
 
+    private fun opprettOppgaveForBpFylt18Aar(hendelse: TidshendelsePacket): TidshendelseResult {
+        val oppgaveId =
+            behandlingService.opprettOppgave(
+                hendelse.sakId,
+                oppgaveTypeFor(hendelse.jobbtype),
+                referanse = null,
+                merknad = hendelse.jobbtype.beskrivelse,
+                // TODO finne rett frist
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+            )
+        logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
+        return TidshendelseResult.OpprettetOppgave(oppgaveId)
+    }
+
     private fun opprettOppgaveForAktivitetspliktVarigUnntak(hendelse: TidshendelsePacket): TidshendelseResult {
         val response =
             behandlingService.opprettOppgaveAktivitetspliktVarigUnntak(
@@ -186,11 +201,14 @@ class TidshendelseService(
             JobbType.AO_OMS67 -> true
             JobbType.OMS_DOED_3AAR -> true
             JobbType.OMS_DOED_5AAR -> true
+
             JobbType.OMS_DOED_4MND -> false
             JobbType.OMS_DOED_6MND -> false
             JobbType.OMS_DOED_10MND -> false
             JobbType.OMS_DOED_12MND -> false
+            JobbType.OP_BP_FYLT_18 -> false
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> false
+
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
@@ -209,6 +227,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_10MND -> AKTIVITETSPLIKT_12MND
             JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> AKTIVITETSPLIKT_REVURDERING
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
+            JobbType.OP_BP_FYLT_18 -> OppgaveType.OPPFOELGING
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,

@@ -14,6 +14,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -99,6 +100,8 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
+    fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId>
+
     fun hentSaksendringer(sakId: SakId): List<Saksendring>
 
     fun oppdaterEnhet(
@@ -138,6 +141,7 @@ class SakServiceImpl(
     private val featureToggle: FeatureToggleService,
     private val tilgangsService: OppdaterTilgangService,
     private val sakTilgang: SakTilgang,
+    private val aldersovergangService: AldersovergangService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -339,6 +343,13 @@ class SakServiceImpl(
             .also {
                 logger.info("Fant ${it.size} saker der pleieforholdet opphørte i $maanedOpphoerte")
             }
+    }
+
+    override fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId> {
+        logger.info("Henter saker der bruker har fylt 18 år i $maaned")
+        return aldersovergangService
+            .hentSoekereFoedtIEnGittMaaned(maaned)
+            .map { SakId(it.toLong()) }
     }
 
     private suspend fun hentSpraak(fnr: String): Spraak {

@@ -47,7 +47,7 @@ class BehandlingKlient(
                 .body()
         }
 
-    fun hentSaker(foedselsmaaned: YearMonth): List<SakId> =
+    fun hentSakerForFoedselsmaaned(foedselsmaaned: YearMonth): List<SakId> =
         runBlocking {
             behandlingHttpClient
                 .get("$behandlingUrl/api/grunnlag/aldersovergang/$foedselsmaaned") {
@@ -60,6 +60,15 @@ class BehandlingKlient(
         runBlocking {
             behandlingHttpClient
                 .get("$behandlingUrl/api/grunnlag/doedsdato/$doedsfallsmaaned") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                }.body()
+        }
+
+    fun hentSakerBpFylt18IMaaned(maaned: YearMonth): List<SakId> =
+        runBlocking {
+            behandlingHttpClient
+                .get("$behandlingUrl/saker/bp-fyller-18-i-maaned/$maaned") {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                 }.body()

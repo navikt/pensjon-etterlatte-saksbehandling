@@ -356,30 +356,7 @@ class SakServiceImpl(
                 .hentSoekereFoedtIEnGittMaaned(maaned)
                 .map { SakId(it.toLong()) }
 
-        return aktuelleSaker.mapNotNull { sakId ->
-            try {
-                val sak = inTransaction { finnSak(sakId) }
-
-                if (sak?.sakType == SakType.BARNEPENSJON) {
-                    val ytelse =
-                        runBlocking {
-                            vedtakKlient.sakHarLopendeVedtakPaaDato(
-                                sakId,
-                                maaned.atDay(1),
-                                HardkodaSystembruker.uttrekk,
-                            )
-                        }
-
-                    if (ytelse.erLoepende) {
-                        return@mapNotNull sakId
-                    }
-                }
-                null
-            } catch (e: Exception) {
-                logger.info("En feil oppstod ved behandling av sak $sakId", e)
-                null
-            }
-        }
+        return aktuelleSaker
     }
 
     private suspend fun hentSpraak(fnr: String): Spraak {

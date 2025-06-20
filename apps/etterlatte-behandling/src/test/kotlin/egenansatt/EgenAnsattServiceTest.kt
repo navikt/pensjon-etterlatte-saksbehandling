@@ -126,7 +126,6 @@ internal class EgenAnsattServiceTest(
                     oppdaterTilgangService,
                     sakTilgang,
                     mockk(),
-                    mockk(),
                 ),
             )
         oppgaveService =

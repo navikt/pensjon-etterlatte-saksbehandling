@@ -101,7 +101,6 @@ internal class SakServiceTest {
             oppdaterTilgangService,
             saktilgang,
             mockk(),
-            mockk(),
         )
 
     @BeforeEach

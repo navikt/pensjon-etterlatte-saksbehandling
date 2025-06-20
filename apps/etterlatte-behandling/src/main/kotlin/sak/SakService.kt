@@ -6,7 +6,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -142,7 +141,6 @@ class SakServiceImpl(
     private val featureToggle: FeatureToggleService,
     private val tilgangsService: OppdaterTilgangService,
     private val sakTilgang: SakTilgang,
-    private val vedtakKlient: VedtakKlient,
     private val aldersovergangService: AldersovergangService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)

@@ -559,7 +559,6 @@ internal class ApplicationContext(
             featureToggleService,
             oppdaterTilgangService,
             sakTilgang,
-            vedtakKlient,
             nyAldersovergangService,
         )
 

@@ -33,15 +33,28 @@ export const gyldigbrevkode = (brevkoder: string): boolean =>
     'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD',
   ].includes(brevkoder)
 
+function finnLenkeTilRedigerbartBrev(brev: IBrev) {
+  if (!brev.behandlingId) {
+    return `/person/sak/${brev.sakId}/brev/${brev.id}`
+  } else if ('OMS_EO_FORHAANDSVARSEL' === brev.brevkoder) {
+    return `/etteroppgjoer/${brev.behandlingId}/oppsummering`
+  } else {
+    return `/behandling/${brev.behandlingId}/brev`
+  }
+}
+
 const handlingKnapp = (brev: IBrev) => {
   if (kanEndres(brev)) {
-    const href =
-      brev.behandlingId && brev.status !== BrevStatus.JOURNALFOERT
-        ? `/behandling/${brev.behandlingId}/brev`
-        : `/person/sak/${brev.sakId}/brev/${brev.id}`
-
+    const hrefForBrev = finnLenkeTilRedigerbartBrev(brev)
     return (
-      <Button as="a" href={href} variant="secondary" title="Rediger" icon={<DocPencilIcon aria-hidden />} size="small">
+      <Button
+        as="a"
+        href={hrefForBrev}
+        variant="secondary"
+        title="Rediger"
+        icon={<DocPencilIcon aria-hidden />}
+        size="small"
+      >
         Rediger
       </Button>
     )

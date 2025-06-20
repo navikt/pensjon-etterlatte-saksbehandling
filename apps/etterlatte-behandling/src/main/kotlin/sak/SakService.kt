@@ -40,7 +40,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
@@ -350,13 +349,9 @@ class SakServiceImpl(
 
     override fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId> {
         logger.info("Henter saker der bruker har fylt 18 år i $maaned")
-
-        val aktuelleSaker =
-            aldersovergangService
-                .hentSoekereFoedtIEnGittMaaned(maaned)
-                .map { SakId(it.toLong()) }
-
-        return aktuelleSaker
+        return aldersovergangService
+            .hentSoekereFoedtIEnGittMaaned(maaned)
+            .map { SakId(it.toLong()) }
     }
 
     private suspend fun hentSpraak(fnr: String): Spraak {

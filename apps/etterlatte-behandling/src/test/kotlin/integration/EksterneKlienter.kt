@@ -78,8 +78,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
-import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -281,13 +282,19 @@ class VedtakKlientTest : VedtakKlient {
         TODO("Not yet implemented")
     }
 
-    override suspend fun hentFoersteVirkOgOppoerTilSak(
+    override suspend fun hentInnvilgedePerioder(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): FoersteVirkOgOppoerTilSak =
-        FoersteVirkOgOppoerTilSak(
-            foersteVirk = YearMonth.of(2024, 1),
-            opphoer = YearMonth.of(2024, 12),
+    ): List<InnvilgetPeriodeDto> =
+        listOf(
+            InnvilgetPeriodeDto(
+                periode =
+                    Periode(
+                        fom = YearMonth.of(2024, 1),
+                        tom = YearMonth.of(2024, 11),
+                    ),
+                vedtak = emptyList(),
+            ),
         )
 }
 

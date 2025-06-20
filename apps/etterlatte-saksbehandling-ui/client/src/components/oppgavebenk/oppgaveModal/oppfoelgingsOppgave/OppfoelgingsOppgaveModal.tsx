@@ -62,10 +62,11 @@ export function OppfoelgingAvOppgaveModal({
   }
 
   const ferdigstill = (data: OppfoegingsOppgaveSkjema) => {
-    const merknad = data.hvaSomErFulgtOpp ? data.hvaSomErFulgtOpp : oppgave.merknad
-    ferdigstillOppgaveMedMerknadRequest({ id: oppgave.id, merknad: merknad }, (oppgave) => {
+    const merknad = oppgave.merknad
+    ferdigstillOppgaveMedMerknadRequest({ id: oppgave.id, merknad }, (oppgave) => {
       opprettOppgaveKommentarRequest({ oppgaveId: oppgave.id, kommentar: data.hvaSomErFulgtOpp }, () => {
         oppdaterStatus(oppgave.id, oppgave.status)
+
         lukkModal()
       })
     })
@@ -89,7 +90,9 @@ export function OppfoelgingAvOppgaveModal({
               <Modal.Body>
                 <VStack gap="4">
                   {erRedigerbar && (
-                   <BodyShort>Når oppfølgingen er gjennomført, kan oppgaven ferdigstilles med en beskrivelse.</BodyShort>
+                    <BodyShort>
+                      Når oppfølgingen er gjennomført, kan oppgaven ferdigstilles med en beskrivelse.
+                    </BodyShort>
                   )}
 
                   {isFailureHandler({

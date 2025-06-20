@@ -345,10 +345,11 @@ class SakServiceImpl(
             }
     }
 
-    override fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId> {
-        logger.info("Henter saker der bruker har fylt 18 år i $maaned")
+    override fun hentSakerBpFylt18AarIMaaned(maanedFyller18: YearMonth): List<SakId> {
+        logger.info("Henter saker der bruker har fylt 18 år i $maanedFyller18")
+        val foedselsMaaned = maanedFyller18.minusYears(18)
         return aldersovergangService
-            .hentSoekereFoedtIEnGittMaaned(maaned)
+            .hentSoekereFoedtIEnGittMaaned(foedselsMaaned)
             .map { SakId(it.toLong()) }
     }
 

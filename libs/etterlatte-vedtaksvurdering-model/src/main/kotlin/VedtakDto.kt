@@ -171,7 +171,7 @@ data class TilbakekrevingVedtakLagretDto(
     val dato: LocalDate,
 )
 
-data class FoersteVirkOgOppoerTilSak(
-    val foersteVirk: YearMonth,
-    val opphoer: YearMonth?,
+data class InnvilgetPeriodeDto(
+    val periode: Periode,
+    val vedtak: List<VedtakDto>,
 )

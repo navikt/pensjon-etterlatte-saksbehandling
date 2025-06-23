@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
@@ -149,7 +149,7 @@ class EtteroppgjoerForbehandlingService(
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
-        val virkOgOpphoer = runBlocking { vedtakKlient.hentFoersteVirkOgOppoerTilSak(sakId, brukerTokenInfo) }
+        val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
         val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
@@ -285,22 +285,23 @@ class EtteroppgjoerForbehandlingService(
     }
 
     private fun utledInnvilgetPeriode(
-        virkOgOpphoer: FoersteVirkOgOppoerTilSak,
+        innvilgedePerioder: List<InnvilgetPeriodeDto>,
         inntektsaar: Int,
-    ) = Periode(
-        fom =
-            if (virkOgOpphoer.foersteVirk.year == inntektsaar) {
-                virkOgOpphoer.foersteVirk
-            } else {
-                YearMonth.of(inntektsaar, Month.JANUARY)
-            },
-        tom =
-            if (virkOgOpphoer.opphoer != null && virkOgOpphoer!!.opphoer!!.year == inntektsaar) {
-                virkOgOpphoer.opphoer
-            } else {
-                YearMonth.of(inntektsaar, Month.DECEMBER)
-            },
-    )
+    ): Periode {
+        val periode =
+            krevIkkeNull(innvilgedePerioder.singleOrNull()) {
+                "Støtter ikke utledning av innvilget periode med 0 eller mer enn en periode: $innvilgedePerioder"
+            }.periode
+        if (periode.fom > YearMonth.of(inntektsaar, Month.DECEMBER)) {
+            throw InternfeilException(
+                "Sak er ikke innvilget i året $inntektsaar, skal ikke kunne opprette etteroppgjør for året $inntektsaar",
+            )
+        }
+        return Periode(
+            fom = maxOf(periode.fom, YearMonth.of(inntektsaar, Month.JANUARY)),
+            tom = minOf(periode.tom ?: YearMonth.of(inntektsaar, Month.DECEMBER), YearMonth.of(inntektsaar, Month.DECEMBER)),
+        )
+    }
 
     private fun hentAvkortingForForbehandling(
         forbehandling: EtteroppgjoerForbehandling,

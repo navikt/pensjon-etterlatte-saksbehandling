@@ -303,7 +303,14 @@ internal class VedtakstidslinjeTest {
                 opphoerFraOgMed = YearMonth.of(2024, 6),
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, endring, opphoertDato)).harLoependeVedtakPaaEllerEtter(LocalDate.of(2024, 6, 4))
+        val actual =
+            Vedtakstidslinje(listOf(iverksattDato, endring, opphoertDato)).harLoependeVedtakPaaEllerEtter(
+                LocalDate.of(
+                    2024,
+                    6,
+                    4,
+                ),
+            )
         assertEquals(false, actual.erLoepende)
     }
 
@@ -368,7 +375,8 @@ internal class VedtakstidslinjeTest {
                 vedtakType = VedtakType.ENDRING,
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, vedtakTilSamordning)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual =
+            Vedtakstidslinje(listOf(iverksattDato, vedtakTilSamordning)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(true, actual.underSamordning)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
@@ -413,7 +421,14 @@ internal class VedtakstidslinjeTest {
                 datoAttestert = attesteringsdato.plus(2, DAYS),
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato, revurdertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual =
+            Vedtakstidslinje(
+                listOf(
+                    iverksattDato,
+                    opphoertDato,
+                    revurdertDato,
+                ),
+            ).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -457,7 +472,14 @@ internal class VedtakstidslinjeTest {
                 opphoerFraOgMed = YearMonth.from(opphoer),
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato, revurdertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual =
+            Vedtakstidslinje(
+                listOf(
+                    iverksattDato,
+                    opphoertDato,
+                    revurdertDato,
+                ),
+            ).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
         assertEquals(fraOgMed, actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
@@ -499,7 +521,10 @@ internal class VedtakstidslinjeTest {
                 datoAttestert = attesteringsdato.plus(2, DAYS),
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, revurderingDato, opphoerDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual =
+            Vedtakstidslinje(listOf(iverksattDato, revurderingDato, opphoerDato)).harLoependeVedtakPaaEllerEtter(
+                fraOgMed,
+            )
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
@@ -544,7 +569,8 @@ internal class VedtakstidslinjeTest {
                 datoAttestert = attesteringsdato.plus(2, DAYS),
             )
 
-        val actual = Vedtakstidslinje(listOf(innvilgelse, revurdering, opphoer)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual =
+            Vedtakstidslinje(listOf(innvilgelse, revurdering, opphoer)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -728,6 +754,78 @@ internal class VedtakstidslinjeTest {
         }
 
         @Test
+        fun `innvilgede perioder finner 2 separerte perioder hvis det er opphør imellom`() {
+            val vedtakVirkJanuar =
+                lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                    id = 1,
+                    virkningFom = YearMonth.of(2024, Month.JANUARY),
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    vedtakFattetDato = Tidspunkt.now().minus(3, DAYS),
+                    opphoerFraOgMed = YearMonth.of(2024, Month.AUGUST),
+                )
+
+            val annulererOpphoer =
+                lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                    id = 2,
+                    virkningFom = YearMonth.of(2024, Month.AUGUST),
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.now().minus(2, DAYS),
+                )
+
+            val vedtakOpphoerFomSeptember =
+                lagVedtak(
+                    id = 3,
+                    virkningsDato = YearMonth.of(2024, Month.SEPTEMBER).atDay(1),
+                    behandlingId = UUID.randomUUID(),
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                    datoAttestert = Tidspunkt.now().minus(1, DAYS),
+                    vedtakType = VedtakType.OPPHOER,
+                    vedtakFattetDato = Tidspunkt.now().minus(1, DAYS),
+                    utbetalingsperioder = listOf(),
+                    opphoerFraOgMed = null,
+                )
+
+            val igangsattIgjen =
+                lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                    id = 4,
+                    virkningFom = YearMonth.of(2024, Month.DECEMBER),
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.now(),
+                    opphoerFraOgMed = null,
+                )
+
+            val tidslinje =
+                Vedtakstidslinje(listOf(vedtakVirkJanuar, annulererOpphoer, vedtakOpphoerFomSeptember, igangsattIgjen))
+
+            val innvilgetPeriode = tidslinje.innvilgedePerioder()
+            innvilgetPeriode.size shouldBe 2
+            innvilgetPeriode[0].periode.fom shouldBe januar2024
+            innvilgetPeriode[0].periode.tom shouldBe YearMonth.of(2024, Month.AUGUST)
+            innvilgetPeriode[1].periode.fom shouldBe YearMonth.of(2024, Month.DECEMBER)
+            innvilgetPeriode[1].periode.tom shouldBe null
+        }
+
+        @Test
+        fun `innvilgedePerioder gir riktig svar med kun ett vedtak`() {
+            val vedtakVirkJanuar =
+                lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                    id = 1,
+                    virkningFom = YearMonth.of(2024, Month.JANUARY),
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    vedtakFattetDato = Tidspunkt.now().minus(3, DAYS),
+                    opphoerFraOgMed = YearMonth.of(2024, Month.AUGUST),
+                )
+
+            val tidslinje = Vedtakstidslinje(listOf(vedtakVirkJanuar))
+            val innvilgetPeriode = tidslinje.innvilgedePerioder()
+
+            innvilgetPeriode.size shouldBe 1
+            innvilgetPeriode[0].periode.fom shouldBe januar2024
+            innvilgetPeriode[0].periode.tom shouldBe YearMonth.of(2024, Month.JULY)
+        }
+
+        @Test
         fun `Skal kunne ha et opphør og en ny revurdering med virk før opphør som bygger opp utbetalingslinjer med opphøret`() {
             val vedtakFomJanuar2024 =
                 lagVedtak(
@@ -869,17 +967,19 @@ private fun lagStandardVedtakMedEnAapenUtbetalingsperiode(
     virkningFom: YearMonth,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     vedtakFattetDato: Tidspunkt = Tidspunkt.ofNorskTidssone(virkningFom.atDay(1), tid = LocalTime.NOON),
+    opphoerFraOgMed: YearMonth? = null,
 ) = lagVedtak(
     id = id,
     virkningsDato = virkningFom.atDay(1),
     vedtakStatus = VedtakStatus.IVERKSATT,
     behandlingType = behandlingType,
     vedtakFattetDato = vedtakFattetDato,
+    opphoerFraOgMed = opphoerFraOgMed,
     utbetalingsperioder =
         listOf(
             Utbetalingsperiode(
                 id = id * 10,
-                periode = Periode(virkningFom, null),
+                periode = Periode(virkningFom, opphoerFraOgMed),
                 beloep = BigDecimal.valueOf(140),
                 type = UtbetalingsperiodeType.UTBETALING,
                 regelverk = Regelverk.REGELVERK_FOM_JAN_2024,

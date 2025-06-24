@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.SamordneResponse
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.samordning.TilSamordningRiver
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

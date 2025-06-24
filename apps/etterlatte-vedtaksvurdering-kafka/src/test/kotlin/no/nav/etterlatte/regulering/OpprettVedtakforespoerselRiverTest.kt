@@ -7,12 +7,11 @@ import io.mockk.verify
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.klienter.BrevKlient
+import no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
-import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
-import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
-import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.omregning.UtbetalingVerifikasjon

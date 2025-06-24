@@ -11,8 +11,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
 import no.nav.etterlatte.vedtaksvurdering.opprettVedtak

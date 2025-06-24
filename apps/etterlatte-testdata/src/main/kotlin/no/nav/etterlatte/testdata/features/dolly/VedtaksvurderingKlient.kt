@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly
+package no.nav.etterlatte.testdata.features.dolly
 
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient

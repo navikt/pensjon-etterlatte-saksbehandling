@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -12,15 +12,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
-import no.nav.etterlatte.vedtaksvurdering.RapidInfo
-import no.nav.etterlatte.vedtaksvurdering.UgyldigAttestantException
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilstandException
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

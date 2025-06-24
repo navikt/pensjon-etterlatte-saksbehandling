@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics
+package no.nav.etterlatte.vedtaksvurdering.metrics
 
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry

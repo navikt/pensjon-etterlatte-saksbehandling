@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.samordning
+package no.nav.etterlatte.vedtaksvurdering.samordning
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.marker.LogstashMarker

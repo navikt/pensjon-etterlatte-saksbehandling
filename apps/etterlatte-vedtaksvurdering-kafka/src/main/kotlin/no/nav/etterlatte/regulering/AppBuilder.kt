@@ -9,6 +9,9 @@ import no.nav.etterlatte.EnvKey.VEDTAK_AZURE_SCOPE
 import no.nav.etterlatte.VedtakServiceImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.klienter.BrevKlient
+import no.nav.etterlatte.klienter.UtbetalingKlient
+import no.nav.etterlatte.klienter.UtbetalingKlientImpl
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -16,9 +19,6 @@ import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
-import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
-import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlientImpl
 import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_BREV_API_URL
 import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_UTBETALING_URL
 import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_VEDTAK_URL

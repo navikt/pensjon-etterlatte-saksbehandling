@@ -48,7 +48,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
-import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
+import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
@@ -227,7 +227,7 @@ internal class SakServiceTest {
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.PORSGRUNN.enhetNr,
-                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                     erSkjermet = false,
                 ),
             )
@@ -257,7 +257,7 @@ internal class SakServiceTest {
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
-                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                     erSkjermet = false,
                 ),
             )
@@ -287,7 +287,7 @@ internal class SakServiceTest {
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
-                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                     erSkjermet = false,
                 ),
             )
@@ -318,7 +318,7 @@ internal class SakServiceTest {
                     ident = KONTANT_FOT.value,
                     sakType = SakType.OMSTILLINGSSTOENAD,
                     enhet = Enheter.PORSGRUNN.enhetNr,
-                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                     erSkjermet = false,
                 ),
             )
@@ -427,7 +427,7 @@ internal class SakServiceTest {
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
-                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                 erSkjermet = false,
             )
         every { sakLesDao.hentSak(sakId1) } returns sak1
@@ -498,7 +498,7 @@ internal class SakServiceTest {
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
-                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                 erSkjermet = false,
             )
         every {
@@ -582,7 +582,7 @@ internal class SakServiceTest {
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
-                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                 erSkjermet = false,
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
@@ -611,7 +611,7 @@ internal class SakServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 id = sakId1,
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
-                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                 erSkjermet = false,
             )
 
@@ -674,7 +674,7 @@ internal class SakServiceTest {
                     sakType = SakType.BARNEPENSJON,
                     id = randomSakId(),
                     enhet = Enheter.EGNE_ANSATTE.enhetNr,
-                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                     erSkjermet = false,
                 ),
             )
@@ -699,7 +699,7 @@ internal class SakServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 id = randomSakId(),
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
-                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                 erSkjermet = false,
             )
 
@@ -731,7 +731,7 @@ internal class SakServiceTest {
                     sakType = SakType.BARNEPENSJON,
                     id = randomSakId(),
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
-                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                     erSkjermet = false,
                 ),
             )
@@ -756,7 +756,7 @@ internal class SakServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 id = randomSakId(),
                 enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
-                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                 erSkjermet = false,
             )
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(ident)
@@ -785,7 +785,7 @@ internal class SakServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 id = randomSakId(),
                 enhet = enhet.enhetNr,
-                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                 erSkjermet = false,
             )
 
@@ -962,14 +962,14 @@ internal class SakServiceTest {
         ident: String,
         sakType: SakType,
         enhet: Enheter = Enheter.PORSGRUNN,
-        addressebeskyttelse: Addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
         erSkjermet: Boolean = false,
     ) = Sak(
         ident = ident,
         sakType = sakType,
         id = randomSakId(),
         enhet = enhet.enhetNr,
-        addressebeskyttelse = addressebeskyttelse,
+        adressebeskyttelse = adressebeskyttelse,
         erSkjermet = erSkjermet,
     )
 

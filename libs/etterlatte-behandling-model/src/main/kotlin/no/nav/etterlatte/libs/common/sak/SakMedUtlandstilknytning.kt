@@ -9,7 +9,7 @@ data class SakMedUtlandstilknytning(
     val sakType: SakType,
     val id: SakId,
     val enhet: Enhetsnummer,
-    val addressebeskyttelse: Addressebeskyttelse,
+    val adressebeskyttelse: Adressebeskyttelse,
     val erSkjermet: Boolean,
     val utlandstilknytning: Utlandstilknytning?,
 ) {
@@ -22,7 +22,7 @@ data class SakMedUtlandstilknytning(
             sakType = sak.sakType,
             id = sak.id,
             enhet = sak.enhet,
-            addressebeskyttelse = sak.addressebeskyttelse,
+            adressebeskyttelse = sak.adressebeskyttelse,
             erSkjermet = sak.erSkjermet,
             utlandstilknytning = utlandstilknytning,
         )

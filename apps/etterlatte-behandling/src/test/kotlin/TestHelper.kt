@@ -56,7 +56,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
+import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
@@ -265,7 +265,7 @@ fun foerstegangsbehandling(
     enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
-    addressebeskyttelse: Addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
     erSkjermet: Boolean = false,
 ) = Foerstegangsbehandling(
     id = id,
@@ -275,7 +275,7 @@ fun foerstegangsbehandling(
             sakType = sakType,
             id = sakId,
             enhet = enhet,
-            addressebeskyttelse = addressebeskyttelse,
+            adressebeskyttelse = adressebeskyttelse,
             erSkjermet = erSkjermet,
         ),
     behandlingOpprettet = behandlingOpprettet,
@@ -315,7 +315,7 @@ fun revurdering(
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
     tidligereFamiliepleier: TidligereFamiliepleier? = null,
-    addressebeskyttelse: Addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
     erSkjermet: Boolean = false,
 ) = Revurdering.opprett(
     id = id,
@@ -325,7 +325,7 @@ fun revurdering(
             sakType = sakType,
             id = sakId,
             enhet = enhet,
-            addressebeskyttelse = addressebeskyttelse,
+            adressebeskyttelse = adressebeskyttelse,
             erSkjermet = erSkjermet,
         ),
     behandlingOpprettet = behandlingOpprettet,

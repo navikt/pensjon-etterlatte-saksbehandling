@@ -139,7 +139,7 @@ class KlageDaoImpl(
                     sakType = enumValueOf(getString("saktype")),
                     id = SakId(getLong("sak_id")),
                     enhet = Enhetsnummer(getString("enhet")),
-                    addressebeskyttelse = enumValueOf(getString("adressebeskyttelse")),
+                    adressebeskyttelse = enumValueOf(getString("adressebeskyttelse")),
                     erSkjermet = getBoolean("erSkjermet"),
                 ),
             opprettet = getTidspunkt("opprettet"),

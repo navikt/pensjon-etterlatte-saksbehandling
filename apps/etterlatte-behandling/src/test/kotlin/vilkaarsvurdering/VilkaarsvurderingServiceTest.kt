@@ -43,7 +43,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
+import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -1006,7 +1006,7 @@ internal class VilkaarsvurderingServiceTest(
                     id = sakId,
                     sakType = sakType,
                     enhet = Enhetsnummer.ukjent,
-                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                     erSkjermet = false,
                 ),
             status = behandlingStatus,

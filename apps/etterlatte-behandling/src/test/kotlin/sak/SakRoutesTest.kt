@@ -29,7 +29,7 @@ import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
+import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -108,7 +108,7 @@ internal class SakRoutesTest {
                 SakType.OMSTILLINGSSTOENAD,
                 sakId,
                 Enheter.defaultEnhet.enhetNr,
-                Addressebeskyttelse.UGRADERT,
+                Adressebeskyttelse.UGRADERT,
                 false,
             )
 
@@ -151,7 +151,7 @@ internal class SakRoutesTest {
                 SakType.OMSTILLINGSSTOENAD,
                 sakId,
                 Enheter.defaultEnhet.enhetNr,
-                Addressebeskyttelse.UGRADERT,
+                Adressebeskyttelse.UGRADERT,
                 false,
             )
 

@@ -46,7 +46,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
+import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -942,9 +942,9 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - flere saker prioriteres korrekt`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = randomSakId(), Enheter.PORSGRUNN.enhetNr, Addressebeskyttelse.UGRADERT, false)
+        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = randomSakId(), Enheter.PORSGRUNN.enhetNr, Adressebeskyttelse.UGRADERT, false)
         val sak2 =
-            Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr, Addressebeskyttelse.UGRADERT, false)
+            Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr, Adressebeskyttelse.UGRADERT, false)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak1.id) } returns
             listOf(
@@ -1046,7 +1046,7 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - kun én sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr, Addressebeskyttelse.UGRADERT, false)
+        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr, Adressebeskyttelse.UGRADERT, false)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
             listOf(

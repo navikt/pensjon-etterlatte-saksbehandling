@@ -8,11 +8,11 @@ data class Sak(
     val sakType: SakType,
     val id: SakId,
     val enhet: Enhetsnummer,
-    val addressebeskyttelse: Addressebeskyttelse,
+    val adressebeskyttelse: Adressebeskyttelse,
     val erSkjermet: Boolean,
 )
 
-enum class Addressebeskyttelse {
+enum class Adressebeskyttelse {
     UGRADERT,
     GRADERT,
 }

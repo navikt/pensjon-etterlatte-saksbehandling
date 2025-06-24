@@ -354,7 +354,7 @@ class EtteroppgjoerForbehandlingDao(
                     sakType = enumValueOf(getString("saktype")),
                     ident = getString("fnr"),
                     enhet = Enhetsnummer(getString("enhet")),
-                    addressebeskyttelse = enumValueOf(getString("addressebeskyttelse")),
+                    adressebeskyttelse = enumValueOf(getString("addressebeskyttelse")),
                     erSkjermet = getBoolean("erSkjermet"),
                 ),
             // sekvensnummerSkatt = "123", // TODO

@@ -100,7 +100,7 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
-    fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId>
+    fun hentSakerBpFylt18AarIMaaned(maanedFyller18: YearMonth): List<SakId>
 
     fun hentSaksendringer(sakId: SakId): List<Saksendring>
 

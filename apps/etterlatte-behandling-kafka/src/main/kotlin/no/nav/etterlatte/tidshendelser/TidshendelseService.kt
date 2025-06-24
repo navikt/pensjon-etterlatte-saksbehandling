@@ -172,8 +172,7 @@ class TidshendelseService(
                 oppgaveTypeFor(hendelse.jobbtype),
                 referanse = null,
                 merknad = hendelse.jobbtype.beskrivelse,
-                // TODO finne rett frist
-                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.minusMonths(1).atDay(21), LocalTime.NOON),
             )
         logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
         return TidshendelseResult.OpprettetOppgave(oppgaveId)

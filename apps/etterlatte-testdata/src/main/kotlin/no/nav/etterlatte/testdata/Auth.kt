@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.testdata
+package no.nav.etterlatte.testdata
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall

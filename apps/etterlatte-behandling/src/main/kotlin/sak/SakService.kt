@@ -85,7 +85,7 @@ interface SakService {
         overstyrendeEnhet: Enhetsnummer?,
     )
 
-    fun hentEnkeltSakForPerson(fnr: String): Sak
+    fun hentSakHvisSaksbehandlerHarTilgang(fnr: String): Sak
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
 
@@ -100,7 +100,7 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
-    fun hentSakerBpFylt18AarIMaaned(maaned: YearMonth): List<SakId>
+    fun hentSakerBpFylt18AarIMaaned(maanedFyller18: YearMonth): List<SakId>
 
     fun hentSaksendringer(sakId: SakId): List<Saksendring>
 
@@ -160,9 +160,9 @@ class SakServiceImpl(
         skrivDao.oppdaterEnhet(sak, kommentar)
     }
 
-    override fun hentEnkeltSakForPerson(fnr: String): Sak {
+    // Vi må verne om navkontor for de med adressebeskyttelse, siden de er geografisk informasjon
+    override fun hentSakHvisSaksbehandlerHarTilgang(fnr: String): Sak {
         val saker = finnSakerForPerson(fnr)
-
         if (saker.isEmpty()) throw PersonManglerSak()
 
         return saker.filterForEnheter().firstOrNull()
@@ -172,7 +172,7 @@ class SakServiceImpl(
     override suspend fun finnNavkontorForPerson(fnr: String): Navkontor {
         val sak =
             inTransaction {
-                hentEnkeltSakForPerson(fnr)
+                hentSakHvisSaksbehandlerHarTilgang(fnr)
             }
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }

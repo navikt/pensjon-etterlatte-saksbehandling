@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.testdata.features.opprettFamilie
+package no.nav.etterlatte.testdata.features.opprettFamilie
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call

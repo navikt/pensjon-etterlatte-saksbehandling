@@ -107,16 +107,17 @@ fun Route.etteroppgjoerRoutes(
             post("ferdigstill") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
+                    // Runblocking rundt ferdigstilling av brevet for å unngå å ferdigstille forbehandlingen uten at
+                    // brevet er ok.
                     runBlocking {
                         forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
                             etteroppgjoerId,
                             brukerTokenInfo,
                         )
-                        inTransaction {
-                            forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
-                        }
                     }
-
+                    inTransaction {
+                        forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }

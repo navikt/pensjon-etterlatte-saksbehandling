@@ -8,7 +8,7 @@ import io.ktor.server.routing.get
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.features
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.no.nav.etterlatte.testdata.harGyldigAdGruppe
+import no.nav.etterlatte.testdata.harGyldigAdGruppe
 
 object IndexFeature : TestDataFeature {
     override val beskrivelse: String

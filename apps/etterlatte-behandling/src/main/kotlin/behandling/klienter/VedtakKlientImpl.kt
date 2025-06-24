@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.FoersteVirkOgOppoerTilSak
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 interface VedtakKlient {
@@ -96,10 +95,10 @@ interface VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<SakId>
 
-    suspend fun hentFoersteVirkOgOppoerTilSak(
+    suspend fun hentInnvilgedePerioder(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): FoersteVirkOgOppoerTilSak
+    ): List<InnvilgetPeriodeDto>
 }
 
 class VedtakKlientException(
@@ -466,14 +465,28 @@ class VedtakKlientImpl(
         }
     }
 
-    override suspend fun hentFoersteVirkOgOppoerTilSak(
+    override suspend fun hentInnvilgedePerioder(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): FoersteVirkOgOppoerTilSak {
-        // TODO
-        return FoersteVirkOgOppoerTilSak(
-            foersteVirk = YearMonth.of(2024, 1),
-            opphoer = YearMonth.of(2024, 12),
-        )
+    ): List<InnvilgetPeriodeDto> {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vedtak/sak/$sakId/innvilgede-perioder",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Kunne ikke hente innvilgede perioder i sak med id $sakId",
+                e,
+            )
+        }
     }
 }

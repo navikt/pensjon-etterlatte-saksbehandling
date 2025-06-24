@@ -22,11 +22,9 @@ import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
+import no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.VedtakSamordningService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
@@ -38,6 +36,8 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingVilkaarsvurderingKl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
+import no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
+import no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxJob
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxService

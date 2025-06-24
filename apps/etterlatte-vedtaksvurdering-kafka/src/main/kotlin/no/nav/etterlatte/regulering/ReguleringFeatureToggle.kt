@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.regulering
+package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 

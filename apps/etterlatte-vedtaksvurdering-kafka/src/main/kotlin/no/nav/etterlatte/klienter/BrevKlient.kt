@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.klienter
+package no.nav.etterlatte.klienter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

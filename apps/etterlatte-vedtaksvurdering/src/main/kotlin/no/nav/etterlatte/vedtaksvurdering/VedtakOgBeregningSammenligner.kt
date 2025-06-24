@@ -1,12 +1,9 @@
-package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.YearMonth

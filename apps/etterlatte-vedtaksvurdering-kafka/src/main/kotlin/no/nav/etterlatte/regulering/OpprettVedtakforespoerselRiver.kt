@@ -4,13 +4,12 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.klienter.BrevKlient
+import no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
-import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
-import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.omregning.UtbetalingVerifikasjon

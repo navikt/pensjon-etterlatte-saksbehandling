@@ -1,12 +1,8 @@
-package no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly
+package no.nav.etterlatte.testdata.features.dolly
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.testdata.features.dolly.Vedtak
-import no.nav.etterlatte.testdata.features.dolly.VedtakTilPerson
-import no.nav.etterlatte.testdata.features.dolly.VedtakType
-import no.nav.etterlatte.testdata.features.dolly.VedtakUtbetaling
 import java.time.LocalDate
 import java.time.YearMonth
 

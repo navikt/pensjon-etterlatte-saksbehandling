@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics
+package no.nav.etterlatte.vedtaksvurdering.metrics
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.database.toList

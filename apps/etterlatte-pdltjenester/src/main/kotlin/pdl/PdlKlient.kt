@@ -218,7 +218,7 @@ class PdlKlient(
         return retry<PdlGeografiskTilknytningResponse> {
             httpClient
                 .post(apiUrl) {
-                    behandlingsnummer(SakType.BARNEPENSJON)
+                    behandlingsnummer(request.saktype)
                     header(HEADER_TEMA, HEADER_TEMA_VALUE)
                     accept(Json)
                     contentType(Json)

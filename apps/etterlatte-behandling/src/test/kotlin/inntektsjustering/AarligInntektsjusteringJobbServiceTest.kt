@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -663,6 +664,8 @@ class AarligInntektsjusteringJobbServiceTest {
                 SakType.OMSTILLINGSSTOENAD,
                 SakId(123L),
                 Enhetsnummer("1234"),
+                Addressebeskyttelse.UGRADERT,
+                false,
             )
         val personPdl =
             PersonDTO(

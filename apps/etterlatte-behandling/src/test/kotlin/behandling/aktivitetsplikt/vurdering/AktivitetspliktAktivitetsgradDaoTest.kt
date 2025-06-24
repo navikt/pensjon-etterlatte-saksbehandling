@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
@@ -554,6 +555,8 @@ class AktivitetspliktAktivitetsgradDaoTest(
                             sakType = SakType.OMSTILLINGSSTOENAD,
                             id = forrigeBehandling.sakId,
                             enhet = Enheter.defaultEnhet.enhetNr,
+                            addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                            erSkjermet = false,
                         ),
                     oppgaveType = OppgaveType.AKTIVITETSPLIKT,
                 )

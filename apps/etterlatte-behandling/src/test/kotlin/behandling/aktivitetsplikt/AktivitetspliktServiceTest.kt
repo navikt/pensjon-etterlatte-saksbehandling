@@ -46,6 +46,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -825,7 +826,15 @@ class AktivitetspliktServiceTest {
                     lagNyOppgave(
                         status = Status.FERDIGSTILT,
                         oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
-                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                        sak =
+                            Sak(
+                                "ident",
+                                SakType.OMSTILLINGSSTOENAD,
+                                SakId(1213L),
+                                Enheter.defaultEnhet.enhetNr,
+                                Addressebeskyttelse.UGRADERT,
+                                false,
+                            ),
                     ),
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
@@ -882,7 +891,15 @@ class AktivitetspliktServiceTest {
                     lagNyOppgave(
                         status = Status.FERDIGSTILT,
                         oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
-                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                        sak =
+                            Sak(
+                                "ident",
+                                SakType.OMSTILLINGSSTOENAD,
+                                SakId(1213L),
+                                Enheter.defaultEnhet.enhetNr,
+                                Addressebeskyttelse.UGRADERT,
+                                false,
+                            ),
                     ),
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
@@ -955,7 +972,15 @@ class AktivitetspliktServiceTest {
                     lagNyOppgave(
                         status = Status.FERDIGSTILT,
                         oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
-                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                        sak =
+                            Sak(
+                                "ident",
+                                SakType.OMSTILLINGSSTOENAD,
+                                SakId(1213L),
+                                Enheter.defaultEnhet.enhetNr,
+                                Addressebeskyttelse.UGRADERT,
+                                false,
+                            ),
                     ),
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs

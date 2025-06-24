@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -40,6 +41,8 @@ internal class RevurderingTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -231,6 +234,8 @@ private fun opprettetRevurdering(
                 sakType = SakType.BARNEPENSJON,
                 id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
+                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                erSkjermet = false,
             ),
         behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
         sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),

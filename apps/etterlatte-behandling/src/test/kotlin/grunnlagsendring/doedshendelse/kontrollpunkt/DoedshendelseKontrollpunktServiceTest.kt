@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.mockDoedshendelsePerson
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -155,7 +156,8 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr)
+        val sak =
+            Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr, Addressebeskyttelse.UGRADERT, false)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -201,7 +203,8 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr)
+        val sak =
+            Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr, Addressebeskyttelse.UGRADERT, false)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -285,7 +288,8 @@ class DoedshendelseKontrollpunktServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
         val sakIdd = sakId1
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr)
+        val sak =
+            Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr, Addressebeskyttelse.UGRADERT, false)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -354,6 +358,8 @@ class DoedshendelseKontrollpunktServiceTest {
                 sakType = doedshendelseInternalBP.sakTypeForEpsEllerBarn(),
                 id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
+                Addressebeskyttelse.UGRADERT,
+                false,
             )
         val oppgaveIntern =
             mockk<OppgaveIntern> {

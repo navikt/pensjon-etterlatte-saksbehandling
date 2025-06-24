@@ -129,6 +129,7 @@ export interface VergemaalEllerFremtidsfullmakt {
   embete?: string
   type?: string
   vergeEllerFullmektig: VergeEllerFullmektig
+  opphoerstidspunkt?: string
 }
 
 export interface VergeEllerFullmektig {

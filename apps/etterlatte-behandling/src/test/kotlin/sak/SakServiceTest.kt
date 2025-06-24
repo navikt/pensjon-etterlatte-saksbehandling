@@ -636,7 +636,7 @@ internal class SakServiceTest {
         every { sakLesDao.finnSaker(any()) } returns emptyList()
 
         assertThrows<PersonManglerSak> {
-            service.hentEnkeltSakForPerson(ident)
+            service.hentSakHvisSaksbehandlerHarTilgang(ident)
         }
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(ident) }
@@ -661,7 +661,7 @@ internal class SakServiceTest {
             )
 
         assertThrows<ManglerTilgangTilEnhet> {
-            service.hentEnkeltSakForPerson(ident)
+            service.hentSakHvisSaksbehandlerHarTilgang(ident)
         }
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(ident) }
@@ -688,7 +688,7 @@ internal class SakServiceTest {
                 sak,
             )
 
-        val enkeltsak = service.hentEnkeltSakForPerson(ident)
+        val enkeltsak = service.hentSakHvisSaksbehandlerHarTilgang(ident)
 
         enkeltsak shouldBe sak
 
@@ -714,7 +714,7 @@ internal class SakServiceTest {
             )
 
         assertThrows<ManglerTilgangTilEnhet> {
-            service.hentEnkeltSakForPerson(ident)
+            service.hentSakHvisSaksbehandlerHarTilgang(ident)
         }
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(ident) }
@@ -740,7 +740,7 @@ internal class SakServiceTest {
                 sak,
             )
 
-        val enkeltsak = service.hentEnkeltSakForPerson(ident)
+        val enkeltsak = service.hentSakHvisSaksbehandlerHarTilgang(ident)
 
         enkeltsak shouldBe sak
 
@@ -765,7 +765,7 @@ internal class SakServiceTest {
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(ident)
         every { sakLesDao.finnSaker(any()) } returns listOf(sak)
 
-        val enkeltsak = service.hentEnkeltSakForPerson(ident)
+        val enkeltsak = service.hentSakHvisSaksbehandlerHarTilgang(ident)
 
         enkeltsak shouldBe sak
 

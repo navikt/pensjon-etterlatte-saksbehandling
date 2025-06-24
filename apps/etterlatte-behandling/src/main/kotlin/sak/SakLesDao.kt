@@ -198,7 +198,7 @@ internal val mapTilSak: ResultSet.() -> Sak = {
         ident = getString("fnr"),
         id = SakId(getLong("id")),
         enhet = Enhetsnummer(getString("enhet")),
-        addressebeskyttelse = enumValueOf(getString("addressebeskyttelse")),
+        addressebeskyttelse = enumValueOf(getString("adressebeskyttelse")),
         erSkjermet = getBoolean("erSkjermet"),
     )
 }

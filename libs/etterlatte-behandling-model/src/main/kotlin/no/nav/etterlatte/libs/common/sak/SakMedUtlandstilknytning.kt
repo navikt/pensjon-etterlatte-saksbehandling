@@ -9,6 +9,8 @@ data class SakMedUtlandstilknytning(
     val sakType: SakType,
     val id: SakId,
     val enhet: Enhetsnummer,
+    val addressebeskyttelse: Addressebeskyttelse,
+    val erSkjermet: Boolean,
     val utlandstilknytning: Utlandstilknytning?,
 ) {
     companion object {
@@ -20,6 +22,8 @@ data class SakMedUtlandstilknytning(
             sakType = sak.sakType,
             id = sak.id,
             enhet = sak.enhet,
+            addressebeskyttelse = sak.addressebeskyttelse,
+            erSkjermet = sak.erSkjermet,
             utlandstilknytning = utlandstilknytning,
         )
     }

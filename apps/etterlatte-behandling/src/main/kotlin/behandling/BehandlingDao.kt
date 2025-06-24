@@ -227,6 +227,8 @@ class BehandlingDao(
             sakType = enumValueOf(rs.getString("saktype")),
             ident = rs.getString("fnr"),
             enhet = Enhetsnummer(rs.getString("enhet")),
+            addressebeskyttelse = enumValueOf(rs.getString("addressebeskyttelse")),
+            erSkjermet = rs.getBoolean("erSkjermet"),
         )
 
     fun opprettBehandling(behandling: OpprettBehandling) =

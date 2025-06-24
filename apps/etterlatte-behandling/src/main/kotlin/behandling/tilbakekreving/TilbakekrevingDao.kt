@@ -300,6 +300,8 @@ class TilbakekrevingDao(
                     sakType = enumValueOf(getString("saktype")),
                     ident = getString("fnr"),
                     enhet = Enhetsnummer(getString("enhet")),
+                    addressebeskyttelse = enumValueOf(getString("addressebeskyttelse")),
+                    erSkjermet = getBoolean("erSkjermet"),
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),

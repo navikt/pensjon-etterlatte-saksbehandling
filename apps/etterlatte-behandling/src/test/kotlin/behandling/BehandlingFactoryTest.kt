@@ -53,6 +53,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
@@ -116,7 +117,7 @@ internal class BehandlingFactoryTest {
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "behandling",
-            Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr),
+            Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr, Addressebeskyttelse.UGRADERT, false),
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             null,
@@ -203,6 +204,8 @@ internal class BehandlingFactoryTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -321,6 +324,8 @@ internal class BehandlingFactoryTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -425,6 +430,8 @@ internal class BehandlingFactoryTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -898,6 +905,8 @@ internal class BehandlingFactoryTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -981,6 +990,8 @@ internal class BehandlingFactoryTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -1084,6 +1095,8 @@ internal class BehandlingFactoryTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -1168,6 +1181,8 @@ internal class BehandlingFactoryTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
+                        addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                        erSkjermet = false,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -1276,6 +1291,8 @@ internal class BehandlingFactoryTest {
                 SakType.BARNEPENSJON,
                 sakId1,
                 Enheter.defaultEnhet.enhetNr,
+                addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                erSkjermet = false,
             )
 
         val opprettetBehandling =
@@ -1375,12 +1392,16 @@ internal class BehandlingFactoryTest {
         sakId: SakId = sakId1,
         sakType: SakType = SakType.BARNEPENSJON,
         enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
+        addressebeskyttelse: Addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+        erSkjermet: Boolean = false,
     ): Sak =
         Sak(
             ident = "Soeker",
             sakType = sakType,
             id = sakId,
             enhet = enhet,
+            addressebeskyttelse = addressebeskyttelse,
+            erSkjermet = erSkjermet,
         )
 
     private fun revurdering(

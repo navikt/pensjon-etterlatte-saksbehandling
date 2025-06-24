@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.sak.Addressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -221,6 +222,8 @@ internal class BehandlingTest {
                     sakType = SakType.BARNEPENSJON,
                     id = sakId1,
                     enhet = Enheter.defaultEnhet.enhetNr,
+                    addressebeskyttelse = Addressebeskyttelse.UGRADERT,
+                    false,
                 ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),

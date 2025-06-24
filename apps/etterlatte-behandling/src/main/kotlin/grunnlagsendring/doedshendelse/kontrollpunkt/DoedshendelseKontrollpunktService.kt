@@ -143,6 +143,8 @@ class DoedshendelseKontrollpunktService(
                         sakType = sakType,
                         id = id,
                         enhet = enhet,
+                        addressebeskyttelse = addressebeskyttelse,
+                        erSkjermet = erSkjermet,
                     )
                 }
             } else {

@@ -604,6 +604,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 embete = null,
                 type = null,
                 vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
+                opphoerstidspunkt = null,
             )
 
         every { grunnlagService.hentPersonopplysninger(any(), any()) } returns

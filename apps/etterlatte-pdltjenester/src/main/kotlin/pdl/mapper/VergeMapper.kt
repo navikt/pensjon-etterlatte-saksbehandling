@@ -5,17 +5,26 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlVergeEllerFullmektig
 import no.nav.etterlatte.pdl.PdlVergemaalEllerFremtidsfullmakt
+import java.time.LocalDateTime
 
 object VergeMapper {
     fun mapVerge(hentPerson: PdlHentPerson): List<VergemaalEllerFremtidsfullmakt>? =
-        hentPerson.vergemaalEllerFremtidsfullmakt?.map(::mapVerge)
+        hentPerson.vergemaalEllerFremtidsfullmakt?.mapNotNull(::mapVerge)
 
-    fun mapVerge(vergemaal: PdlVergemaalEllerFremtidsfullmakt): VergemaalEllerFremtidsfullmakt =
-        toVergemaal(
+    fun mapVerge(vergemaal: PdlVergemaalEllerFremtidsfullmakt): VergemaalEllerFremtidsfullmakt? {
+        val opphoerstidspunkt = vergemaal.folkeregistermetadata?.opphoerstidspunkt
+        val harOpphoert = opphoerstidspunkt != null && opphoerstidspunkt.isBefore(LocalDateTime.now())
+        if (vergemaal.metadata.historisk || harOpphoert) {
+            // Vi er ikke interessert i historiske vergemål
+            return null
+        }
+        return toVergemaal(
             embete = vergemaal.embete,
             type = vergemaal.type,
             vergeEllerErFullmektig = vergemaal.vergeEllerFullmektig,
+            opphoerstidspunkt = opphoerstidspunkt,
         )
+    }
 
     private fun toVergeEllerFullmektig(pdlV: PdlVergeEllerFullmektig) =
         VergeEllerFullmektig(
@@ -31,9 +40,11 @@ object VergeMapper {
         embete: String? = null,
         type: String?,
         vergeEllerErFullmektig: PdlVergeEllerFullmektig,
+        opphoerstidspunkt: LocalDateTime?,
     ) = VergemaalEllerFremtidsfullmakt(
         embete = embete,
         type = type,
         vergeEllerFullmektig = toVergeEllerFullmektig(vergeEllerErFullmektig),
+        opphoerstidspunkt = opphoerstidspunkt,
     )
 }

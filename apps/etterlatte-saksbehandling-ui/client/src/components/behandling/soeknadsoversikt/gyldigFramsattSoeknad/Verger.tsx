@@ -8,8 +8,9 @@ import { useEffect } from 'react'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { mapResult } from '~shared/api/apiUtils'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
-import { VStack } from '@navikt/ds-react'
+import { BodyShort, VStack } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { formaterDato } from '~utils/formatering/dato'
 
 interface Props {
   behandlingId: string
@@ -47,16 +48,21 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
           <Info
             label="Verge"
             tekst={
-              <>
+              <VStack>
                 {it.vergeEllerFullmektig.motpartsPersonident ? (
-                  <KopierbarVerdi value={it.vergeEllerFullmektig.motpartsPersonident!} />
+                  <div>
+                    <KopierbarVerdi value={it.vergeEllerFullmektig.motpartsPersonident!} />
+                  </div>
                 ) : (
                   'Fødselsnummer ikke registrert'
                 )}
-                <br />
-                {it.vergeEllerFullmektig.omfang &&
-                  (omfangMap.get(it.vergeEllerFullmektig.omfang) ?? it.vergeEllerFullmektig.omfang)}
-              </>
+                {it.vergeEllerFullmektig.omfang && (
+                  <BodyShort>
+                    {omfangMap.get(it.vergeEllerFullmektig.omfang) ?? it.vergeEllerFullmektig.omfang}
+                  </BodyShort>
+                )}
+                {!!it.opphoerstidspunkt && <BodyShort>Opphører: {formaterDato(it.opphoerstidspunkt)}</BodyShort>}
+              </VStack>
             }
             undertekst={formaterKildePdl(soekerOpplysning.kilde)}
             key={index}

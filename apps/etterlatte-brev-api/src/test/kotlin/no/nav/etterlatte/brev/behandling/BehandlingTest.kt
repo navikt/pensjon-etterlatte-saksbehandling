@@ -202,6 +202,7 @@ internal class BehandlingTest {
                                                     null,
                                                     null,
                                                     VergeEllerFullmektig(vergesFnr, "Vergenavn", null, false),
+                                                    opphoerstidspunkt = null,
                                                 ),
                                             ),
                                     ).toJsonNode(),

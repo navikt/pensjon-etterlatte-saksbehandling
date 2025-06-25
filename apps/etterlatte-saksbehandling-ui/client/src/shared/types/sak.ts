@@ -15,6 +15,8 @@ export interface ISakMedUtlandstilknytning {
   sakType: SakType
   enhet: string
   utlandstilknytning?: IUtlandstilknytning
+  adressebeskyttelse?: AdressebeskyttelseGradering
+  erSkjermet?: boolean
 }
 
 export enum SakType {

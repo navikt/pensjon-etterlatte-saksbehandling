@@ -210,7 +210,7 @@ class ParallelleSannheterService(
                 foedselsaar = foedselsdato.foedselsaar,
                 doedsdato = doedsfall?.doedsdato,
                 // PPS støtter p.t. ikke verge. Henter derfor ut første fra listen hvis den ikke er null/tom
-                vergemaal = hentPerson.vergemaalEllerFremtidsfullmakt?.firstOrNull()?.let(VergeMapper::mapVerge),
+                vergemaal = hentPerson.vergemaalEllerFremtidsfullmakt?.firstNotNullOfOrNull { VergeMapper.mapVerge(it) },
             )
         }
 

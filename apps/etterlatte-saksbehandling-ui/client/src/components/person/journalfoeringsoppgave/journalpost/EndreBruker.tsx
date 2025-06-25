@@ -4,7 +4,7 @@ import { Alert, BodyShort, Box, Button, CopyButton, Heading, HStack, Label, Text
 import { useForm } from 'react-hook-form'
 import { InputFlexRow } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
+import { hentPersonNavnOgFoedsel } from '~shared/api/pdltjenester'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -30,7 +30,7 @@ export const EndreBruker = ({
   oppdaterBruker: (bruker: Bruker) => void
 }) => {
   const [initieltFnr, setInitieltFnr] = useState<string>()
-  const [personResult, hentPerson, resetPerson] = useApiCall(hentPersonNavnogFoedsel)
+  const [personResult, hentPerson, resetPerson] = useApiCall(hentPersonNavnOgFoedsel)
 
   const {
     register,

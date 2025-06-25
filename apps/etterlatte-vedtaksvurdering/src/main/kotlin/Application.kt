@@ -47,7 +47,7 @@ class Server(
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
                 if (!isProd()) {
-                    swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
+                    swaggerUI(path = "dolly/swagger", swaggerFile = "vedtaksvurderingSwaggerV1.yaml")
                     dollyRoute(vedtaksvurderingService, dollyService)
                 }
             }

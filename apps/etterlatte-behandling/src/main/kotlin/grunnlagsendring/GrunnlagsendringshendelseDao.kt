@@ -30,8 +30,8 @@ class GrunnlagsendringshendelseDao(
                     prepareStatement(
                         """
                         INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, status, hendelse_gjelder_rolle, 
-                            samsvar_mellom_pdl_og_grunnlag, gjelder_person)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                            samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 with(hendelse) {
@@ -43,6 +43,7 @@ class GrunnlagsendringshendelseDao(
                     stmt.setString(6, hendelseGjelderRolle.name)
                     stmt.setJsonb(7, samsvarMellomKildeOgGrunnlag)
                     stmt.setString(8, gjelderPerson)
+                    stmt.setString(9, kommentar)
                 }
                 stmt.executeUpdate()
             }.let {

@@ -1,6 +1,5 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.jobs.saksbehandler
 
-import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours

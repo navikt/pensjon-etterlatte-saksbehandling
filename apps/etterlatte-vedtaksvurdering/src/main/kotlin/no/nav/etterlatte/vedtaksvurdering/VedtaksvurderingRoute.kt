@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
@@ -27,10 +29,12 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.rapidsandrivers.VEDTAK_KEY
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -43,6 +47,26 @@ fun Route.vedtaksvurderingRoute(
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
+
+        // skal kun brukes ifm migrering av iverksattdato
+        get("/iverksatte-uten-innvilgelsestidspunkt") {
+            kunSystembruker {
+                call.respond(vedtakService.hentVedtakUtenInnvilgelsesTidspunkt())
+            }
+        }
+        post("{$VEDTAK_KEY}/oppdater-iverksatt-dato") {
+            kunSystembruker {
+                val vedtakId =
+                    try {
+                        call.parameters[VEDTAK_KEY]?.toLong()
+                    } catch (_: Exception) {
+                        throw UgyldigForespoerselException("VEDTAKID_IKKE_TALL", "Kunne ikke lese ut vedtakId-parameter")
+                    }
+
+                val iverksettelsesTidspunkt = call.receiveParameters()["iverksettelsestidspunkt"]
+                vedtakService.oppdaterIverksattDatoForVedtak(vedtakId!!, iverksettelsesTidspunkt!!)
+            }
+        }
 
         get("/sak/{$SAKID_CALL_PARAMETER}/iverksatte") {
             withSakId(behandlingKlient) { sakId ->
@@ -424,6 +448,7 @@ private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
             datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
             virkningstidspunkt = null,
             opphoerFraOgMed = null,
+            iverksettelsesTidspunkt = iverksettelsesTidspunkt,
         )
     return when (innhold) {
         is VedtakInnhold.Behandling ->

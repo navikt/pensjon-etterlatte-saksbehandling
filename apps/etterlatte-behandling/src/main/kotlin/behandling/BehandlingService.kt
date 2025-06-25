@@ -289,6 +289,8 @@ interface BehandlingService {
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
     fun settBeregnetForRevurderingTilForbehandling(forbehandling: EtteroppgjoerForbehandling)
+
+    fun hentBehandlingHendelseForIverksattVedtak(vedtakId: Long): LagretHendelse
 }
 
 data class SakMedBehandlingerOgOppgaver(
@@ -989,6 +991,13 @@ internal class BehandlingServiceImpl(
         if (revurderingForbehandling != null) {
             behandlingDao.lagreStatus(revurderingForbehandling.tilBeregnet())
         }
+    }
+
+    // skal kun brukes ifm migrering av iverksattdato
+    override fun hentBehandlingHendelseForIverksattVedtak(vedtakId: Long): LagretHendelse {
+        val hendelser = hendelseDao.finnIverksattHendelserIVedtak(vedtakId)
+        if (hendelser.isEmpty() || hendelser.size > 1) throw InternfeilException("fant flere hendelser for iverksatt vedtak")
+        return hendelser.single()
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

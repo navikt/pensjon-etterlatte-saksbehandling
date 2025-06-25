@@ -34,4 +34,14 @@ class VedtaksvurderingService(
         val tidslinje = Vedtakstidslinje(vedtak)
         return tidslinje.innvilgedePerioder()
     }
+
+    // skal kun brukes ifm migrering av iverksattdato
+    fun hentVedtakUtenInnvilgelsesTidspunkt(): List<Vedtak> = repository.hentVedtakUtenInnvilgelsesTidspunkt()
+
+    fun oppdaterIverksattDatoForVedtak(
+        vedtakId: Long,
+        iverksettelsesTidspunkt: String,
+    ) {
+        repository.oppdaterIverksattDatoForVedtak(vedtakId, iverksettelsesTidspunkt)
+    }
 }

@@ -234,6 +234,49 @@ class VedtaksvurderingRepository(
         }
     }
 
+    fun oppdaterIverksattDatoForVedtak(
+        vedtakId: Long,
+        iverksettelsesTidspunkt: String,
+        tx: TransactionalSession? = null,
+    ) {
+        tx.session {
+            oppdater(
+                query = """
+                UPDATE vedtak 
+                SET datoiverksatt = :datoiverksatt
+                WHERE id = :vedtakId AND status = 'IVERKSATT' AND datoiverksatt IS NULL
+                """,
+                params =
+                    mapOf(
+                        "datoiverksatt" to iverksettelsesTidspunkt,
+                        "id" to vedtakId,
+                    ),
+                loggtekst = "Oppdatere datoiverksatt for vedtak $vedtakId",
+            ).also {
+                krev(it == 1) { "Vedtak ble ikke oppdatert" }
+            }
+        }
+    }
+
+    // skal kun brukes ifm migrering av iverksattdato
+    fun hentVedtakUtenInnvilgelsesTidspunkt(tx: TransactionalSession? = null): List<Vedtak> {
+        val hentVedtak = """
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
+                tilbakekreving, klage 
+            FROM vedtak  
+            WHERE status = 'IVERKSATT' and datoiverksatt IS NULL
+            """
+        return tx.session {
+            hentListe(
+                queryString = hentVedtak,
+            ) {
+                it.toVedtak(emptyList())
+            }
+        }
+    }
+
     fun hentSakIdMedUtbetalingForInntektsaar(
         inntektsaar: Int,
         sakType: SakType? = null,

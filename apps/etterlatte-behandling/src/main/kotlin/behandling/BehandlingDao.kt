@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -57,7 +58,7 @@ class BehandlingDao(
 ) {
     private val alleBehandlingerMedSak =
         """
-        SELECT b.*, i.omgjoering_sluttbehandling, s.sakType, s.enhet, s.fnr 
+        SELECT b.*, i.omgjoering_sluttbehandling, s.sakType, s.enhet, s.adressebeskyttelse, s.erSkjermet, s.fnr 
         FROM behandling b
         INNER JOIN sak s ON b.sak_id = s.id
         LEFT JOIN behandling_info i ON b.id = i.behandling_id
@@ -227,7 +228,7 @@ class BehandlingDao(
             sakType = enumValueOf(rs.getString("saktype")),
             ident = rs.getString("fnr"),
             enhet = Enhetsnummer(rs.getString("enhet")),
-            adressebeskyttelse = enumValueOf(rs.getString("adressebeskyttelse")),
+            adressebeskyttelse = rs.getString("adressebeskyttelse")?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
             erSkjermet = rs.getBoolean("erSkjermet"),
         )
 

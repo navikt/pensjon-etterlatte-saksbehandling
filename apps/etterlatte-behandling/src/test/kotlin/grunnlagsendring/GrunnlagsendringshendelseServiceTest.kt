@@ -42,7 +42,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
-import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -661,7 +660,8 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `Skal ikke gjøre oppdateringer om sakidene ikke finnes`() {
         val fnr = "16508201382"
         val adressebeskyttelse =
-            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
+            no.nav.etterlatte.libs.common.pdlhendelse
+                .Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns emptySet()
 
@@ -678,7 +678,8 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `Skal gjøre tilgangsoppdateringer om sakider fines for hendelse adressebeskyttelse`() {
         val fnr = "16508201382"
         val adressebeskyttelse =
-            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
+            no.nav.etterlatte.libs.common.pdlhendelse
+                .Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
         val sakId = SakId(1L)
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns setOf(sakId)

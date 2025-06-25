@@ -28,12 +28,14 @@ class SakSkrivDao(
             with(connection) {
                 val statement =
                     prepareStatement(
-                        "INSERT INTO sak(sakType, fnr, enhet, opprettet) VALUES(?, ?, ?, ?) RETURNING id, sakType, fnr, enhet",
+                        "INSERT INTO sak(sakType, fnr, enhet, adressebeskyttelse, erSkjermet, opprettet) VALUES(?, ?, ?, ?, ?, ?) RETURNING id, sakType, fnr, enhet, adressebeskyttelse, erSkjermet",
                     )
                 statement.setString(1, type.name)
                 statement.setString(2, fnr)
                 statement.setString(3, enhet.enhetNr)
-                statement.setTidspunkt(4, Tidspunkt.now())
+                statement.setString(4, null)
+                statement.setBoolean(5, false)
+                statement.setTidspunkt(6, Tidspunkt.now())
                 krevIkkeNull(
                     statement
                         .executeQuery()

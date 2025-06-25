@@ -70,7 +70,8 @@ internal class NyNotatServiceTest(
     fun `Hent og opprett notat for sak fungerer`() {
         val sakId = randomSakId()
 
-        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
+        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns
+            Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
 
         assertEquals(0, nyNotatService.hentForSak(sakId).size)
 
@@ -103,7 +104,8 @@ internal class NyNotatServiceTest(
     fun `Oppdater tittel paa notat`() {
         val sakId = randomSakId()
 
-        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
+        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns
+            Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
 
         val nyttNotat =
             runBlocking {
@@ -134,7 +136,7 @@ internal class NyNotatServiceTest(
     fun `Journalfoer notat`() {
         val sakId = randomSakId()
 
-        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns sak
         coEvery { dokarkivServiceMock.journalfoer(any(), any()) } returns OpprettJournalpostResponse("123", true)
         coEvery { pdfGeneratorKlientMock.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()

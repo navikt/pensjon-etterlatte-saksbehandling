@@ -35,7 +35,7 @@ class SakLesDao(
             with(connection) {
                 val statement =
                     prepareStatement(
-                        """SELECT id, sakType, fnr, enhet FROM sak s 
+                        """SELECT id, sakType, fnr, enhet, adressebeskyttelse, erSkjermet FROM sak s 
                     WHERE
                     (
                     -- ikke kjørt i det hele tatt
@@ -92,7 +92,7 @@ class SakLesDao(
     fun hentSak(id: SakId): Sak? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
+                val statement = prepareStatement("SELECT id, sakType, fnr, enhet, adressebeskyttelse, erSkjermet from sak where id = ?")
                 statement.setSakId(1, id)
                 statement
                     .executeQuery()
@@ -138,7 +138,7 @@ class SakLesDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT id, sakType, fnr, enhet
+                        SELECT id, sakType, fnr, enhet, adressebeskyttelse, erSkjermet
                         FROM sak
                         WHERE fnr = ?
                             AND (? OR saktype = ?)
@@ -159,7 +159,7 @@ class SakLesDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT id, fnr, enhet, sakType 
+                        SELECT id, fnr, enhet, adressebeskyttelse, erSkjermet, sakType 
                         FROM sak 
                         WHERE id = ANY (?)
                         """.trimIndent(),
@@ -198,5 +198,7 @@ internal val mapTilSak: ResultSet.() -> Sak = {
         ident = getString("fnr"),
         id = SakId(getLong("id")),
         enhet = Enhetsnummer(getString("enhet")),
+        adressebeskyttelse = getString("adressebeskyttelse")?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
+        erSkjermet = getBoolean("erSkjermet"),
     )
 }

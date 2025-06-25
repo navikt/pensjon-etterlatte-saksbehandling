@@ -221,6 +221,8 @@ internal class BehandlingTest {
                     sakType = SakType.BARNEPENSJON,
                     id = sakId1,
                     enhet = Enheter.defaultEnhet.enhetNr,
+                    adressebeskyttelse = null,
+                    erSkjermet = false,
                 ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),

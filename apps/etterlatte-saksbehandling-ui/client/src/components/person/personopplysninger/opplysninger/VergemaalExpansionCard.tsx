@@ -4,6 +4,7 @@ import { PersonGroupIcon } from '@navikt/aksel-icons'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { lowerCase, upperFirst } from 'lodash'
 import React from 'react'
+import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 
 export const VergemaalExpansionCard = ({ vergemaal }: { vergemaal?: VergemaalEllerFremtidsfullmakt[] }) => {
   return (
@@ -23,6 +24,7 @@ export const VergemaalExpansionCard = ({ vergemaal }: { vergemaal?: VergemaalEll
               <Table.HeaderCell scope="col">Omfang</Table.HeaderCell>
               <Table.HeaderCell scope="col">Type</Table.HeaderCell>
               <Table.HeaderCell scope="col">Embete</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Opphørstidspunkt</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -40,6 +42,9 @@ export const VergemaalExpansionCard = ({ vergemaal }: { vergemaal?: VergemaalEll
                   <Table.DataCell>{verge.vergeEllerFullmektig.omfang}</Table.DataCell>
                   <Table.DataCell>{!!verge.type && upperFirst(lowerCase(verge.type))}</Table.DataCell>
                   <Table.DataCell>{verge.embete}</Table.DataCell>
+                  <Table.DataCell>
+                    {formaterKanskjeStringDatoMedFallback('Ingen opphørstidspunkt', verge.opphoerstidspunkt)}
+                  </Table.DataCell>
                 </Table.Row>
               ))
             ) : (

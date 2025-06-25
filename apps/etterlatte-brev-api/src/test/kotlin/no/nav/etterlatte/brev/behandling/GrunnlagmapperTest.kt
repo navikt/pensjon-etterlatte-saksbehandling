@@ -107,6 +107,7 @@ class GrunnlagmapperTest {
             omfang,
             false,
         ),
+        opphoerstidspunkt = null,
     )
 
     private fun opprettOpplysning(jsonNode: JsonNode) =

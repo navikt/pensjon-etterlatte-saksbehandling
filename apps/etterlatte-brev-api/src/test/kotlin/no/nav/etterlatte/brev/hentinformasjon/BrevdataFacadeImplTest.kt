@@ -84,7 +84,7 @@ internal class BrevdataFacadeImplTest {
     fun `hentGenerellBrevData fungerer som forventet for behandling`() {
         coEvery {
             behandlingService.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET, null, null)
         coEvery {
             behandlingService.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
@@ -134,7 +134,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
-        coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET, null, null)
         coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
         coEvery { grunnlagService.hentGrunnlag(any(), SAK_ID, BRUKERTOKEN, any()) } returns opprettGrunnlag()
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null

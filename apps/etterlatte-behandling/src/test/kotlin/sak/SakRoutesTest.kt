@@ -107,6 +107,8 @@ internal class SakRoutesTest {
                 SakType.OMSTILLINGSSTOENAD,
                 sakId,
                 Enheter.defaultEnhet.enhetNr,
+                null,
+                false,
             )
 
         every { sakService.finnSak(any()) } returns sak
@@ -148,6 +150,8 @@ internal class SakRoutesTest {
                 SakType.OMSTILLINGSSTOENAD,
                 sakId,
                 Enheter.defaultEnhet.enhetNr,
+                null,
+                false,
             )
 
         every { sakService.finnSak(any()) } returns sak

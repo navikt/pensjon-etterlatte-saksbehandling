@@ -42,7 +42,7 @@ data class VedtakDto(
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,
     val innhold: VedtakInnholdDto,
-    val iverksettelsesTidspunkt: Tidspunkt,
+    val iverksettelsesTidspunkt: Tidspunkt? = null,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")

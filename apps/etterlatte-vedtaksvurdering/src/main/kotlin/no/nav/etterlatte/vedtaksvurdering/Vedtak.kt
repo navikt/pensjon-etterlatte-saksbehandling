@@ -55,6 +55,7 @@ data class Vedtak(
             type = type,
             vedtakFattet = vedtakFattet,
             attestasjon = attestasjon,
+            iverksettelsesTidspunkt = iverksettelsesTidspunkt,
             innhold =
                 when (innhold) {
                     is VedtakInnhold.Behandling ->

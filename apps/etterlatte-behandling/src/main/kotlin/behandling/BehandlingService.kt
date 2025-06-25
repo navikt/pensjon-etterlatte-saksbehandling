@@ -75,7 +75,7 @@ import java.util.UUID
 
 class BehandlingFinnesIkkeException(
     message: String,
-) : Exception(message)
+) : IkkeFunnetException("FANT_IKKE_BEHANDLING", message)
 
 class KravdatoMaaFinnesHvisBosattutland(
     message: String,

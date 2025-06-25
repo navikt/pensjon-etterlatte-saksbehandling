@@ -163,6 +163,8 @@ private fun klageForInnstilling(sakId: SakId): Klage =
                     sakType = SakType.BARNEPENSJON,
                     id = sakId,
                     enhet = Enheter.PORSGRUNN.enhetNr,
+                    adressebeskyttelse = null,
+                    erSkjermet = null,
                 ),
             innkommendeDokument = null,
         ).copy(

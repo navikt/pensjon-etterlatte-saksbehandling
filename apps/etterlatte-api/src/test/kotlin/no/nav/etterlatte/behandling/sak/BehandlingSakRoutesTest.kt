@@ -220,6 +220,8 @@ class BehandlingSakRoutesTest {
                 Enhetsnummer(
                     "4808",
                 ),
+                null,
+                null,
             )
         coEvery { behandlingService.hentSak(any()) } returns funnetSak
         testApplication {

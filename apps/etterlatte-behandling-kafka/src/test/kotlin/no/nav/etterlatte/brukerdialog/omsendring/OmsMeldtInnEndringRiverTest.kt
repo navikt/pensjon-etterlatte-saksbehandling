@@ -51,7 +51,7 @@ class OmsMeldtInnEndringRiverTest {
 
     @Test
     fun `Skal journalføre meldt inn endring for OMS og lage oppgave`() {
-        val sak = Sak("15507143951", SakType.OMSTILLINGSSTOENAD, SakId(321), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("15507143951", SakType.OMSTILLINGSSTOENAD, SakId(321), Enheter.PORSGRUNN.enhetNr, null, null)
         val endring =
             OmsMeldtInnEndring(
                 id = UUID.randomUUID(),

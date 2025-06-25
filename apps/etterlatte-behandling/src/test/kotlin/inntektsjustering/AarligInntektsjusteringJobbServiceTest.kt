@@ -663,6 +663,8 @@ class AarligInntektsjusteringJobbServiceTest {
                 SakType.OMSTILLINGSSTOENAD,
                 SakId(123L),
                 Enhetsnummer("1234"),
+                null,
+                false,
             )
         val personPdl =
             PersonDTO(

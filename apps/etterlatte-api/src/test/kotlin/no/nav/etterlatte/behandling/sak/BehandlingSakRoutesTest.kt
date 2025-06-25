@@ -29,8 +29,8 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakUtenGradering
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
@@ -213,7 +213,7 @@ class BehandlingSakRoutesTest {
             configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         val sakId: Long = 12
         val funnetSak =
-            Sak(
+            SakUtenGradering(
                 "ident",
                 SakType.OMSTILLINGSSTOENAD,
                 SakId(sakId),
@@ -240,7 +240,7 @@ class BehandlingSakRoutesTest {
                     )
                 }
             response.status shouldBe HttpStatusCode.OK
-            val hentetSak: Sak? = response.body()
+            val hentetSak: SakUtenGradering? = response.body()
 
             hentetSak shouldBe funnetSak
 

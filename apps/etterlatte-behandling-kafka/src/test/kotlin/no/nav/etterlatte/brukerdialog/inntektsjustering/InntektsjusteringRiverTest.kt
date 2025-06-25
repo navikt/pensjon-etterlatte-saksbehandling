@@ -50,7 +50,7 @@ internal class InntektsjusteringRiverTest {
 
     @Test
     fun `Skal journalføre inntektsjustering og starte behandling med summert inntekt`() {
-        val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr, null, null)
         val inntektsjustering =
             Inntektsjustering(
                 id = UUID.randomUUID(),

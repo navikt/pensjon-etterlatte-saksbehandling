@@ -95,7 +95,7 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
     )
 
 fun kravgrunnlag(
-    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, sakId1, Enhetsnummer("1234")),
+    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, sakId1, Enhetsnummer("1234"), null, null),
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
     status: KravgrunnlagStatus = KravgrunnlagStatus.NY,
     perioder: List<KravgrunnlagPeriode>? = null,
@@ -148,7 +148,7 @@ fun kravgrunnlag(
 )
 
 fun kravOgVedtakStatus(
-    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, sakId1, Enhetsnummer("1234")),
+    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, sakId1, Enhetsnummer("1234"), null, null),
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
     status: KravgrunnlagStatus = KravgrunnlagStatus.NY,
 ) = KravOgVedtakstatus(

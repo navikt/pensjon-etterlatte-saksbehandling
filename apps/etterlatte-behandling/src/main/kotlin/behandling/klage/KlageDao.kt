@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -76,7 +77,7 @@ class KlageDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT k.id, k.sak_id, s.saktype, s.fnr, s.enhet, k.opprettet, k.status, 
+                        SELECT k.id, k.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, k.opprettet, k.status, 
                             kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage, aarsak_til_avbrytelse, initielt_utfall
                         FROM klage k INNER JOIN sak s on k.sak_id = s.id
                         WHERE k.id = ?
@@ -95,7 +96,7 @@ class KlageDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT k.id, k.sak_id, s.saktype, s.fnr, s.enhet, k.opprettet, k.status, 
+                        SELECT k.id, k.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, k.opprettet, k.status, 
                             kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage, aarsak_til_avbrytelse, initielt_utfall
                         FROM klage k INNER JOIN sak s on k.sak_id = s.id
                         WHERE s.id = ?
@@ -139,6 +140,8 @@ class KlageDaoImpl(
                     sakType = enumValueOf(getString("saktype")),
                     id = SakId(getLong("sak_id")),
                     enhet = Enhetsnummer(getString("enhet")),
+                    adressebeskyttelse = getString("adressebeskyttelse")?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
+                    erSkjermet = getBoolean("erSkjermet"),
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),

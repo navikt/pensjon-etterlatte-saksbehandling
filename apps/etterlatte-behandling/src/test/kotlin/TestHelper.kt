@@ -264,6 +264,8 @@ fun foerstegangsbehandling(
     enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
+    adressebeskyttelse: AdressebeskyttelseGradering? = null,
+    erSkjermet: Boolean = false,
 ) = Foerstegangsbehandling(
     id = id,
     sak =
@@ -272,6 +274,8 @@ fun foerstegangsbehandling(
             sakType = sakType,
             id = sakId,
             enhet = enhet,
+            adressebeskyttelse = adressebeskyttelse,
+            erSkjermet = erSkjermet,
         ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
@@ -310,6 +314,8 @@ fun revurdering(
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
     tidligereFamiliepleier: TidligereFamiliepleier? = null,
+    adressebeskyttelse: AdressebeskyttelseGradering? = null,
+    erSkjermet: Boolean = false,
 ) = Revurdering.opprett(
     id = id,
     sak =
@@ -318,6 +324,8 @@ fun revurdering(
             sakType = sakType,
             id = sakId,
             enhet = enhet,
+            adressebeskyttelse = adressebeskyttelse,
+            erSkjermet = erSkjermet,
         ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,

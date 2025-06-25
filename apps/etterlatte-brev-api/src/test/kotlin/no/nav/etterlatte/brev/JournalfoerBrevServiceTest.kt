@@ -79,7 +79,7 @@ internal class JournalfoerBrevServiceTest {
     @Test
     fun `Journalfoering fungerer som forventet (kun 1 mottaker)`() {
         val brev = opprettBrev(Status.FERDIGSTILT)
-        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr, null, null)
         val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
 
         coEvery { behandlingService.hentSak(any(), any()) } returns sak
@@ -118,7 +118,7 @@ internal class JournalfoerBrevServiceTest {
                 mottakere = listOf(mottaker1, mottaker2),
             )
 
-        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr, null, null)
         val response1 = OpprettJournalpostResponse(Random.nextLong().toString(), journalpostferdigstilt = true)
         val response2 = OpprettJournalpostResponse(Random.nextLong().toString(), journalpostferdigstilt = true)
 
@@ -165,7 +165,7 @@ internal class JournalfoerBrevServiceTest {
                 any(),
                 any(),
             )
-        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, randomSakId(), Enheter.UTLAND.enhetNr)
+        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, randomSakId(), Enheter.UTLAND.enhetNr, null, null)
 
         runBlocking {
             assertThrows<FeilStatusForJournalfoering> {
@@ -271,7 +271,7 @@ internal class JournalfoerBrevServiceTest {
         val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
         val systembruker = systembruker()
 
-        val sak = Sak(forventetBrevMottakerFnr, type, randomSakId(), Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(forventetBrevMottakerFnr, type, randomSakId(), Enheter.defaultEnhet.enhetNr, null, null)
 
         val forventetBrev =
             Brev(
@@ -385,7 +385,7 @@ internal class JournalfoerBrevServiceTest {
             )
         coEvery { dokarkivService.journalfoer(any(), any()) } returns journalpostResponse
 
-        val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enheter.PORSGRUNN.enhetNr, null, null)
         coEvery { behandlingService.hentSak(any(), any()) } returns sak
 
         runBlocking { service.journalfoer(forventetBrev.id, bruker) }

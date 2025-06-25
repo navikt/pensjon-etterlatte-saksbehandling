@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakUtenGradering
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.samordning.vedtak.getMeta
 import org.slf4j.LoggerFactory
@@ -45,11 +46,17 @@ class BehandlingKlient(
         }
     }
 
-    suspend fun hentSak(sakId: SakId): Sak? {
+    suspend fun hentSak(sakId: SakId): SakUtenGradering? {
         logger.info("Henter sak med id=$sakId")
 
         return try {
-            httpClient.get("$behandlingUrl/sak/${sakId.sakId}").body<Sak>()
+            val sak = httpClient.get("$behandlingUrl/sak/${sakId.sakId}").body<Sak>()
+            SakUtenGradering(
+                ident = sak.ident,
+                sakType = sak.sakType,
+                id = sak.id,
+                enhet = sak.enhet,
+            )
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.NotFound) {
                 logger.info("Ingen sak med id=$sakId funnet")

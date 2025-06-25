@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.mockDoedshendelsePerson
 import org.junit.jupiter.api.Test
@@ -175,7 +174,7 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
-                Adressebeskyttelse.UGRADERT,
+                null,
                 false,
             )
     }

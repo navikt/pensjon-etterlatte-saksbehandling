@@ -25,7 +25,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
-import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -61,7 +60,7 @@ class DoedshendelseJobServiceTest {
                     sakType = SakType.BARNEPENSJON,
                     id = sakId1,
                     enhet = Enheter.AALESUND.enhetNr,
-                    Adressebeskyttelse.UGRADERT,
+                    null,
                     false,
                 )
         }

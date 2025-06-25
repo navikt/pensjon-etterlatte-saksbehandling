@@ -56,7 +56,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
@@ -265,7 +264,7 @@ fun foerstegangsbehandling(
     enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
-    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    adressebeskyttelse: AdressebeskyttelseGradering? = null,
     erSkjermet: Boolean = false,
 ) = Foerstegangsbehandling(
     id = id,
@@ -315,7 +314,7 @@ fun revurdering(
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
     tidligereFamiliepleier: TidligereFamiliepleier? = null,
-    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    adressebeskyttelse: AdressebeskyttelseGradering? = null,
     erSkjermet: Boolean = false,
 ) = Revurdering.opprett(
     id = id,

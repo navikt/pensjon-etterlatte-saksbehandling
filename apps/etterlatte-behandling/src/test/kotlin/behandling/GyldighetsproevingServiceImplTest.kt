@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
-import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
@@ -80,7 +79,7 @@ internal class GyldighetsproevingServiceImplTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
-                        adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+                        adressebeskyttelse = null,
                         erSkjermet = false,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -118,7 +117,7 @@ internal class GyldighetsproevingServiceImplTest {
         val behandling =
             Foerstegangsbehandling(
                 id = id,
-                sak = Sak("", SakType.BARNEPENSJON, sakId1, Enheter.PORSGRUNN.enhetNr, Adressebeskyttelse.UGRADERT, false),
+                sak = Sak("", SakType.BARNEPENSJON, sakId1, Enheter.PORSGRUNN.enhetNr, null, false),
                 behandlingOpprettet = now,
                 sistEndret = now,
                 status = BehandlingStatus.OPPRETTET,
@@ -197,7 +196,7 @@ internal class GyldighetsproevingServiceImplTest {
                         sakType = SakType.BARNEPENSJON,
                         id = sakId1,
                         enhet = Enheter.PORSGRUNN.enhetNr,
-                        adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+                        adressebeskyttelse = null,
                         erSkjermet = false,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),

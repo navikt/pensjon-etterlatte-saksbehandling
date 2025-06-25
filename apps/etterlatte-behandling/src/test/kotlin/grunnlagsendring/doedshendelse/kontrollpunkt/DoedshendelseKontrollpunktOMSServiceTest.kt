@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
-import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.mockDoedshendelsePerson
@@ -131,7 +130,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
             listOf(
                 mockk {
                     every { sak } returns
-                        Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1), Enhetsnummer("1234"), Adressebeskyttelse.UGRADERT, false)
+                        Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1), Enhetsnummer("1234"), null, false)
                 },
             )
 
@@ -213,7 +212,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
-                Adressebeskyttelse.UGRADERT,
+                null,
                 false,
             )
     }

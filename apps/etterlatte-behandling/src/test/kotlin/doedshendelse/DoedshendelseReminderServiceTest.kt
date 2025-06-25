@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
-import no.nav.etterlatte.libs.common.sak.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -49,7 +48,7 @@ class DoedshendelseReminderServiceTest {
         val mockOppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 "behandling",
-                Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr, Adressebeskyttelse.UGRADERT, false),
+                Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr, null, false),
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,

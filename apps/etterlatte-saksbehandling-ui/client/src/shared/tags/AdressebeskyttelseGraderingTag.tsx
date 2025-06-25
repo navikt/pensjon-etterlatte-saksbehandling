@@ -11,6 +11,8 @@ export const AdressebeskyttelseGraderingTag = ({
 }) => {
   // Viser ingenting hvis adressebeskytelse er satt til ugradert
   switch (adressebeskyttelse) {
+    case AdressebeskyttelseGradering.UGRADERT:
+      return null
     case AdressebeskyttelseGradering.FORTROLIG:
       return (
         <Tag variant="warning" size={size} icon={<HouseIcon aria-hidden />}>

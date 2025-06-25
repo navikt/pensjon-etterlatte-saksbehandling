@@ -229,7 +229,7 @@ class HendelseDao(
                 |where vedtakid = ? and hendelse = 'VEDTAK:IVERKSATT'
                         """.trimMargin(),
                     )
-                stmt.setObject(1, vedtakId)
+                stmt.setLong(1, vedtakId)
 
                 stmt.executeQuery().toList {
                     asHendelse()

@@ -3,7 +3,6 @@ package no.nav.etterlatte.vedtaksvurdering
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
-import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -15,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
@@ -56,15 +54,13 @@ fun Route.vedtaksvurderingRoute(
         }
         post("{$VEDTAK_KEY}/oppdater-iverksatt-dato") {
             kunSystembruker {
-                val vedtakId =
-                    try {
-                        call.parameters[VEDTAK_KEY]?.toLong()
-                    } catch (_: Exception) {
-                        throw UgyldigForespoerselException("VEDTAKID_IKKE_TALL", "Kunne ikke lese ut vedtakId-parameter")
-                    }
-
-                val iverksettelsesTidspunkt = call.receiveParameters()["iverksettelsestidspunkt"]
-                vedtakService.oppdaterIverksattDatoForVedtak(vedtakId!!, iverksettelsesTidspunkt!!)
+                try {
+                    val vedtakId = call.parameters[VEDTAK_KEY]?.toLong()
+                    val iverksettelsesTidspunkt = call.receive<Map<String, String>>()["iverksettelsestidspunkt"]
+                    vedtakService.oppdaterIverksattDatoForVedtak(vedtakId!!, iverksettelsesTidspunkt!!)
+                } catch (e: Exception) {
+                    logger.warn("Noe gikk galt ved oppdatere innvilgelsestidspunkt", e)
+                }
             }
         }
 

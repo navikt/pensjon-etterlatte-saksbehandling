@@ -34,14 +34,13 @@ class VedtakIverksettelseTidspunktMigreringService(
 
     private suspend fun startMigreringIverksettelsesTidspunkt() {
         val vedtakListe = vedtakKlient.hentVedtakUtenIverksettelsesTidspunkt(HardkodaSystembruker.uttrekk)
-        vedtakListe.forEach { vedtak ->
-
+        vedtakListe.forEach { vedtakId ->
             try {
-                logger.info("Migrerte vedtak $vedtak iverksettelsesTidspunkt")
-                val hendelse = behandlingService.hentBehandlingHendelseForIverksattVedtak(vedtak.id)
-                vedtakKlient.oppdaterIverksattDatoForVedtak(vedtak.id, hendelse.inntruffet!!, HardkodaSystembruker.uttrekk)
+                logger.info("Migrerte vedtak $vedtakId iverksettelsesTidspunkt")
+                val hendelse = behandlingService.hentBehandlingHendelseForIverksattVedtak(vedtakId)
+                vedtakKlient.oppdaterIverksattDatoForVedtak(vedtakId, hendelse.inntruffet!!, HardkodaSystembruker.uttrekk)
             } catch (e: Exception) {
-                logger.info("Kunne ikke oppdatere iverksettelsesTidspunkt for ${vedtak.id}, ${e.message}")
+                logger.info("Kunne ikke oppdatere iverksettelsesTidspunkt for $vedtakId, ${e.message}")
             }
         }
     }

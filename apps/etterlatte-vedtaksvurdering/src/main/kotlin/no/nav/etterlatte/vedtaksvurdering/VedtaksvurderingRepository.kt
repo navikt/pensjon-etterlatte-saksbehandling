@@ -259,20 +259,17 @@ class VedtaksvurderingRepository(
     }
 
     // skal kun brukes ifm migrering av iverksattdato
-    fun hentVedtakUtenInnvilgelsesTidspunkt(tx: TransactionalSession? = null): List<Vedtak> {
+    fun hentVedtakUtenInnvilgelsesTidspunkt(tx: TransactionalSession? = null): List<Long> {
         val hentVedtak = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
-                tilbakekreving, klage 
+            SELECT id
             FROM vedtak  
-            WHERE status = 'IVERKSATT' and datoiverksatt IS NULL
+            WHERE status = 'IVERKSATT' and datoiverksatt IS NULL LIMIT 100
             """
         return tx.session {
             hentListe(
                 queryString = hentVedtak,
             ) {
-                it.toVedtak(emptyList())
+                it.long("id")
             }
         }
     }

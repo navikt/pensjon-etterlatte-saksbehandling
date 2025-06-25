@@ -86,7 +86,7 @@ interface VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto?
 
-    suspend fun hentVedtakUtenIverksettelsesTidspunkt(brukerTokenInfo: BrukerTokenInfo): List<VedtakDto>
+    suspend fun hentVedtakUtenIverksettelsesTidspunkt(brukerTokenInfo: BrukerTokenInfo): List<Long>
 
     suspend fun oppdaterIverksattDatoForVedtak(
         vedtakId: Long,
@@ -421,7 +421,7 @@ class VedtakKlientImpl(
         }
     }
 
-    override suspend fun hentVedtakUtenIverksettelsesTidspunkt(brukerTokenInfo: BrukerTokenInfo): List<VedtakDto> {
+    override suspend fun hentVedtakUtenIverksettelsesTidspunkt(brukerTokenInfo: BrukerTokenInfo): List<Long> {
         try {
             logger.info("Henter vedtak uten iverksettelsesTidspunkt")
             return downstreamResourceClient

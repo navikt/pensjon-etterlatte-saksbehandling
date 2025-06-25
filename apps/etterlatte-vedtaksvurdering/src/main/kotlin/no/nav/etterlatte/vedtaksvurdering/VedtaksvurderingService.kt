@@ -36,7 +36,7 @@ class VedtaksvurderingService(
     }
 
     // skal kun brukes ifm migrering av iverksattdato
-    fun hentVedtakUtenInnvilgelsesTidspunkt(): List<Vedtak> = repository.hentVedtakUtenInnvilgelsesTidspunkt()
+    fun hentVedtakUtenInnvilgelsesTidspunkt(): List<Long> = repository.hentVedtakUtenInnvilgelsesTidspunkt()
 
     fun oppdaterIverksattDatoForVedtak(
         vedtakId: Long,

@@ -75,6 +75,8 @@ class AktivitetspliktOppgaveServiceTest {
             sakType = SakType.OMSTILLINGSSTOENAD,
             id = randomSakId(),
             enhet = Enheter.defaultEnhet.enhetNr,
+            adressebeskyttelse = null,
+            erSkjermet = false,
         )
 
     @AfterEach

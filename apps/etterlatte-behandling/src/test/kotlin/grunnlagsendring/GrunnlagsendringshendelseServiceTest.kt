@@ -42,7 +42,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
-import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -86,7 +85,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
-            Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr),
+            Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr, null, false),
             OppgaveKilde.HENDELSE,
             OppgaveType.VURDER_KONSEKVENS,
             null,
@@ -126,7 +125,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     @Test
     fun `Sjekk at fnr matcher hendelse fnr og ikke sak ident i duplikatsjekk`() {
         val sakId = sakId1
-        val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr, null, false)
         val grlhendelse =
             grunnlagsendringshendelseMedSamsvar(
                 gjelderPerson = KONTANT_FOT.value,
@@ -326,7 +325,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(sakId)
-        } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, false)
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns emptyList()
@@ -351,10 +350,10 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(sak2)
-        } returns Sak(fnr, SakType.BARNEPENSJON, sak2, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sak2, Enheter.defaultEnhet.enhetNr, null, false)
         every {
             sakService.finnSak(sakId3)
-        } returns Sak(fnr, SakType.BARNEPENSJON, sakId3, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sakId3, Enheter.defaultEnhet.enhetNr, null, false)
 
         val grunnlagsendringshendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -392,7 +391,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
 
-        val sak = Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, false)
         every {
             sakService.finnSak(sakId)
         } returns sak
@@ -449,7 +448,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
 
-        val sak = Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr, null, false)
         every {
             sakService.finnSak(sakId)
         } returns sak
@@ -503,7 +502,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(sakId)
-        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, false)
 
         val tomSivilstandhendelserBP =
             grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
@@ -514,7 +513,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(sakId)
-        } returns Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr, null, false)
 
         every { pdlService.hentPdlModellForSaktype(soekerFnr, any(), SakType.OMSTILLINGSSTOENAD) } returns
             mockPerson()
@@ -566,7 +565,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
         every {
             sakService.finnSak(sakId)
-        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, false)
         every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
                 PersonMedSakerOgRoller(
@@ -660,7 +659,8 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `Skal ikke gjøre oppdateringer om sakidene ikke finnes`() {
         val fnr = "16508201382"
         val adressebeskyttelse =
-            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
+            no.nav.etterlatte.libs.common.pdlhendelse
+                .Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns emptySet()
 
@@ -677,7 +677,8 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `Skal gjøre tilgangsoppdateringer om sakider fines for hendelse adressebeskyttelse`() {
         val fnr = "16508201382"
         val adressebeskyttelse =
-            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
+            no.nav.etterlatte.libs.common.pdlhendelse
+                .Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr)
 
         val sakId = SakId(1L)
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns setOf(sakId)
@@ -707,7 +708,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                 vedtaksType = VedtaksType.INNV,
             )
 
-        every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every { sakService.finnSak(sakId) } returns
+            Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, false)
 
         every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
@@ -754,7 +756,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                 vedtaksType = VedtaksType.INNV,
             )
 
-        every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every { sakService.finnSak(sakId) } returns
+            Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, false)
 
         every { grunnlagService.hentSakerOgRoller(any()) }
             .returns(
@@ -836,6 +839,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                     SakType.OMSTILLINGSSTOENAD,
                     SakId(1L),
                     Enheter.defaultEnhet.enhetNr,
+                    null,
+                    false,
                 )
 
             every { sakService.finnSaker(any()) } returns listOf(sak)
@@ -900,6 +905,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                     SakType.BARNEPENSJON,
                     SakId(1L),
                     Enheter.defaultEnhet.enhetNr,
+                    null,
+                    false,
                 )
 
             every { sakService.finnSaker(any()) } returns listOf(sak)

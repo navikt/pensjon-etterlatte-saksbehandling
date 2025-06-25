@@ -37,7 +37,7 @@ internal class OpprettBehandlingRiverTest {
 
         every {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
-        } returns Sak(soeker, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.PORSGRUNN.enhetNr)
+        } returns Sak(soeker, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
 
         val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
@@ -63,7 +63,7 @@ internal class OpprettBehandlingRiverTest {
 
         every {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
-        } returns Sak(soeker, SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
+        } returns Sak(soeker, SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
 
         val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/barnepensjon.json")) }.inspektør

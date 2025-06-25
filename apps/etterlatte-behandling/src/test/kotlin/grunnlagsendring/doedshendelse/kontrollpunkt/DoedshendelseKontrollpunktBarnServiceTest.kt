@@ -174,6 +174,8 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
+                null,
+                false,
             )
     }
 }

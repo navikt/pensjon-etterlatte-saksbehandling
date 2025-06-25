@@ -239,7 +239,7 @@ internal class VedtakKlageServiceTest(
     private fun klage(utfall: KlageUtfallMedData? = null): Klage =
         Klage(
             UUID.randomUUID(),
-            Sak(FNR_1, SakType.BARNEPENSJON, sakId1, ENHET_1),
+            Sak(FNR_1, SakType.BARNEPENSJON, sakId1, ENHET_1, null, null),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,

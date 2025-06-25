@@ -69,7 +69,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Skal opprette sak og journalføre søknad`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enheter.PORSGRUNN.enhetNr, null, null)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -111,7 +111,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Skal opprette sak og journalføre søknad`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr, null, null)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -153,7 +153,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Bruker har sendt søknad nummer 2`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enhetsnummer("4808"))
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enhetsnummer("4808"), null, null)
         val journalpostId = "123"
         val journalpostResponse = OpprettJournalpostResponse(journalpostId, true)
 
@@ -238,7 +238,7 @@ internal class NySoeknadRiverTest {
     @Test
     fun `BARNEPENSJON - Bruker har sendt søknad nummer 2 og nysoeknad prøver for andre gang å opprette oppgave men den finnes allerede`() {
         val ident = "25478323363"
-        val sak = Sak(ident, SakType.BARNEPENSJON, randomSakId(), Enhetsnummer("4808"))
+        val sak = Sak(ident, SakType.BARNEPENSJON, randomSakId(), Enhetsnummer("4808"), null, null)
         val journalpostId = "123"
         val journalpostResponse = OpprettJournalpostResponse(journalpostId, true)
 
@@ -295,7 +295,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Bruker har sendt søknad nummer 2`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enhetsnummer("4808"))
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enhetsnummer("4808"), null, null)
         val journalpostResponse = OpprettJournalpostResponse("123", true)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
@@ -357,7 +357,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Feil ved journalføring, skal ikke sende melding`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enheter.PORSGRUNN.enhetNr, null, null)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -380,7 +380,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Feil ved journalføring, skal ikke sende melding`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr, null, null)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()

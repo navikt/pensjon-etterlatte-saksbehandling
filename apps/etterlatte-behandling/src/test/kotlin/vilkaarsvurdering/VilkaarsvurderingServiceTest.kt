@@ -1005,6 +1005,8 @@ internal class VilkaarsvurderingServiceTest(
                     id = sakId,
                     sakType = sakType,
                     enhet = Enhetsnummer.ukjent,
+                    adressebeskyttelse = null,
+                    erSkjermet = false,
                 ),
             status = behandlingStatus,
             virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.now()),

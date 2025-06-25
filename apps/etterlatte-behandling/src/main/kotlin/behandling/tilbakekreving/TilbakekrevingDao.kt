@@ -6,6 +6,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -55,7 +56,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ?
                     """.trimIndent(),
@@ -98,7 +99,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ? 
                     ORDER BY t.opprettet DESC LIMIT 1
@@ -116,7 +117,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -300,6 +301,8 @@ class TilbakekrevingDao(
                     sakType = enumValueOf(getString("saktype")),
                     ident = getString("fnr"),
                     enhet = Enhetsnummer(getString("enhet")),
+                    adressebeskyttelse = getString("adressebeskyttelse")?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
+                    erSkjermet = getBoolean("erSkjermet"),
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),

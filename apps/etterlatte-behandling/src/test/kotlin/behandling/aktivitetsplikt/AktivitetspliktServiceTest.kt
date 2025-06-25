@@ -825,7 +825,15 @@ class AktivitetspliktServiceTest {
                     lagNyOppgave(
                         status = Status.FERDIGSTILT,
                         oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
-                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                        sak =
+                            Sak(
+                                "ident",
+                                SakType.OMSTILLINGSSTOENAD,
+                                SakId(1213L),
+                                Enheter.defaultEnhet.enhetNr,
+                                null,
+                                false,
+                            ),
                     ),
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
@@ -882,7 +890,15 @@ class AktivitetspliktServiceTest {
                     lagNyOppgave(
                         status = Status.FERDIGSTILT,
                         oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
-                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                        sak =
+                            Sak(
+                                "ident",
+                                SakType.OMSTILLINGSSTOENAD,
+                                SakId(1213L),
+                                Enheter.defaultEnhet.enhetNr,
+                                null,
+                                false,
+                            ),
                     ),
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
@@ -955,7 +971,15 @@ class AktivitetspliktServiceTest {
                     lagNyOppgave(
                         status = Status.FERDIGSTILT,
                         oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
-                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                        sak =
+                            Sak(
+                                "ident",
+                                SakType.OMSTILLINGSSTOENAD,
+                                SakId(1213L),
+                                Enheter.defaultEnhet.enhetNr,
+                                null,
+                                false,
+                            ),
                     ),
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs

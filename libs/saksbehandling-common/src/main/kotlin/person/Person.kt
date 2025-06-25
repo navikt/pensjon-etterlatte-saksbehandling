@@ -146,6 +146,7 @@ data class VergemaalEllerFremtidsfullmakt(
     val embete: String?,
     val type: String?,
     val vergeEllerFullmektig: VergeEllerFullmektig,
+    val opphoerstidspunkt: LocalDateTime?,
 )
 
 data class VergeEllerFullmektig(

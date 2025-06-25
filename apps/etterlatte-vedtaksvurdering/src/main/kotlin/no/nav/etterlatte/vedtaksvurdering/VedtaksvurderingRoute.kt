@@ -424,6 +424,7 @@ private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
             datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
             virkningstidspunkt = null,
             opphoerFraOgMed = null,
+            iverksettelsesTidspunkt = iverksettelsesTidspunkt,
         )
     return when (innhold) {
         is VedtakInnhold.Behandling ->

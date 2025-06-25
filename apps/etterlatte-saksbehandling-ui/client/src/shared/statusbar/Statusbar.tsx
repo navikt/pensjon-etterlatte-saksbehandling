@@ -2,9 +2,9 @@ import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
 import { Alert, BodyShort, HelpText, HStack, Label, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
-import { mapApiResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import React, { useEffect } from 'react'
-import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
+import { hentPersonNavnOgFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
@@ -16,16 +16,21 @@ import { useAppDispatch } from '~store/Store'
 import { settPerson } from '~store/reducers/PersonReducer'
 import { PersonOversiktFane } from '~components/person/Person'
 import { ClickEvent } from '~utils/amplitude'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { hentSakMedBehandlnger } from '~shared/api/sak'
+import { AdressebeskyttelseGraderingTag } from '~shared/tags/AdressebeskyttelseGraderingTag'
 
 export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
   const dispatch = useAppDispatch()
 
-  const [result, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
+  const [hentPersonNavnOgFoedselResult, hentPersonNavnOgFoedselFetch] = useApiCall(hentPersonNavnOgFoedsel)
+  const [hentSakMedBehandlingerResult, hentSakMedBehandlingerFetch] = useApiCall(hentSakMedBehandlnger)
 
   useEffect(() => {
     if (ident) {
-      hentPerson(ident, (person) => {
+      hentPersonNavnOgFoedselFetch(ident, (person) => {
         dispatch(settPerson(person))
+        hentSakMedBehandlingerFetch(person.foedselsnummer)
       })
     }
   }, [ident])
@@ -40,15 +45,10 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
 
   return (
     <Navbar>
-      {mapApiResult(
-        result,
-        <PersonSkeleton />,
-        (error) => (
-          <Alert variant="error" size="small">
-            Kunne ikke hente person: {error.detail}
-          </Alert>
-        ),
-        (person) => (
+      {mapResult(hentPersonNavnOgFoedselResult, {
+        pending: <PersonSkeleton />,
+        error: (error) => <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente person'}</ApiErrorAlert>,
+        success: (person) => (
           <HStack gap="2" align="center" justify="start">
             <GenderIcon gender={gender(person.foedselsnummer)} />
             <Label>
@@ -72,16 +72,25 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
             </Label>
             <BodyShort>|</BodyShort>
             <KopierbarVerdi value={person.foedselsnummer} />
-            {ident !== person.foedselsnummer && person.historiskeFoedselsnummer.includes(ident!!) && (
+            {ident !== person.foedselsnummer && person.historiskeFoedselsnummer.includes(ident!) && (
               <Alert variant="warning" size="small">
                 Bruker har historisk ident {ident}
               </Alert>
             )}
 
             <VergemaalTag vergemaal={person.vergemaal} />
+            {mapResult(hentSakMedBehandlingerResult, {
+              success: (sakMedBehandlinger) =>
+                !!sakMedBehandlinger.sak.adressebeskyttelse && (
+                  <AdressebeskyttelseGraderingTag
+                    adressebeskyttelse={sakMedBehandlinger.sak.adressebeskyttelse}
+                    size="small"
+                  />
+                ),
+            })}
           </HStack>
-        )
-      )}
+        ),
+      })}
     </Navbar>
   )
 }

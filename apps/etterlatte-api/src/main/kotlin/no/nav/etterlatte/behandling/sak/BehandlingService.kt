@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.sak
 
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakUtenGradering
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 
 class BehandlingService(
@@ -22,5 +22,5 @@ class BehandlingService(
         return false
     }
 
-    suspend fun hentSak(id: SakId): Sak? = behandlingKlient.hentSak(id)
+    suspend fun hentSak(id: SakId): SakUtenGradering? = behandlingKlient.hentSak(id)
 }

@@ -13,6 +13,13 @@ data class Sak(
     val erSkjermet: Boolean?,
 )
 
+data class SakUtenGradering(
+    val ident: String,
+    val sakType: SakType,
+    val id: SakId,
+    val enhet: Enhetsnummer,
+)
+
 data class VedtakSak(
     val ident: String,
     val sakType: SakType,

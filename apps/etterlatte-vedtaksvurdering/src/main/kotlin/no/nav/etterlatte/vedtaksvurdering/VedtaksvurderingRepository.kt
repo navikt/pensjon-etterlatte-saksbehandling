@@ -179,7 +179,7 @@ class VedtaksvurderingRepository(
             hent(
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
                 tilbakekreving, klage 
             FROM vedtak 
@@ -199,7 +199,7 @@ class VedtaksvurderingRepository(
             hent(
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
                 tilbakekreving, klage 
             FROM vedtak 
@@ -218,7 +218,7 @@ class VedtaksvurderingRepository(
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
                 tilbakekreving, klage 
             FROM vedtak  
@@ -271,7 +271,7 @@ class VedtaksvurderingRepository(
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
             FROM vedtak  
             WHERE fnr = :fnr 
@@ -426,7 +426,7 @@ class VedtaksvurderingRepository(
     ): Vedtak =
         tx.session {
             oppdater(
-                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus, datoiverksatt = now() WHERE behandlingId = :behandlingId",
                 params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer iverksatt vedtak",
             ).also {
@@ -536,6 +536,7 @@ class VedtaksvurderingRepository(
             soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
             status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
             type = string("type").let { VedtakType.valueOf(it) },
+            iverksettelsesTidspunkt = stringOrNull("datoiverksatt")?.let { sqlTimestamp("datoiverksatt").toTidspunkt() },
             vedtakFattet =
                 stringOrNull("saksbehandlerid")?.let {
                     VedtakFattet(

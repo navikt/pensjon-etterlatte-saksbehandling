@@ -5,6 +5,8 @@ export interface ISak {
   ident: string
   sakType: SakType
   enhet: string
+  adressebeskyttelse?: AdressebeskyttelseGradering
+  erSkjermet?: boolean
 }
 
 export interface ISakMedUtlandstilknytning {
@@ -13,11 +15,6 @@ export interface ISakMedUtlandstilknytning {
   sakType: SakType
   enhet: string
   utlandstilknytning?: IUtlandstilknytning
-}
-
-export interface IKomplettSak extends ISak {
-  adressebeskyttelse?: AdressebeskyttelseGradering
-  erSkjermet?: boolean
 }
 
 export enum SakType {
@@ -33,8 +30,8 @@ export interface FoersteVirk {
 export interface ISaksendring {
   id: string
   endringstype: Endringstype
-  foer: IKomplettSak
-  etter: IKomplettSak
+  foer: ISak
+  etter: ISak
   ident: string
   identtype: Identtype
   kommentar: string

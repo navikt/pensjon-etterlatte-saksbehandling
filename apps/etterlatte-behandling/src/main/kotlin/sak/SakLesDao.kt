@@ -35,7 +35,7 @@ class SakLesDao(
             with(connection) {
                 val statement =
                     prepareStatement(
-                        """SELECT id, sakType, fnr, enhet FROM sak s 
+                        """SELECT id, sakType, fnr, enhet, adressebeskyttelse, erSkjermet FROM sak s 
                     WHERE
                     (
                     -- ikke kjørt i det hele tatt

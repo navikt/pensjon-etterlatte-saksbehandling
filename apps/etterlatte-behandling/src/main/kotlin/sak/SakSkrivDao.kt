@@ -34,7 +34,7 @@ class SakSkrivDao(
                 statement.setString(2, fnr)
                 statement.setString(3, enhet.enhetNr)
                 statement.setString(4, null)
-                statement.setBoolean(5, false)
+                statement.setObject(5, null)
                 statement.setTidspunkt(6, Tidspunkt.now())
                 krevIkkeNull(
                     statement

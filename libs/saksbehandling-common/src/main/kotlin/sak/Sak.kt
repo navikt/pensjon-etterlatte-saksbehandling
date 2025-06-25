@@ -10,7 +10,7 @@ data class Sak(
     val id: SakId,
     val enhet: Enhetsnummer,
     val adressebeskyttelse: AdressebeskyttelseGradering?,
-    val erSkjermet: Boolean,
+    val erSkjermet: Boolean?,
 )
 
 data class VedtakSak(

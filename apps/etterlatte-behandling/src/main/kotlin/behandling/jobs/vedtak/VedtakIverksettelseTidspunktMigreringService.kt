@@ -40,7 +40,7 @@ class VedtakIverksettelseTidspunktMigreringService(
                 val hendelse = behandlingService.hentBehandlingHendelseForIverksattVedtak(vedtakId)
                 vedtakKlient.oppdaterIverksattDatoForVedtak(vedtakId, hendelse.inntruffet!!, HardkodaSystembruker.uttrekk)
             } catch (e: Exception) {
-                logger.info("Kunne ikke oppdatere iverksettelsesTidspunkt for $vedtakId, ${e.message}")
+                logger.info("Migrering av iverksettelsesTidspunkt for vedtak $vedtakId feilet, ${e.message}")
             }
         }
     }

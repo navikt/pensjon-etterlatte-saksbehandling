@@ -34,6 +34,12 @@ class VedtakIverksettelseTidspunktMigreringService(
 
     private suspend fun startMigreringIverksettelsesTidspunkt() {
         val vedtakListe = vedtakKlient.hentVedtakUtenIverksettelsesTidspunkt(HardkodaSystembruker.uttrekk)
+
+        if (vedtakListe.isEmpty()) {
+            logger.info("Fant ingen vedtak å migrere iverksettelsesTidspunkt for")
+            return
+        }
+
         vedtakListe.forEach { vedtakId ->
             try {
                 logger.info("Starter migrering av iverksettelsesTidspunkt for vedtak $vedtakId")

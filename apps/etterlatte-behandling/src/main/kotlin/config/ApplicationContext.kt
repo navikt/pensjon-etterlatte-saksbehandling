@@ -883,7 +883,7 @@ internal class ApplicationContext(
             vedtakIverksettelseTidspunktMigreringService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(5, ChronoUnit.MINUTES),
+            interval = Duration.of(1, ChronoUnit.MINUTES),
         )
     }
 

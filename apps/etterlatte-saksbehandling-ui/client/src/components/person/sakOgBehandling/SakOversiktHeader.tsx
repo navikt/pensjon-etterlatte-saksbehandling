@@ -19,6 +19,7 @@ import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettS
 import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
 import { ENHETER } from '~shared/types/Enhet'
 import { ClickEvent, trackClick } from '~utils/amplitude'
+import { AdressebeskyttelseGraderingTag } from '~shared/tags/AdressebeskyttelseGraderingTag'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -59,6 +60,8 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         <UtenlandstilknytningTypeTag utenlandstilknytningType={sak.utlandstilknytning?.type} />
 
         <SakStatus sakId={sak.id} />
+
+        {!!sak.adressebeskyttelse && <AdressebeskyttelseGraderingTag adressebeskyttelse={sak.adressebeskyttelse} />}
       </VStack>
 
       <HStack gap="4" wrap={false} align="center">

@@ -12,7 +12,7 @@ import { PersonSoekCriteria } from '~components/person/journalfoeringsoppgave/jo
  * - NPID
  **/
 
-export const hentPersonNavnogFoedsel = async (ident: string): Promise<ApiResponse<IPdlPersonNavnFoedsel>> =>
+export const hentPersonNavnOgFoedsel = async (ident: string): Promise<ApiResponse<IPdlPersonNavnFoedsel>> =>
   apiClient.post(`/pdltjenester/person/navn-foedsel`, { ident })
 
 export const soekPerson = async (soekPerson: PersonSoekCriteria): Promise<ApiResponse<IPdlPersonSoekResponse[]>> =>

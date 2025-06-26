@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -43,6 +44,7 @@ data class Vedtak(
     val vedtakFattet: VedtakFattet? = null,
     val attestasjon: Attestasjon? = null,
     val innhold: VedtakInnhold,
+    val iverksettelsesTidspunkt: Tidspunkt? = null,
 ) {
     fun toDto(): VedtakDto =
         VedtakDto(
@@ -53,6 +55,7 @@ data class Vedtak(
             type = type,
             vedtakFattet = vedtakFattet,
             attestasjon = attestasjon,
+            iverksettelsesTidspunkt = iverksettelsesTidspunkt,
             innhold =
                 when (innhold) {
                     is VedtakInnhold.Behandling ->

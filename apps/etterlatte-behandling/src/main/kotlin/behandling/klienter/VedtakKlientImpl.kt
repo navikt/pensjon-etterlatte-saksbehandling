@@ -456,10 +456,14 @@ class VedtakKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/$vedtakId/oppdater-iverksatt-dato",
+                            url = "$resourceUrl/vedtak/oppdater-iverksatt-dato",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody = { "iverksettelsestidspunkt" to iverksettelsesTidspunkt },
+                    postBody =
+                        mapOf(
+                            "iverksettelsestidspunkt" to iverksettelsesTidspunkt,
+                            "vedtakid" to vedtakId,
+                        ),
                 ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },

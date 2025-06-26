@@ -45,6 +45,7 @@ internal val skjekklisteItemsFoerstegangsbehandlingBP =
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
+        "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",
     )
 
 internal val sjekklisteItemsFoerstegangsbehandlingOMS =
@@ -69,6 +70,7 @@ internal val sjekklisteItemsRevurderingBP =
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
         "Barnet mottar uføretrygd fra Nav - pensjonen er avkortet",
         "Mottatt nye bankopplysninger - sendt oppgave til NØP",
+        "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",
     )
 
 internal val sjekklisteItemsRevurderingOMS =

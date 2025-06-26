@@ -252,7 +252,9 @@ class VedtaksvurderingRepository(
                         "vedtakid" to vedtakId,
                     ),
                 loggtekst = "Oppdatere datoiverksatt for vedtak $vedtakId",
-            )
+            ).also {
+                krev(it == 1) { "Iverksettelsestidspunkt for vedtak ble ikke oppdatert" }
+            }
         }
     }
 

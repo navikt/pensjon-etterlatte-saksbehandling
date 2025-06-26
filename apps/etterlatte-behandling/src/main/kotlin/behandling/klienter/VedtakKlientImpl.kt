@@ -465,7 +465,7 @@ class VedtakKlientImpl(
                             "vedtakid" to vedtakId,
                         ),
                 ).mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { },
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {

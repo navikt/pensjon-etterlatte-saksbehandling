@@ -54,9 +54,10 @@ fun Route.vedtaksvurderingRoute(
         post("/oppdater-iverksatt-dato") {
             kunSystembruker {
                 try {
-                    val vedtakId = call.receive<Map<String, Long>>()["vedtakid"]
-                    val iverksettelsesTidspunkt = call.receive<Map<String, String>>()["iverksettelsestidspunkt"]
-                    vedtakService.oppdaterIverksattDatoForVedtak(vedtakId!!, iverksettelsesTidspunkt!!)
+                    val body = call.receive<Map<String, Any>>()
+                    val vedtakId = (body["vedtakid"] as Number).toLong()
+                    val iverksettelsesTidspunkt = body["iverksettelsestidspunkt"] as String
+                    vedtakService.oppdaterIverksattDatoForVedtak(vedtakId, iverksettelsesTidspunkt)
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
                     logger.warn("Noe gikk galt ved oppdatere innvilgelsestidspunkt", e)

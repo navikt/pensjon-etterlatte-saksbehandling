@@ -36,7 +36,7 @@ class VedtakIverksettelseTidspunktMigreringService(
         val vedtakListe = vedtakKlient.hentVedtakUtenIverksettelsesTidspunkt(HardkodaSystembruker.uttrekk)
         vedtakListe.forEach { vedtakId ->
             try {
-                logger.info("Migrerte vedtak $vedtakId iverksettelsesTidspunkt")
+                logger.info("Starter migrering av iverksettelsesTidspunkt for vedtak $vedtakId")
                 val hendelse = behandlingService.hentBehandlingHendelseForIverksattVedtak(vedtakId)
                 vedtakKlient.oppdaterIverksattDatoForVedtak(vedtakId, hendelse.inntruffet!!, HardkodaSystembruker.uttrekk)
             } catch (e: Exception) {

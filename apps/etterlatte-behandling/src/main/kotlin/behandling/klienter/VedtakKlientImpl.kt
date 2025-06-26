@@ -456,17 +456,21 @@ class VedtakKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/$vedtakId/oppdater-iverksatt-dato",
+                            url = "$resourceUrl/api/vedtak/oppdater-iverksatt-dato",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody = { "iverksettelsestidspunkt" to iverksettelsesTidspunkt },
+                    postBody =
+                        mapOf(
+                            "iverksettelsestidspunkt" to iverksettelsesTidspunkt,
+                            "vedtakid" to vedtakId,
+                        ),
                 ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
             throw VedtakKlientException(
-                "Kunne ikke hente vedtak uten iverksettelsesTidspunkt",
+                "Kunne ikke oppdatere iverksettelsestidspunkt for vedtak $vedtakId",
                 e,
             )
         }

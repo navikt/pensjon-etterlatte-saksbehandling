@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.rapidsandrivers.VEDTAK_KEY
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -52,10 +51,10 @@ fun Route.vedtaksvurderingRoute(
                 call.respond(vedtakService.hentVedtakUtenInnvilgelsesTidspunkt())
             }
         }
-        post("{$VEDTAK_KEY}/oppdater-iverksatt-dato") {
+        post("/oppdater-iverksatt-dato") {
             kunSystembruker {
                 try {
-                    val vedtakId = call.parameters[VEDTAK_KEY]?.toLong()
+                    val vedtakId = call.receive<Map<String, Long>>()["vedtakid"]
                     val iverksettelsesTidspunkt = call.receive<Map<String, String>>()["iverksettelsestidspunkt"]
                     vedtakService.oppdaterIverksattDatoForVedtak(vedtakId!!, iverksettelsesTidspunkt!!)
                 } catch (e: Exception) {

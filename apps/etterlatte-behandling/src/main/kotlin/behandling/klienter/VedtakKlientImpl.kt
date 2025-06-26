@@ -470,7 +470,7 @@ class VedtakKlientImpl(
                 )
         } catch (e: Exception) {
             throw VedtakKlientException(
-                "Kunne ikke hente vedtak uten iverksettelsesTidspunkt",
+                "Kunne ikke oppdatere iverksettelsestidspunkt for vedtak $vedtakId",
                 e,
             )
         }

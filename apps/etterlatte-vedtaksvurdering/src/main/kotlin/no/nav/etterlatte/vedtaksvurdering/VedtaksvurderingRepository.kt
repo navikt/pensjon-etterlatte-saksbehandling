@@ -244,16 +244,16 @@ class VedtaksvurderingRepository(
                 query = """
                 UPDATE vedtak 
                 SET datoiverksatt = :datoiverksatt
-                WHERE id = :vedtakId AND vedtakstatus = 'IVERKSATT' AND datoiverksatt IS NULL
+                WHERE id = :vedtakid AND vedtakstatus = 'IVERKSATT' AND datoiverksatt IS NULL
                 """,
                 params =
                     mapOf(
                         "datoiverksatt" to iverksettelsesTidspunkt,
-                        "id" to vedtakId,
+                        "vedtakid" to vedtakId,
                     ),
                 loggtekst = "Oppdatere datoiverksatt for vedtak $vedtakId",
             ).also {
-                krev(it == 1) { "Vedtak ble ikke oppdatert" }
+                krev(it == 1) { "Iverksettelsestidspunkt for vedtak ble ikke oppdatert" }
             }
         }
     }

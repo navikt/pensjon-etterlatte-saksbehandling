@@ -244,7 +244,7 @@ class VedtaksvurderingRepository(
                 query = """
                 UPDATE vedtak 
                 SET datoiverksatt = :datoiverksatt
-                WHERE id = :vedtakId AND status = 'IVERKSATT' AND datoiverksatt IS NULL
+                WHERE id = :vedtakId AND vedtakstatus = 'IVERKSATT' AND datoiverksatt IS NULL
                 """,
                 params =
                     mapOf(

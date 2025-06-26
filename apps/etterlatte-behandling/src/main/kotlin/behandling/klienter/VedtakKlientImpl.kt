@@ -456,7 +456,7 @@ class VedtakKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/oppdater-iverksatt-dato",
+                            url = "$resourceUrl/api/vedtak/oppdater-iverksatt-dato",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =

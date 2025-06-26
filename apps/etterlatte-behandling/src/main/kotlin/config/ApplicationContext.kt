@@ -49,17 +49,19 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelser
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
-import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
-import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
-import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJobService
-import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
-import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
-import no.nav.etterlatte.behandling.jobs.EtteropppgjoerJob
-import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveUnntakUtloeperJob
+import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveUnntakUtloeperJobService
+import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
+import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteropppgjoerJob
+import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
+import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
+import no.nav.etterlatte.behandling.jobs.vedtak.VedtakIverksettelseTidspunktJob
+import no.nav.etterlatte.behandling.jobs.vedtak.VedtakIverksettelseTidspunktMigreringService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -752,6 +754,9 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
+    val vedtakIverksettelseTidspunktMigreringService =
+        VedtakIverksettelseTidspunktMigreringService(behandlingService, vedtakKlient, featureToggleService)
+
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,
@@ -870,6 +875,15 @@ internal class ApplicationContext(
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val vedtakIverksettelseTidspunktJob: VedtakIverksettelseTidspunktJob by lazy {
+        VedtakIverksettelseTidspunktJob(
+            vedtakIverksettelseTidspunktMigreringService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(5, ChronoUnit.MINUTES),
         )
     }
 

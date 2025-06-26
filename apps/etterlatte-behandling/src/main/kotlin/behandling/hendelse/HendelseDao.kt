@@ -217,6 +217,26 @@ class HendelseDao(
             }
         }
 
+    // skal kun brukes ifm migrering av iverksattdato
+    fun finnIverksattHendelserIVedtak(vedtakId: Long): List<LagretHendelse> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                |SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
+                |FROM behandlinghendelse
+                |where vedtakid = ? and hendelse = 'VEDTAK:IVERKSATT'
+                        """.trimMargin(),
+                    )
+                stmt.setLong(1, vedtakId)
+
+                stmt.executeQuery().toList {
+                    asHendelse()
+                }
+            }
+        }
+
     fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> =
         connectionAutoclosing.hentConnection {
             with(it) {

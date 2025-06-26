@@ -1,6 +1,5 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.jobs.vedtak
 
-import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
@@ -8,8 +7,9 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
 
-class EtteropppgjoerJob(
-    private val etteroppgjoerJobService: EtteroppgjoerJobService,
+// jobb for å sette iverksettelseTidspunkt for vedtak
+class VedtakIverksettelseTidspunktJob(
+    private val service: VedtakIverksettelseTidspunktMigreringService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
@@ -27,7 +27,7 @@ class EtteropppgjoerJob(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
-                etteroppgjoerJobService.run()
+                service.run()
             }
         }
     }

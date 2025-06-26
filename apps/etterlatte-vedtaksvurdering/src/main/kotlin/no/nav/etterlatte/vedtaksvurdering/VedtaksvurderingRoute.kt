@@ -27,10 +27,12 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.rapidsandrivers.VEDTAK_KEY
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -43,6 +45,24 @@ fun Route.vedtaksvurderingRoute(
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
+
+        // skal kun brukes ifm migrering av iverksattdato
+        get("/iverksatte-uten-innvilgelsestidspunkt") {
+            kunSystembruker {
+                call.respond(vedtakService.hentVedtakUtenInnvilgelsesTidspunkt())
+            }
+        }
+        post("{$VEDTAK_KEY}/oppdater-iverksatt-dato") {
+            kunSystembruker {
+                try {
+                    val vedtakId = call.parameters[VEDTAK_KEY]?.toLong()
+                    val iverksettelsesTidspunkt = call.receive<Map<String, String>>()["iverksettelsestidspunkt"]
+                    vedtakService.oppdaterIverksattDatoForVedtak(vedtakId!!, iverksettelsesTidspunkt!!)
+                } catch (e: Exception) {
+                    logger.warn("Noe gikk galt ved oppdatere innvilgelsestidspunkt", e)
+                }
+            }
+        }
 
         get("/sak/{$SAKID_CALL_PARAMETER}/iverksatte") {
             withSakId(behandlingKlient) { sakId ->

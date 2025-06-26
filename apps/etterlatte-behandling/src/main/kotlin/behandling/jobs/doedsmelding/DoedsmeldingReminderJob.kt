@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.jobs.doedsmelding
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Self

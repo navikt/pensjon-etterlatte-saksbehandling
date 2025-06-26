@@ -234,6 +234,46 @@ class VedtaksvurderingRepository(
         }
     }
 
+    fun oppdaterIverksattDatoForVedtak(
+        vedtakId: Long,
+        iverksettelsesTidspunkt: String,
+        tx: TransactionalSession? = null,
+    ) {
+        tx.session {
+            oppdater(
+                query = """
+                UPDATE vedtak 
+                SET datoiverksatt = :datoiverksatt
+                WHERE id = :vedtakId AND status = 'IVERKSATT' AND datoiverksatt IS NULL
+                """,
+                params =
+                    mapOf(
+                        "datoiverksatt" to iverksettelsesTidspunkt,
+                        "id" to vedtakId,
+                    ),
+                loggtekst = "Oppdatere datoiverksatt for vedtak $vedtakId",
+            ).also {
+                krev(it == 1) { "Vedtak ble ikke oppdatert" }
+            }
+        }
+    }
+
+    // skal kun brukes ifm migrering av iverksattdato
+    fun hentVedtakUtenInnvilgelsesTidspunkt(tx: TransactionalSession? = null): List<Long> {
+        val hentVedtak = """
+            SELECT id
+            FROM vedtak  
+            WHERE status = 'IVERKSATT' and datoiverksatt IS NULL LIMIT 100
+            """
+        return tx.session {
+            hentListe(
+                queryString = hentVedtak,
+            ) {
+                it.long("id")
+            }
+        }
+    }
+
     fun hentSakIdMedUtbetalingForInntektsaar(
         inntektsaar: Int,
         sakType: SakType? = null,

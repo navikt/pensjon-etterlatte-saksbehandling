@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
 
-class AktivitetspliktOppgaveUnntakUtloeperJob(
-    private val aktivitetspliktOppgaveUnntakUtloeperJobService: AktivitetspliktOppgaveUnntakUtloeperJobService,
+class EtteropppgjoerJob(
+    private val etteroppgjoerJobService: EtteroppgjoerJobService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
@@ -17,7 +17,7 @@ class AktivitetspliktOppgaveUnntakUtloeperJob(
     private val jobbNavn = this::class.simpleName
 
     override fun schedule(): Timer {
-        logger.info("Starter jobb $jobbNavn med interval $interval")
+        logger.info("$jobbNavn er satt til å kjøre med periode $interval")
 
         return fixedRateCancellableTimer(
             name = jobbNavn,
@@ -26,7 +26,7 @@ class AktivitetspliktOppgaveUnntakUtloeperJob(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
-                aktivitetspliktOppgaveUnntakUtloeperJobService.run()
+                etteroppgjoerJobService.run()
             }
         }
     }

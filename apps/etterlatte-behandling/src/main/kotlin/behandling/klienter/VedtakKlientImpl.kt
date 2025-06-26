@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
@@ -84,6 +85,14 @@ interface VedtakKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto?
+
+    suspend fun hentVedtakUtenIverksettelsesTidspunkt(brukerTokenInfo: BrukerTokenInfo): List<Long>
+
+    suspend fun oppdaterIverksattDatoForVedtak(
+        vedtakId: Long,
+        iverksettelsesTidspunkt: Tidspunkt,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 
     suspend fun hentIverksatteVedtak(
         sakId: SakId,
@@ -409,6 +418,57 @@ class VedtakKlientImpl(
                     meta = mapOf("behandlingId" to behandlingId),
                 )
             }
+        }
+    }
+
+    override suspend fun hentVedtakUtenIverksettelsesTidspunkt(brukerTokenInfo: BrukerTokenInfo): List<Long> {
+        try {
+            logger.info("Henter vedtak uten iverksettelsesTidspunkt")
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vedtak/iverksatte-uten-innvilgelsestidspunkt",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Kunne ikke hente vedtak uten iverksettelsesTidspunkt",
+                e,
+            )
+        }
+    }
+
+    override suspend fun oppdaterIverksattDatoForVedtak(
+        vedtakId: Long,
+        iverksettelsesTidspunkt: Tidspunkt,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        try {
+            logger.info("Oppdatere iverksatt dato for vedtak $vedtakId til $iverksettelsesTidspunkt")
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/vedtak/$vedtakId/oppdater-iverksatt-dato",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = { "iverksettelsestidspunkt" to iverksettelsesTidspunkt },
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Kunne ikke hente vedtak uten iverksettelsesTidspunkt",
+                e,
+            )
         }
     }
 

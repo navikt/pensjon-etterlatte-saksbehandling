@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.job
+package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext

@@ -15,7 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
-import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction

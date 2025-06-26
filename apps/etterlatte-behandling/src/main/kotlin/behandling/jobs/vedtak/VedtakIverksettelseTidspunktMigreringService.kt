@@ -34,13 +34,19 @@ class VedtakIverksettelseTidspunktMigreringService(
 
     private suspend fun startMigreringIverksettelsesTidspunkt() {
         val vedtakListe = vedtakKlient.hentVedtakUtenIverksettelsesTidspunkt(HardkodaSystembruker.uttrekk)
+
+        if (vedtakListe.isEmpty()) {
+            logger.info("Fant ingen vedtak å migrere iverksettelsesTidspunkt for")
+            return
+        }
+
         vedtakListe.forEach { vedtakId ->
             try {
                 logger.info("Starter migrering av iverksettelsesTidspunkt for vedtak $vedtakId")
                 val hendelse = behandlingService.hentBehandlingHendelseForIverksattVedtak(vedtakId)
                 vedtakKlient.oppdaterIverksattDatoForVedtak(vedtakId, hendelse.inntruffet!!, HardkodaSystembruker.uttrekk)
             } catch (e: Exception) {
-                logger.info("Migrering av iverksettelsesTidspunkt for vedtak $vedtakId feilet, ${e.message}")
+                logger.info("Migrering av iverksettelsesTidspunkt for vedtak $vedtakId feilet", e)
             }
         }
     }

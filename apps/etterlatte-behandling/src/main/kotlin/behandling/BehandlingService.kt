@@ -994,11 +994,8 @@ internal class BehandlingServiceImpl(
     }
 
     // skal kun brukes ifm migrering av iverksattdato
-    override fun hentBehandlingHendelseForIverksattVedtak(vedtakId: Long): LagretHendelse {
-        val hendelser = hendelseDao.finnIverksattHendelserIVedtak(vedtakId)
-        if (hendelser.isEmpty() || hendelser.size > 1) throw InternfeilException("fant flere hendelser for iverksatt vedtak")
-        return hendelser.single()
-    }
+    override fun hentBehandlingHendelseForIverksattVedtak(vedtakId: Long): LagretHendelse =
+        hendelseDao.finnIverksattHendelserIVedtak(vedtakId).minBy { it.inntruffet!! }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

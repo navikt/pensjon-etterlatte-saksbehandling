@@ -473,7 +473,7 @@ class VedtaksvurderingRepository(
                     mapOf(
                         "vedtakstatus" to VedtakStatus.IVERKSATT.name,
                         "behandlingId" to behandlingId,
-                        "datoiverksatt" to Tidspunkt.now(),
+                        "datoiverksatt" to Tidspunkt.now().toNorskTid(),
                     ),
                 loggtekst = "Lagrer iverksatt vedtak",
             ).also {

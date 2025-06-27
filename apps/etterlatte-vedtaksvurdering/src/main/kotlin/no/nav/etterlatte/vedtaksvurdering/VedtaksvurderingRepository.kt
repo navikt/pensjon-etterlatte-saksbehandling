@@ -37,7 +37,6 @@ import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.sql.Date
-import java.time.Instant
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -242,11 +241,6 @@ class VedtaksvurderingRepository(
         iverksettelsesTidspunkt: Tidspunkt,
         tx: TransactionalSession? = null,
     ) {
-        val tidspunkt =
-            Instant
-                .parse(iverksettelsesTidspunkt)
-                .truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
-
         tx.session {
             oppdater(
                 query = """

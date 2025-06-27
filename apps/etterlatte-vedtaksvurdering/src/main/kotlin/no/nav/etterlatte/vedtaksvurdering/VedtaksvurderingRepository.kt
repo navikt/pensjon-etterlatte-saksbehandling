@@ -17,6 +17,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -35,7 +37,6 @@ import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.sql.Date
-import java.time.Instant
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -237,14 +238,9 @@ class VedtaksvurderingRepository(
 
     fun oppdaterIverksattDatoForVedtak(
         vedtakId: Long,
-        iverksettelsesTidspunkt: String,
+        iverksettelsesTidspunkt: Tidspunkt,
         tx: TransactionalSession? = null,
     ) {
-        val tidspunkt =
-            Instant
-                .parse(iverksettelsesTidspunkt)
-                .truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
-
         tx.session {
             oppdater(
                 query = """
@@ -254,7 +250,7 @@ class VedtaksvurderingRepository(
                 """,
                 params =
                     mapOf(
-                        "datoiverksatt" to tidspunkt,
+                        "datoiverksatt" to iverksettelsesTidspunkt.toNorskTid(),
                         "vedtakid" to vedtakId,
                     ),
                 loggtekst = "Oppdatere datoiverksatt for vedtak $vedtakId",
@@ -472,8 +468,13 @@ class VedtaksvurderingRepository(
     ): Vedtak =
         tx.session {
             oppdater(
-                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus, datoiverksatt = now() WHERE behandlingId = :behandlingId",
-                params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus, datoiverksatt = :datoiverksatt WHERE behandlingId = :behandlingId",
+                params =
+                    mapOf(
+                        "vedtakstatus" to VedtakStatus.IVERKSATT.name,
+                        "behandlingId" to behandlingId,
+                        "datoiverksatt" to Tidspunkt.now(),
+                    ),
                 loggtekst = "Lagrer iverksatt vedtak",
             ).also {
                 krev(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
@@ -582,7 +583,7 @@ class VedtaksvurderingRepository(
             soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
             status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
             type = string("type").let { VedtakType.valueOf(it) },
-            iverksettelsesTidspunkt = stringOrNull("datoiverksatt")?.let { sqlTimestamp("datoiverksatt").toTidspunkt() },
+            iverksettelsesTidspunkt = sqlTimestampOrNull("datoiverksatt")?.toTidspunkt(),
             vedtakFattet =
                 stringOrNull("saksbehandlerid")?.let {
                     VedtakFattet(

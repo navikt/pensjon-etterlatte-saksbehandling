@@ -461,7 +461,7 @@ class VedtakKlientImpl(
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
                         mapOf(
-                            "iverksettelsestidspunkt" to iverksettelsesTidspunkt,
+                            "iverksettelsestidspunkt" to iverksettelsesTidspunkt.toString(),
                             "vedtakid" to vedtakId,
                         ),
                 ).mapBoth(

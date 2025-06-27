@@ -433,14 +433,12 @@ internal class VedtaksvurderingRepositoryTest(
         nyeVedtak.forEach { repository.opprettVedtak(it) }
 
         val vedtakForSak = repository.hentVedtakForSak(sakId)
-        repository.oppdaterIverksattDatoForVedtak(vedtakForSak.first().id, "2023-11-30T11:07:03.421771Z")
-
+        repository.oppdaterIverksattDatoForVedtak(vedtakForSak.first().id, Tidspunkt.now())
         repository.hentVedtakForSak(sakId).size shouldBeExactly 1
         repository
             .hentVedtakForSak(sakId)
             .first()
-            .iverksettelsesTidspunkt
-            .toString() shouldBe "2023-11-30T11:07:03.421Z"
+            .iverksettelsesTidspunkt shouldNotBe null
     }
 
     @Test

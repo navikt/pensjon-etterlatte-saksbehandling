@@ -375,12 +375,11 @@ internal class VedtaksvurderingRepositoryTest(
         )
 
         val iverksattVedtak = repository.iverksattVedtak(vedtak.behandlingId)
-        val iverksettelseTidspunkt = iverksattVedtak.iverksettelsesTidspunkt
 
         iverksattVedtak shouldNotBe null
         iverksattVedtak.status shouldBe VedtakStatus.IVERKSATT
 
-        iverksettelseTidspunkt shouldNotBe null
+        iverksattVedtak.iverksettelsesTidspunkt shouldNotBe null
     }
 
     @Test
@@ -421,24 +420,6 @@ internal class VedtaksvurderingRepositoryTest(
 
         vedtakForSak.size shouldBeExactly 3
         vedtakForSak.forEach { it.sakId shouldBe sakId }
-    }
-
-    @Test
-    fun `skal sette rett timestamp for migrering og kunne lese ut vedtak`() {
-        val sakId = sakId1
-        val nyeVedtak =
-            listOf(
-                opprettVedtak(sakId = sakId, status = VedtakStatus.IVERKSATT),
-            )
-        nyeVedtak.forEach { repository.opprettVedtak(it) }
-
-        val vedtakForSak = repository.hentVedtakForSak(sakId)
-        repository.oppdaterIverksattDatoForVedtak(vedtakForSak.first().id, Tidspunkt.now())
-        repository.hentVedtakForSak(sakId).size shouldBeExactly 1
-        repository
-            .hentVedtakForSak(sakId)
-            .first()
-            .iverksettelsesTidspunkt shouldNotBe null
     }
 
     @Test

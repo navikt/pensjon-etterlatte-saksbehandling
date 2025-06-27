@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.util.UUID
 
 class VedtaksvurderingService(
@@ -43,11 +42,6 @@ class VedtaksvurderingService(
         vedtakId: Long,
         iverksettelsesTidspunkt: String,
     ) {
-        val tidspunkt =
-            Instant
-                .parse(iverksettelsesTidspunkt)
-                .truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
-
-        repository.oppdaterIverksattDatoForVedtak(vedtakId, tidspunkt.toString())
+        repository.oppdaterIverksattDatoForVedtak(vedtakId, iverksettelsesTidspunkt)
     }
 }

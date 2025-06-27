@@ -31,6 +31,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.config.VedtakKey.KAFKA_VEDTAKSHENDELSER_TOPIC
+import no.nav.etterlatte.vedtaksvurdering.dollybehandling.DollyService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingVilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
@@ -84,7 +85,6 @@ class ApplicationContext {
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
         )
-
     val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
@@ -121,6 +121,8 @@ class ApplicationContext {
         } else {
             TestProdusent()
         }
+
+    val dollyService = DollyService(rapid)
 
     private fun publiser(
         key: UUID,

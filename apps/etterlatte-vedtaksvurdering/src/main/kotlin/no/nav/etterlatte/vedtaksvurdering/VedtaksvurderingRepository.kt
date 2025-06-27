@@ -582,7 +582,8 @@ class VedtaksvurderingRepository(
             soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
             status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
             type = string("type").let { VedtakType.valueOf(it) },
-            iverksettelsesTidspunkt = stringOrNull("datoiverksatt")?.let { sqlTimestamp("datoiverksatt").toTidspunkt() },
+            // iverksettelsesTidspunkt = stringOrNull("datoiverksatt")?.let { sqlTimestamp("datoiverksatt").toTidspunkt() },
+            iverksettelsesTidspunkt = null,
             vedtakFattet =
                 stringOrNull("saksbehandlerid")?.let {
                     VedtakFattet(

@@ -424,6 +424,26 @@ internal class VedtaksvurderingRepositoryTest(
     }
 
     @Test
+    fun `skal sette rett timestamp for migrering og kunne lese ut vedtak`() {
+        val sakId = sakId1
+        val nyeVedtak =
+            listOf(
+                opprettVedtak(sakId = sakId, status = VedtakStatus.IVERKSATT),
+            )
+        nyeVedtak.forEach { repository.opprettVedtak(it) }
+
+        val vedtakForSak = repository.hentVedtakForSak(sakId)
+        repository.oppdaterIverksattDatoForVedtak(vedtakForSak.first().id, "2023-11-30T11:07:03.421771Z")
+
+        repository.hentVedtakForSak(sakId).size shouldBeExactly 1
+        repository
+            .hentVedtakForSak(sakId)
+            .first()
+            .iverksettelsesTidspunkt
+            .toString() shouldBe "2023-11-30T11:07:03.421Z"
+    }
+
+    @Test
     fun `skal hente vedtak for fnr`() {
         val soeker1 = Folkeregisteridentifikator.of(FNR_1)
         val soeker2 = Folkeregisteridentifikator.of(FNR_2)

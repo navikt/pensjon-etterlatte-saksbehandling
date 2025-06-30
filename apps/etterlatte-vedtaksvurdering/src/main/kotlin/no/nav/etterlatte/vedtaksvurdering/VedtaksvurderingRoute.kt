@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -56,7 +57,7 @@ fun Route.vedtaksvurderingRoute(
                 try {
                     val body = call.receive<Map<String, Any>>()
                     val vedtakId = (body["vedtakid"] as Number).toLong()
-                    val iverksettelsesTidspunkt = body["iverksettelsestidspunkt"] as String
+                    val iverksettelsesTidspunkt = Tidspunkt.parse(body["iverksettelsestidspunkt"] as String)
                     vedtakService.oppdaterIverksattDatoForVedtak(vedtakId, iverksettelsesTidspunkt)
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {

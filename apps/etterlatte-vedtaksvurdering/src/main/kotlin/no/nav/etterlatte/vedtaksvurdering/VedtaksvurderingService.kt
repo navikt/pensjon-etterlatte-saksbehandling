@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -40,7 +41,7 @@ class VedtaksvurderingService(
 
     fun oppdaterIverksattDatoForVedtak(
         vedtakId: Long,
-        iverksettelsesTidspunkt: String,
+        iverksettelsesTidspunkt: Tidspunkt,
     ) {
         repository.oppdaterIverksattDatoForVedtak(vedtakId, iverksettelsesTidspunkt)
     }

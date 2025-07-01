@@ -265,7 +265,7 @@ class VedtaksvurderingRepository(
         val hentVedtak = """
             SELECT id
             FROM vedtak  
-            WHERE vedtakstatus = 'IVERKSATT' and datoiverksatt IS NULL LIMIT 100
+            WHERE vedtakstatus = 'IVERKSATT' and datoiverksatt IS NULL LIMIT 100 OFFSET 50
             """
         return tx.session {
             hentListe(

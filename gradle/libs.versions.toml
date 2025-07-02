@@ -64,13 +64,13 @@ logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.18" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.15.0" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.15.1" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
 messaginghub-pooled-jms = { module = "org.messaginghub:pooled-jms", version = "3.1.7" }
 
-mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.2.1" }
+mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.3.0" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024082313161724411773.1db923f4402d" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }

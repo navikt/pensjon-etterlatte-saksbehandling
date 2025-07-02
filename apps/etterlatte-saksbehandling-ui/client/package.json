@@ -14,7 +14,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@amplitude/analytics-browser": "^2.17.6",
+    "@amplitude/analytics-browser": "^2.18.0",
     "@navikt/aksel-icons": "^7.22.0",
     "@navikt/ds-css": "~7.22.0",
     "@navikt/ds-react": "~7.22.0",
@@ -36,7 +36,7 @@
     "slate-dom": "^0.116.0",
     "slate-history": "^0.113.1",
     "slate-react": "^0.117.3",
-    "styled-components": "^6.1.18"
+    "styled-components": "^6.1.19"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

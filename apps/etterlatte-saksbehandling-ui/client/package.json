@@ -46,7 +46,7 @@
     "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/is-hotkey": "^0.1.10",
-    "@types/lodash": "^4.17.17",
+    "@types/lodash": "^4.17.19",
     "@types/node": "^22.15.29",
     "@types/react": "^19.1.6",
     "@types/react-datepicker": "^7.0.0",

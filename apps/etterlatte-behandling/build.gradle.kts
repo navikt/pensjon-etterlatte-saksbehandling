@@ -33,7 +33,7 @@ dependencies {
         exclude("io.ktor", "ktor-server")
     }
 
-    implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
+    implementation(libs.brevbaker.api.model.common)
 
     implementation(libs.database.kotliquery)
 

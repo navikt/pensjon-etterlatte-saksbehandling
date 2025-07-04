@@ -12,8 +12,7 @@ class BlockTilSlateKonvertererTest {
     @Test
     fun `kan lese inn json fra brevbakeren`() {
         val originalJson = this.javaClass.getResource("/brevbaker/barnepensjon_vedtak_omregning.json")!!.readText()
-        objectMapper.addMixIn(LetterMarkup.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-        objectMapper.addMixIn(LetterMarkup.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        objectMapper.registerModule(LetterMarkupModule)
         val letterMarkup = deserialize<LetterMarkup>(originalJson)
 
         val konvertert = BlockTilSlateKonverterer.konverter(letterMarkup)
@@ -26,8 +25,7 @@ class BlockTilSlateKonvertererTest {
             this.javaClass
                 .getResource("/brevbaker/brevbaker_payload_med_title1_title2_og_paragraf.json")!!
                 .readText()
-        objectMapper.addMixIn(LetterMarkup.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-        objectMapper.addMixIn(LetterMarkup.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        objectMapper.registerModule(LetterMarkupModule)
         val letterMarkup = deserialize<LetterMarkup>(originalJson)
 
         val konvertert = BlockTilSlateKonverterer.konverter(letterMarkup)
@@ -41,8 +39,7 @@ class BlockTilSlateKonvertererTest {
     @Test
     fun `skal konvertere item_list til BULLETED_LIST og flytte fra paragraph til toppnode`() {
         val originalJson = this.javaClass.getResource("/brevbaker/brevbaker_payload_med_item_list.json")!!.readText()
-        objectMapper.addMixIn(LetterMarkup.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-        objectMapper.addMixIn(LetterMarkup.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        objectMapper.registerModule(LetterMarkupModule)
         val letterMarkup = deserialize<LetterMarkup>(originalJson)
 
         val konvertert = BlockTilSlateKonverterer.konverter(letterMarkup)

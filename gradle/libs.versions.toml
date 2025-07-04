@@ -4,20 +4,20 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
-jackson-version = "2.18.3"
-jupiter-version = "5.13.0"
+jackson-version = "2.19.1"
+jupiter-version = "5.13.2"
 ktor2-version = "2.3.13"
-navfelles-token-version = "5.0.29"
+navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.21.1"
+testcontainer-version = "1.21.3"
 tjenestespesifikasjoner-version = "1.1436e29"
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.1" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.8.2" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.8.2" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.10.0" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.10.0" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
@@ -79,20 +79,20 @@ navfelles-tjenestespesifikasjoner-oppdragsimulering = { module = "com.github.nav
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.11" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.2.1" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.9.1" }
-test-mockk = { module = "io.mockk:mockk", version = "1.14.2" }
+test-mockk = { module = "io.mockk:mockk", version = "1.14.4" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.27.1" }
-unleash-client = { module = "io.getunleash:unleash-client-java", version = "10.2.2" }
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "11.0.1" }
 openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.6.1" }
 
 [bundles]

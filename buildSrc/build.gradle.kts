@@ -18,9 +18,6 @@ dependencies {
 }
 
 tasks {
-    withType<Wrapper> {
-        gradleVersion = "8.14.2"
-    }
     kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)

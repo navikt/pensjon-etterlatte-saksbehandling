@@ -55,7 +55,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
         </Modal.Header>
 
         <Modal.Body>
-          {innloggetSaksbehandler.ident != oppgave.saksbehandler?.ident && (
+          {innloggetSaksbehandler.ident !== oppgave.saksbehandler?.ident && (
             <Alert variant="warning">Du kan kun endre denne oppgaven hvis du er tildelt den.</Alert>
           )}
 

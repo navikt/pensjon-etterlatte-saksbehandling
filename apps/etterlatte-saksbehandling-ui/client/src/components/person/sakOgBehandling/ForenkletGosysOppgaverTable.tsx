@@ -8,6 +8,10 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import { GosysOppgave } from '~shared/types/Gosys'
 import { GosysOppgaveRow } from '~components/oppgavebenk/gosys/GosysOppgaveRow'
+import { OppdatertOppgaveversjonResponseDto } from '~shared/api/gosys'
+import { OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { sorterOppgaverEtterOpprettetGosys } from '~components/oppgavebenk/GosysOppgaveliste'
+import { useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 
 export const ForenkletGosysOppgaverTable = ({
   oppgaver,
@@ -18,8 +22,24 @@ export const ForenkletGosysOppgaverTable = ({
 }): ReactNode => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
+  const oppgaveDispatcher = useOppgavebenkStateDispatcher()
+
   const [saksbehandlereIEnhet, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
   const [, saksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
+
+  const oppdaterOppgaveTildeling = (
+    oppgaveId: number,
+    versjonDto: OppdatertOppgaveversjonResponseDto,
+    saksbehandler?: OppgaveSaksbehandler
+  ) => {
+    const index = oppgaver.findIndex((o) => o.id === oppgaveId)
+    if (index > -1) {
+      const oppdatertOppgaveState = [...oppgaver]
+      oppdatertOppgaveState[index].saksbehandler = saksbehandler
+      oppdatertOppgaveState[index].versjon = versjonDto.versjon
+      oppgaveDispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettetGosys(oppdatertOppgaveState))
+    }
+  }
 
   useEffect(() => {
     if (!!innloggetSaksbehandler.enheter.length) {
@@ -49,7 +69,7 @@ export const ForenkletGosysOppgaverTable = ({
             oppgave={oppgave}
             saksbehandlereIEnhet={saksbehandlereIEnhet}
             skjulBruker={true}
-            oppdaterOppgaveTildeling={() => {}}
+            oppdaterOppgaveTildeling={oppdaterOppgaveTildeling}
           />
         ))}
       </Table.Body>

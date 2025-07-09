@@ -1,4 +1,4 @@
-import { BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import React, { useContext, useState } from 'react'
@@ -55,6 +55,10 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
         </Modal.Header>
 
         <Modal.Body>
+          {innloggetSaksbehandler.ident != oppgave.saksbehandler?.ident && (
+            <Alert variant="warning">Du kan kun endre denne oppgaven hvis du er tildelt den.</Alert>
+          )}
+
           <TagRow>
             <GosysTemaTag tema={tema} />
           </TagRow>

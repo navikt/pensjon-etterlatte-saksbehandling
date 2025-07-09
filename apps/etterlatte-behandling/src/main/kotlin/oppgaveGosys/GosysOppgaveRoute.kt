@@ -97,7 +97,6 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             post("ferdigstill") {
                 kunSaksbehandler {
                     val versjon = call.request.queryParameters["versjon"]!!.toLong()
-
                     call.respond(gosysService.ferdigstill(gosysOppgaveId, versjon, brukerTokenInfo))
                 }
             }

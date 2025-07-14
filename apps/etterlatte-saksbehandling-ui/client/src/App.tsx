@@ -29,7 +29,7 @@ import { initAmplitude } from '~utils/amplitude'
 import { Unleashcontext, useUnleash } from '~useUnleash'
 import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandling'
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
-import { useStartUmami } from '~shared/umami/useStartUmami'
+import { useLastUmami } from '~shared/umami/useLastUmami'
 
 initAmplitude()
 
@@ -38,7 +38,8 @@ function App() {
 
   setDefaultOptions({ locale: nb })
   registerLocale('nb', nb)
-  useStartUmami()
+  useLastUmami()
+
   const dispatch = useAppDispatch()
 
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)

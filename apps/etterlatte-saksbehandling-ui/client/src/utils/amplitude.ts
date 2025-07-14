@@ -4,6 +4,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { sendHendelseTilUmami } from '~shared/umami/umami'
 
 export enum LogEvents {
   CLICK = 'klikk',
@@ -127,6 +128,7 @@ export const trackClick = (name: ClickEvent) => {
       tekst: name,
     },
   })
+  sendHendelseTilUmami(LogEvents.CLICK, { tekst: name })
 }
 
 export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => trackClickMedSvar(name, svar)
@@ -143,6 +145,7 @@ export const trackClickMedSvar = (name: ClickEvent, svar: string) => {
       svar,
     },
   })
+  sendHendelseTilUmami(LogEvents.CLICK, { tekst: name, svar })
 }
 
 export function velgTilbakemeldingClickEventForUtlandsbehandling(

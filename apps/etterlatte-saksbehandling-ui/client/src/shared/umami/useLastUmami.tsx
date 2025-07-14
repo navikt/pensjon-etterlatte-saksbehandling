@@ -13,8 +13,6 @@ export const useLastUmami = () => {
 
     document.body.appendChild(script)
 
-    console.log(window.location.host)
-
     return () => {
       try {
         document.body.removeChild(script)

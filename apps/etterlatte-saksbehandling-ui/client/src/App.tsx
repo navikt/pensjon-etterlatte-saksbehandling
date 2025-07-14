@@ -29,13 +29,16 @@ import { initAmplitude } from '~utils/amplitude'
 import { Unleashcontext, useUnleash } from '~useUnleash'
 import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandling'
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
+import { useStartUmami } from '~shared/umami/useStartUmami'
 
 initAmplitude()
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
+
   setDefaultOptions({ locale: nb })
   registerLocale('nb', nb)
+  useStartUmami()
   const dispatch = useAppDispatch()
 
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)

@@ -6,11 +6,13 @@ export const EtterbetalingHjelpeTekst = (): ReactNode => {
     <HStack gap="2">
       Skal det etterbetales?
       <HelpText placement="top">
-        Velg ja hvis ytelsen er innvilget tilbake i tid og det blir utbetalt mer enn ett månedsbeløp. Da skal du
-        registrere perioden fra innvilgelsesmåned (eventuelt første virkningstidspunkt i endringen/økningen av stønaden)
-        til og med nåværende måned dersom normal utbetalingsdato er passert. Det vil si at inneværende måned skal være
-        med som etterbetaling dersom dette er hensiktsmessig med tanke på når stønaden blir utbetalt. Simuleringen
-        ovenfor viser nåværende måned som etterbetaling dersom normal utbetalingsdato er passert.
+        Velg &#34;ja&#34; hvis ytelsen er innvilget tilbake i tid, og normal utbetalingsdato for gjeldende periode er
+        forbi. Dette gjelder dersom det vises perioder med &#34;Etterbetaling&#34; under &#34;Simulere utbetaling&#34;.
+        <br />
+        <br />
+        &#34;Fra og med&#34;-dato settes lik virkningstidspunktet i kravet, og &#34;Til og med&#34;-dato settes lik
+        siste passerte normale utbetalingsdato. Det vil si at inneværende måned skal være med som etterbetaling.
+        Simuleringen ovenfor viser inneværende måned som etterbetaling dersom normal utbetalingsdato er passert.
       </HelpText>
     </HStack>
   )

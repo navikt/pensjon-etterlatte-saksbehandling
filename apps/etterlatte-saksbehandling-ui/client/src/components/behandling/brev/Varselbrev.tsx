@@ -111,12 +111,23 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   if (!currentRouteErGyldig()) {
     return (
-      <Alert variant="error">
-        Varselbrev er ugyldig for denne behandlingen med {props.behandling.status} id: {props.behandling.id} mangler
-        kanskje vilkårsvurdering?
-      </Alert>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Alert variant="error">
+          Varselbrev er ugyldig for denne behandlingen med {props.behandling.status} id: {props.behandling.id} mangler
+          kanskje vilkårsvurdering?
+        </Alert>
+      </Box>
     )
   }
+
+  if (!props.behandling.sendeBrev) {
+    return (
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Alert variant="info">Det skal ikke sendes varselbrev for denne behandlingen.</Alert>
+      </Box>
+    )
+  }
+
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner label="Henter brev ..." />
   } else if (isPending(opprettBrevStatus)) {

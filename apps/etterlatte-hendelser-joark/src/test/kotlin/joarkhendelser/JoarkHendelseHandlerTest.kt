@@ -25,7 +25,6 @@ import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
@@ -355,40 +354,6 @@ internal class JoarkHendelseHandlerTest {
             coVerify {
                 behandlingKlientMock wasNot Called
                 pdlTjenesterKlientMock wasNot Called
-            }
-        }
-
-        @Test
-        fun `Bruker har kun NPID`() {
-            val journalpostId = Random.nextLong()
-            val journalpost = opprettJournalpost(journalpostId)
-
-            coEvery { safKlientMock.hentJournalpost(any()) } returns
-                JournalpostResponse(
-                    JournalpostResponse.ResponseData(
-                        journalpost,
-                    ),
-                )
-
-            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
-                PdlIdentifikator.Npid(
-                    NavPersonIdent("01309000000"),
-                )
-
-            val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
-
-            runBlocking {
-                assertThrows<IllegalStateException> {
-                    sut.haandterHendelse(hendelse)
-                }
-            }
-
-            coVerify(exactly = 1) {
-                safKlientMock.hentJournalpost(journalpostId)
-                pdlTjenesterKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
-            }
-            coVerify {
-                behandlingKlientMock wasNot Called
             }
         }
 

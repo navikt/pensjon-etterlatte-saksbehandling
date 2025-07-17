@@ -109,12 +109,17 @@ class JoarkHendelseHandler(
 
             val ident = hentFolkeregisterIdent(journalpostId, journalpost.bruker)
 
+            if (ident !is PdlIdentifikator.FolkeregisterIdent) {
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, temaNytt)
+                return
+            }
+
             val sakType = hendelse.temaTilSakType()
 
             when (val type = hendelse.hendelsesType) {
                 HendelseType.JOURNALPOST_MOTTATT -> {
                     behandlingService.opprettOppgave(
-                        ident,
+                        ident.folkeregisterident.value,
                         sakType,
                         hendelse.lagMerknadFraStatus(journalpost.kanal),
                         journalpostId.toString(),
@@ -123,7 +128,7 @@ class JoarkHendelseHandler(
 
                 HendelseType.TEMA_ENDRET -> {
                     behandlingService.opprettOppgave(
-                        ident,
+                        ident.folkeregisterident.value,
                         sakType,
                         "Tema endret fra ${hendelse.temaGammelt} til $temaNytt",
                         journalpostId.toString(),
@@ -131,7 +136,7 @@ class JoarkHendelseHandler(
                 }
 
                 HendelseType.ENDELIG_JOURNALFOERT ->
-                    behandleEndeligJournalfoert(ident, sakType, journalpost)
+                    behandleEndeligJournalfoert(ident.folkeregisterident.value, sakType, journalpost)
 
                 HendelseType.JOURNALPOST_UTGAATT -> {
                     logger.info("Journalpost $journalpostId har status=${journalpost.journalstatus}")
@@ -184,23 +189,20 @@ class JoarkHendelseHandler(
     private suspend fun hentFolkeregisterIdent(
         journalpostId: Long,
         bruker: Bruker,
-    ): String {
+    ): PdlIdentifikator {
         if (bruker.type == BrukerIdType.ORGNR) {
             // TODO:
             //  Må vi lage støtte for ORGNR...?
             throw IllegalStateException("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
         }
 
-        return when (val pdlIdentifikator = pdlTjenesterKlient.hentPdlIdentifikator(bruker.id)) {
-            is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
-            is PdlIdentifikator.Npid -> {
-                throw IllegalStateException("Bruker tilknyttet journalpost=$journalpostId har kun NPID!")
-            }
+        val pdlIdentifikator =
+            pdlTjenesterKlient.hentPdlIdentifikator(bruker.id)
+                ?: throw IllegalStateException(
+                    "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
+                )
 
-            null -> throw IllegalStateException(
-                "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
-            )
-        }
+        return pdlIdentifikator
     }
 
     private fun mapError(

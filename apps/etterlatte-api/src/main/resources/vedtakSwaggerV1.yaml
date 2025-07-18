@@ -73,7 +73,7 @@ components:
           type: string
           format: date-time
           example: "2025-07-18T14:23:45.123456Z"
-          description: "ISO-8601 tidspunkt med mikrosekund-presisjon"
+          description: "ISO-8601 tidspunkt"
 
     VedtakType:
       type: string

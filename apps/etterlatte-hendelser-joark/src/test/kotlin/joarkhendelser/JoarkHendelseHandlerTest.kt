@@ -25,6 +25,7 @@ import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
@@ -101,6 +102,37 @@ internal class JoarkHendelseHandlerTest {
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
+            }
+        }
+
+        @Test
+        fun `Hvis bruker har NDIP så skal det opprettes manuel journalføringsoppgave`() {
+            val journalpostId = Random.nextLong()
+            val journalpost = opprettJournalpost(journalpostId)
+
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
+
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
+                PdlIdentifikator.Npid(
+                    NavPersonIdent("01309000000"),
+                )
+            coEvery { oppgaveKlient.opprettManuellJournalfoeringsoppgave(any(), any()) } returns Unit
+
+            val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
+
+            runBlocking {
+                sut.haandterHendelse(hendelse)
+            }
+
+            coVerify(exactly = 1) {
+                safKlientMock.hentJournalpost(journalpostId)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId = journalpostId, hendelse.temaNytt)
             }
         }
 

@@ -236,46 +236,6 @@ class VedtaksvurderingRepository(
         }
     }
 
-    fun oppdaterIverksattDatoForVedtak(
-        vedtakId: Long,
-        iverksettelsesTidspunkt: Tidspunkt,
-        tx: TransactionalSession? = null,
-    ) {
-        tx.session {
-            oppdater(
-                query = """
-                UPDATE vedtak 
-                SET datoiverksatt = :datoiverksatt
-                WHERE id = :vedtakid AND vedtakstatus = 'IVERKSATT' AND datoiverksatt IS NULL
-                """,
-                params =
-                    mapOf(
-                        "datoiverksatt" to iverksettelsesTidspunkt.toNorskTid(),
-                        "vedtakid" to vedtakId,
-                    ),
-                loggtekst = "Oppdatere datoiverksatt for vedtak $vedtakId",
-            ).also {
-                krev(it == 1) { "Iverksettelsestidspunkt for vedtak ble ikke oppdatert" }
-            }
-        }
-    }
-
-    // skal kun brukes ifm migrering av iverksattdato
-    fun hentVedtakUtenInnvilgelsesTidspunkt(tx: TransactionalSession? = null): List<Long> {
-        val hentVedtak = """
-            SELECT id
-            FROM vedtak  
-            WHERE vedtakstatus = 'IVERKSATT' and datoiverksatt IS NULL LIMIT 100 OFFSET 80
-            """
-        return tx.session {
-            hentListe(
-                queryString = hentVedtak,
-            ) {
-                it.long("id")
-            }
-        }
-    }
-
     fun hentSakIdMedUtbetalingForInntektsaar(
         inntektsaar: Int,
         sakType: SakType? = null,

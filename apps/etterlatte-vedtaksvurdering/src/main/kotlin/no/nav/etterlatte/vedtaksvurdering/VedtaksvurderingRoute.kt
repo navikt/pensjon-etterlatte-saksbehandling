@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -28,7 +27,6 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
@@ -45,26 +43,6 @@ fun Route.vedtaksvurderingRoute(
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
-
-        // skal kun brukes ifm migrering av iverksattdato
-        get("/iverksatte-uten-innvilgelsestidspunkt") {
-            kunSystembruker {
-                call.respond(vedtakService.hentVedtakUtenInnvilgelsesTidspunkt())
-            }
-        }
-        post("/oppdater-iverksatt-dato") {
-            kunSystembruker {
-                try {
-                    val body = call.receive<Map<String, Any>>()
-                    val vedtakId = (body["vedtakid"] as Number).toLong()
-                    val iverksettelsesTidspunkt = Tidspunkt.parse(body["iverksettelsestidspunkt"] as String)
-                    vedtakService.oppdaterIverksattDatoForVedtak(vedtakId, iverksettelsesTidspunkt)
-                    call.respond(HttpStatusCode.OK)
-                } catch (e: Exception) {
-                    logger.warn("Noe gikk galt ved oppdatere innvilgelsestidspunkt", e)
-                }
-            }
-        }
 
         get("/sak/{$SAKID_CALL_PARAMETER}/iverksatte") {
             withSakId(behandlingKlient) { sakId ->

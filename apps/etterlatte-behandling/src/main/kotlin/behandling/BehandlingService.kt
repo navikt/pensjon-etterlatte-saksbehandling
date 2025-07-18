@@ -289,8 +289,6 @@ interface BehandlingService {
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
     fun settBeregnetForRevurderingTilForbehandling(forbehandling: EtteroppgjoerForbehandling)
-
-    fun hentBehandlingHendelseForIverksattVedtak(vedtakId: Long): LagretHendelse
 }
 
 data class SakMedBehandlingerOgOppgaver(

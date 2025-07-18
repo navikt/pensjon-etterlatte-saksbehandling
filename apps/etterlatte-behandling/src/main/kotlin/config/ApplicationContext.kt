@@ -60,8 +60,6 @@ import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
-import no.nav.etterlatte.behandling.jobs.vedtak.VedtakIverksettelseTidspunktJob
-import no.nav.etterlatte.behandling.jobs.vedtak.VedtakIverksettelseTidspunktMigreringService
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -754,9 +752,6 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
-    val vedtakIverksettelseTidspunktMigreringService =
-        VedtakIverksettelseTidspunktMigreringService(behandlingService, vedtakKlient, featureToggleService)
-
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,
@@ -875,15 +870,6 @@ internal class ApplicationContext(
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
-        )
-    }
-
-    val vedtakIverksettelseTidspunktJob: VedtakIverksettelseTidspunktJob by lazy {
-        VedtakIverksettelseTidspunktJob(
-            vedtakIverksettelseTidspunktMigreringService,
-            { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.MINUTES),
         )
     }
 

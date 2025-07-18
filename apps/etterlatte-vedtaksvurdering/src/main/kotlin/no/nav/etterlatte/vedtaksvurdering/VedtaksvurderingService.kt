@@ -3,7 +3,6 @@ package no.nav.etterlatte.vedtaksvurdering
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -34,15 +33,5 @@ class VedtaksvurderingService(
         val vedtak = hentVedtakISak(sakId)
         val tidslinje = Vedtakstidslinje(vedtak)
         return tidslinje.innvilgedePerioder()
-    }
-
-    // skal kun brukes ifm migrering av iverksattdato
-    fun hentVedtakUtenInnvilgelsesTidspunkt(): List<Long> = repository.hentVedtakUtenInnvilgelsesTidspunkt()
-
-    fun oppdaterIverksattDatoForVedtak(
-        vedtakId: Long,
-        iverksettelsesTidspunkt: Tidspunkt,
-    ) {
-        repository.oppdaterIverksattDatoForVedtak(vedtakId, iverksettelsesTidspunkt)
     }
 }

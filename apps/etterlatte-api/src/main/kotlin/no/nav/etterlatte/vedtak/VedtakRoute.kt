@@ -10,6 +10,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.samordning.vedtak.haandterUgyldigIdent
@@ -47,6 +48,7 @@ data class Vedtak(
     val virkningstidspunkt: LocalDate,
     val type: VedtakType,
     val utbetaling: List<VedtakUtbetaling>,
+    val iverksettelsesTidspunkt: Tidspunkt? = null,
 )
 
 enum class VedtakType {

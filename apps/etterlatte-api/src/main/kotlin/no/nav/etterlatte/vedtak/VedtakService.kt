@@ -31,5 +31,6 @@ fun VedtakDto.fromDto(): Vedtak {
                     beloep = utbetaling.beloep,
                 )
             },
+        iverksettelsesTidspunkt = iverksettelsesTidspunkt,
     )
 }

@@ -168,8 +168,6 @@ Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, m
 ### Vedtak API (kun for bruk internt i nav)
 [Swagger dev-gcp](https://etterlatte-api.intern.dev.nav.no/api/v1/vedtak/swagger)
 [Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
-
-
 ---
 
 

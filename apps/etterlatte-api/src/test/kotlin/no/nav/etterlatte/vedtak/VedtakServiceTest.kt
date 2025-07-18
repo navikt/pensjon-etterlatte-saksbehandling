@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -32,7 +33,7 @@ class VedtakServiceTest {
     @Test
     fun `skal mappe vedtak til dto`() {
         val fnr = Folkeregisteridentifikator.of("16888697822")
-
+        val tidspunkt = Tidspunkt.now()
         coEvery { klient.hentVedtak(fnr) } returns
             listOf(
                 vedtak(
@@ -49,6 +50,7 @@ class VedtakServiceTest {
                             BigDecimal(2000),
                         ),
                     ),
+                    tidspunkt,
                 ),
             )
 
@@ -78,6 +80,7 @@ class VedtakServiceTest {
                                     beloep = BigDecimal(2000),
                                 ),
                             ),
+                        iverksettelsesTidspunkt = tidspunkt,
                     ),
                 ),
             )
@@ -115,6 +118,7 @@ class VedtakServiceTest {
         fun vedtak(
             vedtakstype: VedtakType,
             utbetalingsperioder: List<Utbetalingsperiode>,
+            iverksettelsesTidspunkt: Tidspunkt = Tidspunkt.now(),
         ): VedtakDto {
             val behandlingId = UUID.randomUUID()
             return VedtakDto(
@@ -142,6 +146,7 @@ class VedtakServiceTest {
                         utbetalingsperioder = utbetalingsperioder,
                         opphoerFraOgMed = null,
                     ),
+                iverksettelsesTidspunkt = iverksettelsesTidspunkt,
             )
         }
 

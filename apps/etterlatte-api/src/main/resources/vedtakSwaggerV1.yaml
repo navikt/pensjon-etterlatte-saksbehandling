@@ -69,6 +69,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VedtakUtbetaling'
+        iverksettelsesTidspunkt:
+          type: string
+          format: date-time
+          example: "2025-07-18T14:23:45.123456Z"
+          description: "ISO-8601 tidspunkt med mikrosekund-presisjon"
 
     VedtakType:
       type: string

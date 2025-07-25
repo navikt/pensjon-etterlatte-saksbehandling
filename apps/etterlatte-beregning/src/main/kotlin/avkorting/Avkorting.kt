@@ -256,6 +256,7 @@ data class Avkorting(
         sanksjoner: List<Sanksjon>,
         spesifikasjon: String,
     ): Avkorting {
+        // Er det gitt at det alltid er bare en på samme år? Hvis bruker allerede har meldt inn endret inntekt?
         val tidligereAarsoppgjoer = aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
 
         // TODO kan ha endret seg? slik at forrige behandling sin avkorting ikke lenger stemmer?

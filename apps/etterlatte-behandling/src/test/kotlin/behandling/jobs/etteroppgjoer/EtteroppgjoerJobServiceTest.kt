@@ -1,9 +1,10 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
-import io.ktor.server.testing.testApplication
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -13,7 +14,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
@@ -25,12 +26,10 @@ import no.nav.etterlatte.soeker
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import javax.sql.DataSource
+import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EtteroppgjoerJobServiceTest(
-    private val dataSource: DataSource,
-) : BehandlingIntegrationTest() {
+class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
     val defaultPersongalleriGydligeFnr =
         Persongalleri(
             soeker,
@@ -53,34 +52,53 @@ class EtteroppgjoerJobServiceTest(
     }
 
     @Test
-    fun name() {
+    fun `run skal opprette etteroppgjoer for aar hvor saken har utbetalinger`() {
+        val currentYear = YearMonth.now().year
+        val sak = opprettSak()
+        opprettBehandling(sak)
+
+        coEvery {
+            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear - 1, any())
+        } returns listOf(sak.id)
+        coEvery {
+            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear, any())
+        } returns emptyList()
+
+        applicationContext.etteroppgjoerJobService.run()
+
         inTransaction {
-            val sak =
-                applicationContext.sakService.finnEllerOpprettSakMedGrunnlag(
-                    soeker,
-                    SakType.OMSTILLINGSSTOENAD,
-                    Enhetsnummer("1234"),
-                )
-            coEvery {
-                vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(2024, any())
-            } returns listOf(sak.id)
-            coEvery {
-                vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(2025, any())
-            } returns emptyList()
+            val etteroppgjoerForForrigeAar =
+                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear - 1)!!
+            etteroppgjoerForForrigeAar.sakId shouldBe sak.id
+            etteroppgjoerForForrigeAar.status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+            etteroppgjoerForForrigeAar.inntektsaar shouldBe currentYear - 1
 
-            val behandlingFactory = applicationContext.behandlingFactory
-            behandlingFactory.opprettBehandling(
-                sak.id,
-                defaultPersongalleriGydligeFnr,
-                null,
-                Vedtaksloesning.GJENNY,
-                behandlingFactory.hentDataForOpprettBehandling(sak.id),
-                BehandlingOpprinnelse.JOURNALFOERING,
-            )
-        }
-
-        testApplication {
-            applicationContext.etteroppgjoerJobService.run()
+            val etteroppgjoerForIAar =
+                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear)
+            etteroppgjoerForIAar shouldBe null
         }
     }
+
+    private fun opprettBehandling(sak: Sak) {
+        inTransaction {
+            val behandlingFactory = applicationContext.behandlingFactory
+            behandlingFactory.opprettBehandling(
+                sakId = sak.id,
+                persongalleri = defaultPersongalleriGydligeFnr,
+                mottattDato = null,
+                kilde = Vedtaksloesning.GJENNY,
+                request = behandlingFactory.hentDataForOpprettBehandling(sak.id),
+                opprinnelse = BehandlingOpprinnelse.JOURNALFOERING,
+            )
+        }
+    }
+
+    private fun opprettSak(): Sak =
+        inTransaction {
+            applicationContext.sakService.finnEllerOpprettSakMedGrunnlag(
+                soeker,
+                SakType.OMSTILLINGSSTOENAD,
+                Enhetsnummer("1234"),
+            )
+        }
 }

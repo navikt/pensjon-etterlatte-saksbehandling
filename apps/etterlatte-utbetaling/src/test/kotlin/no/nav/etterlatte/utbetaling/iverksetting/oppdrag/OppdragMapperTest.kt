@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
 
 internal class OppdragMapperTest {
     @Test
@@ -61,7 +64,11 @@ internal class OppdragMapperTest {
     inner class OppdragFraVedtakForRegulering {
         val oppdrag =
             OppdragMapper.oppdragFraUtbetaling(
-                utbetaling = utbetaling(sakType = Saktype.OMSTILLINGSSTOENAD),
+                utbetaling =
+                    utbetaling(
+                        sakType = Saktype.OMSTILLINGSSTOENAD,
+                        revurderingaarsak = Revurderingaarsak.REGULERING,
+                    ),
                 erFoersteUtbetalingPaaSak = true,
                 erGRegulering = true,
             )
@@ -92,6 +99,88 @@ internal class OppdragMapperTest {
 
             oppdrag.oppdrag110.tekst140.forEach {
                 it.tekst.length shouldBeLessThanOrEqual 40
+            }
+        }
+    }
+
+    @Nested
+    inner class OppdragFraVedtakForEtteroppgjoer {
+        val utbetalingIkkeEtteroppgjoer =
+            utbetaling(
+                sakType = Saktype.OMSTILLINGSSTOENAD,
+                revurderingaarsak = null,
+                periodeFra = LocalDate.of(2024, Month.JANUARY, 1),
+                utbetalingslinjer =
+                    listOf(
+                        utbetalingslinje(
+                            periodeFra = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                            periodeTil = YearMonth.of(2024, Month.APRIL).atEndOfMonth(),
+                            utbetalingslinjeId = 1,
+                        ),
+                        utbetalingslinje(
+                            periodeFra = YearMonth.of(2024, Month.MAY).atDay(1),
+                            periodeTil = YearMonth.of(2024, Month.DECEMBER).atEndOfMonth(),
+                            utbetalingslinjeId = 2,
+                        ),
+                        utbetalingslinje(
+                            periodeFra = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                            periodeTil = null,
+                            utbetalingslinjeId = 3,
+                        ),
+                    ),
+            )
+        val utbetalingEtteroppgjoer =
+            utbetaling(
+                sakType = Saktype.OMSTILLINGSSTOENAD,
+                revurderingaarsak = Revurderingaarsak.ETTEROPPGJOER,
+                periodeFra = LocalDate.of(2024, Month.JANUARY, 1),
+                utbetalingslinjer =
+                    listOf(
+                        utbetalingslinje(
+                            periodeFra = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                            periodeTil = YearMonth.of(2024, Month.APRIL).atEndOfMonth(),
+                            utbetalingslinjeId = 4,
+                        ),
+                        utbetalingslinje(
+                            periodeFra = YearMonth.of(2024, Month.MAY).atDay(1),
+                            periodeTil = YearMonth.of(2024, Month.DECEMBER).atEndOfMonth(),
+                            utbetalingslinjeId = 5,
+                        ),
+                        utbetalingslinje(
+                            periodeFra = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                            periodeTil = null,
+                            utbetalingslinjeId = 6,
+                        ),
+                    ),
+            )
+
+        @Test
+        fun `ikke etteroppgjoer skal ha ingen linjer som er markert med typesoknad = EO`() {
+            val oppdrag =
+                OppdragMapper.oppdragFraUtbetaling(
+                    utbetaling = utbetalingIkkeEtteroppgjoer,
+                    erFoersteUtbetalingPaaSak = true,
+                    erGRegulering = false,
+                )
+            oppdrag.oppdrag110.oppdragsLinje150.forEach {
+                it.typeSoknad shouldBe null
+            }
+        }
+
+        @Test
+        fun `etteroppgjoer skal ha markert typeSoknad = EO for utbetalingslinjer i etteroppgjørsåret`() {
+            val oppdrag =
+                OppdragMapper.oppdragFraUtbetaling(
+                    utbetaling = utbetalingEtteroppgjoer,
+                    erFoersteUtbetalingPaaSak = false,
+                    erGRegulering = false,
+                )
+            oppdrag.oppdrag110.oppdragsLinje150.forEach {
+                if (it.datoVedtakFom.year == 2024) {
+                    it.typeSoknad shouldBe "EO"
+                } else {
+                    it.typeSoknad shouldBe null
+                }
             }
         }
     }

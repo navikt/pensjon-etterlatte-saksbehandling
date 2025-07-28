@@ -147,7 +147,7 @@ internal class OppdragMapperTest {
                             utbetalingslinjeId = 5,
                         ),
                         utbetalingslinje(
-                            periodeFra = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                            periodeFra = YearMonth.of(2025, Month.JANUARY).atDay(1),
                             periodeTil = null,
                             utbetalingslinjeId = 6,
                         ),

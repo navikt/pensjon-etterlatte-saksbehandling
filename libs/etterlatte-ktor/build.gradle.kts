@@ -5,12 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.openapi) {
-        exclude("io.ktor", "ktor-server-core-jvm")
-        exclude("io.ktor", "ktor-server-webjars")
-        exclude("io.ktor", "ktor-server-auth")
-        exclude("io.ktor", "ktor-server-resources")
-    }
+
     implementation(libs.ktor2.webjars)
     implementation(libs.ktor2.serverresources)
     // Fram hit: ktor-avhengnadar for å dekkje det vi ekskluderer frå openapi-importen

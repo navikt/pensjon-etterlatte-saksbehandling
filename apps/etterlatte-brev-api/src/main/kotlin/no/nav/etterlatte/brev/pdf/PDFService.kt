@@ -30,6 +30,7 @@ class PDFService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    // TODO Vurder å erstatte bruk av streamProvider() siden den nå er deprecated
     suspend fun lagreOpplastaPDF(
         sakId: SakId,
         multiPart: List<PartData>,

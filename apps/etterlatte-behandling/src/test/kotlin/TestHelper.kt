@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.intercept
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

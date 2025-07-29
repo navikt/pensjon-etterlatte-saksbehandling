@@ -10,7 +10,7 @@ import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.auth.principal
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
-import io.ktor.server.routing.RoutingApplicationCall
+import io.ktor.server.routing.RoutingCall
 import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.getClaimAsString
 import no.nav.etterlatte.samordning.vedtak.orgNummer
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.security.token.support.v3.TokenValidationContextPrincipal
 import org.slf4j.MDC
 
 internal val LOGGER = KtorSimpleLogger("no.nav.etterlatte.samordning.requestLogger")
@@ -134,8 +134,8 @@ val serverRequestLoggerPlugin =
  * - "/api/vedtak?fomdato=2024-01-01&noe=annet" -> "/api/vedtak?fomdato,noe"
  */
 private fun extractUrlTemplate(call: ApplicationCall): String? =
-    when (call) {
-        is RoutingApplicationCall ->
+    when (call) { // TODO sjekk at logging-markers fortsatt er med
+        is RoutingCall ->
             (call.route.parent ?: call.route) // Drop METHOD part
                 .toString()
                 .replace("/(authenticate \"default\")", "", true) // Alle sikrede endepunkter wrappes av authenticate

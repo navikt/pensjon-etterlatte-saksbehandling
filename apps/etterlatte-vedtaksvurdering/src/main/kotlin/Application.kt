@@ -3,7 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.config.ApplicationContext
 import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
@@ -12,7 +12,7 @@ import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 
 fun main() {
-    ApplicationContext().let { Server(it).run() }
+    ApplicationContext().let { Server(it).runServer() }
 }
 
 class Server(
@@ -46,9 +46,9 @@ class Server(
             }
         }
 
-    fun run() =
+    fun runServer() =
         with(context) {
             dataSource.migrate()
-            engine.run()
+            engine.runEngine()
         }
 }

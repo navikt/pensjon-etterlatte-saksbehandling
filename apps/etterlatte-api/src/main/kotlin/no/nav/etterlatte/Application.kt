@@ -1,13 +1,12 @@
 package no.nav.etterlatte
 
-import io.ktor.server.application.install
 import io.ktor.server.plugins.swagger.swaggerUI
 import no.nav.etterlatte.behandling.sak.behandlingSakRoutes
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appName
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.oppgave.oppgaveRoute
 import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
 import no.nav.etterlatte.samordning.userIdMdcPlugin
@@ -16,7 +15,7 @@ import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
 import no.nav.etterlatte.vedtak.vedtakRoute
 
 fun main() {
-    Server(ApplicationContext(Miljoevariabler.systemEnv())).run()
+    Server(ApplicationContext(Miljoevariabler.systemEnv())).runServer()
 }
 
 class Server(
@@ -58,5 +57,5 @@ class Server(
             install(serverRequestLoggerPlugin)
         }
 
-    fun run() = engine.run()
+    fun runServer() = engine.runEngine()
 }

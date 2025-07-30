@@ -16,7 +16,7 @@ import no.nav.security.token.support.v3.TokenValidationContextPrincipal
 /**
  * Sjekk av at bruker kun spør etter egne data - denne brukes kun av selvbetjeningsløsinger(id-porten)
  */
-fun selvbetjeningAuthorizationPlugin(appname: String) =
+fun selvbetjeningAuthorizationPlugin() =
     createRouteScopedPlugin(
         name = "SelvbetjeningAuthorizationPlugin",
         createConfiguration = ::PluginConfiguration,

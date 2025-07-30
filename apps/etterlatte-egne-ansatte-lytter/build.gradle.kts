@@ -15,6 +15,6 @@ dependencies {
     implementation(libs.commons.compress)
 
     testImplementation(libs.test.testcontainer.kafka)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-kafka"))))
 }

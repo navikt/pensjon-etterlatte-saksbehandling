@@ -12,10 +12,10 @@ dependencies {
 
     implementation("io.ktor:ktor-server-swagger:3.2.2")
 
-    testImplementation(libs.ktor2.clientcontentnegotiation)
-    testImplementation(libs.ktor2.jackson)
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientcontentnegotiation)
+    testImplementation(libs.ktor.jackson)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)

@@ -21,8 +21,8 @@ dependencies {
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))

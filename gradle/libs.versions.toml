@@ -6,7 +6,7 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 [versions]
 jackson-version = "2.19.1"
 jupiter-version = "5.13.2"
-ktor2-version = "3.2.2"
+ktor-version = "3.2.2"
 navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.3"
@@ -35,27 +35,27 @@ kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", versi
 
 pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.5" }
 
-ktor2-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor2-version" }
-ktor2-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor2-version" }
-ktor2-clientloggingjvm = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor2-version" }
-ktor2-clientauth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor2-version" }
-ktor2-servercorejvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor2-version" }
-ktor2-doublereceive = { module = "io.ktor:ktor-server-double-receive", version.ref = "ktor2-version" }
-ktor2-servercio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor2-version" }
-ktor2-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor2-version" }
-ktor2-servercontentnegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor2-version" }
-ktor2-clientcontentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor2-version" }
-ktor2-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor2-version" }
-ktor2-calllogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor2-version" }
-ktor2-callid = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor2-version" }
-ktor2-statuspages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor2-version" }
-ktor2-metricsmicrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor2-version" }
-ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2-version" }
-ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
-ktor2-server = { module = "io.ktor:ktor-server", version.ref = "ktor2-version" }
-ktor2-serverresources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor2-version" }
-ktor2-servertests = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor2-version" }
-ktor2-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor2-version" }
+ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-version" }
+ktor-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }
+ktor-clientloggingjvm = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor-version" }
+ktor-clientauth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor-version" }
+ktor-servercorejvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor-version" }
+ktor-doublereceive = { module = "io.ktor:ktor-server-double-receive", version.ref = "ktor-version" }
+ktor-servercio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor-version" }
+ktor-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor-version" }
+ktor-servercontentnegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
+ktor-clientcontentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-version" }
+ktor-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor-version" }
+ktor-calllogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor-version" }
+ktor-callid = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor-version" }
+ktor-statuspages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor-version" }
+ktor-metricsmicrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor-version" }
+ktor-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor-version" }
+ktor-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor-version" }
+ktor-server = { module = "io.ktor:ktor-server", version.ref = "ktor-version" }
+ktor-serverresources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor-version" }
+ktor-servertests = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor-version" }
+ktor-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor-version" }
 
 etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.05.19-08.55.5458c5a0acaf" }
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
@@ -72,13 +72,13 @@ messaginghub-pooled-jms = { module = "org.messaginghub:pooled-jms", version = "3
 
 mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.3.0" }
 
-navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024082313161724411773.1db923f4402d" }
+navfelles-rapidandriversktor = { module = "com.github.navikt:rapids-and-rivers", version = "2024082313161724411773.1db923f4402d" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsimulering = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-system-os-simuler-fp-service-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
-navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v3", version.ref = "navfelles-token-version" }
+navfelles-tokenvalidationktor = { module = "no.nav.security:token-validation-ktor-v3", version.ref = "navfelles-token-version" }
 navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.2.1" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }

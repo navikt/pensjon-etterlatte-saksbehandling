@@ -29,7 +29,7 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     implementation(libs.cache.caffeine)
-    implementation(libs.navfelles.tokenvalidationktor2) {
+    implementation(libs.navfelles.tokenvalidationktor) {
         exclude("io.ktor", "ktor-server")
     }
 
@@ -37,10 +37,10 @@ dependencies {
 
     implementation(libs.database.kotliquery)
 
-    testImplementation(libs.ktor2.clientcontentnegotiation)
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.ktor2.jackson)
+    testImplementation(libs.ktor.clientcontentnegotiation)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
+    testImplementation(libs.ktor.jackson)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:etterlatte-funksjonsbrytere"))

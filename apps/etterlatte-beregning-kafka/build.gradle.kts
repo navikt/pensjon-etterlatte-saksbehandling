@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

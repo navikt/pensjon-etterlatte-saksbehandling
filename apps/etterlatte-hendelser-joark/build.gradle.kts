@@ -23,7 +23,7 @@ dependencies {
 
     implementation(libs.teamdokumenthandtering.avroschemas)
 
-    testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.ktor.servertests)
+    testImplementation(libs.ktor.clientmock)
     testRuntimeOnly(libs.test.junit.platform.launcher)
 }

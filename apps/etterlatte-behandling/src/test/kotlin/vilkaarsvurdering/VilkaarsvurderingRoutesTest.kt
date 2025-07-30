@@ -17,9 +17,12 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.attachMockContextWithDb
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
@@ -95,11 +98,10 @@ internal class VilkaarsvurderingRoutesTest(
     private val behandlingStatus: BehandlingStatusService = mockk<BehandlingStatusServiceImpl>()
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
     private val saksbehandler = mockSaksbehandler("User")
+    private lateinit var context: Context
 
     @BeforeAll
     fun beforeAll() {
-        nyKontekstMedBrukerOgDatabase(saksbehandler, ds)
-
         mockOAuth2Server.startRandomPort()
 
         vilkaarsvurderingServiceImpl =
@@ -109,6 +111,7 @@ internal class VilkaarsvurderingRoutesTest(
                 grunnlagService,
                 behandlingStatus,
             )
+        context = nyKontekstMedBrukerOgDatabase(saksbehandler, ds)
     }
 
     // TODO: må se på mock strukturen her kontra alle steder man gjør alt dette x**y ganger
@@ -135,7 +138,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal hente vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -175,7 +178,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal hente vilkaarsvurdering med ny versjon på behandlingens grunnlag`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -204,7 +207,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal returnere no content dersom en vilkaarsvurdering ikke finnes`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -246,7 +249,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes ved opprettelse`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -270,7 +273,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -319,7 +322,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -409,7 +412,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -468,7 +471,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -516,7 +519,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal ikke kunne endre eller slette vilkaar naar totalresultat er satt`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -564,7 +567,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `revurdering skal kopiere siste vilkaarsvurdering ved opprettele som default`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -628,7 +631,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `revurdering skal ikke kopiere siste vilkaarsvurdering naar kopierVedRevurdering er false`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -670,7 +673,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `Skal slette eksisterende vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -691,7 +694,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `faar 401 hvis spoerring ikke har access token`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -723,7 +726,7 @@ internal class VilkaarsvurderingRoutesTest(
                 behandlingStatusServiceLocal,
             )
 
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -755,7 +758,7 @@ internal class VilkaarsvurderingRoutesTest(
                 behandlingStatusService,
             )
 
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -785,7 +788,7 @@ internal class VilkaarsvurderingRoutesTest(
                 behandlingStatusService,
             )
 
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -831,7 +834,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal sjekke gyldighet og oppdatere status hvis den er OPPRETTET`() {
         coEvery { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
 
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)

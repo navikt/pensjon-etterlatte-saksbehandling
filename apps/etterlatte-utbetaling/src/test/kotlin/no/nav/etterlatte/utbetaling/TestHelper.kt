@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
@@ -66,13 +67,18 @@ fun utbetalingsvedtak(
             ),
         ),
     sakType: Saktype = Saktype.BARNEPENSJON,
+    revurderingaarsak: Revurderingaarsak? = null,
 ) = Utbetalingsvedtak(
     vedtakId = vedtakId,
     behandling =
         Behandling(
             id = UUID.randomUUID(),
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            revurderingsaarsak = null,
+            type =
+                when (revurderingaarsak) {
+                    null -> BehandlingType.FØRSTEGANGSBEHANDLING
+                    else -> BehandlingType.REVURDERING
+                },
+            revurderingsaarsak = revurderingaarsak,
         ),
     sak =
         Sak(
@@ -215,13 +221,14 @@ fun utbetaling(
             ),
         ),
     behandlingId: UUID = UUID.randomUUID(),
+    revurderingaarsak: Revurderingaarsak? = null,
 ) = Utbetaling(
     id = id,
     vedtakId = VedtakId(vedtakId),
     behandlingId = BehandlingId(behandlingId, behandlingId.toUUID30()),
     sakType = sakType ?: Saktype.BARNEPENSJON,
     sakId = sakId,
-    vedtak = utbetalingsvedtak(vedtakId),
+    vedtak = utbetalingsvedtak(vedtakId, revurderingaarsak = revurderingaarsak),
     opprettet = opprettet,
     endret = Tidspunkt.now(),
     avstemmingsnoekkel = avstemmingsnoekkel,

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
@@ -27,6 +28,7 @@ object OppdragMapper {
         erFoersteUtbetalingPaaSak: Boolean,
         erGRegulering: Boolean,
     ): Oppdrag {
+        val virkFom = utbetaling.utbetalingslinjer.minOf { it.periode.fra }
         val oppdrag110 =
             Oppdrag110().apply {
                 kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
@@ -88,7 +90,15 @@ object OppdragMapper {
                                     kodeStatusLinje = TkodeStatusLinje.OPPH
                                     datoStatusFom = it.periode.fra.toXMLDate()
                                 }
+
                                 else -> {}
+                            }
+                            if (utbetaling.erEtteroppgjoer() &&
+                                it.periode.fra.year == virkFom.year &&
+                                it.periode.til?.year == virkFom.year
+                            ) {
+                                // Denne perioden er en etteroppgjørsperiode og må markeres riktig
+                                typeSoknad = "EO"
                             }
                             vedtakId = utbetaling.vedtakId.value.toString()
                             delytelseId = it.id.value.toString()
@@ -117,6 +127,9 @@ object OppdragMapper {
         }
     }
 }
+
+private fun Utbetaling.erEtteroppgjoer(): Boolean =
+    this.sakType == Saktype.OMSTILLINGSSTOENAD && this.vedtak.behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER
 
 fun Saktype.tilKodeFagomraade(): String =
     when (this) {

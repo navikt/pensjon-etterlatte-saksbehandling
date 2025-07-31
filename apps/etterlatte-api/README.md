@@ -26,9 +26,6 @@ NB: The default separator is :. If name contains /, the default separator is ins
 
 Eks: https://docs.nais.io/auth/maskinporten/reference/#scope-naming
 
-etterlatte-samordning-vedtak(gammel og skal saneres) krever token utstedt av Maskinporten med scope _nav:
-etterlatteytelser:vedtaksinformasjon.read_
-
 #### Azure & Tokenx
 
 For interne må det legges inn i yaml filene slik som beskrevet her https://docs.nais.io/auth/entra-id/
@@ -46,15 +43,14 @@ Tjenestepensjon endepunkter(maskinporten):
 
 | Endepunkt                      | Headers                           | Body                                      | Method                            | Responstype        | Beskrivelse                                                                                                                         |
 |:-------------------------------|-----------------------------------|-------------------------------------------|-----------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| /api/vedtak?fomDato=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```          | GET(deprecated)/ POST(fnr i body) | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
-| /api/vedtak?virkFom=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```          | GET(deprecated)/ POST(fnr i body) | Samordningsvedtak[] | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
+| /api/vedtak?fomDato=YYYY-MM-DD | tpnr | ```{ foedselsnummer: String }```          | POST(fnr i body) | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
+| /api/vedtak?virkFom=YYYY-MM-DD | tpnr | ```{ foedselsnummer: String }```          | POST(fnr i body) | Samordningsvedtak[] | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
 | /api/vedtak/{nav-vedtak-id}    | tpnr                              |                                           | GET                               | Samordningsvedtak   | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
 | /api/v1/oppgave/journalfoering |                                   | ```{ sakId: Long, journalpostId: String, beskrivelse: String }```| POST                              | UUID (`oppgaveId`) | Oppretter journalføringsoppgave i Gjenny (kun for internt bruk)                                                                     |
 
 | Header                                 | Beskrivelse                      |
 |----------------------------------------|----------------------------------|
 | tpnr                                   | kallende tjenestepensjonsordning |
-| **DEPRECATED(skal sendes i body)** fnr | fødselsnummer til aktuell person |
 
 #### Informasjonsmodell
 
@@ -170,9 +166,8 @@ Som for omstillingsstønad.
 Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
 
 ### Vedtak API (kun for bruk internt i nav)
-
+[Swagger dev-gcp](https://etterlatte-api.intern.dev.nav.no/api/v1/vedtak/swagger)
 [Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
-
 ---
 
 

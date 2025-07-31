@@ -12,7 +12,7 @@ import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
+import { hentPersonNavnOgFoedsel } from '~shared/api/pdltjenester'
 import { isFailure, isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
 import { PersonLink } from '~components/person/lenker/PersonLink'
@@ -26,7 +26,7 @@ export default function StartOppgavebehandling() {
   const antallBehandlinger = sakMedBehandlinger?.behandlinger.length || 0
   const [tilhoererBruker, settTilhoererBruker] = useState(false)
 
-  const [personResult, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
+  const [personResult, hentPerson] = useApiCall(hentPersonNavnOgFoedsel)
 
   const neste = () => {
     switch (oppgaveHandling) {

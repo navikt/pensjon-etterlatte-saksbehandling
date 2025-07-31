@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim as base
+FROM node:24-bookworm-slim as base
 
 WORKDIR /app
 COPY ./client/dist ./client
@@ -10,7 +10,7 @@ ENV NODE_ENV="production"
 RUN cd ./server && yarn install --frozen-lockfile
 
 
-FROM gcr.io/distroless/nodejs20-debian12 as prod
+FROM gcr.io/distroless/nodejs24-debian12 as prod
 COPY --from=base /app /app
 
 USER nonroot

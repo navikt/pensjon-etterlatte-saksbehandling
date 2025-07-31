@@ -4,11 +4,9 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -18,7 +16,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.config
 import no.nav.etterlatte.ktor.runServerWithConfig
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.CLIENT_ID
@@ -27,11 +24,11 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
-import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtakService
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
 import no.nav.etterlatte.testdata.features.dolly.Vedtak
+import no.nav.etterlatte.testdata.features.dolly.VedtakService
 import no.nav.etterlatte.testdata.features.dolly.VedtakTilPerson
 import no.nav.etterlatte.testdata.features.dolly.VedtakType
 import no.nav.etterlatte.testdata.features.dolly.VedtakUtbetaling

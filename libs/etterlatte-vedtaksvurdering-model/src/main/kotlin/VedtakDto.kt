@@ -30,6 +30,7 @@ data class VedtakSammendragDto(
     val datoAttestert: ZonedDateTime?,
     val virkningstidspunkt: YearMonth?,
     val opphoerFraOgMed: YearMonth?,
+    val iverksettelsesTidspunkt: Tidspunkt? = null,
 )
 
 data class VedtakDto(
@@ -41,6 +42,7 @@ data class VedtakDto(
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,
     val innhold: VedtakInnholdDto,
+    val iverksettelsesTidspunkt: Tidspunkt? = null,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -171,7 +173,7 @@ data class TilbakekrevingVedtakLagretDto(
     val dato: LocalDate,
 )
 
-data class FoersteVirkOgOppoerTilSak(
-    val foersteVirk: YearMonth,
-    val opphoer: YearMonth?,
+data class InnvilgetPeriodeDto(
+    val periode: Periode,
+    val vedtak: List<VedtakDto>,
 )

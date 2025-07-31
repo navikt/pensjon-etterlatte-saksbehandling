@@ -783,7 +783,7 @@ internal class VedtaksbrevServiceTest {
     ): GenerellBrevData {
         val soeker = SOEKER_FOEDSELSNUMMER.value
         return GenerellBrevData(
-            sak = Sak(soeker, sakType, SAK_ID, Enheter.PORSGRUNN.enhetNr),
+            sak = Sak(soeker, sakType, SAK_ID, Enheter.PORSGRUNN.enhetNr, null, null),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),

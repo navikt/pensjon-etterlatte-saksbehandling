@@ -129,7 +129,8 @@ class DoedshendelseKontrollpunktOMSServiceTest {
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns
             listOf(
                 mockk {
-                    every { sak } returns Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1), Enhetsnummer("1234"))
+                    every { sak } returns
+                        Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1), Enhetsnummer("1234"), null, false)
                 },
             )
 
@@ -211,6 +212,8 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
+                null,
+                false,
             )
     }
 }

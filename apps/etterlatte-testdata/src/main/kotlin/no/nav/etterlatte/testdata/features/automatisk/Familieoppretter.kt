@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk
+package no.nav.etterlatte.testdata.features.automatisk
 
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.BestillingStatus

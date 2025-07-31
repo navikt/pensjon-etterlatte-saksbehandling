@@ -32,7 +32,6 @@ fun haandterUgyldigIdent(fnr: String): Folkeregisteridentifikator {
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
     config: Config,
-    appname: String,
 ) {
     route("api/vedtak") {
         install(MaskinportenScopeAuthorizationPlugin) {
@@ -101,7 +100,7 @@ fun Route.samordningVedtakRoute(
                 setOf("les-oms-vedtak", "les-oms-samordning-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
         }
-        install(selvbetjeningAuthorizationPlugin(appname)) {
+        install(selvbetjeningAuthorizationPlugin()) {
             validator = { fnr, borger -> borger.value == fnr.value }
             issuer = Issuer.TOKENX.issuerName
         }

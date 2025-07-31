@@ -1,7 +1,6 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
@@ -23,7 +22,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.no.nav.etterlatte.testdata.features.dolly.VedtakService
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest

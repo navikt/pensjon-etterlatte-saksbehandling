@@ -1,20 +1,17 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
-import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
-import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
 
-class SaksbehandlerJob(
-    private val saksbehandlerJobService: SaksbehandlerJobService,
+class EtteropppgjoerJob(
+    private val etteroppgjoerJobService: EtteroppgjoerJobService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
-    private val openingHours: OpeningHours,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -27,10 +24,9 @@ class SaksbehandlerJob(
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
-            openingHours = openingHours,
         ) {
             if (erLeader()) {
-                saksbehandlerJobService.run()
+                etteroppgjoerJobService.run()
             }
         }
     }

@@ -126,7 +126,7 @@ class TilbakekrevingInnholdDTOTest {
             perioder: List<TilbakekrevingPeriode> = listOf(tilbakekrevingperiode()),
             vurdering: TilbakekrevingVurdering = tilbakekrevingvurdering(),
         ) = GenerellBrevData(
-            sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr),
+            sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr, null, null),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),

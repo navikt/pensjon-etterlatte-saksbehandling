@@ -60,6 +60,8 @@ class DoedshendelseJobServiceTest {
                     sakType = SakType.BARNEPENSJON,
                     id = sakId1,
                     enhet = Enheter.AALESUND.enhetNr,
+                    null,
+                    false,
                 )
         }
     private val femDagerGammel = 5

@@ -28,4 +28,10 @@ class VedtaksvurderingService(
     // TODO: bedre plassering for denne?
     fun hentSakIdMedUtbetalingForInntektsaar(aar: Int): List<SakId> =
         repository.hentSakIdMedUtbetalingForInntektsaar(aar, SakType.OMSTILLINGSSTOENAD)
+
+    fun hentInnvilgedePerioder(sakId: SakId): List<InnvilgetPeriode> {
+        val vedtak = hentVedtakISak(sakId)
+        val tidslinje = Vedtakstidslinje(vedtak)
+        return tidslinje.innvilgedePerioder()
+    }
 }

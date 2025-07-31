@@ -604,6 +604,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 embete = null,
                 type = null,
                 vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
+                opphoerstidspunkt = null,
             )
 
         every { grunnlagService.hentPersonopplysninger(any(), any()) } returns
@@ -663,6 +664,8 @@ class AarligInntektsjusteringJobbServiceTest {
                 SakType.OMSTILLINGSSTOENAD,
                 SakId(123L),
                 Enhetsnummer("1234"),
+                null,
+                false,
             )
         val personPdl =
             PersonDTO(

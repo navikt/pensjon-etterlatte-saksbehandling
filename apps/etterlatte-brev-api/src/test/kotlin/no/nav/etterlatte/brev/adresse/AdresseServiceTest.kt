@@ -93,7 +93,7 @@ internal class AdresseServiceTest {
         coEvery { saksbehandlerKlient.hentSaksbehandlerNavn(any(), any()) } returns "saks behandler"
 
         val sakId = randomSakId()
-        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, null)
 
         val faktiskAvsender =
             runBlocking {

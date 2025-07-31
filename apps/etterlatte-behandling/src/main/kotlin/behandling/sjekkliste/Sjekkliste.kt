@@ -45,6 +45,8 @@ internal val skjekklisteItemsFoerstegangsbehandlingBP =
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
+        "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",
+        "Bruker mottar AFP livsvarig. Registreres som inntekt (se tjenestepensjon i Pesys og A-ordningen)",
     )
 
 internal val sjekklisteItemsFoerstegangsbehandlingOMS =
@@ -62,6 +64,7 @@ internal val sjekklisteItemsFoerstegangsbehandlingOMS =
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
         "Sjekk om bruker har overgangsstønad",
         "Forutsigbart opphør (aldersovergang e.l.) før desember i år eller neste år: Oppgitt inntekt for i år/ neste år i søknaden er kontrollert, og måneder etter opphør er trukket fra i beregningen.",
+        "Bruker mottar AFP livsvarig. Registreres som inntekt (se tjenestepensjon i Pesys og A-ordningen)",
     )
 
 internal val sjekklisteItemsRevurderingBP =
@@ -69,6 +72,8 @@ internal val sjekklisteItemsRevurderingBP =
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
         "Barnet mottar uføretrygd fra Nav - pensjonen er avkortet",
         "Mottatt nye bankopplysninger - sendt oppgave til NØP",
+        "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",
+        "Bruker mottar AFP livsvarig. Registreres som inntekt (se tjenestepensjon i Pesys og A-ordningen)",
     )
 
 internal val sjekklisteItemsRevurderingOMS =
@@ -80,6 +85,7 @@ internal val sjekklisteItemsRevurderingOMS =
         "Gjenlevende er innvilget AAP/OMS - oppgave sendt til Nav lokal pga spesiell oppfølging for de med OMS",
         "Inntekt neste år: sjekket at bruker har oppgitt inntekt frem til forutsigbart opphør pga aldersovergang e.l.",
         "Sjekket at forutsigbart opphør (aldersovergang e.l.) inneværende år er tatt hensyn til i beregningen av forventet inntekt for innvilget periode i år",
+        "Bruker mottar AFP livsvarig. Registreres som inntekt (se tjenestepensjon i Pesys og A-ordningen)",
     )
 
 internal val sjekklisteItemsBosattNorgeSluttbehandling =

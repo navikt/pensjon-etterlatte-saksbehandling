@@ -125,6 +125,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
@@ -157,6 +159,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
@@ -188,6 +192,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
@@ -220,6 +226,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
@@ -249,6 +257,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
@@ -303,6 +313,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_2,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
@@ -362,6 +374,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -405,6 +419,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
@@ -437,6 +453,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
             mockVilkaarsvurdering(
@@ -475,6 +493,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
             mockVilkaarsvurdering(
@@ -506,6 +526,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
@@ -551,6 +573,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.OMSTILLINGSSTOENAD,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
 
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -668,6 +692,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId,
                 ENHET_2,
+                null,
+                null,
             )
         coEvery {
             vilkaarsvurderingKlientMock.hentVilkaarsvurdering(
@@ -734,6 +760,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_2,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
@@ -785,6 +813,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_2,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
@@ -860,6 +890,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -904,6 +936,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
@@ -968,6 +1002,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -1011,6 +1047,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
@@ -1058,6 +1096,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
@@ -1109,6 +1149,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
@@ -1171,6 +1213,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -1214,6 +1258,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns true
@@ -1257,6 +1303,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns false
@@ -1329,6 +1377,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -1403,6 +1453,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
 
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
@@ -1452,6 +1504,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
@@ -1486,6 +1540,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
@@ -1521,6 +1577,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
@@ -1558,6 +1616,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.BARNEPENSJON,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
@@ -1776,6 +1836,8 @@ internal class VedtakBehandlingServiceTest(
                 SakType.OMSTILLINGSSTOENAD,
                 sakId1,
                 ENHET_1,
+                null,
+                null,
             )
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(

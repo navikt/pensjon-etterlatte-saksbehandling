@@ -150,6 +150,7 @@ internal class VedtaksvurderingRepositoryTest(
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             type shouldBe VedtakType.INNVILGELSE
+            iverksettelsesTidspunkt shouldBe null
             innhold should beInstanceOf<VedtakInnhold.Behandling>()
             (innhold as VedtakInnhold.Behandling).let {
                 it.behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
@@ -377,6 +378,8 @@ internal class VedtaksvurderingRepositoryTest(
 
         iverksattVedtak shouldNotBe null
         iverksattVedtak.status shouldBe VedtakStatus.IVERKSATT
+
+        iverksattVedtak.iverksettelsesTidspunkt shouldNotBe null
     }
 
     @Test

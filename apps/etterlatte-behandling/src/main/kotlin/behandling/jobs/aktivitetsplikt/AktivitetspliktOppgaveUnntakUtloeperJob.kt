@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.jobs.aktivitetsplikt
 
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer

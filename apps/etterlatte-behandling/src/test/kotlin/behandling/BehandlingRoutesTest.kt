@@ -97,7 +97,7 @@ internal class BehandlingRoutesTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
 
         every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
         val behandlingId = UUID.randomUUID()
@@ -141,7 +141,7 @@ internal class BehandlingRoutesTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
 
         every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
         coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns

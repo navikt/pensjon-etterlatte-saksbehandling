@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -354,6 +355,8 @@ class EtteroppgjoerForbehandlingDao(
                     sakType = enumValueOf(getString("saktype")),
                     ident = getString("fnr"),
                     enhet = Enhetsnummer(getString("enhet")),
+                    adressebeskyttelse = getString("adressebeskyttelse")?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
+                    erSkjermet = getBoolean("erSkjermet"),
                 ),
             // sekvensnummerSkatt = "123", // TODO
             opprettet = getTidspunkt("opprettet"),

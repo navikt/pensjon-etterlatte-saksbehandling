@@ -51,7 +51,7 @@ internal class KlagehendelseRiverTest {
                                 UUID.randomUUID(),
                                 Klage(
                                     UUID.randomUUID(),
-                                    Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr),
+                                    Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, null),
                                     Tidspunkt.now(),
                                     KlageStatus.OPPRETTET,
                                     kabalResultat = null,

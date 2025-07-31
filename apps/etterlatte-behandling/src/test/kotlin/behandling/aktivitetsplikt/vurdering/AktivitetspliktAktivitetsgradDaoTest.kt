@@ -554,6 +554,8 @@ class AktivitetspliktAktivitetsgradDaoTest(
                             sakType = SakType.OMSTILLINGSSTOENAD,
                             id = forrigeBehandling.sakId,
                             enhet = Enheter.defaultEnhet.enhetNr,
+                            adressebeskyttelse = null,
+                            erSkjermet = false,
                         ),
                     oppgaveType = OppgaveType.AKTIVITETSPLIKT,
                 )

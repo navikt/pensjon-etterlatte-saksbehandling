@@ -17,6 +17,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -179,7 +181,7 @@ class VedtaksvurderingRepository(
             hent(
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
                 tilbakekreving, klage 
             FROM vedtak 
@@ -199,7 +201,7 @@ class VedtaksvurderingRepository(
             hent(
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
                 tilbakekreving, klage 
             FROM vedtak 
@@ -218,7 +220,7 @@ class VedtaksvurderingRepository(
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
                 tilbakekreving, klage 
             FROM vedtak  
@@ -271,7 +273,7 @@ class VedtaksvurderingRepository(
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
             FROM vedtak  
             WHERE fnr = :fnr 
@@ -426,8 +428,13 @@ class VedtaksvurderingRepository(
     ): Vedtak =
         tx.session {
             oppdater(
-                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
-                params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus, datoiverksatt = :datoiverksatt WHERE behandlingId = :behandlingId",
+                params =
+                    mapOf(
+                        "vedtakstatus" to VedtakStatus.IVERKSATT.name,
+                        "behandlingId" to behandlingId,
+                        "datoiverksatt" to Tidspunkt.now().toNorskTid(),
+                    ),
                 loggtekst = "Lagrer iverksatt vedtak",
             ).also {
                 krev(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
@@ -536,6 +543,7 @@ class VedtaksvurderingRepository(
             soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
             status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
             type = string("type").let { VedtakType.valueOf(it) },
+            iverksettelsesTidspunkt = sqlTimestampOrNull("datoiverksatt")?.toTidspunkt(),
             vedtakFattet =
                 stringOrNull("saksbehandlerid")?.let {
                     VedtakFattet(

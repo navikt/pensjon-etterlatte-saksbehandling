@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.jobs.aktivitetsplikt
 
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext

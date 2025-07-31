@@ -105,6 +105,37 @@ internal class JoarkHendelseHandlerTest {
             }
         }
 
+        @Test
+        fun `Hvis bruker har NDIP så skal det opprettes manuel journalføringsoppgave`() {
+            val journalpostId = Random.nextLong()
+            val journalpost = opprettJournalpost(journalpostId)
+
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
+
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
+                PdlIdentifikator.Npid(
+                    NavPersonIdent("01309000000"),
+                )
+            coEvery { oppgaveKlient.opprettManuellJournalfoeringsoppgave(any(), any()) } returns Unit
+
+            val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
+
+            runBlocking {
+                sut.haandterHendelse(hendelse)
+            }
+
+            coVerify(exactly = 1) {
+                safKlientMock.hentJournalpost(journalpostId)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId = journalpostId, hendelse.temaNytt)
+            }
+        }
+
         @ParameterizedTest
         @EnumSource(SakType::class)
         fun `Journalpost med TEMA_ENDRET skal behandles hvis ikke ferdigstilt`(sakType: SakType) {
@@ -355,40 +386,6 @@ internal class JoarkHendelseHandlerTest {
             coVerify {
                 behandlingKlientMock wasNot Called
                 pdlTjenesterKlientMock wasNot Called
-            }
-        }
-
-        @Test
-        fun `Bruker har kun NPID`() {
-            val journalpostId = Random.nextLong()
-            val journalpost = opprettJournalpost(journalpostId)
-
-            coEvery { safKlientMock.hentJournalpost(any()) } returns
-                JournalpostResponse(
-                    JournalpostResponse.ResponseData(
-                        journalpost,
-                    ),
-                )
-
-            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
-                PdlIdentifikator.Npid(
-                    NavPersonIdent("01309000000"),
-                )
-
-            val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
-
-            runBlocking {
-                assertThrows<IllegalStateException> {
-                    sut.haandterHendelse(hendelse)
-                }
-            }
-
-            coVerify(exactly = 1) {
-                safKlientMock.hentJournalpost(journalpostId)
-                pdlTjenesterKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
-            }
-            coVerify {
-                behandlingKlientMock wasNot Called
             }
         }
 

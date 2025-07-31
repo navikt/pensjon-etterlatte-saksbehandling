@@ -15,7 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
-import no.nav.etterlatte.behandling.job.EtteroppgjoerJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -107,16 +107,17 @@ fun Route.etteroppgjoerRoutes(
             post("ferdigstill") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
+                    // Runblocking rundt ferdigstilling av brevet for å unngå å ferdigstille forbehandlingen uten at
+                    // brevet er ok.
                     runBlocking {
                         forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
                             etteroppgjoerId,
                             brukerTokenInfo,
                         )
-                        inTransaction {
-                            forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
-                        }
                     }
-
+                    inTransaction {
+                        forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }

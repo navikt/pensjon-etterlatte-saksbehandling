@@ -69,7 +69,7 @@ class OppdatererTilgangServiceTest {
         coEvery { skjermingKlient.personErSkjermet(any()) } returns true
 
         val sakId = SakId(1L)
-        val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr, null, false)
         every { sakLesDao.hentSak(sakId) } returns sak
         every { sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
         every { sakTilgang.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
@@ -92,7 +92,7 @@ class OppdatererTilgangServiceTest {
         coEvery { skjermingKlient.personErSkjermet(GJENLEVENDE_FOEDSELSNUMMER.value) } returns true
 
         val sakId = SakId(1L)
-        val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr, null, false)
         every { sakLesDao.hentSak(sakId) } returns sak
         every { sakTilgang.oppdaterSkjerming(any(), any()) } just Runs
         every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
@@ -122,7 +122,7 @@ class OppdatererTilgangServiceTest {
             )
 
         val sakId = SakId(1L)
-        val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr, null, false)
 
         every { sakLesDao.hentSak(sakId) } returns sak
         every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
@@ -163,7 +163,7 @@ class OppdatererTilgangServiceTest {
             )
 
         val sakId = SakId(1L)
-        val sak = Sak(soeker, saktype, sakId, Enheter.EGNE_ANSATTE.enhetNr)
+        val sak = Sak(soeker, saktype, sakId, Enheter.EGNE_ANSATTE.enhetNr, null, false)
 
         every { sakLesDao.hentSak(sakId) } returns sak
         every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
@@ -224,7 +224,7 @@ class OppdatererTilgangServiceTest {
             )
 
         val sakId = SakId(1L)
-        val sak = Sak(soeker, saktype, sakId, graderingOgEnhet.second)
+        val sak = Sak(soeker, saktype, sakId, graderingOgEnhet.second, null, false)
 
         every { sakLesDao.hentSak(sakId) } returns sak
         every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
@@ -256,7 +256,7 @@ class OppdatererTilgangServiceTest {
     fun `Skal fjerne skjerming fra sak`() {
         val saktype = SakType.BARNEPENSJON
         val sakId = SakId(1L)
-        val sak = Sak(soeker, saktype, sakId, Enheter.EGNE_ANSATTE.enhetNr)
+        val sak = Sak(soeker, saktype, sakId, Enheter.EGNE_ANSATTE.enhetNr, null, false)
 
         val enhet = Enheter.defaultEnhet
         every { brukerService.finnEnhetForPersonOgTema(soeker, SakType.BARNEPENSJON.tema, SakType.BARNEPENSJON) } returns

@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -240,7 +239,7 @@ internal class VedtakKlageServiceTest(
     private fun klage(utfall: KlageUtfallMedData? = null): Klage =
         Klage(
             UUID.randomUUID(),
-            Sak(FNR_1, SakType.BARNEPENSJON, sakId1, ENHET_1),
+            Sak(FNR_1, SakType.BARNEPENSJON, sakId1, ENHET_1, null, null),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,

@@ -97,7 +97,15 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             StatistikkBehandling(
                 id = behandlingId,
-                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = enhet, ident = "ident"),
+                sak =
+                    Sak(
+                        id = sakId,
+                        sakType = SakType.OMSTILLINGSSTOENAD,
+                        enhet = enhet,
+                        ident = "ident",
+                        adressebeskyttelse = null,
+                        erSkjermet = null,
+                    ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -221,6 +229,8 @@ class StatistikkServiceTest {
                         sakType = SakType.BARNEPENSJON,
                         enhet = Enheter.defaultEnhet.enhetNr,
                         ident = "ident",
+                        adressebeskyttelse = null,
+                        erSkjermet = null,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
@@ -321,7 +331,15 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             StatistikkBehandling(
                 id = behandlingId,
-                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = Enheter.defaultEnhet.enhetNr, ident = "ident"),
+                sak =
+                    Sak(
+                        id = sakId,
+                        sakType = SakType.OMSTILLINGSSTOENAD,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                        ident = "ident",
+                        adressebeskyttelse = null,
+                        erSkjermet = null,
+                    ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -501,7 +519,7 @@ fun behandling(
     avdoed: List<String>? = null,
 ) = StatistikkBehandling(
     id = id,
-    sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr),
+    sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr, null, null),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,

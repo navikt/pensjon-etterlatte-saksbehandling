@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.job
+package no.nav.etterlatte.behandling.jobs.saksbehandler
 
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope

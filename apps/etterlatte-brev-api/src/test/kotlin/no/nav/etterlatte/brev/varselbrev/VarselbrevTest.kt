@@ -58,7 +58,7 @@ class VarselbrevTest(
 
     private val brevRepository = BrevRepository(datasource)
 
-    val sak = Sak("ident1", SakType.BARNEPENSJON, sakId1, Enheter.STEINKJER.enhetNr)
+    val sak = Sak("ident1", SakType.BARNEPENSJON, sakId1, Enheter.STEINKJER.enhetNr, null, null)
 
     @BeforeEach
     fun start() {
@@ -96,7 +96,7 @@ class VarselbrevTest(
                 } returns
                     mockk<GenerellBrevData>().also {
                         every { it.spraak } returns Spraak.NN
-                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
+                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, null)
                         every { it.forenkletVedtak } returns null
                         every { it.personerISak } returns
                             PersonerISak(

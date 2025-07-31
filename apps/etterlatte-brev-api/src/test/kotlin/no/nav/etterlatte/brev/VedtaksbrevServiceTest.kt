@@ -848,14 +848,15 @@ internal class VedtaksbrevServiceTest {
                     override val gjelderNavn = ""
                     override val gjelderFoedselsnummer = ""
                     override val saksnummer = ""
-                    override val dokumentDato = ""
+                    override val dokumentDato = LocalDate.now()
+                    override val vergeNavn = null
                 }
             override val blocks = emptyList<LetterMarkup.Block>()
             override val signatur =
                 object : LetterMarkup.Signatur {
                     override val hilsenTekst = ""
                     override val saksbehandlerRolleTekst = ""
-                    override val saksbehandlerNavn = ""
+                    override val saksbehandlerNavn = null
                     override val attesterendeSaksbehandlerNavn = ""
                     override val navAvsenderEnhet = ""
                 }

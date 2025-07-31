@@ -71,6 +71,7 @@ class StatistikkServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
     private val aktivitetspliktService = mockk<AktivitetspliktService>()
+    private val etteroppgjoerService = mockk<EtteroppgjoerStatistikkService>()
     private val service =
         StatistikkService(
             stoenadRepository = stoenadRepo,
@@ -78,6 +79,7 @@ class StatistikkServiceTest {
             behandlingKlient = behandlingKlient,
             beregningKlient = beregningKlient,
             aktivitetspliktService = aktivitetspliktService,
+            etteroppgjoerService = etteroppgjoerService,
         )
 
     @Test
@@ -428,6 +430,7 @@ class StatistikkServiceTest {
                 behandlingKlient = behandlingKlient,
                 beregningKlient = beregningKlient,
                 aktivitetspliktService = aktivitetspliktService,
+                etteroppgjoerService = etteroppgjoerService,
             )
         service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList(), emptyMap()))
         verify {
@@ -458,6 +461,7 @@ class StatistikkServiceTest {
                 behandlingKlient = behandlingKlient,
                 beregningKlient = beregningKlient,
                 aktivitetspliktService = mockAktivitetspliktService,
+                etteroppgjoerService = etteroppgjoerService,
             )
         val brukteOmsIder = slot<List<SakId>>()
 

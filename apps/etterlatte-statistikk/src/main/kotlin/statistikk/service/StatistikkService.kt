@@ -6,6 +6,8 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -14,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
@@ -34,6 +37,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
+import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
@@ -61,6 +65,7 @@ class StatistikkService(
     private val behandlingKlient: BehandlingKlient,
     private val beregningKlient: BeregningKlient,
     private val aktivitetspliktService: AktivitetspliktService,
+    private val etteroppgjoerService: EtteroppgjoerStatistikkService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -133,6 +138,186 @@ class StatistikkService(
         val omsSaker = vedtak.filter { it.sakYtelse == SakType.OMSTILLINGSSTOENAD.name }.map { it.sakId }
         val aktiviteterForOmsSaker = aktivitetspliktService.mapAktivitetForSaker(omsSaker, maaned)
         return MaanedStatistikk(maaned, vedtak, aktiviteterForOmsSaker)
+    }
+
+    fun registrerStatistikkForBehandlinghendelse(
+        statistikkBehandling: StatistikkBehandling,
+        hendelse: BehandlingHendelseType,
+        tekniskTid: LocalDateTime,
+    ): SakRad? {
+        if (hendelse == BehandlingHendelseType.OPPRETTET) {
+            // Dette kan potensielt være en behandling som blir rullet tilbake. Vi vil gjøre ekstra verifisering på
+            // at behandlingen finnes
+            try {
+                runBlocking { retry(3) { behandlingKlient.hentStatistikkBehandling(statistikkBehandling.id) } }
+            } catch (e: Exception) {
+                logger.error(
+                    "Kunne ikke hente behandling med id ${statistikkBehandling.id} fra behandling. " +
+                        "Hvis opprettelse av behandlingen ble rullet tilbake og behandlingen med id=" +
+                        "${statistikkBehandling.id} ikke finnes i behandlingsbasen lengre, må det også legges inn " +
+                        "en avbrytelsesmelding til statistikk. ",
+                )
+            }
+        }
+        return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    }
+
+    fun registrerEndretEnhetForReferanse(
+        referanse: UUID,
+        nyEnhet: Enhetsnummer,
+        tekniskTid: LocalDateTime,
+    ): SakRad? {
+        val sisteRadForReferanse = sakRepository.hentSisteRad(referanse)
+        if (sisteRadForReferanse == null) {
+            logger.warn("Fikk melding om behandling statistikk ikke kjenner til, med referanse $referanse")
+            return null
+        }
+
+        return if (sisteRadForReferanse.ansvarligEnhet == nyEnhet) {
+            logger.info(
+                "Behandlingen med referanse $referanse har allerede enhet $nyEnhet på siste registrering. " +
+                    "Oppdaterer ikke statistikken.",
+            )
+            null
+        } else {
+            val tekniskTidForOppdatertEnhet =
+                if (sisteRadForReferanse.tekniskTid >= tekniskTid.toTidspunkt()) {
+                    sisteRadForReferanse.tekniskTid.plus(1, ChronoUnit.SECONDS)
+                } else {
+                    tekniskTid.toTidspunkt()
+                }
+            val nyRad =
+                sisteRadForReferanse.copy(
+                    ansvarligEnhet = nyEnhet,
+                    status = BehandlingHendelseType.ENDRET_ENHET.name,
+                    tekniskTid = tekniskTidForOppdatertEnhet,
+                )
+            return sakRepository.lagreRad(nyRad)
+        }
+    }
+
+    fun registrerStatistikkBehandlingPaaVentHendelse(
+        behandlingId: UUID,
+        hendelse: BehandlingHendelseType,
+        tekniskTid: LocalDateTime,
+        aarsak: PaaVentAarsak,
+    ): SakRad? {
+        val sisteRad =
+            sakRepository.hentSisteRad(behandlingId)?.copy(
+                status = hendelse.name,
+                tekniskTid = tekniskTid.toTidspunkt(),
+                paaVentAarsak = aarsak,
+            )
+        if (sisteRad == null) {
+            logger.warn(
+                "Registrerte ikke behandling på vent fordi det ble ikke funnet en tidligere rad knyttet til behandlig=$behandlingId",
+            )
+            return null
+        }
+        return sakRepository.lagreRad(sisteRad)
+    }
+
+    fun registrerStatistikkForKlagehendelse(
+        statistikkKlage: StatistikkKlage,
+        tekniskTid: LocalDateTime,
+        hendelse: KlageHendelseType,
+    ): SakRad? = sakRepository.lagreRad(klageTilSakRad(statistikkKlage, tekniskTid, hendelse))
+
+    fun registrerStatistikkFortilbakkrevinghendelse(
+        statistikkTilbakekreving: StatistikkTilbakekrevingDto,
+        tekniskTid: LocalDateTime,
+        hendelse: TilbakekrevingHendelseType,
+    ): SakRad? = sakRepository.lagreRad(tilbakekrevingTilSakRad(statistikkTilbakekreving, tekniskTid, hendelse))
+
+    fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus = stoenadRepository.kjoertStatusForMaanedsstatistikk(maaned)
+
+    fun lagreMaanedsstatistikk(maanedsstatistikkk: MaanedStatistikk) {
+        var raderMedFeil = 0L
+        var raderRegistrert = 0L
+        maanedsstatistikkk.rader.forEach {
+            try {
+                stoenadRepository.lagreMaanedStatistikkRad(it)
+                raderRegistrert += 1
+            } catch (e: Exception) {
+                logger.warn("Maanedsstatistikk for sak med id=${it.sakId} kunne ikke lagres", e)
+                raderMedFeil += 1
+            }
+        }
+        stoenadRepository.lagreMaanedJobUtfoert(
+            maanedsstatistikkk.maaned,
+            raderMedFeil,
+            raderRegistrert,
+        )
+    }
+
+    fun registrerEtteroppgjoerHendelse(
+        hendelse: EtteroppgjoerHendelseType,
+        statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
+        tekniskTid: Tidspunkt,
+        resultat: BeregnetEtteroppgjoerResultatDto?,
+    ) {
+        val etteroppgjoerStatistikk =
+            etteroppgjoerService.registrerEtteroppgjoerHendelse(
+                hendelse = hendelse,
+                forbehandling = statistikkDto.forbehandling,
+                tekniskTid = tekniskTid,
+                resultat = resultat,
+            )
+        val sakRad =
+            etteroppgjoerRadTilSakRad(
+                etteroppgjoerRad = etteroppgjoerStatistikk,
+                statistikkDto = statistikkDto,
+            )
+        sakRepository.lagreRad(sakRad)
+        logger.info("Registrerte saksstatistikk og etteroppgjoersstatistikk for forbehandling")
+    }
+
+    private fun etteroppgjoerRadTilSakRad(
+        etteroppgjoerRad: EtteroppgjoerRad,
+        statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
+    ): SakRad {
+        val foersteMaanedIEtteroppgjoer = etteroppgjoerRad.maanederYtelse.min()
+        val sisteMaanedIEtteroppgjoeor = etteroppgjoerRad.maanederYtelse.max()
+
+        return SakRad(
+            id = -1,
+            referanseId = etteroppgjoerRad.forbehandlingId,
+            sakId = etteroppgjoerRad.sakId,
+            mottattTidspunkt = etteroppgjoerRad.opprettet, // TODO: denne kunne tenkelig være dato for skatteoppgjør
+            registrertTidspunkt = etteroppgjoerRad.opprettet,
+            ferdigbehandletTidspunkt =
+                etteroppgjoerRad.tekniskTid.takeIf {
+                    etteroppgjoerRad.hendelse ==
+                        EtteroppgjoerHendelseType.FERDIGSTILT
+                },
+            vedtakTidspunkt = null,
+            type = "ETTEROPPGJOER_FORBEHANDLING",
+            status = etteroppgjoerRad.hendelse.name,
+            resultat = etteroppgjoerRad.resultatType?.name,
+            resultatBegrunnelse = null,
+            behandlingMetode = BehandlingMetode.MANUELL, // TODO: hvis vi setter på automatisering her må vi skille her
+            soeknadFormat = SoeknadFormat.DIGITAL,
+            opprettetAv = "GJENNY",
+            ansvarligBeslutter = null,
+            aktorId = statistikkDto.forbehandling.sak.ident,
+            datoFoersteUtbetaling = YearMonth.of(etteroppgjoerRad.aar, etteroppgjoerRad.maanederYtelse.min()).atDay(1),
+            tekniskTid = etteroppgjoerRad.tekniskTid,
+            sakYtelse = SakType.OMSTILLINGSSTOENAD.name,
+            vedtakLoependeFom = YearMonth.of(etteroppgjoerRad.aar, foersteMaanedIEtteroppgjoer).atDay(1),
+            vedtakLoependeTom = YearMonth.of(etteroppgjoerRad.aar, sisteMaanedIEtteroppgjoeor).atEndOfMonth(),
+            saksbehandler = statistikkDto.saksbehandler,
+            ansvarligEnhet = statistikkDto.forbehandling.sak.enhet,
+            sakUtland = statistikkDto.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
+            sakUtlandEnhet = SakUtland.fraEnhetsnummer(statistikkDto.forbehandling.sak.enhet),
+            beregning = null,
+            avkorting = null,
+            sakYtelsesgruppe = null,
+            avdoedeForeldre = null,
+            revurderingAarsak = null,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
+            pesysId = null,
+            relatertTil = statistikkDto.forbehandling.sisteIverksatteBehandlingId.toString(),
+        )
     }
 
     private fun registrerSakStatistikkForVedtak(
@@ -511,116 +696,6 @@ class StatistikkService(
             )
         }
         return fellesRad
-    }
-
-    fun registrerStatistikkForBehandlinghendelse(
-        statistikkBehandling: StatistikkBehandling,
-        hendelse: BehandlingHendelseType,
-        tekniskTid: LocalDateTime,
-    ): SakRad? {
-        if (hendelse == BehandlingHendelseType.OPPRETTET) {
-            // Dette kan potensielt være en behandling som blir rullet tilbake. Vi vil gjøre ekstra verifisering på
-            // at behandlingen finnes
-            try {
-                runBlocking { retry(3) { behandlingKlient.hentStatistikkBehandling(statistikkBehandling.id) } }
-            } catch (e: Exception) {
-                logger.error(
-                    "Kunne ikke hente behandling med id ${statistikkBehandling.id} fra behandling. " +
-                        "Hvis opprettelse av behandlingen ble rullet tilbake og behandlingen med id=" +
-                        "${statistikkBehandling.id} ikke finnes i behandlingsbasen lengre, må det også legges inn " +
-                        "en avbrytelsesmelding til statistikk. ",
-                )
-            }
-        }
-        return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
-    }
-
-    fun registrerEndretEnhetForReferanse(
-        referanse: UUID,
-        nyEnhet: Enhetsnummer,
-        tekniskTid: LocalDateTime,
-    ): SakRad? {
-        val sisteRadForReferanse = sakRepository.hentSisteRad(referanse)
-        if (sisteRadForReferanse == null) {
-            logger.warn("Fikk melding om behandling statistikk ikke kjenner til, med referanse $referanse")
-            return null
-        }
-
-        return if (sisteRadForReferanse.ansvarligEnhet == nyEnhet) {
-            logger.info(
-                "Behandlingen med referanse $referanse har allerede enhet $nyEnhet på siste registrering. " +
-                    "Oppdaterer ikke statistikken.",
-            )
-            null
-        } else {
-            val tekniskTidForOppdatertEnhet =
-                if (sisteRadForReferanse.tekniskTid >= tekniskTid.toTidspunkt()) {
-                    sisteRadForReferanse.tekniskTid.plus(1, ChronoUnit.SECONDS)
-                } else {
-                    tekniskTid.toTidspunkt()
-                }
-            val nyRad =
-                sisteRadForReferanse.copy(
-                    ansvarligEnhet = nyEnhet,
-                    status = BehandlingHendelseType.ENDRET_ENHET.name,
-                    tekniskTid = tekniskTidForOppdatertEnhet,
-                )
-            return sakRepository.lagreRad(nyRad)
-        }
-    }
-
-    fun registrerStatistikkBehandlingPaaVentHendelse(
-        behandlingId: UUID,
-        hendelse: BehandlingHendelseType,
-        tekniskTid: LocalDateTime,
-        aarsak: PaaVentAarsak,
-    ): SakRad? {
-        val sisteRad =
-            sakRepository.hentSisteRad(behandlingId)?.copy(
-                status = hendelse.name,
-                tekniskTid = tekniskTid.toTidspunkt(),
-                paaVentAarsak = aarsak,
-            )
-        if (sisteRad == null) {
-            logger.warn(
-                "Registrerte ikke behandling på vent fordi det ble ikke funnet en tidligere rad knyttet til behandlig=$behandlingId",
-            )
-            return null
-        }
-        return sakRepository.lagreRad(sisteRad)
-    }
-
-    fun registrerStatistikkForKlagehendelse(
-        statistikkKlage: StatistikkKlage,
-        tekniskTid: LocalDateTime,
-        hendelse: KlageHendelseType,
-    ): SakRad? = sakRepository.lagreRad(klageTilSakRad(statistikkKlage, tekniskTid, hendelse))
-
-    fun registrerStatistikkFortilbakkrevinghendelse(
-        statistikkTilbakekreving: StatistikkTilbakekrevingDto,
-        tekniskTid: LocalDateTime,
-        hendelse: TilbakekrevingHendelseType,
-    ): SakRad? = sakRepository.lagreRad(tilbakekrevingTilSakRad(statistikkTilbakekreving, tekniskTid, hendelse))
-
-    fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus = stoenadRepository.kjoertStatusForMaanedsstatistikk(maaned)
-
-    fun lagreMaanedsstatistikk(maanedsstatistikkk: MaanedStatistikk) {
-        var raderMedFeil = 0L
-        var raderRegistrert = 0L
-        maanedsstatistikkk.rader.forEach {
-            try {
-                stoenadRepository.lagreMaanedStatistikkRad(it)
-                raderRegistrert += 1
-            } catch (e: Exception) {
-                logger.warn("Maanedsstatistikk for sak med id=${it.sakId} kunne ikke lagres", e)
-                raderMedFeil += 1
-            }
-        }
-        stoenadRepository.lagreMaanedJobUtfoert(
-            maanedsstatistikkk.maaned,
-            raderMedFeil,
-            raderRegistrert,
-        )
     }
 }
 

@@ -38,6 +38,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlin
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
@@ -394,7 +395,8 @@ internal class ApplicationContext(
     private val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val saksbehandlerService: SaksbehandlerService =
         SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
+    val oppgaveService =
+        OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
     val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
     private val aldersovergangDao = AldersovergangDao(dataSource)
@@ -641,6 +643,9 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
         )
 
+    private val etteroppgjoerHendelseService =
+        EtteroppgjoerHendelseService(rapid, hendelseDao)
+
     val etteroppgjoerForbehandlingService =
         EtteroppgjoerForbehandlingService(
             dao = etteroppgjoerForbehandlingDao,
@@ -648,6 +653,7 @@ internal class ApplicationContext(
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
             inntektskomponentService = inntektskomponentService,
+            hendelserService = etteroppgjoerHendelseService,
             sigrunKlient = sigrunKlient,
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,

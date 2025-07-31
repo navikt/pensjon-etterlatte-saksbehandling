@@ -17,6 +17,7 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
 import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
+import no.nav.etterlatte.statistikk.database.EtteroppgjoerRepository
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
@@ -25,11 +26,13 @@ import no.nav.etterlatte.statistikk.river.AktivitetspliktHendelseRiver
 import no.nav.etterlatte.statistikk.river.AvbruttOpprettetBehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.BehandlingEndretEnhetRiver
 import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
+import no.nav.etterlatte.statistikk.river.EtteroppgjoerHendelseRiver
 import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
 import no.nav.etterlatte.statistikk.river.SoeknadStatistikkRiver
 import no.nav.etterlatte.statistikk.river.TilbakekrevinghendelseRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.AktivitetspliktService
+import no.nav.etterlatte.statistikk.service.EtteroppgjoerStatistikkService
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkServiceImpl
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -41,7 +44,14 @@ import javax.sql.DataSource
 class ApplicationContext {
     private val env = Miljoevariabler.systemEnv()
     private val statistikkService: StatistikkService by lazy {
-        StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingKlient, beregningKlient, aktivitetspliktService)
+        StatistikkService(
+            stoenadRepository = statistikkRepository,
+            sakRepository = sakstatistikkRepository,
+            behandlingKlient = behandlingKlient,
+            beregningKlient = beregningKlient,
+            aktivitetspliktService = aktivitetspliktService,
+            etteroppgjoerService = etteroppgjoerStatistikkService,
+        )
     }
 
     fun initRapidsConnection() =
@@ -54,7 +64,16 @@ class ApplicationContext {
             KlagehendelseRiver(rapidsConnection, statistikkService)
             AktivitetspliktHendelseRiver(rapidsConnection, aktivitetspliktService)
             BehandlingEndretEnhetRiver(rapidsConnection, statistikkService)
+            EtteroppgjoerHendelseRiver(rapidsConnection, statistikkService)
         }
+
+    private val etteroppgjoerStatistikkService: EtteroppgjoerStatistikkService by lazy {
+        EtteroppgjoerStatistikkService(etteroppgjoerRepository = etteroppgjoerRepository)
+    }
+
+    private val etteroppgjoerRepository: EtteroppgjoerRepository by lazy {
+        EtteroppgjoerRepository(datasource)
+    }
 
     private val behandlingKlient: BehandlingKlient by lazy {
         BehandlingKlientImpl(behandlingHttpClient, "http://etterlatte-behandling")
@@ -91,9 +110,9 @@ class ApplicationContext {
 
     val maanedligStatistikkJob: MaanedligStatistikkJob by lazy {
         MaanedligStatistikkJob(
-            statistikkService,
-            leaderElection,
-            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            statistikkService = statistikkService,
+            leaderElection = leaderElection,
+            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(4, ChronoUnit.HOURS),
         )
     }

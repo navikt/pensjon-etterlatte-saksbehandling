@@ -4,8 +4,11 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.postgresql.util.PGobject
+import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.Types
+import java.time.LocalDate
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? =
     if (next()) {
@@ -58,3 +61,35 @@ fun PreparedStatement.setSakId(
     index: Int,
     sakId: SakId,
 ) = this.setLong(index, sakId.sakId)
+
+fun PreparedStatement.setNullableInt(
+    index: Int,
+    value: Int?,
+) = when (value) {
+    null -> this.setNull(index, Types.BIGINT)
+    else -> this.setInt(index, value)
+}
+
+fun PreparedStatement.setNullableDate(
+    index: Int,
+    value: LocalDate?,
+) = when (value) {
+    null -> this.setNull(index, Types.DATE)
+    else -> this.setDate(index, Date.valueOf(value))
+}
+
+fun PreparedStatement.setNullableLong(
+    index: Int,
+    value: Long?,
+) = when (value) {
+    null -> this.setNull(index, Types.BIGINT)
+    else -> this.setLong(index, value)
+}
+
+fun PreparedStatement.setNullableDouble(
+    index: Int,
+    value: Double?,
+) = when (value) {
+    null -> this.setNull(index, Types.FLOAT)
+    else -> this.setDouble(index, value)
+}

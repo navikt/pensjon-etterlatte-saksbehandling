@@ -793,10 +793,10 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/lodash@^4.17.19":
-  version "4.17.19"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.19.tgz#de18c90b7891f00fed7c1273495a2f851efd99c4"
-  integrity sha512-NYqRyg/hIQrYPT9lbOeYc3kIRabJDn/k4qQHIXUpx88CBDww2fD15Sg5kbXlW86zm2XEW4g0QxkTI3/Kfkc7xQ==
+"@types/lodash@^4.17.20":
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.20.tgz#1ca77361d7363432d29f5e55950d9ec1e1c6ea93"
+  integrity sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==
 
 "@types/node@^24.0.10":
   version "24.0.10"
@@ -3511,6 +3511,7 @@ strip-literal@^3.0.0:
   integrity sha512-TcccoMhJOM3OebGhSBEmp3UZ2SfDMZUEBdRA/9ynfLi8yYajyWX3JiXArcJt4Umh4vISpspkQIY8ZZoCqjbviA==
   dependencies:
     js-tokens "^9.0.1"
+
 styled-components@^6.1.19:
   version "6.1.19"
   resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-6.1.19.tgz#9a41b4db79a3b7a2477daecabe8dd917235263d6"

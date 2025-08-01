@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="etterlatte-samordning-vedtak.dev-gcp" type="JetRunConfigurationType">
+  <configuration default="false" name="etterlatte-api.dev-gcp" type="JetRunConfigurationType">
     <envs>
       <env name="ETTERLATTE_VEDTAKSVURDERING_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="ETTERLATTE_VEDTAKSVURDERING_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default" />
@@ -11,6 +11,7 @@
       <env name="LOGBACK_LEVEL" value="DEBUG" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-api.main" />
     <shortenClasspath name="NONE" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />
@@ -20,7 +21,7 @@
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
-        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-samordning-vedtak/.env.dev-gcp" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-api/.env.dev-gcp" />
       </ENTRIES>
     </extension>
     <method v="2">

@@ -16,12 +16,12 @@ dependencies {
     implementation(libs.database.kotliquery)
     implementation(libs.navfelles.tokenclientcore)
 
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
 
-    testImplementation(libs.ktor2.jackson)
-    testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(libs.ktor.jackson)
+    testImplementation(libs.ktor.clientcontentnegotiation)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))

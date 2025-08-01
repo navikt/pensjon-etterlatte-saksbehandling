@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -14,7 +15,7 @@ object ADGruppe {
     const val ETTERLATTE = "1a424f32-16a4-4b97-9d77-3e9e781a887e"
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunEtterlatteUtvikling(onSuccess: () -> Unit) {
+suspend inline fun RoutingContext.kunEtterlatteUtvikling(onSuccess: () -> Unit) {
     val rollerEllerAdGrupper =
         when (brukerTokenInfo) {
             is Saksbehandler -> (call.brukerTokenInfo as Saksbehandler).groups
@@ -27,7 +28,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunEtterlatteUtvikling(on
     }
 }
 
-fun PipelineContext<*, ApplicationCall>.harGyldigAdGruppe(): Boolean =
+fun RoutingContext.harGyldigAdGruppe(): Boolean =
     when (brukerTokenInfo) {
         is Saksbehandler -> (brukerTokenInfo as Saksbehandler).groups
         is Systembruker -> (brukerTokenInfo as Systembruker).roller

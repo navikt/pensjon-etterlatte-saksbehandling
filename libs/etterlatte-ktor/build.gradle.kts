@@ -5,38 +5,33 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.openapi) {
-        exclude("io.ktor", "ktor-server-core-jvm")
-        exclude("io.ktor", "ktor-server-webjars")
-        exclude("io.ktor", "ktor-server-auth")
-        exclude("io.ktor", "ktor-server-resources")
-    }
-    implementation(libs.ktor2.webjars)
-    implementation(libs.ktor2.serverresources)
+
+    implementation(libs.ktor.webjars)
+    implementation(libs.ktor.serverresources)
     // Fram hit: ktor-avhengnadar for å dekkje det vi ekskluderer frå openapi-importen
 
     implementation(project(":libs:saksbehandling-common"))
-    api(libs.ktor2.auth)
-    api(libs.ktor2.servercorejvm)
-    api(libs.ktor2.servercio)
-    api(libs.ktor2.server)
-    api(libs.ktor2.clientcontentnegotiation)
-    api(libs.ktor2.jackson)
-    api(libs.ktor2.okhttp)
-    api(libs.ktor2.clientauth)
-    api(libs.ktor2.clientloggingjvm)
+    api(libs.ktor.auth)
+    api(libs.ktor.servercorejvm)
+    api(libs.ktor.servercio)
+    api(libs.ktor.server)
+    api(libs.ktor.clientcontentnegotiation)
+    api(libs.ktor.jackson)
+    api(libs.ktor.okhttp)
+    api(libs.ktor.clientauth)
+    api(libs.ktor.clientloggingjvm)
 
     api(libs.navfelles.tokenclientcore)
 
-    implementation(libs.ktor2.calllogging)
-    implementation(libs.ktor2.callid)
-    implementation(libs.ktor2.statuspages)
-    implementation(libs.ktor2.servercontentnegotiation)
+    implementation(libs.ktor.calllogging)
+    implementation(libs.ktor.callid)
+    implementation(libs.ktor.statuspages)
+    implementation(libs.ktor.servercontentnegotiation)
 
-    implementation(libs.ktor2.metricsmicrometer)
-    implementation(libs.ktor2.doublereceive)
+    implementation(libs.ktor.metricsmicrometer)
+    implementation(libs.ktor.doublereceive)
 
-    api(libs.navfelles.tokenvalidationktor2) {
+    api(libs.navfelles.tokenvalidationktor) {
         exclude("io.ktor", "ktor-server")
     }
 
@@ -52,20 +47,20 @@ dependencies {
     implementation(libs.metrics.prometheus.simpleclienthotspot)
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
-    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.ktor.clientmock)
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.engine)
     testRuntimeOnly(libs.test.junit.platform.launcher)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.navfelles.mockoauth2server)
 
     testFixturesImplementation(libs.navfelles.mockoauth2server)
-    testFixturesImplementation(libs.ktor2.servertests)
-    testFixturesImplementation(libs.navfelles.tokenvalidationktor2)
-    testFixturesImplementation(libs.ktor2.jackson)
-    testFixturesImplementation(libs.ktor2.servercontentnegotiation)
-    testFixturesImplementation(libs.ktor2.clientcontentnegotiation)
+    testFixturesImplementation(libs.ktor.servertests)
+    testFixturesImplementation(libs.navfelles.tokenvalidationktor)
+    testFixturesImplementation(libs.ktor.jackson)
+    testFixturesImplementation(libs.ktor.servercontentnegotiation)
+    testFixturesImplementation(libs.ktor.clientcontentnegotiation)
     testFixturesImplementation(project(":libs:saksbehandling-common"))
 }

@@ -13,11 +13,11 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import org.slf4j.LoggerFactory
 
 fun main() {
-    Server().run()
+    Server().runServer()
 }
 
 class Server {
@@ -28,10 +28,10 @@ class Server {
         sikkerLoggOppstart("etterlatte-egne-ansatte-lytter")
     }
 
-    fun run() {
+    fun runServer() {
         val env = Miljoevariabler.systemEnv()
         startEgenAnsattLytter(env, defaultConfig)
-        engine.run()
+        engine.runEngine()
     }
 }
 

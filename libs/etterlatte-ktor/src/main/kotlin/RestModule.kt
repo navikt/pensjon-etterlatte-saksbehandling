@@ -1,9 +1,6 @@
 package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.core.JacksonException
-import io.github.smiley4.ktorswaggerui.SwaggerUI
-import io.github.smiley4.ktorswaggerui.routing.openApiSpec
-import io.github.smiley4.ktorswaggerui.routing.swaggerUI
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.jackson.JacksonConverter
@@ -14,8 +11,8 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
-import io.ktor.server.plugins.callloging.CallLogging
-import io.ktor.server.plugins.callloging.processingTimeMillis
+import io.ktor.server.plugins.calllogging.CallLogging
+import io.ktor.server.plugins.calllogging.processingTimeMillis
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -27,7 +24,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.micrometer.core.instrument.binder.MeterBinder
-import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.feilhaandtering.StatusPagesKonfigurasjon
@@ -35,7 +31,7 @@ import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.getClaimAsString
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
-import no.nav.security.token.support.v2.tokenValidationSupport
+import no.nav.security.token.support.v3.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
 import java.util.UUID
@@ -101,14 +97,6 @@ fun Application.restModule(
     }
 
     install(StatusPages, StatusPagesKonfigurasjon(sikkerLogg).config)
-    install(SwaggerUI) {
-        info {
-            title = "Etterlatte"
-            contact {
-                url = "https://github.com/navikt/pensjon-etterlatte-saksbehandling"
-            }
-        }
-    }
 
     routing {
         healthApi()
@@ -117,14 +105,7 @@ fun Application.restModule(
                 authenticatedRoutes()
             }
         }
-        if (!isProd()) {
-            route("swagger") {
-                swaggerUI("/api.json")
-            }
-            route("api.json") {
-                openApiSpec()
-            }
-        }
+
         if (routes != null) {
             routes()
         }

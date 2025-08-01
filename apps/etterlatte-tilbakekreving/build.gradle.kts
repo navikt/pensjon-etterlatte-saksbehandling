@@ -24,10 +24,10 @@ dependencies {
 
     implementation(libs.database.kotliquery)
 
-    testImplementation(libs.ktor2.clientcontentnegotiation)
-    testImplementation(libs.ktor2.jackson)
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientcontentnegotiation)
+    testImplementation(libs.ktor.jackson)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")
     }

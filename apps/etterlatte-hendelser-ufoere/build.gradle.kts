@@ -13,11 +13,11 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.kafka.avroserializer)
 
-    testImplementation(libs.ktor2.clientcontentnegotiation)
-    testImplementation(libs.ktor2.jackson)
+    testImplementation(libs.ktor.clientcontentnegotiation)
+    testImplementation(libs.ktor.jackson)
     testImplementation(libs.test.testcontainer.kafka)
-    testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.ktor.servertests)
+    testImplementation(libs.ktor.clientmock)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
     testImplementation(testFixtures((project(":libs:etterlatte-kafka"))))
 }

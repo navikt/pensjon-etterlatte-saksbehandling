@@ -279,7 +279,7 @@ class VedtaksvurderingRepository(
             WHERE fnr = :fnr 
               AND (
                    vedtakstatus IN ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT', 'AVSLAG') 
-                   OR type = 'AVSLAG'
+                   OR (type = 'AVSLAG' AND vedtakstatus = 'ATTESTERT')
               )
             ${if (sakType == null) "" else "AND saktype = :saktype"}
             """

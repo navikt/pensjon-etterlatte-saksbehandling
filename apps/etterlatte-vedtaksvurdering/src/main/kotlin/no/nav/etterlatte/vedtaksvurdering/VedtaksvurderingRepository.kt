@@ -273,11 +273,14 @@ class VedtaksvurderingRepository(
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
+                   datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                   attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
             FROM vedtak  
             WHERE fnr = :fnr 
-            AND vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
+              AND (
+                   vedtakstatus IN ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT', 'AVSLAG') 
+                   OR (type = 'AVSLAG' AND vedtakstatus = 'ATTESTERT')
+              )
             ${if (sakType == null) "" else "AND saktype = :saktype"}
             """
         return tx.session {

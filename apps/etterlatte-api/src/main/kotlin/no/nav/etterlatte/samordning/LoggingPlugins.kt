@@ -11,6 +11,7 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.routing.RoutingCall
+import io.ktor.server.routing.RoutingPipelineCall
 import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
@@ -135,7 +136,7 @@ val serverRequestLoggerPlugin =
  */
 private fun extractUrlTemplate(call: ApplicationCall): String? =
     when (call) { // TODO sjekk at logging-markers fortsatt er med
-        is RoutingCall ->
+        is RoutingPipelineCall ->
             (call.route.parent ?: call.route) // Drop METHOD part
                 .toString()
                 .replace("/(authenticate \"default\")", "", true) // Alle sikrede endepunkter wrappes av authenticate

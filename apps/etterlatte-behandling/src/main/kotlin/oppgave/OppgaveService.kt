@@ -117,7 +117,10 @@ class OppgaveService(
         oppgaveIds.forEach {
             val oppgave = oppgaveDao.hentOppgave(it) ?: throw OppgaveIkkeFunnet(it)
             if (oppgave.enhet !in enheterForSaksbehandler) {
-                throw IkkeTillattException("HAR_IKKE_TILGANG_TIL_SAK", "Kan ikke tildele saksbehandler i en sak man ikke har tilgang i.")
+                throw IkkeTillattException(
+                    "HAR_IKKE_TILGANG_TIL_SAK",
+                    "Kan ikke tildele saksbehandler i en sak man ikke har tilgang i.",
+                )
             }
             tildelSaksbehandler(it, nyTildeling)
         }
@@ -170,9 +173,15 @@ class OppgaveService(
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
 
-        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
-            oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandler?.ident.isNullOrBlank()) {
+            logger.warn(
+                "Saksbehandler ikke satt på oppgave som vi oppretter behandling ut i fra, " +
+                    "oppgaveId=${hentetOppgave.id}, saksbehandler satt på oppgave " +
+                    "er ${hentetOppgave.saksbehandler?.ident}",
+            )
         }
+        oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
     }
 
     fun oppdaterReferanseOgMerknad(

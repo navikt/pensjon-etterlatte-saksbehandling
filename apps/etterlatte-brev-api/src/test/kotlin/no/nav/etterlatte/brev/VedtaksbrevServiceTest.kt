@@ -841,12 +841,26 @@ internal class VedtaksbrevServiceTest {
         )
 
     private fun opprettLetterMarkup() =
-        LetterMarkup(
-            "",
-            LetterMarkup.Sakspart("", "", "", ""),
-            emptyList(),
-            LetterMarkup.Signatur("", "", "", "", ""),
-        ).let { BlockTilSlateKonverterer.konverter(it) }
+        object : LetterMarkup {
+            override val title = ""
+            override val sakspart =
+                object : LetterMarkup.Sakspart {
+                    override val gjelderNavn = ""
+                    override val gjelderFoedselsnummer = ""
+                    override val saksnummer = ""
+                    override val dokumentDato = LocalDate.now()
+                    override val vergeNavn = null
+                }
+            override val blocks = emptyList<LetterMarkup.Block>()
+            override val signatur =
+                object : LetterMarkup.Signatur {
+                    override val hilsenTekst = ""
+                    override val saksbehandlerRolleTekst = ""
+                    override val saksbehandlerNavn = null
+                    override val attesterendeSaksbehandlerNavn = ""
+                    override val navAvsenderEnhet = ""
+                }
+        }.let { BlockTilSlateKonverterer.konverter(it) }
 
     private fun opprettOpphoerPayload() =
         Slate(

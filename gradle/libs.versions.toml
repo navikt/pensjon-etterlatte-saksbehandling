@@ -6,7 +6,7 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 [versions]
 jackson-version = "2.19.1"
 jupiter-version = "5.13.2"
-ktor-version = "3.2.2"
+ktor-version = "3.2.3"
 navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.3"

@@ -21,8 +21,8 @@ dependencies {
         exclude("io.ktor", "ktor-server")
     }
     implementation(libs.ktor2.server)
-    implementation("io.ktor:ktor-server-core:2.3.13")
-    implementation("io.ktor:ktor-server-swagger:2.3.13")
+    implementation("io.ktor:ktor-server-core:3.2.3")
+    implementation("io.ktor:ktor-server-swagger:3.2.3")
 
     testImplementation(libs.test.kotest.assertionscore)
 

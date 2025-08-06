@@ -276,6 +276,11 @@ class StatistikkService(
         etteroppgjoerRad: EtteroppgjoerRad,
         statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
     ): SakRad {
+        val sisteResultat =
+            when (etteroppgjoerRad.hendelse) {
+                EtteroppgjoerHendelseType.FERDIGSTILT -> etteroppgjoerService.hentNyesteRad(etteroppgjoerRad.forbehandlingId)
+                else -> null
+            }
         val foersteMaanedIEtteroppgjoer = etteroppgjoerRad.maanederYtelse.min()
         val sisteMaanedIEtteroppgjoeor = etteroppgjoerRad.maanederYtelse.max()
 
@@ -293,7 +298,7 @@ class StatistikkService(
             vedtakTidspunkt = null,
             type = "ETTEROPPGJOER_FORBEHANDLING",
             status = etteroppgjoerRad.hendelse.name,
-            resultat = etteroppgjoerRad.resultatType?.name,
+            resultat = etteroppgjoerRad.resultatType?.name ?: sisteResultat?.resultatType?.name,
             resultatBegrunnelse = null,
             behandlingMetode = BehandlingMetode.MANUELL, // TODO: hvis vi setter på automatisering her må vi skille her
             soeknadFormat = SoeknadFormat.DIGITAL,

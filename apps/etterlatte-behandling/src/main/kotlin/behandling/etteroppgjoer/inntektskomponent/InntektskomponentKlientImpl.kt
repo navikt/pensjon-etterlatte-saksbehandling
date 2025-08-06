@@ -8,6 +8,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
@@ -17,12 +18,27 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
 
+enum class InntektskomponentenFilter(
+    val filter: String,
+) {
+    ETTEROPPGJOER_LOENN("OmsEOLoenn"),
+    ETTEROPPGJOER_OMS("OmsEO"),
+    ETTEROPPGJOER_AFP("OmsEOAfp"),
+}
+
 interface InntektskomponentKlient {
     suspend fun hentInntekt(
         personident: String,
         maanedFom: YearMonth,
         maanedTom: YearMonth,
     ): AInntektReponsData
+
+    suspend fun hentInntektFlereFilter(
+        personident: String,
+        maanedFom: YearMonth,
+        maanedTom: YearMonth,
+        filter: List<InntektskomponentenFilter>,
+    ): AInntektBulkResponsData
 }
 
 class InntektskomponentKlientImpl(
@@ -68,6 +84,48 @@ class InntektskomponentKlientImpl(
                 }
             }
         }
+
+    override suspend fun hentInntektFlereFilter(
+        personident: String,
+        maanedFom: YearMonth,
+        maanedTom: YearMonth,
+        filter: List<InntektskomponentenFilter>,
+    ): AInntektBulkResponsData {
+        krev(filter.isNotEmpty()) {
+            "Må hente inntekt med minst ett filter"
+        }
+
+        return retry {
+            httpClient.post("$url/rest/v2/inntekt/bulk") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                val body =
+                    InntektBulkRequest(
+                        personident = personident,
+                        filter = filter.map(InntektskomponentenFilter::filter),
+                        formaal = ETTERLATTEYTELSER,
+                        maanedFom = maanedFom.toString(),
+                        maanedTom = maanedTom.toString(),
+                    )
+                setBody(body.toJson())
+            }
+        }.let { response ->
+            when (response) {
+                is RetryResult.Success -> {
+                    response.content.body<AInntektBulkResponsData>()
+                }
+
+                is RetryResult.Failure -> {
+                    logger.error("Kall mot inntektskomponent bulk feilet med filter ${filter.joinToString()}")
+                    sikkerlogg.error(
+                        "Kall mot inntektskomponent bulk feilet med filter ${filter.joinToString()}" +
+                                " for $personident",
+                    )
+                    throw response.samlaExceptions()
+                }
+            }
+        }
+    }
 }
 
 data class InntektRequest(
@@ -78,7 +136,24 @@ data class InntektRequest(
     val maanedTom: String,
 )
 
+data class InntektBulkRequest(
+    val personident: String,
+    val filter: List<String>,
+    val formaal: String,
+    val maanedFom: String,
+    val maanedTom: String,
+)
+
 data class AInntektReponsData(
+    val data: List<InntektsinformasjonDto>,
+)
+
+data class AInntektBulkResponsData(
+    val bulk: List<InntektBulkResponsDto>,
+)
+
+data class InntektBulkResponsDto(
+    val filter: String,
     val data: List<InntektsinformasjonDto>,
 )
 

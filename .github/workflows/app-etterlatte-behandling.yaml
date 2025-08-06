@@ -28,6 +28,7 @@ on:
       - libs/etterlatte-tilbakekreving-model/**
       - libs/etterlatte-tidshendelser-model/**
       - libs/etterlatte-trygdetid-model/**
+      - libs/etterlatte-regler/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:

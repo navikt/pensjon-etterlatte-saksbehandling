@@ -63,8 +63,8 @@ class EtteroppgjoerForbehandlingService(
     ) {
         logger.info("Ferdigstiller forbehandling for behandling=$behandlingId")
         val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
-
-        dao.lagreForbehandling(forbehandling.tilFerdigstilt())
+        val ferdigstiltForbehandling = forbehandling.tilFerdigstilt()
+        dao.lagreForbehandling(ferdigstiltForbehandling)
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
             forbehandling.sak.id,
             forbehandling.aar,
@@ -77,7 +77,7 @@ class EtteroppgjoerForbehandlingService(
         )
         val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
-            etteroppgjoerForbehandling = forbehandling,
+            etteroppgjoerForbehandling = ferdigstiltForbehandling,
             etteroppgjoerResultat = null,
             hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
@@ -222,6 +222,8 @@ class EtteroppgjoerForbehandlingService(
 
         behandlingService.settBeregnetForRevurderingTilForbehandling(forbehandling)
         val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
+        forbehandling = forbehandling.tilBeregnet()
+        dao.lagreForbehandling(forbehandling)
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = forbehandling,
             etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
@@ -229,7 +231,6 @@ class EtteroppgjoerForbehandlingService(
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
             utlandstilknytningType = utlandstilknytning?.type,
         )
-        dao.lagreForbehandling(forbehandling.tilBeregnet())
         return beregnetEtteroppgjoerResultat
     }
 

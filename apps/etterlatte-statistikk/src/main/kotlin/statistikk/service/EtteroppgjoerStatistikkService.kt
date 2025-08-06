@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRepository
+import java.util.UUID
 
 class EtteroppgjoerStatistikkService(
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
@@ -26,5 +27,10 @@ class EtteroppgjoerStatistikkService(
 
         etteroppgjoerRepository.lagreEtteroppgjoerRad(etteroppgjoerRad)
         return etteroppgjoerRad
+    }
+
+    fun hentNyesteRad(forbehandlingId: UUID): EtteroppgjoerRad? {
+        val rader = etteroppgjoerRepository.hentEtteroppgjoerRaderForForbehandling(forbehandlingId)
+        return rader.maxByOrNull { it.tekniskTid }
     }
 }

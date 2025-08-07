@@ -4,7 +4,7 @@
     "gjelderNavn" : "Test bruker Testerson",
     "gjelderFoedselsnummer" : "01019878910",
     "saksnummer" : "1337123",
-    "dokumentDato" : "01.01.2020"
+    "dokumentDato" : "2020-01-01"
   },
   "blocks" : [ {
     "id" : 2069547117,

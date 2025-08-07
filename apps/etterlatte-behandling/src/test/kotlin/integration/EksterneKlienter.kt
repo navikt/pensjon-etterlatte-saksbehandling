@@ -268,18 +268,6 @@ class VedtakKlientTest : VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto? = null
 
-    override suspend fun hentVedtakUtenIverksettelsesTidspunkt(brukerTokenInfo: BrukerTokenInfo): List<Long> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun oppdaterIverksattDatoForVedtak(
-        vedtakId: Long,
-        iverksettelsesTidspunkt: Tidspunkt,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun hentIverksatteVedtak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,

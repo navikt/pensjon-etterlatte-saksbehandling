@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -112,6 +113,28 @@ class HendelseDao(
         ),
     )
 
+    fun etteroppgjoerHendelse(
+        forbehandlingId: UUID,
+        sakId: SakId,
+        hendelseType: EtteroppgjoerHendelseType,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String?,
+        begrunnelse: String?,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = hendelseType.lagEventnameForType(),
+            inntruffet = inntruffet,
+            vedtakId = null,
+            behandlingId = forbehandlingId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = kommentar,
+            valgtBegrunnelse = begrunnelse,
+        ),
+    )
+
     fun generellBehandlingHendelse(
         behandlingId: UUID,
         sakId: SakId,
@@ -212,26 +235,6 @@ class HendelseDao(
 
                 statement.setSakId(1, sakId)
                 statement.executeQuery().toList {
-                    asHendelse()
-                }
-            }
-        }
-
-    // skal kun brukes ifm migrering av iverksattdato
-    fun finnIverksattHendelserIVedtak(vedtakId: Long): List<LagretHendelse> =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt =
-                    prepareStatement(
-                        """
-                |SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
-                |FROM behandlinghendelse
-                |where vedtakid = ? and hendelse = 'VEDTAK:IVERKSATT'
-                        """.trimMargin(),
-                    )
-                stmt.setLong(1, vedtakId)
-
-                stmt.executeQuery().toList {
                     asHendelse()
                 }
             }

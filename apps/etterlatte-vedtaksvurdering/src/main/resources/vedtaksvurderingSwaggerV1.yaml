@@ -7,7 +7,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: https://etterlatte-testdata.intern.dev.nav.no/dolly
+  - url: https://etterlatte-vedtaksvurdering.intern.dev.nav.no/dolly
 
 security:
   - BearerAuth: []

@@ -46,9 +46,6 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
-      autoLoginIgnorePaths:
-        - /dolly/api/**
-        - /dolly/swagger/**
   kafka:
     pool: nav-dev
   env:
@@ -69,7 +66,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
         - application: testnav-person-service
           namespace: dolly
           cluster: dev-gcp
@@ -80,22 +76,3 @@ spec:
       rules:
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: nais
-          cluster: dev-gcp
-        - application: dolly-backend
-          namespace: dolly
-          cluster: dev-gcp
-        - application: dolly-backend-dev
-          namespace: dolly
-          cluster: dev-gcp
-        - application: dolly-frontend
-          namespace: dolly
-          cluster: dev-gcp
-        - application: dolly-frontend-dev
-          namespace: dolly
-          cluster: dev-gcp
-        - application: dolly-idporten
-          namespace: dolly
-          cluster: dev-gcp
-        - application: team-dolly-lokal-app
-          namespace: dolly
-          cluster: dev-gcp

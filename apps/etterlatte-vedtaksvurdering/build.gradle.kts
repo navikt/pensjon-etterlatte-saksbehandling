@@ -22,6 +22,8 @@ dependencies {
 
     implementation(libs.database.kotliquery)
     implementation(libs.cache.caffeine)
+    implementation(libs.etterlatte.common)
+    implementation("io.ktor:ktor-server-swagger:2.3.13")
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.servertests)

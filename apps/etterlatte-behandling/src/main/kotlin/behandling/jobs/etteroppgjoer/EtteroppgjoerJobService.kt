@@ -40,7 +40,7 @@ class EtteroppgjoerJobService(
         val yearNow = YearMonth.now().year
         val aarMellom2024OgNaa = (2024..yearNow).toList()
 
-        for (inntektsaar in aarMellom2024OgNaa) {
+        for (inntektsaar in aarMellom2024OgNaa) { // Ønsker vi å potensielt kjøre etteroppgjør for flere år...?
             finnOgOpprettEtteroppgjoer(inntektsaar)
 
             // TODO: legge inn denne når vi har testet litt mer?

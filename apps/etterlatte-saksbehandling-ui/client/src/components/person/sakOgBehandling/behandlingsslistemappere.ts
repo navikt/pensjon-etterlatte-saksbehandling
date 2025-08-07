@@ -3,6 +3,8 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { GenerellBehandlingType, Status } from '~shared/types/Generellbehandling'
 
+// TODO: burde skrive oss bort og bruke revurderingsaarsak.ts
+// se også revurderingsaarsak.ts
 export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
   switch (aarsak) {
     case AarsaksTyper.SOEKNAD:

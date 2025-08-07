@@ -87,6 +87,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Årlig inntektsjustering'
     case Revurderingaarsak.INNTEKTSENDRING:
       return 'Inntektsendring'
+    case Revurderingaarsak.SLUTTBEHANDLING:
+      return 'Sluttbehandling'
   }
 }
 

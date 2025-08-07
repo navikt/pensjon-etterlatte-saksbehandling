@@ -1,7 +1,7 @@
 package no.nav.etterlatte.migrering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.helse.rapids_rivers.JsonMessage
 
 const val FNR_KEY = "fnr"
 const val VILKAARSVURDERT_KEY = "vilkaarsvurdert"

@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -11,7 +12,6 @@ import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
 import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottakRiver
 import no.nav.etterlatte.utbetaling.utbetalingRoutes
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import rapidsandrivers.initRogR
 

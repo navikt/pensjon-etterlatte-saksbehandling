@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -11,7 +12,6 @@ import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.SamordningsnotatRiver
-import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
 fun main() {

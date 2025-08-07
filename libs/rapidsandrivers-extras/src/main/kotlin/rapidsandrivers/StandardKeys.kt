@@ -1,9 +1,9 @@
 package no.nav.etterlatte.libs.common.rapidsandrivers
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.River
 
 const val EVENT_NAME_KEY = "@event_name"
 const val CORRELATION_ID_KEY = "@correlation_id"
@@ -18,7 +18,7 @@ const val REVURDERING_AARSAK = "revurdering_aarsak"
 const val FEILMELDING_KEY = "feilmelding"
 
 fun River.eventName(eventName: String) {
-    validate { it.demandValue(EVENT_NAME_KEY, eventName) }
+    precondition { it.requireValue(EVENT_NAME_KEY, eventName) }
 }
 
 fun JsonMessage.setEventNameForHendelseType(eventnameHendelseType: EventnameHendelseType) {

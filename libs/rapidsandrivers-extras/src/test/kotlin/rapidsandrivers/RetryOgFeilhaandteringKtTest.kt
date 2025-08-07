@@ -1,13 +1,13 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -17,8 +17,8 @@ internal class RetryOgFeilhaandteringKtTest {
     @Test
     fun `feilhaandtering kaster ikke feilen videre, men publiserer på feilkø`() {
         val packet =
-            JsonMessage("{}", MessageProblems(""), prometheusMeterRegistry)
-        val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
+            JsonMessage("{}", MessageProblems(""))
+        val context = mockk<MessageContext> { every { publish(any<String>()) } returns Unit }
         var antallForsoek = 0
         withRetryOgFeilhaandtering(
             packet = packet,
@@ -29,14 +29,14 @@ internal class RetryOgFeilhaandteringKtTest {
             antallForsoek++
             throw RuntimeException()
         }
-        verify(exactly = 1) { context.publish(any()) }
+        verify(exactly = 1) { context.publish(any<String>()) }
         assertEquals(Kontekst.REGULERING.retries + 1, antallForsoek)
     }
 
     @Test
     fun `feilhaandtering gjoer ingenting hvis ingenting feiler`() {
-        val packet = JsonMessage("{}", MessageProblems(""), prometheusMeterRegistry)
-        val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
+        val packet = JsonMessage("{}", MessageProblems(""))
+        val context = mockk<MessageContext>().also { every { it.publish(any<String>()) } returns Unit }
         var antallForsoek = 0
         withRetryOgFeilhaandtering(
             packet = packet,
@@ -46,15 +46,15 @@ internal class RetryOgFeilhaandteringKtTest {
         ) {
             antallForsoek++
         }
-        verify(exactly = 0) { context.publish(any()) }
+        verify(exactly = 0) { context.publish(any<String>()) }
         assertEquals(1, antallForsoek)
     }
 
     @Test
     fun `Feilhaandtering skal kjoere ny retry hvis feiler for doedshendelse`() {
         val packet =
-            JsonMessage("{}", MessageProblems(""), prometheusMeterRegistry)
-        val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
+            JsonMessage("{}", MessageProblems(""))
+        val context = mockk<MessageContext>().also { every { it.publish(any<String>()) } returns Unit }
         var antallForsoek = 0
         withRetryOgFeilhaandtering(
             packet = packet,
@@ -65,7 +65,7 @@ internal class RetryOgFeilhaandteringKtTest {
             antallForsoek++
             throw RuntimeException()
         }
-        verify(exactly = 1) { context.publish(any()) }
+        verify(exactly = 1) { context.publish(any<String>()) }
         assertEquals(Kontekst.DOEDSHENDELSE.retries + 1, antallForsoek)
     }
 }

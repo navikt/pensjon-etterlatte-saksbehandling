@@ -1,10 +1,10 @@
 package no.nav.etterlatte
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.tidshendelser.AppContext
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseRiver
-import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 import java.util.Timer
 

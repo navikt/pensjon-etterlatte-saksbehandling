@@ -45,6 +45,7 @@ export enum Revurderingaarsak {
   AARLIG_INNTEKTSJUSTERING = 'AARLIG_INNTEKTSJUSTERING',
 }
 
+// se også behandlingsslistemappere.ts
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   REGULERING: 'Regulering',
   OMREGNING: 'Omregning',

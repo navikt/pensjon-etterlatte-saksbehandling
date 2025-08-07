@@ -87,9 +87,15 @@ class EtteroppgjoerService(
         val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling) ?: emptyList()
 
         val tidligereAarsoppgjoer =
-            avkortingRepository.hentAvkorting(request.sisteIverksatteBehandling)?.let {
+            runBlocking {
+                avkortingService.hentAvkortingMedReparertAarsoppgjoer(
+                    sakId = request.sakId,
+                    behandlingId = request.sisteIverksatteBehandling,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }.let {
                 it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
-            } ?: throw InternfeilException("Mangler avkorting")
+            }
 
         val avkorting =
             with(request) {

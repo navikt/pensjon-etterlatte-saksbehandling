@@ -45,8 +45,17 @@ object InntektskomponentBeregning {
             )
 
         return when (resultat) {
-            is RegelkjoeringResultat.Suksess -> resultat.periodiserteResultater.single().resultat
-            else -> throw InternfeilException("a")
+            is RegelkjoeringResultat.Suksess ->
+                resultat.periodiserteResultater.singleOrNull()?.resultat
+                    ?: throw InternfeilException(
+                        "Fikk 0 eller flere perioder tilbake i summering av inntekter fra" +
+                            " inntektskomponenten, som ikke skal være mulig",
+                    )
+
+            else -> throw InternfeilException(
+                "Fikk ugyldig periode når inntekter fra inntektskomponenten" +
+                    " skulle beregnes for år $etteroppgjoersAar",
+            )
         }
     }
 }

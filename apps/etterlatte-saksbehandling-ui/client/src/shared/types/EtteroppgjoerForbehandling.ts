@@ -44,9 +44,27 @@ export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlin
   FERDIGSTILT: 'Ferdigstilt',
 }
 
+export interface Inntektsmaaned {
+  maaned: string
+  beloep: number
+}
+
+export interface InntektSummert {
+  filter: string
+  inntekter: Inntektsmaaned[]
+}
+
+export interface SummerteInntekterAOrdningen {
+  afp: InntektSummert
+  loenn: InntektSummert
+  oms: InntektSummert
+  tidspunktBeregnet: string
+}
+
 export interface EtteroppgjoerOpplysninger {
   skatt: PensjonsgivendeInntektFraSkatteetaten
   ainntekt: AInntekt
+  summerteInntekter?: SummerteInntekterAOrdningen
   tidligereAvkorting: Avkorting
 }
 

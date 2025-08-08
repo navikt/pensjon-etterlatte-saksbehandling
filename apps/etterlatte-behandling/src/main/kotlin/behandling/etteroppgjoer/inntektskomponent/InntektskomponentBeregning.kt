@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -60,10 +61,11 @@ object InntektskomponentBeregning {
     }
 }
 
-data class Inntekter(
+data class SummerteInntekterAOrdningen(
     val afp: InntektSummert,
     val loenn: InntektSummert,
     val oms: InntektSummert,
+    val tidspunktBeregnet: Tidspunkt,
     val regelresultat: Map<InntektskomponentenFilter, JsonNode>? = null,
 ) {
     init {
@@ -86,6 +88,12 @@ data class Inntekter(
         }
         krev(alleOmsMaaneder.all { it.year == alleOmsMaaneder.first().year }) {
             "Har inntekter som går over forskjellige år: ${alleOmsMaaneder.map { it.year }.toSet()}"
+        }
+
+        if (regelresultat != null) {
+            krev(regelresultat.keys.containsAll(InntektskomponentenFilter.entries)) {
+                "Har ikke regelresultat for alle filtere, fikk ${regelresultat.size} regelresultat"
+            }
         }
     }
 }

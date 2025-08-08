@@ -110,7 +110,7 @@ class InntektskomponentBeregningTest {
     }
 }
 
-private fun inntektsinformasjonDto(
+fun inntektsinformasjonDto(
     inntektListe: List<InntektDto>,
     maaned: YearMonth,
 ): InntektsinformasjonDto =
@@ -123,7 +123,7 @@ private fun inntektsinformasjonDto(
         inntektListe = inntektListe,
     )
 
-private fun inntektDto(beloep: BigDecimal): InntektDto =
+fun inntektDto(beloep: BigDecimal): InntektDto =
     InntektDto(
         type = "",
         beloep = beloep,

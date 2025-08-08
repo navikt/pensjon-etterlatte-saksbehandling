@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.Inntekt
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 
 class InntektskomponentService(
@@ -58,7 +59,7 @@ class InntektskomponentService(
     suspend fun hentSummerteInntekter(
         personident: String,
         aar: Int,
-    ): Inntekter {
+    ): SummerteInntekterAOrdningen {
         val bulkInntekter =
             klient.hentInntektFlereFilter(
                 personident = personident,
@@ -85,10 +86,11 @@ class InntektskomponentService(
             }
         val loennResultat = InntektskomponentBeregning.beregnInntekt(loennData, aar)
 
-        return Inntekter(
+        return SummerteInntekterAOrdningen(
             afp = afpResultat.verdi,
             loenn = loennResultat.verdi,
             oms = omsResultat.verdi,
+            tidspunktBeregnet = Tidspunkt(loennResultat.opprettet),
             regelresultat =
                 mapOf(
                     InntektskomponentenFilter.ETTEROPPGJOER_AFP to objectMapper.valueToTree(afpResultat),

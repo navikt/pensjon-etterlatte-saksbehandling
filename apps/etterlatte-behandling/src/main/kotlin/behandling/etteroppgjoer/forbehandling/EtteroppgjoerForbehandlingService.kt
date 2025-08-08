@@ -168,12 +168,17 @@ class EtteroppgjoerForbehandlingService(
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
-        val summerteInntekter = runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
+
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
         val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
-        dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
+        try {
+            val summerteInntekter = runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
+            dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
+        } catch (e: Exception) {
+            logger.error("Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId", e)
+        }
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 

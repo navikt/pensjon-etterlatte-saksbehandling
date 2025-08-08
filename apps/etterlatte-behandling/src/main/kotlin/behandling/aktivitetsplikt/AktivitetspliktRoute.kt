@@ -6,6 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -35,14 +36,14 @@ import java.util.UUID
 
 const val AKTIVITET_ID_CALL_PARAMETER = "id"
 const val HENDELSE_ID_CALL_PARAMETER = "hendelseId"
-inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
+inline val RoutingContext.aktivitetId: UUID
     get() =
         call.parameters[AKTIVITET_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
             "MANGLER_AKTIVITET_ID",
             "Aktivitet id er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.hendelseId: UUID
+inline val RoutingContext.hendelseId: UUID
     get() =
         call.parameters[HENDELSE_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
             "MANGLER_HENDELSE_ID",
@@ -50,7 +51,7 @@ inline val PipelineContext<*, ApplicationCall>.hendelseId: UUID
         )
 
 const val AKTIVITETSGRAD_ID_CALL_PARAMETER = "aktivitetsgradId"
-inline val PipelineContext<*, ApplicationCall>.aktivitetsgradId: UUID
+inline val RoutingContext.aktivitetsgradId: UUID
     get() =
         call.parameters[AKTIVITETSGRAD_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
             "MANGLER_AKTIVITETSGRAD_ID",
@@ -58,7 +59,7 @@ inline val PipelineContext<*, ApplicationCall>.aktivitetsgradId: UUID
         )
 
 const val UNNTAK_ID_CALL_PARAMETER = "unntakId"
-inline val PipelineContext<*, ApplicationCall>.unntakId: UUID
+inline val RoutingContext.unntakId: UUID
     get() =
         call.parameters[UNNTAK_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
             "MANGLER_UNNTAK_ID",

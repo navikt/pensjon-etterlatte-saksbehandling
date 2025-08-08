@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.person.personRoute
 import no.nav.etterlatte.personweb.SporingService
@@ -16,7 +16,7 @@ import org.slf4j.Logger
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    Server(ApplicationContext(Miljoevariabler.systemEnv())).run()
+    Server(ApplicationContext(Miljoevariabler.systemEnv())).runServer()
 }
 
 class Server(
@@ -38,5 +38,5 @@ class Server(
             }
         }
 
-    fun run() = engine.run()
+    fun runServer() = engine.runEngine()
 }

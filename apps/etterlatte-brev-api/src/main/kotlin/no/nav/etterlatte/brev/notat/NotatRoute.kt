@@ -8,6 +8,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -42,7 +43,7 @@ data class NotatRequest(
 
 const val NOTAT_ID_CALL_PARAMETER = "notatId"
 
-inline val PipelineContext<*, ApplicationCall>.notatId: NotatID
+inline val RoutingContext.notatId: NotatID
     get() =
         krevIkkeNull(call.parameters[NOTAT_ID_CALL_PARAMETER]?.toLong()) {
             "Gosys oppgaveId er ikke i path params"

@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(libs.bundles.jackson)
-    api(libs.navfelles.rapidandriversktor2) {
+    api(libs.navfelles.rapidandriversktor) {
         exclude("io.ktor", "ktor-server-cio")
         exclude("io.ktor", "ktor-server-metrics-micrometer")
     }

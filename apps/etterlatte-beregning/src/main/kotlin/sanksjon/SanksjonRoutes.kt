@@ -6,6 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -22,7 +23,7 @@ import java.util.UUID
 private val logger = LoggerFactory.getLogger("sanksjonRoute")
 
 const val SANKSJONID_CALL_PARAMETER = "id"
-inline val PipelineContext<*, ApplicationCall>.sanksjonId: UUID
+inline val RoutingContext.sanksjonId: UUID
     get() =
         call.parameters[SANKSJONID_CALL_PARAMETER].let { UUID.fromString(it) } ?: throw NullPointerException(
             "Sanksjon id er ikke i path params",

@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
@@ -13,7 +14,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
-inline val PipelineContext<*, ApplicationCall>.enheter: List<Enhetsnummer>
+inline val RoutingContext.enheter: List<Enhetsnummer>
     get() =
         call.request.queryParameters["enheter"]
             ?.split(",")

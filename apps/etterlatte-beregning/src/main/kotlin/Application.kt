@@ -8,12 +8,12 @@ import no.nav.etterlatte.grunnbeloep.grunnbeloep
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.sanksjon.sanksjon
 import no.nav.etterlatte.ytelseMedGrunnlag.ytelseMedGrunnlag
 
 fun main() {
-    ApplicationContext().let { Server(it).run() }
+    ApplicationContext().let { Server(it).runServer() }
 }
 
 class Server(
@@ -45,9 +45,9 @@ class Server(
             }
         }
 
-    fun run() =
+    fun runServer() =
         with(context) {
             dataSource.migrate()
-            engine.run()
+            engine.runEngine()
         }
 }

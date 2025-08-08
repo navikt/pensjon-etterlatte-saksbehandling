@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
-    implementation(libs.ktor2.clientcore)
+    implementation(libs.ktor.clientcore)
 
     implementation(libs.etterlatte.common)
     implementation(libs.pdf.pdfbox)
@@ -27,9 +27,9 @@ dependencies {
     implementation(libs.cache.caffeine)
 
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.okhttp)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.okhttp)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))

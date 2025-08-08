@@ -7,6 +7,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -45,7 +46,7 @@ import java.util.UUID
 
 private const val TRYGDETIDID_CALL_PARAMETER = "trygdetidId"
 
-private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
+private inline val RoutingContext.trygdetidId: UUID
     get() =
         try {
             this.call.uuid(TRYGDETIDID_CALL_PARAMETER)

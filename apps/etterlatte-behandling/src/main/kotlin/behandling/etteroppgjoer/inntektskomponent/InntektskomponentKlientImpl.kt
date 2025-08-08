@@ -64,7 +64,7 @@ class InntektskomponentKlientImpl(
                 val body =
                     InntektRequest(
                         personident = personident,
-                        filter = ETTERLATTEYTELSER,
+                        filter = InntektskomponentenFilter.ETTEROPPGJOER_LOENN.filter,
                         formaal = ETTERLATTEYTELSER,
                         maanedFom = maanedFom.toString(),
                         maanedTom = maanedTom.toString(),
@@ -119,7 +119,7 @@ class InntektskomponentKlientImpl(
                     logger.error("Kall mot inntektskomponent bulk feilet med filter ${filter.joinToString()}")
                     sikkerlogg.error(
                         "Kall mot inntektskomponent bulk feilet med filter ${filter.joinToString()}" +
-                                " for $personident",
+                            " for $personident",
                     )
                     throw response.samlaExceptions()
                 }

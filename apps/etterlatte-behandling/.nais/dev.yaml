@@ -158,7 +158,7 @@ spec:
     - name: AXSYS_SCOPE
       value: api://dev-fss.org.axsys/.default
     - name: INNTEKTSKOMPONENT_URL
-      value: https://ikomp-q2.intern.dev.nav.no
+      value: https://ikomp-q2.dev-fss-pub.nais.io
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://dev-fss.team-inntekt.ikomp-q2/.default
     - name: SIGRUN_URL

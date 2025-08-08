@@ -165,9 +165,9 @@ spec:
     - name: AXSYS_SCOPE
       value: api://prod-fss.org.axsys/.default
     - name: INNTEKTSKOMPONENT_URL
-      value: https://team-inntekt-proxy.prod-fss-pub.nais.io/proxy/inntektskomponenten
+      value: https://ikomp.prod-fss-pub.nais.io
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
-      value: api://prod-fss.team-inntekt.inntektskomponenten/.default
+      value: api://prod-fss.team-inntekt.ikomp/.default
 
     # TODO: bytte ut med prod config
     - name: SIGRUN_URL

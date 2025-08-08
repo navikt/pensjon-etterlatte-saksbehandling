@@ -160,7 +160,7 @@ spec:
     - name: INNTEKTSKOMPONENT_URL
       value: https://ikomp-q2.intern.dev.nav.no
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
-      value: api://dev-gcp.team-inntekt.ikomp-q2/.default
+      value: api://dev-fss.team-inntekt.ikomp-q2/.default
     - name: SIGRUN_URL
       value: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-q2
     - name: SIGRUN_OUTBOUND_SCOPE

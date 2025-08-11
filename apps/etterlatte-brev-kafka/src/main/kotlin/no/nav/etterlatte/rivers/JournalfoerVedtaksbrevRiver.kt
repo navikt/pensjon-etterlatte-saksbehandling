@@ -1,5 +1,8 @@
 package no.nav.etterlatte.rivers
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
@@ -14,9 +17,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

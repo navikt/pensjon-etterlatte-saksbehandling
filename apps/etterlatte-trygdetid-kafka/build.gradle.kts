@@ -12,4 +12,5 @@ dependencies {
 
     testImplementation(libs.ktor.clientmock)
     testImplementation(libs.ktor.servertests)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

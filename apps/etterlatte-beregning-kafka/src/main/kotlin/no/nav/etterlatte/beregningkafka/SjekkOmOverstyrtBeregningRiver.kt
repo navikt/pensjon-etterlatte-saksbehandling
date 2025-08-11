@@ -1,5 +1,8 @@
 package no.nav.etterlatte.beregningkafka
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.omregning.OmregningHendelseType
@@ -10,9 +13,6 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.aapneBehandlinger
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 class SjekkOmOverstyrtBeregningRiver(

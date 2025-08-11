@@ -1,5 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -10,8 +12,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

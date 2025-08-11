@@ -1,5 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.ktor.client.statement.HttpResponse
@@ -19,8 +21,6 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Month

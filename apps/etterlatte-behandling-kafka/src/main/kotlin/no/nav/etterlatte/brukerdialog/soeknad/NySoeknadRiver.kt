@@ -2,6 +2,9 @@ package no.nav.etterlatte.brukerdialog.soeknad
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.runBlocking
@@ -27,9 +30,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.sikkerLogg
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal class NySoeknadRiver(

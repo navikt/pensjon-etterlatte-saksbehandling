@@ -1,5 +1,8 @@
 package no.nav.etterlatte.beregningkafka
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
@@ -25,9 +28,6 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import tidspunkt.erEtter
 import tidspunkt.erFoerEllerPaa

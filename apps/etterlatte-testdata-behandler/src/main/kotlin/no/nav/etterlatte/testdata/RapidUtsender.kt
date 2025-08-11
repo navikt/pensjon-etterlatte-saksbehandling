@@ -1,11 +1,11 @@
 package no.nav.etterlatte.testdata
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.vedtaksvurdering.RapidInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

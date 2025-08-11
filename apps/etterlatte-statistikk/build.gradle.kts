@@ -19,4 +19,5 @@ dependencies {
     testImplementation(libs.ktor.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

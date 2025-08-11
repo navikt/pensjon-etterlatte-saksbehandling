@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(libs.bundles.jackson)
-    api(libs.navfelles.rapidandriversktor) {
+    api(libs.navfelles.rapidsandriversktor) {
         exclude("io.ktor", "ktor-server-cio")
         exclude("io.ktor", "ktor-server-metrics-micrometer")
     }
@@ -15,4 +15,5 @@ dependencies {
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

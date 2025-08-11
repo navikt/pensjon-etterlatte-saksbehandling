@@ -9,10 +9,10 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:etterlatte-inntektsjustering-model"))
-    implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     testImplementation(libs.ktor.clientmock)
     testImplementation(libs.ktor.servertests)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

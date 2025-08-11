@@ -1,10 +1,10 @@
 package no.nav.etterlatte.rapidsandrivers
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.toUUID
 import java.time.LocalDate
 import java.util.UUID
 

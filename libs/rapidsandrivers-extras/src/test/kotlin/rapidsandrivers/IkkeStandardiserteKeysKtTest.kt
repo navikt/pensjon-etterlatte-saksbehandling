@@ -1,6 +1,6 @@
 package no.nav.etterlatte.rapidsandrivers
 
-import no.nav.helse.rapids_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID

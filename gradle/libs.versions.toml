@@ -11,6 +11,8 @@ navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.3"
 tjenestespesifikasjoner-version = "1.1436e29"
+rapidsandrivers-version = "2025081112301754908236.47b364d7b14c" # OBS! tbdlibs brukes av denne. De bør stemme overens
+tbdlibs-version = "2025.08.07-09.55-15719a86" # OBS! rapidsandrivers bruker denne. De bør stemme overens
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.1" }
@@ -74,7 +76,7 @@ messaginghub-pooled-jms = { module = "org.messaginghub:pooled-jms", version = "3
 
 mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.3.0" }
 
-navfelles-rapidandriversktor = { module = "com.github.navikt:rapids-and-rivers", version = "2024082313161724411773.1db923f4402d" }
+navfelles-rapidsandriversktor = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapidsandrivers-version" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsimulering = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-system-os-simuler-fp-service-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
@@ -83,6 +85,7 @@ navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", vers
 navfelles-tokenvalidationktor = { module = "no.nav.security:token-validation-ktor-v3", version.ref = "navfelles-token-version" }
 navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.2.1" }
 
+test-navfelles-rapidsandriversktor = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdlibs-version" }
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }

@@ -43,4 +43,5 @@ dependencies {
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

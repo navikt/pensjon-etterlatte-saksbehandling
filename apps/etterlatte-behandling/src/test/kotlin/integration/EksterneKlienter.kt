@@ -7,8 +7,10 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektBulkResponsData
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentenFilter
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -799,6 +801,16 @@ class InntektskomponentKlientTest : InntektskomponentKlient {
         maanedTom: YearMonth,
     ): AInntektReponsData =
         AInntektReponsData(
+            emptyList(),
+        )
+
+    override suspend fun hentInntektFlereFilter(
+        personident: String,
+        maanedFom: YearMonth,
+        maanedTom: YearMonth,
+        filter: List<InntektskomponentenFilter>,
+    ): AInntektBulkResponsData =
+        AInntektBulkResponsData(
             emptyList(),
         )
 }

@@ -1,5 +1,7 @@
 package behandling.etteroppgjoer
 
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
+import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -11,7 +13,14 @@ import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektBulkResponsDto
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentBeregning
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentenFilter
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.inntektDto
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.inntektsinformasjonDto
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -31,6 +40,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -204,6 +215,141 @@ class EtteroppgjoerForbehandlingDaoTest(
             inntektsaar shouldBe inntektsaar
             inntektsmaaneder shouldBe AInntekt.stub(inntektsaar).inntektsmaaneder
         }
+    }
+
+    @Test
+    fun `kan lagre ned og hente ut summerte inntekter for forbehandling`() {
+        val afp =
+            InntektskomponentBeregning.beregnInntekt(
+                InntektBulkResponsDto(
+                    filter = "test",
+                    data =
+                        listOf(
+                            inntektsinformasjonDto(
+                                maaned = YearMonth.of(2024, Month.JANUARY),
+                                inntektListe =
+                                    listOf(
+                                        inntektDto(BigDecimal.ONE),
+                                    ),
+                            ),
+                        ),
+                ),
+                2024,
+            )
+        val loenn = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
+        val oms = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
+
+        val summerteInntekterAOrdningen =
+            SummerteInntekterAOrdningen(
+                afp = afp.verdi,
+                loenn = loenn.verdi,
+                oms = oms.verdi,
+                tidspunktBeregnet = Tidspunkt(oms.opprettet),
+                regelresultat =
+                    mapOf(
+                        InntektskomponentenFilter.ETTEROPPGJOER_AFP to objectMapper.valueToTree(afp),
+                        InntektskomponentenFilter.ETTEROPPGJOER_LOENN to objectMapper.valueToTree(loenn),
+                        InntektskomponentenFilter.ETTEROPPGJOER_OMS to objectMapper.valueToTree(oms),
+                    ),
+            )
+        val ny =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = null,
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+            )
+        etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningen)
+
+        val hentetInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        summerteInntekterAOrdningen.shouldBeEqualToIgnoringFields(hentetInntekter, SummerteInntekterAOrdningen::regelresultat)
+    }
+
+    @Test
+    fun `kan oppdatere inntekter for forbehandling`() {
+        val ny =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = null,
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+            )
+        etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
+        val afp =
+            InntektskomponentBeregning.beregnInntekt(
+                InntektBulkResponsDto(
+                    filter = "test",
+                    data =
+                        listOf(
+                            inntektsinformasjonDto(
+                                maaned = YearMonth.of(2024, Month.JANUARY),
+                                inntektListe =
+                                    listOf(
+                                        inntektDto(BigDecimal.ONE),
+                                    ),
+                            ),
+                        ),
+                ),
+                2024,
+            )
+        val loenn = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
+        val oms = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
+
+        val summerteInntekterAOrdningenEn =
+            SummerteInntekterAOrdningen(
+                afp = afp.verdi,
+                loenn = loenn.verdi,
+                oms = oms.verdi,
+                tidspunktBeregnet = Tidspunkt(oms.opprettet),
+                regelresultat =
+                    mapOf(
+                        InntektskomponentenFilter.ETTEROPPGJOER_AFP to objectMapper.valueToTree(afp),
+                        InntektskomponentenFilter.ETTEROPPGJOER_LOENN to objectMapper.valueToTree(loenn),
+                        InntektskomponentenFilter.ETTEROPPGJOER_OMS to objectMapper.valueToTree(oms),
+                    ),
+            )
+
+        val summerteInntekterAOrdningenTo =
+            SummerteInntekterAOrdningen(
+                afp = afp.verdi,
+                loenn = afp.verdi,
+                oms = afp.verdi,
+                tidspunktBeregnet = Tidspunkt(oms.opprettet),
+                regelresultat =
+                    mapOf(
+                        InntektskomponentenFilter.ETTEROPPGJOER_AFP to objectMapper.valueToTree(afp),
+                        InntektskomponentenFilter.ETTEROPPGJOER_LOENN to objectMapper.valueToTree(loenn),
+                        InntektskomponentenFilter.ETTEROPPGJOER_OMS to objectMapper.valueToTree(oms),
+                    ),
+            )
+
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningenEn)
+        val hentetInntekterEn = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        summerteInntekterAOrdningenEn.shouldBeEqualToIgnoringFields(hentetInntekterEn, SummerteInntekterAOrdningen::regelresultat)
+
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningenTo)
+        val hentetInntekterTo = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        summerteInntekterAOrdningenTo.shouldBeEqualToIgnoringFields(hentetInntekterTo, SummerteInntekterAOrdningen::regelresultat)
+        hentetInntekterEn shouldNotBeEqual hentetInntekterTo
     }
 
     @Test

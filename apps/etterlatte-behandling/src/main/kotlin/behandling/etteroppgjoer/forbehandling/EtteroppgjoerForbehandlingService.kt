@@ -111,6 +111,12 @@ class EtteroppgjoerForbehandlingService(
                 "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$forbehandlingId",
             )
         }
+        val summerteInntekter =
+            try {
+                dao.hentSummerteInntekter(forbehandling.id, null)
+            } catch (_: Exception) {
+                null
+            }
 
         val beregnetEtteroppgjoerResultat =
             runBlocking {
@@ -130,6 +136,7 @@ class EtteroppgjoerForbehandlingService(
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntekt,
                     ainntekt = aInntekt,
+                    summerteInntekter = summerteInntekter,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
@@ -161,11 +168,17 @@ class EtteroppgjoerForbehandlingService(
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
         val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
-
+        try {
+            val summerteInntekter = runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
+            dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
+        } catch (e: Exception) {
+            logger.error("Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId", e)
+        }
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 

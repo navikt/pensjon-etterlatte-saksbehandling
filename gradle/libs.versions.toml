@@ -58,7 +58,7 @@ ktor-servertests = { module = "io.ktor:ktor-server-test-host", version.ref = "kt
 ktor-serverswagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor-version" }
 ktor-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.08.06-10.28.3d6b10dde7b2" }
+etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.08.08-08.56.e6cba1b21456" }
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 brevbaker-api-model-common = { module = "no.nav.pensjon.brevbaker:brevbaker-api-model-common", version = "1.18.0"}
 
@@ -66,7 +66,7 @@ logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.18" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.15.1" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.15.2" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 

@@ -371,7 +371,9 @@ class BehandlingStatusServiceImpl(
         }
 
         val forbehandling = forbehandlingService.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
-        forbehandlingService.lagreForbehandling(forbehandling.tilFerdigstilt())
+        if (!forbehandling.erFerdigstilt()) {
+            forbehandlingService.lagreForbehandling(forbehandling.tilFerdigstilt())
+        }
     }
 
     private fun haandterUtland(behandling: Behandling) {

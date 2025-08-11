@@ -17,6 +17,7 @@ import { EtteroppgjoerBehandlingStatus, EtteroppgjoerForbehandling } from '~shar
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBrev } from '~shared/types/Brev'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export function EtteroppgjoerForbehandlingBrev() {
   const etteroppgjoer = useEtteroppgjoer()
@@ -120,7 +121,10 @@ export function EtteroppgjoerForbehandlingBrev() {
           )}
 
           {mapSuccess(brevResult, (brev) => (
-            <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
+            <>
+              <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
+              <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
+            </>
           ))}
         </VStack>
       </Box>

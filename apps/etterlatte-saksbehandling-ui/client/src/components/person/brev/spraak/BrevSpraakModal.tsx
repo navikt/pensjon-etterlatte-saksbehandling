@@ -101,8 +101,8 @@ export const BrevSpraakModal = ({
             {!!behandlingId && (
               <BodyShort as="div" spacing>
                 <Alert variant="warning" inline>
-                  Endring av språk på vedtaksbrev vil medføre at brevet tilbakestilles og informasjon hentes på nytt.
-                  Dette vil slette tidligere endringer, så husk å kopiere tekst du vil beholde før du fortsetter.
+                  Endring av språk i brevet vil medføre at det tilbakestilles og informasjon hentes på nytt. Dette vil
+                  slette tidligere endringer, så husk å kopiere tekst du vil beholde før du fortsetter.
                 </Alert>
               </BodyShort>
             )}

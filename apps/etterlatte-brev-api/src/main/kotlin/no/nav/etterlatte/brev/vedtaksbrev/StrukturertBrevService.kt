@@ -141,7 +141,6 @@ class StrukturertBrevService(
         return pdf
     }
 
-    // TODO burde denne kaste exception i stede?
     suspend fun ferdigstillJournalfoerOgDistribuerStrukturertBrev(
         behandlingId: UUID,
         brevType: Brevtype,
@@ -175,6 +174,7 @@ class StrukturertBrevService(
                 "Det oppstod en feil under ferdigstilling, journalføring eller distribusjon av strukturert brev med brevID=${brev.id}, status: ${brev.status}",
                 e,
             )
+            throw e
         }
     }
 

@@ -26,8 +26,8 @@ fun newInitRogR(
                 if (restModule != null) {
                     withKtorModule(restModule)
                 }
-                withIsAliveEndpoint("/health/isalive")
-                withIsReadyEndpoint("/health/isready")
+                // withIsAliveEndpoint("/health/isalive")
+                // withIsReadyEndpoint("/health/isready")
             },
             consumerProducerFactory = ConsumerProducerFactory(config),
         ).apply { settOppRivers(this, rapidEnv) }

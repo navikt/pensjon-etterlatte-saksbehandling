@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregningkafka
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -26,78 +27,78 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class OmregningsHendelserTest {
-//    private val beregningService = mockk<BeregningService>()
-//    private val inspector = TestRapid().apply { OmregningHendelserBeregningRiver(this, beregningService) }
-//
-//    @Test
-//    fun `skal opprette omregning`() {
-//        val omregningsid = slot<UUID>()
-//        val behandlingsId = slot<UUID>()
-//        val forrigeBehandlingId = slot<UUID>()
-//        val beregningDTO =
-//            BeregningDTO(
-//                beregningId = UUID.randomUUID(),
-//                behandlingId = UUID.randomUUID(),
-//                type = Beregningstype.BP,
-//                beregningsperioder =
-//                    listOf(
-//                        Beregningsperiode(
-//                            datoFOM = YearMonth.of(2023, Month.JANUARY),
-//                            utbetaltBeloep = 1000,
-//                            grunnbelopMnd = 1000,
-//                            grunnbelop = 12000,
-//                            trygdetid = 40,
-//                        ),
-//                    ),
-//                beregnetDato = Tidspunkt.now(),
-//                grunnlagMetadata = Metadata(randomSakId(), 1),
-//                overstyrBeregning = null,
-//            )
-//
-//        val returnValue =
-//            mockk<HttpResponse>().also {
-//                every {
-//                    runBlocking { it.body<BeregningDTO>() }
-//                } returns beregningDTO
-//            }
-//
-//        val noContentValue =
-//            mockk<HttpResponse>().also {
-//                every {
-//                    runBlocking { it.status }
-//                } returns HttpStatusCode.NoContent
-//            }
-//
-//        every {
-//            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
-//                capture(behandlingsId),
-//                capture(forrigeBehandlingId),
-//            )
-//        }.returns(noContentValue)
-//        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(capture(omregningsid)) } returns mockk()
-//        every { beregningService.beregn(capture(omregningsid)) }.returns(returnValue)
-//        every { beregningService.hentBeregning(any()) }.returns(returnValue)
-//        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal.ONE)
-//
-//        val inspector = inspector.apply { sendTestMessage(fullMelding) }
-//
-//        inspector.sendTestMessage(fullMelding)
-//
-//        Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), behandlingsId.captured)
-//        Assertions.assertEquals(UUID.fromString("1be3d0dd-97be-4ccb-a71c-b3254ce7ae0a"), forrigeBehandlingId.captured)
-//        Assertions.assertEquals(2, inspector.inspektør.size)
-//        Assertions.assertEquals(
-//            beregningDTO.toJson(),
-//            inspector.inspektør
-//                .message(1)
-//                .get(BEREGNING_KEY)
-//                .toJson(),
-//        )
-//    }
-//
-//    companion object {
-//        val fullMelding = readFile("/omregningshendelse.json")
-//    }
+    private val beregningService = mockk<BeregningService>()
+    private val inspector = TestRapid().apply { OmregningHendelserBeregningRiver(this, beregningService) }
+
+    @Test
+    fun `skal opprette omregning`() {
+        val omregningsid = slot<UUID>()
+        val behandlingsId = slot<UUID>()
+        val forrigeBehandlingId = slot<UUID>()
+        val beregningDTO =
+            BeregningDTO(
+                beregningId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                type = Beregningstype.BP,
+                beregningsperioder =
+                    listOf(
+                        Beregningsperiode(
+                            datoFOM = YearMonth.of(2023, Month.JANUARY),
+                            utbetaltBeloep = 1000,
+                            grunnbelopMnd = 1000,
+                            grunnbelop = 12000,
+                            trygdetid = 40,
+                        ),
+                    ),
+                beregnetDato = Tidspunkt.now(),
+                grunnlagMetadata = Metadata(randomSakId(), 1),
+                overstyrBeregning = null,
+            )
+
+        val returnValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.body<BeregningDTO>() }
+                } returns beregningDTO
+            }
+
+        val noContentValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.status }
+                } returns HttpStatusCode.NoContent
+            }
+
+        every {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                capture(behandlingsId),
+                capture(forrigeBehandlingId),
+            )
+        }.returns(noContentValue)
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(capture(omregningsid)) } returns mockk()
+        every { beregningService.beregn(capture(omregningsid)) }.returns(returnValue)
+        every { beregningService.hentBeregning(any()) }.returns(returnValue)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal.ONE)
+
+        val inspector = inspector.apply { sendTestMessage(fullMelding) }
+
+        inspector.sendTestMessage(fullMelding)
+
+        Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), behandlingsId.captured)
+        Assertions.assertEquals(UUID.fromString("1be3d0dd-97be-4ccb-a71c-b3254ce7ae0a"), forrigeBehandlingId.captured)
+        Assertions.assertEquals(2, inspector.inspektør.size)
+        Assertions.assertEquals(
+            beregningDTO.toJson(),
+            inspector.inspektør
+                .message(1)
+                .get(BEREGNING_KEY)
+                .toJson(),
+        )
+    }
+
+    companion object {
+        val fullMelding = readFile("/omregningshendelse.json")
+    }
 }
 
 fun readFile(file: String) =

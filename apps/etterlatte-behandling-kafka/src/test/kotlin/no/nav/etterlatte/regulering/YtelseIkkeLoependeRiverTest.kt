@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -12,21 +13,21 @@ import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 
 class YtelseIkkeLoependeRiverTest {
-//    companion object {
-//        val melding =
-//            Companion::class.java.getResource("/ytelse_ikke_loepende.json")?.readText()
-//                ?: throw FileNotFoundException("Fant ikke filen")
-//    }
-//
-//    private val behandlingService = mockk<BehandlingService>()
-//    private val inspector = TestRapid().apply { YtelseIkkeLoependeRiver(this, behandlingService) }
-//
-//    @Test
-//    fun `skal lese melding om ytelse ikke løpende og registrere kjøring`() {
-//        every { behandlingService.lagreKjoering(any(), any(), any(), any(), any(), any()) } just Runs
-//        inspector.sendTestMessage(melding)
-//        verify(exactly = 1) {
-//            behandlingService.lagreKjoering(SakId(1005147), KjoeringStatus.IKKE_LOEPENDE, "Regulering-test-2025")
-//        }
-//    }
+    companion object {
+        val melding =
+            Companion::class.java.getResource("/ytelse_ikke_loepende.json")?.readText()
+                ?: throw FileNotFoundException("Fant ikke filen")
+    }
+
+    private val behandlingService = mockk<BehandlingService>()
+    private val inspector = TestRapid().apply { YtelseIkkeLoependeRiver(this, behandlingService) }
+
+    @Test
+    fun `skal lese melding om ytelse ikke løpende og registrere kjøring`() {
+        every { behandlingService.lagreKjoering(any(), any(), any(), any(), any(), any()) } just Runs
+        inspector.sendTestMessage(melding)
+        verify(exactly = 1) {
+            behandlingService.lagreKjoering(SakId(1005147), KjoeringStatus.IKKE_LOEPENDE, "Regulering-test-2025")
+        }
+    }
 }

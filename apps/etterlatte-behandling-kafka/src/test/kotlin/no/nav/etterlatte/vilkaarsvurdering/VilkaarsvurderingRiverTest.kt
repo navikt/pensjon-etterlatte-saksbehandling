@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -17,47 +18,47 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VilkaarsvurderingRiverTest {
-//    private val vilkaarsvurderingServiceMock =
-//        mockk<VilkaarsvurderingService> {
-//            coEvery { kopierForrigeVilkaarsvurdering(any(), any()) } returns mockk()
-//        }
-//    private val testRapid = TestRapid().apply { VilkaarsvurderingRiver(this, vilkaarsvurderingServiceMock) }
-//
-//    @Test
-//    fun `tar opp VILKAARSVURDER-event, kopierer vilkaarsvurdering og poster ny BEREGN-meldig på koen`() {
-//        val behandlingId = UUID.randomUUID()
-//        val behandlingViOmregnerFra = UUID.randomUUID()
-//        val omregningData =
-//            OmregningData(
-//                kjoering = "kjoering",
-//                sakId = randomSakId(),
-//                revurderingaarsak = Revurderingaarsak.REGULERING,
-//                fradato = LocalDate.now(),
-//                behandlingId = behandlingId,
-//                forrigeBehandlingId = behandlingViOmregnerFra,
-//            )
-//
-//        val melding =
-//            JsonMessage
-//                .newMessage(
-//                    mapOf(
-//                        OmregningHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
-//                        HENDELSE_DATA_KEY to omregningData.toPacket(),
-//                    ),
-//                ).toJson()
-//        testRapid.sendTestMessage(melding)
-//
-//        coVerify(exactly = 1) {
-//            vilkaarsvurderingServiceMock.kopierForrigeVilkaarsvurdering(
-//                behandlingId,
-//                behandlingViOmregnerFra,
-//            )
-//        }
-//        with(testRapid.inspektør.message(0)) {
-//            Assertions.assertEquals(
-//                OmregningHendelseType.VILKAARSVURDERT.lagEventnameForType(),
-//                this[EVENT_NAME_KEY].asText(),
-//            )
-//        }
-//    }
+    private val vilkaarsvurderingServiceMock =
+        mockk<VilkaarsvurderingService> {
+            coEvery { kopierForrigeVilkaarsvurdering(any(), any()) } returns mockk()
+        }
+    private val testRapid = TestRapid().apply { VilkaarsvurderingRiver(this, vilkaarsvurderingServiceMock) }
+
+    @Test
+    fun `tar opp VILKAARSVURDER-event, kopierer vilkaarsvurdering og poster ny BEREGN-meldig på koen`() {
+        val behandlingId = UUID.randomUUID()
+        val behandlingViOmregnerFra = UUID.randomUUID()
+        val omregningData =
+            OmregningData(
+                kjoering = "kjoering",
+                sakId = randomSakId(),
+                revurderingaarsak = Revurderingaarsak.REGULERING,
+                fradato = LocalDate.now(),
+                behandlingId = behandlingId,
+                forrigeBehandlingId = behandlingViOmregnerFra,
+            )
+
+        val melding =
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        OmregningHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
+                        HENDELSE_DATA_KEY to omregningData.toPacket(),
+                    ),
+                ).toJson()
+        testRapid.sendTestMessage(melding)
+
+        coVerify(exactly = 1) {
+            vilkaarsvurderingServiceMock.kopierForrigeVilkaarsvurdering(
+                behandlingId,
+                behandlingViOmregnerFra,
+            )
+        }
+        with(testRapid.inspektør.message(0)) {
+            Assertions.assertEquals(
+                OmregningHendelseType.VILKAARSVURDERT.lagEventnameForType(),
+                this[EVENT_NAME_KEY].asText(),
+            )
+        }
+    }
 }

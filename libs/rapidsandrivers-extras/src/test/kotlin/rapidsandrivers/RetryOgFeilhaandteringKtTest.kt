@@ -12,13 +12,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RetryOgFeilhaandteringKtTest {
-    private val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-
     @Test
     fun `feilhaandtering kaster ikke feilen videre, men publiserer på feilkø`() {
         val packet =
             JsonMessage("{}", MessageProblems(""))
-        val context = mockk<MessageContext> { every { publish(any<String>()) } returns Unit }
+        val context = mockk<MessageContext>().also { every { it.publish(any<String>()) } returns Unit }
         var antallForsoek = 0
         withRetryOgFeilhaandtering(
             packet = packet,

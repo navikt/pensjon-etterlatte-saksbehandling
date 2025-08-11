@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -23,58 +24,58 @@ import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagsversjoneringRiverTest {
-//    private val grunnlagKlientMock = mockk<GrunnlagKlient>(relaxed = true)
-//
-//    private lateinit var inspector: TestRapid
-//
-//    @BeforeAll
-//    fun beforeAll() {
-//        inspector =
-//            TestRapid().apply {
-//                GrunnlagsversjoneringRiver(this, grunnlagKlientMock)
-//            }
-//    }
-//
-//    @Test
-//    fun `Grunnlaget skal låses når vedtak attesteres`() {
-//        val behandlingId = UUID.randomUUID()
-//
-//        val vedtak =
-//            VedtakDto(
-//                id = Random.nextLong(),
-//                behandlingId = behandlingId,
-//                status = VedtakStatus.ATTESTERT,
-//                sak =
-//                    VedtakSak(
-//                        "ident",
-//                        SakType.BARNEPENSJON,
-//                        SakId(
-//                            Random.nextLong(),
-//                        ),
-//                    ),
-//                type = VedtakType.INNVILGELSE,
-//                vedtakFattet = null,
-//                attestasjon = null,
-//                innhold =
-//                    VedtakInnholdDto.VedtakBehandlingDto(
-//                        virkningstidspunkt = YearMonth.now(),
-//                        behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.randomUUID(), null),
-//                        utbetalingsperioder = emptyList(),
-//                        opphoerFraOgMed = null,
-//                    ),
-//            )
-//
-//        val melding =
-//            JsonMessage
-//                .newMessage(
-//                    mapOf(
-//                        VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
-//                        "vedtak" to vedtak,
-//                    ),
-//                ).toJson()
-//
-//        inspector.sendTestMessage(melding)
-//
-//        verify { grunnlagKlientMock.laasVersjonForBehandling(behandlingId) }
-//    }
+    private val grunnlagKlientMock = mockk<GrunnlagKlient>(relaxed = true)
+
+    private lateinit var inspector: TestRapid
+
+    @BeforeAll
+    fun beforeAll() {
+        inspector =
+            TestRapid().apply {
+                GrunnlagsversjoneringRiver(this, grunnlagKlientMock)
+            }
+    }
+
+    @Test
+    fun `Grunnlaget skal låses når vedtak attesteres`() {
+        val behandlingId = UUID.randomUUID()
+
+        val vedtak =
+            VedtakDto(
+                id = Random.nextLong(),
+                behandlingId = behandlingId,
+                status = VedtakStatus.ATTESTERT,
+                sak =
+                    VedtakSak(
+                        "ident",
+                        SakType.BARNEPENSJON,
+                        SakId(
+                            Random.nextLong(),
+                        ),
+                    ),
+                type = VedtakType.INNVILGELSE,
+                vedtakFattet = null,
+                attestasjon = null,
+                innhold =
+                    VedtakInnholdDto.VedtakBehandlingDto(
+                        virkningstidspunkt = YearMonth.now(),
+                        behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.randomUUID(), null),
+                        utbetalingsperioder = emptyList(),
+                        opphoerFraOgMed = null,
+                    ),
+            )
+
+        val melding =
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
+                        "vedtak" to vedtak,
+                    ),
+                ).toJson()
+
+        inspector.sendTestMessage(melding)
+
+        verify { grunnlagKlientMock.laasVersjonForBehandling(behandlingId) }
+    }
 }

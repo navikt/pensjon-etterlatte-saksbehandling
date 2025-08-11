@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.avro)
     id("etterlatte.common")
@@ -16,5 +17,6 @@ dependencies {
 
     testImplementation(libs.test.testcontainer.kafka)
     testImplementation(libs.ktor.servertests)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
     testImplementation(testFixtures((project(":libs:etterlatte-kafka"))))
 }

@@ -24,4 +24,5 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

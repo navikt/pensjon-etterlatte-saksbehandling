@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.river
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -26,50 +27,50 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class KlagehendelseRiverTest {
-//    private val soeknadStatistikkService: StatistikkService =
-//        mockk {
-//            every { registrerStatistikkForKlagehendelse(any(), any(), any()) } returns null
-//        }
-//
-//    private val testRapid: TestRapid =
-//        TestRapid().apply {
-//            KlagehendelseRiver(this, soeknadStatistikkService)
-//        }
-//
-//    @Test
-//    fun `Skal ta i mot klagemeldinger`() {
-//        val message =
-//            JsonMessage
-//                .newMessage(
-//                    mapOf(
-//                        KlageHendelseType.OPPRETTET.lagParMedEventNameKey(),
-//                        CORRELATION_ID_KEY to UUID.randomUUID(),
-//                        TEKNISK_TID_KEY to LocalDateTime.now(),
-//                        KLAGE_STATISTIKK_RIVER_KEY to
-//                            StatistikkKlage(
-//                                UUID.randomUUID(),
-//                                Klage(
-//                                    UUID.randomUUID(),
-//                                    Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, null),
-//                                    Tidspunkt.now(),
-//                                    KlageStatus.OPPRETTET,
-//                                    kabalResultat = null,
-//                                    kabalStatus = null,
-//                                    formkrav = null,
-//                                    innkommendeDokument = null,
-//                                    resultat = null,
-//                                    utfall = null,
-//                                    aarsakTilAvbrytelse = null,
-//                                    initieltUtfall = null,
-//                                ),
-//                                Tidspunkt.now(),
-//                                null,
-//                            ),
-//                    ),
-//                ).toJson()
-//        val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
-//        Assertions.assertEquals(0, inspector.size) // kjører ingen STATISTIKK:REGISTRERT melding da null i mock
-//
-//        verify { soeknadStatistikkService.registrerStatistikkForKlagehendelse(any(), any(), any()) }
-//    }
+    private val soeknadStatistikkService: StatistikkService =
+        mockk {
+            every { registrerStatistikkForKlagehendelse(any(), any(), any()) } returns null
+        }
+
+    private val testRapid: TestRapid =
+        TestRapid().apply {
+            KlagehendelseRiver(this, soeknadStatistikkService)
+        }
+
+    @Test
+    fun `Skal ta i mot klagemeldinger`() {
+        val message =
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        KlageHendelseType.OPPRETTET.lagParMedEventNameKey(),
+                        CORRELATION_ID_KEY to UUID.randomUUID(),
+                        TEKNISK_TID_KEY to LocalDateTime.now(),
+                        KLAGE_STATISTIKK_RIVER_KEY to
+                            StatistikkKlage(
+                                UUID.randomUUID(),
+                                Klage(
+                                    UUID.randomUUID(),
+                                    Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, null),
+                                    Tidspunkt.now(),
+                                    KlageStatus.OPPRETTET,
+                                    kabalResultat = null,
+                                    kabalStatus = null,
+                                    formkrav = null,
+                                    innkommendeDokument = null,
+                                    resultat = null,
+                                    utfall = null,
+                                    aarsakTilAvbrytelse = null,
+                                    initieltUtfall = null,
+                                ),
+                                Tidspunkt.now(),
+                                null,
+                            ),
+                    ),
+                ).toJson()
+        val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
+        Assertions.assertEquals(0, inspector.size) // kjører ingen STATISTIKK:REGISTRERT melding da null i mock
+
+        verify { soeknadStatistikkService.registrerStatistikkForKlagehendelse(any(), any(), any()) }
+    }
 }

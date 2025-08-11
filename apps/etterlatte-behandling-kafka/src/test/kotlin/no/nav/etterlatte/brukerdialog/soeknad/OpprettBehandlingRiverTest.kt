@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.clearAllMocks
 import io.mockk.coVerify
 import io.mockk.every
@@ -21,70 +22,70 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpprettBehandlingRiverTest {
-//    private val behandlingClientMock = mockk<BehandlingClient>()
-//
-//    @AfterEach
-//    fun afterEach() {
-//        clearAllMocks()
-//    }
-//
-//    @Test
-//    fun `OMSTILLINGSSTOENAD - Skal opprette sak og behandling`() {
-//        val soeker = "13848599411"
-//        val sakId = randomSakId()
-//        val behandlingId = UUID.randomUUID()
-//
-//        every {
-//            behandlingClientMock.finnEllerOpprettSak(any(), any())
-//        } returns Sak(soeker, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
-//        every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
-//
-//        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
-//        val message = inspector.message(0)
-//
-//        assertEquals(1, inspector.size)
-//        assertEquals(
-//            SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
-//            message.get(EVENT_NAME_KEY).asText(),
-//        )
-//        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
-//        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
-//
-//        coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.OMSTILLINGSSTOENAD) }
-//        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any()) }
-//    }
-//
-//    @Test
-//    fun `BARNEPENSJON - Skal opprette sak og behandling`() {
-//        val soeker = "24111258054"
-//        val sakId = randomSakId()
-//        val behandlingId = UUID.randomUUID()
-//
-//        every {
-//            behandlingClientMock.finnEllerOpprettSak(any(), any())
-//        } returns Sak(soeker, SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
-//        every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
-//
-//        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/barnepensjon.json")) }.inspektør
-//        val message = inspector.message(0)
-//
-//        assertEquals(
-//            SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
-//            message.get(EVENT_NAME_KEY).asText(),
-//        )
-//        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
-//        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
-//
-//        assertEquals(1, inspector.size)
-//
-//        coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.BARNEPENSJON) }
-//        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any()) }
-//    }
-//
-//    private fun testRapid() =
-//        TestRapid().apply {
-//            OpprettBehandlingRiver(this, behandlingClientMock)
-//        }
-//
-//    private fun getJson(file: String) = javaClass.getResource(file)!!.readText()
+    private val behandlingClientMock = mockk<BehandlingClient>()
+
+    @AfterEach
+    fun afterEach() {
+        clearAllMocks()
+    }
+
+    @Test
+    fun `OMSTILLINGSSTOENAD - Skal opprette sak og behandling`() {
+        val soeker = "13848599411"
+        val sakId = randomSakId()
+        val behandlingId = UUID.randomUUID()
+
+        every {
+            behandlingClientMock.finnEllerOpprettSak(any(), any())
+        } returns Sak(soeker, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
+        every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
+
+        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
+        val message = inspector.message(0)
+
+        assertEquals(1, inspector.size)
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
+            message.get(EVENT_NAME_KEY).asText(),
+        )
+        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
+        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
+
+        coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.OMSTILLINGSSTOENAD) }
+        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any()) }
+    }
+
+    @Test
+    fun `BARNEPENSJON - Skal opprette sak og behandling`() {
+        val soeker = "24111258054"
+        val sakId = randomSakId()
+        val behandlingId = UUID.randomUUID()
+
+        every {
+            behandlingClientMock.finnEllerOpprettSak(any(), any())
+        } returns Sak(soeker, SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
+        every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
+
+        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/barnepensjon.json")) }.inspektør
+        val message = inspector.message(0)
+
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
+            message.get(EVENT_NAME_KEY).asText(),
+        )
+        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
+        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
+
+        assertEquals(1, inspector.size)
+
+        coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.BARNEPENSJON) }
+        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any()) }
+    }
+
+    private fun testRapid() =
+        TestRapid().apply {
+            OpprettBehandlingRiver(this, behandlingClientMock)
+        }
+
+    private fun getJson(file: String) = javaClass.getResource(file)!!.readText()
 }

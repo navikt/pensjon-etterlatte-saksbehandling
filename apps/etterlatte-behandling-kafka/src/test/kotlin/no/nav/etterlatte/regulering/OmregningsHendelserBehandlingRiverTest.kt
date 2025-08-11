@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -18,41 +19,41 @@ import java.io.FileNotFoundException
 import java.util.UUID
 
 internal class OmregningsHendelserBehandlingRiverTest {
-//    private val behandlingService = mockk<BehandlingServiceImpl>()
-//    private val inspector = TestRapid().apply { OmregningsHendelserBehandlingRiver(this, behandlingService) }
-//
-//    @Test
-//    fun `skal opprette omregning`() {
-//        val revurderingRequestSlot = slot<AutomatiskRevurderingRequest>()
-//        val behandlingId = UUID.randomUUID()
-//        val behandlingViOmregnerFra = UUID.randomUUID()
-//
-//        val returnValue = AutomatiskRevurderingResponse(behandlingId, behandlingViOmregnerFra, SakType.BARNEPENSJON)
-//
-//        every { behandlingService.opprettAutomatiskRevurdering(capture(revurderingRequestSlot)) }.returns(returnValue)
-//
-//        val inspector = inspector.apply { sendTestMessage(fullMelding) }
-//
-//        inspector.sendTestMessage(fullMelding)
-//
-//        revurderingRequestSlot.captured.sakId shouldBe SakId(1)
-//        inspector.inspektør.size shouldBe 2
-//        with(
-//            deserialize<OmregningData>(
-//                inspector.inspektør
-//                    .message(1)
-//                    .get(HENDELSE_DATA_KEY)
-//                    .toJson(),
-//            ),
-//        ) {
-//            hentBehandlingId() shouldBe behandlingId
-//            hentForrigeBehandlingid() shouldBe behandlingViOmregnerFra
-//        }
-//    }
-//
-//    companion object {
-//        val fullMelding = readFile("/omregningshendelse.json")
-//    }
+    private val behandlingService = mockk<BehandlingServiceImpl>()
+    private val inspector = TestRapid().apply { OmregningsHendelserBehandlingRiver(this, behandlingService) }
+
+    @Test
+    fun `skal opprette omregning`() {
+        val revurderingRequestSlot = slot<AutomatiskRevurderingRequest>()
+        val behandlingId = UUID.randomUUID()
+        val behandlingViOmregnerFra = UUID.randomUUID()
+
+        val returnValue = AutomatiskRevurderingResponse(behandlingId, behandlingViOmregnerFra, SakType.BARNEPENSJON)
+
+        every { behandlingService.opprettAutomatiskRevurdering(capture(revurderingRequestSlot)) }.returns(returnValue)
+
+        val inspector = inspector.apply { sendTestMessage(fullMelding) }
+
+        inspector.sendTestMessage(fullMelding)
+
+        revurderingRequestSlot.captured.sakId shouldBe SakId(1)
+        inspector.inspektør.size shouldBe 2
+        with(
+            deserialize<OmregningData>(
+                inspector.inspektør
+                    .message(1)
+                    .get(HENDELSE_DATA_KEY)
+                    .toJson(),
+            ),
+        ) {
+            hentBehandlingId() shouldBe behandlingId
+            hentForrigeBehandlingid() shouldBe behandlingViOmregnerFra
+        }
+    }
+
+    companion object {
+        val fullMelding = readFile("/omregningshendelse.json")
+    }
 }
 
 fun readFile(file: String) =

@@ -25,7 +25,6 @@ import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.brevbaker.BlockTilSlateKonverterer
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
@@ -76,7 +75,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -336,7 +334,7 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(sakType, vedtakType, revurderingsaarsak = revurderingsaarsak)
             val mottaker = opprettMottaker()
 
-            coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettLetterMarkup()
+            coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettSlate()
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakere(sakType, any(), any()) } returns listOf(mottaker)
@@ -840,27 +838,7 @@ internal class VedtaksbrevServiceTest {
             "Per Attestant",
         )
 
-    private fun opprettLetterMarkup() =
-        object : LetterMarkup {
-            override val title = ""
-            override val sakspart =
-                object : LetterMarkup.Sakspart {
-                    override val gjelderNavn = ""
-                    override val gjelderFoedselsnummer = ""
-                    override val saksnummer = ""
-                    override val dokumentDato = LocalDate.now()
-                    override val vergeNavn = null
-                }
-            override val blocks = emptyList<LetterMarkup.Block>()
-            override val signatur =
-                object : LetterMarkup.Signatur {
-                    override val hilsenTekst = ""
-                    override val saksbehandlerRolleTekst = ""
-                    override val saksbehandlerNavn = null
-                    override val attesterendeSaksbehandlerNavn = ""
-                    override val navAvsenderEnhet = ""
-                }
-        }.let { BlockTilSlateKonverterer.konverter(it) }
+    private fun opprettSlate() = Slate()
 
     private fun opprettOpphoerPayload() =
         Slate(

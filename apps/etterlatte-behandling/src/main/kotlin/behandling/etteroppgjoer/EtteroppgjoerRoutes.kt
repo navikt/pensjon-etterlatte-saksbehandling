@@ -36,6 +36,7 @@ enum class EtteroppgjoerToggles(
 ) : FeatureToggle {
     ETTEROPPGJOER("etteroppgjoer"),
     ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
+    ETTEROPPGJOER_STUB_PGI("etteroppgjoer_stub_pgi"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_PERIODISK_JOBB("ettteroppgjoer_periodisk_jobb"),
     ;

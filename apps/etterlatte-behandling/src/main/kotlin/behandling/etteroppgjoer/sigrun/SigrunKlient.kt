@@ -43,7 +43,7 @@ class SigrunKlientImpl(
         ident: String,
         inntektsaar: Int,
     ): PensjonsgivendeInntektFraSkatt {
-        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_INNTEKT, false)) {
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_PGI, false)) {
             return PensjonsgivendeInntektFraSkatt.stub()
         }
 

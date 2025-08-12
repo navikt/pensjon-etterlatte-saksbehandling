@@ -44,7 +44,9 @@ fun SakMedGraderingOgSkjermet.erSpesialSak(): Boolean {
             }
         } ?: false
 
-    return harAdressebeskyttelse || erEgenansatt
+    val harSpesialEnhet = this.enhetNr?.let { Enheter.erSpesialTilgangsEnheter(it) } ?: false
+
+    return harAdressebeskyttelse || erEgenansatt || harSpesialEnhet
 }
 
 class OppdaterTilgangService(

@@ -109,7 +109,13 @@
       "moduleName": "no.nav.*"
     },
     {
-      "moduleName": "com.github.navikt.tbd-libs"
+      "moduleName": "com.github.navikt.tbd-libs:kafka"
+    },
+    {
+      "moduleName": "com.github.navikt.tbd-libs:rapids-and-rivers"
+    },
+    {
+      "moduleName": "com.github.navikt.tbd-libs:rapids-and-rivers-api"
     }
   ]
 }

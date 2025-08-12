@@ -55,7 +55,7 @@ class SigrunKlientImpl(
                 setBody(body)
                 headers.append("Nav-Personident", ident)
                 headers.append("inntektsaar", inntektsaar.toString())
-                headers.append("rettighetspakker", "navUfoeretrygd") // TODO: bytte ut med egen for team etterlatte
+                headers.append("rettighetspakke", "navUfoeretrygd") // TODO: bytte ut med egen for team etterlatte
             }
         }.let {
             when (it) {

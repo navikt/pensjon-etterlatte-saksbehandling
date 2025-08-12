@@ -119,7 +119,7 @@ class InntektskomponentKlientImpl(
                     logger.error("Kall mot inntektskomponent bulk feilet med filter ${filter.joinToString()}")
                     sikkerlogg.error(
                         "Kall mot inntektskomponent bulk feilet med filter ${filter.joinToString()}" +
-                                " for $personident",
+                            " for $personident",
                     )
                     throw response.samlaExceptions()
                 }
@@ -173,6 +173,6 @@ data class InntektDto(
     val beskrivelse: String,
     val inngaarIGrunnlagForTrekk: Boolean,
     val utloeserArbeidsgiveravgift: Boolean,
-    val opptjeningsperiodeFom: LocalDate,
-    val opptjeningsperiodeTom: LocalDate,
+    val opptjeningsperiodeFom: LocalDate?,
+    val opptjeningsperiodeTom: LocalDate?,
 )

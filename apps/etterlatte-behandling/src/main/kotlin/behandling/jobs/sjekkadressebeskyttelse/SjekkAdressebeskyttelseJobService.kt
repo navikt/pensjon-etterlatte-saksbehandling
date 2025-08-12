@@ -39,7 +39,7 @@ class SjekkAdressebeskyttelseJobService(
 
     private fun run() {
         if (featureToggleService.isEnabled(SjekkAdressebeskyttelseToggles.SJEKK_ADRESSEBESKYTTELSE_JOBB, false)) {
-            val aktuelleSaker = listOf(SakId(22092))
+            val aktuelleSaker = listOf(SakId(22597))
             aktuelleSaker.forEach { aktuellSak ->
                 val (sak, persongalleriGrunnlag) =
                     inTransaction {

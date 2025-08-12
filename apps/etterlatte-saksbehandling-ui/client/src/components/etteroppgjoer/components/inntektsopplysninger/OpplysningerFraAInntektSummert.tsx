@@ -1,6 +1,8 @@
 import { SummerteInntekterAOrdningen } from '~shared/types/EtteroppgjoerForbehandling'
-import { BodyShort, Heading, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Heading, Label, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
+import React from 'react'
+import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 
 export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: SummerteInntekterAOrdningen }) {
   return (
@@ -16,7 +18,7 @@ export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: Summe
           <Table.Row>
             <Table.HeaderCell>Type inntekt</Table.HeaderCell>
             {inntekter.afp.inntekter.map((maaned) => (
-              <Table.HeaderCell key={maaned.maaned} scope="col">
+              <Table.HeaderCell key={maaned.maaned} scope="col" align="right">
                 {maaned.maaned}
               </Table.HeaderCell>
             ))}
@@ -24,26 +26,37 @@ export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: Summe
         </Table.Header>
         <Table.Body>
           <Table.Row>
-            <Table.DataCell>AFP</Table.DataCell>
-            {inntekter.afp.inntekter.map((maaned) => (
-              <Table.DataCell key={maaned.maaned}>{NOK(maaned.beloep)}</Table.DataCell>
-            ))}
-          </Table.Row>
-          <Table.Row>
             <Table.DataCell>Lønn</Table.DataCell>
             {inntekter.loenn.inntekter.map((maaned) => (
-              <Table.DataCell key={maaned.maaned}>{NOK(maaned.beloep)}</Table.DataCell>
+              <Table.DataCell key={maaned.maaned} align="right">
+                {NOK(maaned.beloep)}
+              </Table.DataCell>
             ))}
           </Table.Row>
 
           <Table.Row>
             <Table.DataCell>OMS</Table.DataCell>
             {inntekter.oms.inntekter.map((maaned) => (
-              <Table.DataCell key={maaned.maaned}>{NOK(maaned.beloep)}</Table.DataCell>
+              <Table.DataCell key={maaned.maaned} align="right">
+                {NOK(maaned.beloep)}
+              </Table.DataCell>
+            ))}
+          </Table.Row>
+          <Table.Row>
+            <Table.DataCell>AFP</Table.DataCell>
+            {inntekter.afp.inntekter.map((maaned) => (
+              <Table.DataCell key={maaned.maaned} align="right">
+                {NOK(maaned.beloep)}
+              </Table.DataCell>
             ))}
           </Table.Row>
         </Table.Body>
       </Table>
+
+      <div>
+        <Label size="small">Kilde</Label>
+        <BodyShort size="small">A-inntekt {formaterDatoMedKlokkeslett(inntekter.tidspunktBeregnet)}</BodyShort>
+      </div>
     </VStack>
   )
 }

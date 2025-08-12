@@ -107,8 +107,9 @@
     },
     {
       "moduleName": "no.nav.*"
+    },
+    {
+      "moduleName": "com.github.navikt.tbd-libs"
     }
-
-
   ]
 }

@@ -40,7 +40,7 @@ export default function AnnullerForbehandling() {
   const kanRedigeres =
     ![EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT].includes(
       etteroppgjoer.behandling.status
-    ) || !enhetErSkrivbar(etteroppgjoer.behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
+    ) && enhetErSkrivbar(etteroppgjoer.behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {
     control,

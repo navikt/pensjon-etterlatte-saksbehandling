@@ -1,0 +1,2 @@
+ALTER TABLE etteroppgjoer_behandling ADD COLUMN aarsak_til_avbrytelse VARCHAR;
+ALTER TABLE etteroppgjoer_behandling ADD COLUMN kommentar_til_avbrytelse VARCHAR;

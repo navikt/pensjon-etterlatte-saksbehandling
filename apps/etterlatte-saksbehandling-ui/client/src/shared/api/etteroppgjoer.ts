@@ -6,6 +6,7 @@ import {
   BeregnetEtteroppgjoerResultatDto,
   Etteroppgjoer,
   IInformasjonFraBruker,
+  AvbrytEtteroppgjoerForbehandlingRequest,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
@@ -22,6 +23,15 @@ export const hentEtteroppgjoerForbehandling = async (
   behandlingId: string
 ): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
   return apiClient.get(`/etteroppgjoer/forbehandling/${behandlingId}`)
+}
+
+export const avbrytEtteroppgjoerForbehandling = async (args: {
+  id: string
+  avbrytEtteroppgjoerForbehandlingRequest: AvbrytEtteroppgjoerForbehandlingRequest
+}): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.id}/avbryt`, {
+    ...args.avbrytEtteroppgjoerForbehandlingRequest,
+  })
 }
 
 export const opprettEtteroppgjoerIDev = async (sakId: number): Promise<ApiResponse<EtteroppgjoerOgOppgave>> => {

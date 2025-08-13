@@ -10,6 +10,7 @@ enum class EtteroppgjoerForbehandlingStatus {
     OPPRETTET,
     BEREGNET,
     FERDIGSTILT,
+    AVBRUTT,
 }
 
 data class EtteroppgjoerForbehandlingDto(
@@ -34,6 +35,7 @@ enum class EtteroppgjoerHendelseType(
     OPPRETTET(true),
     BEREGNET(false),
     FERDIGSTILT(true),
+    AVBRUTT(true),
     ;
 
     override fun lagEventnameForType(): String = "ETTEROPPGJOER_FORBEHANDLING:${this.name}"
@@ -47,3 +49,15 @@ data class EtteroppgjoerForbehandlingStatistikkDto(
     val utlandstilknytningType: UtlandstilknytningType?,
     val saksbehandler: String?,
 )
+
+data class AvbrytForbehandlingRequest(
+    val aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling,
+    val kommentar: String?,
+)
+
+enum class AarsakTilAvbryteForbehandling {
+    IKKE_LENGER_AKTUELL,
+    FEILREGISTRERT,
+    AVBRUTT_PAA_GRUNN_AV_FEIL,
+    ANNET,
+}

@@ -31,13 +31,13 @@ class GrunnlagHendelserRiver(
 
     init {
         initialiserRiver(rapidsConnection, EventNames.NY_OPPLYSNING) {
+            precondition { it.forbidValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
+            precondition { it.forbidValue(EVENT_NAME_KEY, EventNames.FEILA.lagEventnameForType()) }
+            precondition { it.forbidValue(VILKAARSVURDERT_KEY, true) }
             validate { it.interestedIn(FNR_KEY) }
             validate { it.requireKey(OPPLYSNING_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
-            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA.lagEventnameForType()) }
-            validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
         }
     }
 

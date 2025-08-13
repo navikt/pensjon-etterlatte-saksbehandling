@@ -23,7 +23,7 @@ class SjekkOmOverstyrtBeregningRiver(
 
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET) {
-            validate { it.rejectKey(BEHANDLING_ID_KEY) }
+            precondition { it.forbid(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.interestedIn(AAPNE_BEHANDLINGER_KEY) }
         }

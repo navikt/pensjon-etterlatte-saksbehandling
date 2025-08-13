@@ -22,9 +22,9 @@ internal class DistribuerBrevRiver(
 
     init {
         initialiserRiver(rapidsConnection, BrevHendelseType.JOURNALFOERT) {
+            precondition { it.forbid("bestillingsId") }
             validate { it.requireKey(BREV_ID_KEY, "distribusjonType") }
             validate { it.requireKey("vedtak.sak.id") }
-            validate { it.rejectKey("bestillingsId") }
         }
     }
 

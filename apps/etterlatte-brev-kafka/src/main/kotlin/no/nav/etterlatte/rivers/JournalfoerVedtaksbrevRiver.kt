@@ -28,6 +28,7 @@ internal class JournalfoerVedtaksbrevRiver(
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
+            precondition { it.forbidValue(SKAL_SENDE_BREV, false) }
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.id") }
             validate { it.requireKey("vedtak.behandlingId") }
@@ -37,7 +38,6 @@ internal class JournalfoerVedtaksbrevRiver(
             validate { it.requireKey("vedtak.sak.sakType") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligSaksbehandler") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
-            validate { it.rejectValue(SKAL_SENDE_BREV, false) }
         }
     }
 

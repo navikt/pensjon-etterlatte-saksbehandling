@@ -38,6 +38,7 @@ class VedtakMottakRiver(
     init {
         // Barnepensjon
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
+            precondition { it.forbid(FIKS_BREV_MIGRERING) }
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.BARNEPENSJON.name) }
             validate {
@@ -46,7 +47,6 @@ class VedtakMottakRiver(
                     listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name),
                 )
             }
-            validate { it.rejectKey(FIKS_BREV_MIGRERING) }
         }
 
         // Omstillingsstønad

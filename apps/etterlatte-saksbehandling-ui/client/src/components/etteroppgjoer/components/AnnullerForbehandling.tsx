@@ -16,21 +16,20 @@ import {
 import { avbrytEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export default function AnnullerForbehandling() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [status, avbrytBehandling] = useApiCall(avbrytEtteroppgjoerForbehandling)
   const etteroppgjoer = useEtteroppgjoer()
-
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   const kanRedigeres = ![EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT].includes(
     etteroppgjoer.behandling.status
   )
-
-  // TODO: sjekk at behandlingen er tildelt sb?
-  //const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const {
     control,
@@ -41,7 +40,7 @@ export default function AnnullerForbehandling() {
     defaultValues: { aarsakTilAvbrytelse: AarsakTilAvsluttingEtteroppgjoerForbehandling.ANNET, kommentar: '' },
   })
 
-  if (!kanRedigeres) {
+  if (!kanRedigeres || enhetErSkrivbar(etteroppgjoer.behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)) {
     return null
   }
 

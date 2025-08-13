@@ -24,7 +24,9 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -96,13 +98,17 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = hentForbehandling(forbehandlingId)
 
         if (!forbehandling.kanAvbrytes()) {
-            throw InternfeilException(
+            throw IkkeTillattException(
+                "FEIL_STATUS_FORBEHANDLING",
                 "Forbehandling med id=$forbehandlingId kan ikke avbrytes. Status er ${forbehandling.status}",
             )
         }
 
         if (aarsak == AarsakTilAvbryteForbehandling.ANNET && kommentar.isNullOrBlank()) {
-            throw InternfeilException("Kan ikke avbryte behandling uten å begrunne hvorfor. Kommentar er null eller blankt")
+            throw UgyldigForespoerselException(
+                "VERDI_ER_NULL",
+                "Kan ikke avbryte behandling uten å begrunne hvorfor. Kommentar er null eller blankt",
+            )
         }
 
         dao.lagreForbehandling(forbehandling.tilAvbrutt()).let {

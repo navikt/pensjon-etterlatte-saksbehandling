@@ -1,8 +1,18 @@
 import React, { useState } from 'react'
-import { BodyLong, Button, ExpansionCard, Heading, HStack, Modal, Select, Textarea, VStack } from '@navikt/ds-react'
+import {
+  BodyLong,
+  Box,
+  Button,
+  ExpansionCard,
+  Heading,
+  HStack,
+  Modal,
+  Select,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
-import styled from 'styled-components'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Controller, useForm } from 'react-hook-form'
@@ -55,28 +65,16 @@ export default function AnnullerForbehandling() {
     })
   }
 
-  const aarsakOptions = () => {
-    return Object.values(AarsakTilAvsluttingEtteroppgjoerForbehandling).map((aarsak) => (
-      <option key={aarsak} value={aarsak}>
-        {tekstAarsakTilAvsluttingEtteroppgjoerForbehandling[aarsak]}
-      </option>
-    ))
-  }
-
   return (
-    <>
-      <ExpansionCardSpaced aria-labelledby="card-heading">
+    <Box paddingInline="2" paddingBlock="4">
+      <ExpansionCard aria-labelledby="card-heading" size="small">
         <ExpansionCard.Header>
-          <div className="with-icon">
-            <div className="icon">
-              <ExclamationmarkTriangleFillIcon aria-hidden />
-            </div>
+          <HStack wrap={false} gap="4" align="center">
+            <ExclamationmarkTriangleFillIcon aria-hidden />
             <div>
-              <Heading size="xsmall" id="card-heading">
-                Annuller forbehandling
-              </Heading>
+              <ExpansionCard.Title size="small">Annuller forbehandling</ExpansionCard.Title>
             </div>
-          </div>
+          </HStack>
         </ExpansionCard.Header>
 
         <ExpansionCard.Content>
@@ -88,7 +86,7 @@ export default function AnnullerForbehandling() {
             </Button>
           </div>
         </ExpansionCard.Content>
-      </ExpansionCardSpaced>
+      </ExpansionCard>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Header>
@@ -116,7 +114,11 @@ export default function AnnullerForbehandling() {
                   return (
                     <>
                       <Select label="Årsak til avslutning" value={value ?? ''} {...rest}>
-                        {aarsakOptions()}
+                        {Object.values(AarsakTilAvsluttingEtteroppgjoerForbehandling).map((aarsak) => (
+                          <option key={aarsak} value={aarsak}>
+                            {tekstAarsakTilAvsluttingEtteroppgjoerForbehandling[aarsak]}
+                          </option>
+                        ))}
                       </Select>
                     </>
                   )
@@ -150,6 +152,11 @@ export default function AnnullerForbehandling() {
               />
             </>
           </VStack>
+
+          {isFailureHandler({
+            apiResult: status,
+            errorMessage: 'Det oppsto en feil ved avbryting av forbehandlingen.',
+          })}
         </Modal.Body>
 
         <Modal.Footer>
@@ -161,38 +168,8 @@ export default function AnnullerForbehandling() {
               Ja, annuller forbehandlingen
             </Button>
           </HStack>
-          {isFailureHandler({
-            apiResult: status,
-            errorMessage: 'Det oppsto en feil ved avbryting av forbehandlingen.',
-          })}
         </Modal.Footer>
       </Modal>
-    </>
+    </Box>
   )
 }
-
-const ExpansionCardSpaced = styled(ExpansionCard)`
-  margin: 20px 8px 0 8px;
-  border-radius: 3px;
-
-  .title {
-    white-space: nowrap;
-  }
-
-  .navds-expansioncard__header {
-    border-radius: 3px;
-  }
-
-  .with-icon {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-    display: grid;
-    place-content: center;
-  }
-`

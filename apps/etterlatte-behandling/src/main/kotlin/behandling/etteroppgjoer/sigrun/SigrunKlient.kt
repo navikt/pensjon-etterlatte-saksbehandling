@@ -18,6 +18,12 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import org.slf4j.LoggerFactory
 
+enum class SigrunRettighetspakke(
+    val rettighetspakke: String,
+) {
+    OMSTILLINGSSTOENAD("navomstillingsstoenad"),
+}
+
 interface SigrunKlient {
     suspend fun hentPensjonsgivendeInntekt(
         ident: String,
@@ -55,7 +61,7 @@ class SigrunKlientImpl(
                 setBody(body)
                 headers.append("Nav-Personident", ident)
                 headers.append("inntektsaar", inntektsaar.toString())
-                headers.append("rettighetspakke", "navUfoeretrygd") // TODO: bytte ut med egen for team etterlatte
+                headers.append("rettighetspakke", SigrunRettighetspakke.OMSTILLINGSSTOENAD.rettighetspakke)
             }
         }.let {
             when (it) {

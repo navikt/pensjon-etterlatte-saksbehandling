@@ -27,9 +27,10 @@ export default function AnnullerForbehandling() {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
-  const kanRedigeres = ![EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT].includes(
-    etteroppgjoer.behandling.status
-  )
+  const kanRedigeres =
+    ![EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT].includes(
+      etteroppgjoer.behandling.status
+    ) || !enhetErSkrivbar(etteroppgjoer.behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {
     control,
@@ -40,7 +41,7 @@ export default function AnnullerForbehandling() {
     defaultValues: { aarsakTilAvbrytelse: AarsakTilAvsluttingEtteroppgjoerForbehandling.ANNET, kommentar: '' },
   })
 
-  if (!kanRedigeres || enhetErSkrivbar(etteroppgjoer.behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)) {
+  if (!kanRedigeres) {
     return null
   }
 

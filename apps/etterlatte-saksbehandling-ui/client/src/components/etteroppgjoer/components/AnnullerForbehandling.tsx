@@ -25,7 +25,6 @@ import {
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { avbrytEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
@@ -35,7 +34,6 @@ export default function AnnullerForbehandling() {
   const [status, avbrytBehandling] = useApiCall(avbrytEtteroppgjoerForbehandling)
   const etteroppgjoer = useEtteroppgjoer()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   const kanRedigeres =
     ![EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT].includes(
@@ -57,8 +55,8 @@ export default function AnnullerForbehandling() {
 
   const annuller = (data: AvbrytEtteroppgjoerForbehandlingRequest) => {
     avbrytBehandling({ id: etteroppgjoer.behandling!!.id, avbrytEtteroppgjoerForbehandlingRequest: data }, () => {
-      if (soeker?.foedselsnummer) {
-        navigate('/person', { state: { fnr: soeker?.foedselsnummer } })
+      if (etteroppgjoer.behandling.sak.ident) {
+        navigate('/person', { state: { fnr: etteroppgjoer.behandling.sak.ident } })
       } else {
         window.location.reload() // Bare refresh behandling
       }

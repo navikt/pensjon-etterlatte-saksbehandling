@@ -12,6 +12,9 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbryteForbehandling
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
@@ -21,7 +24,9 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -32,6 +37,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
@@ -46,6 +52,7 @@ class EtteroppgjoerForbehandlingService(
     private val etteroppgjoerService: EtteroppgjoerService,
     private val oppgaveService: OppgaveService,
     private val inntektskomponentService: InntektskomponentService,
+    private val hendelserService: EtteroppgjoerHendelseService,
     private val sigrunKlient: SigrunKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
@@ -57,10 +64,10 @@ class EtteroppgjoerForbehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        logger.info("Ferdigstiller forbehandling for behandling=$behandlingId")
-        val forbehandling = dao.hentForbehandling(behandlingId)
-
-        dao.lagreForbehandling(forbehandling!!.tilFerdigstilt())
+        logger.info("Ferdigstiller forbehandling med id=$behandlingId")
+        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+        val ferdigstiltForbehandling = forbehandling.tilFerdigstilt()
+        dao.lagreForbehandling(ferdigstiltForbehandling)
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
             forbehandling.sak.id,
             forbehandling.aar,
@@ -70,6 +77,54 @@ class EtteroppgjoerForbehandlingService(
             forbehandling.id.toString(),
             OppgaveType.ETTEROPPGJOER,
             brukerTokenInfo,
+        )
+        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = ferdigstiltForbehandling,
+            etteroppgjoerResultat = null,
+            hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
+            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytningType = utlandstilknytning?.type,
+        )
+    }
+
+    fun avbrytForbehandling(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        aarsak: AarsakTilAvbryteForbehandling,
+        kommentar: String?,
+    ) {
+        logger.info("Avbryter forbehandling med id=$forbehandlingId")
+        val forbehandling = hentForbehandling(forbehandlingId)
+
+        if (!forbehandling.kanAvbrytes()) {
+            throw IkkeTillattException(
+                "FEIL_STATUS_FORBEHANDLING",
+                "Forbehandling med id=$forbehandlingId kan ikke avbrytes. Status er ${forbehandling.status}",
+            )
+        }
+
+        if (aarsak == AarsakTilAvbryteForbehandling.ANNET && kommentar.isNullOrBlank()) {
+            throw UgyldigForespoerselException(
+                "VERDI_ER_NULL",
+                "Kan ikke avbryte behandling uten å begrunne hvorfor. Kommentar er null eller blankt",
+            )
+        }
+
+        dao.lagreForbehandling(forbehandling.tilAvbrutt()).let {
+            dao.lagreAvbruttAarsak(forbehandlingId, aarsak, kommentar.orEmpty())
+        }
+
+        val merknad = "Avbrutt manuelt. Årsak: ${kommentar ?: aarsak.name}"
+        oppgaveService.avbrytAapneOppgaverMedReferanse(forbehandlingId.toString(), merknad)
+
+        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
+
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = forbehandling,
+            hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
+            saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+            utlandstilknytningType = utlandstilknytning?.type,
         )
     }
 
@@ -99,6 +154,12 @@ class EtteroppgjoerForbehandlingService(
                 "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$forbehandlingId",
             )
         }
+        val summerteInntekter =
+            try {
+                dao.hentSummerteInntekter(forbehandling.id, null)
+            } catch (_: Exception) {
+                null
+            }
 
         val beregnetEtteroppgjoerResultat =
             runBlocking {
@@ -118,6 +179,7 @@ class EtteroppgjoerForbehandlingService(
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntekt,
                     ainntekt = aInntekt,
+                    summerteInntekter = summerteInntekter,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
@@ -149,15 +211,28 @@ class EtteroppgjoerForbehandlingService(
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
         val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
-
+        try {
+            val summerteInntekter = runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
+            dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
+        } catch (e: Exception) {
+            logger.error("Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId", e)
+        }
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = nyForbehandling,
+            hendelseType = EtteroppgjoerHendelseType.OPPRETTET,
+            saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+            utlandstilknytningType = utlandstilknytning?.type,
+        )
 
         return EtteroppgjoerForbehandlingOgOppgave(
             etteroppgjoerForbehandling = nyForbehandling,
@@ -202,8 +277,16 @@ class EtteroppgjoerForbehandlingService(
             runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(beregningRequest, brukerTokenInfo) }
 
         behandlingService.settBeregnetForRevurderingTilForbehandling(forbehandling)
-
-        dao.lagreForbehandling(forbehandling.tilBeregnet())
+        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
+        forbehandling = forbehandling.tilBeregnet()
+        dao.lagreForbehandling(forbehandling)
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = forbehandling,
+            etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
+            hendelseType = EtteroppgjoerHendelseType.BEREGNET,
+            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytningType = utlandstilknytning?.type,
+        )
         return beregnetEtteroppgjoerResultat
     }
 
@@ -299,7 +382,11 @@ class EtteroppgjoerForbehandlingService(
         }
         return Periode(
             fom = maxOf(periode.fom, YearMonth.of(inntektsaar, Month.JANUARY)),
-            tom = minOf(periode.tom ?: YearMonth.of(inntektsaar, Month.DECEMBER), YearMonth.of(inntektsaar, Month.DECEMBER)),
+            tom =
+                minOf(
+                    periode.tom ?: YearMonth.of(inntektsaar, Month.DECEMBER),
+                    YearMonth.of(inntektsaar, Month.DECEMBER),
+                ),
         )
     }
 

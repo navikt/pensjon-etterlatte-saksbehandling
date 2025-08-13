@@ -2,7 +2,10 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingDto
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
@@ -66,6 +69,16 @@ data class EtteroppgjoerForbehandling(
         }
     }
 
+    fun tilAvbrutt(): EtteroppgjoerForbehandling {
+        if (kanAvbrytes()) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.AVBRUTT)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.AVBRUTT}")
+        }
+    }
+
+    fun kanAvbrytes() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
+
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 
     fun erUnderBehandling() =
@@ -80,6 +93,23 @@ data class EtteroppgjoerForbehandling(
             listOf(
                 EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
             )
+
+    fun tilDto(): EtteroppgjoerForbehandlingDto =
+        EtteroppgjoerForbehandlingDto(
+            id = id,
+            hendelseId = hendelseId,
+            opprettet = opprettet,
+            status = status,
+            sak = sak,
+            aar = aar,
+            innvilgetPeriode = innvilgetPeriode,
+            brevId = brevId,
+            kopiertFra = kopiertFra,
+            sisteIverksatteBehandlingId = sisteIverksatteBehandlingId,
+            harMottattNyInformasjon = harMottattNyInformasjon,
+            endringErTilUgunstForBruker = endringErTilUgunstForBruker,
+            beskrivelseAvUgunst = beskrivelseAvUgunst,
+        )
 }
 
 data class DetaljertForbehandlingDto(
@@ -89,14 +119,9 @@ data class DetaljertForbehandlingDto(
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
 )
 
-enum class EtteroppgjoerForbehandlingStatus {
-    OPPRETTET,
-    BEREGNET,
-    FERDIGSTILT,
-}
-
 data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkatt,
     val ainntekt: AInntekt,
+    val summerteInntekter: SummerteInntekterAOrdningen?,
     val tidligereAvkorting: AvkortingDto,
 )

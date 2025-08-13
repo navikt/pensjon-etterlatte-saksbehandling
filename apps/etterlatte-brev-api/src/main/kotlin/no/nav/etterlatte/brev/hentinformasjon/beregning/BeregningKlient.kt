@@ -3,7 +3,9 @@ package no.nav.etterlatte.brev.hentinformasjon.beregning
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
@@ -45,11 +47,12 @@ class BeregningKlient(
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
-            logger.error(
-                "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
-                e,
-            )
-            return null
+            if (e is ResponseException && e.response.status == HttpStatusCode.NotFound) {
+                logger.info("Fant ikke beregning for behandling med behandlingId=$behandlingId", e)
+                return null
+            }
+            logger.error("Henting av beregning for behandling med behandlingId=$behandlingId feilet", e)
+            throw e
         }
     }
 

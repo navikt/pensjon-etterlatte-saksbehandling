@@ -27,10 +27,9 @@ import no.nav.etterlatte.brev.adresse.RegoppslagKlient
 import no.nav.etterlatte.brev.adresse.saksbehandler.SaksbehandlerKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.OppgaveKlient
-import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONBlockMixIn
-import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.LetterMarkupModule
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
@@ -76,7 +75,6 @@ import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
-import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import org.slf4j.Logger
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -254,8 +252,7 @@ internal class ApplicationContext {
     ) = httpClient(
         forventSuksess = forventStatusSuccess,
         ekstraJacksoninnstillinger = {
-            it.addMixIn(LetterMarkup.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-            it.addMixIn(LetterMarkup.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+            it.registerModule(LetterMarkupModule)
         },
         auth = {
             if (scope != null) {

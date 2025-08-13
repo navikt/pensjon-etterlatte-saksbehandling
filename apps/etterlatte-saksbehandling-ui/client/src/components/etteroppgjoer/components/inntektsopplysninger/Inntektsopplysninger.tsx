@@ -3,6 +3,7 @@ import { Box, Heading, VStack } from '@navikt/ds-react'
 import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraSkatteetaten'
 import { OpplysningerFraAInntekt } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraAInntekt'
 import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/components/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
+import { OpplysningerFraAInntektSummert } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraAInntektSummert'
 
 export const Inntektsopplysninger = () => {
   const etteroppgjoer = useEtteroppgjoer()
@@ -21,6 +22,9 @@ export const Inntektsopplysninger = () => {
         </Heading>
         <OpplysningerFraSkatteetaten pensjonsgivendeInntektFraSkatteetaten={etteroppgjoer.opplysninger.skatt} />
         <OpplysningerFraAInntekt ainntekt={etteroppgjoer.opplysninger.ainntekt} />
+        {etteroppgjoer.opplysninger.summerteInntekter && (
+          <OpplysningerFraAInntektSummert inntekter={etteroppgjoer.opplysninger.summerteInntekter} />
+        )}
         <BrukeroppgittInntektForInnvilgedePerioder
           avkortingGrunnlag={etteroppgjoer.opplysninger.tidligereAvkorting.avkortingGrunnlag}
         />

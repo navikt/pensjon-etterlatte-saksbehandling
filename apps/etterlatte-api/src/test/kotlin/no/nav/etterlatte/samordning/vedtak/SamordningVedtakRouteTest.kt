@@ -49,8 +49,6 @@ class SamordningVedtakRouteTest {
         mockOAuth2Server.startRandomPort()
     }
 
-    // TODO: alle tester her skal oppdateres med fnr i body når tp leverandører er over på post fra get ifbm fnr endring
-    // i tillegg til fjerning av etterlatte-samordning-vedtak
     @Nested
     inner class MaskinportenApi {
         @BeforeEach
@@ -328,7 +326,6 @@ class SamordningVedtakRouteTest {
             samordningVedtakRoute(
                 samordningVedtakService = samordningVedtakService,
                 config = config,
-                appname = appname ?: "etterlatte-samordning-vedtak",
             )
         }
 

@@ -27,13 +27,14 @@ dependencies {
     implementation(project(":libs:etterlatte-inntektsjustering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:etterlatte-regler"))
 
     implementation(libs.cache.caffeine)
     implementation(libs.navfelles.tokenvalidationktor2) {
         exclude("io.ktor", "ktor-server")
     }
 
-    implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
+    implementation(libs.brevbaker.api.model.common)
 
     implementation(libs.database.kotliquery)
 

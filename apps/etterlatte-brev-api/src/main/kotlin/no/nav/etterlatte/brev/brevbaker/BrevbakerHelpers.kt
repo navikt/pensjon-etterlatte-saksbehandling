@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.pensjon.brevbaker.api.model.Bruker
 import no.nav.pensjon.brevbaker.api.model.Felles
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import no.nav.pensjon.brevbaker.api.model.NAVEnhet
+import no.nav.pensjon.brevbaker.api.model.NavEnhet
 import no.nav.pensjon.brevbaker.api.model.SignerendeSaksbehandlere
 import java.time.LocalDate
 
@@ -20,7 +20,7 @@ object BrevbakerHelpers {
         dokumentDato = LocalDate.now(),
         saksnummer = sakId.toString(),
         avsenderEnhet =
-            NAVEnhet(
+            NavEnhet(
                 nettside = "nav.no",
                 navn = avsender.kontor,
                 telefonnummer = avsender.telefonnummer,

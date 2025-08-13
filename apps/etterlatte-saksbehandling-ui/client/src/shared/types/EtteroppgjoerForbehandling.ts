@@ -36,17 +36,41 @@ export enum EtteroppgjoerBehandlingStatus {
   OPPRETTET = 'OPPRETTET',
   BEREGNET = 'BEREGNET',
   FERDIGSTILT = 'FERDIGSTILT',
+  AVBRUTT = 'AVBRUTT',
+}
+
+export function kanRedigereEtteroppgjoerBehandling(status: EtteroppgjoerBehandlingStatus): boolean {
+  return status! in [EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT]
 }
 
 export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlingStatus, string> = {
   OPPRETTET: 'Opprettet',
   BEREGNET: 'Beregnet',
   FERDIGSTILT: 'Ferdigstilt',
+  AVBRUTT: 'Avbrutt',
+}
+
+export interface Inntektsmaaned {
+  maaned: string
+  beloep: number
+}
+
+export interface InntektSummert {
+  filter: string
+  inntekter: Inntektsmaaned[]
+}
+
+export interface SummerteInntekterAOrdningen {
+  afp: InntektSummert
+  loenn: InntektSummert
+  oms: InntektSummert
+  tidspunktBeregnet: string
 }
 
 export interface EtteroppgjoerOpplysninger {
   skatt: PensjonsgivendeInntektFraSkatteetaten
   ainntekt: AInntekt
+  summerteInntekter?: SummerteInntekterAOrdningen
   tidligereAvkorting: Avkorting
 }
 
@@ -116,4 +140,26 @@ interface EtteroppgjoerGrenseDto {
   etterbetaling: number
   rettsgebyr: number
   rettsgebyrGyldigFra: string
+}
+
+export interface AvbrytEtteroppgjoerForbehandlingRequest {
+  aarsakTilAvbrytelse: AarsakTilAvsluttingEtteroppgjoerForbehandling
+  kommentar: string
+}
+
+export enum AarsakTilAvsluttingEtteroppgjoerForbehandling {
+  IKKE_LENGER_AKTUELL = 'IKKE_LENGER_AKTUELL',
+  FEILREGISTRERT = 'FEILREGISTRERT',
+  AVBRUTT_PAA_GRUNN_AV_FEIL = 'AVBRUTT_PAA_GRUNN_AV_FEIL',
+  ANNET = 'ANNET',
+}
+
+export const tekstAarsakTilAvsluttingEtteroppgjoerForbehandling: Record<
+  AarsakTilAvsluttingEtteroppgjoerForbehandling,
+  string
+> = {
+  IKKE_LENGER_AKTUELL: 'Ikke lengre aktuell',
+  FEILREGISTRERT: 'Feilregistrert',
+  AVBRUTT_PAA_GRUNN_AV_FEIL: 'Avbrutt på grunn av feil',
+  ANNET: 'Annet',
 }

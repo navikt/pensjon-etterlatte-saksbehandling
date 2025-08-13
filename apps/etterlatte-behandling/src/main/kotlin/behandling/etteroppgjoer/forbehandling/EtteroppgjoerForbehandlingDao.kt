@@ -4,15 +4,20 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbryteForbehandling
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -22,8 +27,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.YearMonth
@@ -32,6 +40,8 @@ import java.util.UUID
 class EtteroppgjoerForbehandlingDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingDao::class.java)
+
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -47,6 +57,24 @@ class EtteroppgjoerForbehandlingDao(
                 statement.executeQuery().singleOrNull { toForbehandling() }
             }
         }
+
+    fun lagreAvbruttAarsak(
+        behandlingId: UUID,
+        aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling,
+        kommentar: String,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement("UPDATE etteroppgjoer_behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
+
+            stmt.setString(1, aarsakTilAvbrytelse.name)
+            stmt.setString(2, kommentar)
+            stmt.setObject(3, behandlingId)
+            krev(stmt.executeUpdate() == 1) {
+                "Kunne ikke lagre avbrutt aarsak for forbehandling=$behandlingId"
+            }
+        }
+    }
 
     fun hentForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> =
         connectionAutoclosing.hentConnection {
@@ -296,6 +324,60 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
+    fun lagreSummerteInntekter(
+        forbehandlingId: UUID,
+        revurderingId: UUID?,
+        summerteInntekterAOrdningen: SummerteInntekterAOrdningen,
+    ) {
+        krevIkkeNull(summerteInntekterAOrdningen.regelresultat) {
+            "Kan ikke lagre inntekter for for behandling $forbehandlingId siden regelresultat mangler"
+        }
+        connectionAutoclosing.hentConnection { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    INSERT INTO etteroppgjoer_summerte_inntekter (
+                        forbehandling_id, behandling_id, afp, loenn, oms, tidspunkt_beregnet, regel_resultat
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (forbehandling_id, behandling_id) DO UPDATE SET
+                        afp = excluded.afp,
+                        loenn = excluded.loenn,
+                        oms = excluded.oms,
+                        tidspunkt_beregnet = excluded.tidspunkt_beregnet,
+                        regel_resultat = excluded.regel_resultat
+                    """.trimIndent(),
+                )
+            statement.setObject(1, forbehandlingId)
+            statement.setObject(2, revurderingId ?: forbehandlingId)
+            statement.setJsonb(3, summerteInntekterAOrdningen.afp)
+            statement.setJsonb(4, summerteInntekterAOrdningen.loenn)
+            statement.setJsonb(5, summerteInntekterAOrdningen.oms)
+            statement.setTidspunkt(6, summerteInntekterAOrdningen.tidspunktBeregnet)
+            statement.setJsonb(7, summerteInntekterAOrdningen.regelresultat)
+            statement.executeUpdate()
+        }
+        logger.info("Lagret inntekter for forbehandling $forbehandlingId knyttet til behandling $revurderingId")
+    }
+
+    fun hentSummerteInntekter(
+        forbehandlingId: UUID,
+        revurderingId: UUID?,
+    ): SummerteInntekterAOrdningen =
+        connectionAutoclosing.hentConnection { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT afp, loenn, oms, tidspunkt_beregnet, forbehandling_id, behandling_id FROM etteroppgjoer_summerte_inntekter
+                    WHERE forbehandling_id = ? and behandling_id = ?
+                    """.trimIndent(),
+                )
+            statement.setObject(1, forbehandlingId)
+            statement.setObject(2, revurderingId ?: forbehandlingId)
+            statement.executeQuery().single {
+                toSummerteInntekter()
+            }
+        }
+
     fun lagreAInntekt(
         aInntekt: AInntekt,
         behandlingId: UUID,
@@ -384,3 +466,12 @@ class EtteroppgjoerForbehandlingDao(
             inntektsaar = getInt("inntektsaar"),
         )
 }
+
+fun ResultSet.toSummerteInntekter(): SummerteInntekterAOrdningen =
+    SummerteInntekterAOrdningen(
+        afp = getString("afp").let { objectMapper.readValue(it) },
+        loenn = getString("loenn").let { objectMapper.readValue(it) },
+        oms = getString("oms").let { objectMapper.readValue(it) },
+        tidspunktBeregnet = getTidspunkt("tidspunkt_beregnet"),
+        regelresultat = null,
+    )

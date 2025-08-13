@@ -191,11 +191,10 @@ object InnsendtSoeknadTestData {
                         ),
                     inntektOgPensjon =
                         InntektOgPensjon(
-                            loennsinntekt = null,
-                            naeringsinntekt = null,
-                            pensjonEllerUfoere = null,
-                            inntektViaYtelserFraNAV = null,
-                            ingenInntekt = null,
+                            skalGaaAvMedAlderspensjon = null,
+                            inntektFremTilDoedsfallet = null,
+                            forventetInntektIAar = null,
+                            forventetInntektTilNesteAar = null,
                             ytelserNAV =
                                 YtelserNav(
                                     soektOmYtelse =

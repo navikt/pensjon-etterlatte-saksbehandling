@@ -46,17 +46,13 @@ class BeregningKlient(
                     success = { resource -> deserialize(resource.response.toString()) },
                     failure = { errorResponse -> throw errorResponse },
                 )
-        } catch (e: ClientRequestException) {
-            when (e.response.status) {
-                HttpStatusCode.NotFound -> {
-                    logger.info("Fant ikke beregning for behandling med behandlingId=$behandlingId", e)
-                    return null
-                }
-                else -> {
-                    logger.error("Henting av beregning for behandling med behandlingId=$behandlingId feilet", e)
-                    throw e
-                }
+        } catch (e: Exception) {
+            if (e is ResponseException && e.response.status == HttpStatusCode.NotFound) {
+                logger.info("Fant ikke beregning for behandling med behandlingId=$behandlingId", e)
+                return null
             }
+            logger.error("Henting av beregning for behandling med behandlingId=$behandlingId feilet", e)
+            throw e
         }
     }
 

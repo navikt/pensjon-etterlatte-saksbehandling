@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
-import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
+import { kanRedigereEtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
@@ -21,8 +21,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
   const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
 
   const erRedigerbar =
-    (behandling.status == EtteroppgjoerBehandlingStatus.OPPRETTET ||
-      behandling.status == EtteroppgjoerBehandlingStatus.BEREGNET) &&
+    kanRedigereEtteroppgjoerBehandling(behandling.status) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<

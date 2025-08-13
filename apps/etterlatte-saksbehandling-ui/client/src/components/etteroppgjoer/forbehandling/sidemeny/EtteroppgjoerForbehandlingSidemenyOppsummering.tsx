@@ -9,24 +9,22 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
   const etteroppgjoer = useEtteroppgjoer()
 
   const forbehandlingErFerdigstilt = etteroppgjoer.behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
+  const forbehandlingErAvbrutt = etteroppgjoer.behandling.status === EtteroppgjoerBehandlingStatus.AVBRUTT
 
   return (
-    <SidebarPanel
-      $border
-      style={
-        forbehandlingErFerdigstilt
-          ? {
-              borderLeft: '5px solid var(--a-green-400)',
-            }
-          : {}
-      }
-    >
+    <SidebarPanel $border>
       <VStack gap="4">
         <VStack gap="2">
           <Heading size="small">Etteroppgjør forbehandling</Heading>
           {forbehandlingErFerdigstilt && (
             <Heading size="xsmall" style={{ color: 'var(--a-green-400)' }}>
               Ferdigstilt
+            </Heading>
+          )}
+
+          {forbehandlingErAvbrutt && (
+            <Heading size="xsmall" style={{ color: 'var(--a-red-400)' }}>
+              Avbrutt
             </Heading>
           )}
         </VStack>

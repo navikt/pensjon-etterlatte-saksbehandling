@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -23,7 +24,9 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -61,7 +64,7 @@ class EtteroppgjoerForbehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        logger.info("Ferdigstiller forbehandling for behandling=$behandlingId")
+        logger.info("Ferdigstiller forbehandling med id=$behandlingId")
         val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
         val ferdigstiltForbehandling = forbehandling.tilFerdigstilt()
         dao.lagreForbehandling(ferdigstiltForbehandling)
@@ -81,6 +84,46 @@ class EtteroppgjoerForbehandlingService(
             etteroppgjoerResultat = null,
             hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytningType = utlandstilknytning?.type,
+        )
+    }
+
+    fun avbrytForbehandling(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        aarsak: AarsakTilAvbryteForbehandling,
+        kommentar: String?,
+    ) {
+        logger.info("Avbryter forbehandling med id=$forbehandlingId")
+        val forbehandling = hentForbehandling(forbehandlingId)
+
+        if (!forbehandling.kanAvbrytes()) {
+            throw IkkeTillattException(
+                "FEIL_STATUS_FORBEHANDLING",
+                "Forbehandling med id=$forbehandlingId kan ikke avbrytes. Status er ${forbehandling.status}",
+            )
+        }
+
+        if (aarsak == AarsakTilAvbryteForbehandling.ANNET && kommentar.isNullOrBlank()) {
+            throw UgyldigForespoerselException(
+                "VERDI_ER_NULL",
+                "Kan ikke avbryte behandling uten å begrunne hvorfor. Kommentar er null eller blankt",
+            )
+        }
+
+        dao.lagreForbehandling(forbehandling.tilAvbrutt()).let {
+            dao.lagreAvbruttAarsak(forbehandlingId, aarsak, kommentar.orEmpty())
+        }
+
+        val merknad = "Avbrutt manuelt. Årsak: ${kommentar ?: aarsak.name}"
+        oppgaveService.avbrytAapneOppgaverMedReferanse(forbehandlingId.toString(), merknad)
+
+        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
+
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = forbehandling,
+            hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
+            saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
             utlandstilknytningType = utlandstilknytning?.type,
         )
     }

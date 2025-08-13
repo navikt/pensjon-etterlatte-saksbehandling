@@ -162,7 +162,7 @@ spec:
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://dev-fss.team-inntekt.ikomp-q2/.default
     - name: SIGRUN_URL
-      value: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-q2
+      value: https://sigrun-ske.dev.adeo.no
     - name: SIGRUN_OUTBOUND_SCOPE
       value: api://dev-fss.team-inntekt.sigrun-q2/.default
 

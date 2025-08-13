@@ -41,15 +41,15 @@ internal class NySoeknadRiver(
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {
+            precondition { it.forbid(SoeknadInnsendt.dokarkivReturKey) }
+            precondition { it.forbid(GyldigSoeknadVurdert.sakIdKey) }
+            precondition { it.forbid(FordelerFordelt.soeknadFordeltKey) }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoTypeKey) }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
             validate { it.requireKey(SoeknadInnsendt.templateKey) }
             validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
             validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }
             validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
-            validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
-            validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
-            validate { it.rejectKey(FordelerFordelt.soeknadFordeltKey) }
         }
     }
 

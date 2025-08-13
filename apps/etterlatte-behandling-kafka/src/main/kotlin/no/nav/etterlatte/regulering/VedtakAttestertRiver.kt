@@ -35,8 +35,8 @@ internal class VedtakAttestertRiver(
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
-            validate {
-                it.demandAny(
+            precondition {
+                it.requireAny(
                     EVENT_NAME_KEY,
                     listOf(
                         VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType(),

@@ -31,7 +31,7 @@ internal class OmregningsHendelserBehandlingRiver(
 
     init {
         initialiserRiver(rapidsConnection, OmregningHendelseType.KLAR_FOR_OMREGNING) {
-            validate { it.rejectKey(BEHANDLING_ID_KEY) }
+            precondition { it.forbid(BEHANDLING_ID_KEY) }
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
         }

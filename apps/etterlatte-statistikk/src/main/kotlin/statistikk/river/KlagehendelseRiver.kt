@@ -27,7 +27,7 @@ class KlagehendelseRiver(
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.demandAny(EVENT_NAME_KEY, klagehendelser) }
+            precondition { it.requireAny(EVENT_NAME_KEY, klagehendelser) }
             validate { it.requireKey(KLAGE_STATISTIKK_RIVER_KEY) }
             validate { it.requireKey(TEKNISK_TID_KEY) }
         }

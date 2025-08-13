@@ -46,7 +46,7 @@ internal class OmregningHendelserBeregningRiver(
 
     init {
         initialiserRiver(rapidsConnection, OmregningHendelseType.TRYGDETID_KOPIERT) {
-            validate { it.rejectKey(BEREGNING_KEY) }
+            precondition { it.forbid(BEREGNING_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.FORRIGE_BEHANDLING_ID) }

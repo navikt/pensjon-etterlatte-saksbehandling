@@ -32,7 +32,7 @@ class BehandlingPaaVentHendelseRiver(
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.demandAny(EVENT_NAME_KEY, paaVentHendelser) }
+            precondition { it.requireAny(EVENT_NAME_KEY, paaVentHendelser) }
             validate { it.requireKey(TEKNISK_TID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_PAA_VENT_RIVER_KEY) }
             validate { it.requireKey(PAA_VENT_AARSAK_KEY) }

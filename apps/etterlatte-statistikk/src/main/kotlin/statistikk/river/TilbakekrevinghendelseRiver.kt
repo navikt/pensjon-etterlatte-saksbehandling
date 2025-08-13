@@ -27,7 +27,7 @@ class TilbakekrevinghendelseRiver(
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.demandAny(EVENT_NAME_KEY, tilbakekrevinghendelser) }
+            precondition { it.requireAny(EVENT_NAME_KEY, tilbakekrevinghendelser) }
             validate { it.requireKey(TILBAKEKREVING_STATISTIKK_RIVER_KEY) }
             validate { it.requireKey(TEKNISK_TID_KEY) }
         }

@@ -33,7 +33,7 @@ class VedtakhendelserRiver(
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.demandAny(EVENT_NAME_KEY, vedtakshendelser) }
+            precondition { it.requireAny(EVENT_NAME_KEY, vedtakshendelser) }
             validate { it.requireKey("vedtak") }
             validate { it.interestedIn(TEKNISK_TID_KEY) }
             validate { it.rejectKey(FIKS_BREV_MIGRERING) }

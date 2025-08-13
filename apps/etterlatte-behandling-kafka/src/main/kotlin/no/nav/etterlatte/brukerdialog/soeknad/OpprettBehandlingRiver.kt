@@ -24,9 +24,9 @@ internal class OpprettBehandlingRiver(
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {
+            precondition { it.forbid(GyldigSoeknadVurdert.behandlingIdKey) }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
             validate { it.interestedIn(GyldigSoeknadVurdert.lagretSoeknadIdKey) }
-            validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }
     }
 

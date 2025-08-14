@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingFeilTilstandUgyldig
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatus
@@ -66,6 +67,8 @@ class EtteroppgjoerForbehandlingService(
     ) {
         logger.info("Ferdigstiller forbehandling med id=$behandlingId")
         val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+
         val ferdigstiltForbehandling = forbehandling.tilFerdigstilt()
         dao.lagreForbehandling(ferdigstiltForbehandling)
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
@@ -78,6 +81,7 @@ class EtteroppgjoerForbehandlingService(
             OppgaveType.ETTEROPPGJOER,
             brukerTokenInfo,
         )
+
         val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = ferdigstiltForbehandling,
@@ -96,6 +100,7 @@ class EtteroppgjoerForbehandlingService(
     ) {
         logger.info("Avbryter forbehandling med id=$forbehandlingId")
         val forbehandling = hentForbehandling(forbehandlingId)
+        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
         if (!forbehandling.kanAvbrytes()) {
             throw IkkeTillattException(
@@ -113,6 +118,11 @@ class EtteroppgjoerForbehandlingService(
 
         dao.lagreForbehandling(forbehandling.tilAvbrutt()).let {
             dao.lagreAvbruttAarsak(forbehandlingId, aarsak, kommentar.orEmpty())
+            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                forbehandling.sak.id,
+                forbehandling.aar,
+                EtteroppgjoerStatus.AVBRUTT_FORBEHANDLING,
+            )
         }
 
         val merknad = "Avbrutt manuelt. Årsak: ${kommentar ?: aarsak.name}"
@@ -335,6 +345,7 @@ class EtteroppgjoerForbehandlingService(
             listOf(
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
                 EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                EtteroppgjoerStatus.AVBRUTT_FORBEHANDLING,
             )
         ) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
@@ -414,7 +425,9 @@ class EtteroppgjoerForbehandlingService(
     private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatte(forbehandling.sak.id)
-                ?: throw InternfeilException("Fant ikke siste iverksatte")
+                ?: throw InternfeilException(
+                    "Fant ikke siste iverksatte behandling for sak=${forbehandling.sak.id} ved kopiering av forbehandling",
+                )
 
         val forbehandlingCopy =
             forbehandling.copy(
@@ -431,6 +444,31 @@ class EtteroppgjoerForbehandlingService(
         dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
 
         return forbehandlingCopy
+    }
+
+    fun sjekkAtOppgavenErTildeltSaksbehandler(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val oppgave =
+            oppgaveService
+                .hentOppgaverForReferanse(forbehandlingId.toString())
+                .firstOrNull { it.erIkkeAvsluttet() }
+                ?: throw InternfeilException("Fant ingen oppgaver under behandling for forbehandlingId=$forbehandlingId")
+
+        if (oppgave.saksbehandler?.ident != brukerTokenInfo.ident()) {
+            throw IkkeTillattException(
+                "IKKE_TILGANG_TIL_BEHANDLING",
+                "Saksbehandler ${brukerTokenInfo.ident()} er ikke tildelt oppgaveId=${oppgave.id}",
+            )
+        }
+
+        if (oppgave.erAvsluttet()) {
+            throw UgyldigForespoerselException(
+                "OPPGAVE_AVSLUTTET",
+                "Oppgaven tilknyttet forbehandlingId=$forbehandlingId er avsluttet og kan ikke behandles",
+            )
+        }
     }
 }
 

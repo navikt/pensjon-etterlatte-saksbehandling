@@ -13,6 +13,7 @@ data class Etteroppgjoer(
 }
 
 enum class EtteroppgjoerStatus {
+    AVBRUTT_FORBEHANDLING,
     VENTER_PAA_SKATTEOPPGJOER,
     MOTTATT_SKATTEOPPGJOER,
     UNDER_FORBEHANDLING,

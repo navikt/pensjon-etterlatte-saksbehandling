@@ -19,7 +19,7 @@ import java.time.YearMonth
 enum class UttrekkToggles(
     private val key: String,
 ) : FeatureToggle {
-    UTTREKK_LOEPENDE_YTELSE_ETTER_20("uttrekk-loepende-ytelse-etter-67"),
+    UTTREKK_LOEPENDE_YTELSE_ETTER_67("uttrekk-loepende-ytelse-etter-67"),
     ;
 
     override fun key(): String = key
@@ -46,7 +46,7 @@ class UttrekkLoependeYtelseEtter67JobService(
     }
 
     private fun run() {
-        if (!featureToggleService.isEnabled(UttrekkToggles.UTTREKK_LOEPENDE_YTELSE_ETTER_20, false)) {
+        if (!featureToggleService.isEnabled(UttrekkToggles.UTTREKK_LOEPENDE_YTELSE_ETTER_67, false)) {
             logger.info("Jobb for UttrekkLoependeYtelseEtter67 er deakativert")
             return
         }

@@ -28,7 +28,7 @@ enum class UttrekkToggles(
 data class LoependeSak(
     val sakId: SakId,
     val foedselMnd: YearMonth,
-    val fyller20Mnd: YearMonth,
+    val fyller67Mnd: YearMonth,
     val opphoerDato: LocalDate,
 )
 
@@ -102,7 +102,7 @@ class UttrekkLoependeYtelseEtter67JobService(
             sakerSomSkulleVaertOpphoert.forEach { loependeSak ->
                 logger.info(
                     "${loependeSak.sakId} hadde løpende OMS pr ${loependeSak.opphoerDato}, men søker har fylt " +
-                        "67 år i måned ${loependeSak.fyller20Mnd} og ytelse burde vært opphørt.",
+                        "67 år i måned ${loependeSak.fyller67Mnd} og ytelse burde vært opphørt.",
                 )
             }
         } else {

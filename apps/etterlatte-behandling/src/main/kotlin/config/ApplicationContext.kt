@@ -646,6 +646,14 @@ internal class ApplicationContext(
     private val etteroppgjoerHendelseService =
         EtteroppgjoerHendelseService(rapid, hendelseDao)
 
+    val etteroppgjoerForbehandlingBrevService =
+        EtteroppgjoerForbehandlingBrevService(
+            brevKlient = brevKlient,
+            grunnlagService = grunnlagService,
+            etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
+            behandlingService = behandlingService,
+        )
+
     val etteroppgjoerForbehandlingService =
         EtteroppgjoerForbehandlingService(
             dao = etteroppgjoerForbehandlingDao,
@@ -658,6 +666,7 @@ internal class ApplicationContext(
             beregningKlient = beregningsKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
+            forbehandlingBrevService = etteroppgjoerForbehandlingBrevService,
         )
 
     val behandlingsStatusService =
@@ -704,14 +713,6 @@ internal class ApplicationContext(
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
             beregningKlient = beregningsKlient,
             brevApiKlient = brevApiKlient,
-        )
-
-    val etteroppgjoerForbehandlingBrevService =
-        EtteroppgjoerForbehandlingBrevService(
-            brevKlient = brevKlient,
-            grunnlagService = grunnlagService,
-            etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
-            behandlingService = behandlingService,
         )
 
     val brevService =

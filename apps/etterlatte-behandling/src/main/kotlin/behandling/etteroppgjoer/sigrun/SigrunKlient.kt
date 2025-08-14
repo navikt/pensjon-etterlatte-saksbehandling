@@ -113,29 +113,29 @@ class SigrunKlientImpl(
 }
 
 data class PensjonsgivendeInntektAarResponse(
-    val inntektsaar: String,
+    val inntektsaar: Int,
     val norskPersonidentifikator: String,
     val pensjonsgivendeInntekt: List<PensjonsgivendeInntektResponse>,
 )
 
 data class PensjonsgivendeInntektResponse(
     val skatteordning: String,
-    val pensjonsgivendeInntektAvLoennsinntekt: String,
-    val pensjonsgivendeInntektAvNaeringsinntekt: String,
-    val pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage: String,
+    val pensjonsgivendeInntektAvLoennsinntekt: Int?,
+    val pensjonsgivendeInntektAvNaeringsinntekt: Int?,
+    val pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage: Int?,
 )
 
 fun PensjonsgivendeInntektAarResponse.fromResponse() =
     PensjonsgivendeInntektFraSkatt(
-        inntektsaar = inntektsaar.toInt(),
+        inntektsaar = inntektsaar,
         inntekter =
             pensjonsgivendeInntekt.map {
                 PensjonsgivendeInntekt(
                     skatteordning = it.skatteordning,
-                    loensinntekt = it.pensjonsgivendeInntektAvLoennsinntekt.toInt(),
-                    naeringsinntekt = it.pensjonsgivendeInntektAvNaeringsinntekt.toInt(),
-                    fiskeFangstFamiliebarnehage = it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage.toInt(),
-                    inntektsaar = inntektsaar.toInt(),
+                    loensinntekt = it.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
+                    naeringsinntekt = it.pensjonsgivendeInntektAvNaeringsinntekt ?: 0,
+                    fiskeFangstFamiliebarnehage = it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0,
+                    inntektsaar = inntektsaar,
                 )
             },
     )

@@ -9,6 +9,9 @@ import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
 
+/**
+ * Hvis du supplier en restModule må du bruke standard endepunkter /isready, /isalive
+ */
 fun initRogR(
     applikasjonsnavn: String,
     restModule: (Application.() -> Unit)? = null,
@@ -25,9 +28,10 @@ fun initRogR(
             builder = {
                 if (restModule != null) {
                     withKtorModule(restModule)
+                } else {
+                    withIsAliveEndpoint("/health/isalive")
+                    withIsReadyEndpoint("/health/isready")
                 }
-                withIsAliveEndpoint("/health/isalive")
-                withIsReadyEndpoint("/health/isready")
             },
             consumerProducerFactory = ConsumerProducerFactory(config),
         ).apply { settOppRivers(this, rapidEnv) }

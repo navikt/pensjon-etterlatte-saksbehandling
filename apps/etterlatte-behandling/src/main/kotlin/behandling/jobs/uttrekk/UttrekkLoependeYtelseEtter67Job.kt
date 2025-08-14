@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs.sjekkloependeover20
+package behandling.jobs.uttrekk
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Self
@@ -13,8 +13,8 @@ import java.time.Duration
 import java.util.Timer
 import javax.sql.DataSource
 
-class UttrekkLoependeYtelseEtter20Job(
-    private val service: UttrekkLoependeYtelseEtter20JobService,
+class UttrekkLoependeYtelseEtter67Job(
+    private val service: UttrekkLoependeYtelseEtter67JobService,
     val sakTilgangDao: SakTilgangDao,
     val dataSource: DataSource,
     private val erLeader: () -> Boolean,

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.config
 
+import behandling.jobs.uttrekk.UttrekkLoependeYtelseEtter67Job
+import behandling.jobs.uttrekk.UttrekkLoependeYtelseEtter67JobService
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
@@ -706,6 +708,14 @@ internal class ApplicationContext(
             brevApiKlient = brevApiKlient,
         )
 
+    private val uttrekkLoependeYtelseEtter67JobService =
+        UttrekkLoependeYtelseEtter67JobService(
+            vedtakKlient,
+            sakService,
+            nyAldersovergangService,
+            featureToggleService,
+        )
+
     val etteroppgjoerForbehandlingBrevService =
         EtteroppgjoerForbehandlingBrevService(
             brevKlient = brevKlient,
@@ -828,6 +838,17 @@ internal class ApplicationContext(
             Duration.of(6, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val uttrekkLoependeYtelseEtter67Job: UttrekkLoependeYtelseEtter67Job by lazy {
+        UttrekkLoependeYtelseEtter67Job(
+            service = uttrekkLoependeYtelseEtter67JobService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(8, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

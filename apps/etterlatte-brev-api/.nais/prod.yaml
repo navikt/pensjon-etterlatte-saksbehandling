@@ -98,7 +98,7 @@ spec:
     - name: DOKDIST_URL
       value: https://dokdistfordeling.prod-fss-pub.nais.io/rest/v1
     - name: DOKDIST_CLIENT_ID
-      value: prod-fss.teamdokumenthandtering.saf
+      value: prod-fss.teamdokumenthandtering.dokdistfordeling
     - name: DOKDISTKANAL_URL
       value: https://dokdistkanal.prod-fss-pub.nais.io/rest
     - name: DOKDISTKANAL_CLIENT_ID

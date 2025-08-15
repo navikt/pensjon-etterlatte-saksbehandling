@@ -69,6 +69,16 @@ data class EtteroppgjoerForbehandling(
         }
     }
 
+    fun tilAvbrutt(): EtteroppgjoerForbehandling {
+        if (kanAvbrytes()) {
+            return copy(status = EtteroppgjoerForbehandlingStatus.AVBRUTT)
+        } else {
+            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.AVBRUTT}")
+        }
+    }
+
+    fun kanAvbrytes() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
+
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 
     fun erUnderBehandling() =

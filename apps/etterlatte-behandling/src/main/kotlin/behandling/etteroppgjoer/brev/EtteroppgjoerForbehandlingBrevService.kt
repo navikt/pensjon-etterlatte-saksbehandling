@@ -56,8 +56,8 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
+        etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
-
         return brevKlient.tilbakestillStrukturertBrev(
             brevID = brevId,
             behandlingId = forbehandlingId,
@@ -67,11 +67,12 @@ class EtteroppgjoerForbehandlingBrevService(
     }
 
     suspend fun ferdigstillJournalfoerOgDistribuerBrev(
-        behandlingId: UUID,
+        forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
-            behandlingId,
+            forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
         )

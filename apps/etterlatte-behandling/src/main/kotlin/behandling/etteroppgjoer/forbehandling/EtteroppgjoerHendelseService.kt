@@ -34,7 +34,7 @@ class EtteroppgjoerHendelseService(
             forbehandlingId = etteroppgjoerForbehandling.id,
             sakId = etteroppgjoerForbehandling.sak.id,
             hendelseType = hendelseType,
-            inntruffet = Tidspunkt.Companion.now(),
+            inntruffet = Tidspunkt.now(),
             saksbehandler = saksbehandler,
             kommentar = null,
             begrunnelse = null,
@@ -84,7 +84,7 @@ class EtteroppgjoerHendelseService(
             .publiser(
                 noekkel = etteroppgjoerForbehandling.id.toString(),
                 verdi =
-                    JsonMessage.Companion
+                    JsonMessage
                         .newMessage(
                             eventName = hendelseType.lagEventnameForType(),
                             map = meldingMap,

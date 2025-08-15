@@ -20,11 +20,14 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
+import no.nav.etterlatte.libs.common.behandling.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -36,6 +39,7 @@ enum class EtteroppgjoerToggles(
 ) : FeatureToggle {
     ETTEROPPGJOER("etteroppgjoer"),
     ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
+    ETTEROPPGJOER_STUB_PGI("etteroppgjoer_stub_pgi"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_PERIODISK_JOBB("ettteroppgjoer_periodisk_jobb"),
     ;
@@ -117,6 +121,22 @@ fun Route.etteroppgjoerRoutes(
                     }
                     inTransaction {
                         forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
+                    }
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("avbryt") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    val body = call.receive<AvbrytForbehandlingRequest>()
+                    inTransaction {
+                        forbehandlingService.avbrytForbehandling(
+                            etteroppgjoerId,
+                            brukerTokenInfo,
+                            body.aarsakTilAvbrytelse,
+                            body.kommentar,
+                        )
                     }
                     call.respond(HttpStatusCode.OK)
                 }

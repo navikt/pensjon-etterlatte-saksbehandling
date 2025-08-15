@@ -6,14 +6,13 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import org.slf4j.LoggerFactory
 import java.net.SocketTimeoutException
 import java.time.Duration
@@ -55,14 +54,14 @@ class BrevbakerKlient(
             throw BrevbakerException("Feil ved kall til brevbaker (se sikkerlogg)", ex)
         }
 
-    suspend fun genererJSON(brevRequest: BrevbakerRequest): LetterMarkup =
+    suspend fun genererJSON(brevRequest: BrevbakerRequest): Slate =
         try {
             measureTimedValue {
                 client
-                    .post("$apiUrl/etterlatte/json") {
+                    .post("$apiUrl/etterlatte/json/slate") {
                         contentType(ContentType.Application.Json)
                         setBody(brevRequest.toJsonNode())
-                    }.body<LetterMarkup>()
+                    }.body<Slate>()
             }.let { (result, duration) ->
                 logger.info("Fullført brevbaker JSON OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result

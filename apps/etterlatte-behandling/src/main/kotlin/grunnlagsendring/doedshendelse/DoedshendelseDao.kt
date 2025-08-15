@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.behandling.objectMapper
@@ -14,7 +15,6 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.toList
-import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
 import java.util.UUID
 

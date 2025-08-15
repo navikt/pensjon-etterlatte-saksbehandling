@@ -1,13 +1,13 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration

@@ -1,16 +1,14 @@
 package no.nav.etterlatte.tidshendelser
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.kotest.matchers.shouldBe
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.util.UUID
@@ -25,7 +23,6 @@ internal class TidshendelsePacketTest {
                     TIDSHENDELSE_TYPE_KEY to JobbType.AO_BP21,
                 ).toJson(),
                 MessageProblems(""),
-                PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             )
         interestedIn(jsonMessage)
 
@@ -62,7 +59,6 @@ internal class TidshendelsePacketTest {
                     "ao_id" to "min_id",
                 ).toJson(),
                 MessageProblems(""),
-                PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             )
         interestedIn(jsonMessage)
 

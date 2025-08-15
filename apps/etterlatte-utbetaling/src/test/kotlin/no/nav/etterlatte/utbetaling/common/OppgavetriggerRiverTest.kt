@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.common
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -10,7 +11,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingshendelse
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 
 internal class OppgavetriggerRiverTest {

@@ -18,8 +18,8 @@ import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenRespons
 class DefaultOAuth2HttpClient : OAuth2HttpClient {
     private val defaultHttpClient =
         HttpClient(OkHttp) {
+            this.expectSuccess = true
             install(ContentNegotiation) {
-                expectSuccess = true
                 jackson {
                     configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                     setSerializationInclusion(JsonInclude.Include.NON_NULL)

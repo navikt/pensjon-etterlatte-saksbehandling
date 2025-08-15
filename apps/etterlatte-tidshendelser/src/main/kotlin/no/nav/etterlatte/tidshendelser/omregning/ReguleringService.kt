@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tidshendelser.omregning
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents
@@ -7,7 +8,6 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.tilSeparertString
 import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID

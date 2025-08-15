@@ -1,5 +1,7 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -17,8 +19,6 @@ import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.omregning.UtbetalingVerifikasjon
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate

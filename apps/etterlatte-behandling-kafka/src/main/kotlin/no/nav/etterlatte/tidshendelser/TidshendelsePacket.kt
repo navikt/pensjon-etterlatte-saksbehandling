@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tidshendelser
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
@@ -8,7 +9,6 @@ import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
-import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.YearMonth
 
 class TidshendelsePacket(

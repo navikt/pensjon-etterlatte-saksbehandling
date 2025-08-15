@@ -1,5 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering.rivers
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -20,8 +22,6 @@ import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month

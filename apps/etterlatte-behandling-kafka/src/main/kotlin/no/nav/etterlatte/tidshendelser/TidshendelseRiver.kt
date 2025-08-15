@@ -1,5 +1,8 @@
 package no.nav.etterlatte.tidshendelser
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -13,9 +16,6 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 class TidshendelseRiver(

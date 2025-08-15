@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregningkafka
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.mockk.every
@@ -8,7 +9,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.EventNames
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

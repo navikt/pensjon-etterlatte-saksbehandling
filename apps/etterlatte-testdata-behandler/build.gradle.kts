@@ -14,4 +14,5 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(libs.cache.caffeine)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

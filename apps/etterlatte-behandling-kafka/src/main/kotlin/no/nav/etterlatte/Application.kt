@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.brev.OppdaterDoedshendelseBrevDistribuert
 import no.nav.etterlatte.brukerdialog.inntektsjustering.InntektsjusteringRiver
 import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringRiver
@@ -22,7 +23,6 @@ import no.nav.etterlatte.regulering.YtelseIkkeLoependeRiver
 import no.nav.etterlatte.tidshendelser.TidshendelseRiver
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRiver
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingTidshendelseRiver
-import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
 fun main() {

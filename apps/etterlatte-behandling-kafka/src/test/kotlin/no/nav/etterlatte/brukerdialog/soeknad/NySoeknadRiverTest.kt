@@ -1,5 +1,6 @@
 package no.nav.etterlatte.fordeler
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.ktor.client.plugins.ResponseException
 import io.mockk.Called
 import io.mockk.clearAllMocks
@@ -38,7 +39,6 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

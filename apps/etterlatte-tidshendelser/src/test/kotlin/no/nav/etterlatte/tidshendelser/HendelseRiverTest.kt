@@ -1,5 +1,7 @@
 package no.nav.etterlatte.tidshendelser
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.behandling.randomSakId
@@ -15,8 +17,6 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelseRiver
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseStatus
 import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
 import no.nav.etterlatte.tidshendelser.hendelser.Steg
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith

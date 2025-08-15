@@ -14,4 +14,5 @@ dependencies {
 
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.junit.platform.launcher)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

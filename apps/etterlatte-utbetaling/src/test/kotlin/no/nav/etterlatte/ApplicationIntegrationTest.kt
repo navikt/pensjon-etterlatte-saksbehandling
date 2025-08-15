@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -96,7 +97,7 @@ class ApplicationIntegrationTest {
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
-                match {
+                match<String> {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.vedtakId == 1L &&
@@ -114,7 +115,7 @@ class ApplicationIntegrationTest {
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
-                match {
+                match<String> {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
@@ -158,7 +159,7 @@ class ApplicationIntegrationTest {
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
-                match {
+                match<String> {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
@@ -198,7 +199,7 @@ class ApplicationIntegrationTest {
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
-                match {
+                match<String> {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&

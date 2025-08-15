@@ -4,6 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpTimeoutConfig
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.deserialize
@@ -188,7 +189,7 @@ class BrevKlientImpl(
         postBody: Any = Unit,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
-        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
+        timeoutConfig: (HttpTimeoutConfig.() -> Unit)? = null,
     ): T =
         downstreamResourceClient
             .post(

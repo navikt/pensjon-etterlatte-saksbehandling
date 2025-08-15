@@ -2,6 +2,9 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -17,9 +20,6 @@ import no.nav.etterlatte.rapidsandrivers.GRUNNLAG_OPPDATERT
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -31,13 +31,13 @@ class GrunnlagHendelserRiver(
 
     init {
         initialiserRiver(rapidsConnection, EventNames.NY_OPPLYSNING) {
+            precondition { it.forbidValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
+            precondition { it.forbidValue(EVENT_NAME_KEY, EventNames.FEILA.lagEventnameForType()) }
+            precondition { it.forbidValue(VILKAARSVURDERT_KEY, true) }
             validate { it.interestedIn(FNR_KEY) }
             validate { it.requireKey(OPPLYSNING_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
-            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA.lagEventnameForType()) }
-            validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
         }
     }
 

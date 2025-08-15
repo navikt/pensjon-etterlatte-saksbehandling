@@ -10,10 +10,10 @@ import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 
 fun main() {
-    Server(ApplicationContext()).run()
+    Server(ApplicationContext()).runServer()
 }
 
 private class Server(
@@ -46,9 +46,9 @@ private class Server(
             strukturertBrevRoute(context.tilbakekrevingBrevService, context.tilgangssjekker)
         }
 
-    fun run() =
+    fun runServer() =
         with(context) {
             datasource.migrate()
-            engine.run()
+            engine.runEngine()
         }
 }

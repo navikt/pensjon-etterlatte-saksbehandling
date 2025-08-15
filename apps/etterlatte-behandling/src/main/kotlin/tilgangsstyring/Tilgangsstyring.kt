@@ -13,6 +13,7 @@ import io.ktor.server.request.path
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
@@ -186,7 +187,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
     }
 
 // Disse extension funksjonene er ikke gjort i hooken ovenfor pga casting overhead
-suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInternal(
+suspend inline fun RoutingContext.withFoedselsnummerInternal(
     tilgangService: TilgangServiceSjekker,
     onSuccess: (fnr: Folkeregisteridentifikator) -> Unit,
 ) {
@@ -210,11 +211,11 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     }
 }
 
-fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
+fun RoutingContext.sjekkSkrivetilgang(
     sakId: SakId? = null,
     enhetNr: Enhetsnummer? = null,
 ): Boolean {
-    application.log.debug("Sjekker skrivetilgang")
+    call.application.log.debug("Sjekker skrivetilgang")
     return when (val user = Kontekst.get().AppUser) {
         is SaksbehandlerMedEnheterOgRoller -> {
             val enhetNrSomSkalTestes =
@@ -234,14 +235,14 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     }
 }
 
-private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsnummer? {
+private fun RoutingContext.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsnummer? {
     val sakTilgangDao = Kontekst.get().sakTilgangDao
     if (sakId != null) {
         return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
     }
     val funnetCallIdParametersType = CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
     return if (funnetCallIdParametersType == null) {
-        application.log.warn("Fant ingen pathparam i url: ${call.request.path()} params: ${call.parameters}")
+        call.application.log.warn("Fant ingen pathparam i url: ${call.request.path()} params: ${call.parameters}")
         null
     } else {
         val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
@@ -262,20 +263,20 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Sa
     }
 }
 
-inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
+inline fun RoutingContext.kunSkrivetilgang(
     sakId: SakId? = null,
     enhetNr: Enhetsnummer? = null,
     onSuccess: () -> Unit,
 ) {
-    application.log.debug("Sjekker skrivetilgang")
+    call.application.log.debug("Sjekker skrivetilgang")
     when (sjekkSkrivetilgang(sakId, enhetNr)) {
         true -> {
-            application.log.debug("Har skrivetilgang, fortsetter")
+            call.application.log.debug("Har skrivetilgang, fortsetter")
             onSuccess()
         }
 
         false -> {
-            application.log.debug("Mangler skrivetilgang, avviser forespørselen")
+            call.application.log.debug("Mangler skrivetilgang, avviser forespørselen")
 
             val enhetString = if (enhetNr == null) "enheten" else "enhet $enhetNr"
 
@@ -288,22 +289,22 @@ inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
+suspend inline fun RoutingContext.kunSaksbehandlerMedSkrivetilgang(
     sakId: SakId? = null,
     enhetNr: Enhetsnummer? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {
-    application.log.debug("Sjekker skrivetilgang")
+    call.application.log.debug("Sjekker skrivetilgang")
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
             when (sjekkSkrivetilgang(sakId, enhetNr)) {
                 true -> {
-                    application.log.debug("Har skrivetilgang, fortsetter")
+                    call.application.log.debug("Har skrivetilgang, fortsetter")
                     onSuccess(token)
                 }
 
                 false -> {
-                    application.log.debug("Mangler skrivetilgang, avviser forespørselen")
+                    call.application.log.debug("Mangler skrivetilgang, avviser forespørselen")
                     val enhetString = if (enhetNr == null) "enheten" else "enhet $enhetNr"
 
                     throw ForespoerselException(
@@ -316,13 +317,13 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrive
         }
 
         else -> {
-            application.log.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
+            call.application.log.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
             call.respond(HttpStatusCode.Forbidden)
         }
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: () -> Unit) {
+suspend inline fun RoutingContext.kunAttestant(onSuccess: () -> Unit) {
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller

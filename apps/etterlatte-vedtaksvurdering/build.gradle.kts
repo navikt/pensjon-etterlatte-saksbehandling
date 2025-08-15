@@ -24,7 +24,7 @@ dependencies {
     implementation(libs.cache.caffeine)
 
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")
     }
@@ -32,4 +32,5 @@ dependencies {
     testImplementation(testFixtures(project(":libs:etterlatte-database")))
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

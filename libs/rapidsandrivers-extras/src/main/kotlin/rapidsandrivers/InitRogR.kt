@@ -1,40 +1,39 @@
 package rapidsandrivers
 
+import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
+import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.helse.rapids_rivers.AivenConfig
-import no.nav.helse.rapids_rivers.Config
 import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
 
+/**
+ * Hvis du supplier en restModule må du bruke standard endepunkter /isready, /isalive
+ */
 fun initRogR(
     applikasjonsnavn: String,
     restModule: (Application.() -> Unit)? = null,
-    configFromEnvironment: (Miljoevariabler) -> Config = { AivenConfig.default },
-    settOppRivers: (RapidsConnection, rapidEnv: Miljoevariabler) -> Unit,
+    settOppRivers: (RapidsConnection, Miljoevariabler) -> Unit,
 ) {
     sikkerLoggOppstart("etterlatte-$applikasjonsnavn")
 
     val rapidEnv = getRapidEnv()
+    val config = configFromEnvironment(rapidEnv)
 
-    var builder =
-        RapidApplication.Builder(
-            RapidApplication.RapidApplicationConfig.fromEnv(
-                rapidEnv.props,
-                configFromEnvironment(rapidEnv),
-            ),
-        )
-    if (restModule != null) {
-        builder = builder.withKtorModule(restModule)
-    }
-
-    val connection =
-        builder
-            .withIsAliveEndpoint("/health/isalive")
-            .withIsReadyEndpoint("/health/isready")
-            .build()
-            .also { rapidsConnection -> settOppRivers(rapidsConnection, rapidEnv) }
-    connection.start()
+    RapidApplication
+        .create(
+            env = rapidEnv.props,
+            builder = {
+                if (restModule != null) {
+                    withKtorModule(restModule)
+                } else {
+                    withIsAliveEndpoint("/health/isalive")
+                    withIsReadyEndpoint("/health/isready")
+                }
+            },
+            consumerProducerFactory = ConsumerProducerFactory(config),
+        ).apply { settOppRivers(this, rapidEnv) }
+        .start()
 }

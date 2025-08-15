@@ -1,5 +1,7 @@
 package no.nav.etterlatte.testdata
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -14,8 +16,6 @@ import no.nav.etterlatte.testdata.automatisk.GrunnlagService
 import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

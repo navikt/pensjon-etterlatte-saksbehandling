@@ -1,6 +1,9 @@
 package no.nav.etterlatte.regulering
 
 import com.fasterxml.jackson.databind.node.MissingNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -29,9 +32,6 @@ import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit

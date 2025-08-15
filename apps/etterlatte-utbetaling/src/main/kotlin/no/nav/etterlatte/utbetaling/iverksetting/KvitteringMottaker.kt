@@ -1,5 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import kotlinx.coroutines.runBlocking
@@ -21,8 +23,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringRe
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UtbetalingFinnesIkke
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess

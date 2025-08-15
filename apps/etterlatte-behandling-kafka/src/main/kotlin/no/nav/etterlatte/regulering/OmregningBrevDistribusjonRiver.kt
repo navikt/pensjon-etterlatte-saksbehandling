@@ -1,5 +1,8 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -9,9 +12,6 @@ import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal class OmregningBrevDistribusjonRiver(

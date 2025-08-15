@@ -1,6 +1,8 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -17,8 +19,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

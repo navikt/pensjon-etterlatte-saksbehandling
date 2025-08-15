@@ -32,8 +32,8 @@ dependencies {
     implementation(libs.database.kotliquery)
     implementation(libs.cache.caffeine)
 
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")
     }
@@ -43,4 +43,5 @@ dependencies {
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

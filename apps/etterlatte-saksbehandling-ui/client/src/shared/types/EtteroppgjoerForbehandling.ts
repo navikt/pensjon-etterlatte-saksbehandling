@@ -40,7 +40,7 @@ export enum EtteroppgjoerBehandlingStatus {
 }
 
 export function kanRedigereEtteroppgjoerBehandling(status: EtteroppgjoerBehandlingStatus): boolean {
-  return status! in [EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT]
+  return [EtteroppgjoerBehandlingStatus.OPPRETTET, EtteroppgjoerBehandlingStatus.BEREGNET].includes(status)
 }
 
 export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlingStatus, string> = {

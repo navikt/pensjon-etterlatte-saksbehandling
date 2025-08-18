@@ -15,9 +15,10 @@ dependencies {
 
     implementation(libs.database.kotliquery)
 
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures(project(":libs:etterlatte-database")))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

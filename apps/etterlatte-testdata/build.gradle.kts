@@ -12,26 +12,27 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
-    implementation(libs.ktor2.mustache)
+    implementation(libs.ktor.mustache)
 
     implementation(libs.cache.caffeine)
     implementation(libs.etterlatte.common)
 
-    implementation(libs.navfelles.tokenvalidationktor2) {
+    implementation(libs.navfelles.tokenvalidationktor) {
         exclude("io.ktor", "ktor-server")
     }
-    implementation(libs.ktor2.server)
-    implementation("io.ktor:ktor-server-core:2.3.13")
-    implementation("io.ktor:ktor-server-swagger:2.3.13")
+    implementation(libs.ktor.server)
+    implementation(libs.ktor.servercorejvm)
+    implementation(libs.ktor.serverswagger)
 
     testImplementation(libs.test.kotest.assertionscore)
 
-    testImplementation(libs.ktor2.clientcontentnegotiation)
-    testImplementation(libs.ktor2.jackson)
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientcontentnegotiation)
+    testImplementation(libs.ktor.jackson)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
 }

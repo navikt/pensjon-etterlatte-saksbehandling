@@ -6,6 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -189,7 +190,7 @@ data class OperasjonGyldig(
     val gyldig: Boolean,
 )
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.haandterStatusEndring(proevStatusEndring: () -> Unit) {
+private suspend fun RoutingContext.haandterStatusEndring(proevStatusEndring: () -> Unit) {
     runCatching(proevStatusEndring)
         .fold(
             onSuccess = { call.respond(HttpStatusCode.OK, OperasjonGyldig(true)) },

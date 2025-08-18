@@ -13,8 +13,10 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.asContextElement
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.attachMockContextWithDb
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -81,6 +83,7 @@ internal class VilkaarsvurderingIntegrationTest(
     private val sbBrukertokenInfo = simpleSaksbehandler()
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
+    private lateinit var context: Context
 
     private fun grunnlagMedVersjon(grunnlagVersjon: Long): Grunnlag {
         val grunnlagMock =
@@ -132,6 +135,8 @@ internal class VilkaarsvurderingIntegrationTest(
 
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
         coEvery { grunnService.hentOpplysningsgrunnlag(any()) } returns grunnlagMock
+
+        context = nyKontekstMedBrukerOgDatabase(saksbehandler, applicationContext.dataSource)
     }
 
     @AfterEach
@@ -144,8 +149,7 @@ internal class VilkaarsvurderingIntegrationTest(
         afterAll()
     }
 
-    private fun opprettSakOgBehandling(saksbehandler: SaksbehandlerMedEnheterOgRoller): UUID {
-        nyKontekstMedBrukerOgDatabase(saksbehandler, applicationContext.dataSource)
+    private fun opprettSakOgBehandling(): UUID {
         val sakid =
             inTransaction { applicationContext.sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id }
         val opprettBehandlingMedPersongalleri =
@@ -193,13 +197,13 @@ internal class VilkaarsvurderingIntegrationTest(
 
     @Test
     fun `Oppretter og henter vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, applicationContext.dataSource)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
-            val behandlingId = opprettSakOgBehandling(saksbehandler)
+            val behandlingId = opprettSakOgBehandling()
 
             client.post("/api/vilkaarsvurdering/$behandlingId/opprett") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -238,12 +242,12 @@ internal class VilkaarsvurderingIntegrationTest(
 
     @Test
     fun `Oppdaterer delvilkår`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, applicationContext.dataSource)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
-            val behandlingId = opprettSakOgBehandling(saksbehandler)
+            val behandlingId = opprettSakOgBehandling()
 
             val res =
                 client.post("/api/vilkaarsvurdering/$behandlingId/opprett") {
@@ -292,13 +296,13 @@ internal class VilkaarsvurderingIntegrationTest(
 
     @Test
     fun `Oppdaterer status på vilkårsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, applicationContext.dataSource)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
-            val behandlingId = opprettSakOgBehandling(saksbehandler)
+            val behandlingId = opprettSakOgBehandling()
             inTransaction {
                 vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
                 vilkaarsvurderingServiceImpl.oppdaterTotalVurdering(behandlingId, sbBrukertokenInfo, vilkaarsvurderingResultat())
@@ -338,12 +342,12 @@ internal class VilkaarsvurderingIntegrationTest(
 
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, applicationContext.dataSource)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
-            val behandlingId = opprettSakOgBehandling(saksbehandler)
+            val behandlingId = opprettSakOgBehandling()
 
             val (vilkaarsvurdering) =
                 inTransaction {
@@ -408,13 +412,13 @@ internal class VilkaarsvurderingIntegrationTest(
 
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, applicationContext.dataSource)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
-            val behandlingId = opprettSakOgBehandling(saksbehandler)
+            val behandlingId = opprettSakOgBehandling()
 
             val (_) =
                 inTransaction {
@@ -461,13 +465,13 @@ internal class VilkaarsvurderingIntegrationTest(
 
     @Test
     fun `Skal slette eksisterende vilkaarsvurdering`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
                 attachMockContextWithDb(saksbehandler, applicationContext.dataSource)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
-            val behandlingId = opprettSakOgBehandling(saksbehandler)
+            val behandlingId = opprettSakOgBehandling()
 
             val (_) = inTransaction { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo) }
 

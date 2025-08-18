@@ -1,0 +1,1 @@
+ALTER TABLE etteroppgjoer_statistikk ADD COLUMN tidspunkt_registrert timestamp DEFAULT NOW();

@@ -1,6 +1,9 @@
 package no.nav.etterlatte.brukerdialog.inntektsjustering
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.OpprettJournalpostResponse
@@ -13,9 +16,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth

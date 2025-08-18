@@ -1,12 +1,12 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import com.github.navikt.tbd_libs.kafka.AivenConfig
+import com.github.navikt.tbd_libs.kafka.Config
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.rapidsandrivers.RapidKey.KAFKA_BOOTSTRAP_SERVERS
-import no.nav.helse.rapids_rivers.AivenConfig
-import no.nav.helse.rapids_rivers.Config
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig

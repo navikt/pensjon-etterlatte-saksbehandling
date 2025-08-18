@@ -1,12 +1,12 @@
 package no.nav.etterlatte.vedtaksvurdering.rivers
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

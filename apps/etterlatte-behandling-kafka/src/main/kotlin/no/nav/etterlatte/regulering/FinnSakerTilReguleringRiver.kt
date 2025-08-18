@@ -1,5 +1,8 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -9,9 +12,6 @@ import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.kjoering
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 

@@ -1,6 +1,9 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -19,9 +22,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.Ut
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -38,6 +38,7 @@ class VedtakMottakRiver(
     init {
         // Barnepensjon
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
+            precondition { it.forbid(FIKS_BREV_MIGRERING) }
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.BARNEPENSJON.name) }
             validate {
@@ -46,7 +47,6 @@ class VedtakMottakRiver(
                     listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name),
                 )
             }
-            validate { it.rejectKey(FIKS_BREV_MIGRERING) }
         }
 
         // Omstillingsstønad

@@ -78,7 +78,7 @@ data class BarnepensjonRevurdering(
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 datoVedtakOmgjoering = datoVedtakOmgjoering,
-                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
+                erEndret = forrigeUtbetalingsinfo != null && forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 erMigrertYrkesskade = erMigrertYrkesskade,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 etterbetaling = etterbetaling,

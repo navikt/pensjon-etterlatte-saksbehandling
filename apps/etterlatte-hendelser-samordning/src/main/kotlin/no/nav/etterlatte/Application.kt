@@ -4,12 +4,12 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.samordning.ApplicationContext
 import org.slf4j.LoggerFactory
 
 fun main() {
-    Server(ApplicationContext()).run()
+    Server(ApplicationContext()).runServer()
 }
 
 class Server(
@@ -21,8 +21,8 @@ class Server(
             applicationConfig = ConfigFactory.load(),
         )
 
-    fun run() {
+    fun runServer() {
         startLytting(context.konsument, LoggerFactory.getLogger(Application::class.java))
-        engine.run()
+        engine.runEngine()
     }
 }

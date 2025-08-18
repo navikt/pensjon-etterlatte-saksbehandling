@@ -4,9 +4,9 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.auth.principal
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.intercept
 import io.ktor.server.routing.route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
@@ -50,7 +50,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
@@ -68,7 +68,7 @@ import javax.sql.DataSource
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    Server(ApplicationContext()).run()
+    Server(ApplicationContext()).runServer()
 }
 
 private class Server(
@@ -88,10 +88,10 @@ private class Server(
             settOppApplikasjonen(context)
         }
 
-    fun run() =
+    fun runServer() =
         with(context) {
             dataSource.migrate()
-            engine.run()
+            engine.runEngine()
         }
 }
 
@@ -104,6 +104,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.etteroppgjoerJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.sjekkAdressebeskyttelseJob,
+        context.uttrekkLoependeYtelseEtter67Job,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")

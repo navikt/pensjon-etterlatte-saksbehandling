@@ -1,5 +1,8 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
@@ -14,9 +17,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal class OmregningFeiletRiver(

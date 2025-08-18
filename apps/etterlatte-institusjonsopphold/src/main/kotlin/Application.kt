@@ -8,11 +8,11 @@ import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
-import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import org.slf4j.LoggerFactory
 
 fun main() {
-    Server().run()
+    Server().runServer()
 }
 
 class Server {
@@ -23,10 +23,10 @@ class Server {
             applicationConfig = defaultConfig,
         )
 
-    fun run() {
+    fun runServer() {
         val env = Miljoevariabler.systemEnv()
         startInstitusjonsoppholdLytter(env, defaultConfig)
-        engine.run()
+        engine.runEngine()
     }
 }
 

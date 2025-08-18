@@ -19,13 +19,13 @@ import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.applicationEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.mustache.Mustache
-import io.ktor.server.plugins.callloging.CallLogging
-import io.ktor.server.plugins.callloging.processingTimeMillis
+import io.ktor.server.plugins.calllogging.CallLogging
+import io.ktor.server.plugins.calllogging.processingTimeMillis
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.plugins.swagger.swaggerUI
@@ -34,6 +34,7 @@ import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -69,7 +70,7 @@ import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeatu
 import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.opprettFamilie.OpprettFamilie
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
-import no.nav.security.token.support.v2.tokenValidationSupport
+import no.nav.security.token.support.v3.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -126,66 +127,66 @@ val features: List<TestDataFeature> =
 
 fun main() {
     embeddedServer(
-        CIO,
-        applicationEngineEnvironment {
-            module {
-                install(Mustache) {
-                    mustacheFactory = DefaultMustacheFactory("templates")
-                }
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                }
-                install(CallLogging) {
-                    level = org.slf4j.event.Level.INFO
-                    filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics|.*/static")) }
-
-                    format { call ->
-                        val responseTime = call.processingTimeMillis()
-                        val status = call.response.status()?.value
-                        val method = call.request.httpMethod.value
-                        val path = call.request.path()
-
-                        skjulAllePotensielleFnr(
-                            "<- $status $method $path in $responseTime ms",
-                        )
-                    }
-
-                    mdc(X_USER) { call -> call.brukerTokenInfo.ident() }
-                }
-                install(StatusPages) {
-                    exception<Throwable> { call, cause ->
-                        call.application.log.error("En feil oppstod: ${cause.message}", cause)
-                        call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
-                    }
-                }
-
-                if (localDevelopment) {
-                    routing {
-                        staticResources("/static", "static")
-                        swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
-                        api()
-                    }
-                } else {
-                    install(Authentication) {
-                        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-                    }
-
-                    routing {
-                        get("/health/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
-                        get("/health/isready") { call.respondText("READY", ContentType.Text.Plain) }
-                        swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
-                        staticResources("/static", "static")
-
-                        authenticate {
-                            api()
-                        }
-                    }
-                    metricsRoute()
-                }
-            }
+        factory = CIO,
+        environment = applicationEnvironment(),
+        configure = {
             connector { port = 8080 }
         },
-    ).start(true)
+    ) {
+        install(Mustache) {
+            mustacheFactory = DefaultMustacheFactory("templates")
+        }
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
+        }
+        install(CallLogging) {
+            level = org.slf4j.event.Level.INFO
+            filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics|.*/static")) }
+
+            format { call ->
+                val responseTime = call.processingTimeMillis()
+                val status = call.response.status()?.value
+                val method = call.request.httpMethod.value
+                val path = call.request.path()
+
+                skjulAllePotensielleFnr(
+                    "<- $status $method $path in $responseTime ms",
+                )
+            }
+
+            mdc(X_USER) { call -> call.brukerTokenInfo.ident() }
+        }
+        install(StatusPages) {
+            exception<Throwable> { call, cause ->
+                call.application.log.error("En feil oppstod: ${cause.message}", cause)
+                call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
+            }
+        }
+
+        if (localDevelopment) {
+            routing {
+                staticResources("/static", "static")
+                swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
+                api()
+            }
+        } else {
+            install(Authentication) {
+                tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+            }
+
+            routing {
+                get("/health/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
+                get("/health/isready") { call.respondText("READY", ContentType.Text.Plain) }
+                swaggerUI(path = "dolly/swagger", swaggerFile = "testdataSwaggerV1.yaml")
+                staticResources("/static", "static")
+
+                authenticate {
+                    api()
+                }
+            }
+            metricsRoute()
+        }
+    }.start(true)
 }
 
 private fun Route.api() {
@@ -196,7 +197,7 @@ private fun Route.api() {
     }
 }
 
-fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidTokenClaims()?.get("oid")?.toString()
+fun RoutingContext.brukerIdFraToken() = call.firstValidTokenClaims()?.get("oid")?.toString()
 
 fun getDollyAccessToken(): String =
     runBlocking {

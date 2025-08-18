@@ -21,9 +21,10 @@ dependencies {
 
     implementation(libs.brevbaker.api.model.common)
 
-    testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.ktor.clientmock)
+    testImplementation(libs.ktor.servertests)
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

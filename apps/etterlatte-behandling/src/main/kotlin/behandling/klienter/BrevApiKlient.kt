@@ -7,6 +7,7 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpTimeoutConfig
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
@@ -407,7 +408,7 @@ class BrevApiKlientObo(
         postBody: Any = Unit,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
-        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
+        timeoutConfig: (HttpTimeoutConfig.() -> Unit)? = null,
     ): T =
         downstreamResourceClient
             .post(
@@ -424,7 +425,7 @@ class BrevApiKlientObo(
         url: String,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
-        timeoutConfig: (HttpTimeout.HttpTimeoutCapabilityConfiguration.() -> Unit)? = null,
+        timeoutConfig: (HttpTimeoutConfig.() -> Unit)? = null,
     ): T =
         downstreamResourceClient
             .get(

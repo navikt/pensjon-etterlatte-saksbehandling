@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -45,19 +46,19 @@ enum class CallParamAuthId(
 
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 
-inline val PipelineContext<*, ApplicationCall>.generellBehandlingId: UUID
+inline val RoutingContext.generellBehandlingId: UUID
     get() =
         call.parameters[GENERELLBEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
             "GenerellBehandlingId er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
+inline val RoutingContext.behandlingId: UUID
     get() =
         call.parameters[BEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
             "BehandlingId er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.sakId: SakId
+inline val RoutingContext.sakId: SakId
     get() =
         try {
             call.parameters[SAKID_CALL_PARAMETER]?.tilSakId()!!
@@ -68,31 +69,31 @@ inline val PipelineContext<*, ApplicationCall>.sakId: SakId
             }
         }
 
-inline val PipelineContext<*, ApplicationCall>.oppgaveId: UUID
+inline val RoutingContext.oppgaveId: UUID
     get() =
         krevIkkeNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "OppgaveId er ikke i path params"
         }
 
-inline val PipelineContext<*, ApplicationCall>.klageId: UUID
+inline val RoutingContext.klageId: UUID
     get() =
         krevIkkeNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "KlageId er ikke i path params"
         }
 
-inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
+inline val RoutingContext.gosysOppgaveId: String
     get() =
         krevIkkeNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
             "Gosys oppgaveId er ikke i path params"
         }
 
-inline val PipelineContext<*, ApplicationCall>.tilbakekrevingId: UUID
+inline val RoutingContext.tilbakekrevingId: UUID
     get() =
         call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
             "TilbakekrevingId er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.etteroppgjoerId: UUID
+inline val RoutingContext.etteroppgjoerId: UUID
     get() =
         call.parameters[ETTEROPPGJOER_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
             "EtteroppgjoerId er ikke i path params",
@@ -100,7 +101,7 @@ inline val PipelineContext<*, ApplicationCall>.etteroppgjoerId: UUID
 
 val logger = LoggerFactory.getLogger("TilgangsSjekk")
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
+suspend inline fun RoutingContext.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
@@ -125,7 +126,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
+suspend inline fun RoutingContext.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: SakId) -> Unit,
@@ -155,7 +156,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
+suspend inline fun RoutingContext.withFoedselsnummer(
     personTilgangsSjekk: PersonTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (fnr: Folkeregisteridentifikator) -> Unit,
@@ -182,7 +183,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     }
 }
 
-suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody(onSuccess: (t: T) -> Unit) {
+suspend inline fun <reified T : Any> RoutingContext.medBody(onSuccess: (t: T) -> Unit) {
     val body =
         try {
             call.receive<T>()
@@ -194,7 +195,7 @@ suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody
     onSuccess(body)
 }
 
-inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: (systemBruker: Systembruker) -> Unit) {
+inline fun RoutingContext.kunSystembruker(onSuccess: (systemBruker: Systembruker) -> Unit) {
     when (val bruker = brukerTokenInfo) {
         is Systembruker -> {
             onSuccess(bruker)
@@ -207,7 +208,7 @@ inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: (syste
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(onSuccess: (Saksbehandler) -> Unit) {
+suspend inline fun RoutingContext.kunSaksbehandler(onSuccess: (Saksbehandler) -> Unit) {
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
             onSuccess(token)
@@ -220,7 +221,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(onSucces
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withUuidParam(
+suspend inline fun RoutingContext.withUuidParam(
     param: String,
     onSuccess: (value: UUID) -> Unit,
 ) {

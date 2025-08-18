@@ -1,5 +1,8 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -18,9 +21,6 @@ import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal class OmregningsHendelserBehandlingRiver(
@@ -31,7 +31,7 @@ internal class OmregningsHendelserBehandlingRiver(
 
     init {
         initialiserRiver(rapidsConnection, OmregningHendelseType.KLAR_FOR_OMREGNING) {
-            validate { it.rejectKey(BEHANDLING_ID_KEY) }
+            precondition { it.forbid(BEHANDLING_ID_KEY) }
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
         }

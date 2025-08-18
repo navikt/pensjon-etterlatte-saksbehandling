@@ -1,5 +1,7 @@
 package no.nav.etterlatte.inntektsjustering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -16,8 +18,6 @@ import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 
 internal class AarligInntektsjusteringJobbRiverTest {

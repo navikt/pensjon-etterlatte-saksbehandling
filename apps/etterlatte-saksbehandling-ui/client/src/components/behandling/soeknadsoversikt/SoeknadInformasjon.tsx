@@ -33,7 +33,7 @@ export const SoeknadInformasjon = ({ behandling }: { behandling: IDetaljertBehan
     <Table size="small">
       <Table.Header>
         <Table.Row>
-          <Table.HeaderCell scope="col">Søknad mottat</Table.HeaderCell>
+          <Table.HeaderCell scope="col">Søknad mottatt</Table.HeaderCell>
           <Table.HeaderCell scope="col">Innsender</Table.HeaderCell>
           <Table.HeaderCell scope="col">Vergemål</Table.HeaderCell>
         </Table.Row>

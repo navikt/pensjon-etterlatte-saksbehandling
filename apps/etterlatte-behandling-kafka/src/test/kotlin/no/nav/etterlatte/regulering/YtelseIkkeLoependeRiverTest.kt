@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regulering
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -8,7 +9,6 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 

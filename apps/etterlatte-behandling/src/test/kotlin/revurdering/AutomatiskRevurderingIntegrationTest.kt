@@ -10,7 +10,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
+import kotlinx.coroutines.asContextElement
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
@@ -47,10 +50,12 @@ import java.time.LocalDateTime
 class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
     val testUser = mockSaksbehandler("User")
 
+    private lateinit var context: Context
+
     @BeforeAll
     fun start() {
         startServer()
-        nyKontekstMedBrukerOgDatabase(testUser, applicationContext.dataSource)
+        context = nyKontekstMedBrukerOgDatabase(testUser, applicationContext.dataSource)
     }
 
     @AfterAll
@@ -114,7 +119,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `kan opprette revurdering automatisk paa sak som har iverksatt foerstegangsbehandling`() {
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
             val client =
                 runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
@@ -172,8 +177,8 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Opprettelse av revurdering feiler hvis det ikke finnes noen iverksatt behandling fra foer`() {
-        val (sak, _) = opprettSakMedFoerstegangsbehandling("234")
-        testApplication {
+        testApplication(Kontekst.asContextElement(context)) {
+            val (sak, _) = opprettSakMedFoerstegangsbehandling("234")
             val client =
                 runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)

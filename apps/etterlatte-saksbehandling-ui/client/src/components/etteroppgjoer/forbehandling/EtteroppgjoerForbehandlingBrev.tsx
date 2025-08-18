@@ -13,7 +13,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
-import { EtteroppgjoerBehandlingStatus, EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import {
+  EtteroppgjoerForbehandling,
+  kanRedigereEtteroppgjoerBehandling,
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBrev } from '~shared/types/Brev'
@@ -30,7 +33,7 @@ export function EtteroppgjoerForbehandlingBrev() {
     ferdigstillEtteroppgjoerForbehandlingBrev
   )
 
-  const kanRedigeres = etteroppgjoer.behandling.status != EtteroppgjoerBehandlingStatus.FERDIGSTILT
+  const kanRedigeres = kanRedigereEtteroppgjoerBehandling(etteroppgjoer.behandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
 

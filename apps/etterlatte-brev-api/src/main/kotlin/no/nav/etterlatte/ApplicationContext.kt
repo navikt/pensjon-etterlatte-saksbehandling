@@ -29,7 +29,6 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.OppgaveKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.brevbaker.LetterMarkupModule
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
@@ -251,9 +250,6 @@ internal class ApplicationContext {
         forventStatusSuccess: Boolean = true,
     ) = httpClient(
         forventSuksess = forventStatusSuccess,
-        ekstraJacksoninnstillinger = {
-            it.registerModule(LetterMarkupModule)
-        },
         auth = {
             if (scope != null) {
                 it.install(Auth) {

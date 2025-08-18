@@ -6,6 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -38,14 +39,14 @@ import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
-inline val PipelineContext<*, ApplicationCall>.referanse: String
+inline val RoutingContext.referanse: String
     get() =
         call.parameters["referanse"] ?: throw UgyldigForespoerselException(
             code = "REFERANSE_MANGLER",
             detail = "Mangler referanse i forespørselen",
         )
 
-inline val PipelineContext<*, ApplicationCall>.gruppeId: String
+inline val RoutingContext.gruppeId: String
     get() =
         call.parameters["gruppeId"] ?: throw UgyldigForespoerselException(
             code = "GRUPPEID_MANGLER",
@@ -59,7 +60,7 @@ fun filtrerGyldigeStatuser(statuser: List<String>?): List<String> =
         ?.map { i -> i.uppercase() }
         ?.filter { i -> Status.entries.map { it.name }.contains(i) || i == VISALLE } ?: emptyList()
 
-inline val PipelineContext<*, ApplicationCall>.minOppgavelisteidentQueryParam: String?
+inline val RoutingContext.minOppgavelisteidentQueryParam: String?
     get() {
         val minOppgavelisteIdentFilter = call.request.queryParameters["kunInnloggetOppgaver"].toBoolean()
         return if (minOppgavelisteIdentFilter) {

@@ -1,6 +1,9 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.client.FeiletVedOpprettBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -11,9 +14,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal class OpprettBehandlingRiver(
@@ -24,9 +24,9 @@ internal class OpprettBehandlingRiver(
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {
+            precondition { it.forbid(GyldigSoeknadVurdert.behandlingIdKey) }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
             validate { it.interestedIn(GyldigSoeknadVurdert.lagretSoeknadIdKey) }
-            validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }
     }
 

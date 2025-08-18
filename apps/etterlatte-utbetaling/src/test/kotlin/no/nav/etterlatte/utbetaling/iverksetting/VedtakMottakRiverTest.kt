@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
@@ -15,7 +16,6 @@ import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import no.nav.etterlatte.utbetaling.utbetalingslinje
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

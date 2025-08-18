@@ -2,8 +2,11 @@ package no.nav.etterlatte.libs.ktor.token
 
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.PipelineCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
+import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
@@ -24,7 +27,12 @@ fun hentAccessToken(call: ApplicationCall) =
         }
     }
 
-inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
+inline val PipelineContext<Unit, PipelineCall>.brukerTokenInfo: BrukerTokenInfo
+    get() {
+        return call.brukerTokenInfo
+    }
+
+inline val RoutingContext.brukerTokenInfo: BrukerTokenInfo
     get() {
         return call.brukerTokenInfo
     }

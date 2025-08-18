@@ -5,6 +5,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -23,7 +24,7 @@ import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.tilgangsstyring.sjekkSkrivetilgang
 
 const val SKRIVETILGANG_CALL_QUERYPARAMETER = "skrivetilgang"
-inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean
+inline val RoutingContext.berOmSkrivetilgang: Boolean
     get() =
         call.request.queryParameters[SKRIVETILGANG_CALL_QUERYPARAMETER]?.toBoolean() ?: throw NullPointerException(
             "Skrivetilgangparameter er ikke i query params",

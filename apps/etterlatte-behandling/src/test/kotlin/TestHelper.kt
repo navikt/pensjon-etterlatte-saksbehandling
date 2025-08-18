@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.intercept
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -142,7 +143,11 @@ fun nyKontekstMedBrukerOgDatabaseContext(
 fun nyKontekstMedBrukerOgDatabase(
     testUser: User,
     dataSource: DataSource,
-) = Kontekst.set(lagContext(testUser, DatabaseContext(dataSource)))
+): Context {
+    val context = lagContext(testUser, DatabaseContext(dataSource))
+    Kontekst.set(context)
+    return context
+}
 
 fun nyKontekstMedBruker(testUser: User) = Kontekst.set(lagContext(testUser))
 

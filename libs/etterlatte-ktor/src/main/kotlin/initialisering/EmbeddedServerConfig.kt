@@ -7,7 +7,8 @@ import io.ktor.server.application.ServerReady
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine
 import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.applicationEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
@@ -52,33 +53,32 @@ private fun settOppEmbeddedServer(
     applicationConfig: Config,
     cronjobs: List<TimerJob> = emptyList(),
     body: Application.() -> Unit,
-): CIOApplicationEngine =
+): EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration> =
     embeddedServer(
-        configure = shutdownPolicyEmbeddedServer(),
+        configure = {
+            shutdownPolicyEmbeddedServer()
+            connector { port = httpPort }
+        },
         factory = CIO,
         environment =
-            applicationEngineEnvironment {
+            applicationEnvironment {
                 config = HoconApplicationConfig(applicationConfig)
-                module {
-                    body()
-                }
-                module {
-                    environment.monitor.subscribe(ServerReady) {
-                        val scheduledJobs = cronjobs.map { it.schedule() }
-                        addShutdownHook(scheduledJobs)
-                        setReady(true)
-                    }
-                    environment.monitor.subscribe(ApplicationStopPreparing) {
-                        setReady(false)
-                    }
-                }
-                connector { port = httpPort }
             },
-    )
+    ) {
+        body()
+        environment.monitor.subscribe(ServerReady) {
+            val scheduledJobs = cronjobs.map { it.schedule() }
+            addShutdownHook(scheduledJobs)
+            setReady(true)
+        }
+        environment.monitor.subscribe(ApplicationStopPreparing) {
+            setReady(false)
+        }
+    }
 
 val logger = LoggerFactory.getLogger("CIOApplicationEngine")
 
-fun CIOApplicationEngine.run() {
+fun EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>.runEngine() {
     try {
         start(true)
     } catch (e: CancellationException) {

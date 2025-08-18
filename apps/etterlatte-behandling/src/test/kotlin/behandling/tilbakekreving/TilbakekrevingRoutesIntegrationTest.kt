@@ -15,8 +15,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -45,14 +48,14 @@ import org.junit.jupiter.api.TestInstance
 class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
     private lateinit var tilbakekrevingService: TilbakekrevingService
     private lateinit var oppgaveService: OppgaveService
+    private lateinit var context: Context
 
     @BeforeAll
     fun start() {
         startServer()
         tilbakekrevingService = applicationContext.tilbakekrevingService
         oppgaveService = applicationContext.oppgaveService
-
-        nyKontekstMedBrukerOgDatabase(mockSaksbehandler("Z123456"), applicationContext.dataSource)
+        context = nyKontekstMedBrukerOgDatabase(mockSaksbehandler("Z123456"), applicationContext.dataSource)
     }
 
     @BeforeEach
@@ -67,7 +70,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal opprette tilbakekreving fra kravgrunnlag`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val sak: Sak = opprettSak(client)
 
             val tilbakekreving = opprettTilbakekreving(sak, client)
@@ -79,7 +82,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal kunne oppdatere vurdering paa tilbakekreving`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
             client.putAndAssertOk(
@@ -101,7 +104,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal kunne oppdatere perioder paa tilbakekreving`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
             val oppdatertPeriode =
@@ -142,7 +145,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal feile dersom ikke paakrevde felter er fylt ut`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
             client.putAndAssertOk(
@@ -166,7 +169,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal validere tilbakekreving og sette status til validert`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
             client.putAndAssertOk(
@@ -217,7 +220,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal endre sende brev`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
             client.putAndAssertOk(
@@ -239,7 +242,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal hente liste med tilbakekrevinger for sak`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val sak: Sak = opprettSak(client)
 
             val tilbakekreving = opprettTilbakekreving(sak, client)
@@ -257,7 +260,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal sette tilbakekreving paa vent og saa tilbake av vent`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
             client.putAndAssertOk(
@@ -288,7 +291,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal avbryte en tilbakekreving`() {
-        withTestApplication { client ->
+        withTestApplication(context) { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
             client.putAndAssertOk(
@@ -396,8 +399,11 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             addAuthToken(token)
         }.also { assertEquals(HttpStatusCode.OK, it.status) }
 
-    private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        testApplication {
+    private fun withTestApplication(
+        context: Context,
+        block: suspend (client: HttpClient) -> Unit,
+    ) {
+        testApplication(Kontekst.asContextElement(context)) {
             val client =
                 runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)

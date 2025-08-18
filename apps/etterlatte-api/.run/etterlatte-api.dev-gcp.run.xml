@@ -1,16 +1,20 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="etterlatte-samordning-vedtak.dev-gcp" type="JetRunConfigurationType">
+  <configuration default="false" name="etterlatte-api.dev-gcp" type="JetRunConfigurationType">
     <envs>
       <env name="ETTERLATTE_VEDTAKSVURDERING_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="ETTERLATTE_VEDTAKSVURDERING_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default" />
       <env name="TJENESTEPENSJON_URL" value="https://tp-api-q2.dev-fss-pub.nais.io" />
       <env name="TJENESTEPENSJON_SCOPE" value="api://dev-fss.pensjonsamhandling.tp-q2/.default" />
-      <env name="ROLLE_PENSJONSAKSBEHANDLER" value="8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" />
+      <env name="ETTERLATTE_BEHANDLING_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-behandling/.default" />
+      <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="HTTP_PORT" value="8094" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="LOGBACK_LEVEL" value="DEBUG" />
+      <env name="ROLLE_PENSJONSAKSBEHANDLER" value="8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" />
+      <env name="ROLLE_GJENNYSAKSBEHANDLER" value="5b6745de-b65d-40eb-a6f5-860c8b61c27f" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-api.main" />
     <shortenClasspath name="NONE" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />
@@ -20,7 +24,7 @@
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
-        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-samordning-vedtak/.env.dev-gcp" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-api/.env.dev-gcp" />
       </ENTRIES>
     </extension>
     <method v="2">

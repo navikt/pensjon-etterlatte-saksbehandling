@@ -1,6 +1,9 @@
 package no.nav.etterlatte.statistikk.river
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
@@ -12,9 +15,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.statistikk.service.StatistikkService
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 class KlagehendelseRiver(
@@ -27,7 +27,7 @@ class KlagehendelseRiver(
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.demandAny(EVENT_NAME_KEY, klagehendelser) }
+            precondition { it.requireAny(EVENT_NAME_KEY, klagehendelser) }
             validate { it.requireKey(KLAGE_STATISTIKK_RIVER_KEY) }
             validate { it.requireKey(TEKNISK_TID_KEY) }
         }

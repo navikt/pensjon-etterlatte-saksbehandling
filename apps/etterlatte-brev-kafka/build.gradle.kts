@@ -11,5 +11,6 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
 
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(libs.test.navfelles.rapidsandriversktor)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

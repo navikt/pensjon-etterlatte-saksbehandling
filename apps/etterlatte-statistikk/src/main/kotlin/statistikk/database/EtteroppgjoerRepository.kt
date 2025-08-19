@@ -42,7 +42,7 @@ class EtteroppgjoerRepository(
                     """
                     INSERT INTO etteroppgjoer_statistikk (forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                     opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,summert_inntekter, pensjonsgivende_inntekter)
+                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,summerte_inntekter, pensjonsgivende_inntekter)
                     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )

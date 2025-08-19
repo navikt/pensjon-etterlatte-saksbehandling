@@ -32,6 +32,7 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
+      - buildSrc/build.gradle.kts
 
 permissions:
   contents: write

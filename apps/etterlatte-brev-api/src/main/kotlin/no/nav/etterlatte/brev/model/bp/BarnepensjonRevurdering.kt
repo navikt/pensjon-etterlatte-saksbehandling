@@ -26,6 +26,9 @@ import java.time.LocalDate
 data class BarnepensjonRevurdering(
     override val innhold: List<Slate.Element>,
     val innholdForhaandsvarsel: List<Slate.Element>,
+    /** Skal være true bare hvis det er en endring i beløp på siste beregningsperiode sammenlignet med
+     * forrige iverksatte behandling. Hvis forrige iverksatte behandling ikke har beregningsperioder i Beregning
+     * så er det sannsynligvis et opphør og da lander vi på at vi ikke kan dokumentere en endring. */
     val erEndret: Boolean,
     val erOmgjoering: Boolean,
     val datoVedtakOmgjoering: LocalDate?,

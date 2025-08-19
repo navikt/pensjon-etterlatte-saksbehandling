@@ -27,8 +27,5 @@ class BrevbakerService(
             .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }
 
-    suspend fun hentRedigerbarTekstFraBrevbakeren(request: BrevbakerRequest): Slate {
-        val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererJSON(request) }
-        return BlockTilSlateKonverterer.konverter(brevbakerResponse)
-    }
+    suspend fun hentRedigerbarTekstFraBrevbakeren(request: BrevbakerRequest): Slate = retryOgPakkUt { brevbakerKlient.genererJSON(request) }
 }

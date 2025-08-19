@@ -11,13 +11,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingFeilTilstandUgyldig
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbryteForbehandling
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
@@ -82,13 +81,11 @@ class EtteroppgjoerForbehandlingService(
             brukerTokenInfo,
         )
 
-        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = ferdigstiltForbehandling,
             etteroppgjoerResultat = null,
             hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
-            utlandstilknytningType = utlandstilknytning?.type,
         )
     }
 
@@ -128,13 +125,10 @@ class EtteroppgjoerForbehandlingService(
         val merknad = "Avbrutt manuelt. Årsak: ${kommentar ?: aarsak.name}"
         oppgaveService.avbrytAapneOppgaverMedReferanse(forbehandlingId.toString(), merknad)
 
-        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
-
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = forbehandling,
             hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
             saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
-            utlandstilknytningType = utlandstilknytning?.type,
         )
     }
 
@@ -236,12 +230,11 @@ class EtteroppgjoerForbehandlingService(
         dao.lagreAInntekt(aInntekt, nyForbehandling.id)
 
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
-        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
+
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = nyForbehandling,
             hendelseType = EtteroppgjoerHendelseType.OPPRETTET,
             saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
-            utlandstilknytningType = utlandstilknytning?.type,
         )
 
         return EtteroppgjoerForbehandlingOgOppgave(
@@ -286,17 +279,21 @@ class EtteroppgjoerForbehandlingService(
         val beregnetEtteroppgjoerResultat =
             runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(beregningRequest, brukerTokenInfo) }
 
-        behandlingService.settBeregnetForRevurderingTilForbehandling(forbehandling)
-        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(forbehandling.sak.id)
-        forbehandling = forbehandling.tilBeregnet()
-        dao.lagreForbehandling(forbehandling)
+        val beregnetForbehandling =
+            forbehandling
+                .tilBeregnet()
+                .also {
+                    dao.lagreForbehandling(it)
+                    behandlingService.oppdaterRelatertBehandlingIdStatusTilBeregnet(it)
+                }
+
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
-            etteroppgjoerForbehandling = forbehandling,
+            etteroppgjoerForbehandling = beregnetForbehandling,
             etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
             hendelseType = EtteroppgjoerHendelseType.BEREGNET,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
-            utlandstilknytningType = utlandstilknytning?.type,
         )
+
         return beregnetEtteroppgjoerResultat
     }
 

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
+
 data class HendelseslisteFraSkatt(
     val hendelser: List<SkatteoppgjoerHendelser>,
 ) {
@@ -68,11 +70,3 @@ data class PensjonsgivendeInntektFraSkatt(
         )
     }
 }
-
-data class PensjonsgivendeInntekt(
-    val inntektsaar: Int,
-    val skatteordning: String,
-    val loensinntekt: Int,
-    val naeringsinntekt: Int,
-    val fiskeFangstFamiliebarnehage: Int,
-)

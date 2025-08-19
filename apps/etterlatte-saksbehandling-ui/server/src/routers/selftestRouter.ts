@@ -6,7 +6,11 @@ export const selftestRouter = express.Router()
 
 selftestRouter.get('/', express.json(), async (_, res) => {
   const results: Promise<IPingResult>[] = Object.entries(ApiConfig).map(async ([serviceName, urlscope]) => {
-    const statuscode = await fetch(`${urlscope.url}/health/isready`)
+    // Siden utbetaling kjører R&R med restmodul fungerer vårt interne health/isready dårlig (den blir aldri ready)
+    // og vi går derfor i stedet mot standard isready fra R&R
+    const isReadyEndpoint = serviceName === 'utbetaling' ? `${urlscope.url}/isready` : `${urlscope.url}/health/isready`
+
+    const statuscode = await fetch(isReadyEndpoint)
       .then((res) => res.status)
       .catch((err) => {
         logger.warn(`${serviceName} is down.`, err)

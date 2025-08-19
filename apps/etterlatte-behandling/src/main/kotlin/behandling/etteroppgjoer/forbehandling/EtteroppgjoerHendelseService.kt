@@ -1,13 +1,18 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.libs.common.behandling.ETTEROPPGJOER_RESULTAT_RIVER_KEY
-import no.nav.etterlatte.libs.common.behandling.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatistikkDto
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_RESULTAT_RIVER_KEY
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -20,6 +25,8 @@ import java.time.LocalDateTime
 class EtteroppgjoerHendelseService(
     private val rapidPubliserer: KafkaProdusent<String, String>,
     private val hendelseDao: HendelseDao,
+    private val behandlingService: BehandlingService,
+    private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerHendelseService::class.java)
 
@@ -28,7 +35,6 @@ class EtteroppgjoerHendelseService(
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto? = null,
         hendelseType: EtteroppgjoerHendelseType,
         saksbehandler: String?,
-        utlandstilknytningType: UtlandstilknytningType?,
     ) {
         hendelseDao.etteroppgjoerHendelse(
             forbehandlingId = etteroppgjoerForbehandling.id,
@@ -41,11 +47,21 @@ class EtteroppgjoerHendelseService(
         )
 
         if (hendelseType.skalSendeStatistikk) {
+            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(etteroppgjoerForbehandling.sak.id)
+
+            // TODO: nullable?
+            val summerteInntekter =
+                etteroppgjoerForbehandlingDao
+                    .hentSummerteInntekter(etteroppgjoerForbehandling.id, null) // TODO: revurderingId
+            val pensjonsgivendeInntektFraSkatt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!
+
             sendKafkaMelding(
                 etteroppgjoerForbehandling = etteroppgjoerForbehandling,
                 hendelseType = hendelseType,
                 etteroppgjoerResultat = etteroppgjoerResultat,
-                utlandstilknytningType = utlandstilknytningType,
+                summerteInntekter = summerteInntekter,
+                pensjonsgivendeInntekt = pensjonsgivendeInntektFraSkatt,
+                utlandstilknytningType = utlandstilknytning?.type,
                 saksbehandler = saksbehandler,
             )
         }
@@ -55,6 +71,8 @@ class EtteroppgjoerHendelseService(
         etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
         hendelseType: EtteroppgjoerHendelseType,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
+        summerteInntekter: SummerteInntekterAOrdningen,
+        pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt,
         utlandstilknytningType: UtlandstilknytningType?,
         saksbehandler: String?,
     ) {
@@ -68,6 +86,18 @@ class EtteroppgjoerHendelseService(
                         forbehandling = etteroppgjoerForbehandling.tilDto(),
                         utlandstilknytningType = utlandstilknytningType,
                         saksbehandler = saksbehandler,
+                        summerteInntekter =
+                            SummerteInntekterAOrdningenStatistikkDto(
+                                afp = summerteInntekter.afp,
+                                loenn = summerteInntekter.loenn,
+                                oms = summerteInntekter.oms,
+                                tidspunktBeregnet = summerteInntekter.tidspunktBeregnet,
+                            ),
+                        pensjonsgivendeInntekt =
+                            PensjonsgivendeInntektFraSkattStatistikkDto(
+                                inntektsaar = pensjonsgivendeInntekt.inntektsaar,
+                                inntekter = pensjonsgivendeInntekt.inntekter,
+                            ),
                     ),
             )
         val meldingMap =

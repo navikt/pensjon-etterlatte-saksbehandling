@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_RESU
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -46,6 +48,8 @@ class EtteroppgjoerHendelseService(
 
         if (hendelseType.skalSendeStatistikk) {
             val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(etteroppgjoerForbehandling.sak.id)
+
+            // TODO: nullable?
             val summerteInntekter =
                 etteroppgjoerForbehandlingDao
                     .hentSummerteInntekter(etteroppgjoerForbehandling.id, null) // TODO: revurderingId
@@ -82,8 +86,18 @@ class EtteroppgjoerHendelseService(
                         forbehandling = etteroppgjoerForbehandling.tilDto(),
                         utlandstilknytningType = utlandstilknytningType,
                         saksbehandler = saksbehandler,
-                        summerteInntekter = summerteInntekter,
-                        pensjonsgivendeInntekt = pensjonsgivendeInntekt,
+                        summerteInntekter =
+                            SummerteInntekterAOrdningenStatistikkDto(
+                                afp = summerteInntekter.afp,
+                                loenn = summerteInntekter.loenn,
+                                oms = summerteInntekter.oms,
+                                tidspunktBeregnet = summerteInntekter.tidspunktBeregnet,
+                            ),
+                        pensjonsgivendeInntekt =
+                            PensjonsgivendeInntektFraSkattStatistikkDto(
+                                inntektsaar = pensjonsgivendeInntekt.inntektsaar,
+                                inntekter = pensjonsgivendeInntekt.inntekter,
+                            ),
                     ),
             )
         val meldingMap =

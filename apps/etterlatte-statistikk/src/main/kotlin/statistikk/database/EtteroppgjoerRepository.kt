@@ -1,9 +1,14 @@
 package no.nav.etterlatte.statistikk.database
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.serialization.json.Json
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -13,6 +18,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setNullableDate
 import no.nav.etterlatte.libs.database.setNullableDouble
 import no.nav.etterlatte.libs.database.setNullableInt
@@ -36,8 +42,8 @@ class EtteroppgjoerRepository(
                     """
                     INSERT INTO etteroppgjoer_statistikk (forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                     opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,summert_inntekter, pensjonsgivende_inntekter)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )
             statement.setObject(1, rad.forbehandlingId)
@@ -56,6 +62,8 @@ class EtteroppgjoerRepository(
             statement.setNullableDouble(14, rad.tilbakekrevingGrense)
             statement.setNullableDouble(15, rad.etterbetalingGrense)
             statement.setString(16, rad.resultatType?.name)
+            statement.setJsonb(17, rad.summerteInntekter)
+            statement.setJsonb(18, rad.pensjonsgivendeInntekt)
             statement.executeUpdate()
         }
     }
@@ -67,7 +75,7 @@ class EtteroppgjoerRepository(
                     """
                     SELECT id, forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                       opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type
+                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter
                     FROM etteroppgjoer_statistikk
                     WHERE id = ?
                     """.trimIndent(),
@@ -117,6 +125,8 @@ private fun ResultSet.tilEtteroppgjoerRad(): EtteroppgjoerRad =
             getString("resultat_type")
                 .takeUnless { wasNull() }
                 ?.let { enumValueOf<EtteroppgjoerResultatType>(it) },
+        summerteInntekter = getString("summerte_inntekter")?.let { objectMapper.readValue(it) },
+        pensjonsgivendeInntekt = getString("pensjonsgivende_inntekt")?.let { objectMapper.readValue(it) },
     )
 
 data class EtteroppgjoerRad(
@@ -129,6 +139,8 @@ data class EtteroppgjoerRad(
     val opprettet: Tidspunkt,
     val maanederYtelse: List<Int>,
     val tekniskTid: Tidspunkt,
+    val summerteInntekter: SummerteInntekterAOrdningenStatistikkDto? = null,
+    val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkattStatistikkDto? = null,
     // Følgende rader går på resultat, som ikke nødvendigvis er gitt
     val utbetaltStoenad: Long?,
     val nyBruttoStoenad: Long?,
@@ -142,19 +154,19 @@ data class EtteroppgjoerRad(
     companion object {
         fun fraHendelseOgDto(
             hendelse: EtteroppgjoerHendelseType,
-            forbehandlingDto: EtteroppgjoerForbehandlingDto,
+            statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
             tekniskTid: Tidspunkt,
             resultat: BeregnetEtteroppgjoerResultatDto?,
         ): EtteroppgjoerRad =
             EtteroppgjoerRad(
                 id = -1,
-                forbehandlingId = forbehandlingDto.id,
-                sakId = forbehandlingDto.sak.id,
-                aar = forbehandlingDto.aar,
+                forbehandlingId = statistikkDto.forbehandling.id,
+                sakId = statistikkDto.forbehandling.sak.id,
+                aar = statistikkDto.forbehandling.aar,
                 hendelse = hendelse,
-                forbehandlingStatus = forbehandlingDto.status,
-                opprettet = forbehandlingDto.opprettet,
-                maanederYtelse = finnMaanederMedYtelseIEtteroppgjoersaar(forbehandlingDto.innvilgetPeriode),
+                forbehandlingStatus = statistikkDto.forbehandling.status,
+                opprettet = statistikkDto.forbehandling.opprettet,
+                maanederYtelse = finnMaanederMedYtelseIEtteroppgjoersaar(statistikkDto.forbehandling.innvilgetPeriode),
                 tekniskTid = tekniskTid,
                 utbetaltStoenad = resultat?.utbetaltStoenad,
                 nyBruttoStoenad = resultat?.nyBruttoStoenad,
@@ -164,6 +176,8 @@ data class EtteroppgjoerRad(
                 tilbakekrevingGrense = resultat?.grense?.tilbakekreving,
                 etterbetalingGrense = resultat?.grense?.etterbetaling,
                 resultatType = resultat?.resultatType,
+                summerteInntekter = statistikkDto.summerteInntekter,
+                pensjonsgivendeInntekt = statistikkDto.pensjonsgivendeInntekt,
             )
     }
 }

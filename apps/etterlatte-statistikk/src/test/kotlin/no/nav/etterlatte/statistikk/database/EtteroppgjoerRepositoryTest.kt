@@ -4,13 +4,20 @@ import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldBeEqual
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -39,6 +46,27 @@ class EtteroppgjoerRepositoryTest(
                 tilbakekrevingGrense = 40.0,
                 etterbetalingGrense = 20.0,
                 resultatType = EtteroppgjoerResultatType.INGEN_ENDRING,
+                summerteInntekter =
+                    SummerteInntekterAOrdningenStatistikkDto(
+                        afp = InntektSummert("Filter", listOf(Inntektsmaaned(YearMonth.now(), BigDecimal(123)))),
+                        loenn = InntektSummert("Filter", listOf(Inntektsmaaned(YearMonth.now(), BigDecimal(123)))),
+                        oms = InntektSummert("Filter", listOf(Inntektsmaaned(YearMonth.now(), BigDecimal(123)))),
+                        tidspunktBeregnet = Tidspunkt.now(),
+                    ),
+                pensjonsgivendeInntekt =
+                    PensjonsgivendeInntektFraSkattStatistikkDto(
+                        inntektsaar = 2024,
+                        inntekter =
+                            listOf(
+                                PensjonsgivendeInntekt(
+                                    inntektsaar = 2024,
+                                    skatteordning = "skatteordning",
+                                    loensinntekt = 1,
+                                    naeringsinntekt = 1,
+                                    fiskeFangstFamiliebarnehage = 1,
+                                ),
+                            ),
+                    ),
             )
         val repo = EtteroppgjoerRepository(dataSource)
         repo.lagreEtteroppgjoerRad(rad)

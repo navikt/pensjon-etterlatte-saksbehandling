@@ -49,9 +49,21 @@ const val ETTEROPPGJOER_RESULTAT_RIVER_KEY = "etteroppgave_resultat"
 data class EtteroppgjoerForbehandlingStatistikkDto(
     val forbehandling: EtteroppgjoerForbehandlingDto,
     val utlandstilknytningType: UtlandstilknytningType?,
-    val summerteInntekter: SummerteInntekterAOrdningen,
-    val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt,
+    val summerteInntekter: SummerteInntekterAOrdningenStatistikkDto? = null,
+    val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkattStatistikkDto? = null,
     val saksbehandler: String?,
+)
+
+data class SummerteInntekterAOrdningenStatistikkDto(
+    val afp: InntektSummert,
+    val loenn: InntektSummert,
+    val oms: InntektSummert,
+    val tidspunktBeregnet: Tidspunkt,
+)
+
+data class PensjonsgivendeInntektFraSkattStatistikkDto(
+    val inntektsaar: Int,
+    val inntekter: List<PensjonsgivendeInntekt>,
 )
 
 data class AvbrytForbehandlingRequest(

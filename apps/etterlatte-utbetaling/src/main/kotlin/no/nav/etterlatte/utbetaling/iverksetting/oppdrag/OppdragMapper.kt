@@ -126,12 +126,11 @@ object OppdragMapper {
 }
 
 fun Utbetaling.erEtteroppgjoerslinje(linje: Utbetalingslinje): Boolean {
-    val virkFom = this.utbetalingslinjer.minOf { it.periode.fra }
-    return this.erEtteroppgjoer() && linje.periode.fra.year == virkFom.year && linje.periode.til?.year == virkFom.year
+    val utbetalingGjelderEtteroppgjoer =
+        this.sakType == Saktype.OMSTILLINGSSTOENAD && this.vedtak.behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER
+    val etteroppgjoersAar = this.utbetalingslinjer.minOf { it.periode.fra }.year
+    return utbetalingGjelderEtteroppgjoer && linje.periode.fra.year == etteroppgjoersAar && linje.periode.til?.year == etteroppgjoersAar
 }
-
-private fun Utbetaling.erEtteroppgjoer(): Boolean =
-    this.sakType == Saktype.OMSTILLINGSSTOENAD && this.vedtak.behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER
 
 fun Saktype.tilKodeFagomraade(): String =
     when (this) {

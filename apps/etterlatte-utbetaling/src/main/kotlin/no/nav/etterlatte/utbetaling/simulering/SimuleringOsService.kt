@@ -186,7 +186,8 @@ class SimuleringOsService(
                 },
             )
             if (utbetaling.erEtteroppgjoerslinje(utbetalingslinje)) {
-                this.typeSoknad = "EO"
+                // Denne perioden er en etteroppgjørsperiode og må markeres riktig
+                typeSoknad = "EO"
             }
             kodeEndringLinje = "NY"
             kodeKlassifik = utbetalingslinje.klassifikasjonskode.toString()

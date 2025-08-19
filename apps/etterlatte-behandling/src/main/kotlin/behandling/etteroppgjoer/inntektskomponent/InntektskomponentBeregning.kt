@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -97,13 +98,3 @@ data class SummerteInntekterAOrdningen(
         }
     }
 }
-
-data class InntektSummert(
-    val filter: String,
-    val inntekter: List<Inntektsmaaned>,
-)
-
-data class Inntektsmaaned(
-    val maaned: YearMonth,
-    val beloep: BigDecimal,
-)

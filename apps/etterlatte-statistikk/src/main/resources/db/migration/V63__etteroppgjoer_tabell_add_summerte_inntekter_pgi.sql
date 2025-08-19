@@ -1,0 +1,2 @@
+ALTER TABLE etteroppgjoer_statistikk ADD COLUMN summerte_inntekter JSONB;
+ALTER TABLE etteroppgjoer_statistikk ADD COLUMN pensjonsgivende_inntekter JSONB;

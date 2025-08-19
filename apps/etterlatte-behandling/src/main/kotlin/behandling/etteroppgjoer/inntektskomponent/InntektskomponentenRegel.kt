@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent
 
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel

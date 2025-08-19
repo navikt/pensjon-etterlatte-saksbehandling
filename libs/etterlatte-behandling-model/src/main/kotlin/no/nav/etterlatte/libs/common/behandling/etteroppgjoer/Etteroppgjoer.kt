@@ -1,5 +1,7 @@
-package no.nav.etterlatte.libs.common.behandling
+package no.nav.etterlatte.libs.common.behandling.etteroppgjoer
 
+import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -47,7 +49,21 @@ const val ETTEROPPGJOER_RESULTAT_RIVER_KEY = "etteroppgave_resultat"
 data class EtteroppgjoerForbehandlingStatistikkDto(
     val forbehandling: EtteroppgjoerForbehandlingDto,
     val utlandstilknytningType: UtlandstilknytningType?,
+    val summerteInntekter: SummerteInntekterAOrdningenStatistikkDto? = null,
+    val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkattStatistikkDto? = null,
     val saksbehandler: String?,
+)
+
+data class SummerteInntekterAOrdningenStatistikkDto(
+    val afp: InntektSummert,
+    val loenn: InntektSummert,
+    val oms: InntektSummert,
+    val tidspunktBeregnet: Tidspunkt,
+)
+
+data class PensjonsgivendeInntektFraSkattStatistikkDto(
+    val inntektsaar: Int,
+    val inntekter: List<PensjonsgivendeInntekt>,
 )
 
 data class AvbrytForbehandlingRequest(

@@ -1,7 +1,8 @@
 package no.nav.etterlatte.statistikk.service
 
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingDto
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad
@@ -13,14 +14,14 @@ class EtteroppgjoerStatistikkService(
 ) {
     fun registrerEtteroppgjoerHendelse(
         hendelse: EtteroppgjoerHendelseType,
-        forbehandling: EtteroppgjoerForbehandlingDto,
+        statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
         tekniskTid: Tidspunkt,
         resultat: BeregnetEtteroppgjoerResultatDto?,
     ): EtteroppgjoerRad {
         val etteroppgjoerRad =
             EtteroppgjoerRad.fraHendelseOgDto(
                 hendelse = hendelse,
-                forbehandlingDto = forbehandling,
+                statistikkDto = statistikkDto,
                 tekniskTid = tekniskTid,
                 resultat = resultat,
             )

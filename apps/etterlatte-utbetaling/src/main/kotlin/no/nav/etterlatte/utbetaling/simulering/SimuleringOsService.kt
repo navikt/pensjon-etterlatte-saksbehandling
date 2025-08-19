@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.SimulertBeregning
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.erEtteroppgjoerslinje
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
@@ -184,7 +185,9 @@ class SimuleringOsService(
                     attestantId = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
                 },
             )
-
+            if (utbetaling.erEtteroppgjoerslinje(utbetalingslinje)) {
+                this.typeSoknad = "EO"
+            }
             kodeEndringLinje = "NY"
             kodeKlassifik = utbetalingslinje.klassifikasjonskode.toString()
             sats = utbetalingslinje.beloep

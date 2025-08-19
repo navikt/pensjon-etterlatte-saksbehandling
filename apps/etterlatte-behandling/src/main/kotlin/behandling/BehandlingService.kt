@@ -288,7 +288,7 @@ interface BehandlingService {
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
-    fun settBeregnetForRevurderingTilForbehandling(forbehandling: EtteroppgjoerForbehandling)
+    fun oppdaterRelatertBehandlingIdStatusTilBeregnet(forbehandling: EtteroppgjoerForbehandling)
 }
 
 data class SakMedBehandlingerOgOppgaver(
@@ -982,7 +982,7 @@ internal class BehandlingServiceImpl(
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
 
-    override fun settBeregnetForRevurderingTilForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+    override fun oppdaterRelatertBehandlingIdStatusTilBeregnet(forbehandling: EtteroppgjoerForbehandling) {
         val revurderingForbehandling =
             hentBehandlingerForSak(sakId = forbehandling.sak.id)
                 .firstOrNull { it.relatertBehandlingId == forbehandling.id.toString() && it.status.kanEndres() }

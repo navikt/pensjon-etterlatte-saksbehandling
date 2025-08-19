@@ -9,10 +9,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.navConsumerId
@@ -134,7 +134,9 @@ fun PensjonsgivendeInntektAarResponse.fromResponse() =
                     skatteordning = it.skatteordning,
                     loensinntekt = it.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
                     naeringsinntekt = it.pensjonsgivendeInntektAvNaeringsinntekt ?: 0,
-                    fiskeFangstFamiliebarnehage = it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0,
+                    fiskeFangstFamiliebarnehage =
+                        it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage
+                            ?: 0,
                     inntektsaar = inntektsaar,
                 )
             },

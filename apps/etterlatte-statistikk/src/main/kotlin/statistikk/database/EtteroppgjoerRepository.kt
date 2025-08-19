@@ -93,7 +93,7 @@ class EtteroppgjoerRepository(
                     """
                     SELECT id, forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                       opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type
+                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter
                     FROM etteroppgjoer_statistikk
                     WHERE forbehandling_id = ?
                     """.trimIndent(),
@@ -126,7 +126,7 @@ private fun ResultSet.tilEtteroppgjoerRad(): EtteroppgjoerRad =
                 .takeUnless { wasNull() }
                 ?.let { enumValueOf<EtteroppgjoerResultatType>(it) },
         summerteInntekter = getString("summerte_inntekter")?.let { objectMapper.readValue(it) },
-        pensjonsgivendeInntekt = getString("pensjonsgivende_inntekt")?.let { objectMapper.readValue(it) },
+        pensjonsgivendeInntekt = getString("pensjonsgivende_inntekter")?.let { objectMapper.readValue(it) },
     )
 
 data class EtteroppgjoerRad(

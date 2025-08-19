@@ -1,9 +1,9 @@
 package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingDto
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException

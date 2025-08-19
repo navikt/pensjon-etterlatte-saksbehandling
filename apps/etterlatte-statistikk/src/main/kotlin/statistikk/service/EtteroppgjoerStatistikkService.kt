@@ -1,7 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerForbehandlingDto
-import no.nav.etterlatte.libs.common.behandling.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad

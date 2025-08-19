@@ -282,8 +282,10 @@ class EtteroppgjoerForbehandlingService(
         val beregnetForbehandling =
             forbehandling
                 .tilBeregnet()
-                .also { dao.lagreForbehandling(it) }
-                .also { behandlingService.oppdaterRelatertBehandlingIdStatusTilBeregnet(forbehandling) }
+                .also {
+                    dao.lagreForbehandling(it)
+                    behandlingService.oppdaterRelatertBehandlingIdStatusTilBeregnet(it)
+                }
 
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = beregnetForbehandling,

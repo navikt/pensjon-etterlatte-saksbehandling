@@ -646,7 +646,7 @@ internal class ApplicationContext(
         )
 
     private val etteroppgjoerHendelseService =
-        EtteroppgjoerHendelseService(rapid, hendelseDao)
+        EtteroppgjoerHendelseService(rapid, hendelseDao, behandlingService, etteroppgjoerForbehandlingDao)
 
     val etteroppgjoerForbehandlingService =
         EtteroppgjoerForbehandlingService(

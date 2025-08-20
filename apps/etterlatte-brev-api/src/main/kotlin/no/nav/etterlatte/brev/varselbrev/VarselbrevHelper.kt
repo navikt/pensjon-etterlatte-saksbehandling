@@ -8,12 +8,9 @@ import java.time.YearMonth
 
 // For å skille mellom 6 mnd varsel og over 12 mnd varsel
 fun gjelderAktivitetspliktVarselOver12mnd(
-    detaljertBehandling: DetaljertBehandling?,
-    grunnlag: Grunnlag?,
+    detaljertBehandling: DetaljertBehandling,
+    grunnlag: Grunnlag,
 ): Boolean {
-    requireNotNull(detaljertBehandling) { "Behandling er null - kan ikke utlede virkningstidspunkt / opphoertPleierforhold" }
-    requireNotNull(grunnlag) { "Grunnlag er null - kan ikke utlede dødsdato" }
-
     val erTidligereFamiliepleier = detaljertBehandling.tidligereFamiliepleier?.svar == true
 
     val doedsdatoEllerOpphoertPleieforhold =
@@ -32,5 +29,5 @@ fun gjelderAktivitetspliktVarselOver12mnd(
     }
 
     val virk = detaljertBehandling.virkningstidspunkt?.dato
-    return virk!!.isAfter(YearMonth.from(doedsdatoEllerOpphoertPleieforhold!!.plusMonths(12)))
+    return virk!!.isAfter(YearMonth.from(doedsdatoEllerOpphoertPleieforhold.plusMonths(12)))
 }

@@ -215,11 +215,15 @@ class VedtaksbrevService(
             }
         }) {
             if (brevtype == Brevtype.VARSEL) {
+                val behandling = behandlingService.hentBehandling(behandlingId, brukerTokenInfo)
+                val grunnlag = behandlingService.hentGrunnlag(behandling.id, brukerTokenInfo)
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
                     it.sakType,
                     brukerTokenInfo,
                     it.utlandstilknytningType,
                     it.revurderingsaarsak,
+                    grunnlag,
+                    behandling,
                 )
             } else {
                 brevDataMapperRedigerbartUtfallVedtak.brevData(it)

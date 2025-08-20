@@ -17,8 +17,8 @@ object BrevDataMapperRedigerbartUtfallVarsel {
         bruker: BrukerTokenInfo,
         utlandstilknytningType: UtlandstilknytningType?,
         revurderingsaarsak: Revurderingaarsak? = null,
-        grunnlag: Grunnlag? = null,
-        detaljertBehandling: DetaljertBehandling? = null,
+        grunnlag: Grunnlag,
+        detaljertBehandling: DetaljertBehandling,
     ) = when (sakType) {
         SakType.BARNEPENSJON ->
             BarnepensjonVarselRedigerbartUtfall(

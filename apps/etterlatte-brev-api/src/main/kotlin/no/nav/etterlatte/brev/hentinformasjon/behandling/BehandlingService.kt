@@ -49,4 +49,9 @@ class BehandlingService(
     ) = behandlingKlient.hentTidligereFamiliepleier(behandlingId, brukerTokenInfo)
 
     suspend fun hentLand(brukerTokenInfo: BrukerTokenInfo) = behandlingKlient.hentLand(brukerTokenInfo)
+
+    suspend fun hentGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = behandlingKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
 }

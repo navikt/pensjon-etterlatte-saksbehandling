@@ -36,7 +36,7 @@ class EtteroppgjoerJobService(
         }
     }
 
-    fun startEtteroppgjoerKjoering() {
+    suspend fun startEtteroppgjoerKjoering() {
         val yearNow = YearMonth.now().year
         val aarMellom2024OgNaa = (2024..yearNow).toList()
 
@@ -72,7 +72,7 @@ class EtteroppgjoerJobService(
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
-    fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
+    suspend fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
         logger.info("Starter oppretting av etteroppgjør for inntektsår $inntektsaar")
         val sakerMedUtbetaling =
             runBlocking {

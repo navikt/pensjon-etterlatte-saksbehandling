@@ -73,14 +73,7 @@ class EtteroppgjoerDao(
             }
         }
 
-    private fun ResultSet.toEtteroppgjoer() =
-        Etteroppgjoer(
-            sakId = SakId(getLong("sak_id")),
-            inntektsaar = getInt("inntektsaar"),
-            status = EtteroppgjoerStatus.valueOf(getString("status")),
-        )
-
-    fun lagerEtteroppgjoer(
+    fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
         inntektsaar: Int,
         status: EtteroppgjoerStatus,
@@ -89,23 +82,54 @@ class EtteroppgjoerDao(
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO etteroppgjoer(
-                        sak_id, inntektsaar, opprettet, status
-                    ) 
-                    VALUES (?, ?, ?, ?) 
-                    ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
-                        status = excluded.status
+                    UPDATE etteroppgjoer
+                    SET status = ?
+                    WHERE sak_id = ? AND inntektsaar = ?
                     """.trimIndent(),
                 )
-            statement.setSakId(1, sakId)
-            statement.setInt(2, inntektsaar)
-            statement.setTidspunkt(3, Tidspunkt(java.time.Instant.now()))
-            statement.setString(4, status.name)
-            statement.executeUpdate().also {
-                krev(it == 1) {
-                    "Kunne ikke lagre etteroppgjør for sakid $sakId"
+
+            statement.setString(1, status.name)
+            statement.setSakId(2, sakId)
+            statement.setInt(3, inntektsaar)
+
+            val updated = statement.executeUpdate()
+            krev(updated == 1) { "Kunne ikke lagre etteroppgjør for sakid $sakId" }
+        }
+    }
+
+    fun lagerEtteroppgjoer(etteroppgjoer: Etteroppgjoer) =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        INSERT INTO etteroppgjoer(
+                            sak_id, inntektsaar, opprettet, status
+                        ) 
+                        VALUES (?, ?, ?, ?) 
+                        ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
+                            status = excluded.status
+                        """.trimIndent(),
+                    )
+
+                with(etteroppgjoer) {
+                    statement.setSakId(1, sakId)
+                    statement.setInt(2, inntektsaar)
+                    statement.setTidspunkt(3, Tidspunkt(java.time.Instant.now()))
+                    statement.setString(4, status.name)
+                    statement.executeUpdate().also {
+                        krev(it == 1) {
+                            "Kunne ikke lagre etteroppgjør for sakid $sakId"
+                        }
+                    }
                 }
             }
         }
-    }
+
+    private fun ResultSet.toEtteroppgjoer() =
+        Etteroppgjoer(
+            sakId = SakId(getLong("sak_id")),
+            inntektsaar = getInt("inntektsaar"),
+            status = EtteroppgjoerStatus.valueOf(getString("status")),
+        )
 }

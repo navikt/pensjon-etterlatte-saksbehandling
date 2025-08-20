@@ -163,7 +163,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns listOf(sak)
         every {
-            behandlingService.hentSisteIverksatte(
+            behandlingService.hentSisteIverksatteBehandling(
                 sak.id,
             )
         } returns foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
@@ -209,7 +209,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedshendelseInternalAvdoed.avdoedFnr,
             )
         } returns listOf(sak)
-        every { behandlingService.hentSisteIverksatte(sak.id) } returns null
+        every { behandlingService.hentSisteIverksatteBehandling(sak.id) } returns null
         every {
             pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
@@ -295,7 +295,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns listOf(sak)
         every {
-            behandlingService.hentSisteIverksatte(
+            behandlingService.hentSisteIverksatteBehandling(
                 sakIdd,
             )
         } returns foerstegangsbehandling(sakId = sakIdd, status = BehandlingStatus.IVERKSATT)

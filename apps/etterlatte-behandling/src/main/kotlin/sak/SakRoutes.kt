@@ -1,7 +1,6 @@
 package no.nav.etterlatte.sak
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -169,7 +168,7 @@ internal fun Route.sakSystemRoutes(
                 val sisteIverksatteBehandling =
                     inTransaction {
                         behandlingService
-                            .hentSisteIverksatte(sakId)
+                            .hentSisteIverksatteBehandling(sakId)
                             ?.let { SisteIverksatteBehandling(it.id) }
                     } ?: throw GenerellIkkeFunnetException()
 
@@ -266,7 +265,7 @@ internal fun Route.sakWebRoutes(
                 val sisteIverksatteBehandling =
                     inTransaction {
                         behandlingService
-                            .hentSisteIverksatte(sakId)
+                            .hentSisteIverksatteBehandling(sakId)
                             ?.let { SisteIverksatteBehandling(it.id) }
                     } ?: throw GenerellIkkeFunnetException()
 

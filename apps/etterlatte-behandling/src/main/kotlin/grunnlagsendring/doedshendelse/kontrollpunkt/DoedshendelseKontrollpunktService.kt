@@ -159,7 +159,7 @@ class DoedshendelseKontrollpunktService(
         } else if (sakerForAvdoed.size > 1) {
             throw RuntimeException("Person: ${hendelse.avdoedFnr.maskerFnr()} hendelseid: ${hendelse.id} har 2 saker, må sjekkes manuelt")
         } else {
-            val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sakerForAvdoed[0].id)
+            val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sakerForAvdoed[0].id)
             if (sisteIverksatteBehandling != null) {
                 val duplikat =
                     sakerForAvdoed.firstNotNullOfOrNull {

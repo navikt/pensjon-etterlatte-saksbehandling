@@ -33,7 +33,7 @@ kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version 
 
 klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.9.24" }
 
-kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.0.1" }
+kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.1.0" }
 
 pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.5" }
 

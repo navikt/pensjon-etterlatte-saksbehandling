@@ -5,7 +5,6 @@ import { HeaderBanner } from '~shared/header/HeaderBanner'
 import { Person } from '~components/person/Person'
 import useHentInnloggetSaksbehandler from 'src/shared/hooks/useSettInnloggetSaksbehandler'
 import { nb } from 'date-fns/locale'
-import { registerLocale } from 'react-datepicker'
 import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
@@ -37,7 +36,6 @@ function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
 
   setDefaultOptions({ locale: nb })
-  registerLocale('nb', nb)
   useLastUmami()
 
   const dispatch = useAppDispatch()

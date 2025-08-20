@@ -213,16 +213,16 @@ class BehandlingKlientImpl(
                     postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn),
                 )
 
-        return when {
-            response.isOk -> true
-            else -> {
+        return response.mapBoth(
+            success = { true },
+            failure = { error ->
                 logger.error(
                     "Tildeling av $oppgaveTilAttestering til systembruker for attestering feilet",
-                    response.error,
+                    error,
                 )
-                throw response.error
-            }
-        }
+                throw error
+            },
+        )
     }
 
     override suspend fun fattVedtakBehandling(
@@ -243,16 +243,17 @@ class BehandlingKlientImpl(
                     postBody = vedtakEndringDTO,
                 )
             }
-        return when {
-            response.isOk -> true
-            else -> {
+
+        return response.mapBoth(
+            success = { true },
+            failure = { error ->
                 logger.error(
                     "Kan ikke fatte oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,
                 )
-                throw response.error
-            }
-        }
+                throw error
+            },
+        )
     }
 
     override suspend fun underkjennVedtak(
@@ -271,16 +272,17 @@ class BehandlingKlientImpl(
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = vedtakEndringDTO,
             )
-        return when {
-            response.isOk -> true
-            else -> {
+
+        return response.mapBoth(
+            success = { true },
+            failure = { error ->
                 logger.error(
                     "Kan ikke underkjenne oppgaver og commite vedtak av type ${vedtakEndringDTO.vedtakType} " +
                         "for behandling ${vedtakEndringDTO.sakIdOgReferanse.referanse}",
                 )
-                throw response.error
-            }
-        }
+                throw error
+            },
+        )
     }
 
     override suspend fun attesterVedtak(
@@ -299,16 +301,17 @@ class BehandlingKlientImpl(
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = vedtakEndringDTO,
             )
-        return when {
-            response.isOk -> true
-            else -> {
+
+        return response.mapBoth(
+            success = { true },
+            failure = { error ->
                 logger.error(
                     "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,
                 )
-                throw response.error
-            }
-        }
+                throw error
+            },
+        )
     }
 
     override suspend fun kanFatteVedtak(

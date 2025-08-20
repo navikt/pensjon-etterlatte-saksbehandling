@@ -4,8 +4,8 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
-jackson-version = "2.19.1"
-jupiter-version = "5.13.2"
+jackson-version = "2.19.2"
+jupiter-version = "5.13.4"
 ktor-version = "3.2.3"
 navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
@@ -15,11 +15,11 @@ rapidsandrivers-version = "2025081112301754908236.47b364d7b14c" # OBS! tbdlibs b
 tbdlibs-version = "2025.08.07-09.55-15719a86" # OBS! rapidsandrivers bruker denne. De bør stemme overens
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.1" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.10.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.10.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.11.1" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.11.1" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
@@ -33,7 +33,7 @@ kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version 
 
 klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.9.24" }
 
-kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.0.1" }
+kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.1.0" }
 
 pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.5" }
 
@@ -91,13 +91,13 @@ test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", versi
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.9.1" }
-test-mockk = { module = "io.mockk:mockk", version = "1.14.4" }
+test-mockk = { module = "io.mockk:mockk", version = "1.14.5" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }
 
-commons-compress = { module = "org.apache.commons:commons-compress", version = "1.27.1" }
-unleash-client = { module = "io.getunleash:unleash-client-java", version = "11.0.1" }
+commons-compress = { module = "org.apache.commons:commons-compress", version = "1.28.0" }
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "11.1.0" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

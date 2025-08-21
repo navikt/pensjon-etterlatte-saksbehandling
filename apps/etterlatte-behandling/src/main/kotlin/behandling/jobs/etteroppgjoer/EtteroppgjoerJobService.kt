@@ -52,10 +52,6 @@ class EtteroppgjoerJobService(
 
         for (inntektsaar in aarMellom2024OgNaa) {
             finnOgOpprettEtteroppgjoer(inntektsaar)
-
-            // TODO: legge inn denne når vi har testet litt mer?
-            // skatteoppgjoerHendelserService.startHendelsesKjoering(HendelseKjoeringRequest(500),"automatisk")
-
             finnOgOpprettForbehandlinger(inntektsaar, filter)
         }
     }

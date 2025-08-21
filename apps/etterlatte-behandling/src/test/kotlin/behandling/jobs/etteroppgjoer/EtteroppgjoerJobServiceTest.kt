@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -43,6 +44,7 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
 
     private val saksbehandler = mockSaksbehandler("SB007")
     private val vedtakKlientMock = mockk<VedtakKlient>()
+    private val behandlingServiceMock = mockk<BehandlingService>()
 
     @BeforeAll
     fun start() {
@@ -66,6 +68,8 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
         val currentYear = YearMonth.now().year
         val sak = opprettSak()
         opprettBehandling(sak)
+
+        coEvery { behandlingServiceMock.hentSisteIverksatteBehandling(sak.id) } returns null
 
         coEvery {
             vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear - 1, any())

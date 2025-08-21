@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -48,6 +49,11 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForStatus(status, inntektsaar)
 
+    fun hentEtteroppgjoerForFilter(
+        filter: EtteroppgjoerFilter,
+        inntektsaar: Int,
+    ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForFilter(filter, inntektsaar)
+
     fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
         inntektsaar: Int,
@@ -78,8 +84,8 @@ class EtteroppgjoerService(
                 inntektsaar = inntektsaar,
                 status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
                 harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
-                harInstitusjonsEllerFengselsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id),
-                harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed === null,
+                harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id),
+                harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,
                 harBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
             )
 
@@ -97,7 +103,7 @@ class EtteroppgjoerService(
             )
 
         return sanksjoner.any { sanksjon ->
-            sanksjon.fom.year == inntektsaar || sanksjon.tom?.year == inntektsaar
+            sanksjon.fom.year == inntektsaar && sanksjon.tom == null
         }
     }
 

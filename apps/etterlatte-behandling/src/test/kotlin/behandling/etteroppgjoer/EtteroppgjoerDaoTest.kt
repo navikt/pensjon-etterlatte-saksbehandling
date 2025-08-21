@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.common.Enheter
@@ -58,7 +59,7 @@ class EtteroppgjoerDaoTest(
 
     @Test
     fun `lagre og oppdatere etteroppgjoer`() {
-        etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
         val lagret = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(lagret!!) {
             sakId shouldBe sakId
@@ -66,7 +67,7 @@ class EtteroppgjoerDaoTest(
             status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
         }
 
-        etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING))
         val oppdatert = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(oppdatert!!) {
             sakId shouldBe sakId
@@ -77,8 +78,8 @@ class EtteroppgjoerDaoTest(
 
     @Test
     fun `hent etteroppgjoer for status`() {
-        etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
-        etteroppgjoerDao.lagerEtteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
 
         // negative
         etteroppgjoerDao.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, 2024) shouldBe emptyList()

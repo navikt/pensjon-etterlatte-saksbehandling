@@ -61,6 +61,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -173,6 +174,13 @@ class BeregningKlientTest :
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+    }
+
+    override suspend fun hentSanksjoner(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Sanksjon> {
+        TODO("Not yet implemented")
     }
 }
 

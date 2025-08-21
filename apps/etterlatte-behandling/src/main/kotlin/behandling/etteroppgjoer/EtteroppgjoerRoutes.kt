@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -193,8 +194,11 @@ fun Route.etteroppgjoerRoutes(
                     krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
                         "Inntektsaar mangler"
                     }
+
                 inTransaction {
-                    etteroppgjoerJobService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                    runBlocking {
+                        etteroppgjoerJobService.finnOgOpprettEtteroppgjoer(inntektsaar)
+                    }
                 }
                 call.respond(HttpStatusCode.OK)
             }
@@ -209,7 +213,9 @@ fun Route.etteroppgjoerRoutes(
                         "Inntektsaar mangler"
                     }
 
-                etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar)
+                val filter = call.request.queryParameters["filter"]?.let { EtteroppgjoerFilter.valueOf(it) }
+
+                etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar, filter)
             }
         }
     }

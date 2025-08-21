@@ -9,9 +9,11 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -31,6 +33,7 @@ class EtteroppgjoerDaoTest(
     private lateinit var etteroppgjoerDao: EtteroppgjoerDao
 
     private lateinit var sak: Sak
+    private lateinit var sak2: Sak
 
     @BeforeAll
     fun setup() {
@@ -55,24 +58,41 @@ class EtteroppgjoerDaoTest(
                 type = SakType.OMSTILLINGSSTOENAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
+
+        sak2 =
+            sakSkrivDao.opprettSak(
+                fnr = "en bruker",
+                type = SakType.OMSTILLINGSSTOENAD,
+                enhet = Enheter.defaultEnhet.enhetNr,
+            )
     }
 
     @Test
     fun `lagre og oppdatere etteroppgjoer`() {
-        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagerEtteroppgjoer(
+            Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false),
+        )
         val lagret = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(lagret!!) {
             sakId shouldBe sakId
             inntektsaar shouldBe inntektsaar
             status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+            harSanksjon shouldBe false
+            harOpphoer shouldBe false
+            harBosattUtland shouldBe false
+            harInstitusjonsopphold shouldBe false
         }
 
-        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING))
+        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING, true, true, true, true))
         val oppdatert = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(oppdatert!!) {
             sakId shouldBe sakId
             inntektsaar shouldBe inntektsaar
             status shouldBe EtteroppgjoerStatus.UNDER_FORBEHANDLING
+            harSanksjon shouldBe true
+            harOpphoer shouldBe true
+            harBosattUtland shouldBe true
+            harInstitusjonsopphold shouldBe true
         }
     }
 
@@ -88,6 +108,22 @@ class EtteroppgjoerDaoTest(
         with(resultat) {
             size shouldBe 1
             first().inntektsaar shouldBe 2024
+        }
+    }
+
+    @Test
+    fun `hent etteroppgjoer for filter`() {
+        val inntektsaar = 2024
+        val enkelSak = Etteroppgjoer(sak.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
+        val annenSak = Etteroppgjoer(sak2.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, true, false, false, false)
+        etteroppgjoerDao.lagerEtteroppgjoer(enkelSak)
+        etteroppgjoerDao.lagerEtteroppgjoer(annenSak)
+
+        val resultat = etteroppgjoerDao.hentEtteroppgjoerForFilter(EtteroppgjoerFilter.ENKEL, inntektsaar)
+        with(resultat) {
+            size shouldBe 1
+            first().inntektsaar shouldBe inntektsaar
+            first().sakId shouldBe enkelSak.sakId
         }
     }
 }

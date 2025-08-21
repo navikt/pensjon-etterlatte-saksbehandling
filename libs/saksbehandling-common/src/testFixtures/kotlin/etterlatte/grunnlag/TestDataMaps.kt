@@ -341,7 +341,7 @@ fun soeker(): Person =
         null,
         randomUUID().toString(),
         SOEKER_FOEDSELSNUMMER,
-        null,
+        LocalDate.of(2005, 1, 1),
         1234,
         null,
         null,

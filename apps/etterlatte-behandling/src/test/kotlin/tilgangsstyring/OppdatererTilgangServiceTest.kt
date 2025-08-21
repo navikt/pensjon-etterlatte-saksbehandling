@@ -15,7 +15,9 @@ import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -31,6 +33,7 @@ import no.nav.etterlatte.sak.SakTilgang
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.time.LocalDate
 
 class OppdatererTilgangServiceTest {
     private val skjermingKlient = mockk<SkjermingKlientImpl>()
@@ -88,6 +91,7 @@ class OppdatererTilgangServiceTest {
     fun `Skal sette EGEN_ANSATT hvis den finnes og ingen gradering`() {
         val saktype = SakType.BARNEPENSJON
         coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery { pdltjenesterKlient.hentPerson(soeker, any(), any()) } returns soekerPerson(soeker)
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         coEvery { skjermingKlient.personErSkjermet(GJENLEVENDE_FOEDSELSNUMMER.value) } returns true
 
@@ -113,6 +117,7 @@ class OppdatererTilgangServiceTest {
     fun `Skal ikke oppdatere enheter om det er en vanlig sak(ikke adressebeskyttelse eller egen ansatt)`() {
         val saktype = SakType.BARNEPENSJON
         coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery { pdltjenesterKlient.hentPerson(soeker, any(), any()) } returns soekerPerson(soeker)
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         val enhet = Enheter.defaultEnhet
         every { brukerService.finnEnhetForPersonOgTema(soeker, SakType.BARNEPENSJON.tema, SakType.BARNEPENSJON) } returns
@@ -154,6 +159,7 @@ class OppdatererTilgangServiceTest {
     fun `Skal sette ny enhet hvis saken var egen ansatt men ikke er det lenger`() {
         val saktype = SakType.BARNEPENSJON
         coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery { pdltjenesterKlient.hentPerson(soeker, any(), any()) } returns soekerPerson(soeker)
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         val enhet = Enheter.defaultEnhet
         every { brukerService.finnEnhetForPersonOgTema(soeker, SakType.BARNEPENSJON.tema, SakType.BARNEPENSJON) } returns
@@ -215,6 +221,7 @@ class OppdatererTilgangServiceTest {
     ) {
         val saktype = SakType.BARNEPENSJON
         coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery { pdltjenesterKlient.hentPerson(soeker, any(), any()) } returns soekerPerson(soeker)
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         val enhet = Enheter.defaultEnhet
         every { brukerService.finnEnhetForPersonOgTema(soeker, SakType.BARNEPENSJON.tema, SakType.BARNEPENSJON) } returns
@@ -253,6 +260,117 @@ class OppdatererTilgangServiceTest {
     }
 
     @Test
+    fun `Skal fjerne skjerming hvis soeker BP er over 18 aar og selv ikke er skjermet`() {
+        val soeker18Aar = soekerPerson(soeker, foedselsdato = LocalDate.now().minusYears(18))
+        coEvery {
+            pdltjenesterKlient.hentPerson(soeker, any(), any())
+        } returns soeker18Aar
+        val saktype = SakType.BARNEPENSJON
+        coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
+        coEvery { skjermingKlient.personErSkjermet(persongalleri.gjenlevende.first()) } returns true
+        val enhet = Enheter.defaultEnhet
+        every {
+            brukerService.finnEnhetForPersonOgTema(
+                soeker,
+                SakType.BARNEPENSJON.tema,
+                SakType.BARNEPENSJON,
+            )
+        } returns
+            ArbeidsFordelingEnhet(
+                enhet.navn,
+                enhet.enhetNr,
+            )
+
+        val sakId = SakId(1L)
+        val skjermetSak = Sak(soeker, saktype, sakId, Enheter.EGNE_ANSATTE.enhetNr, AdressebeskyttelseGradering.UGRADERT, true)
+
+        every { sakLesDao.hentSak(sakId) } returns skjermetSak
+        every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
+            SakMedGraderingOgSkjermet(
+                skjermetSak.id,
+                skjermetSak.adressebeskyttelse,
+                skjermetSak.erSkjermet,
+                skjermetSak.enhet,
+            )
+        every { sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT) } just Runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
+        every { sakTilgang.oppdaterSkjerming(skjermetSak.id, false) } just Runs
+        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == skjermetSak.id }) } just Runs
+
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+
+        verify(exactly = 0) {
+            sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
+        }
+        verify(exactly = 1) {
+            sakTilgang.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
+            sakTilgang.oppdaterSkjerming(skjermetSak.id, false)
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(skjermetSak.id, enhet.enhetNr))
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == skjermetSak.id })
+        }
+    }
+
+    @Test
+    fun `Skal ikke fjerne gradering og skjerming hvis soeker er fylt 18 aar og andre i saken har adressebeskyttelse`() {
+        val soeker18Aar = soekerPerson(soeker, foedselsdato = LocalDate.now().minusYears(18))
+        coEvery {
+            pdltjenesterKlient.hentPerson(soeker, any(), any())
+        } returns soeker18Aar
+        val saktype = SakType.BARNEPENSJON
+        coEvery {
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(any())
+        } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery {
+            pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == persongalleri.soesken.first() })
+        } returns AdressebeskyttelseGradering.FORTROLIG
+
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
+        coEvery { skjermingKlient.personErSkjermet(persongalleri.gjenlevende.first()) } returns true
+        val expectedEnhet =
+            ArbeidsFordelingEnhet(
+                Enheter.PORSGRUNN.navn,
+                Enheter.PORSGRUNN.enhetNr,
+            )
+        every {
+            brukerService.finnEnhetForPersonOgTema(
+                soeker,
+                SakType.BARNEPENSJON.tema,
+                SakType.BARNEPENSJON,
+            )
+        } returns
+            expectedEnhet
+
+        val sakId = SakId(1L)
+        val skjermetSak = Sak(soeker, saktype, sakId, Enheter.STEINKJER.enhetNr, AdressebeskyttelseGradering.FORTROLIG, true)
+
+        every { sakLesDao.hentSak(sakId) } returns skjermetSak
+        every { sakTilgang.hentGraderingForSak(sakId, any(Systembruker::class)) } returns
+            SakMedGraderingOgSkjermet(
+                skjermetSak.id,
+                skjermetSak.adressebeskyttelse,
+                skjermetSak.erSkjermet,
+                skjermetSak.enhet,
+            )
+        every { sakTilgang.oppdaterAdressebeskyttelse(any(), any()) } just Runs
+        every { sakSkrivDao.oppdaterEnhet(any()) } just Runs
+        every { sakTilgang.oppdaterSkjerming(skjermetSak.id, false) } just Runs
+        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == skjermetSak.id }) } just Runs
+
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+
+        verify(exactly = 1) {
+            sakTilgang.oppdaterAdressebeskyttelse(skjermetSak.id, AdressebeskyttelseGradering.FORTROLIG)
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(skjermetSak.id, expectedEnhet.enhetNr))
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(SakMedEnhet(skjermetSak.id, expectedEnhet.enhetNr)))
+        }
+        verify(exactly = 0) {
+            sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
+            sakTilgang.oppdaterSkjerming(skjermetSak.id, false)
+        }
+    }
+
+    @Test
     fun `Skal fjerne skjerming fra sak`() {
         val saktype = SakType.BARNEPENSJON
         val sakId = SakId(1L)
@@ -281,4 +399,33 @@ class OppdatererTilgangServiceTest {
             )
         }
     }
+
+    fun soekerPerson(
+        soekerFnr: String,
+        foedselsdato: LocalDate = LocalDate.now().minusYears(15),
+    ): Person =
+        Person(
+            fornavn = "Ola",
+            mellomnavn = null,
+            etternavn = "Nordmann",
+            foedselsnummer = Folkeregisteridentifikator.of(soekerFnr),
+            foedselsdato = foedselsdato,
+            foedselsaar = foedselsdato.year,
+            foedeland = null,
+            doedsdato = null,
+            adressebeskyttelse = null,
+            bostedsadresse = null,
+            deltBostedsadresse = null,
+            kontaktadresse = null,
+            oppholdsadresse = null,
+            sivilstatus = null,
+            sivilstand = null,
+            statsborgerskap = null,
+            pdlStatsborgerskap = null,
+            utland = null,
+            familieRelasjon = null,
+            avdoedesBarn = null,
+            avdoedesBarnUtenIdent = null,
+            vergemaalEllerFremtidsfullmakt = null,
+        )
 }

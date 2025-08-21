@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -69,7 +68,7 @@ class EtteroppgjoerDaoTest(
 
     @Test
     fun `lagre og oppdatere etteroppgjoer`() {
-        etteroppgjoerDao.lagerEtteroppgjoer(
+        etteroppgjoerDao.lagreEtteroppgjoer(
             Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false),
         )
         val lagret = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
@@ -83,7 +82,7 @@ class EtteroppgjoerDaoTest(
             harInstitusjonsopphold shouldBe false
         }
 
-        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING, true, true, true, true))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING, true, true, true, true))
         val oppdatert = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(oppdatert!!) {
             sakId shouldBe sakId
@@ -98,8 +97,8 @@ class EtteroppgjoerDaoTest(
 
     @Test
     fun `hent etteroppgjoer for status`() {
-        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
-        etteroppgjoerDao.lagerEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
 
         // negative
         etteroppgjoerDao.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, 2024) shouldBe emptyList()
@@ -116,8 +115,8 @@ class EtteroppgjoerDaoTest(
         val inntektsaar = 2024
         val enkelSak = Etteroppgjoer(sak.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
         val annenSak = Etteroppgjoer(sak2.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, true, false, false, false)
-        etteroppgjoerDao.lagerEtteroppgjoer(enkelSak)
-        etteroppgjoerDao.lagerEtteroppgjoer(annenSak)
+        etteroppgjoerDao.lagreEtteroppgjoer(enkelSak)
+        etteroppgjoerDao.lagreEtteroppgjoer(annenSak)
 
         val resultat = etteroppgjoerDao.hentEtteroppgjoerForFilter(EtteroppgjoerFilter.ENKEL, inntektsaar)
         with(resultat) {

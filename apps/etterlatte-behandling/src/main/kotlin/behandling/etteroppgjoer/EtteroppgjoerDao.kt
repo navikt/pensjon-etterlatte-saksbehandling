@@ -127,7 +127,7 @@ class EtteroppgjoerDao(
         }
     }
 
-    fun lagerEtteroppgjoer(etteroppgjoer: Etteroppgjoer) =
+    fun lagreEtteroppgjoer(etteroppgjoer: Etteroppgjoer) =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

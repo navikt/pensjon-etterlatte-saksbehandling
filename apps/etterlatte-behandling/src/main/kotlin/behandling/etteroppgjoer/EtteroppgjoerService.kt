@@ -1,11 +1,9 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -91,7 +89,7 @@ class EtteroppgjoerService(
                 harBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
             )
 
-        dao.lagerEtteroppgjoer(etteroppgjoer)
+        dao.lagreEtteroppgjoer(etteroppgjoer)
     }
 
     private suspend fun utledSanksjoner(

@@ -56,6 +56,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
@@ -112,7 +113,17 @@ class BeregningKlientTest :
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto {
-        TODO("Not yet implemented")
+        val mockPeriode = mockk<BeregningOgAvkortingPeriodeDto>()
+        every { mockPeriode.institusjonsopphold } returns null
+
+        return BeregningOgAvkortingDto(
+            perioder =
+                listOf(
+                    mockPeriode,
+                ),
+            erInnvilgelsesaar = false,
+            endringIUtbetalingVedVirk = false,
+        )
     }
 
     override suspend fun slettAvkorting(
@@ -179,9 +190,7 @@ class BeregningKlientTest :
     override suspend fun hentSanksjoner(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Sanksjon> {
-        TODO("Not yet implemented")
-    }
+    ): List<Sanksjon> = emptyList()
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {

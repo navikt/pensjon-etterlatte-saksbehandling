@@ -3,16 +3,23 @@ package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -44,7 +51,6 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
 
     private val saksbehandler = mockSaksbehandler("SB007")
     private val vedtakKlientMock = mockk<VedtakKlient>()
-    private val behandlingServiceMock = mockk<BehandlingService>()
 
     @BeforeAll
     fun start() {
@@ -69,8 +75,9 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
         val sak = opprettSak()
         opprettBehandling(sak)
 
-        coEvery { behandlingServiceMock.hentSisteIverksatteBehandling(sak.id) } returns null
-
+        coEvery {
+            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear - 1, any())
+        } returns listOf(sak.id)
         coEvery {
             vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear - 1, any())
         } returns listOf(sak.id)
@@ -78,14 +85,18 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
             vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear, any())
         } returns emptyList()
 
-        applicationContext.etteroppgjoerJobService.run()
-
         inTransaction {
+            runBlocking {
+                applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering(EtteroppgjoerFilter.ENKEL)
+            }
+
             val etteroppgjoerForForrigeAar =
                 applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear - 1)!!
-            etteroppgjoerForForrigeAar.sakId shouldBe sak.id
-            etteroppgjoerForForrigeAar.status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
-            etteroppgjoerForForrigeAar.inntektsaar shouldBe currentYear - 1
+            with(etteroppgjoerForForrigeAar) {
+                sakId shouldBe sak.id
+                status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+                inntektsaar shouldBe currentYear - 1
+            }
 
             val etteroppgjoerForIAar =
                 applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear)
@@ -118,14 +129,16 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
     private fun opprettBehandling(sak: Sak) {
         inTransaction {
             val behandlingFactory = applicationContext.behandlingFactory
-            behandlingFactory.opprettBehandling(
-                sakId = sak.id,
-                persongalleri = defaultPersongalleriGydligeFnr,
-                mottattDato = null,
-                kilde = Vedtaksloesning.GJENNY,
-                request = behandlingFactory.hentDataForOpprettBehandling(sak.id),
-                opprinnelse = BehandlingOpprinnelse.JOURNALFOERING,
-            )
+            val behandlingOgOppgave =
+                behandlingFactory.opprettBehandling(
+                    sakId = sak.id,
+                    persongalleri = defaultPersongalleriGydligeFnr,
+                    mottattDato = null,
+                    kilde = Vedtaksloesning.GJENNY,
+                    request = behandlingFactory.hentDataForOpprettBehandling(sak.id),
+                    opprinnelse = BehandlingOpprinnelse.JOURNALFOERING,
+                )
+            iverksett(behandlingOgOppgave.behandling)
         }
     }
 
@@ -137,4 +150,14 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
                 Enhetsnummer("1234"),
             )
         }
+
+    private fun iverksett(behandling: Behandling) {
+        val iverksatt =
+            when (behandling) {
+                is Foerstegangsbehandling -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+                is ManuellRevurdering -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+                is AutomatiskRevurdering -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+            }
+        applicationContext.behandlingDao.lagreStatus(iverksatt)
+    }
 }

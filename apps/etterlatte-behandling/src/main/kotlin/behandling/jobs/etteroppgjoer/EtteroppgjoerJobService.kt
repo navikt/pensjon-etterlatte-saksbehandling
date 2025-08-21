@@ -66,12 +66,11 @@ class EtteroppgjoerJobService(
             "Starter oppretting av forbehandling for etteroppgjør (inntektsår=$inntektsaar, status=$status, filter=${filter ?: "INGEN"})",
         )
 
+        // for å støtte filter og uten i dev ifm testing
         val etteroppgjoerListe =
-            if (filter == null) {
-                etteroppgjoerService.hentEtteroppgjoerForStatus(status, inntektsaar)
-            } else {
-                etteroppgjoerService.hentEtteroppgjoerForFilter(filter, inntektsaar)
-            }
+            filter
+                ?.let { etteroppgjoerService.hentEtteroppgjoerForFilter(it, inntektsaar) }
+                ?: etteroppgjoerService.hentEtteroppgjoerForStatus(status, inntektsaar)
 
         etteroppgjoerListe.forEach { etteroppgjoer ->
             try {
@@ -95,12 +94,10 @@ class EtteroppgjoerJobService(
     suspend fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
         logger.info("Starter oppretting av etteroppgjør for inntektsår $inntektsaar")
         val sakerMedUtbetaling =
-            runBlocking {
-                vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
-                    inntektsaar,
-                    HardkodaSystembruker.etteroppgjoer,
-                )
-            }
+            vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
+                inntektsaar,
+                HardkodaSystembruker.etteroppgjoer,
+            )
 
         sakerMedUtbetaling
             .forEach { sakId -> etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) }

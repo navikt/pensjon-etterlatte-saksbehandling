@@ -69,6 +69,7 @@ class SamordningVedtakService(
                 fnr = fnr.value,
                 callerContext = context,
             ).filter { tilOgMed?.let { t -> it.virkningstidspunkt <= t } ?: true }
+            .filter { it.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING, VedtakType.OPPHOER) }
             .map { it.mapSamordningsvedtak() }
     }
 

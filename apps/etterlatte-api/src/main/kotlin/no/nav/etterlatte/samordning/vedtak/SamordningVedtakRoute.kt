@@ -1,12 +1,8 @@
 package no.nav.etterlatte.samordning.vedtak
 
 import com.typesafe.config.Config
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -15,6 +11,7 @@ import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.hentFnrBody
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.dato
@@ -59,7 +56,7 @@ fun Route.samordningVedtakRoute(
                         ),
                     )
                 } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    throw InternfeilException("En feil oppstod under utlesing av vedtak", e)
                 }
 
             call.respond(samordningVedtakDto)
@@ -87,7 +84,7 @@ fun Route.samordningVedtakRoute(
                             ),
                     )
                 } catch (e: IllegalArgumentException) {
-                    return@post call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    throw InternfeilException("En feil oppstod under utlesing av vedtak", e)
                 }
 
             call.respond(samordningVedtakDtos)
@@ -121,7 +118,7 @@ fun Route.samordningVedtakRoute(
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
-                    return@post call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    throw InternfeilException("En feil oppstod under utlesing av vedtak", e)
                 }
 
             call.respond(samordningVedtakDtos)
@@ -140,7 +137,7 @@ fun Route.samordningVedtakRoute(
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
-                    return@post call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    throw InternfeilException("En feil oppstod under utlesing av løpende ytelse", e)
                 }
 
             call.respond(

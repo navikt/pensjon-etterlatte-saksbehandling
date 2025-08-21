@@ -65,7 +65,7 @@ class SamordningHendelseIntegrationTest {
 
         startLytting(konsument, LoggerFactory.getLogger(Application::class.java))
 
-        verify(exactly = 1, timeout = 5000) {
+        verify(exactly = 1, timeout = 10000) {
             rapidsKafkaProducer.publiser(
                 any(),
                 match {

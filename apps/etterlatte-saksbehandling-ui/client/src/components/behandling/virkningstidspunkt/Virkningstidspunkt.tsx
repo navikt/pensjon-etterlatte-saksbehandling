@@ -50,7 +50,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
   const [kravdato, setKravdato] = useState<Date | null>(
     behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null
   )
-  const [overstyr, setOverstyr] = useState(true)
+  const [overstyr, setOverstyr] = useState(false)
 
   const [errorTekst, setErrorTekst] = useState<string>('')
 

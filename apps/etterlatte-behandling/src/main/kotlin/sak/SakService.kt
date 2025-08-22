@@ -402,8 +402,11 @@ class SakServiceImpl(
             }
         sakTilgang.oppdaterAdressebeskyttelse(sak.id, hentetGradering)
         sakTilgang.settEnhetOmAdressebeskyttet(sak, hentetGradering)
-        sjekkGraderingOgEnhetStemmer(lesDao.hentSak(sak.id) ?: throw InternfeilException("Sak ${sak.id} finnes ikke"))
-        return sak // FIXME - returnere den oppdaterte saken lest fra DB?
+
+        val oppdatertSak = lesDao.hentSak(sak.id) ?: throw InternfeilException("Sak ${sak.id} finnes ikke")
+        sjekkGraderingOgEnhetStemmer(oppdatertSak)
+
+        return oppdatertSak
     }
 
     override fun hentSaksendringer(sakId: SakId): List<Saksendring> {

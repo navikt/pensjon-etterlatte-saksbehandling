@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -19,10 +20,10 @@ class EtteroppgjoerDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT e.sak_id, e.inntektsaar, e.status
-                        FROM etteroppgjoer e
-                        WHERE e.sak_id = ?
-                        AND e.status != ?
+                        SELECT *
+                        FROM etteroppgjoer 
+                        WHERE sak_id = ?
+                        AND status != ?
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId.sakId)
@@ -40,15 +41,44 @@ class EtteroppgjoerDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT e.sak_id, e.inntektsaar, e.status
-                        FROM etteroppgjoer e
-                        WHERE e.sak_id = ?
-                        AND e.inntektsaar = ?
+                        SELECT *
+                        FROM etteroppgjoer
+                        WHERE sak_id = ?
+                        AND inntektsaar = ?
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId.sakId)
                 statement.setInt(2, inntektsaar)
                 statement.executeQuery().singleOrNull { toEtteroppgjoer() }
+            }
+        }
+
+    fun hentEtteroppgjoerForFilter(
+        filter: EtteroppgjoerFilter,
+        inntektsaar: Int,
+    ): List<Etteroppgjoer> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val sql =
+                    """
+                    SELECT *
+                    FROM etteroppgjoer
+                    WHERE inntektsaar = ?
+                      AND har_sanksjon = ?
+                      AND har_institusjonsopphold = ?
+                      AND har_opphoer = ?
+                      AND har_bosattutland = ?
+                    """.trimIndent()
+
+                prepareStatement(sql)
+                    .apply {
+                        setInt(1, inntektsaar)
+                        setBoolean(2, filter.harSanksjon)
+                        setBoolean(3, filter.harInsitusjonsopphold)
+                        setBoolean(4, filter.harOpphoer)
+                        setBoolean(5, filter.harBosattUtland)
+                    }.executeQuery()
+                    .toList { toEtteroppgjoer() }
             }
         }
 
@@ -73,14 +103,7 @@ class EtteroppgjoerDao(
             }
         }
 
-    private fun ResultSet.toEtteroppgjoer() =
-        Etteroppgjoer(
-            sakId = SakId(getLong("sak_id")),
-            inntektsaar = getInt("inntektsaar"),
-            status = EtteroppgjoerStatus.valueOf(getString("status")),
-        )
-
-    fun lagerEtteroppgjoer(
+    fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
         inntektsaar: Int,
         status: EtteroppgjoerStatus,
@@ -89,23 +112,66 @@ class EtteroppgjoerDao(
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO etteroppgjoer(
-                        sak_id, inntektsaar, opprettet, status
-                    ) 
-                    VALUES (?, ?, ?, ?) 
-                    ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
-                        status = excluded.status
+                    UPDATE etteroppgjoer
+                    SET status = ?
+                    WHERE sak_id = ? AND inntektsaar = ?
                     """.trimIndent(),
                 )
-            statement.setSakId(1, sakId)
-            statement.setInt(2, inntektsaar)
-            statement.setTidspunkt(3, Tidspunkt(java.time.Instant.now()))
-            statement.setString(4, status.name)
-            statement.executeUpdate().also {
-                krev(it == 1) {
-                    "Kunne ikke lagre etteroppgjør for sakid $sakId"
+
+            statement.setString(1, status.name)
+            statement.setSakId(2, sakId)
+            statement.setInt(3, inntektsaar)
+
+            val updated = statement.executeUpdate()
+            krev(updated == 1) { "Kunne ikke lagre etteroppgjør for sakid $sakId" }
+        }
+    }
+
+    fun lagreEtteroppgjoer(etteroppgjoer: Etteroppgjoer) =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        INSERT INTO etteroppgjoer(
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosattutland
+                        ) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+                        ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
+                            har_institusjonsopphold = excluded.har_institusjonsopphold,
+                            har_bosattutland = excluded.har_bosattutland,
+                            har_sanksjon = excluded.har_sanksjon,
+                            har_opphoer = excluded.har_opphoer,
+                            status = excluded.status
+                        """.trimIndent(),
+                    )
+
+                with(etteroppgjoer) {
+                    statement.setSakId(1, sakId)
+                    statement.setInt(2, inntektsaar)
+                    statement.setTidspunkt(3, Tidspunkt(java.time.Instant.now()))
+                    statement.setString(4, status.name)
+                    statement.setBoolean(5, harOpphoer)
+                    statement.setBoolean(6, harInstitusjonsopphold)
+                    statement.setBoolean(7, harSanksjon)
+                    statement.setBoolean(8, harBosattUtland)
+                    statement.executeUpdate().also {
+                        krev(it == 1) {
+                            "Kunne ikke lagre etteroppgjør for sakid $sakId"
+                        }
+                    }
                 }
             }
         }
-    }
+
+    private fun ResultSet.toEtteroppgjoer() =
+        Etteroppgjoer(
+            sakId = SakId(getLong("sak_id")),
+            inntektsaar = getInt("inntektsaar"),
+            status = EtteroppgjoerStatus.valueOf(getString("status")),
+            harOpphoer = getBoolean("har_opphoer"),
+            harInstitusjonsopphold = getBoolean("har_institusjonsopphold"),
+            harSanksjon = getBoolean("har_sanksjon"),
+            harBosattUtland = getBoolean("har_bosattutland"),
+        )
 }

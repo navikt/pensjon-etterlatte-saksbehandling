@@ -31,6 +31,8 @@ data class DetaljertBehandling(
 ) {
     fun erBrukermeldtEtteroppgjoer(): Boolean =
         revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER && opprinnelse != BehandlingOpprinnelse.AUTOMATISK_JOBB
+
+    fun erBosattUtland(): Boolean = utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
 }
 
 enum class BehandlingOpprinnelse {

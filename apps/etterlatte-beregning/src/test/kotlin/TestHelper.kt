@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnla
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -60,7 +61,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.sanksjon.LagreSanksjon
-import no.nav.etterlatte.sanksjon.Sanksjon
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth

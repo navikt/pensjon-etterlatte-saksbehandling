@@ -324,7 +324,7 @@ class EtteroppgjoerForbehandlingService(
             throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
         }
 
-        if (behandlingService.hentSisteIverksatte(sak.id) == null) {
+        if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
             throw InternfeilException(
                 "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
@@ -365,7 +365,7 @@ class EtteroppgjoerForbehandlingService(
         sak: Sak,
         innvilgetPeriode: Periode,
     ): EtteroppgjoerForbehandling {
-        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sak.id)
+        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sak.id)
         krevIkkeNull(sisteIverksatteBehandling) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
@@ -421,7 +421,7 @@ class EtteroppgjoerForbehandlingService(
 
     private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(forbehandling.sak.id)
+            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
                 ?: throw InternfeilException(
                     "Fant ikke siste iverksatte behandling for sak=${forbehandling.sak.id} ved kopiering av forbehandling",
                 )

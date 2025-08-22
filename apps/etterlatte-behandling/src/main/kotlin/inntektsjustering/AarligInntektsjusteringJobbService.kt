@@ -400,7 +400,7 @@ class AarligInntektsjusteringJobbService(
     }
 
     private fun hentForrigeBehandling(sakId: SakId) =
-        behandlingService.hentSisteIverksatte(sakId)
+        behandlingService.hentSisteIverksatteBehandling(sakId)
             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
     private fun hentPdlPersonopplysning(sak: Sak) =

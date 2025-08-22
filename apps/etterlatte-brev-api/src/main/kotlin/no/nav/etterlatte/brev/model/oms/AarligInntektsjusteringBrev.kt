@@ -109,7 +109,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 endringIUtbetaling = avkortingsinfo.endringIUtbetalingVedVirk,
                 virkningstidspunkt = virk,
-                bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                bosattUtland = behandling.erBosattUtland(),
             )
         }
     }

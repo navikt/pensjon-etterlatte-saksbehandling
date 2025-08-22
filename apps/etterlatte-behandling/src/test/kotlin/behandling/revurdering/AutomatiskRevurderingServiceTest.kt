@@ -107,7 +107,7 @@ class AutomatiskRevurderingServiceTest {
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
-        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(
@@ -130,7 +130,7 @@ class AutomatiskRevurderingServiceTest {
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
-        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(
@@ -155,7 +155,7 @@ class AutomatiskRevurderingServiceTest {
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
-        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(
@@ -181,7 +181,7 @@ class AutomatiskRevurderingServiceTest {
             )
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
         coEvery { beregningKlient.harOverstyrt(any(), any()) } returns true
-        every { behandlingService.hentSisteIverksatte(any()) } returns mockBehandling
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 
         val request =
             AutomatiskRevurderingRequest(

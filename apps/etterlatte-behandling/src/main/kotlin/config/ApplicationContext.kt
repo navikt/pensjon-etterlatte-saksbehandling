@@ -300,7 +300,7 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
+    val beregningKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val trygdetidKlient: TrygdetidKlient = TrygdetidKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
@@ -438,7 +438,7 @@ internal class ApplicationContext(
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
-            beregningKlient = beregningsKlient,
+            beregningKlient = beregningKlient,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -493,7 +493,7 @@ internal class ApplicationContext(
             behandlingService,
             grunnlagService,
             vedtakKlient,
-            beregningsKlient,
+            beregningKlient,
         )
     val manuellRevurderingService =
         ManuellRevurderingService(
@@ -572,6 +572,8 @@ internal class ApplicationContext(
             sakLesDao = sakLesDao,
             sakService = sakService,
             vedtakKlient = vedtakKlient,
+            behandlingService = behandlingService,
+            beregningKlient = beregningKlient,
         )
 
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
@@ -583,7 +585,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             rapid = rapid,
             featureToggleService = featureToggleService,
-            beregningKlient = beregningsKlient,
+            beregningKlient = beregningKlient,
         )
 
     val aarligInntektsjusteringJobbService =
@@ -594,7 +596,7 @@ internal class ApplicationContext(
             revurderingService = revurderingService,
             vedtakKlient = vedtakKlient,
             grunnlagService = grunnlagService,
-            beregningKlient = beregningsKlient,
+            beregningKlient = beregningKlient,
             pdlTjenesterKlient = pdlTjenesterKlient,
             oppgaveService = oppgaveService,
             rapid = rapid,
@@ -657,7 +659,7 @@ internal class ApplicationContext(
             inntektskomponentService = inntektskomponentService,
             hendelserService = etteroppgjoerHendelseService,
             sigrunKlient = sigrunKlient,
-            beregningKlient = beregningsKlient,
+            beregningKlient = beregningKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
         )
@@ -704,7 +706,7 @@ internal class ApplicationContext(
             brevKlient = brevKlient,
             behandlingService = behandlingService,
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
-            beregningKlient = beregningsKlient,
+            beregningKlient = beregningKlient,
             brevApiKlient = brevApiKlient,
         )
 
@@ -811,7 +813,7 @@ internal class ApplicationContext(
             revurderingService,
             vilkaarsvurderingService,
             trygdetidKlient,
-            beregningsKlient,
+            beregningKlient,
             vedtakKlient,
         )
 

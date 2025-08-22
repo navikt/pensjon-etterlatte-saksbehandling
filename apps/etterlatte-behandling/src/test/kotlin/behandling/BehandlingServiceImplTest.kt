@@ -877,7 +877,7 @@ internal class BehandlingServiceImplTest {
 
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        assertEquals(behandling1, behandlingService.hentSisteIverksatte(sakId1))
+        assertEquals(behandling1, behandlingService.hentSisteIverksatteBehandling(sakId1))
     }
 
     @Test

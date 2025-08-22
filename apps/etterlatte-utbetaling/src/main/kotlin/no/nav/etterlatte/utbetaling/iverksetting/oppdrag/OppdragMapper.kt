@@ -7,6 +7,7 @@ import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Avstemming115
@@ -28,7 +29,6 @@ object OppdragMapper {
         erFoersteUtbetalingPaaSak: Boolean,
         erGRegulering: Boolean,
     ): Oppdrag {
-        val virkFom = utbetaling.utbetalingslinjer.minOf { it.periode.fra }
         val oppdrag110 =
             Oppdrag110().apply {
                 kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
@@ -93,10 +93,7 @@ object OppdragMapper {
 
                                 else -> {}
                             }
-                            if (utbetaling.erEtteroppgjoer() &&
-                                it.periode.fra.year == virkFom.year &&
-                                it.periode.til?.year == virkFom.year
-                            ) {
+                            if (utbetaling.erEtteroppgjoerslinje(it)) {
                                 // Denne perioden er en etteroppgjørsperiode og må markeres riktig
                                 typeSoknad = "EO"
                             }
@@ -128,8 +125,12 @@ object OppdragMapper {
     }
 }
 
-private fun Utbetaling.erEtteroppgjoer(): Boolean =
-    this.sakType == Saktype.OMSTILLINGSSTOENAD && this.vedtak.behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER
+fun Utbetaling.erEtteroppgjoerslinje(linje: Utbetalingslinje): Boolean {
+    val utbetalingGjelderEtteroppgjoer =
+        this.sakType == Saktype.OMSTILLINGSSTOENAD && this.vedtak.behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER
+    val etteroppgjoersAar = this.utbetalingslinjer.minOf { it.periode.fra }.year
+    return utbetalingGjelderEtteroppgjoer && linje.periode.fra.year == etteroppgjoersAar && linje.periode.til?.year == etteroppgjoersAar
+}
 
 fun Saktype.tilKodeFagomraade(): String =
     when (this) {

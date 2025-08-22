@@ -157,7 +157,7 @@ class EtteroppgjoerRevurderingBrevService(
                 skalLagre = skalLagres,
                 brevFastInnholdData =
                     EtteroppgjoerBrevData.Vedtak(
-                        bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                        bosattUtland = sisteIverksatteBehandling.erBosattUtland(),
                         etteroppgjoersAar = detaljertForbehandling.behandling.aar,
                         avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
                         utbetaltBeloep = Kroner(sisteUtbetaltBeloep),

@@ -44,7 +44,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -173,7 +172,7 @@ interface BehandlingService {
 
     fun hentSakMedBehandlinger(saker: List<Sak>): SakMedBehandlinger
 
-    fun hentSisteIverksatte(sakId: SakId): Behandling?
+    fun hentSisteIverksatteBehandling(sakId: SakId): Behandling?
 
     fun avbrytBehandling(
         behandlingId: UUID,
@@ -376,7 +375,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentSisteIverksatte(sakId: SakId): Behandling? =
+    override fun hentSisteIverksatteBehandling(sakId: SakId): Behandling? =
         hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
             .maxByOrNull { it.behandlingOpprettet }
@@ -553,7 +552,7 @@ internal class BehandlingServiceImpl(
                 "Utenlandstilknytning må være valgt for å kunne vurdere om virkningstidspunktet er gyldig",
             )
         }
-        if (behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND) {
+        if (behandling.erBosattUtland()) {
             val kravdato =
                 request.kravdato
                     ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")

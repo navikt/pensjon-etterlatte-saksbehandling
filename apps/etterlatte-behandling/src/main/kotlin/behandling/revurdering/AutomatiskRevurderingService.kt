@@ -55,7 +55,7 @@ class AutomatiskRevurderingService(
         val forrigeBehandling = hentForrigeBehandling(loepende, request.sakId)
 
         val forrigeIverksatteBehandling =
-            inTransaction { behandlingService.hentSisteIverksatte(request.sakId) }
+            inTransaction { behandlingService.hentSisteIverksatteBehandling(request.sakId) }
                 ?: throw RevurderingManglerIverksattBehandling(request.sakId)
 
         gyldigForAutomatiskRevurdering(request, loepende, systembruker)

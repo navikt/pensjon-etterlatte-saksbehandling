@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -74,6 +75,11 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun hentSanksjoner(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Sanksjon>
 }
 
 class BeregningKlientImpl(
@@ -310,6 +316,36 @@ class BeregningKlientImpl(
             throw InternfeilException(
                 "Beregning feilet for behandling=$behandlingId",
                 e,
+            )
+        }
+    }
+
+    override suspend fun hentSanksjoner(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Sanksjon> {
+        try {
+            logger.info("Henter sanksjoner for behandlingId=$behandlingId")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/sanksjon/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (re: ResponseException) {
+            val details = "Henting av sanksjoner for behandling med behandlingId=$behandlingId feilet"
+            logger.error(
+                details,
+                re,
+            )
+
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "FEIL_HENT_SANKSJONER",
+                detail = details,
             )
         }
     }

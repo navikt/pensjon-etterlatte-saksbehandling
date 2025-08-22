@@ -123,7 +123,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 SakType.OMSTILLINGSSTOENAD,
             )
         } returns personPdl
-        every { behandlingService.hentSisteIverksatte(any()) } returns
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns
             mockk {
                 every { id } returns sisteBehandling
                 every { utlandstilknytning } returns mockk()
@@ -491,7 +491,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 saker = listOf(SakId(123L)),
             )
 
-        every { behandlingService.hentSisteIverksatte(any()) } returns
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns
             mockk {
                 every { id } returns sisteBehandling
                 every { utlandstilknytning } returns mockk()

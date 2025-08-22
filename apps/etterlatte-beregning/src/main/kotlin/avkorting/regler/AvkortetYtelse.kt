@@ -1,6 +1,7 @@
 package no.nav.etterlatte.avkorting.regler
 
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.Regel
@@ -11,7 +12,6 @@ import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.regler.Beregningstall
-import no.nav.etterlatte.sanksjon.Sanksjon
 import java.time.LocalDate
 import kotlin.math.max
 import kotlin.math.min

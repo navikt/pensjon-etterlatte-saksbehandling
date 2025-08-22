@@ -281,7 +281,7 @@ class VilkaarsvurderingService(
                 BehandlingType.REVURDERING -> {
                     if (kopierVedRevurdering) {
                         logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
-                        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(behandling.sak.id)!!
+                        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(behandling.sak.id)!!
                         VilkaarsvurderingMedBehandlingGrunnlagsversjon(
                             kopierVilkaarsvurdering(
                                 behandlingId,

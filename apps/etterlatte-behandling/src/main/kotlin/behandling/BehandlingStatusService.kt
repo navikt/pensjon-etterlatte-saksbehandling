@@ -102,7 +102,7 @@ interface BehandlingStatusService {
         vedtakHendelse: VedtakHendelse,
     )
 
-    fun settIverksattVedtak(
+    suspend fun settIverksattVedtak(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
     )
@@ -318,7 +318,7 @@ class BehandlingStatusServiceImpl(
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.SAMORDNET)
     }
 
-    override fun settIverksattVedtak(
+    override suspend fun settIverksattVedtak(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
     ) {
@@ -336,7 +336,7 @@ class BehandlingStatusServiceImpl(
         }
     }
 
-    private fun haandterEtteroppgjoerIverksattVedtak(behandling: Behandling) {
+    private suspend fun haandterEtteroppgjoerIverksattVedtak(behandling: Behandling) {
         if (behandling.sak.sakType != SakType.OMSTILLINGSSTOENAD) return
 
         val virk =

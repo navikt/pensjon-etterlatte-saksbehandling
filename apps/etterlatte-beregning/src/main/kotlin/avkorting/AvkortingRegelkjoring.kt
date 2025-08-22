@@ -15,6 +15,7 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -29,7 +30,6 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.regler.Beregningstall
-import no.nav.etterlatte.sanksjon.Sanksjon
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -402,7 +402,7 @@ object AvkortingRegelkjoring {
                 .map {
                     YearMonth.of(fraOgMed.year, it)
                 }.map { maaned ->
-                    maaned to sanksjoner.any { it.fom <= maaned && (it.tom == null || it.tom >= maaned) }
+                    maaned to sanksjoner.any { it.fom <= maaned && (it.tom == null || it.tom!! >= maaned) }
                 }
         val grunnlag =
             RestanseGrunnlag(

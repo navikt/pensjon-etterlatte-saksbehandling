@@ -741,7 +741,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
-            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
             every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
@@ -795,7 +795,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
-            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
             every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
@@ -860,7 +860,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
-            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
             every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
@@ -941,7 +941,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
-            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
             every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
@@ -1022,7 +1022,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
-            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
             every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
@@ -1092,7 +1092,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
-            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling, aapenBehandling)
             every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
             every {
@@ -1132,7 +1132,7 @@ class AktivitetspliktServiceTest {
                     },
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
-            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
             every { grunnlagService.hentPersongalleri(forrigeBehandling.id) } returns persongalleri
 
             val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd)

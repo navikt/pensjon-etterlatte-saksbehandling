@@ -13,6 +13,16 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
+enum class EtteroppgjoerFilter(
+    val harSanksjon: Boolean,
+    val harInsitusjonsopphold: Boolean,
+    val harOpphoer: Boolean,
+    val harBosattUtland: Boolean,
+) {
+    ENKEL(false, false, false, false),
+    MED_SANKSJON(true, false, false, false),
+}
+
 @OptIn(DelicateCoroutinesApi::class)
 class EtteroppgjoerJobService(
     private val etteroppgjoerService: EtteroppgjoerService,
@@ -28,7 +38,7 @@ class EtteroppgjoerJobService(
             runBlocking(ctx) {
                 if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
                     logger.info("Starter periodiske jobber for etteroppgjoer")
-                    startEtteroppgjoerKjoering()
+                    startEtteroppgjoerKjoering(EtteroppgjoerFilter.ENKEL)
                 } else {
                     logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
                 }
@@ -36,29 +46,33 @@ class EtteroppgjoerJobService(
         }
     }
 
-    fun startEtteroppgjoerKjoering() {
+    suspend fun startEtteroppgjoerKjoering(filter: EtteroppgjoerFilter) {
         val yearNow = YearMonth.now().year
         val aarMellom2024OgNaa = (2024..yearNow).toList()
 
         for (inntektsaar in aarMellom2024OgNaa) {
             finnOgOpprettEtteroppgjoer(inntektsaar)
-
-            // TODO: legge inn denne når vi har testet litt mer?
-            // skatteoppgjoerHendelserService.startHendelsesKjoering(HendelseKjoeringRequest(500),"automatisk")
-
-            finnOgOpprettForbehandlinger(inntektsaar)
+            finnOgOpprettForbehandlinger(inntektsaar, filter)
         }
     }
 
     // finn saker med etteroppgjoer og mottatt skatteoppgjoer som skal ha forbehandling
-    fun finnOgOpprettForbehandlinger(inntektsaar: Int) {
+    fun finnOgOpprettForbehandlinger(
+        inntektsaar: Int,
+        filter: EtteroppgjoerFilter?,
+    ) {
+        val status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
         logger.info(
-            "Starter oppretting av forbehandling for etteroppgjør med mottatt skatteoppgjør for inntektsår $inntektsaar",
+            "Starter oppretting av forbehandling for etteroppgjør (inntektsår=$inntektsaar, status=$status, filter=${filter ?: "INGEN"})",
         )
-        val etteroppgjoerListe =
-            etteroppgjoerService.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
 
-        for (etteroppgjoer in etteroppgjoerListe) {
+        // for å støtte filter og uten i dev ifm testing
+        val etteroppgjoerListe =
+            filter
+                ?.let { etteroppgjoerService.hentEtteroppgjoerForFilter(it, inntektsaar) }
+                ?: etteroppgjoerService.hentEtteroppgjoerForStatus(status, inntektsaar)
+
+        etteroppgjoerListe.forEach { etteroppgjoer ->
             try {
                 etteroppgjoerForbehandlingService.opprettEtteroppgjoerForbehandling(
                     etteroppgjoer.sakId,
@@ -66,21 +80,24 @@ class EtteroppgjoerJobService(
                     HardkodaSystembruker.etteroppgjoer,
                 )
             } catch (e: Exception) {
-                logger.error("Kunne ikke opprette forbehandling for sakId=${etteroppgjoer.sakId} grunnen: ${e.message}")
+                logger.error(
+                    "Kunne ikke opprette forbehandling for sakId=${etteroppgjoer.sakId}. Årsak: ${e.message}",
+                    e,
+                )
             }
         }
+
+        logger.info("Ferdig. Opprettet forbehandling for ${etteroppgjoerListe.size} saker.")
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
-    fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
+    suspend fun finnOgOpprettEtteroppgjoer(inntektsaar: Int) {
         logger.info("Starter oppretting av etteroppgjør for inntektsår $inntektsaar")
         val sakerMedUtbetaling =
-            runBlocking {
-                vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
-                    inntektsaar,
-                    HardkodaSystembruker.etteroppgjoer,
-                )
-            }
+            vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
+                inntektsaar,
+                HardkodaSystembruker.etteroppgjoer,
+            )
 
         sakerMedUtbetaling
             .forEach { sakId -> etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) }

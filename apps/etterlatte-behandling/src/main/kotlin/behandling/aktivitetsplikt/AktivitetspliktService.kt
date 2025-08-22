@@ -77,7 +77,7 @@ class AktivitetspliktService(
         behandlingId: UUID?,
     ): AktivitetspliktDto {
         val faktiskBehandlingId =
-            behandlingId ?: behandlingService.hentSisteIverksatte(sakId)?.id
+            behandlingId ?: behandlingService.hentSisteIverksatteBehandling(sakId)?.id
                 ?: throw ManglerBehandlingIdEllerIverksattBehandlingException(sakId)
 
         val grunnlag =
@@ -653,7 +653,7 @@ class AktivitetspliktService(
         request: OpprettRevurderingForAktivitetspliktDto,
     ): OpprettRevurderingForAktivitetspliktResponse {
         val forrigeBehandling =
-            krevIkkeNull(behandlingService.hentSisteIverksatte(request.sakId)) {
+            krevIkkeNull(behandlingService.hentSisteIverksatteBehandling(request.sakId)) {
                 "Fant ikke forrige behandling i sak ${request.sakId}sakId"
             }
         val persongalleri =

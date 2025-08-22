@@ -11,6 +11,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakslisteDTO
@@ -167,7 +168,9 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
                 val vedtakHendelse = call.receive<VedtakHendelse>()
                 haandterStatusEndring {
                     inTransaction {
-                        behandlingsstatusService.settIverksattVedtak(behandlingId, vedtakHendelse)
+                        runBlocking {
+                            behandlingsstatusService.settIverksattVedtak(behandlingId, vedtakHendelse)
+                        }
                     }
                 }
             }

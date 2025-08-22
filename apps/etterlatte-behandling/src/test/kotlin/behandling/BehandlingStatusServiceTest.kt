@@ -7,6 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
@@ -227,7 +228,9 @@ internal class BehandlingStatusServiceTest {
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId)
 
         inTransaction {
-            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+            runBlocking {
+                sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+            }
         }
 
         verify {
@@ -293,7 +296,9 @@ internal class BehandlingStatusServiceTest {
         every { generellBehandlingService.opprettBehandling(any(), any()) } returns generellBehandlingUtland
 
         inTransaction {
-            sut.settIverksattVedtak(behandlingId, iverksattVedtak)
+            runBlocking {
+                sut.settIverksattVedtak(behandlingId, iverksattVedtak)
+            }
         }
 
         verify {
@@ -422,7 +427,9 @@ internal class BehandlingStatusServiceTest {
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
         inTransaction {
-            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+            runBlocking {
+                sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+            }
         }
 
         verify {
@@ -465,7 +472,9 @@ internal class BehandlingStatusServiceTest {
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
         inTransaction {
-            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+            runBlocking {
+                sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+            }
         }
 
         verify {

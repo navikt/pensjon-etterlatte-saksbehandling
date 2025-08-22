@@ -610,7 +610,7 @@ internal class VilkaarsvurderingRoutesTest(
                     every { id } returns revurderingBehandlingId
                 }
 
-            coEvery { behandlingService.hentSisteIverksatte(any()) } returns
+            coEvery { behandlingService.hentSisteIverksatteBehandling(any()) } returns
                 foerstegangsbehandling(
                     behandlingId,
                     sakId1,

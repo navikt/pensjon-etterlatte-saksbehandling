@@ -169,7 +169,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
 
         val sisteIverksatteBehandlingId = UUID.randomUUID()
-        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+        every { behandlingService.hentSisteIverksatteBehandling(sak.id) } returns
             mockk {
                 every { id } returns sisteIverksatteBehandlingId
             }
@@ -196,7 +196,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
 
         val sisteIverksatteBehandlingId = UUID.randomUUID()
-        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+        every { behandlingService.hentSisteIverksatteBehandling(sak.id) } returns
             mockk {
                 every { id } returns sisteIverksatteBehandlingId
             }
@@ -223,7 +223,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
 
         val sisteIverksatteBehandlingId = UUID.randomUUID()
-        every { behandlingService.hentSisteIverksatte(sak.id) } returns
+        every { behandlingService.hentSisteIverksatteBehandling(sak.id) } returns
             mockk {
                 every { id } returns sisteIverksatteBehandlingId
             }

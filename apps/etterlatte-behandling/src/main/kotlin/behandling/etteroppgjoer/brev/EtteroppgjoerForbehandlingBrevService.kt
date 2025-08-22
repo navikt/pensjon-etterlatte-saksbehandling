@@ -155,7 +155,7 @@ class EtteroppgjoerForbehandlingBrevService(
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
         }
 
-        val bosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND
+        val bosattUtland = sisteIverksatteBehandling.erBosattUtland()
         val grunnlag = data.faktiskInntekt ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
         // TODO: usikker om dette blir rett, følge opp ifm testing

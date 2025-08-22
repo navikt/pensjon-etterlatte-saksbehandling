@@ -118,7 +118,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
             )
 
         kontrollpunkter shouldBe emptyList()
-        verify(exactly = 0) { behandlingService.hentSisteIverksatte(sak.id) }
+        verify(exactly = 0) { behandlingService.hentSisteIverksatteBehandling(sak.id) }
         coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, bruker) }
         confirmVerified(behandlingService, pesysKlient)
     }
@@ -162,7 +162,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
             )
 
         kontrollpunkter shouldBe emptyList()
-        verify(exactly = 0) { behandlingService.hentSisteIverksatte(sak.id) }
+        verify(exactly = 0) { behandlingService.hentSisteIverksatteBehandling(sak.id) }
         coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, bruker) }
         confirmVerified(behandlingService, pesysKlient)
     }

@@ -6,6 +6,10 @@ data class Etteroppgjoer(
     val sakId: SakId,
     val inntektsaar: Int,
     val status: EtteroppgjoerStatus,
+    val harSanksjon: Boolean = false,
+    val harInstitusjonsopphold: Boolean = false,
+    val harOpphoer: Boolean = false,
+    val harBosattUtland: Boolean = false,
 ) {
     fun skalHaEtteroppgjoer(): Boolean =
         status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER ||

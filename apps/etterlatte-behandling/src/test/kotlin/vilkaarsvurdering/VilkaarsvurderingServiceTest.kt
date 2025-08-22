@@ -474,7 +474,7 @@ internal class VilkaarsvurderingServiceTest(
                 every { revurderingsaarsak() } returns Revurderingaarsak.REGULERING
             }
 
-        every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
 
         val foerstegangsvilkaar =
             runBlocking {
@@ -534,7 +534,7 @@ internal class VilkaarsvurderingServiceTest(
                 every { revurderingsaarsak() } returns Revurderingaarsak.REGULERING
             }
 
-        every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
+        every { behandlingService.hentSisteIverksatteBehandling(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
 
         runBlocking {
             vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, brukerTokenInfo)
@@ -782,7 +782,7 @@ internal class VilkaarsvurderingServiceTest(
 
         coEvery { behandlingService.hentBehandling(foerstegangsbehandling.id) } returns foerstegangsbehandling
         coEvery { behandlingService.hentBehandling(revurdering.id) } returns revurdering
-        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns foerstegangsbehandling
+        coEvery { behandlingService.hentSisteIverksatteBehandling(sakId1) } returns foerstegangsbehandling
 
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs

@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -90,6 +91,8 @@ sealed class Behandling {
                 }
             }
         }
+
+    fun erBosattUtland(): Boolean = utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
 
     fun gyldighetsproeving(): GyldighetsResultat? =
         when (this) {

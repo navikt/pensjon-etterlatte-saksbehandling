@@ -9,6 +9,7 @@ import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetP
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -17,7 +18,6 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.regler.RegelPeriode
-import no.nav.etterlatte.sanksjon.Sanksjon
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -842,7 +842,7 @@ data class AarsoppgjoerLoepende(
     fun sanksjonerInnenforAarsoppjoer(sanksjoner: List<Sanksjon>): List<Sanksjon> =
         sanksjoner.filter { sanksjon ->
             val erFomDetteAaret = sanksjon.fom.year == aar
-            val overlapperTom = sanksjon.fom.year <= aar && (sanksjon.tom == null || sanksjon.tom.year >= aar)
+            val overlapperTom = sanksjon.fom.year <= aar && (sanksjon.tom == null || sanksjon.tom!!.year >= aar)
             erFomDetteAaret || overlapperTom
         }
 }

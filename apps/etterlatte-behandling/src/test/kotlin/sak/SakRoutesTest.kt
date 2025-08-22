@@ -71,7 +71,7 @@ internal class SakRoutesTest {
 
     @Test
     fun `siste iverksatte route returnerer 200 ok og behandling`() {
-        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns mockk(relaxed = true)
+        coEvery { behandlingService.hentSisteIverksatteBehandling(sakId1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
             val response =
@@ -85,7 +85,7 @@ internal class SakRoutesTest {
 
     @Test
     fun `siste iverksatte route returnerer 404 naar det ikke finnes noen iverksatt behandling`() {
-        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns null
+        coEvery { behandlingService.hentSisteIverksatteBehandling(sakId1) } returns null
         withTestApplication { client ->
             val response =
                 client.get("/saker/1/behandlinger/sisteIverksatte") {

@@ -3,6 +3,7 @@ package no.nav.etterlatte.sanksjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -154,18 +155,6 @@ class SanksjonRepository(
             ).let { query -> tx.run(query.map { it.toSanksjon() }.asSingle) }
         }
 }
-
-data class Sanksjon(
-    val id: UUID?,
-    val behandlingId: UUID,
-    val sakId: SakId,
-    val type: SanksjonType,
-    val fom: YearMonth,
-    val tom: YearMonth?,
-    val opprettet: Grunnlagsopplysning.Saksbehandler,
-    val endret: Grunnlagsopplysning.Saksbehandler?,
-    val beskrivelse: String,
-)
 
 data class LagreSanksjon(
     val id: UUID?,

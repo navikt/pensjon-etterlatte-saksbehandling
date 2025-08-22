@@ -64,7 +64,7 @@ class ManuellRevurderingService(
 
         revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
         val forrigeIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(sakId)
+            behandlingService.hentSisteIverksatteBehandling(sakId)
                 ?: throw RevurderingManglerIverksattBehandling(sakId)
 
         if (forrigeIverksatteBehandling.status != BehandlingStatus.IVERKSATT) {

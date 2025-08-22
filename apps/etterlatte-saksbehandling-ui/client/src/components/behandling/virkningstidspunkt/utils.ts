@@ -7,7 +7,7 @@ export interface Hjemmel {
 }
 
 export function hentMinimumsVirkningstidspunkt(
-  // @ts-ignore
+  // @ts-expect-error skal revertes når saksbehandler har fikset en sak
   avdoedDoedsdato: Date | undefined,
   soeknadMottattDato: Date,
   sakType: SakType

@@ -5,8 +5,6 @@ import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 
 interface SakTilgang {
     fun oppdaterAdressebeskyttelse(
@@ -23,22 +21,12 @@ interface SakTilgang {
         sakId: SakId,
         skjermet: Boolean,
     )
-
-    fun hentGraderingForSak(
-        sakId: SakId,
-        bruker: Systembruker,
-    ): SakMedGraderingOgSkjermet
 }
 
 class SakTilgangImpl(
     private val skrivDao: SakSkrivDao,
     private val lesDao: SakLesDao,
 ) : SakTilgang {
-    override fun hentGraderingForSak(
-        sakId: SakId,
-        bruker: Systembruker,
-    ): SakMedGraderingOgSkjermet = lesDao.finnSakMedGraderingOgSkjerming(sakId)
-
     override fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,

@@ -19,8 +19,6 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakLesDao
@@ -29,9 +27,9 @@ import no.nav.etterlatte.sak.SakTilgang
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-fun SakMedGraderingOgSkjermet.erSpesialSak(): Boolean {
+fun Sak.erSpesialSak(): Boolean {
     val harAdressebeskyttelse =
-        this.adressebeskyttelseGradering?.let { gradering ->
+        this.adressebeskyttelse?.let { gradering ->
             when (gradering) {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> true
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG -> true
@@ -48,7 +46,7 @@ fun SakMedGraderingOgSkjermet.erSpesialSak(): Boolean {
             }
         } ?: false
 
-    val harSpesialEnhet = this.enhetNr?.let { Enheter.erSpesialTilgangsEnheter(it) } ?: false
+    val harSpesialEnhet = Enheter.erSpesialTilgangsEnheter(this.enhet)
 
     return harAdressebeskyttelse || erEgenansatt || harSpesialEnhet
 }
@@ -112,11 +110,8 @@ class OppdaterTilgangService(
                 sakSkrivDao.oppdaterEnhet(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
             } else {
-                val tilgangSak = sakTilgang.hentGraderingForSak(sakId, HardkodaSystembruker.tilgang)
-                /*
-                    Vi vil kun tilbakestille en sak som har vært egen anstt, strengt fortrolig(/utland) eller fortrolig
-                 */
-                if (tilgangSak.erSpesialSak()) {
+                // Vi vil kun tilbakestille en sak som har vært egen ansatt, strengt fortrolig(/utland) eller fortrolig
+                if (sak.erSpesialSak()) {
                     val enhetsNummer = hentEnhet(fnr = sak.ident, sak = sak)
                     val sakMedEnhet = SakMedEnhet(sakId, enhetsNummer)
                     sakSkrivDao.oppdaterEnhet(sakMedEnhet)

@@ -117,8 +117,8 @@ fun Route.etteroppgjoerRoutes(
                                 etteroppgjoerId,
                                 brukerTokenInfo,
                             )
+                            forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
                         }
-                        forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

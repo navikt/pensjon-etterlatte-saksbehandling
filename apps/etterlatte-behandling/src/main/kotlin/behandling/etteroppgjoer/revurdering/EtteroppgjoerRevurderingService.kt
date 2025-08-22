@@ -37,7 +37,7 @@ class EtteroppgjoerRevurderingService(
     private val beregningKlient: BeregningKlient,
     private val vedtakKlient: VedtakKlient,
 ) {
-    fun opprett(
+    fun opprettEtteroppgjoerRevurdering(
         sakId: SakId,
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -49,8 +49,7 @@ class EtteroppgjoerRevurderingService(
                     throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
                 }
 
-                // TODO hva blir riktig her? vi ønsker ikke mer enn en oppgave, men kan det være oppgaver åpne på forbehandling?
-                // revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
 
                 val iverksatteVedtak =
                     runBlocking {

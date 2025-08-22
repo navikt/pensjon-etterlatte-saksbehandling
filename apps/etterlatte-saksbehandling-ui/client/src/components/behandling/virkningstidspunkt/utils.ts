@@ -7,6 +7,7 @@ export interface Hjemmel {
 }
 
 export function hentMinimumsVirkningstidspunkt(
+  // @ts-ignore
   avdoedDoedsdato: Date | undefined,
   soeknadMottattDato: Date,
   sakType: SakType

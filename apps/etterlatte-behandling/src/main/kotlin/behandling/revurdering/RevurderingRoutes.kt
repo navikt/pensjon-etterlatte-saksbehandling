@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -86,7 +85,12 @@ internal fun Route.revurderingRoutes(
             post("/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
-                    val revurdering = etteroppgjoerRevurderingService.opprett(sakId, etteroppgjoerId, brukerTokenInfo)
+                    val revurdering =
+                        etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
+                            sakId,
+                            etteroppgjoerId,
+                            brukerTokenInfo,
+                        )
                     call.respond(revurdering.id)
                 }
             }

@@ -235,7 +235,7 @@ class EtteroppgjoerForbehandlingService(
             logger.error("Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId", e)
         }
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
-        dao.lagreAInntekt(aInntekt, nyForbehandling.id)
+        dao.lagreAInntekt(aInntekt, nyForbehandling.id) // TODO: fjerne?
 
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
@@ -490,22 +490,38 @@ class EtteroppgjoerForbehandlingService(
         }
 
         val sistePensjonsgivendeInntekt = sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
-        val sisteAInntekt = inntektskomponentService.hentInntektFraAInntekt(forbehandling.sak.ident, forbehandling.aar)
+        val sisteSummerteInntekter = inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
 
         // verifisere at vi har siste pensjonsgivende inntekt i databasen
-        if (sistePensjonsgivendeInntekt != dao.hentPensjonsgivendeInntekt(forbehandling.id)) {
-            throw IkkeTillattException(
-                "UTDATERT_FORBEHANDLING",
-                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste Pensjonsgivende inntekt",
-            )
+        dao.hentPensjonsgivendeInntekt(forbehandling.id).let { pgi ->
+            if (pgi != sistePensjonsgivendeInntekt) {
+                throw IkkeTillattException(
+                    "UTDATERT_FORBEHANDLING",
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste Pensjonsgivende inntekt",
+                )
+            }
         }
 
-        // verifisere at vi har siste A-inntekt i databasen
-        if (sisteAInntekt != dao.hentAInntekt(forbehandling.id)) {
-            throw IkkeTillattException(
-                "UTDATERT_FORBEHANDLING",
-                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste A-inntekt",
-            )
+        // verifisere at vi har siste summerte inntekter
+        dao.hentSummerteInntekter(forbehandling.id).let { summerteInntekter ->
+            if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
+                throw IkkeTillattException(
+                    "UTDATERT_FORBEHANDLING",
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",
+                )
+            }
+            if (summerteInntekter.loenn != sisteSummerteInntekter.loenn) {
+                throw IkkeTillattException(
+                    "UTDATERT_FORBEHANDLING",
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste LOENN inntekt",
+                )
+            }
+            if (summerteInntekter.oms != sisteSummerteInntekter.oms) {
+                throw IkkeTillattException(
+                    "UTDATERT_FORBEHANDLING",
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste OMS inntekt",
+                )
+            }
         }
     }
 }

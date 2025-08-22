@@ -360,7 +360,7 @@ class EtteroppgjoerForbehandlingDao(
 
     fun hentSummerteInntekter(
         forbehandlingId: UUID,
-        revurderingId: UUID?,
+        revurderingId: UUID? = null,
     ): SummerteInntekterAOrdningen =
         connectionAutoclosing.hentConnection { connection ->
             val statement =

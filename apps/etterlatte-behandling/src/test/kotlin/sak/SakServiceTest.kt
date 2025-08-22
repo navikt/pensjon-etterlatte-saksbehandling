@@ -125,12 +125,6 @@ internal class SakServiceTest {
                 mobiltelefonnummer = null,
                 sikkerDigitalPostkasse = null,
             )
-
-        every {
-            sakLesDao.finnSakMedGraderingOgSkjerming(
-                any(),
-            )
-        } returns SakMedGraderingOgSkjermet(sakId1, null, false, Enheter.defaultEnhet.enhetNr)
     }
 
     @AfterEach
@@ -456,7 +450,6 @@ internal class SakServiceTest {
             sak1
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
-        verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakSkrivDao.oppdaterSkjerming(any(), any()) }
         verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
@@ -541,7 +534,6 @@ internal class SakServiceTest {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
         }
-        verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakSkrivDao.oppdaterSkjerming(any(), any()) }
         verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
@@ -573,9 +565,7 @@ internal class SakServiceTest {
 
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
-        every {
-            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
-        } returns
+        val opprettetSak =
             Sak(
                 id = sakId1,
                 ident = KONTANT_FOT.value,
@@ -584,6 +574,10 @@ internal class SakServiceTest {
                 adressebeskyttelse = null,
                 erSkjermet = false,
             )
+        every {
+            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
+        } returns opprettetSak
+        every { sakLesDao.hentSak(opprettetSak.id) } returns opprettetSak
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
         every { sakSkrivDao.oppdaterEnhet(any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } just runs
@@ -617,7 +611,6 @@ internal class SakServiceTest {
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
         verify(exactly = 1) { sakSkrivDao.oppdaterSkjerming(any(), any()) }
         verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(

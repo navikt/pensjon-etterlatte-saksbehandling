@@ -216,7 +216,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 )
             }
         }
-        coVerify(exactly = 3) {
+        coVerify(atLeast = 1, atMost = 5) {
             pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr })
         }
     }

@@ -502,7 +502,7 @@ class EtteroppgjoerForbehandlingService(
             }
         }
 
-        // verifisere at vi har siste summerte inntekter
+        // verifisere at vi har siste summerte inntekter fra A-inntekt
         dao.hentSummerteInntekter(forbehandling.id).let { summerteInntekter ->
             if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
                 throw IkkeTillattException(

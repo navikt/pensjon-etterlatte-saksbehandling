@@ -140,6 +140,8 @@ interface BehandlingService {
     )
 
     fun lagreFullfoertKjoering(request: LagreKjoeringRequest)
+
+    fun oppdaterSkjerming(sakId: SakId)
 }
 
 class BehandlingServiceImpl(
@@ -447,6 +449,12 @@ class BehandlingServiceImpl(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
+        }
+    }
+
+    override fun oppdaterSkjerming(sakId: SakId) {
+        runBlocking {
+            behandlingKlient.post("$url/egenansatt/$sakId/oppdater")
         }
     }
 }

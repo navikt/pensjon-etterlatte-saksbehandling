@@ -41,6 +41,8 @@ class TidshendelseService(
                     hendelse,
                 )
 
+            JobbType.OPPDATER_SKJERMING_BP_FYLTE_18_AAR -> oppdaterSkjerming(hendelse)
+
             else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
         }
     }
@@ -58,6 +60,11 @@ class TidshendelseService(
             return opprettOppgaveOpphoerYtelse(hendelse)
                 .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
         }
+    }
+
+    private fun oppdaterSkjerming(hendelse: TidshendelsePacket): TidshendelseResult {
+        behandlingService.oppdaterSkjerming(hendelse.sakId)
+        return TidshendelseResult.OppdatertSak
     }
 
     private fun skalSkippes(hendelse: TidshendelsePacket): Boolean {
@@ -234,6 +241,8 @@ sealed class TidshendelseResult {
     data class OpprettRevurderingForAktivitetsplikt(
         val behandlingId: UUID,
     ) : TidshendelseResult()
+
+    data object OppdatertSak : TidshendelseResult()
 
     data object Skipped : TidshendelseResult()
 }

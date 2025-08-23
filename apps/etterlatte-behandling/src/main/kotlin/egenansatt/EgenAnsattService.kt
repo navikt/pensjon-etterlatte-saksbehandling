@@ -38,7 +38,16 @@ class EgenAnsattService(
         logger.info("Ferdighåndtert skjermet hendelse")
     }
 
-    fun hentSkjermedeSaker(sakType: SakType): List<SakId> {
-        return sakService.hentSakerMedSkjerming(sakType)
+    fun oppdaterGraderingOgEgenAnsatt(sakId: SakId) {
+        logger.info("Oppdaterer gradering og egen ansatt")
+        val persongalleri = grunnlagService.hentPersongalleri(sakId)!!
+
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(
+            sakId = sakId,
+            persongalleri = persongalleri,
+        )
+        logger.info("Ferdig oppdatert gradering og egen ansatt")
     }
+
+    fun hentSkjermedeSaker(sakType: SakType): List<SakId> = sakService.hentSakerMedSkjerming(sakType)
 }

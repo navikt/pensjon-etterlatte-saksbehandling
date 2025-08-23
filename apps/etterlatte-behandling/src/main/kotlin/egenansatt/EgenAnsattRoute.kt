@@ -13,7 +13,9 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -41,6 +43,15 @@ internal fun Route.egenAnsattRoute(
             }
         }
 
+        post("{$SAKID_CALL_PARAMETER}/oppdater") {
+            kunSystembruker {
+                inTransaction {
+                    egenAnsattService.oppdaterGraderingOgEgenAnsatt(sakId)
+                }
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         get("saker/{sakType}") {
             kunSystembruker {
                 val sakType: SakType =
@@ -49,7 +60,7 @@ internal fun Route.egenAnsattRoute(
                 call.respond(
                     inTransaction {
                         egenAnsattService.hentSkjermedeSaker(sakType)
-                    }
+                    },
                 )
             }
         }

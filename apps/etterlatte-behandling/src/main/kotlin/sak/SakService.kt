@@ -102,6 +102,8 @@ interface SakService {
 
     fun hentSakerBpFylt18AarIMaaned(maanedFyller18: YearMonth): List<SakId>
 
+    fun hentSakerMedSkjerming(sakType: SakType): List<SakId>
+
     fun hentSaksendringer(sakId: SakId): List<Saksendring>
 
     fun oppdaterEnhet(
@@ -351,6 +353,10 @@ class SakServiceImpl(
         return aldersovergangService
             .hentSoekereFoedtIEnGittMaaned(foedselsMaaned)
             .map { SakId(it.toLong()) }
+    }
+
+    override fun hentSakerMedSkjerming(sakType: SakType): List<SakId> {
+        return lesDao.finnSakerMedSkjerming(sakType).map { it.id }
     }
 
     private suspend fun hentSpraak(fnr: String): Spraak {

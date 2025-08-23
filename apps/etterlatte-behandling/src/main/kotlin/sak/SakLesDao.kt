@@ -190,6 +190,25 @@ class SakLesDao(
                 SakId(getLong("sak_id"))
             }
         }
+
+    fun finnSakerMedSkjerming(sakType: SakType): List<Sak> =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, sakType, fnr, enhet, adressebeskyttelse, erSkjermet
+                        FROM sak
+                        WHERE sakType = ?
+                        AND erSkjermet is true
+                        """.trimIndent(),
+                    )
+                statement.setString(1, sakType.name)
+                statement
+                    .executeQuery()
+                    .toList(mapTilSak)
+            }
+        }
 }
 
 internal val mapTilSak: ResultSet.() -> Sak = {

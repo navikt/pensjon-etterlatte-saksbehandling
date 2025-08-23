@@ -2,6 +2,7 @@ package no.nav.etterlatte.egenansatt
 
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.sak.SakService
@@ -35,5 +36,9 @@ class EgenAnsattService(
             }
 
         logger.info("Ferdighåndtert skjermet hendelse")
+    }
+
+    fun hentSkjermedeSaker(sakType: SakType): List<SakId> {
+        return sakService.hentSakerMedSkjerming(sakType)
     }
 }

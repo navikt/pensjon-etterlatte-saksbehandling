@@ -4,13 +4,16 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.JobbScheduler.PeriodiskeMaanedligeJobber
+import no.nav.etterlatte.tidshendelser.JobbScheduler.PeriodiskeUkentligeJobber
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.time.DayOfWeek
 import java.time.YearMonth
+import java.time.temporal.TemporalAdjusters
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -66,5 +69,36 @@ class JobberIntegrationTestScheduler(
         jobbScheduler.scheduleMaanedligeJobber()
 
         hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeMaanedligeJobber.entries.size + 1
+    }
+
+    @Test
+    fun `skal lage ukentlige jobber om de ikke er laget fra før`() {
+        jobbScheduler.scheduleUkentligeJobber()
+        val mandagINesteUke =
+            java.time.LocalDate
+                .now()
+                .plusWeeks(1)
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        hendelseDao.finnJobberMedKjoeringForUke(mandagINesteUke) shouldHaveSize PeriodiskeUkentligeJobber.entries.size
+    }
+
+    @Test
+    fun `skal ikke lage ukentlige jobber om de er laget fra før`() {
+        jobbTestdata.opprettJobb(
+            PeriodiskeUkentligeJobber.OPPDATER_SKJERMING_BP_FYLTE_18_AAR.jobbType,
+            nesteMaaned,
+            java.time.LocalDate
+                .now()
+                .plusWeeks(1),
+        )
+        jobbScheduler.scheduleUkentligeJobber()
+
+        val mandagINesteUke =
+            java.time.LocalDate
+                .now()
+                .plusWeeks(1)
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+
+        hendelseDao.finnJobberMedKjoeringForUke(mandagINesteUke) shouldHaveSize PeriodiskeUkentligeJobber.entries.size
     }
 }

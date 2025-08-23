@@ -215,6 +215,7 @@ class TidshendelseService(
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
+            JobbType.OPPDATER_SKJERMING_BP_FYLTE_18_AAR,
 
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: $type")
         }

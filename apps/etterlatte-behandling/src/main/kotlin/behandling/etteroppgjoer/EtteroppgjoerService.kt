@@ -28,10 +28,8 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
-    fun hentEtteroppgjoerForStatus(
-        status: EtteroppgjoerStatus,
-        inntektsaar: Int,
-    ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForStatus(status, inntektsaar)
+    fun hentEtteroppgjoerMedMottattSkatteoppgjoer(inntektsaar: Int): List<Etteroppgjoer> =
+        dao.hentEtteroppgjoerForStatus(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, inntektsaar)
 
     fun hentEtteroppgjoerForFilter(
         filter: EtteroppgjoerFilter,

@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
 enum class EtteroppgjoerFilter(
+    val status: EtteroppgjoerStatus,
     val harSanksjon: Boolean,
     val harInsitusjonsopphold: Boolean,
     val harOpphoer: Boolean,
     val harBosattUtland: Boolean,
 ) {
-    ENKEL(false, false, false, false),
-    MED_SANKSJON(true, false, false, false),
+    ENKEL(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, false, false, false, false),
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -36,8 +36,8 @@ class EtteroppgjoerJobService(
         newSingleThreadContext("etteroppgjoerjob").use { ctx ->
             Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })
             runBlocking(ctx) {
-                if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
-                    logger.info("Starter periodiske jobber for etteroppgjoer")
+                if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
+                    // TODO: definere filter i endepunkt som kaller
                     startEtteroppgjoerKjoering(EtteroppgjoerFilter.ENKEL)
                 } else {
                     logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
@@ -51,8 +51,17 @@ class EtteroppgjoerJobService(
         val aarMellom2024OgNaa = (2024..yearNow).toList()
 
         for (inntektsaar in aarMellom2024OgNaa) {
-            finnOgOpprettEtteroppgjoer(inntektsaar)
-            finnOgOpprettForbehandlinger(inntektsaar, filter)
+            if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_KJOERING_OPPRETT_ETTEROPPGJOER, false)) {
+                finnOgOpprettEtteroppgjoer(inntektsaar)
+            } else {
+                logger.info("Opprette etteroppgjoer i forbindelse med kjoering er deaktivert")
+            }
+
+            if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_KJOERING_OPPRETT_FORBEHANDLING, false)) {
+                finnOgOpprettForbehandlinger(inntektsaar, filter)
+            } else {
+                logger.info("Opprette forbehandling for etteroppgjoer i forbindelse med kjoering er deaktivert")
+            }
         }
     }
 
@@ -61,16 +70,14 @@ class EtteroppgjoerJobService(
         inntektsaar: Int,
         filter: EtteroppgjoerFilter?,
     ) {
-        val status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
         logger.info(
-            "Starter oppretting av forbehandling for etteroppgjør (inntektsår=$inntektsaar, status=$status, filter=${filter ?: "INGEN"})",
+            "Starter oppretting av forbehandling for etteroppgjør med mottatt skatteoppgjør (inntektsår=$inntektsaar, filter=${filter ?: "INGEN"})",
         )
 
         // for å støtte filter og uten i dev ifm testing
         val etteroppgjoerListe =
-            filter
-                ?.let { etteroppgjoerService.hentEtteroppgjoerForFilter(it, inntektsaar) }
-                ?: etteroppgjoerService.hentEtteroppgjoerForStatus(status, inntektsaar)
+            filter?.let { etteroppgjoerService.hentEtteroppgjoerForFilter(it, inntektsaar) }
+                ?: etteroppgjoerService.hentEtteroppgjoerMedMottattSkatteoppgjoer(inntektsaar)
 
         etteroppgjoerListe.forEach { etteroppgjoer ->
             try {
@@ -87,7 +94,7 @@ class EtteroppgjoerJobService(
             }
         }
 
-        logger.info("Ferdig. Opprettet forbehandling for ${etteroppgjoerListe.size} saker.")
+        logger.info("Det er opprettet forbehandling for ${etteroppgjoerListe.size} saker for inntektsaar=$inntektsaar.")
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør

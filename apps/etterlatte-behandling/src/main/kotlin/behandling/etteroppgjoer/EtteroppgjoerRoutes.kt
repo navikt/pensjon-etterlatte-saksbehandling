@@ -35,11 +35,14 @@ import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 enum class EtteroppgjoerToggles(
     private val toggle: String,
 ) : FeatureToggle {
+    ETTEROPPGJOER_KJOERING_OPPRETT_ETTEROPPGJOER("ettteroppgjoer_kjoering_opprett_etteroppgjoer"),
+    ETTEROPPGJOER_KJOERING_OPPRETT_FORBEHANDLING("etteroppgjoer_kjoering_opprett_forbehandling"),
+
     ETTEROPPGJOER("etteroppgjoer"),
     ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
     ETTEROPPGJOER_STUB_PGI("etteroppgjoer_stub_pgi"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
-    ETTEROPPGJOER_PERIODISK_JOBB("ettteroppgjoer_periodisk_jobb"),
+
     ;
 
     override fun key(): String = toggle
@@ -214,7 +217,6 @@ fun Route.etteroppgjoerRoutes(
                     }
 
                 val filter = call.request.queryParameters["filter"]?.let { EtteroppgjoerFilter.valueOf(it) }
-
                 etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar, filter)
             }
         }

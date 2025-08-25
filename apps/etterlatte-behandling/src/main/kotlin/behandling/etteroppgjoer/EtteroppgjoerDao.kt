@@ -59,26 +59,27 @@ class EtteroppgjoerDao(
     ): List<Etteroppgjoer> =
         connectionAutoclosing.hentConnection {
             with(it) {
-                val sql =
-                    """
-                    SELECT *
-                    FROM etteroppgjoer
-                    WHERE inntektsaar = ?
-                      AND har_sanksjon = ?
-                      AND har_institusjonsopphold = ?
-                      AND har_opphoer = ?
-                      AND har_bosattutland = ?
-                    """.trimIndent()
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM etteroppgjoer
+                        WHERE inntektsaar = ?
+                          AND status = ?
+                          AND har_sanksjon = ?
+                          AND har_institusjonsopphold = ?
+                          AND har_opphoer = ?
+                          AND har_bosattutland = ?
+                        """.trimIndent(),
+                    )
 
-                prepareStatement(sql)
-                    .apply {
-                        setInt(1, inntektsaar)
-                        setBoolean(2, filter.harSanksjon)
-                        setBoolean(3, filter.harInsitusjonsopphold)
-                        setBoolean(4, filter.harOpphoer)
-                        setBoolean(5, filter.harBosattUtland)
-                    }.executeQuery()
-                    .toList { toEtteroppgjoer() }
+                statement.setString(1, filter.status.name)
+                statement.setInt(2, inntektsaar)
+                statement.setBoolean(3, filter.harSanksjon)
+                statement.setBoolean(4, filter.harInsitusjonsopphold)
+                statement.setBoolean(5, filter.harOpphoer)
+                statement.setBoolean(6, filter.harBosattUtland)
+                statement.executeQuery().toList { toEtteroppgjoer() }
             }
         }
 

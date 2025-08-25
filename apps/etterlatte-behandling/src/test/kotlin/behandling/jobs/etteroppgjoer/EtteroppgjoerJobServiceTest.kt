@@ -5,14 +5,12 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -58,7 +56,7 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
         startServer(vedtakKlient = vedtakKlientMock, featureToggleService = dummyFeatureToggleService)
 
         nyKontekstMedBrukerOgDatabase(saksbehandler, applicationContext.dataSource)
-        dummyFeatureToggleService.settBryter(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, true)
+        dummyFeatureToggleService.settBryter(EtteroppgjoerToggles.ETTEROPPGJOER_KJOERING_OPPRETT_ETTEROPPGJOER, true)
     }
 
     @AfterAll

@@ -402,8 +402,11 @@ class SakServiceImpl(
             }
         sakTilgang.oppdaterAdressebeskyttelse(sak.id, hentetGradering)
         sakTilgang.settEnhetOmAdressebeskyttet(sak, hentetGradering)
-        sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
-        return sak
+
+        val oppdatertSak = lesDao.hentSak(sak.id) ?: throw InternfeilException("Sak ${sak.id} finnes ikke")
+        sjekkGraderingOgEnhetStemmer(oppdatertSak)
+
+        return oppdatertSak
     }
 
     override fun hentSaksendringer(sakId: SakId): List<Saksendring> {
@@ -412,15 +415,15 @@ class SakServiceImpl(
         return sak?.let { endringerDao.hentEndringerForSak(it.id) } ?: emptyList()
     }
 
-    private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
+    private fun sjekkGraderingOgEnhetStemmer(sak: Sak) {
         sak.gradertEnhetsnummerErIkkeAlene()
         sak.egenAnsattStemmer()
         sak.graderingerStemmer()
     }
 
-    private fun SakMedGraderingOgSkjermet.gradertEnhetsnummerErIkkeAlene() {
-        if (this.enhetNr == Enheter.STRENGT_FORTROLIG.enhetNr &&
-            this.adressebeskyttelseGradering !in
+    private fun Sak.gradertEnhetsnummerErIkkeAlene() {
+        if (this.enhet == Enheter.STRENGT_FORTROLIG.enhetNr &&
+            this.adressebeskyttelse !in
             listOf(
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
@@ -431,17 +434,17 @@ class SakServiceImpl(
         }
     }
 
-    private fun SakMedGraderingOgSkjermet.graderingerStemmer() {
-        when (this.adressebeskyttelseGradering) {
+    private fun Sak.graderingerStemmer() {
+        when (this.adressebeskyttelse) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
-                if (this.enhetNr != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
+                if (this.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
                     logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
             }
 
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
-                if (this.enhetNr != Enheter.STRENGT_FORTROLIG.enhetNr) {
+                if (this.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
                     logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
@@ -451,14 +454,14 @@ class SakServiceImpl(
         }
     }
 
-    private fun SakMedGraderingOgSkjermet.egenAnsattStemmer() {
+    private fun Sak.egenAnsattStemmer() {
         if (this.erSkjermet == true) {
-            if (this.enhetNr != Enheter.EGNE_ANSATTE.enhetNr) {
+            if (this.enhet != Enheter.EGNE_ANSATTE.enhetNr) {
                 logger.error("Sak har fått satt feil enhetsnummer basert på skjermingen, se sikkerlogg.")
                 sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering skjerming(egen ansatt)")
             }
         }
-        if (this.enhetNr == Enheter.EGNE_ANSATTE.enhetNr && this.erSkjermet != true) {
+        if (this.enhet == Enheter.EGNE_ANSATTE.enhetNr && this.erSkjermet != true) {
             logger.error("Sak mangler skjerming, se sikkerlogg.")
             sikkerLogg.info("Sakid: ${this.id} har fått satt feil skjerming(egen ansatt)")
         }

@@ -43,6 +43,9 @@ class SkatteoppgjoerHendelserService(
                     if (etteroppgjoer.status in
                         listOf(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
                     ) {
+                        logger.info(
+                            "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør for $inntektsaar, sakId=${sak.id}. Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
+                        )
                         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                             sak.id,
                             etteroppgjoer.inntektsaar,

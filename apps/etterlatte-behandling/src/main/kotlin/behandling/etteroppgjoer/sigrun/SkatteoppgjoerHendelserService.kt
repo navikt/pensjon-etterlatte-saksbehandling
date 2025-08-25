@@ -56,7 +56,7 @@ class SkatteoppgjoerHendelserService(
                             "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
                         )
                         sikkerLogg.error(
-                            "Person med fnr=$ident har mottatt ny hendelse fra skatt om nytt skatteoppgjør, men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
+                            "Person med fnr=$ident har mottatt ny hendelse fra skatt om nytt skatteoppgjør, men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
                         )
                     }
                 }

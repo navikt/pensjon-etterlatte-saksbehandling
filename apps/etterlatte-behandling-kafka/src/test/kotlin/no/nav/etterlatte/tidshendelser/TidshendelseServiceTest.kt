@@ -169,7 +169,6 @@ internal class TidshendelseServiceTest {
     fun `skal oppdatere skjerming hvis jobbtypen er oppdater skjerming`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
         every { behandlingService.oppdaterSkjerming(any()) } just runs
-        every { behandlingService.opprettOppgave(any(), any(), any(), any(), any()) } returns opprettetOppgaveId
 
         val melding =
             lagMeldingForVurdertLoependeYtelse(

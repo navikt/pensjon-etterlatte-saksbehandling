@@ -71,11 +71,11 @@ class JobbScheduler(
         val planlagteJobberNesteMnd = hendelseDao.finnJobberMedKjoeringForUke(mandagNesteUke)
 
         PeriodiskeUkentligeJobber.entries
-            // filtrere bort jobber som allerede er planlagt for neste måned
+            // filtrere bort jobber som allerede er planlagt for neste uke
             .filter { periodiskJobb ->
                 planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
             }
-            // opprett jobb for neste måned
+            // opprett jobb for neste uke
             .forEach { periodiskJobb ->
                 hendelseDao.opprettUkentligJobb(periodiskJobb, mandagNesteUke)
             }

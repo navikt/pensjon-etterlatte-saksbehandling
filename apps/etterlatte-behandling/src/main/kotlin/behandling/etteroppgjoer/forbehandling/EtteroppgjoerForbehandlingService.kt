@@ -60,21 +60,29 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    fun ferdigstillForbehandling(
+    suspend fun ferdigstillForbehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Ferdigstiller forbehandling med id=$behandlingId")
-        val forbehandling = dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
-        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+        val forbehandling =
+            dao.hentForbehandling(behandlingId)
+                ?: throw FantIkkeForbehandling(behandlingId)
 
-        val ferdigstiltForbehandling = forbehandling.tilFerdigstilt()
-        dao.lagreForbehandling(ferdigstiltForbehandling)
+        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+        sjekkAtForbehandlingKanFerdigstilles(forbehandling)
+
+        val ferdigstiltForbehandling =
+            forbehandling.tilFerdigstilt().also {
+                dao.lagreForbehandling(it)
+            }
+
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
             forbehandling.sak.id,
             forbehandling.aar,
             EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
         )
+
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             forbehandling.id.toString(),
             OppgaveType.ETTEROPPGJOER,
@@ -227,7 +235,7 @@ class EtteroppgjoerForbehandlingService(
             logger.error("Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId", e)
         }
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
-        dao.lagreAInntekt(aInntekt, nyForbehandling.id)
+        dao.lagreAInntekt(aInntekt, nyForbehandling.id) // TODO: fjerne?
 
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
@@ -313,6 +321,31 @@ class EtteroppgjoerForbehandlingService(
                         endringErTilUgunstForBruker == JaNei.JA
                 },
         )
+    }
+
+    fun sjekkAtOppgavenErTildeltSaksbehandler(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val oppgave =
+            oppgaveService
+                .hentOppgaverForReferanse(forbehandlingId.toString())
+                .firstOrNull { it.erIkkeAvsluttet() }
+                ?: throw InternfeilException("Fant ingen oppgaver under behandling for forbehandlingId=$forbehandlingId")
+
+        if (oppgave.saksbehandler?.ident != brukerTokenInfo.ident()) {
+            throw IkkeTillattException(
+                "IKKE_TILGANG_TIL_BEHANDLING",
+                "Saksbehandler ${brukerTokenInfo.ident()} er ikke tildelt oppgaveId=${oppgave.id}",
+            )
+        }
+
+        if (oppgave.erAvsluttet()) {
+            throw UgyldigForespoerselException(
+                "OPPGAVE_AVSLUTTET",
+                "Oppgaven tilknyttet forbehandlingId=$forbehandlingId er avsluttet og kan ikke behandles",
+            )
+        }
     }
 
     private fun kanOppretteForbehandlingForEtteroppgjoer(
@@ -443,28 +476,47 @@ class EtteroppgjoerForbehandlingService(
         return forbehandlingCopy
     }
 
-    fun sjekkAtOppgavenErTildeltSaksbehandler(
-        forbehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        val oppgave =
-            oppgaveService
-                .hentOppgaverForReferanse(forbehandlingId.toString())
-                .firstOrNull { it.erIkkeAvsluttet() }
-                ?: throw InternfeilException("Fant ingen oppgaver under behandling for forbehandlingId=$forbehandlingId")
+    private suspend fun sjekkAtForbehandlingKanFerdigstilles(forbehandling: EtteroppgjoerForbehandling) {
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
+                ?: throw InternfeilException("Kunne ikke finne siste iverksatte behandling for sakId=${forbehandling.sak.id}")
 
-        if (oppgave.saksbehandler?.ident != brukerTokenInfo.ident()) {
-            throw IkkeTillattException(
-                "IKKE_TILGANG_TIL_BEHANDLING",
-                "Saksbehandler ${brukerTokenInfo.ident()} er ikke tildelt oppgaveId=${oppgave.id}",
+        // verifisere at vi bruker siste iverksatte behandling
+        if (sisteIverksatteBehandling.id != forbehandling.sisteIverksatteBehandlingId) {
+            throw InternfeilException(
+                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.id}",
             )
         }
 
-        if (oppgave.erAvsluttet()) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_AVSLUTTET",
-                "Oppgaven tilknyttet forbehandlingId=$forbehandlingId er avsluttet og kan ikke behandles",
-            )
+        val sistePensjonsgivendeInntekt = sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
+        val sisteSummerteInntekter = inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+
+        // verifisere at vi har siste pensjonsgivende inntekt i databasen
+        dao.hentPensjonsgivendeInntekt(forbehandling.id).let { pgi ->
+            if (pgi != sistePensjonsgivendeInntekt) {
+                throw InternfeilException(
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste Pensjonsgivende inntekt",
+                )
+            }
+        }
+
+        // verifisere at vi har siste summerte inntekter fra A-inntekt
+        dao.hentSummerteInntekter(forbehandling.id).let { summerteInntekter ->
+            if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
+                throw InternfeilException(
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",
+                )
+            }
+            if (summerteInntekter.loenn != sisteSummerteInntekter.loenn) {
+                throw InternfeilException(
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste LOENN inntekt",
+                )
+            }
+            if (summerteInntekter.oms != sisteSummerteInntekter.oms) {
+                throw InternfeilException(
+                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste OMS inntekt",
+                )
+            }
         }
     }
 }

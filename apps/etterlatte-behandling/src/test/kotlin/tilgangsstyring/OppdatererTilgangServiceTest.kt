@@ -284,28 +284,6 @@ class OppdatererTilgangServiceTest {
         }
     }
 
-    @Test
-    fun `Skal fjerne skjerming fra sak`() {
-        val sak = bpSak(enhet = Enheter.EGNE_ANSATTE.enhetNr, gradering = null, erSkjermet = false)
-        every { sakLesDao.hentSak(sak.id) } returns sak
-
-        oppdaterTilgangService.fjernSkjermingFraSak(sak, soeker)
-
-        verify(exactly = 1) {
-            sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, defaultEnhetFraBrukerService.enhetNr))
-            sakTilgang.oppdaterSkjerming(sak.id, false)
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(
-                match {
-                    it.first().id == sak.id &&
-                        it.first().enhet == defaultEnhetFraBrukerService.enhetNr
-                },
-            )
-        }
-        verify(exactly = 0) {
-            sakTilgang.oppdaterAdressebeskyttelse(any(), any())
-        }
-    }
-
     private fun bpSak(
         enhet: Enhetsnummer,
         gradering: AdressebeskyttelseGradering?,

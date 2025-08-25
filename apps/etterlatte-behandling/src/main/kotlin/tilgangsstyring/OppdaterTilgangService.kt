@@ -135,17 +135,6 @@ class OppdaterTilgangService(
         return relevanteIdenterForSkjerming.any { fnr -> sjekkOmIdentErSkjermet(fnr) }
     }
 
-    fun fjernSkjermingFraSak(
-        sak: Sak,
-        fnr: String,
-    ) {
-        val enhet = hentEnhet(fnr = fnr, sak = sak)
-        val sakerMedNyEnhet = SakMedEnhet(sak.id, enhet)
-        sakSkrivDao.oppdaterEnhet(sakerMedNyEnhet)
-        sakTilgang.oppdaterSkjerming(sak.id, false)
-        oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakerMedNyEnhet))
-    }
-
     private fun hentEnhet(
         fnr: String,
         sak: Sak,

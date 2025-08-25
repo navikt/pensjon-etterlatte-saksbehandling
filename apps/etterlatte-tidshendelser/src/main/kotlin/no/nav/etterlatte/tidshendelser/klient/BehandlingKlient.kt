@@ -9,6 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -69,6 +70,15 @@ class BehandlingKlient(
         runBlocking {
             behandlingHttpClient
                 .get("$behandlingUrl/saker/bp-fyller-18-i-maaned/$maaned") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                }.body()
+        }
+
+    fun hentSkjermedeSakerBarnepensjon(): List<SakId> =
+        runBlocking {
+            behandlingHttpClient
+                .get("$behandlingUrl/egenansatt/saker/${SakType.BARNEPENSJON.name}") {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                 }.body()

@@ -1,17 +1,21 @@
 package no.nav.etterlatte.egenansatt
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -36,6 +40,28 @@ internal fun Route.egenAnsattRoute(
                     )
                 }
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("{$SAKID_CALL_PARAMETER}/oppdater") {
+            kunSystembruker {
+                inTransaction {
+                    egenAnsattService.oppdaterGraderingOgEgenAnsatt(sakId)
+                }
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        get("saker/{sakType}") {
+            kunSystembruker {
+                val sakType: SakType =
+                    enumValueOf(krevIkkeNull(call.parameters["sakType"]) { "Må ha en Saktype for å finne saker" })
+
+                call.respond(
+                    inTransaction {
+                        egenAnsattService.hentSkjermedeSaker(sakType)
+                    },
+                )
             }
         }
     }

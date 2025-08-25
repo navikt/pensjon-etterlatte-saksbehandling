@@ -1,5 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -13,12 +14,16 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.spyk
+import kotlinx.coroutines.asContextElement
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SkjermingKlientTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -30,12 +35,16 @@ import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.module
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -51,13 +60,20 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
     private val soeker = no.nav.etterlatte.soeker // Obs denne må matche med grunnlag sitt persongalleri
 
+    private lateinit var sakSkrivDao: SakSkrivDao
+    private lateinit var context: Context
+
     @BeforeEach
     fun start() =
         startServer(
             norg2Klient = norg2Klient,
             pdlTjenesterKlient = pdltjenesterKlient,
             skjermingKlient = skjermingHttpKlient,
-        ).also { resetDatabase() }
+        ).also {
+            context = nyKontekstMedBrukerOgDatabase(mockSaksbehandler(), applicationContext.dataSource)
+            resetDatabase()
+            sakSkrivDao = applicationContext.sakSkrivDao
+        }
 
     @AfterEach
     fun afterEach() {
@@ -276,6 +292,39 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
             Assertions.assertEquals(Enheter.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)
+        }
+    }
+
+    @Test
+    fun `skal hente alle saker med skjerming og gitt sakstype`() {
+        testApplication(Kontekst.asContextElement(context)) {
+            val (sak1, _, _, sak4) =
+                inTransaction {
+                    val dontCareEnhet = Enheter.defaultEnhet.enhetNr
+                    listOf(
+                        sakSkrivDao.opprettSak("1349", SakType.BARNEPENSJON, dontCareEnhet).id
+                            .also { sakSkrivDao.oppdaterSkjerming(it, true) },
+                        sakSkrivDao.opprettSak("1814", SakType.BARNEPENSJON, dontCareEnhet).id
+                            .also { sakSkrivDao.oppdaterSkjerming(it, false) },
+                        sakSkrivDao.opprettSak("1940", SakType.OMSTILLINGSSTOENAD, dontCareEnhet).id
+                            .also { sakSkrivDao.oppdaterSkjerming(it, true) },
+                        sakSkrivDao.opprettSak("1945", SakType.BARNEPENSJON, dontCareEnhet).id
+                            .also { sakSkrivDao.oppdaterSkjerming(it, true) }
+                    )
+                }
+
+            val client =
+                runServerWithModule(mockOAuth2Server) {
+                    module(applicationContext)
+                }
+
+            val result: List<SakId> = client.get("egenansatt/saker/${SakType.BARNEPENSJON.name}") {
+                addAuthToken(this@EgenAnsattRouteTest.systemBruker)
+            }.let {
+                Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                it.body()
+            }
+            result shouldContainExactlyInAnyOrder listOf(sak1, sak4)
         }
     }
 }

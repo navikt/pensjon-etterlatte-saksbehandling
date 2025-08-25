@@ -85,6 +85,10 @@ class TidshendelseRiver(
                 packetUpdates[BEHANDLING_ID_KEY] = result.behandlingId
             }
 
+            is TidshendelseResult.OppdatertSak -> {
+                packetUpdates[TIDSHENDELSE_STEG_KEY] = "OPPDATERT_SAK"
+            }
+
             is TidshendelseResult.Skipped -> {
                 packetUpdates[TIDSHENDELSE_STEG_KEY] = "HOPPET_OVER"
             }

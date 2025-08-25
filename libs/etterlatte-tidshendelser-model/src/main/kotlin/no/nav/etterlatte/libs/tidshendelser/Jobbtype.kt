@@ -61,6 +61,11 @@ enum class JobbType(
         JobbKategori.AARLIG_INNTEKTSJUSTERING,
         sakType = SakType.OMSTILLINGSSTOENAD,
     ),
+    OPPDATER_SKJERMING_BP(
+        "Oppdaterer skjerming på skjermede barnepensjonssaker",
+        JobbKategori.OPPDATERING_SKJERMING_BP,
+        sakType = SakType.BARNEPENSJON,
+    ),
 }
 
 enum class JobbKategori {
@@ -69,4 +74,5 @@ enum class JobbKategori {
     REGULERING,
     AARLIG_INNTEKTSJUSTERING,
     OPPFOELGING_BP_FYLT_18,
+    OPPDATERING_SKJERMING_BP,
 }

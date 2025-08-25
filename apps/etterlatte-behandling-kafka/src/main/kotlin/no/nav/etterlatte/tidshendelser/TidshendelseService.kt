@@ -26,7 +26,7 @@ class TidshendelseService(
             return TidshendelseResult.Skipped
         }
         logger.info(
-            """Løpende ytelse: oppretter behandling/oppgave for sak ${hendelse.sakId} 
+            """Løpende ytelse: behandler tidshendelse for sak ${hendelse.sakId} 
                     behandlingsmåned=${hendelse.behandlingsmaaned}""",
         )
 
@@ -40,6 +40,8 @@ class TidshendelseService(
                 opprettAutomatiskRevurdering(
                     hendelse,
                 )
+
+            JobbType.OPPDATER_SKJERMING_BP -> oppdaterSkjerming(hendelse)
 
             else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
         }
@@ -60,6 +62,11 @@ class TidshendelseService(
         }
     }
 
+    private fun oppdaterSkjerming(hendelse: TidshendelsePacket): TidshendelseResult {
+        behandlingService.oppdaterSkjerming(hendelse.sakId)
+        return TidshendelseResult.OppdatertSak
+    }
+
     private fun skalSkippes(hendelse: TidshendelsePacket): Boolean {
         if (hendelse.jobbtype == JobbType.AO_BP20 && hendelse.harMigrertYrkesskadeFordel) {
             logger.info("Har migrert yrkesskadefordel: utvidet aldersgrense [sak=${hendelse.sakId}]")
@@ -77,7 +84,7 @@ class TidshendelseService(
         }
         if (hendelse.harLoependeYtelse && hendelse.dryrun) {
             logger.info(
-                """Dry run: Løpende ytelse: skipper oppretting av behandling/oppgave
+                """Dry run: Løpende ytelse: skipper behandling av tidshendelse
                     for sak ${hendelse.sakId} behandlingsmåned=${hendelse.behandlingsmaaned}""",
             )
             return true
@@ -215,6 +222,7 @@ class TidshendelseService(
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
+            JobbType.OPPDATER_SKJERMING_BP,
 
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: $type")
         }
@@ -233,6 +241,8 @@ sealed class TidshendelseResult {
     data class OpprettRevurderingForAktivitetsplikt(
         val behandlingId: UUID,
     ) : TidshendelseResult()
+
+    data object OppdatertSak : TidshendelseResult()
 
     data object Skipped : TidshendelseResult()
 }

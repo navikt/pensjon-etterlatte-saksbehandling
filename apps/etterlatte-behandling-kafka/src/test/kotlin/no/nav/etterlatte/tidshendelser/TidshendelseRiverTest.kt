@@ -165,7 +165,7 @@ internal class TidshendelseRiverTest {
 
 fun lagMeldingForVurdertLoependeYtelse(
     hendelseId: UUID = UUID.randomUUID(),
-    sakId: SakId,
+    sakId: SakId = randomSakId(),
     behandlingsmaaned: YearMonth,
     type: JobbType = JobbType.AO_BP20,
     dryRun: Boolean = false,

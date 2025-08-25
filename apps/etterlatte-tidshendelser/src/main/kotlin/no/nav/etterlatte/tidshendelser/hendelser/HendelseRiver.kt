@@ -22,6 +22,15 @@ class HendelseRiver(
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    private val avsluttendeSteg =
+        listOf(
+            "VEDTAK_ATTESTERT",
+            "OPPGAVE_OPPRETTET",
+            "HOPPET_OVER",
+            "AKTIVITETSPLIKT_REVURDERING_OPPRETTET",
+            "OPPDATERT_SAK",
+        )
+
     init {
         initialiserRiver(rapidsConnection, EventNames.TIDSHENDELSE) {
             validate { it.requireKey(TIDSHENDELSE_STEG_KEY) }
@@ -59,7 +68,7 @@ class HendelseRiver(
                 val loependeYtelse = packet[HENDELSE_DATA_KEY]["loependeYtelse"].asBoolean()
                 logger.info("Sak $sakId har løpende ytelse? $loependeYtelse")
                 hendelseDao.settHarLoependeYtelse(hendelseIdUUID, loependeYtelse)
-            } else if (steg in listOf("VEDTAK_ATTESTERT", "OPPGAVE_OPPRETTET", "HOPPET_OVER", "AKTIVITETSPLIKT_REVURDERING_OPPRETTET")) {
+            } else if (steg in avsluttendeSteg) {
                 logger.info("Ferdigstiller hendelse $hendelseId for sak $sakId")
                 hendelseDao.oppdaterHendelseStatus(hendelseIdUUID, HendelseStatus.FERDIG)
                 hendelseDao.ferdigstillJobbHvisAlleHendelserErFerdige(hendelseIdUUID)

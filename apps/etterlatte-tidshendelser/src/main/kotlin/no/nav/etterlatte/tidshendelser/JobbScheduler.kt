@@ -7,8 +7,11 @@ import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import org.slf4j.LoggerFactory
+import java.time.DayOfWeek
 import java.time.Duration
+import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.TemporalAdjusters
 import java.util.Timer
 
 class JobbSchedulerTask(
@@ -30,6 +33,7 @@ class JobbSchedulerTask(
             openingHours = openingHours,
         ) {
             jobbScheduler.scheduleMaanedligeJobber()
+            jobbScheduler.scheduleUkentligeJobber()
         }
     }
 }
@@ -56,6 +60,27 @@ class JobbScheduler(
             }
     }
 
+    fun scheduleUkentligeJobber() {
+        val mandagNesteUke =
+            LocalDate
+                .now()
+                .plusWeeks(1)
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        logger.info("Sjekker for jobber å legge til for neste uke: $mandagNesteUke")
+
+        val planlagteJobberNesteMnd = hendelseDao.finnJobberMedKjoeringForUke(mandagNesteUke)
+
+        PeriodiskeUkentligeJobber.entries
+            // filtrere bort jobber som allerede er planlagt for neste uke
+            .filter { periodiskJobb ->
+                planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
+            }
+            // opprett jobb for neste uke
+            .forEach { periodiskJobb ->
+                hendelseDao.opprettUkentligJobb(periodiskJobb, mandagNesteUke)
+            }
+    }
+
     enum class PeriodiskeMaanedligeJobber(
         val jobbType: JobbType,
         val dagIMaaned: Int,
@@ -71,5 +96,13 @@ class JobbScheduler(
         AO_BP20(JobbType.AO_BP20, 20, 1),
         AO_OMS67(JobbType.AO_OMS67, 20, 1),
         OP_BP_FYLT_18(JobbType.OP_BP_FYLT_18, 21, 2),
+    }
+
+    enum class PeriodiskeUkentligeJobber(
+        val jobbType: JobbType,
+        // Merk at justering av behandlingMaaned kan medføre uønsket oppførsel (f.eks. har løpende ytelse sjekker feil måned)
+        val behandlingMaanedJustering: Long,
+    ) {
+        OPPDATER_SKJERMING_BP(JobbType.OPPDATER_SKJERMING_BP, 0),
     }
 }

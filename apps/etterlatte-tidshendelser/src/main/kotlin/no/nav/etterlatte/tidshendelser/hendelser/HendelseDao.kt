@@ -67,6 +67,20 @@ class HendelseDao(
             ).let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }
 
+    fun finnJobberMedKjoeringForUke(mandagIUka: LocalDate): List<HendelserJobb> =
+        datasource.transaction { tx ->
+            queryOf(
+                """
+                SELECT *
+                FROM jobb
+                WHERE kjoeredato >= to_date(:mandagen, 'YYYY-MM-DD')
+                  AND kjoeredato < to_date(:mandagen, 'YYYY-MM-DD') + interval '1 week'
+                ORDER BY id asc
+                """.trimIndent(),
+                mapOf("mandagen" to mandagIUka.toString()),
+            ).let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
+        }
+
     fun hentJobber(jobbIDs: List<Int>): List<HendelserJobb> =
         datasource.transaction { tx ->
             queryOf(
@@ -155,6 +169,33 @@ class HendelseDao(
             ).let { query -> tx.run(query.asUpdate) }
 
             logger.info("Opprettet jobbtype ${jobb.jobbType} for måneden $maaned")
+        }
+    }
+
+    fun opprettUkentligJobb(
+        jobb: JobbScheduler.PeriodiskeUkentligeJobber,
+        kjoeredato: LocalDate,
+    ) {
+        val behandlingsmaaned =
+            YearMonth
+                .of(kjoeredato.year, kjoeredato.month)
+                .plusMonths(jobb.behandlingMaanedJustering)
+                .toString()
+
+        datasource.transaction { tx ->
+            queryOf(
+                """
+                INSERT INTO jobb (type, kjoeredato, behandlingsmaaned)
+                VALUES (:type, :kjoeredato, :behandlingsmaaned)
+                """.trimIndent(),
+                mapOf(
+                    "type" to jobb.jobbType.name,
+                    "kjoeredato" to kjoeredato,
+                    "behandlingsmaaned" to behandlingsmaaned,
+                ),
+            ).let { query -> tx.run(query.asUpdate) }
+
+            logger.info("Opprettet jobbtype ${jobb.jobbType} for uka som starter på $kjoeredato")
         }
     }
 

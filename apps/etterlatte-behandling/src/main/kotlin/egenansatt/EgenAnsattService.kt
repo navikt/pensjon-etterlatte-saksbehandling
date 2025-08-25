@@ -2,6 +2,7 @@ package no.nav.etterlatte.egenansatt
 
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.sak.SakService
@@ -36,4 +37,17 @@ class EgenAnsattService(
 
         logger.info("Ferdighåndtert skjermet hendelse")
     }
+
+    fun oppdaterGraderingOgEgenAnsatt(sakId: SakId) {
+        logger.info("Oppdaterer gradering og egen ansatt")
+        val persongalleri = grunnlagService.hentPersongalleri(sakId)!!
+
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(
+            sakId = sakId,
+            persongalleri = persongalleri,
+        )
+        logger.info("Ferdig oppdatert gradering og egen ansatt")
+    }
+
+    fun hentSkjermedeSaker(sakType: SakType): List<SakId> = sakService.hentSakerMedSkjerming(sakType)
 }

@@ -224,17 +224,15 @@ class EtteroppgjoerForbehandlingService(
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+        val nyForbehandling = opprettOgLagreNyForbehandling(sak, inntektsaar, brukerTokenInfo)
 
-        val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
-        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
-
-        val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
         try {
             val summerteInntekter = runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
             dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
         } catch (e: Exception) {
             logger.error("Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId", e)
         }
+
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id) // TODO: fjerne?
 
@@ -413,12 +411,16 @@ class EtteroppgjoerForbehandlingService(
 
     private fun opprettOgLagreNyForbehandling(
         sak: Sak,
-        innvilgetPeriode: Periode,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sak.id)
         krevIkkeNull(sisteIverksatteBehandling) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
+
+        val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
+        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
         return EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode, sisteIverksatteBehandling.id).also {
             dao.lagreForbehandling(it)

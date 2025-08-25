@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.revurdering.MaksEnAktivOppgavePaaBehandling
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -223,17 +224,15 @@ class EtteroppgjoerForbehandlingService(
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+        val nyForbehandling = opprettOgLagreNyForbehandling(sak, inntektsaar, brukerTokenInfo)
 
-        val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
-        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
-
-        val nyForbehandling = opprettOgLagreNyForbehandling(sak, innvilgetPeriode)
         try {
             val summerteInntekter = runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
             dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
         } catch (e: Exception) {
             logger.error("Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId", e)
         }
+
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         dao.lagreAInntekt(aInntekt, nyForbehandling.id) // TODO: fjerne?
 
@@ -352,9 +351,23 @@ class EtteroppgjoerForbehandlingService(
         sak: Sak,
         inntektsaar: Int,
     ) {
+        // Sak
+
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
             throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
+        }
+
+        if (oppgaveService
+                .hentOppgaverForSak(sak.id)
+                .filter { it.kilde == OppgaveKilde.BEHANDLING }
+                .any { !it.erAvsluttet() }
+        ) {
+            logger.info("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger")
+            throw IkkeTillattException(
+                "ALLEREDE_AAPEN_BEHANDLING",
+                "Kan ikke opprette forbehandling, sakId=${sak.id} har allerede behandling under arbeid",
+            )
         }
 
         if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
@@ -363,6 +376,8 @@ class EtteroppgjoerForbehandlingService(
                 "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
             )
         }
+
+        // Etteroppgjør
 
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
         if (etteroppgjoer == null) {
@@ -384,24 +399,28 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
+        // Forbehandling
+
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
         if (forbehandlinger.any { it.aar == inntektsaar && it.erUnderBehandling() }) {
             throw InternfeilException(
                 "Kan ikke opprette forbehandling fordi det allerede eksisterer en forbehandling som ikke er ferdigstilt",
             )
         }
-
-        // TODO: flere sjekker?
     }
 
     private fun opprettOgLagreNyForbehandling(
         sak: Sak,
-        innvilgetPeriode: Periode,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sak.id)
         krevIkkeNull(sisteIverksatteBehandling) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
+
+        val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
+        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
         return EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode, sisteIverksatteBehandling.id).also {
             dao.lagreForbehandling(it)

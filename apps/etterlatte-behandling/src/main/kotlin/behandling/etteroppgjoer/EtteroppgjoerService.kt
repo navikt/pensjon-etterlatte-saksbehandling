@@ -21,22 +21,6 @@ class EtteroppgjoerService(
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
 ) {
-    // når vi mottar hendelse fra skatt, sjekk om ident skal ha etteroppgjør
-    fun skalHaEtteroppgjoer(
-        ident: String,
-        inntektsaar: Int,
-    ): SkalHaEtteroppgjoerResultat {
-        val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
-        val etteroppgjoer = sak?.let { dao.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
-
-        val skalHaEtteroppgjoer = etteroppgjoer?.skalHaEtteroppgjoer() ?: false
-
-        return SkalHaEtteroppgjoerResultat(
-            skalHaEtteroppgjoer,
-            etteroppgjoer,
-        )
-    }
-
     fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentAlleAktiveEtteroppgjoerForSak(sakId)
 
     fun hentEtteroppgjoerForInntektsaar(

@@ -3,12 +3,16 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class SkatteoppgjoerHendelserService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
     private val etteroppgjoerService: EtteroppgjoerService,
+    private val sakService: SakService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -17,7 +21,6 @@ class SkatteoppgjoerHendelserService(
         trigger: String? = "manuelt",
     ) {
         logger.info("Starter å behandle ${request.antall} hendelser fra skatt (type: $trigger)")
-
         val sisteKjoering = dao.hentSisteKjoering()
         val hendelsesListe = runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
 
@@ -30,24 +33,36 @@ class SkatteoppgjoerHendelserService(
 
         kjoering.antallRelevante =
             hendelsesListe.hendelser.count { hendelse ->
-                val resultat =
-                    etteroppgjoerService.skalHaEtteroppgjoer(
-                        hendelse.identifikator,
-                        hendelse.gjelderPeriode.toInt(),
-                    )
+                val ident = hendelse.identifikator
+                val inntektsaar = hendelse.gjelderPeriode.toInt()
 
-                if (resultat.skalHaEtteroppgjoer) {
-                    val etteroppgjoer = resultat.etteroppgjoer!!
+                val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
+                val etteroppgjoer = sak?.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
 
-                    logger.info("Sak=${etteroppgjoer.sakId} skal ha etteroppgjør for inntektsår=${hendelse.gjelderPeriode}")
-                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                        etteroppgjoer.sakId,
-                        etteroppgjoer.inntektsaar,
-                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                    )
+                if (etteroppgjoer != null) {
+                    if (etteroppgjoer.status in
+                        listOf(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
+                    ) {
+                        logger.info(
+                            "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør for $inntektsaar, sakId=${sak.id}. Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
+                        )
+                        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                            sak.id,
+                            etteroppgjoer.inntektsaar,
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                        )
+                    } else {
+                        logger.error(
+                            "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
+                        )
+                        sikkerLogg.error(
+                            "Person med fnr=$ident har mottatt ny hendelse fra skatt om nytt skatteoppgjør, men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
+                        )
+                    }
                 }
 
-                resultat.skalHaEtteroppgjoer
+                val relevantHendelse = etteroppgjoer != null
+                return@count relevantHendelse
             }
 
         dao.lagreKjoering(kjoering)

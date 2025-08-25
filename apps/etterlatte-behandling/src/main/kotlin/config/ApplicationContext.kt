@@ -697,6 +697,7 @@ internal class ApplicationContext(
             dao = skatteoppgjoerHendelserDao,
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
+            sakService = sakService,
         )
 
     private val etteroppgjoerRevurderingBrevService =

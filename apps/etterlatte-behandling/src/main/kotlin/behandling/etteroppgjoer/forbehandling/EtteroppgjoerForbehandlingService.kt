@@ -363,7 +363,7 @@ class EtteroppgjoerForbehandlingService(
                 .filter { it.kilde == OppgaveKilde.BEHANDLING }
                 .any { !it.erAvsluttet() }
         ) {
-            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger")
+            logger.info("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger")
             throw IkkeTillattException(
                 "ALLEREDE_AAPEN_BEHANDLING",
                 "Kan ikke opprette forbehandling, sakId=${sak.id} har allerede behandling under arbeid",

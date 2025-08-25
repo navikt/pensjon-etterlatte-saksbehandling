@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.revurdering.MaksEnAktivOppgavePaaBehandling
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -352,9 +353,23 @@ class EtteroppgjoerForbehandlingService(
         sak: Sak,
         inntektsaar: Int,
     ) {
+        // Sak
+
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
             throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
+        }
+
+        if (oppgaveService
+                .hentOppgaverForSak(sak.id)
+                .filter { it.kilde == OppgaveKilde.BEHANDLING }
+                .any { !it.erAvsluttet() }
+        ) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger")
+            throw IkkeTillattException(
+                "ALLEREDE_AAPEN_BEHANDLING",
+                "Kan ikke opprette forbehandling, sakId=${sak.id} har allerede behandling under arbeid",
+            )
         }
 
         if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
@@ -363,6 +378,8 @@ class EtteroppgjoerForbehandlingService(
                 "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
             )
         }
+
+        // Etteroppgjør
 
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
         if (etteroppgjoer == null) {
@@ -384,14 +401,14 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
+        // Forbehandling
+
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
         if (forbehandlinger.any { it.aar == inntektsaar && it.erUnderBehandling() }) {
             throw InternfeilException(
                 "Kan ikke opprette forbehandling fordi det allerede eksisterer en forbehandling som ikke er ferdigstilt",
             )
         }
-
-        // TODO: flere sjekker?
     }
 
     private fun opprettOgLagreNyForbehandling(

@@ -61,7 +61,8 @@ class SkatteoppgjoerHendelserService(
                     }
                 }
 
-                etteroppgjoer != null // relevant / ikke relevant hendelse
+                val relevantHendelse = etteroppgjoer != null
+                return@count relevantHendelse
             }
 
         dao.lagreKjoering(kjoering)

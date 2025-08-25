@@ -103,6 +103,6 @@ class JobbScheduler(
         // Merk at justering av behandlingMaaned kan medføre uønsket oppførsel (f.eks. har løpende ytelse sjekker feil måned)
         val behandlingMaanedJustering: Long,
     ) {
-        OPPDATER_SKJERMING_BP_FYLTE_18_AAR(JobbType.OPPDATER_SKJERMING_BP_FYLTE_18_AAR, -1),
+        OPPDATER_SKJERMING_BP_FYLTE_18_AAR(JobbType.OPPDATER_SKJERMING_BP_FYLT_18_AAR, 0),
     }
 }

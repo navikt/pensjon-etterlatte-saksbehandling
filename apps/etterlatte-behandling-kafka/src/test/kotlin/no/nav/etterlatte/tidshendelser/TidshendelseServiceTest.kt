@@ -3,7 +3,9 @@ package no.nav.etterlatte.tidshendelser
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.randomSakId
@@ -15,6 +17,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.rapidsandrivers.sakId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Month
@@ -160,5 +163,21 @@ internal class TidshendelseServiceTest {
                 frist = any(),
             )
         }
+    }
+
+    @Test
+    fun `skal oppdatere skjerming hvis jobbtypen er oppdater skjerming`() {
+        val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
+        every { behandlingService.oppdaterSkjerming(any()) } just runs
+        every { behandlingService.opprettOppgave(any(), any(), any(), any(), any()) } returns opprettetOppgaveId
+
+        val melding =
+            lagMeldingForVurdertLoependeYtelse(
+                behandlingsmaaned = behandlingsmaaned,
+                type = JobbType.OPPDATER_SKJERMING_BP_FYLT_18_AAR,
+            )
+        tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
+
+        verify { behandlingService.oppdaterSkjerming(melding.sakId) }
     }
 }

@@ -113,12 +113,12 @@ fun Route.etteroppgjoerRoutes(
                         // Runblocking rundt ferdigstilling av brevet for å unngå å ferdigstille forbehandlingen uten at
                         // brevet er ok.
                         runBlocking {
+                            forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
                             forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
                                 etteroppgjoerId,
                                 brukerTokenInfo,
                             )
                         }
-                        forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

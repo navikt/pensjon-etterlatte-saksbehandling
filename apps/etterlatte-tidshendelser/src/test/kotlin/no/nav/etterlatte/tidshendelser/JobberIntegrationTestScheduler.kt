@@ -85,7 +85,7 @@ class JobberIntegrationTestScheduler(
     @Test
     fun `skal ikke lage ukentlige jobber om de er laget fra før`() {
         jobbTestdata.opprettJobb(
-            PeriodiskeUkentligeJobber.OPPDATER_SKJERMING_BP_FYLTE_18_AAR.jobbType,
+            PeriodiskeUkentligeJobber.OPPDATER_SKJERMING_BP.jobbType,
             nesteMaaned,
             java.time.LocalDate
                 .now()

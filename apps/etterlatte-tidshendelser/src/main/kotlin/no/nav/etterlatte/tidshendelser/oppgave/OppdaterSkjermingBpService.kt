@@ -9,7 +9,7 @@ import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import org.slf4j.LoggerFactory
 
-class OppdaterSkjermingBpFylt18Service(
+class OppdaterSkjermingBpService(
     private val hendelseDao: HendelseDao,
     private val behandlingKlient: BehandlingKlient,
 ) {

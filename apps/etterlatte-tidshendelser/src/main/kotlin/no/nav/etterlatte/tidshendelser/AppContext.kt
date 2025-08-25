@@ -31,7 +31,7 @@ import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.omregning.OmregningDao
 import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
-import no.nav.etterlatte.tidshendelser.oppgave.OppdaterSkjermingBpFylt18Service
+import no.nav.etterlatte.tidshendelser.oppgave.OppdaterSkjermingBpService
 import no.nav.etterlatte.tidshendelser.oppgave.OppfoelgingBpFylt18Service
 import java.time.Duration
 import java.util.UUID
@@ -66,7 +66,7 @@ class AppContext(
     private val reguleringService = ReguleringService(publisher, omregningDao)
     private val inntektsjusteringService = AarligInntektsjusteringService(publisher, omregningDao)
     private val oppfoelgingBpFylt18Service = OppfoelgingBpFylt18Service(hendelseDao, behandlingKlient)
-    private val oppdaterSkjermingBpFylt18Service = OppdaterSkjermingBpFylt18Service(hendelseDao, behandlingKlient)
+    private val oppdaterSkjermingBpService = OppdaterSkjermingBpService(hendelseDao, behandlingKlient)
 
     val jobbPollerTask =
         JobbPollerTask(
@@ -81,7 +81,7 @@ class AppContext(
                     reguleringService,
                     inntektsjusteringService,
                     oppfoelgingBpFylt18Service,
-                    oppdaterSkjermingBpFylt18Service,
+                    oppdaterSkjermingBpService,
                 ),
         )
 

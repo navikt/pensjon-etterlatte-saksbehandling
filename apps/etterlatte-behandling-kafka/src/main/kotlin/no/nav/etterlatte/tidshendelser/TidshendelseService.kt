@@ -26,7 +26,7 @@ class TidshendelseService(
             return TidshendelseResult.Skipped
         }
         logger.info(
-            """Løpende ytelse: oppretter behandling/oppgave for sak ${hendelse.sakId} 
+            """Løpende ytelse: behandler tidshendelse for sak ${hendelse.sakId} 
                     behandlingsmåned=${hendelse.behandlingsmaaned}""",
         )
 
@@ -41,7 +41,7 @@ class TidshendelseService(
                     hendelse,
                 )
 
-            JobbType.OPPDATER_SKJERMING_BP_FYLT_18_AAR -> oppdaterSkjerming(hendelse)
+            JobbType.OPPDATER_SKJERMING_BP -> oppdaterSkjerming(hendelse)
 
             else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
         }
@@ -84,7 +84,7 @@ class TidshendelseService(
         }
         if (hendelse.harLoependeYtelse && hendelse.dryrun) {
             logger.info(
-                """Dry run: Løpende ytelse: skipper oppretting av behandling/oppgave
+                """Dry run: Løpende ytelse: skipper behandling av tidshendelse
                     for sak ${hendelse.sakId} behandlingsmåned=${hendelse.behandlingsmaaned}""",
             )
             return true
@@ -222,7 +222,7 @@ class TidshendelseService(
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
-            JobbType.OPPDATER_SKJERMING_BP_FYLT_18_AAR,
+            JobbType.OPPDATER_SKJERMING_BP,
 
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: $type")
         }

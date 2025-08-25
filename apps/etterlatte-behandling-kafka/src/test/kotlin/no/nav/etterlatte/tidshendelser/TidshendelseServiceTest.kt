@@ -174,7 +174,7 @@ internal class TidshendelseServiceTest {
         val melding =
             lagMeldingForVurdertLoependeYtelse(
                 behandlingsmaaned = behandlingsmaaned,
-                type = JobbType.OPPDATER_SKJERMING_BP_FYLT_18_AAR,
+                type = JobbType.OPPDATER_SKJERMING_BP,
             )
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
 

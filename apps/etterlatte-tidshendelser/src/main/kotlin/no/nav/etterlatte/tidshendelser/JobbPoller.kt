@@ -10,7 +10,7 @@ import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
-import no.nav.etterlatte.tidshendelser.oppgave.OppdaterSkjermingBpFylt18Service
+import no.nav.etterlatte.tidshendelser.oppgave.OppdaterSkjermingBpService
 import no.nav.etterlatte.tidshendelser.oppgave.OppfoelgingBpFylt18Service
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -46,7 +46,7 @@ class JobbPoller(
     private val reguleringService: ReguleringService,
     private val inntektsjusteringService: AarligInntektsjusteringService,
     private val oppfoelgingBpFylt18Service: OppfoelgingBpFylt18Service,
-    private val oppdaterSkjermingBpFylt18Service: OppdaterSkjermingBpFylt18Service,
+    private val oppdaterSkjermingBpService: OppdaterSkjermingBpService,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
@@ -65,7 +65,7 @@ class JobbPoller(
                         JobbKategori.REGULERING -> reguleringService.execute(it)
                         JobbKategori.AARLIG_INNTEKTSJUSTERING -> inntektsjusteringService.execute(it)
                         JobbKategori.OPPFOELGING_BP_FYLT_18 -> oppfoelgingBpFylt18Service.execute(it)
-                        JobbKategori.OPPDATERING_SKJERMING_BP_FYLT_18 -> oppdaterSkjermingBpFylt18Service.execute(it)
+                        JobbKategori.OPPDATERING_SKJERMING_BP -> oppdaterSkjermingBpService.execute(it)
                     }
 
                 if (saker.isEmpty()) {

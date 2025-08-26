@@ -90,7 +90,7 @@ export interface IBoddEllerArbeidetUtlandet {
   boddArbeidetIkkeEosEllerAvtaleland?: boolean
   boddArbeidetEosNordiskKonvensjon?: boolean
   boddArbeidetAvtaleland?: boolean
-  vurdereAvoededsTrygdeavtale?: boolean
+  vurdereAvdoedesTrygdeavtale?: boolean
   skalSendeKravpakke?: boolean
 }
 

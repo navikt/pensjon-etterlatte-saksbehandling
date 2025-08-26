@@ -104,7 +104,7 @@ internal class GrunnlagVersjonValideringTest {
     }
 
     @Test
-    fun `Vilkårsvurdering avslag, ikke avhuket vurdereAvoededsTrygdeavtale, ignorerer trygdetid diff`() {
+    fun `Vilkårsvurdering avslag, ikke avhuket vurdereAvdoedesTrygdeavtale, ignorerer trygdetid diff`() {
         val vilkaarsvurderingDto =
             mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 1
@@ -126,7 +126,7 @@ internal class GrunnlagVersjonValideringTest {
             mockk<DetaljertBehandling>(relaxed = true) {
                 every { boddEllerArbeidetUtlandet } returns
                     BoddEllerArbeidetUtlandet(
-                        vurdereAvoededsTrygdeavtale = false,
+                        vurdereAvdoedesTrygdeavtale = false,
                         begrunnelse = "tom",
                         kilde = Grunnlagsopplysning.Saksbehandler.create("navIdent"),
                         boddEllerArbeidetUtlandet = false,

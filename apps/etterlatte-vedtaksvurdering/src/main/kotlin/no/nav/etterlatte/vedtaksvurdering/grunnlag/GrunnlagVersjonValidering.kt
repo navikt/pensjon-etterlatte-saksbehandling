@@ -19,7 +19,7 @@ object GrunnlagVersjonValidering {
     ) {
         logger.info("Sjekker at grunnlagsversjon er konsekvent på tvers av appene")
         if (vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT &&
-            behandling.boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale == false
+            behandling.boddEllerArbeidetUtlandet?.vurdereAvdoedesTrygdeavtale == false
         ) {
             logger.info(
                 "Behandling ${behandling.id} skal ikke ha trygdetid ved avslag da " +

@@ -151,9 +151,10 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN_UTEN_BREV && (
           <RevurderingAnnen type={Revurderingaarsak.ANNEN_UTEN_BREV} behandling={behandling} />
         )}
-        {behandling.revurderingsaarsak === Revurderingaarsak.UTSENDELSE_AV_KRAVPAKKE && (
-          <RevurderingKravpakke behandling={behandling} />
-        )}
+        {behandling.revurderingsaarsak === Revurderingaarsak.UTSENDELSE_AV_KRAVPAKKE ||
+          (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING && (
+            <RevurderingKravpakke behandling={behandling} />
+          ))}
 
         <Virkningstidspunkt
           erBosattUtland={false}

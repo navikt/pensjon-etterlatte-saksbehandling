@@ -317,7 +317,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     boddArbeidetIkkeEosEllerAvtaleland = true,
                     boddArbeidetEosNordiskKonvensjon = true,
                     boddArbeidetAvtaleland = true,
-                    vurdereAvoededsTrygdeavtale = true,
+                    vurdereAvdoedesTrygdeavtale = true,
                     skalSendeKravpakke = true,
                 ),
             )

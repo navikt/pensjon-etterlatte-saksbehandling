@@ -43,8 +43,8 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
   const [boddArbeidetAvtaleland, setBoddArbeidetAvtaleland] = useState<boolean>(
     boddEllerArbeidetUtlandet?.boddArbeidetAvtaleland ?? false
   )
-  const [vurdereAvoededsTrygdeavtale, setVurdereAvoededsTrygdeavtale] = useState<boolean>(
-    boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale ?? false
+  const [vurdereAvdoedesTrygdeavtale, setVurdereAvdoedesTrygdeavtale] = useState<boolean>(
+    boddEllerArbeidetUtlandet?.vurdereAvdoedesTrygdeavtale ?? false
   )
   const [skalSendeKravpakke, setSkalSendeKravpakke] = useState<boolean>(
     boddEllerArbeidetUtlandet?.skalSendeKravpakke ?? false
@@ -70,7 +70,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
         boddArbeidetIkkeEosEllerAvtaleland,
         boddArbeidetEosNordiskKonvensjon,
         boddArbeidetAvtaleland,
-        vurdereAvoededsTrygdeavtale,
+        vurdereAvdoedesTrygdeavtale: vurdereAvdoedesTrygdeavtale,
         skalSendeKravpakke,
       },
       (response) => {
@@ -97,7 +97,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
       setBoddArbeidetIkkeEosEllerAvtaleland(false)
       setBoddArbeidetEosNordiskKonvensjon(false)
       setBoddArbeidetAvtaleland(false)
-      setVurdereAvoededsTrygdeavtale(false)
+      setVurdereAvdoedesTrygdeavtale(false)
       setSkalSendeKravpakke(false)
     }
   }
@@ -176,9 +176,9 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
                 Huk av hvis aktuelt
               </Heading>
               <Checkbox
-                checked={vurdereAvoededsTrygdeavtale}
+                checked={vurdereAvdoedesTrygdeavtale}
                 onChange={() => {
-                  setVurdereAvoededsTrygdeavtale(!vurdereAvoededsTrygdeavtale)
+                  setVurdereAvdoedesTrygdeavtale(!vurdereAvdoedesTrygdeavtale)
                 }}
               >
                 Vurdere avdødes trygdeavtale

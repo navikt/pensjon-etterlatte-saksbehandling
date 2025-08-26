@@ -45,7 +45,7 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
             <div>
               <BodyShort spacing>Vurdere avdødes trygdeavtale</BodyShort>
               <Label as="p" size="small">
-                {JaNeiRec[boddEllerArbeidetUtlandet.vurdereAvoededsTrygdeavtale ? JaNei.JA : JaNei.NEI]}
+                {JaNeiRec[boddEllerArbeidetUtlandet.vurdereAvdoedesTrygdeavtale ? JaNei.JA : JaNei.NEI]}
               </Label>
             </div>
             <div>

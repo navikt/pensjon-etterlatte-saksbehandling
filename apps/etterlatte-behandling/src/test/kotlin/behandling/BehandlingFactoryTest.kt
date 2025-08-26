@@ -55,7 +55,6 @@ import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -618,7 +617,7 @@ internal class BehandlingFactoryTest {
                 boddArbeidetIkkeEosEllerAvtaleland = true,
                 boddArbeidetEosNordiskKonvensjon = true,
                 boddArbeidetAvtaleland = true,
-                vurdereAvoededsTrygdeavtale = true,
+                vurdereAvdoedesTrygdeavtale = true,
                 skalSendeKravpakke = true,
             )
         val opphoerFraOgMed = YearMonth.now()

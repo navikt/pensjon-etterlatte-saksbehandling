@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -314,7 +313,7 @@ internal fun Route.behandlingRoutes(
                             boddArbeidetIkkeEosEllerAvtaleland = body.boddArbeidetIkkeEosEllerAvtaleland,
                             boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
                             boddArbeidetAvtaleland = body.boddArbeidetAvtaleland,
-                            vurdereAvoededsTrygdeavtale = body.vurdereAvoededsTrygdeavtale,
+                            vurdereAvdoedesTrygdeavtale = body.vurdereAvdoedesTrygdeavtale,
                             skalSendeKravpakke = body.skalSendeKravpakke,
                         )
 

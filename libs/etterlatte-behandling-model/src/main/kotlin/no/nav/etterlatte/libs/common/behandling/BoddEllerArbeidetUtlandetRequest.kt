@@ -6,6 +6,6 @@ data class BoddEllerArbeidetUtlandetRequest(
     val boddArbeidetIkkeEosEllerAvtaleland: Boolean = false,
     val boddArbeidetEosNordiskKonvensjon: Boolean = false,
     val boddArbeidetAvtaleland: Boolean = false,
-    val vurdereAvoededsTrygdeavtale: Boolean = false,
+    val vurdereAvdoedesTrygdeavtale: Boolean = false,
     val skalSendeKravpakke: Boolean = false,
 )

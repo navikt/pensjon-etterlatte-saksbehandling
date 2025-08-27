@@ -91,7 +91,8 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Boolean {
         val aktivitetsKravDato = LocalDate.of(inntektsaar, 7, 1)
-        return behandlingService.hentFoersteDoedsdato(behandlingId, sakType)!!.isBefore(aktivitetsKravDato)
+        val sisteDoedsdato = behandlingService.hentFoersteDoedsdato(behandlingId, sakType) ?: return false
+        return sisteDoedsdato.isBefore(aktivitetsKravDato)
     }
 
     private suspend fun utledSanksjoner(

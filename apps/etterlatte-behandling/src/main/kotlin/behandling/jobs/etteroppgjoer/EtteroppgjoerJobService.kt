@@ -101,8 +101,13 @@ class EtteroppgjoerJobService(
                 HardkodaSystembruker.etteroppgjoer,
             )
 
-        sakerMedUtbetaling
-            .forEach { sakId -> etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) }
+        sakerMedUtbetaling.forEach { sakId ->
+            try {
+                etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar)
+            } catch (e: Exception) {
+                logger.error("Feil ved oppretting av etteroppgjør. ${e.message}")
+            }
+        }
 
         logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
     }

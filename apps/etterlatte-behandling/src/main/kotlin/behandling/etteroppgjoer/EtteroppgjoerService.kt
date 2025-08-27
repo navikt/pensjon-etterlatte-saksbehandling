@@ -118,8 +118,3 @@ class EtteroppgjoerService(
         return beregningOgAvkorting.perioder.any { it.institusjonsopphold != null }
     }
 }
-
-data class SkalHaEtteroppgjoerResultat(
-    val skalHaEtteroppgjoer: Boolean,
-    val etteroppgjoer: Etteroppgjoer?,
-)

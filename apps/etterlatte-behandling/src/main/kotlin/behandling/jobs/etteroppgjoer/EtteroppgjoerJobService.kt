@@ -17,9 +17,9 @@ enum class EtteroppgjoerFilter(
     val harSanksjon: Boolean,
     val harInsitusjonsopphold: Boolean,
     val harOpphoer: Boolean,
-    val harBosattUtland: Boolean,
     val harAdressebeskyttelse: Boolean,
     val harAktivitetskrav: Boolean,
+    val erBosattUtland: Boolean,
 ) {
     ENKEL(false, false, false, false, false, false),
 }

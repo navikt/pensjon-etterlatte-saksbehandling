@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -75,7 +74,7 @@ class EtteroppgjoerService(
                 harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
                 harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id),
                 harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,
-                harBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
+                erBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
                 harAdressebeskyttelse =
                     sisteIverksatteBehandling.sak.adressebeskyttelse?.harAdressebeskyttelse() == true ||
                         sisteIverksatteBehandling.sak.erSkjermet == true,

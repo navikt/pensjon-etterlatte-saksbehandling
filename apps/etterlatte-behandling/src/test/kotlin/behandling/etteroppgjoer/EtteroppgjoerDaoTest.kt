@@ -78,7 +78,7 @@ class EtteroppgjoerDaoTest(
             status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
             harSanksjon shouldBe false
             harOpphoer shouldBe false
-            harBosattUtland shouldBe false
+            erBosattUtland shouldBe false
             harInstitusjonsopphold shouldBe false
         }
 
@@ -103,7 +103,7 @@ class EtteroppgjoerDaoTest(
             status shouldBe EtteroppgjoerStatus.UNDER_FORBEHANDLING
             harSanksjon shouldBe true
             harOpphoer shouldBe true
-            harBosattUtland shouldBe true
+            erBosattUtland shouldBe true
             harInstitusjonsopphold shouldBe true
             harAdressebeskyttelse shouldBe true
             harAktivitetskrav shouldBe true

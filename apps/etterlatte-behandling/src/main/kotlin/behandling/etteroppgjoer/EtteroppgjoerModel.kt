@@ -9,9 +9,9 @@ data class Etteroppgjoer(
     val harSanksjon: Boolean = false,
     val harInstitusjonsopphold: Boolean = false,
     val harOpphoer: Boolean = false,
-    val harBosattUtland: Boolean = false,
     val harAdressebeskyttelse: Boolean = false,
     val harAktivitetskrav: Boolean = false,
+    val erBosattUtland: Boolean = false,
 )
 
 enum class EtteroppgjoerStatus {

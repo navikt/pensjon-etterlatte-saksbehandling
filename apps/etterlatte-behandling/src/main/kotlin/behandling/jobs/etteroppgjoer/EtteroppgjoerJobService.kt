@@ -19,7 +19,7 @@ enum class EtteroppgjoerFilter(
     val harOpphoer: Boolean,
     val harAdressebeskyttelseEllerSkjermet: Boolean,
     val harAktivitetskrav: Boolean,
-    val erBosattUtland: Boolean,
+    val harBosattUtland: Boolean,
 ) {
     ENKEL(false, false, false, false, false, false),
 }

@@ -11,7 +11,7 @@ data class Etteroppgjoer(
     val harOpphoer: Boolean = false,
     val harAdressebeskyttelseEllerSkjermet: Boolean = false,
     val harAktivitetskrav: Boolean = false,
-    val erBosattUtland: Boolean = false,
+    val harBosattUtland: Boolean = false,
 )
 
 enum class EtteroppgjoerStatus {

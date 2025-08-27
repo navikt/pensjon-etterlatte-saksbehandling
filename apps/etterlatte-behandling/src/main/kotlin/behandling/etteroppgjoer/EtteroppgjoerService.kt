@@ -74,7 +74,7 @@ class EtteroppgjoerService(
                 harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
                 harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id),
                 harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,
-                erBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
+                harBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
                 harAdressebeskyttelseEllerSkjermet =
                     sisteIverksatteBehandling.sak.adressebeskyttelse?.harAdressebeskyttelse() == true ||
                         sisteIverksatteBehandling.sak.erSkjermet == true,

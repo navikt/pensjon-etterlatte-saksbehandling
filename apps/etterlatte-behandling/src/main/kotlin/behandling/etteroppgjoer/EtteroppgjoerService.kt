@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
+import java.time.LocalDate
 import java.util.UUID
 
 class EtteroppgjoerService(
@@ -71,9 +73,22 @@ class EtteroppgjoerService(
                 harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id),
                 harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,
                 harBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
+                harAdressebeskyttelse =
+                    sisteIverksatteBehandling.sak.adressebeskyttelse?.harAdressebeskyttelse() == true ||
+                        sisteIverksatteBehandling.sak.erSkjermet == true,
+                harAktivitetskrav = utledAktivitetskrav(sisteIverksatteBehandling.id, sisteIverksatteBehandling.sak.sakType, inntektsaar),
             )
 
         dao.lagreEtteroppgjoer(etteroppgjoer)
+    }
+
+    private fun utledAktivitetskrav(
+        behandlingId: UUID,
+        sakType: SakType,
+        inntektsaar: Int,
+    ): Boolean {
+        val aktivitetsKravDato = LocalDate.of(inntektsaar, 7, 1)
+        return behandlingService.hentFoersteDoedsdato(behandlingId, sakType)!!.isBefore(aktivitetsKravDato)
     }
 
     private suspend fun utledSanksjoner(

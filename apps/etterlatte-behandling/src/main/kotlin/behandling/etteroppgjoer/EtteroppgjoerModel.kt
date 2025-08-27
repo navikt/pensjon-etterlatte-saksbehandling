@@ -10,11 +10,9 @@ data class Etteroppgjoer(
     val harInstitusjonsopphold: Boolean = false,
     val harOpphoer: Boolean = false,
     val harBosattUtland: Boolean = false,
-) {
-    fun skalHaEtteroppgjoer(): Boolean =
-        status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER ||
-            status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
-}
+    val harAdressebeskyttelse: Boolean = false,
+    val harAktivitetskrav: Boolean = false,
+)
 
 enum class EtteroppgjoerStatus {
     AVBRUTT_FORBEHANDLING,

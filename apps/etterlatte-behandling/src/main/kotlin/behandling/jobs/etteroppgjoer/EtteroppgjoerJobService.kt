@@ -18,6 +18,9 @@ enum class EtteroppgjoerFilter(
     val harInsitusjonsopphold: Boolean,
     val harOpphoer: Boolean,
     val harBosattUtland: Boolean,
+    val harAdressebeskyttelse: Boolean,
+    val harUtbetaling: Boolean,
+    val harAktivitetskrav: Boolean,
 ) {
     ENKEL(false, false, false, false),
     MED_SANKSJON(true, false, false, false),
@@ -66,7 +69,6 @@ class EtteroppgjoerJobService(
             "Starter oppretting av forbehandling for etteroppgjør (inntektsår=$inntektsaar, status=$status, filter=${filter ?: "INGEN"})",
         )
 
-        // for å støtte filter og uten i dev ifm testing
         val etteroppgjoerListe =
             filter
                 ?.let { etteroppgjoerService.hentEtteroppgjoerForFilter(it, inntektsaar) }

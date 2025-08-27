@@ -174,6 +174,11 @@ interface BehandlingService {
 
     fun hentSisteIverksatteBehandling(sakId: SakId): Behandling?
 
+    fun hentFoersteDoedsdato(
+        behandlingId: UUID,
+        sakType: SakType,
+    ): LocalDate?
+
     fun avbrytBehandling(
         behandlingId: UUID,
         saksbehandler: BrukerTokenInfo,
@@ -614,7 +619,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    private fun hentFoersteDoedsdato(
+    override fun hentFoersteDoedsdato(
         behandlingId: UUID,
         sakType: SakType,
     ): LocalDate? {

@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.SkalHaEtteroppgjoerResultat
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach

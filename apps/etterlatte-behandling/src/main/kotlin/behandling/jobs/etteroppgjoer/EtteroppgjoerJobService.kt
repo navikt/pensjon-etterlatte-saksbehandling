@@ -19,11 +19,9 @@ enum class EtteroppgjoerFilter(
     val harOpphoer: Boolean,
     val harBosattUtland: Boolean,
     val harAdressebeskyttelse: Boolean,
-    val harUtbetaling: Boolean,
     val harAktivitetskrav: Boolean,
 ) {
-    ENKEL(false, false, false, false),
-    MED_SANKSJON(true, false, false, false),
+    ENKEL(false, false, false, false, false, false),
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -49,7 +47,7 @@ class EtteroppgjoerJobService(
         }
     }
 
-    suspend fun startEtteroppgjoerKjoering(filter: EtteroppgjoerFilter) {
+    suspend fun startEtteroppgjoerKjoering(filter: EtteroppgjoerFilter? = null) {
         val yearNow = YearMonth.now().year
         val aarMellom2024OgNaa = (2024..yearNow).toList()
 

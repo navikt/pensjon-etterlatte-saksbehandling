@@ -214,7 +214,6 @@ fun Route.etteroppgjoerRoutes(
                     }
 
                 val filter = call.request.queryParameters["filter"]?.let { EtteroppgjoerFilter.valueOf(it) }
-
                 etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar, filter)
             }
         }

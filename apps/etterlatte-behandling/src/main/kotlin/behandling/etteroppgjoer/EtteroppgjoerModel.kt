@@ -9,7 +9,7 @@ data class Etteroppgjoer(
     val harSanksjon: Boolean = false,
     val harInstitusjonsopphold: Boolean = false,
     val harOpphoer: Boolean = false,
-    val harAdressebeskyttelse: Boolean = false,
+    val harAdressebeskyttelseEllerSkjermet: Boolean = false,
     val harAktivitetskrav: Boolean = false,
     val erBosattUtland: Boolean = false,
 )

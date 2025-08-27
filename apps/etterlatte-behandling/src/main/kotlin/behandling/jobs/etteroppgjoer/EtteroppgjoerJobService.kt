@@ -17,7 +17,7 @@ enum class EtteroppgjoerFilter(
     val harSanksjon: Boolean,
     val harInsitusjonsopphold: Boolean,
     val harOpphoer: Boolean,
-    val harAdressebeskyttelse: Boolean,
+    val harAdressebeskyttelseEllerSkjermet: Boolean,
     val harAktivitetskrav: Boolean,
     val erBosattUtland: Boolean,
 ) {

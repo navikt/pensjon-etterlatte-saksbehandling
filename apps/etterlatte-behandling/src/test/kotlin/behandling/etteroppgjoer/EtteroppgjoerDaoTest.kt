@@ -105,7 +105,7 @@ class EtteroppgjoerDaoTest(
             harOpphoer shouldBe true
             erBosattUtland shouldBe true
             harInstitusjonsopphold shouldBe true
-            harAdressebeskyttelse shouldBe true
+            harAdressebeskyttelseEllerSkjermet shouldBe true
             harAktivitetskrav shouldBe true
         }
     }

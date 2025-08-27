@@ -68,7 +68,7 @@ class EtteroppgjoerDao(
                       AND har_institusjonsopphold = ?
                       AND har_opphoer = ?
                       AND er_bosatt_utland = ?
-                      AND har_adressebeskyttelse = ?
+                      AND har_adressebeskyttelse_eller_skjermet = ?
                       AND har_aktivitetskrav = ?
                     """.trimIndent()
 
@@ -79,7 +79,7 @@ class EtteroppgjoerDao(
                         setBoolean(3, filter.harInsitusjonsopphold)
                         setBoolean(4, filter.harOpphoer)
                         setBoolean(5, filter.erBosattUtland)
-                        setBoolean(6, filter.harAdressebeskyttelse)
+                        setBoolean(6, filter.harAdressebeskyttelseEllerSkjermet)
                         setBoolean(7, filter.harAktivitetskrav)
                     }.executeQuery()
                     .toList { toEtteroppgjoer() }
@@ -138,7 +138,7 @@ class EtteroppgjoerDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer(
-                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, er_bosatt_utland, har_adressebeskyttelse, har_aktivitetskrav
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, er_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav
                         ) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
@@ -146,7 +146,7 @@ class EtteroppgjoerDao(
                             er_bosatt_utland = excluded.er_bosatt_utland,
                             har_sanksjon = excluded.har_sanksjon,
                             har_opphoer = excluded.har_opphoer,
-                            har_adressebeskyttelse = excluded.har_adressebeskyttelse,
+                            har_adressebeskyttelse_eller_skjermet = excluded.har_adressebeskyttelse_eller_skjermet,
                             har_aktivitetskrav = excluded.har_aktivitetskrav,
                             status = excluded.status
                         """.trimIndent(),
@@ -161,7 +161,7 @@ class EtteroppgjoerDao(
                     statement.setBoolean(6, harInstitusjonsopphold)
                     statement.setBoolean(7, harSanksjon)
                     statement.setBoolean(8, erBosattUtland)
-                    statement.setBoolean(9, harAdressebeskyttelse)
+                    statement.setBoolean(9, harAdressebeskyttelseEllerSkjermet)
                     statement.setBoolean(10, harAktivitetskrav)
                     statement.executeUpdate().also {
                         krev(it == 1) {
@@ -181,7 +181,7 @@ class EtteroppgjoerDao(
             harInstitusjonsopphold = getBoolean("har_institusjonsopphold"),
             harSanksjon = getBoolean("har_sanksjon"),
             erBosattUtland = getBoolean("er_bosatt_utland"),
-            harAdressebeskyttelse = getBoolean("har_adressebeskyttelse"),
+            harAdressebeskyttelseEllerSkjermet = getBoolean("har_adressebeskyttelse_eller_skjermet"),
             harAktivitetskrav = getBoolean("har_aktivitetskrav"),
         )
 }

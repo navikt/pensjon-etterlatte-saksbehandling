@@ -36,10 +36,8 @@ class EtteroppgjoerJobService(
         Kontekst.set(jobContext)
         if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
             logger.info("Starter periodiske jobber for etteroppgjoer")
-            inTransaction {
-                runBlocking {
-                    startEtteroppgjoerKjoering()
-                }
+            runBlocking {
+                startEtteroppgjoerKjoering()
             }
         } else {
             logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
@@ -63,7 +61,11 @@ class EtteroppgjoerJobService(
         val antallOpprettet =
             sakerMedUtbetaling.count { sakId ->
                 try {
-                    etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
+                    inTransaction {
+                        runBlocking {
+                            etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
+                        }
+                    }
                 } catch (e: Exception) {
                     logger.warn("Feil ved oppretting av etteroppgjør", e)
                     false

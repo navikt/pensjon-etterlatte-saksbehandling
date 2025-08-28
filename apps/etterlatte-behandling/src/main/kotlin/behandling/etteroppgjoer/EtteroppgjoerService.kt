@@ -50,19 +50,17 @@ class EtteroppgjoerService(
     suspend fun opprettEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-    ) {
+    ): Etteroppgjoer? {
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
 
         val etteroppgjoerForSak = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-        if (etteroppgjoerForSak != null) {
-            if (etteroppgjoerForSak.status != EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
-                logger.info(
-                    "Etteroppgjoer for sakId=$sakId og inntektsaar=$inntektsaar er allerede opprettet med status ${etteroppgjoerForSak.status}.",
-                )
-                return
-            }
+        if (etteroppgjoerForSak != null && etteroppgjoerForSak.status != EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
+            logger.info(
+                "Etteroppgjoer for sakId=$sakId og inntektsaar=$inntektsaar er allerede opprettet med status ${etteroppgjoerForSak.status}.",
+            )
+            return null
         }
 
         val sisteIverksatteBehandling =
@@ -81,10 +79,16 @@ class EtteroppgjoerService(
                 harAdressebeskyttelseEllerSkjermet =
                     sisteIverksatteBehandling.sak.adressebeskyttelse?.harAdressebeskyttelse() == true ||
                         sisteIverksatteBehandling.sak.erSkjermet == true,
-                harAktivitetskrav = utledAktivitetskrav(sisteIverksatteBehandling.id, sisteIverksatteBehandling.sak.sakType, inntektsaar),
+                harAktivitetskrav =
+                    utledAktivitetskrav(
+                        sisteIverksatteBehandling.id,
+                        sisteIverksatteBehandling.sak.sakType,
+                        inntektsaar,
+                    ),
             )
 
         dao.lagreEtteroppgjoer(etteroppgjoer)
+        return etteroppgjoer
     }
 
     private fun utledAktivitetskrav(

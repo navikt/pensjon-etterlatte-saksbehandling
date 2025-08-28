@@ -757,7 +757,6 @@ internal class ApplicationContext(
     val etteroppgjoerJobService =
         EtteroppgjoerJobService(
             etteroppgjoerService,
-            etteroppgjoerForbehandlingService,
             vedtakKlient,
             featureToggleService,
         )
@@ -907,7 +906,7 @@ internal class ApplicationContext(
         EtteropppgjoerJob(
             etteroppgjoerJobService = etteroppgjoerJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(30, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.DAYS),
         )
     }

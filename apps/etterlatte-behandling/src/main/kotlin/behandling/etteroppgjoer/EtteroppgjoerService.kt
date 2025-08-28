@@ -5,12 +5,14 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
+import java.time.LocalDate
 import java.util.UUID
 
 class EtteroppgjoerService(
@@ -54,8 +56,10 @@ class EtteroppgjoerService(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
         if (dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) != null) {
-            logger.error("Kan ikke opprette etteroppgjør for sak=$sakId og inntektsaar=$inntektsaar. Etteroppgjør er allerede opprettet")
-            return
+            throw IkkeTillattException(
+                "ETTEROPPGJOER_EKSISTERER_ALLEREDE",
+                "Kan ikke opprette etteroppgjør for sak=$sakId og inntektsaar=$inntektsaar. Etteroppgjør er allerede opprettet",
+            )
         }
 
         val sisteIverksatteBehandling =
@@ -71,9 +75,23 @@ class EtteroppgjoerService(
                 harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id),
                 harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,
                 harBosattUtland = sisteIverksatteBehandling.erBosattUtland(),
+                harAdressebeskyttelseEllerSkjermet =
+                    sisteIverksatteBehandling.sak.adressebeskyttelse?.harAdressebeskyttelse() == true ||
+                        sisteIverksatteBehandling.sak.erSkjermet == true,
+                harAktivitetskrav = utledAktivitetskrav(sisteIverksatteBehandling.id, sisteIverksatteBehandling.sak.sakType, inntektsaar),
             )
 
         dao.lagreEtteroppgjoer(etteroppgjoer)
+    }
+
+    private fun utledAktivitetskrav(
+        behandlingId: UUID,
+        sakType: SakType,
+        inntektsaar: Int,
+    ): Boolean {
+        val aktivitetsKravDato = LocalDate.of(inntektsaar, 7, 1)
+        val sisteDoedsdato = behandlingService.hentFoersteDoedsdato(behandlingId, sakType) ?: return false
+        return sisteDoedsdato.isBefore(aktivitetsKravDato)
     }
 
     private suspend fun utledSanksjoner(
@@ -100,8 +118,3 @@ class EtteroppgjoerService(
         return beregningOgAvkorting.perioder.any { it.institusjonsopphold != null }
     }
 }
-
-data class SkalHaEtteroppgjoerResultat(
-    val skalHaEtteroppgjoer: Boolean,
-    val etteroppgjoer: Etteroppgjoer?,
-)

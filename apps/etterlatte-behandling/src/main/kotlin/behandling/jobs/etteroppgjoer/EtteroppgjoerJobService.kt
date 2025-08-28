@@ -17,10 +17,11 @@ enum class EtteroppgjoerFilter(
     val harSanksjon: Boolean,
     val harInsitusjonsopphold: Boolean,
     val harOpphoer: Boolean,
+    val harAdressebeskyttelseEllerSkjermet: Boolean,
+    val harAktivitetskrav: Boolean,
     val harBosattUtland: Boolean,
 ) {
-    ENKEL(false, false, false, false),
-    MED_SANKSJON(true, false, false, false),
+    ENKEL(false, false, false, false, false, false),
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -46,7 +47,7 @@ class EtteroppgjoerJobService(
         }
     }
 
-    suspend fun startEtteroppgjoerKjoering(filter: EtteroppgjoerFilter) {
+    suspend fun startEtteroppgjoerKjoering(filter: EtteroppgjoerFilter? = null) {
         val yearNow = YearMonth.now().year
         val aarMellom2024OgNaa = (2024..yearNow).toList()
 
@@ -66,7 +67,6 @@ class EtteroppgjoerJobService(
             "Starter oppretting av forbehandling for etteroppgjør (inntektsår=$inntektsaar, status=$status, filter=${filter ?: "INGEN"})",
         )
 
-        // for å støtte filter og uten i dev ifm testing
         val etteroppgjoerListe =
             filter
                 ?.let { etteroppgjoerService.hentEtteroppgjoerForFilter(it, inntektsaar) }
@@ -99,8 +99,13 @@ class EtteroppgjoerJobService(
                 HardkodaSystembruker.etteroppgjoer,
             )
 
-        sakerMedUtbetaling
-            .forEach { sakId -> etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) }
+        sakerMedUtbetaling.forEach { sakId ->
+            try {
+                etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar)
+            } catch (e: Exception) {
+                logger.error("Feil ved oppretting av etteroppgjør. ${e.message}")
+            }
+        }
 
         logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
     }

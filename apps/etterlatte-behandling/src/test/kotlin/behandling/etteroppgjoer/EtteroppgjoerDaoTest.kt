@@ -69,7 +69,7 @@ class EtteroppgjoerDaoTest(
     @Test
     fun `lagre og oppdatere etteroppgjoer`() {
         etteroppgjoerDao.lagreEtteroppgjoer(
-            Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false),
+            Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
         )
         val lagret = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(lagret!!) {
@@ -82,7 +82,20 @@ class EtteroppgjoerDaoTest(
             harInstitusjonsopphold shouldBe false
         }
 
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING, true, true, true, true))
+        etteroppgjoerDao.lagreEtteroppgjoer(
+            Etteroppgjoer(
+                sak.id,
+                2024,
+                EtteroppgjoerStatus.UNDER_FORBEHANDLING,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+            ),
+        )
+
         val oppdatert = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(oppdatert!!) {
             sakId shouldBe sakId
@@ -92,6 +105,8 @@ class EtteroppgjoerDaoTest(
             harOpphoer shouldBe true
             harBosattUtland shouldBe true
             harInstitusjonsopphold shouldBe true
+            harAdressebeskyttelseEllerSkjermet shouldBe true
+            harAktivitetskrav shouldBe true
         }
     }
 
@@ -113,8 +128,8 @@ class EtteroppgjoerDaoTest(
     @Test
     fun `hent etteroppgjoer for filter`() {
         val inntektsaar = 2024
-        val enkelSak = Etteroppgjoer(sak.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
-        val annenSak = Etteroppgjoer(sak2.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, true, false, false, false)
+        val enkelSak = Etteroppgjoer(sak.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+        val annenSak = Etteroppgjoer(sak2.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, true)
         etteroppgjoerDao.lagreEtteroppgjoer(enkelSak)
         etteroppgjoerDao.lagreEtteroppgjoer(annenSak)
 

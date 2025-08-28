@@ -6,6 +6,7 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -79,7 +80,7 @@ interface BeregningKlient {
     suspend fun hentSanksjoner(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Sanksjon>
+    ): List<Sanksjon>?
 }
 
 class BeregningKlientImpl(
@@ -323,7 +324,7 @@ class BeregningKlientImpl(
     override suspend fun hentSanksjoner(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Sanksjon> {
+    ): List<Sanksjon>? {
         try {
             logger.info("Henter sanksjoner for behandlingId=$behandlingId")
 
@@ -332,7 +333,12 @@ class BeregningKlientImpl(
                     Resource(clientId, "$resourceUrl/api/beregning/sanksjon/$behandlingId"),
                     brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> deserialize(resource.response.toString()) },
+                    success = { resource ->
+                        when (resource.status) {
+                            HttpStatusCode.NoContent -> null
+                            else -> deserialize(resource.response.toString())
+                        }
+                    },
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (re: ResponseException) {

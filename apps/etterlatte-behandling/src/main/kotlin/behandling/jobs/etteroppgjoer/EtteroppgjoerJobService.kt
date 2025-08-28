@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
@@ -67,7 +66,7 @@ class EtteroppgjoerJobService(
                     etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar)
                     true
                 } catch (e: Exception) {
-                    logger.error("Feil ved oppretting av etteroppgjør. ${e.message}")
+                    logger.error("Feil ved oppretting av etteroppgjør", e)
                     false
                 }
             }

@@ -39,13 +39,17 @@ class EtteroppgjoerJobService(
             runBlocking(ctx) {
                 if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
                     logger.info("Starter periodiske jobber for etteroppgjoer")
-                    val forrigeAar = YearMonth.now().year - 1
-                    finnOgOpprettEtteroppgjoer(forrigeAar)
+                    startEtteroppgjoerKjoering()
                 } else {
                     logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
                 }
             }
         }
+    }
+
+    suspend fun startEtteroppgjoerKjoering() {
+        val forrigeAar = YearMonth.now().year - 1
+        finnOgOpprettEtteroppgjoer(forrigeAar)
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør

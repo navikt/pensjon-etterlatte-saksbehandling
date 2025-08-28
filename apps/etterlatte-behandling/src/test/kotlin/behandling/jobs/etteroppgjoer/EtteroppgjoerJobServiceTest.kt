@@ -87,7 +87,7 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
 
         inTransaction {
             runBlocking {
-                applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering(EtteroppgjoerFilter.ENKEL)
+                applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering()
             }
 
             val etteroppgjoerForForrigeAar =

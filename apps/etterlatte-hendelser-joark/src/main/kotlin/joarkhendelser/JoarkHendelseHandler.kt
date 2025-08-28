@@ -1,5 +1,6 @@
 package no.nav.etterlatte.joarkhendelser
 
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.config.sikkerLogg
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
@@ -109,7 +110,7 @@ class JoarkHendelseHandler(
             // sendes rett til kabal (når det gjelder en anke på våre tema)
             val kjentSkjemakode =
                 KjenteSkjemaKoder.entries.find { kjentSkjema -> kjentSkjema.skjemaKode in journalpost.dokumenter.map { it.brevkode } }
-            if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == "4294") {
+            if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr) {
                 logger.warn(
                     "Hopper over behandling av journalpost med id=$journalpostId, " +
                         "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +

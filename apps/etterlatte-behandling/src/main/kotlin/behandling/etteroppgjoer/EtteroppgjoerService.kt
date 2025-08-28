@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -108,9 +107,9 @@ class EtteroppgjoerService(
                 HardkodaSystembruker.etteroppgjoer,
             )
 
-        return sanksjoner.any { sanksjon ->
-            sanksjon.fom.year == inntektsaar && sanksjon.tom == null
-        }
+        return sanksjoner?.any { sanksjon ->
+            sanksjon.fom.year <= inntektsaar && sanksjon.tom?.year ?: inntektsaar >= inntektsaar
+        } == true
     }
 
     private suspend fun utledInstitusjonsopphold(behandlingId: UUID): Boolean {

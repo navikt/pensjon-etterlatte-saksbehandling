@@ -4,9 +4,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -27,7 +25,6 @@ enum class EtteroppgjoerFilter(
 @OptIn(DelicateCoroutinesApi::class)
 class EtteroppgjoerJobService(
     private val etteroppgjoerService: EtteroppgjoerService,
-    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val vedtakKlient: VedtakKlient,
     private val featureToggleService: FeatureToggleService,
 ) {

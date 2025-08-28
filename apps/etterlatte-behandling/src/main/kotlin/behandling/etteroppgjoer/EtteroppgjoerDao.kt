@@ -138,9 +138,9 @@ class EtteroppgjoerDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer(
-                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, endret
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
                             har_institusjonsopphold = excluded.har_institusjonsopphold,
                             har_bosatt_utland = excluded.har_bosatt_utland,
@@ -148,7 +148,8 @@ class EtteroppgjoerDao(
                             har_opphoer = excluded.har_opphoer,
                             har_adressebeskyttelse_eller_skjermet = excluded.har_adressebeskyttelse_eller_skjermet,
                             har_aktivitetskrav = excluded.har_aktivitetskrav,
-                            status = excluded.status
+                            status = excluded.status,
+                            endret = excluded.endret
                         """.trimIndent(),
                     )
 
@@ -163,6 +164,7 @@ class EtteroppgjoerDao(
                     statement.setBoolean(8, harBosattUtland)
                     statement.setBoolean(9, harAdressebeskyttelseEllerSkjermet)
                     statement.setBoolean(10, harAktivitetskrav)
+                    statement.setTidspunkt(11, Tidspunkt.now())
                     statement.executeUpdate().also {
                         krev(it == 1) {
                             "Kunne ikke lagre etteroppgjør for sakId=$sakId"

@@ -3,10 +3,13 @@ package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
@@ -30,17 +33,17 @@ class EtteroppgjoerJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun run() {
-        newSingleThreadContext("etteroppgjoerjob").use { ctx ->
-            Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })
-            runBlocking(ctx) {
-                if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
-                    logger.info("Starter periodiske jobber for etteroppgjoer")
+    fun startKjoering(jobContext: Context) {
+        Kontekst.set(jobContext)
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
+            logger.info("Starter periodiske jobber for etteroppgjoer")
+            inTransaction {
+                runBlocking {
                     startEtteroppgjoerKjoering()
-                } else {
-                    logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
                 }
             }
+        } else {
+            logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
         }
     }
 

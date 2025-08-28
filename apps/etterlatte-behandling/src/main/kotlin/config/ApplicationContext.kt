@@ -907,7 +907,9 @@ internal class ApplicationContext(
             etteroppgjoerJobService = etteroppgjoerJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.DAYS),
+            interval = Duration.of(10, ChronoUnit.MINUTES),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

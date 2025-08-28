@@ -63,8 +63,7 @@ class EtteroppgjoerJobService(
         val antallOpprettet =
             sakerMedUtbetaling.count { sakId ->
                 try {
-                    etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar)
-                    true
+                    etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
                 } catch (e: Exception) {
                     logger.error("Feil ved oppretting av etteroppgjør", e)
                     false

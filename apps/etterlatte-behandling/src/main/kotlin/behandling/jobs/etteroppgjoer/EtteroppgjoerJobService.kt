@@ -39,55 +39,13 @@ class EtteroppgjoerJobService(
             runBlocking(ctx) {
                 if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
                     logger.info("Starter periodiske jobber for etteroppgjoer")
-                    startEtteroppgjoerKjoering(EtteroppgjoerFilter.ENKEL)
+                    val forrigeAar = YearMonth.now().year - 1
+                    finnOgOpprettEtteroppgjoer(forrigeAar)
                 } else {
                     logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
                 }
             }
         }
-    }
-
-    suspend fun startEtteroppgjoerKjoering(filter: EtteroppgjoerFilter? = null) {
-        val yearNow = YearMonth.now().year
-        val aarMellom2024OgNaa = (2024..yearNow).toList()
-
-        for (inntektsaar in aarMellom2024OgNaa) {
-            finnOgOpprettEtteroppgjoer(inntektsaar)
-            finnOgOpprettForbehandlinger(inntektsaar, filter)
-        }
-    }
-
-    // finn saker med etteroppgjoer og mottatt skatteoppgjoer som skal ha forbehandling
-    fun finnOgOpprettForbehandlinger(
-        inntektsaar: Int,
-        filter: EtteroppgjoerFilter?,
-    ) {
-        val status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
-        logger.info(
-            "Starter oppretting av forbehandling for etteroppgjør (inntektsår=$inntektsaar, status=$status, filter=${filter ?: "INGEN"})",
-        )
-
-        val etteroppgjoerListe =
-            filter
-                ?.let { etteroppgjoerService.hentEtteroppgjoerForFilter(it, inntektsaar) }
-                ?: etteroppgjoerService.hentEtteroppgjoerForStatus(status, inntektsaar)
-
-        etteroppgjoerListe.forEach { etteroppgjoer ->
-            try {
-                etteroppgjoerForbehandlingService.opprettEtteroppgjoerForbehandling(
-                    etteroppgjoer.sakId,
-                    etteroppgjoer.inntektsaar,
-                    HardkodaSystembruker.etteroppgjoer,
-                )
-            } catch (e: Exception) {
-                logger.error(
-                    "Kunne ikke opprette forbehandling for sakId=${etteroppgjoer.sakId}. Årsak: ${e.message}",
-                    e,
-                )
-            }
-        }
-
-        logger.info("Ferdig. Opprettet forbehandling for ${etteroppgjoerListe.size} saker.")
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
@@ -99,14 +57,17 @@ class EtteroppgjoerJobService(
                 HardkodaSystembruker.etteroppgjoer,
             )
 
-        sakerMedUtbetaling.forEach { sakId ->
-            try {
-                etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar)
-            } catch (e: Exception) {
-                logger.error("Feil ved oppretting av etteroppgjør. ${e.message}")
+        val antallOpprettet =
+            sakerMedUtbetaling.count { sakId ->
+                try {
+                    etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar)
+                    true
+                } catch (e: Exception) {
+                    logger.error("Feil ved oppretting av etteroppgjør. ${e.message}")
+                    false
+                }
             }
-        }
 
-        logger.info("Opprettet totalt ${sakerMedUtbetaling.size} etteroppgjoer for inntektsaar=$inntektsaar")
+        logger.info("Opprettet totalt $antallOpprettet etteroppgjoer for inntektsaar=$inntektsaar")
     }
 }

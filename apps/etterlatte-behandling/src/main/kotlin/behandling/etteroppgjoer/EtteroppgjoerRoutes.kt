@@ -39,7 +39,8 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
     ETTEROPPGJOER_STUB_PGI("etteroppgjoer_stub_pgi"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
-    ETTEROPPGJOER_PERIODISK_JOBB("ettteroppgjoer_periodisk_jobb"),
+    ETTEROPPGJOER_PERIODISK_JOBB("etteroppgjoer_periodisk_jobb"),
+    ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),
     ;
 
     override fun key(): String = toggle
@@ -48,9 +49,7 @@ enum class EtteroppgjoerToggles(
 fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
     forbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
-    skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     etteroppgjoerService: EtteroppgjoerService,
-    etteroppgjoerJobService: EtteroppgjoerJobService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer") {
@@ -172,50 +171,6 @@ fun Route.etteroppgjoerRoutes(
             sjekkEtteroppgjoerEnabled(featureToggleService)
             val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
             call.respond(forbehandlinger)
-        }
-
-        // TODO opprett periodisk jobb
-        post("/skatteoppgjoerhendelser/start-kjoering") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            kunSystembruker {
-                val request = call.receive<HendelseKjoeringRequest>()
-                inTransaction {
-                    skatteoppgjoerHendelserService.startHendelsesKjoering(request)
-                }
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        // TODO opprett periodisk jobb
-        post("/{inntektsaar}/start-kjoering") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            kunSystembruker {
-                val inntektsaar =
-                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
-                        "Inntektsaar mangler"
-                    }
-
-                inTransaction {
-                    runBlocking {
-                        etteroppgjoerJobService.finnOgOpprettEtteroppgjoer(inntektsaar)
-                    }
-                }
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        // TODO opprett periodisk jobb
-        post("/{inntektsaar}/opprett-forbehandlinger") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            kunSystembruker {
-                val inntektsaar =
-                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
-                        "Inntektsaar mangler"
-                    }
-
-                val filter = call.request.queryParameters["filter"]?.let { EtteroppgjoerFilter.valueOf(it) }
-                etteroppgjoerJobService.finnOgOpprettForbehandlinger(inntektsaar, filter)
-            }
         }
     }
 }

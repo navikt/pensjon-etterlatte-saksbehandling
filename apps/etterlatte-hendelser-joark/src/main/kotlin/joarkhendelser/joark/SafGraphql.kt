@@ -55,12 +55,29 @@ data class Journalpost(
     val bruker: Bruker?,
     val tittel: String?,
     val journalstatus: Journalstatus,
+    val journalfoerendeEnhet: String?,
+    val dokumenter: List<DokumentInfo>,
     val sak: Fagsak?,
     val kanal: Kanal,
 ) {
     fun erFerdigstilt(): Boolean =
         (journalstatus == Journalstatus.FERDIGSTILT || journalstatus == Journalstatus.JOURNALFOERT) &&
             sak?.fagsaksystem == Fagsaksystem.EY.navn
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class DokumentInfo(
+    val dokumentInfoId: String,
+    val tittel: String?,
+    val brevkode: String?,
+    val dokumentStatus: DokumentStatus,
+)
+
+enum class DokumentStatus {
+    FERDIGSTILT,
+    AVBRUTT,
+    UNDER_REDIGERING,
+    KASSERT,
 }
 
 enum class Journalstatus {

@@ -22,7 +22,7 @@ export const enum FeatureToggle {
   opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
   aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
   aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
-  etteroppgjoer = 'etteroppgjoer',
+  etteroppgjoer = 'etteroppgjoer-frontend',
   bytt_til_annen_sak = 'bytt-til-annen-sak',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
 }

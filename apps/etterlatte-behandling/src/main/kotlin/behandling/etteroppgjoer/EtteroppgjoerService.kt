@@ -55,11 +55,15 @@ class EtteroppgjoerService(
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) != null) {
-            throw IkkeTillattException(
-                "ETTEROPPGJOER_EKSISTERER_ALLEREDE",
-                "Kan ikke opprette etteroppgjør for sak=$sakId og inntektsaar=$inntektsaar. Etteroppgjør er allerede opprettet",
-            )
+
+        val etteroppgjoerForSak = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+        if (etteroppgjoerForSak != null) {
+            if (etteroppgjoerForSak.status != EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
+                logger.info(
+                    "Etteroppgjoer for sakId=$sakId og inntektsaar=$inntektsaar er allerede opprettet med status ${etteroppgjoerForSak.status}.",
+                )
+                return
+            }
         }
 
         val sisteIverksatteBehandling =

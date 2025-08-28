@@ -65,11 +65,14 @@ class EtteroppgjoerJobService(
                 try {
                     etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
                 } catch (e: Exception) {
-                    logger.error("Feil ved oppretting av etteroppgjør", e)
+                    logger.warn("Feil ved oppretting av etteroppgjør", e)
                     false
                 }
             }
 
-        logger.info("Opprettet totalt $antallOpprettet etteroppgjoer for inntektsaar=$inntektsaar")
+        logger.info(
+            "Opprettet totalt $antallOpprettet av ${sakerMedUtbetaling.size} " +
+                "etteroppgjoer for inntektsaar=$inntektsaar",
+        )
     }
 }

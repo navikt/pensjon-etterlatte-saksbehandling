@@ -1,0 +1,1 @@
+update oppgave set status='UNDER_BEHANDLING' where status='UNDER_ARBEID';

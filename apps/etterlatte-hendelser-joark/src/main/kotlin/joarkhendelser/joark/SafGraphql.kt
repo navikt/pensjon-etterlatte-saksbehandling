@@ -70,15 +70,7 @@ data class DokumentInfo(
     val dokumentInfoId: String,
     val tittel: String?,
     val brevkode: String?,
-    val dokumentStatus: DokumentStatus,
 )
-
-enum class DokumentStatus {
-    FERDIGSTILT,
-    AVBRUTT,
-    UNDER_REDIGERING,
-    KASSERT,
-}
 
 enum class Journalstatus {
     MOTTATT,

@@ -83,11 +83,11 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
             vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear, any())
         } returns emptyList()
 
-        inTransaction {
-            runBlocking {
-                applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering()
-            }
+        runBlocking {
+            applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering()
+        }
 
+        inTransaction {
             val etteroppgjoerForForrigeAar =
                 applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear - 1)!!
             with(etteroppgjoerForForrigeAar) {

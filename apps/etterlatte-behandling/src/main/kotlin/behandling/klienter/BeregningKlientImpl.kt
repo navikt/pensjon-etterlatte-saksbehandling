@@ -32,7 +32,7 @@ interface BeregningKlient {
     suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BeregningOgAvkortingDto
+    ): BeregningOgAvkortingDto?
 
     suspend fun slettAvkorting(
         behandlingId: UUID,
@@ -98,10 +98,9 @@ class BeregningKlientImpl(
     override suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BeregningOgAvkortingDto {
+    ): BeregningOgAvkortingDto? {
         try {
             logger.info("Henter beregning og avkorting for behandlingId=$behandlingId")
-
             return downstreamResourceClient
                 .get(
                     Resource(clientId, "$resourceUrl/api/beregning/ytelse-med-grunnlag/$behandlingId"),
@@ -110,17 +109,21 @@ class BeregningKlientImpl(
                     success = { resource -> deserialize(resource.response.toString()) },
                     failure = { errorResponse -> throw errorResponse },
                 )
-        } catch (re: ResponseException) {
-            logger.error(
-                "Henting av beregning og avkorting for behandling med behandlingId=$behandlingId feilet",
-                re,
-            )
-
-            throw ForespoerselException(
-                status = re.response.status.value,
-                code = "FEIL_HENT_BEREGNING_AVKORTING",
-                detail = "Henting av beregning og avkorting for behandling med behandlingId=$behandlingId feilet",
-            )
+        } catch (response: ResponseException) {
+            if (response.response.status == HttpStatusCode.NotFound) {
+                logger.info("Fant ingen beregning og avkorting for behandlingId=$behandlingId", response)
+                null
+            } else {
+                logger.error(
+                    "Henting av beregning og avkorting for behandlingId=$behandlingId feilet med status ${response.response.status}",
+                    response,
+                )
+                throw ForespoerselException(
+                    status = response.response.status.value,
+                    code = "FEIL_HENT_BEREGNING_AVKORTING",
+                    detail = "Henting av beregning og avkorting for behandlingId=$behandlingId feilet",
+                )
+            }
         }
     }
 

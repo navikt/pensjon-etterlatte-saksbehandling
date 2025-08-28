@@ -113,7 +113,7 @@ class EtteroppgjoerService(
             )
 
         return sanksjoner?.any { sanksjon ->
-            sanksjon.fom.year <= inntektsaar && sanksjon.tom?.year ?: inntektsaar >= inntektsaar
+            sanksjon.fom.year <= inntektsaar && (sanksjon.tom?.year ?: inntektsaar) >= inntektsaar
         } == true
     }
 
@@ -123,6 +123,6 @@ class EtteroppgjoerService(
                 behandlingId,
                 HardkodaSystembruker.etteroppgjoer,
             )
-        return beregningOgAvkorting.perioder.any { it.institusjonsopphold != null }
+        return beregningOgAvkorting?.perioder?.any { it.institusjonsopphold != null } ?: false
     }
 }

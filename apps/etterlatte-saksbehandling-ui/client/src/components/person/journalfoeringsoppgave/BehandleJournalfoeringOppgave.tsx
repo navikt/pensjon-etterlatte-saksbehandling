@@ -1,6 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
-import { Route, Routes, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
@@ -32,9 +32,10 @@ import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { Alert, Box, HStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { logger } from '~utils/logger'
+import { ExternalLinkIcon } from '@navikt/aksel-icons'
 
 export default function BehandleJournalfoeringOppgave() {
   useSidetittel('Journalføringsoppgave')
@@ -115,6 +116,7 @@ export default function BehandleJournalfoeringOppgave() {
                 <Route index element={<OpprettKlagebehandling />} />
                 <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
               </Route>
+              <Route path="etteroppgjoer" element={<SvarEtteroppgjoer />} />
 
               <Route path="ferdigstill" element={<FerdigstillOppgave />} />
             </Routes>
@@ -140,6 +142,57 @@ export default function BehandleJournalfoeringOppgave() {
         </Sidebar>
       </HStack>
     </>
+  )
+}
+
+function SvarEtteroppgjoer() {
+  return (
+    <VStack gap="4">
+      <Heading size="medium" spacing>
+        Mottatt svar på etteroppgjøret
+      </Heading>
+
+      <Alert variant="info">
+        <VStack gap="2">
+          <BodyShort>Bruker har meldt inn svar på etteroppgjøret</BodyShort>
+          <div>
+            <Button
+              as={Link}
+              icon={<ExternalLinkIcon aria-hidden />}
+              size="small"
+              to="/api/dokumenter/"
+              target="_blank"
+            >
+              Åpne dokument (åpnes i ny fane)
+            </Button>
+          </div>
+        </VStack>
+      </Alert>
+
+      <BodyShort>Hvis bruker har gitt nok informasjon kan revurderingen for etteroppgjøret opprettes.</BodyShort>
+
+      <Table>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>Andre oppgaver</Table.HeaderCell>
+            <Table.HeaderCell></Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          <Table.Row>
+            <Table.DataCell>Skjema ettersending</Table.DataCell>
+            <Table.DataCell>
+              <Button>Vis</Button>
+            </Table.DataCell>
+          </Table.Row>
+        </Table.Body>
+      </Table>
+
+      <HStack gap="4">
+        <Button>Opprett revurdering</Button>
+        <Button>Avslutt oppgave</Button>
+      </HStack>
+    </VStack>
   )
 }
 

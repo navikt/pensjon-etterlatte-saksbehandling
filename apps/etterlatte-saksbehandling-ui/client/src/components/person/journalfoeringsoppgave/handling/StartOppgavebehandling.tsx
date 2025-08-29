@@ -25,6 +25,9 @@ export default function StartOppgavebehandling() {
   const navigate = useNavigate()
   const antallBehandlinger = sakMedBehandlinger?.behandlinger.length || 0
   const [tilhoererBruker, settTilhoererBruker] = useState(false)
+  // const etteroppgjoer
+
+  const skalViseValgRevurderingEtteroppgjoer = sakMedBehandlinger?.sak?.sakType === 'OMSTILLINGSSTOENAD'
 
   const [personResult, hentPerson] = useApiCall(hentPersonNavnOgFoedsel)
 
@@ -36,6 +39,8 @@ export default function StartOppgavebehandling() {
         return navigate('ferdigstill', { relative: 'path' })
       case OppgaveHandling.NY_KLAGE:
         return navigate('oppretteklage', { relative: 'path' })
+      case OppgaveHandling.SVAR_ETTEROPPGJOER:
+        return navigate('etteroppgjoer', { relative: 'path' })
     }
   }
 
@@ -99,12 +104,17 @@ export default function StartOppgavebehandling() {
         }}
         value={oppgaveHandling || ''}
       >
+        {skalViseValgRevurderingEtteroppgjoer && (
+          <Radio value={OppgaveHandling.SVAR_ETTEROPPGJOER} description="Hvis bruker har svart på etteroppgjøret">
+            Mottatt svar etteroppgjør
+          </Radio>
+        )}
         <Radio
           value={OppgaveHandling.NY_BEHANDLING}
-          description="Oppretter en ny behandling"
+          description="Oppretter en ny revurdering i saken"
           disabled={!journalpost || !tilhoererBruker}
         >
-          Opprett behandling
+          Opprett revurdering
         </Radio>
         <Radio
           value={OppgaveHandling.NY_KLAGE}
@@ -123,7 +133,7 @@ export default function StartOppgavebehandling() {
       <VStack gap="2">
         <HStack justify="center">
           <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
-            Neste
+            {}Neste
           </Button>
         </HStack>
         <HStack justify="center">

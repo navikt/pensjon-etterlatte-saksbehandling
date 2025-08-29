@@ -89,6 +89,19 @@ export const MeldtInnEndring = () => {
                     <>
                       {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.INGEN ? (
                         <>
+                          <Label>Endringen er svar på etteroppgjøret</Label>
+                          <BodyShort>Hvis endringen er et svar på etteroppgjøret blabla</BodyShort>
+
+                          <div>
+                            <Button
+                              onClick={() =>
+                                setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.OPPRETT_REVURDERING)
+                              }
+                            >
+                              Behandle mottatt svar etteroppgjør
+                            </Button>
+                          </div>
+
                           <Label>Endringen krever en revurdering</Label>
                           <BodyShort>
                             Hvis endringen har betydning for omstillingsstønaden skal det opprettes en revurdering. Når

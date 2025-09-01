@@ -7,7 +7,9 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.sak.SakLesDao
@@ -64,9 +66,17 @@ class EtteroppgjoerService(
             return null
         }
 
+        val sisteIverksatteVedtak =
+            vedtakKlient
+                .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
+                .sortedByDescending { it.datoAttestert }
+                .firstOrNull { it.vedtakType != VedtakType.OPPHOER }
+                ?: throw InternfeilException("Fant ikke siste iverksatte vedtak i sak=$sakId")
         val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatteBehandling(sakId)
-                ?: throw InternfeilException("Kunne ikke hente siste iverksatte behandling for sakId=$sakId")
+            krevIkkeNull(behandlingService.hentBehandling(sisteIverksatteVedtak.behandlingId)) {
+                "Siste iverksatte vedtak (id=${sisteIverksatteVedtak.id} peker på en behandling " +
+                    "med id=${sisteIverksatteVedtak.behandlingId} som ikke finnes"
+            }
 
         val etteroppgjoer =
             Etteroppgjoer(
@@ -74,7 +84,7 @@ class EtteroppgjoerService(
                 inntektsaar = inntektsaar,
                 status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
                 harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
-                harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id),
+                harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id, inntektsaar),
                 harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,
                 harBosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type !== UtlandstilknytningType.NASJONAL,
                 harAdressebeskyttelseEllerSkjermet =
@@ -113,16 +123,18 @@ class EtteroppgjoerService(
             )
 
         return sanksjoner?.any { sanksjon ->
-            sanksjon.fom.year <= inntektsaar && sanksjon.tom?.year ?: inntektsaar >= inntektsaar
+            sanksjon.fom.year <= inntektsaar && (sanksjon.tom?.year ?: inntektsaar) >= inntektsaar
         } == true
     }
 
-    private suspend fun utledInstitusjonsopphold(behandlingId: UUID): Boolean {
-        val beregningOgAvkorting =
-            beregningKlient.hentBeregningOgAvkorting(
-                behandlingId,
-                HardkodaSystembruker.etteroppgjoer,
-            )
-        return beregningOgAvkorting.perioder.any { it.institusjonsopphold != null }
+    private suspend fun utledInstitusjonsopphold(
+        behandlingId: UUID,
+        inntektsaar: Int,
+    ): Boolean {
+        val beregningsGrunnlag =
+            beregningKlient.hentBeregningsgrunnlag(behandlingId, HardkodaSystembruker.etteroppgjoer)
+        return beregningsGrunnlag.institusjonsopphold.any {
+            it.fom.year <= inntektsaar && (it.tom?.year ?: inntektsaar) >= inntektsaar
+        }
     }
 }

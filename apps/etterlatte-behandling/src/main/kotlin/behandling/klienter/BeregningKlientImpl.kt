@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -81,6 +82,11 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Sanksjon>?
+
+    suspend fun hentBeregningsgrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningsGrunnlag
 }
 
 class BeregningKlientImpl(
@@ -94,6 +100,25 @@ class BeregningKlientImpl(
 
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
+
+    override suspend fun hentBeregningsgrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningsGrunnlag {
+        try {
+            logger.info("Henter beregningsgrunnlag for behandling=$behandlingId")
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, ""),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: ResponseException) {
+            throw InternfeilException("Kunne ikke hente beregningsgrunnlag for behandlingen med id=$behandlingId", e)
+        }
+    }
 
     override suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,

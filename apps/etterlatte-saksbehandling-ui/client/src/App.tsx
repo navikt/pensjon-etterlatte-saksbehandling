@@ -24,13 +24,10 @@ import { mapResult } from '~shared/api/apiUtils'
 import { setDefaultOptions } from 'date-fns'
 import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
-import { initAmplitude } from '~utils/analytics'
 import { Unleashcontext, useUnleash } from '~useUnleash'
 import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandling'
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
 import { useLastUmami } from '~shared/umami/useLastUmami'
-
-initAmplitude()
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()

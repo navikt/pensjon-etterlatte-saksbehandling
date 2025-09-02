@@ -18,6 +18,7 @@ import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/form
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { logger } from '~utils/logger'
 import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
+import { SakType } from '~shared/types/sak'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -25,9 +26,6 @@ export default function StartOppgavebehandling() {
   const navigate = useNavigate()
   const antallBehandlinger = sakMedBehandlinger?.behandlinger.length || 0
   const [tilhoererBruker, settTilhoererBruker] = useState(false)
-  // const etteroppgjoer
-
-  const skalViseValgRevurderingEtteroppgjoer = sakMedBehandlinger?.sak?.sakType === 'OMSTILLINGSSTOENAD'
 
   const [personResult, hentPerson] = useApiCall(hentPersonNavnOgFoedsel)
 
@@ -104,11 +102,6 @@ export default function StartOppgavebehandling() {
         }}
         value={oppgaveHandling || ''}
       >
-        {skalViseValgRevurderingEtteroppgjoer && (
-          <Radio value={OppgaveHandling.SVAR_ETTEROPPGJOER} description="Hvis bruker har svart på etteroppgjøret">
-            Mottatt svar etteroppgjør
-          </Radio>
-        )}
         <Radio
           value={OppgaveHandling.NY_BEHANDLING}
           description="Oppretter en ny revurdering i saken"
@@ -129,6 +122,11 @@ export default function StartOppgavebehandling() {
         >
           Ferdigstill oppgaven
         </Radio>
+        {sakMedBehandlinger?.sak.sakType === SakType.OMSTILLINGSSTOENAD && (
+          <Radio value={OppgaveHandling.SVAR_ETTEROPPGJOER} description="Hvis bruker har svart på etteroppgjøret">
+            Mottatt svar etteroppgjør
+          </Radio>
+        )}
       </RadioGroup>
       <VStack gap="2">
         <HStack justify="center">

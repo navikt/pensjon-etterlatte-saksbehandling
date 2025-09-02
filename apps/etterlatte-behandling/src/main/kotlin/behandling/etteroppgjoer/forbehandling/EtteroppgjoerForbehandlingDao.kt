@@ -144,7 +144,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(11, forbehandling.harMottattNyInformasjon?.name)
                 statement.setString(12, forbehandling.endringErTilUgunstForBruker?.name)
                 statement.setString(13, forbehandling.beskrivelseAvUgunst)
-                statement.setDate(14, Date.valueOf(forbehandling.varselbrevSendt))
+                statement.setDate(14, forbehandling.varselbrevSendt?.let { Date.valueOf(it) })
 
                 statement.executeUpdate().also {
                     krev(it == 1) {

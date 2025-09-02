@@ -6,7 +6,7 @@ import { ClickEvent, trackClick } from '~utils/analytics'
 export const ForventetInntektHeaderHjelpeTekst = () => {
   const [aapen, setAapen] = useState<boolean>(false)
 
-  const sendAmplitudeKlikkEvent = () => {
+  const sendKlikkEvent = () => {
     if (!aapen) {
       setAapen(true)
       trackClick(ClickEvent.AVKORTING_FORVENTET_INNTEKT_HJELPETEKST)
@@ -16,7 +16,7 @@ export const ForventetInntektHeaderHjelpeTekst = () => {
   }
 
   return (
-    <HelpText title="Hva innebærer forventet inntekt totalt" onClick={sendAmplitudeKlikkEvent}>
+    <HelpText title="Hva innebærer forventet inntekt totalt" onClick={sendKlikkEvent}>
       Forventet inntekt totalt er registrert inntekt Norge pluss inntekt utland minus eventuelt fratrekk for inn-år.
       Beløpet vil automatisk avrundes ned til nærmeste tusen når avkorting beregnes.
     </HelpText>
@@ -26,7 +26,7 @@ export const ForventetInntektHeaderHjelpeTekst = () => {
 export const InnvilgaMaanederHeaderHjelpeTekst = () => {
   const [aapen, setAapen] = useState<boolean>(false)
 
-  const sendAmplitudeKlikkEvent = () => {
+  const sendKlikkEvent = () => {
     if (!aapen) {
       setAapen(true)
       trackClick(ClickEvent.AVKORTING_INNVILGA_MAANEDER_HJELPETEKST)
@@ -36,7 +36,7 @@ export const InnvilgaMaanederHeaderHjelpeTekst = () => {
   }
 
   return (
-    <HelpText title="Hva betyr innvilgede måneder" onClick={sendAmplitudeKlikkEvent}>
+    <HelpText title="Hva betyr innvilgede måneder" onClick={sendKlikkEvent}>
       Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Registrert forventet inntekt, med eventuelt
       fratrekk for inntekt opptjent før/etter innvilgelse, blir fordelt på de innvilgede månedene. Antallet vil ikke
       endres selv om man tar en inntektsendring i løpet av året.

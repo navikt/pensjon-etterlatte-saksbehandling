@@ -473,7 +473,7 @@ class EtteroppgjoerForbehandlingDao(
             harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { enumValueOf<JaNei>(it) },
             endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { enumValueOf<JaNei>(it) },
             beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
-            varselbrevSendt = getDate("varselbrev_sendt").toLocalDate(),
+            varselbrevSendt = getDate("varselbrev_sendt")?.let { it.toLocalDate() },
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

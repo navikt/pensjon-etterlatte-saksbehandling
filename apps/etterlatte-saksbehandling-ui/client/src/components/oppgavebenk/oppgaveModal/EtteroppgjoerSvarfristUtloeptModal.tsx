@@ -5,10 +5,12 @@ import React, { useState } from 'react'
 import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterDato } from '~utils/formatering/dato'
+import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -23,10 +25,14 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
-  const avslutt = () => {
-    ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
-      oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-      setOpen(false)
+  const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
+
+  const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
+    opprettRevurderingRequest({ sakId: oppgave.sakId, forbehandlingId: forbehandlingId }, () => {
+      ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+        setOpen(false)
+      })
     })
   }
 
@@ -38,7 +44,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
 
       <Modal
         open={open}
-        aria-labelledby="etteroppgjoer-svarfrist-utloept-heading"
+        aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
         header={{ heading: 'Etteroppgjør – svarfrist utløpt' }}
@@ -58,13 +64,23 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
 
             <BodyShort>Etteroppgjøret kan ferdigstilles</BodyShort>
 
+            {mapResult(opprettRevurderingResult, {
+              error: (error) => (
+                <ApiErrorAlert>Kunne ikke opprette revurdering for etteroppgjør. {error.detail}</ApiErrorAlert>
+              ),
+            })}
+
             <HStack gap="4" justify="end">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillStatus)}>
                 Lukk
               </Button>
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button variant="danger" onClick={avslutt} loading={isPending(ferdigstillStatus)}>
+                <Button
+                  loading={isPending(opprettRevurderingResult)}
+                  size="small"
+                  onClick={() => opprettRevurderingEtteroppgjoer(oppgave.referanse!!)}
+                >
                   Opprett revurdering
                 </Button>
               )}

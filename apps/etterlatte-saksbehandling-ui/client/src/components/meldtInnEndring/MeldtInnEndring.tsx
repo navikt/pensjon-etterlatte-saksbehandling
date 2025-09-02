@@ -16,6 +16,7 @@ import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { MeldtInnEndringSkjema } from '~components/meldtInnEndring/MeldtInnEndringSkjema'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export enum MeldtInnEndringHandlingValgt {
   AVSLUTT_OPPGAVE,
@@ -29,6 +30,8 @@ export const MeldtInnEndring = () => {
   const { oppgaveId } = useParams()
   const configContext = useContext(ConfigContext)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
+  const etteroppgjoerFeatureToggle = useFeaturetoggle(FeatureToggle.etteroppgjoer)
 
   if (!oppgaveId) {
     return <Alert variant="error">Oppgave ID ligger ikke med i URL</Alert>
@@ -89,18 +92,21 @@ export const MeldtInnEndring = () => {
                     <>
                       {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.INGEN ? (
                         <>
-                          <Label>Endringen er svar på etteroppgjøret</Label>
-                          <BodyShort>Hvis endringen er et svar på etteroppgjøret blabla</BodyShort>
+                          {etteroppgjoerFeatureToggle && (
+                            <>
+                              <Label>Endringen er svar på etteroppgjøret</Label>
 
-                          <div>
-                            <Button
-                              onClick={() =>
-                                setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.OPPRETT_REVURDERING)
-                              }
-                            >
-                              Behandle mottatt svar etteroppgjør
-                            </Button>
-                          </div>
+                              <div>
+                                <Button
+                                  onClick={() =>
+                                    setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.OPPRETT_REVURDERING)
+                                  }
+                                >
+                                  Behandle mottatt svar etteroppgjør
+                                </Button>
+                              </div>
+                            </>
+                          )}
 
                           <Label>Endringen krever en revurdering</Label>
                           <BodyShort>

@@ -32,7 +32,7 @@ import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Table, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { logger } from '~utils/logger'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -170,23 +170,6 @@ function SvarEtteroppgjoer() {
       </Alert>
 
       <BodyShort>Hvis bruker har gitt nok informasjon kan revurderingen for etteroppgjøret opprettes.</BodyShort>
-
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>Andre oppgaver</Table.HeaderCell>
-            <Table.HeaderCell></Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          <Table.Row>
-            <Table.DataCell>Skjema ettersending</Table.DataCell>
-            <Table.DataCell>
-              <Button>Vis</Button>
-            </Table.DataCell>
-          </Table.Row>
-        </Table.Body>
-      </Table>
 
       <HStack gap="4">
         <Button>Opprett revurdering</Button>

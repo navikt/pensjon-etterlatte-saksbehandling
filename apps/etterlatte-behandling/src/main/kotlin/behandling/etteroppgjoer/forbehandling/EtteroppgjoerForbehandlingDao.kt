@@ -117,9 +117,9 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id
@@ -144,6 +144,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(11, forbehandling.harMottattNyInformasjon?.name)
                 statement.setString(12, forbehandling.endringErTilUgunstForBruker?.name)
                 statement.setString(13, forbehandling.beskrivelseAvUgunst)
+                statement.setDate(14, Date.valueOf(forbehandling.varselbrevSendt))
 
                 statement.executeUpdate().also {
                     krev(it == 1) {

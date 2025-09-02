@@ -1,15 +1,21 @@
 import { Alert, BodyShort, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { Link, useParams } from 'react-router-dom'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgave } from '~shared/api/oppgaver'
+import { ferdigstillOppgaveMedMerknad, hentOppgave } from '~shared/api/oppgaver'
 import { hentJournalpost } from '~shared/api/dokument'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
+import { OppgaveDTO } from '~shared/types/oppgave'
+import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
+import { PersonOversiktFane } from '~components/person/Person'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const SvarPaaEtteroppgjoer = () => {
   useSidetittel('Svar på etteroppgjør')
@@ -20,10 +26,29 @@ export const SvarPaaEtteroppgjoer = () => {
     return <Alert variant="error">Oppgave ID ligger ikke med i URL</Alert>
   }
 
-  const harEtteroppgjoer = true
+  const [begrunnelse, setBegrunnelse] = useState<string>('')
 
   const [hentOppgaveResult, hentOppgaveFetch] = useApiCall(hentOppgave)
   const [hentJournalpostResult, hentJournalpostFetch] = useApiCall(hentJournalpost)
+
+  const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
+  const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
+
+  const harEtteroppgjoer = true
+
+  const opprettRevurdering = (oppgave: OppgaveDTO) => {
+    opprettRevurderingRequest({ sakId: oppgave.sakId, aarsak: Revurderingaarsak.ETTEROPPGJOER }, () => {
+      ferdigstillOppgaveRequest({ id: oppgave.id, merknad: begrunnelse }, () => {
+        navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)
+      })
+    })
+  }
+
+  const avsluttOppgave = (oppgave: OppgaveDTO) => {
+    ferdigstillOppgaveRequest({ id: oppgave.id, merknad: begrunnelse }, () => {
+      navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)
+    })
+  }
 
   useEffect(() => {
     hentOppgaveFetch(oppgaveId!, (oppgave) => hentJournalpostFetch(oppgave.referanse!))
@@ -79,11 +104,35 @@ export const SvarPaaEtteroppgjoer = () => {
                     oppgaven avsluttes.
                   </BodyShort>
 
-                  <Textarea label="Begrunnelse (valgfri)" />
+                  <Textarea
+                    label="Begrunnelse (valgfri)"
+                    value={begrunnelse || ''}
+                    onChange={(e) => setBegrunnelse(e.target.value)}
+                  />
+
+                  {isFailureHandler({
+                    apiResult: ferdigstillOppgaveResult,
+                    errorMessage: 'Feil under ferdigstilling av oppgave',
+                  })}
+
+                  {isFailureHandler({
+                    apiResult: opprettRevurderingResult,
+                    errorMessage: 'Feil under opprettelse av revurdering',
+                  })}
 
                   <HStack gap="4">
-                    <Button>Opprett revurdering</Button>
-                    <Button>Avslutt oppgave</Button>
+                    <Button
+                      loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
+                      onClick={() => opprettRevurdering(oppgave)}
+                    >
+                      Opprett revurdering
+                    </Button>
+                    <Button
+                      loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
+                      onClick={() => avsluttOppgave(oppgave)}
+                    >
+                      Avslutt oppgave
+                    </Button>
                   </HStack>
                 </VStack>
               </>

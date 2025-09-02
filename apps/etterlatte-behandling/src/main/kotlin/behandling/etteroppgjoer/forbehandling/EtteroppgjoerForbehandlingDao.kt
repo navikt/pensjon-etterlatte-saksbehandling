@@ -41,6 +41,25 @@ class EtteroppgjoerForbehandlingDao(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingDao::class.java)
 
+    fun hentForbehandlingMedSvarfristUtloept(inntektsAar: Int): List<EtteroppgjoerForbehandling>? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *  
+                        FROM etteroppgjoer_behandling
+                        WHERE varselbrev_sendt IS NOT NULL
+                        AND varselbrev_sendt < (now() - interval '1 month')
+                        AND status = 'FERDIGSTILT'
+                        AND aar = ?
+                        """.trimIndent(),
+                    )
+                statement.setInt(1, inntektsAar)
+                statement.executeQuery().toList { toForbehandling() }
+            }
+        }
+
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -454,6 +473,7 @@ class EtteroppgjoerForbehandlingDao(
             harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { enumValueOf<JaNei>(it) },
             endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { enumValueOf<JaNei>(it) },
             beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
+            varselbrevSendt = getDate("varselbrev_sendt").toLocalDate(),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

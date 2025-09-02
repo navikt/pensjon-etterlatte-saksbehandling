@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.revurdering.MaksEnAktivOppgavePaaBehandling
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -43,6 +42,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -98,6 +98,8 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
+    fun hentForbehandlingMedSvarfristUtloept(inntektsaar: Int) = dao.hentForbehandlingMedSvarfristUtloept(inntektsaar)
+
     fun avbrytForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -142,6 +144,17 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
+
+    fun lagreVarselbrevSendt(forbehandlingId: UUID) {
+        val forbehandling = hentForbehandling(forbehandlingId)
+        if (!forbehandling.erUnderBehandling()) {
+            throw IkkeTillattException(
+                "FEIL_STATUS_FORBEHANDLING",
+                "Forbehandling med id=$forbehandlingId kan ikke oppdatere varselbrev sendt siden forbehandling har status ${forbehandling.status}",
+            )
+        }
+        lagreForbehandling(forbehandling.copy(varselbrevSendt = LocalDate.now()))
+    }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)

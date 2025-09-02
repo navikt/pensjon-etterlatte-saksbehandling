@@ -1,0 +1,73 @@
+package no.nav.etterlatte.behandling.jobs.etteroppgjoer
+
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.oppgave.OppgaveService
+import org.slf4j.LoggerFactory
+import java.time.YearMonth
+
+@OptIn(DelicateCoroutinesApi::class)
+class EtteroppgjoerSvarfristUtloeptJobService(
+    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
+    private val etteroppgjoerService: EtteroppgjoerService,
+    private val oppgaveService: OppgaveService,
+    private val featureToggleService: FeatureToggleService,
+) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun startKjoering(jobContext: Context) {
+        Kontekst.set(jobContext)
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_TIDSFRISTUTLOEPT_JOBB, false)) {
+            logger.info("Starter periodiske jobber for opprette oppgave svarfrist utløpt etteroppgjoer")
+            runBlocking {
+                opprettNyOppgaveSvarfristUtloept()
+            }
+        } else {
+            logger.info("Periodisk jobber for opprette oppgave svarfrist utløpt er deaktivert")
+        }
+    }
+
+    private fun opprettNyOppgaveSvarfristUtloept() {
+        // TODO: trekke ut til felles for alle etteroppgjør jobber
+        val inntektsaar = YearMonth.now().year - 1
+
+        val forbehandlinger =
+            etteroppgjoerForbehandlingService
+                .hentForbehandlingMedSvarfristUtloept(inntektsaar)
+                .orEmpty()
+
+        val skalHaOppgaveSvarfristUtloept =
+            forbehandlinger.filter { forbehandling ->
+                val etteroppgjoer =
+                    etteroppgjoerService
+                        .hentEtteroppgjoerForInntektsaar(forbehandling.sak.id, inntektsaar)
+                        ?: throw InternfeilException(
+                            "ForbehandlingId=${forbehandling.id} forventet etteroppgjør for sakId=${forbehandling.sak.id} og inntektsaar=$inntektsaar men var NULL",
+                        )
+                etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
+            }
+
+        skalHaOppgaveSvarfristUtloept.forEach { forbehandling ->
+            logger.info("Oppretter oppgave for svarfrist utløpt for forbehandlingId=${forbehandling.id}")
+            oppgaveService.opprettOppgave(
+                referanse = forbehandling.id.toString(),
+                sakId = forbehandling.sak.id,
+                type = OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT,
+                merknad = "Svarfrist for etteroppgjør $inntektsaar er utløpt",
+                kilde = OppgaveKilde.HENDELSE,
+            )
+        }
+
+        logger.info("Opprettet ${skalHaOppgaveSvarfristUtloept.size} oppgaver for etteroppgjør med svarfrist utløpt for $inntektsaar")
+    }
+}

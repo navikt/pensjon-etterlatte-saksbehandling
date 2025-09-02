@@ -38,6 +38,7 @@ export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) =>
       return <Tag variant="alt3-filled">Oppfølging</Tag>
 
     case Oppgavetype.ETTEROPPGJOER:
+    case Oppgavetype.ETTEROPPGJOER_SVARFRIST_UTLOEPT:
       return <Tag variant="alt1-filled">Etteroppgjør</Tag>
 
     case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:

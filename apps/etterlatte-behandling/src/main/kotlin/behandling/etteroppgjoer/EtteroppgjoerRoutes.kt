@@ -41,6 +41,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_PERIODISK_JOBB("etteroppgjoer_periodisk_jobb"),
     ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),
+    ETTEROPPGJOER_TIDSFRISTUTLOEPT_JOBB("etteroppgjoer_tidsfristutlopt_jobb"),
     ;
 
     override fun key(): String = toggle

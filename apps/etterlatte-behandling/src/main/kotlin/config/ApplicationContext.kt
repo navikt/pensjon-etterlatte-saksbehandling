@@ -57,6 +57,8 @@ import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveU
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteropppgjoerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
@@ -761,6 +763,14 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
+    val etteroppgjoerSvarfristUtloeptJobService =
+        EtteroppgjoerSvarfristUtloeptJobService(
+            etteroppgjoerForbehandlingService,
+            etteroppgjoerService,
+            oppgaveService,
+            featureToggleService,
+        )
+
     private val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
             aktivitetspliktDao,
@@ -908,6 +918,17 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(10, ChronoUnit.MINUTES),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+        )
+    }
+
+    val etteroppgjoerSvarfristUtloeptJob: EtteroppgjoerSvarfristUtloeptJob by lazy {
+        EtteroppgjoerSvarfristUtloeptJob(
+            etteroppgjoerSvarfristUtloeptJobService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.DAYS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

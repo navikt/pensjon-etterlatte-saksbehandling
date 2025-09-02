@@ -169,7 +169,7 @@ class EtteroppgjoerRevurderingBrevService(
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(
                         etteroppgjoersAar = detaljertForbehandling.behandling.aar,
-                        forhaandsvarselSendtDato = forhaandsvarselBrev.statusEndret.toLocalDate(),
+                        forhaandsvarselSendtDato = detaljertForbehandling.behandling.varselbrevSendt!!,
                         mottattSvarDato = null, // TODO: legg til dato for mottatt journalpost
                     ),
                 brevVedleggData =

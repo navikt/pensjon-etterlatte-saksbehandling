@@ -129,6 +129,10 @@ export const HandlingerForOppgave = ({
         </Button>
       )
 
+    case Oppgavetype.ETTEROPPGJOER_SVARFRIST_UTLOEPT:
+      return 'Gå til oppgave'
+      // TODO: modal
+
     case Oppgavetype.KLAGE:
       return (
         erInnloggetSaksbehandlerOppgave && (

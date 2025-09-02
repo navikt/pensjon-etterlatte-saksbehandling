@@ -18,7 +18,7 @@ import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTy
 import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettSaksgrunnlag'
 import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
 import { ENHETER } from '~shared/types/Enhet'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 import { AdressebeskyttelseGraderingTag } from '~shared/tags/AdressebeskyttelseGraderingTag'
 
 const ETTERLATTEREFORM_DATO = '2024-01'

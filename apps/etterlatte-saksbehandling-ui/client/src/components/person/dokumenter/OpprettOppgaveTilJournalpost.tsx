@@ -9,7 +9,7 @@ import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { PersonLink } from '~components/person/lenker/PersonLink'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 interface OpprettJournalpostForm {
   journalpostId: string

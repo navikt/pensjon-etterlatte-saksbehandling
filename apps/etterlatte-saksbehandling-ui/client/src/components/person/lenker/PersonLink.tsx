@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { PersonOversiktFane } from '~components/person/Person'
 import { lagrePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { Link, LinkProps } from '@navikt/ds-react'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 interface PersonLinkProps extends Omit<LinkProps, 'href' | 'onClick'> {
   fane?: PersonOversiktFane

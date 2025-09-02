@@ -2,7 +2,7 @@ import { ReactNode, useState } from 'react'
 import { Button } from '@navikt/ds-react'
 import styled, { css } from 'styled-components'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const Sidebar = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false)

@@ -1,7 +1,7 @@
 import { NOK } from '~utils/formatering/formatering'
 import { HelpText } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const ForventetInntektHeaderHjelpeTekst = () => {
   const [aapen, setAapen] = useState<boolean>(false)

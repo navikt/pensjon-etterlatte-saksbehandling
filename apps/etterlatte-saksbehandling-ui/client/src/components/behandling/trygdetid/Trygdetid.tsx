@@ -24,7 +24,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/EnigUenigTilbakemelding'
-import { velgTilbakemeldingClickEventForUtlandsbehandling } from '~utils/amplitude'
+import { velgTilbakemeldingClickEventForUtlandsbehandling } from '~utils/analytics'
 
 interface Props {
   redigerbar: boolean

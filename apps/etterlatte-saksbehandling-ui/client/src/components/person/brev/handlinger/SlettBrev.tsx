@@ -5,7 +5,7 @@ import { BodyShort, Button, HStack, Modal } from '@navikt/ds-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 import { gyldigbrevkode } from '~components/person/brev/BrevOversikt'
 
 const kanSlettes = (brev: IBrev) => {

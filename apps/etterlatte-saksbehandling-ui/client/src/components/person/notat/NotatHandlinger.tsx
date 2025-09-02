@@ -5,7 +5,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { journalfoerNotat } from '~shared/api/notat'
 import { NotatRedigeringFane } from '~components/person/notat/NotatRedigeringModal'
 import { formaterTidspunktTimeMinutterSekunder } from '~utils/formatering/dato'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const NotatHandlinger = ({
   notatId,

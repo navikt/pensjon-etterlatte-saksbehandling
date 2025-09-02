@@ -15,7 +15,7 @@ import { opprettOppgave } from '~shared/api/oppgaver'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 import { ApiError } from '~shared/api/apiClient'
 
 export const KnyttTilAnnenBruker = ({

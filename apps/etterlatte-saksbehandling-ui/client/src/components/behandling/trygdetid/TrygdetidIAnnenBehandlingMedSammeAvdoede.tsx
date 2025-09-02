@@ -10,7 +10,7 @@ import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Spacer, VStack } 
 import { ExternalLinkIcon, PlusCircleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { ClickEvent, trackClickJaNei } from '~utils/amplitude'
+import { ClickEvent, trackClickJaNei } from '~utils/analytics'
 import { JaNei } from '~shared/types/ISvar'
 
 export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({

@@ -4,7 +4,7 @@ import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Notat, NotatMal, opprettNotatForSak } from '~shared/api/notat'
 import { isPending } from '~shared/api/apiUtils'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 /**
  * Modal blir lagt tilbake når andre maler er på plass.

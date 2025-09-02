@@ -1,6 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
-import { Link, Route, Routes, useParams } from 'react-router-dom'
+import { Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
@@ -16,7 +16,7 @@ import { hentOppgave } from '~shared/api/oppgaver'
 import { useAppDispatch } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isPending, isPendingOrInitial, isSuccess, mapSuccess } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import { OppdaterJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import StartOppgavebehandling, {
   OppgaveDetaljer,
@@ -32,10 +32,9 @@ import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, Box, HStack } from '@navikt/ds-react'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { logger } from '~utils/logger'
-import { ExternalLinkIcon } from '@navikt/aksel-icons'
 
 export default function BehandleJournalfoeringOppgave() {
   useSidetittel('Journalføringsoppgave')
@@ -96,31 +95,32 @@ export default function BehandleJournalfoeringOppgave() {
 
       <HStack height="100%" minHeight="100vh" wrap={false}>
         <Box padding="8" minWidth="40rem">
-          {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
-            <Spinner label="Laster journalpost" />
-          ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
-            <OppdaterJournalpost
-              initialJournalpost={journalpostStatus.data}
-              sak={sakMedBehandlinger.sak}
-              oppgaveId={oppgaveId!!}
-            />
-          ) : (
-            <Routes>
-              <Route index element={<StartOppgavebehandling />} />
+          {mapResult(journalpostStatus, {
+            pending: <Spinner label="Laster journalpost..." />,
+            success: (journalpost) =>
+              !!sakMedBehandlinger && kanEndreJournalpost(journalpost) ? (
+                <OppdaterJournalpost
+                  initialJournalpost={journalpost}
+                  sak={sakMedBehandlinger.sak}
+                  oppgaveId={oppgaveId!!}
+                />
+              ) : (
+                <Routes>
+                  <Route index element={<StartOppgavebehandling />} />
 
-              <Route path="nybehandling">
-                <Route index element={<OpprettNyBehandling />} />
-                <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
-              </Route>
-              <Route path="oppretteklage">
-                <Route index element={<OpprettKlagebehandling />} />
-                <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
-              </Route>
-              <Route path="etteroppgjoer" element={<SvarEtteroppgjoer />} />
+                  <Route path="nybehandling">
+                    <Route index element={<OpprettNyBehandling />} />
+                    <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
+                  </Route>
+                  <Route path="oppretteklage">
+                    <Route index element={<OpprettKlagebehandling />} />
+                    <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
+                  </Route>
 
-              <Route path="ferdigstill" element={<FerdigstillOppgave />} />
-            </Routes>
-          )}
+                  <Route path="ferdigstill" element={<FerdigstillOppgave />} />
+                </Routes>
+              ),
+          })}
         </Box>
 
         <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">
@@ -142,40 +142,6 @@ export default function BehandleJournalfoeringOppgave() {
         </Sidebar>
       </HStack>
     </>
-  )
-}
-
-function SvarEtteroppgjoer() {
-  return (
-    <VStack gap="4">
-      <Heading size="medium" spacing>
-        Mottatt svar på etteroppgjøret
-      </Heading>
-
-      <Alert variant="info">
-        <VStack gap="2">
-          <BodyShort>Bruker har meldt inn svar på etteroppgjøret</BodyShort>
-          <div>
-            <Button
-              as={Link}
-              icon={<ExternalLinkIcon aria-hidden />}
-              size="small"
-              to="/api/dokumenter/"
-              target="_blank"
-            >
-              Åpne dokument (åpnes i ny fane)
-            </Button>
-          </div>
-        </VStack>
-      </Alert>
-
-      <BodyShort>Hvis bruker har gitt nok informasjon kan revurderingen for etteroppgjøret opprettes.</BodyShort>
-
-      <HStack gap="4">
-        <Button>Opprett revurdering</Button>
-        <Button>Avslutt oppgave</Button>
-      </HStack>
-    </VStack>
   )
 }
 

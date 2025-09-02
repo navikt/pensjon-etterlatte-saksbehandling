@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -30,6 +30,8 @@ export const MeldtInnEndring = () => {
   const { oppgaveId } = useParams()
   const configContext = useContext(ConfigContext)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
+  const navigate = useNavigate()
 
   const etteroppgjoerFeatureToggle = useFeaturetoggle(FeatureToggle.etteroppgjoer)
 
@@ -97,11 +99,7 @@ export const MeldtInnEndring = () => {
                               <Label>Endringen er svar på etteroppgjøret</Label>
 
                               <div>
-                                <Button
-                                  onClick={() =>
-                                    setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.OPPRETT_REVURDERING)
-                                  }
-                                >
+                                <Button onClick={() => navigate(`/svar-paa-etteroppgjoer/${oppgaveId}`)}>
                                   Behandle mottatt svar etteroppgjør
                                 </Button>
                               </div>

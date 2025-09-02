@@ -38,7 +38,7 @@ export default function StartOppgavebehandling() {
       case OppgaveHandling.NY_KLAGE:
         return navigate('oppretteklage', { relative: 'path' })
       case OppgaveHandling.SVAR_ETTEROPPGJOER:
-        return navigate('etteroppgjoer', { relative: 'path' })
+        return navigate(`/svar-paa-etteroppgjoer/${oppgave?.id}`, { relative: 'path' })
     }
   }
 
@@ -131,7 +131,7 @@ export default function StartOppgavebehandling() {
       <VStack gap="2">
         <HStack justify="center">
           <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
-            {}Neste
+            Neste
           </Button>
         </HStack>
         <HStack justify="center">

@@ -21,6 +21,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
+import { EtteroppgjoerSvarfristUtloeptModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerSvarfristUtloeptModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -130,8 +131,11 @@ export const HandlingerForOppgave = ({
       )
 
     case Oppgavetype.ETTEROPPGJOER_SVARFRIST_UTLOEPT:
-      return 'Gå til oppgave'
-      // TODO: modal
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <EtteroppgjoerSvarfristUtloeptModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
 
     case Oppgavetype.KLAGE:
       return (

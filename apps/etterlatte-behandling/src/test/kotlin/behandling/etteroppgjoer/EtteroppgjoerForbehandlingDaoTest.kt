@@ -102,6 +102,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
@@ -133,6 +134,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             ),
         )
         etteroppgjoerForbehandlingDao.lagreForbehandling(
@@ -150,6 +152,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             ),
         )
 
@@ -267,6 +270,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningen)
@@ -292,6 +296,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         val afp =

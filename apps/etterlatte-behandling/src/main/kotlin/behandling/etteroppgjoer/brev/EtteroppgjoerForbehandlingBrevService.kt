@@ -70,7 +70,6 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,

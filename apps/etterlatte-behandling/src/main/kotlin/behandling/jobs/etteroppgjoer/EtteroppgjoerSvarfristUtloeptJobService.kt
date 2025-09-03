@@ -27,7 +27,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val svarfrist = config.getString("etteroppgjoer.svarfristutloept.jobb.interval")
+    private val svarfrist = config.getString("etteroppgjoer.svarfrist")
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)

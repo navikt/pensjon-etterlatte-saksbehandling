@@ -165,8 +165,6 @@ spec:
       value: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-ske
     - name: SIGRUN_OUTBOUND_SCOPE
       value: api://dev-fss.team-inntekt.sigrun-q4/.default
-    - name: ETTEROPPGJOER_SVARFRIST
-      value: '1 minute'
 
   envFrom:
     - secret: my-application-unleash-api-token

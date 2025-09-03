@@ -21,10 +21,8 @@ import java.util.UUID
 enum class EtteroppgjoerSvarfrist(
     val value: String,
 ) {
-    ONE_MINUTE("1 minute"),
-    ONE_HOUR("1 hour"),
-    ONE_DAY("1 day"),
-    ONE_MONTH("1 month"),
+    ETT_MINUTT("1 minute"),
+    EN_MND("1 month"),
 }
 
 class EtteroppgjoerService(

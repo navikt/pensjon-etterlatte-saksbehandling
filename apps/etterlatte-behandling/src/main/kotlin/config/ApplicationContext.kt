@@ -765,7 +765,6 @@ internal class ApplicationContext(
 
     val etteroppgjoerSvarfristUtloeptJobService =
         EtteroppgjoerSvarfristUtloeptJobService(
-            config,
             etteroppgjoerService,
             oppgaveService,
             featureToggleService,

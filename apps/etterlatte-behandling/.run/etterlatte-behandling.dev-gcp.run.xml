@@ -60,8 +60,6 @@
                  value="https://sigrun-q2.dev.adeo.no"/>
             <env name="SIGRUN_OUTBOUND_SCOPE"
                  value="api://dev-fss.team-inntekt.sigrun-q2/.default"/>
-            <env name="ETTEROPPGJOER_SVARFRIST"
-                 value="1 minute"/>
         </envs>
         <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt"/>
         <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main"/>

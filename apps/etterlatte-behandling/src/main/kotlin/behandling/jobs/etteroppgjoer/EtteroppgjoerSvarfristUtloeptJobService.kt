@@ -1,17 +1,14 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
-import com.typesafe.config.Config
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -20,14 +17,13 @@ import java.time.YearMonth
 
 @OptIn(DelicateCoroutinesApi::class)
 class EtteroppgjoerSvarfristUtloeptJobService(
-    private val config: Config,
     private val etteroppgjoerService: EtteroppgjoerService,
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val svarfrist = EtteroppgjoerSvarfrist.valueOf(config.getString("etteroppgjoer.svarfrist"))
+    private val svarfrist = if (isProd()) EtteroppgjoerSvarfrist.EN_MND else EtteroppgjoerSvarfrist.ETT_MINUTT
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)

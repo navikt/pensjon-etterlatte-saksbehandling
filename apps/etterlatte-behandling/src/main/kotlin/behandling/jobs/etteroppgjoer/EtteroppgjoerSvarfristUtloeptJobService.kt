@@ -31,7 +31,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
-        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_TIDSFRISTUTLOEPT_JOBB, false)) {
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB, false)) {
             logger.info("Starter periodiske jobber for opprette oppgave svarfrist utløpt etteroppgjoer")
             runBlocking {
                 opprettNyOppgaveSvarfristUtloept()

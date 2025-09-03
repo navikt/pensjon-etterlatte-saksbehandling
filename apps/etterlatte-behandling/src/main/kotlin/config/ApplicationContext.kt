@@ -929,7 +929,7 @@ internal class ApplicationContext(
             etteroppgjoerSvarfristUtloeptJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.DAYS),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
+import com.typesafe.config.Config
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
@@ -18,12 +19,15 @@ import java.time.YearMonth
 
 @OptIn(DelicateCoroutinesApi::class)
 class EtteroppgjoerSvarfristUtloeptJobService(
+    private val config: Config,
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val etteroppgjoerService: EtteroppgjoerService,
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    private val svarfrist = config.getString("etteroppgjoer.svarfristutloept.jobb.interval")
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
@@ -43,7 +47,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
 
         val forbehandlinger =
             etteroppgjoerForbehandlingService
-                .hentForbehandlingMedSvarfristUtloept(inntektsaar)
+                .hentForbehandlingMedSvarfristUtloept(inntektsaar, svarfrist)
                 .orEmpty()
 
         val skalHaOppgaveSvarfristUtloept =
@@ -57,17 +61,31 @@ class EtteroppgjoerSvarfristUtloeptJobService(
                 etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
             }
 
-        skalHaOppgaveSvarfristUtloept.forEach { forbehandling ->
-            logger.info("Oppretter oppgave for svarfrist utløpt for forbehandlingId=${forbehandling.id}")
-            oppgaveService.opprettOppgave(
-                referanse = forbehandling.id.toString(),
-                sakId = forbehandling.sak.id,
-                type = OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT,
-                merknad = "Svarfrist for etteroppgjør $inntektsaar er utløpt",
-                kilde = OppgaveKilde.HENDELSE,
-            )
-        }
+        val antallOppgaverOpprettet =
+            skalHaOppgaveSvarfristUtloept.count { forbehandling ->
+                val finnesAllerede =
+                    oppgaveService
+                        .hentOppgaverForSakAvType(
+                            forbehandling.sak.id,
+                            listOf(OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT),
+                        ).any { it.opprettet.toLocalDate().year == inntektsaar }
 
-        logger.info("Opprettet ${skalHaOppgaveSvarfristUtloept.size} oppgaver for etteroppgjør med svarfrist utløpt for $inntektsaar")
+                if (finnesAllerede) {
+                    logger.info("Oppgave for svarfrist utløpt finnes allerede for forbehandlingId=${forbehandling.id}")
+                    false
+                } else {
+                    logger.info("Oppretter oppgave for svarfrist utløpt for forbehandlingId=${forbehandling.id}")
+                    oppgaveService.opprettOppgave(
+                        referanse = forbehandling.id.toString(),
+                        sakId = forbehandling.sak.id,
+                        type = OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT,
+                        merknad = "Svarfrist for etteroppgjør $inntektsaar er utløpt",
+                        kilde = OppgaveKilde.HENDELSE,
+                    )
+                    true
+                }
+            }
+
+        logger.info("Opprettet $antallOppgaverOpprettet oppgaver for etteroppgjør med svarfrist utløpt for $inntektsaar")
     }
 }

@@ -168,6 +168,8 @@ spec:
       value: https://ikomp.prod-fss-pub.nais.io
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.ikomp/.default
+    - name: ETTEROPPGJOER_SVARFRIST
+      value: '1 month'
 
     # TODO: bytte ut med prod config
     - name: SIGRUN_URL

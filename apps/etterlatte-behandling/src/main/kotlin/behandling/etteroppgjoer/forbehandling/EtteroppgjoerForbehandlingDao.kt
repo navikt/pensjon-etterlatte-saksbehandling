@@ -41,21 +41,25 @@ class EtteroppgjoerForbehandlingDao(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingDao::class.java)
 
-    fun hentForbehandlingMedSvarfristUtloept(inntektsAar: Int): List<EtteroppgjoerForbehandling>? =
+    fun hentForbehandlingerMedSvarfristUtloept(
+        inntektsAar: Int,
+        svarfrist: String,
+    ): List<EtteroppgjoerForbehandling>? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
                         SELECT *  
-                        FROM etteroppgjoer_behandling
-                        WHERE varselbrev_sendt IS NOT NULL
-                        AND varselbrev_sendt < (now() - interval '1 month')
-                        AND status = 'FERDIGSTILT'
-                        AND aar = ?
+                        FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
+                        WHERE t.varselbrev_sendt IS NOT NULL
+                          AND t.varselbrev_sendt < (now() - interval '$svarfrist')
+                          AND t.status = 'FERDIGSTILT'
+                          AND t.aar = ?
                         """.trimIndent(),
                     )
                 statement.setInt(1, inntektsAar)
+
                 statement.executeQuery().toList { toForbehandling() }
             }
         }

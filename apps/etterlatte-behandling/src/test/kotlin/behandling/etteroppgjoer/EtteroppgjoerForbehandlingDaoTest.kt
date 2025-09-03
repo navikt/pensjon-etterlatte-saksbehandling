@@ -86,6 +86,32 @@ class EtteroppgjoerForbehandlingDaoTest(
     }
 
     @Test
+    fun `hent forbehandling med svarfrist utloept`() {
+        val dato = LocalDate.of(2024, 1, 1)
+        val kopiertFra = UUID.randomUUID()
+        val forbehandling =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = kopiertFra,
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+                varselbrevSendt = dato,
+            )
+
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling.copy())
+        etteroppgjoerForbehandlingDao.hentForbehandlingerMedSvarfristUtloept(2024, "1 minute")!!.size shouldBe 1
+    }
+
+    @Test
     fun `lagre og oppdatere forbehandling`() {
         val dato = LocalDate.now()
         val kopiertFra = UUID.randomUUID()

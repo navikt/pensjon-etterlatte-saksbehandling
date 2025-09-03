@@ -98,7 +98,10 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    fun hentForbehandlingMedSvarfristUtloept(inntektsaar: Int) = dao.hentForbehandlingMedSvarfristUtloept(inntektsaar)
+    fun hentForbehandlingMedSvarfristUtloept(
+        inntektsaar: Int,
+        svarfrist: String,
+    ) = dao.hentForbehandlingerMedSvarfristUtloept(inntektsaar, svarfrist)
 
     fun avbrytForbehandling(
         forbehandlingId: UUID,

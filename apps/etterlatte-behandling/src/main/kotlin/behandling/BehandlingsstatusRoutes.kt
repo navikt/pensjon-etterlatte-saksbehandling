@@ -1,8 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -10,7 +8,6 @@ import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -197,13 +194,17 @@ private suspend fun RoutingContext.haandterStatusEndring(proevStatusEndring: () 
     runCatching(proevStatusEndring)
         .fold(
             onSuccess = { call.respond(HttpStatusCode.OK, OperasjonGyldig(true)) },
-            onFailure = { throw BehandlingKanIkkeBytteStatusException() },
+            onFailure = { e ->
+                throw BehandlingKanIkkeBytteStatusException(e)
+            },
         )
 }
 
-class BehandlingKanIkkeBytteStatusException :
-    ForespoerselException(
+class BehandlingKanIkkeBytteStatusException(
+    cause: Throwable,
+) : ForespoerselException(
         status = HttpStatusCode.Conflict.value,
         code = "BEHANDLING_HAR_UGYLDIG_STATUS",
         detail = "Behandlingen kan ikke bytte til ønsket status",
+        cause = cause,
     )

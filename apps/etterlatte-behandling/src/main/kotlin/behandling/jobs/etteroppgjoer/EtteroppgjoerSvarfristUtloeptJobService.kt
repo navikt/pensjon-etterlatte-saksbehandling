@@ -7,6 +7,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -20,14 +21,13 @@ import java.time.YearMonth
 @OptIn(DelicateCoroutinesApi::class)
 class EtteroppgjoerSvarfristUtloeptJobService(
     private val config: Config,
-    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val etteroppgjoerService: EtteroppgjoerService,
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val svarfrist = config.getString("etteroppgjoer.svarfrist")
+    private val svarfrist = EtteroppgjoerSvarfrist.valueOf(config.getString("etteroppgjoer.svarfrist"))
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
@@ -45,39 +45,29 @@ class EtteroppgjoerSvarfristUtloeptJobService(
         // TODO: trekke ut til felles for alle etteroppgjør jobber
         val inntektsaar = YearMonth.now().year - 1
 
-        val forbehandlinger =
-            etteroppgjoerForbehandlingService
-                .hentForbehandlingMedSvarfristUtloept(inntektsaar, svarfrist)
-                .orEmpty()
-
-        val skalHaOppgaveSvarfristUtloept =
-            forbehandlinger.filter { forbehandling ->
-                val etteroppgjoer =
-                    etteroppgjoerService
-                        .hentEtteroppgjoerForInntektsaar(forbehandling.sak.id, inntektsaar)
-                        ?: throw InternfeilException(
-                            "ForbehandlingId=${forbehandling.id} forventet etteroppgjør for sakId=${forbehandling.sak.id} og inntektsaar=$inntektsaar men var NULL",
-                        )
-                etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
-            }
+        val relevanteEtteroppgjoer = etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(inntektsaar, svarfrist)
 
         val antallOppgaverOpprettet =
-            skalHaOppgaveSvarfristUtloept.count { forbehandling ->
-                val finnesAllerede =
-                    oppgaveService
-                        .hentOppgaverForSakAvType(
-                            forbehandling.sak.id,
-                            listOf(OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT),
-                        ).any { it.opprettet.toLocalDate().year == inntektsaar }
+            relevanteEtteroppgjoer?.count { etteroppgjoer ->
 
-                if (finnesAllerede) {
-                    logger.info("Oppgave for svarfrist utløpt finnes allerede for forbehandlingId=${forbehandling.id}")
+                val oppgaveFinnesAllerede =
+                    oppgaveService
+                        .hentOppgaverForReferanse(
+                            etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
+                        ).any { it.type == OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT }
+
+                if (oppgaveFinnesAllerede) {
+                    logger.info(
+                        "Oppgave for svarfrist utløpt finnes allerede for forbehandlingId=${etteroppgjoer.sisteFerdigstilteForbehandling}",
+                    )
                     false
                 } else {
-                    logger.info("Oppretter oppgave for svarfrist utløpt for forbehandlingId=${forbehandling.id}")
+                    logger.info(
+                        "Oppretter oppgave for svarfrist utløpt for forbehandlingId=${etteroppgjoer.sisteFerdigstilteForbehandling}",
+                    )
                     oppgaveService.opprettOppgave(
-                        referanse = forbehandling.id.toString(),
-                        sakId = forbehandling.sak.id,
+                        referanse = etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
+                        sakId = etteroppgjoer.sakId,
                         type = OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT,
                         merknad = "Svarfrist for etteroppgjør $inntektsaar er utløpt",
                         kilde = OppgaveKilde.HENDELSE,

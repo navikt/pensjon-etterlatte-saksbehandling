@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -17,6 +18,15 @@ import no.nav.etterlatte.sak.SakService
 import java.time.LocalDate
 import java.util.UUID
 
+enum class EtteroppgjoerSvarfrist(
+    val value: String,
+) {
+    ONE_MINUTE("1 minute"),
+    ONE_HOUR("1 hour"),
+    ONE_DAY("1 day"),
+    ONE_MONTH("1 month"),
+}
+
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
     val sakLesDao: SakLesDao,
@@ -26,6 +36,11 @@ class EtteroppgjoerService(
     val beregningKlient: BeregningKlient,
 ) {
     fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentAlleAktiveEtteroppgjoerForSak(sakId)
+
+    fun hentEtteroppgjoerMedSvarfristUtloept(
+        inntektsaar: Int,
+        svarfrist: EtteroppgjoerSvarfrist,
+    ): List<Etteroppgjoer>? = dao.hentEtteroppgjoerMedSvarfristUtloept(inntektsaar, svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
@@ -48,6 +63,19 @@ class EtteroppgjoerService(
         status: EtteroppgjoerStatus,
     ) {
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
+    }
+
+    fun oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING)
+        oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
+    }
+
+    fun oppdaterSisteFerdigstiltForbehandlingId(
+        sakId: SakId,
+        inntektsaar: Int,
+        forbehandlingId: UUID,
+    ) {
+        dao.oppdaterFerdigstiltForbehandlingId(sakId, inntektsaar, forbehandlingId)
     }
 
     suspend fun opprettEtteroppgjoer(

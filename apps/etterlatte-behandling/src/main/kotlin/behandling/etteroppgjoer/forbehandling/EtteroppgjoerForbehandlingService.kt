@@ -78,11 +78,7 @@ class EtteroppgjoerForbehandlingService(
                 dao.lagreForbehandling(it)
             }
 
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-            forbehandling.sak.id,
-            forbehandling.aar,
-            EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
-        )
+        etteroppgjoerService.oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             forbehandling.id.toString(),
@@ -97,11 +93,6 @@ class EtteroppgjoerForbehandlingService(
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
         )
     }
-
-    fun hentForbehandlingMedSvarfristUtloept(
-        inntektsaar: Int,
-        svarfrist: String,
-    ) = dao.hentForbehandlingerMedSvarfristUtloept(inntektsaar, svarfrist)
 
     fun avbrytForbehandling(
         forbehandlingId: UUID,

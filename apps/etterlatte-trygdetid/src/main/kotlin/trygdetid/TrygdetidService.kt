@@ -754,7 +754,7 @@ class TrygdetidServiceImpl(
         return if (kanFastsetteTrygdetid) {
             block()
         } else {
-            logger.error("Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand")
+            logger.info("Kan ikke opprette/endre trygdetid da behandlingen med id=$behandlingId er i feil tilstand")
 
             throw UgyldigForespoerselException(
                 code = "UGYLDIG_TILSTAND_TRYGDETID",

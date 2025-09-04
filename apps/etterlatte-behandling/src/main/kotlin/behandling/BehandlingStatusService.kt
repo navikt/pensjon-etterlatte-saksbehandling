@@ -352,7 +352,7 @@ class BehandlingStatusServiceImpl(
             // TODO: litt for enkelt, må kanskje sjekke mer
             if (aar > virkAar) {
                 try {
-                    etteroppgjoerService.opprettEtteroppgjoer(behandling.sak.id, virkAar)
+                    etteroppgjoerService.opprettEtteroppgjoer(behandling, virkAar)
                 } catch (e: Exception) {
                     logger.error("Kunne ikke opprette etteroppgjør ved iverksettelse av sak", e)
                 }

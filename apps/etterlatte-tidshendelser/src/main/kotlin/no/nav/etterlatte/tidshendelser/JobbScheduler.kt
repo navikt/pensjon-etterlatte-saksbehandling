@@ -33,7 +33,9 @@ class JobbSchedulerTask(
             openingHours = openingHours,
         ) {
             jobbScheduler.scheduleMaanedligeJobber()
-            jobbScheduler.scheduleUkentligeJobber()
+
+            // Den eneste ukentlige jobben er midlertidig skrudd av
+            // jobbScheduler.scheduleUkentligeJobber()
         }
     }
 }
@@ -68,12 +70,12 @@ class JobbScheduler(
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         logger.info("Sjekker for jobber å legge til for neste uke: $mandagNesteUke")
 
-        val planlagteJobberNesteMnd = hendelseDao.finnJobberMedKjoeringForUke(mandagNesteUke)
+        val planlagteJobberNesteUke = hendelseDao.finnJobberMedKjoeringForUke(mandagNesteUke)
 
         PeriodiskeUkentligeJobber.entries
             // filtrere bort jobber som allerede er planlagt for neste uke
             .filter { periodiskJobb ->
-                planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
+                planlagteJobberNesteUke.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
             }
             // opprett jobb for neste uke
             .forEach { periodiskJobb ->

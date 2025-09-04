@@ -4,6 +4,9 @@
       <env name="JOBB_POLLER_INITIAL_DELAY" value="5" />
       <env name="JOBB_POLLER_INTERVAL" value="PT10S" />
       <env name="JOBB_POLLER_OPENING_HOURS" value="00-23" />
+      <env name="OPPRETT_JOBBER_INITIAL_DELAY" value="65" />
+      <env name="OPPRETT_JOBBER_INTERVAL" value="PT30M" />
+      <env name="OPPRETT_JOBBER_OPENING_HOURS" value="09-19" />
       <env name="HENDELSE_POLLER_INITIAL_DELAY" value="10" />
       <env name="HENDELSE_POLLER_INTERVAL" value="PT10S" />
       <env name="HENDELSE_POLLER_MAX_ANTALL" value="5" />

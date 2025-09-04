@@ -1,10 +1,10 @@
-import { Alert, HStack, Link, Table } from '@navikt/ds-react'
+import { Alert, HStack, Link, Table, VStack } from '@navikt/ds-react'
 import { IBehandlingsammendrag, SakMedBehandlinger } from '../typer'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
-import { Generellbehandling } from '~shared/types/Generellbehandling'
+import { Generellbehandling, Status } from '~shared/types/Generellbehandling'
 import {
   behandlingStatusTilLesbartnavn,
   genbehandlingTypeTilLesbartNavn,
@@ -13,7 +13,7 @@ import {
 } from '~components/person/sakOgBehandling/behandlingsslistemappere'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
@@ -21,6 +21,16 @@ import { formaterDato } from '~utils/formatering/dato'
 import { formaterBehandlingstype, formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
+
+const kravpakkeKanGjenopprettes = (
+  behandlinger: alleBehandlingsTyper[],
+  enhet: string,
+  enheter: Array<string>
+): boolean => {
+  const kravpakkeBehandlinger = behandlinger.filter(
+    (behandling) => !isVanligBehandling(behandling) && behandling.type === 'KRAVPAKKE_UTLAND'
+  )
+}
 
 function isVanligBehandling(behandling: alleBehandlingsTyper): behandling is IBehandlingsammendrag {
   return (behandling as IBehandlingsammendrag).soeknadMottattDato !== undefined
@@ -52,7 +62,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
   allebehandlinger.sort((a, b) => (new Date(hentDato(a)) < new Date(hentDato(b)) ? 1 : -1))
 
   return (
-    <>
+    <VStack gap="4">
       {!!allebehandlinger?.length ? (
         <Table zebraStripes>
           <Table.Header>
@@ -121,11 +131,24 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
       )}
 
       <Spinner visible={isPending(generellbehandlingStatus)} label="Henter generelle behandlinger" />
+      {mapSuccess(generellbehandlingStatus, (generelleBehandlinger) => {
+        const kravpakkeBehandlinger = generelleBehandlinger.filter(
+          (behandling) => behandling.type === 'KRAVPAKKE_UTLAND'
+        )
+        const harKunAvbrutteKravpakkeBehandlinger =
+          kravpakkeBehandlinger.length > 0 &&
+          kravpakkeBehandlinger.every((behandling) => behandling.status === Status.AVBRUTT)
+        return harKunAvbrutteKravpakkeBehandlinger && <GjenopprettKravpakkeBehandling sakId={sak.id} />
+      })}
 
       {isFailureHandler({
         apiResult: generellbehandlingStatus,
         errorMessage: 'Vi klarte ikke å hente generelle behandligner',
       })}
-    </>
+    </VStack>
   )
+}
+
+function GjenopprettKravpakkeBehandling(props: { sakId: number }) {
+  return null
 }

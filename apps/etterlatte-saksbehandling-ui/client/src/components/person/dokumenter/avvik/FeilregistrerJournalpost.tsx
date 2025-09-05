@@ -4,7 +4,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { feilregistrerSakstilknytning } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journalpost }) => {
   const [feilSakstilknytningStatus, apiFeilregistrerSakstilknytning] = useApiCall(feilregistrerSakstilknytning)

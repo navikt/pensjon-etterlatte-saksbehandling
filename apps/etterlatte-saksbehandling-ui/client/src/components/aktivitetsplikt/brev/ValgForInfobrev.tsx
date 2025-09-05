@@ -27,7 +27,7 @@ import { formaterSpraak } from '~utils/formatering/formatering'
 import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
 import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { hentSisteIverksatteBehandlingId } from '~shared/api/sak'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei

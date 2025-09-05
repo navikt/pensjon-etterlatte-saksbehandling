@@ -25,7 +25,7 @@ import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 import { SakType } from '~shared/types/sak'
 
 export enum OppgaveValg {

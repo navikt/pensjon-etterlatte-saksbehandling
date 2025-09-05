@@ -5,7 +5,7 @@ import { opphevFeilregistrertSakstilknytning } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost: Journalpost }) => {
   const [opphevFeilregistreringStatus, apiOpphevFeilregistrering] = useApiCall(opphevFeilregistrertSakstilknytning)

@@ -13,7 +13,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 const NasjonalEllerUtlandRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledRadioGruppe

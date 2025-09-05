@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -68,8 +69,15 @@ class EtteroppgjoerDaoTest(
 
     @Test
     fun `lagre og oppdatere etteroppgjoer`() {
+        val uuid = UUID.randomUUID()
+
         etteroppgjoerDao.lagreEtteroppgjoer(
-            Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
+            Etteroppgjoer(
+                sakId = sak.id,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                sisteFerdigstilteForbehandling = uuid,
+            ),
         )
         val lagret = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024)
         with(lagret!!) {
@@ -93,6 +101,7 @@ class EtteroppgjoerDaoTest(
                 true,
                 true,
                 true,
+                uuid,
             ),
         )
 

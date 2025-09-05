@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.time.LocalDate
 import java.util.UUID
 
 enum class EtteroppgjoerForbehandlingStatus {
@@ -24,11 +25,13 @@ data class EtteroppgjoerForbehandlingDto(
     val aar: Int,
     val innvilgetPeriode: Periode,
     val brevId: Long?,
-    val kopiertFra: UUID? = null, // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
-    val sisteIverksatteBehandlingId: UUID, // siste iverksatte behandling når forbehandling ble opprettet
+    val varselbrevSendt: LocalDate?,
+    val sisteIverksatteBehandlingId: UUID,
     val harMottattNyInformasjon: JaNei?,
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
+    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
+    val kopiertFra: UUID? = null,
 )
 
 enum class EtteroppgjoerHendelseType(

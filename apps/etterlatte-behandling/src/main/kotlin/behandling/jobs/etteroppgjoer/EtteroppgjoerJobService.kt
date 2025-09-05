@@ -45,8 +45,8 @@ class EtteroppgjoerJobService(
     }
 
     suspend fun startEtteroppgjoerKjoering() {
-        val forrigeAar = YearMonth.now().year - 1
-        finnOgOpprettEtteroppgjoer(forrigeAar)
+        val etteroppgjoersAar = YearMonth.now().year - 1
+        finnOgOpprettEtteroppgjoer(etteroppgjoersAar)
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør

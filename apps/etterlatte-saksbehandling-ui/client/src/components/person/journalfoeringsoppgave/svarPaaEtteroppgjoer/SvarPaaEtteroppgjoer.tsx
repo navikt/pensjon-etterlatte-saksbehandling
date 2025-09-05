@@ -119,20 +119,27 @@ export const SvarPaaEtteroppgjoer = () => {
                     apiResult: opprettRevurderingResult,
                     errorMessage: 'Feil under opprettelse av revurdering',
                   })}
-
-                  <HStack gap="4">
+                  <HStack justify="space-between">
                     <Button
-                      loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
-                      onClick={() => opprettRevurdering(oppgave)}
+                      variant="secondary"
+                      onClick={() => navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)}
                     >
-                      Opprett revurdering
+                      Avbryt
                     </Button>
-                    <Button
-                      loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
-                      onClick={() => avsluttOppgave(oppgave)}
-                    >
-                      Avslutt oppgave
-                    </Button>
+                    <HStack gap="4">
+                      <Button
+                        loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
+                        onClick={() => opprettRevurdering(oppgave)}
+                      >
+                        Opprett revurdering
+                      </Button>
+                      <Button
+                        loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
+                        onClick={() => avsluttOppgave(oppgave)}
+                      >
+                        Avslutt oppgave
+                      </Button>
+                    </HStack>
                   </HStack>
                 </VStack>
               </>

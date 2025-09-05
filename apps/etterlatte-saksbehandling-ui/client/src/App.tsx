@@ -28,6 +28,7 @@ import { Unleashcontext, useUnleash } from '~useUnleash'
 import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandling'
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
 import { useLastUmami } from '~shared/umami/useLastUmami'
+import { SvarPaaEtteroppgjoer } from '~components/person/journalfoeringsoppgave/svarPaaEtteroppgjoer/SvarPaaEtteroppgjoer'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -72,6 +73,7 @@ function App() {
                     <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                     <Route path="/aktivitet-vurdering/:oppgaveId/*" element={<VurderAktivitetspliktOppgave />} />
                     <Route path="/etteroppgjoer/:etteroppgjoerId/*" element={<EtteroppgjoerForbehandling />} />
+                    <Route path="/svar-paa-etteroppgjoer/:oppgaveId/*" element={<SvarPaaEtteroppgjoer />} />
                     <Route path="/meldt-inn-endring/:oppgaveId/*" element={<MeldtInnEndring />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>

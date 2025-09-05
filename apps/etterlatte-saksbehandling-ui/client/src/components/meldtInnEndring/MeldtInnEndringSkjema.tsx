@@ -112,6 +112,7 @@ export const MeldtInnEndringSkjema = ({
           apiResult: ferdigstillOppgaveResult,
           errorMessage: 'Feil under ferdigstilling av oppgave',
         })}
+
         {isFailureHandler({
           apiResult: opprettRevurderingResult,
           errorMessage: 'Feil under opprettelse av revurdering',
@@ -121,13 +122,13 @@ export const MeldtInnEndringSkjema = ({
           <Button
             variant="secondary"
             type="button"
-            disabled={isPending(opprettRevurderingResult || ferdigstillOppgaveResult)}
+            disabled={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
             onClick={() => setMeldtInnEndringHandlingValgt(MeldtInnEndringHandlingValgt.INGEN)}
           >
             Avbryt
           </Button>
           {meldtInnEndringHandlingValgt !== MeldtInnEndringHandlingValgt.INGEN && (
-            <Button loading={isPending(opprettRevurderingResult || ferdigstillOppgaveResult)}>
+            <Button loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}>
               {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.AVSLUTT_OPPGAVE ? 'Avslutt' : 'Opprett'}
             </Button>
           )}

@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -16,6 +16,7 @@ import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { MeldtInnEndringSkjema } from '~components/meldtInnEndring/MeldtInnEndringSkjema'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export enum MeldtInnEndringHandlingValgt {
   AVSLUTT_OPPGAVE,
@@ -29,6 +30,10 @@ export const MeldtInnEndring = () => {
   const { oppgaveId } = useParams()
   const configContext = useContext(ConfigContext)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
+  const navigate = useNavigate()
+
+  const etteroppgjoerFeatureToggle = useFeaturetoggle(FeatureToggle.etteroppgjoer)
 
   if (!oppgaveId) {
     return <Alert variant="error">Oppgave ID ligger ikke med i URL</Alert>
@@ -89,6 +94,18 @@ export const MeldtInnEndring = () => {
                     <>
                       {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.INGEN ? (
                         <>
+                          {etteroppgjoerFeatureToggle && (
+                            <>
+                              <Label>Endringen er svar på etteroppgjøret</Label>
+
+                              <div>
+                                <Button onClick={() => navigate(`/svar-paa-etteroppgjoer/${oppgaveId}`)}>
+                                  Behandle mottatt svar etteroppgjør
+                                </Button>
+                              </div>
+                            </>
+                          )}
+
                           <Label>Endringen krever en revurdering</Label>
                           <BodyShort>
                             Hvis endringen har betydning for omstillingsstønaden skal det opprettes en revurdering. Når

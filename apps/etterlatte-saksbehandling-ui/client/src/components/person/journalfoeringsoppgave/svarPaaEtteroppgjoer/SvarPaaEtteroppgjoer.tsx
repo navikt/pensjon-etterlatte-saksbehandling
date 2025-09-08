@@ -38,9 +38,7 @@ export const SvarPaaEtteroppgjoer = () => {
 
   const opprettRevurdering = (oppgave: OppgaveDTO) => {
     opprettRevurderingRequest({ sakId: oppgave.sakId, aarsak: Revurderingaarsak.ETTEROPPGJOER }, () => {
-      ferdigstillOppgaveRequest({ id: oppgave.id, merknad: begrunnelse }, () => {
-        navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)
-      })
+      avsluttOppgave(oppgave)
     })
   }
 

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.klage
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -84,6 +83,18 @@ internal fun Route.klageRoutes(
                         val oppdatertKlage =
                             inTransaction {
                                 klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
+                            }
+                        call.respond(oppdatertKlage)
+                    }
+                }
+            }
+
+            put("klager-ikke-svart") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<KlagerHarIkkeSvartDto> { ikkeSvartDto ->
+                        val oppdatertKlage =
+                            inTransaction {
+                                klageService.oppdaterKlagerIkkeSvart(klageId, ikkeSvartDto.begrunnelse, saksbehandler)
                             }
                         call.respond(oppdatertKlage)
                     }
@@ -262,4 +273,8 @@ data class KlageAttesterRequest(
 data class KlageUnderkjennRequest(
     val kommentar: String,
     val valgtBegrunnelse: String,
+)
+
+data class KlagerHarIkkeSvartDto(
+    val begrunnelse: String,
 )

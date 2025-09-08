@@ -14,6 +14,7 @@ import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny
 import { erSkjemaUtfylt, KlageOmgjoering } from '~components/klage/vurdering/KlageVurderingForms'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { JaNei } from '~shared/types/ISvar'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -74,10 +75,15 @@ export function KlageAvvisning(props: { klage: Klage }) {
       <form onSubmit={handleSubmit(sendInnVurdering)}>
         <Box paddingBlock="8" paddingInline="16 8">
           <VStack gap="4">
-            <BodyLong>
-              Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket
-              skal omgjøres.
-            </BodyLong>
+            {klage.formkrav?.formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI && (
+              <BodyLong>
+                Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket
+                skal omgjøres.
+              </BodyLong>
+            )}
+            {!!klage.formkrav?.klagerHarIkkeSvartVurdering?.begrunnelse && (
+              <BodyLong>Siden klager ikke har svart for å oppfylle formkravene skal klagen avvises.</BodyLong>
+            )}
 
             <ControlledRadioGruppe
               name="utfall"

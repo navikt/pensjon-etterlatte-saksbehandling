@@ -32,6 +32,7 @@ import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/ap
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { BeOmInfoFraKlager } from '~components/klage/formkrav/components/BeOmInfoFraKlager'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { KlagerHarIkkeSvart } from './KlagerHarIkkeSvart'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -333,7 +334,10 @@ export function KlageFormkravRedigering() {
                     </Button>
                   </HStack>
                 ) : (
-                  <BeOmInfoFraKlager klage={klage} />
+                  <>
+                    <BeOmInfoFraKlager klage={klage} />
+                    <KlagerHarIkkeSvart klage={klage} />
+                  </>
                 )}
               </VStack>
             )}

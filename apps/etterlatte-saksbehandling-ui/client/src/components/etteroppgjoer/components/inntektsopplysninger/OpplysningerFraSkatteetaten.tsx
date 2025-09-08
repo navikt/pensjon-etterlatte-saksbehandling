@@ -26,11 +26,9 @@ export const OpplysningerFraSkatteetaten = ({
           </Table.Row>
           <Table.Row>
             <Table.DataCell>
-              <HStack gap="2">
+              <HStack gap="1">
                 Næringsinntekt
-                <HelpText strategy="fixed" placement="right">
-                  Næringsinntekt inkluderer også næringsinntekt fra fiske, fangst og familiebarnehage
-                </HelpText>
+                <HelpText>Næringsinntekt inkluderer også næringsinntekt fra fiske, fangst og familiebarnehage</HelpText>
               </HStack>
             </Table.DataCell>
             <Table.DataCell>

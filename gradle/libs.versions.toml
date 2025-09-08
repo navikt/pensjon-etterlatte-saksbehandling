@@ -61,7 +61,7 @@ ktor-serverswagger = { module = "io.ktor:ktor-server-swagger", version.ref = "kt
 ktor-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor-version" }
 
 etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.08.26-11.41.6f3f2d59f9e8" }
-teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
+teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "1.1.6" }
 brevbaker-api-model-common = { module = "no.nav.pensjon.brevbaker:brevbaker-api-model-common", version = "1.20.0"}
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }

@@ -155,10 +155,9 @@ class EtteroppgjoerForbehandlingService(
                 }
 
             if (!ferdigstilteForbehandlinger.isEmpty()) {
-                // Er det her trygt?
                 return ferdigstilteForbehandlinger.last()
             } else {
-                throw InternfeilException("Ingen ferdigstilte forbehandlinger på sak med id: ${sakId.sakId}")
+                throw IkkeFunnetException(code = "IKKE_FUNNET", detail = "Ingen ferdigstilte forbehandlinger på sak med id: ${sakId.sakId}")
             }
         } else {
             throw IkkeFunnetException(code = "IKKE_FUNNET", detail = "Fant ingen forbehandlinger på sak med id: ${sakId.sakId}")

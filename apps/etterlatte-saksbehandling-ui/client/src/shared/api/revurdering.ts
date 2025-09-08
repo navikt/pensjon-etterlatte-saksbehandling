@@ -43,6 +43,9 @@ export const opprettRevurdering = async ({
   })
 }
 
+//TODO: bytte om til å være til siste ferdigstilte forbehandling
+//  kun ta inn sakId
+
 export const opprettRevurderingEtteroppgjoer = async ({
   sakId,
   forbehandlingId,

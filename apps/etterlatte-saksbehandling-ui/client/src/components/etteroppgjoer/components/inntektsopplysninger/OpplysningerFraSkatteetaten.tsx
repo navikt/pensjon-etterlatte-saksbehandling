@@ -4,9 +4,9 @@ import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
 
 export const OpplysningerFraSkatteetaten = ({
-  inntektFraSkatteetaten,
+  inntektFraSkatteetatenSummert,
 }: {
-  inntektFraSkatteetaten: PensjonsgivendeInntektFraSkatteetatenSummert
+  inntektFraSkatteetatenSummert: PensjonsgivendeInntektFraSkatteetatenSummert
 }) => {
   return (
     <VStack gap="4">
@@ -22,7 +22,7 @@ export const OpplysningerFraSkatteetaten = ({
         <Table.Body>
           <Table.Row>
             <Table.DataCell>Lønnsinntekt</Table.DataCell>
-            <Table.DataCell>{NOK(inntektFraSkatteetaten.loensinntekt)}</Table.DataCell>
+            <Table.DataCell>{NOK(inntektFraSkatteetatenSummert.loensinntekt)}</Table.DataCell>
           </Table.Row>
           <Table.Row>
             <Table.DataCell>
@@ -32,7 +32,10 @@ export const OpplysningerFraSkatteetaten = ({
               </HStack>
             </Table.DataCell>
             <Table.DataCell>
-              {NOK(inntektFraSkatteetaten.naeringsinntekt + inntektFraSkatteetaten.fiskeFangstFamiliebarnehage)}
+              {NOK(
+                inntektFraSkatteetatenSummert.naeringsinntekt +
+                  inntektFraSkatteetatenSummert.fiskeFangstFamiliebarnehage
+              )}
             </Table.DataCell>
           </Table.Row>
         </Table.Body>

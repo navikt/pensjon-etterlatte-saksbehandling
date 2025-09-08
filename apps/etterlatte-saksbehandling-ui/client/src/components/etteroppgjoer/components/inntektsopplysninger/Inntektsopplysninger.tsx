@@ -19,7 +19,7 @@ export const Inntektsopplysninger = () => {
         <Heading size="large" level="2">
           Inntektsopplysninger
         </Heading>
-        <OpplysningerFraSkatteetaten inntektFraSkatteetaten={etteroppgjoer.opplysninger.skatt} />
+        <OpplysningerFraSkatteetaten inntektFraSkatteetatenSummert={etteroppgjoer.opplysninger.skatt} />
 
         {etteroppgjoer.opplysninger.summerteInntekter && (
           <OpplysningerFraAInntektSummert inntekter={etteroppgjoer.opplysninger.summerteInntekter} />

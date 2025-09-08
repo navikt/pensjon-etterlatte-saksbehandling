@@ -12,7 +12,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.revurdering.MaksEnAktivOppgavePaaBehandling
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -146,6 +145,25 @@ class EtteroppgjoerForbehandlingService(
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
+    fun hentSisteFerdigstillteForbehandlingPaaSak(sakId: SakId): EtteroppgjoerForbehandling {
+        val forbehandlinger = dao.hentForbehandlinger(sakId)
+
+        if (!forbehandlinger.isEmpty()) {
+            val ferdigstilteForbehandlinger =
+                forbehandlinger.filter { forbehandling ->
+                    forbehandling.erFerdigstilt()
+                }
+
+            if (!ferdigstilteForbehandlinger.isEmpty()) {
+                return ferdigstilteForbehandlinger.last()
+            } else {
+                throw IkkeFunnetException(code = "IKKE_FUNNET", detail = "Ingen ferdigstilte forbehandlinger på sak med id: ${sakId.sakId}")
+            }
+        } else {
+            throw IkkeFunnetException(code = "IKKE_FUNNET", detail = "Fant ingen forbehandlinger på sak med id: ${sakId.sakId}")
+        }
+    }
 
     fun hentDetaljertForbehandling(
         forbehandlingId: UUID,

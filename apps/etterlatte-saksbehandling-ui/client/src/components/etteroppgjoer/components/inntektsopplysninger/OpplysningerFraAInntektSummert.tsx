@@ -7,9 +7,9 @@ import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: SummerteInntekterAOrdningen }) {
   return (
     <VStack gap="4">
-      <Heading size="small">Opplysninger fra A-Inntekt for relevante filter</Heading>
+      <Heading size="small">Opplysninger fra A-Inntekt</Heading>
       <BodyShort>
-        Opplysnignene er oppgitt som brutto inntekt og summert innenfor hver måned. Hvis man vil se hva som inngår i en
+        Opplysningene er oppgitt som brutto inntekt og summert innenfor hver måned. Hvis man vil se hva som inngår i en
         måned må man manuelt sjekke opp i A-ordningen.
       </BodyShort>
 

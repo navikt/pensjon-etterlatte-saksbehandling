@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -186,11 +187,24 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
+        val pensjonsgivendeInntektSummert =
+            pensjonsgivendeInntekt.inntekter.fold(
+                initial = PensjonsgivendeInntektFraSkattSummert(pensjonsgivendeInntekt.inntektsaar, 0, 0, 0),
+                operation = { acc, inntekt ->
+                    PensjonsgivendeInntektFraSkattSummert(
+                        pensjonsgivendeInntekt.inntektsaar,
+                        acc.loensinntekt + inntekt.loensinntekt,
+                        acc.naeringsinntekt + inntekt.naeringsinntekt,
+                        acc.fiskeFangstFamiliebarnehage + inntekt.fiskeFangstFamiliebarnehage,
+                    )
+                },
+            )
+
         return DetaljertForbehandlingDto(
             behandling = forbehandling,
             opplysninger =
                 EtteroppgjoerOpplysninger(
-                    skatt = pensjonsgivendeInntekt,
+                    skatt = pensjonsgivendeInntektSummert,
                     ainntekt = aInntekt,
                     summerteInntekter = summerteInntekter,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,

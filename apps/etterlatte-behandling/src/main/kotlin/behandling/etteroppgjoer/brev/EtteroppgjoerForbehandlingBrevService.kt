@@ -74,6 +74,7 @@ class EtteroppgjoerForbehandlingBrevService(
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
         )
+        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(forbehandlingId)
     }
 
     suspend fun genererPdf(

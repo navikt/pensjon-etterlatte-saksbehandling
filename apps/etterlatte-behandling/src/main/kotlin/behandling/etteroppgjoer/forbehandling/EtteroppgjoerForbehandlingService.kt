@@ -43,6 +43,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -78,11 +79,7 @@ class EtteroppgjoerForbehandlingService(
                 dao.lagreForbehandling(it)
             }
 
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-            forbehandling.sak.id,
-            forbehandling.aar,
-            EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
-        )
+        etteroppgjoerService.oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             forbehandling.id.toString(),
@@ -142,6 +139,17 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
+
+    fun lagreVarselbrevSendt(forbehandlingId: UUID) {
+        val forbehandling = hentForbehandling(forbehandlingId)
+        if (!forbehandling.erUnderBehandling()) {
+            throw IkkeTillattException(
+                "FEIL_STATUS_FORBEHANDLING",
+                "Forbehandling med id=$forbehandlingId kan ikke oppdatere varselbrev sendt siden forbehandling har status ${forbehandling.status}",
+            )
+        }
+        lagreForbehandling(forbehandling.copy(varselbrevSendt = LocalDate.now()))
+    }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)

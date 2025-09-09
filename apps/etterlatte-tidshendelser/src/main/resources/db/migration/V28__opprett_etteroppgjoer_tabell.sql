@@ -10,5 +10,6 @@ CREATE TABLE etteroppgjoer_konfigurasjon (
     etteroppgjoer_filter etteroppgjoer_filter NOT NULL DEFAULT 'ENKEL',
     spesifikke_saker  BIGINT[],
     ekskluderte_saker BIGINT[],
-    aktiv             BOOLEAN                  NOT NULL DEFAULT TRUE
+    aktiv             BOOLEAN                  NOT NULL DEFAULT TRUE,
+    kjoering_id       VARCHAR
 )

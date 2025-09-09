@@ -3,15 +3,8 @@ package no.nav.etterlatte.tidshendelser.etteroppgjoer
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
 
-enum class EtteroppgjoerFilter(
-    val harSanksjon: Boolean,
-    val harInsitusjonsopphold: Boolean,
-    val harOpphoer: Boolean,
-    val harAdressebeskyttelseEllerSkjermet: Boolean,
-    val harAktivitetskrav: Boolean,
-    val harBosattUtland: Boolean,
-) {
-    ENKEL(false, false, false, false, false, false),
+enum class EtteroppgjoerFilter {
+    ENKEL,
 }
 
 data class EtteroppgjoerKonfigurasjon(

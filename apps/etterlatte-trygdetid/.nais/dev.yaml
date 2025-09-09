@@ -60,7 +60,9 @@ spec:
   resources:
     requests:
       cpu: 25m
-      memory: 1000Mi
+      memory: 800Mi
+    limits:
+      memory: 800Mi
   replicas:
     scalingStrategy:
       cpu:

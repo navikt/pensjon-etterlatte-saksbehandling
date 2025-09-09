@@ -18,12 +18,13 @@ import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Formkrav
-import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
@@ -167,40 +168,43 @@ private fun klageForInnstilling(sakId: SakId): Klage =
                     erSkjermet = null,
                 ),
             innkommendeDokument = null,
-        ).copy(
+        ).oppdaterFormkrav(
+            Formkrav(
+                vedtaketKlagenGjelder =
+                    VedtaketKlagenGjelder(
+                        id = "",
+                        behandlingId = "",
+                        datoAttestert = LocalDate.now().atStartOfDay(ZoneId.systemDefault()),
+                        vedtakType = VedtakType.INNVILGELSE,
+                    ),
+                erKlagerPartISaken = JaNei.JA,
+                erKlagenSignert = JaNei.JA,
+                gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                erKlagenFramsattInnenFrist = JaNei.JA,
+                erFormkraveneOppfylt = JaNei.JA,
+                begrunnelse = null,
+            ),
+            saksbehandlerIdent = "EY",
+        ).oppdaterInitieltUtfallMedBegrunnelse(
             utfall =
-                KlageUtfallMedData.StadfesteVedtak(
-                    innstilling =
-                        InnstillingTilKabal(
-                            lovhjemmel = KabalHjemmel.FTRL_18_4,
-                            internKommentar = null,
-                            brev = KlageOversendelsebrev(brevId = 123L),
-                            innstillingTekst = "Hello",
-                        ),
-                    saksbehandler =
-                        Grunnlagsopplysning.Saksbehandler(
-                            ident = "",
-                            tidspunkt = Tidspunkt.now(),
-                        ),
+                InitieltUtfallMedBegrunnelseDto(
+                    utfall = KlageUtfall.STADFESTE_VEDTAK,
+                    begrunnelse = "hei",
                 ),
-            formkrav =
-                FormkravMedBeslutter(
-                    formkrav =
-                        Formkrav(
-                            vedtaketKlagenGjelder =
-                                VedtaketKlagenGjelder(
-                                    id = "",
-                                    behandlingId = "",
-                                    datoAttestert = LocalDate.now().atStartOfDay(ZoneId.systemDefault()),
-                                    vedtakType = VedtakType.INNVILGELSE,
-                                ),
-                            erKlagerPartISaken = JaNei.JA,
-                            erKlagenSignert = JaNei.JA,
-                            gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
-                            erKlagenFramsattInnenFrist = JaNei.JA,
-                            erFormkraveneOppfylt = JaNei.JA,
-                            begrunnelse = null,
-                        ),
-                    saksbehandler = Grunnlagsopplysning.automatiskSaksbehandler,
-                ),
+            saksbehandlerIdent = "EY",
+        ).oppdaterUtfall(
+            KlageUtfallMedData.StadfesteVedtak(
+                innstilling =
+                    InnstillingTilKabal(
+                        lovhjemmel = KabalHjemmel.FTRL_18_4,
+                        internKommentar = null,
+                        brev = KlageOversendelsebrev(brevId = 123L),
+                        innstillingTekst = "Hello",
+                    ),
+                saksbehandler =
+                    Grunnlagsopplysning.Saksbehandler(
+                        ident = "",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+            ),
         )

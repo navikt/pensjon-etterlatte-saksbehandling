@@ -10,13 +10,16 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
-import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageVedtak
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
@@ -54,7 +57,7 @@ internal class VedtakKlageServiceTest(
 
     @Test
     fun `opprettEllerOppdaterVedtakOmAvvisning skal opprette vedtak når det ikke finnes fra før`() {
-        val klage = klage()
+        val klage = klageMedFormkravOgInitieltUtfall()
         val vedtakId = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage).id
 
         val vedtak = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
@@ -69,7 +72,9 @@ internal class VedtakKlageServiceTest(
 
     @Test
     fun `opprettEllerOppdaterVedtakOmAvvisning skal oppdatere vedtak når det finnes fra før`() {
-        val klage = klage(utfall = utfallOmgjoering())
+        val klage =
+            klageMedFormkravOgInitieltUtfall()
+                .oppdaterUtfall(utfallOmgjoering())
 
         val vedtakId =
             vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage).id
@@ -77,7 +82,7 @@ internal class VedtakKlageServiceTest(
         val vedtak = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
 
         vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(
-            klage.copy(utfall = utfallStadfesteVedtak()),
+            klage.oppdaterUtfall(utfallStadfesteVedtak()),
         )
 
         val oppdatert = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
@@ -87,8 +92,8 @@ internal class VedtakKlageServiceTest(
 
     @Test
     fun `fattVedtak skal oppdatere og fatte vedtak når det finnes fra før`() {
-        val klage = klage()
-        val klageMedUtfall = klage.copy(utfall = utfallAvvist())
+        val klage = klageMedFormkravOgInitieltUtfall()
+        val klageMedUtfall = klage.oppdaterUtfall(utfallAvvist())
 
         vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
 
@@ -111,7 +116,7 @@ internal class VedtakKlageServiceTest(
 
     @Test
     fun `attesterVedtak skal attestere vedtak og returnere vedtaket`() {
-        val klage = klage()
+        val klage = klageMedFormkravOgInitieltUtfall()
         vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
         val vedtakId = vedtakKlageService.fattVedtak(klage, saksbehandler).id
         vedtakKlageService.attesterVedtak(klage, attestant)
@@ -140,7 +145,7 @@ internal class VedtakKlageServiceTest(
 
     @Test
     fun `attesterVedtak skal ikke attestere hvis feil status`() {
-        val klage = klage()
+        val klage = klageMedFormkravOgInitieltUtfall()
         vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
         vedtakKlageService.fattVedtak(klage, saksbehandler)
         vedtaksvurderingRepository.iverksattVedtak(klage.id)
@@ -156,7 +161,7 @@ internal class VedtakKlageServiceTest(
 
     @Test
     fun `attesterVedtak skal ikke attestere hvis attestant ogsaa er saksbehandler`() {
-        val klage = klage()
+        val klage = klageMedFormkravOgInitieltUtfall()
         vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
         vedtakKlageService.fattVedtak(klage, saksbehandler)
         assertThrows<UgyldigAttestantException> {
@@ -170,7 +175,7 @@ internal class VedtakKlageServiceTest(
 
     @Test
     fun `underkjennVedtak skal underkjenne vedtak`() {
-        val klage = klage()
+        val klage = klageMedFormkravOgInitieltUtfall()
         val vedtak: Vedtak = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
         vedtakKlageService.fattVedtak(klage, saksbehandler)
 
@@ -236,21 +241,29 @@ internal class VedtakKlageServiceTest(
             brev = KlageVedtaksbrev(brevId = 1L),
         )
 
-    private fun klage(utfall: KlageUtfallMedData? = null): Klage =
-        Klage(
-            UUID.randomUUID(),
-            Sak(FNR_1, SakType.BARNEPENSJON, sakId1, ENHET_1, null, null),
-            Tidspunkt.now(),
-            KlageStatus.OPPRETTET,
-            kabalResultat = null,
-            kabalStatus = null,
-            formkrav = null,
-            innkommendeDokument = null,
-            resultat = null,
-            utfall = utfall,
-            aarsakTilAvbrytelse = null,
-            initieltUtfall = null,
-        )
+    private fun klageMedFormkravOgInitieltUtfall(): Klage =
+        Klage
+            .ny(
+                sak = Sak(FNR_1, SakType.BARNEPENSJON, sakId1, ENHET_1, null, null),
+                innkommendeDokument = null,
+            ).oppdaterFormkrav(
+                Formkrav(
+                    vedtaketKlagenGjelder = null,
+                    erKlagerPartISaken = JaNei.JA,
+                    erKlagenSignert = JaNei.JA,
+                    gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                    erKlagenFramsattInnenFrist = JaNei.JA,
+                    erFormkraveneOppfylt = JaNei.JA,
+                    begrunnelse = "",
+                ),
+                "saksbehandler",
+            ).oppdaterInitieltUtfallMedBegrunnelse(
+                InitieltUtfallMedBegrunnelseDto(
+                    utfall = KlageUtfall.OMGJOERING,
+                    begrunnelse = "",
+                ),
+                "saksbehandler",
+            )
 
     private fun vedtakInnholdToKlage(vedtak: Vedtak) = deserialize<Klage>((vedtak.innhold as VedtakInnhold.Klage).klage.toJson())
 }

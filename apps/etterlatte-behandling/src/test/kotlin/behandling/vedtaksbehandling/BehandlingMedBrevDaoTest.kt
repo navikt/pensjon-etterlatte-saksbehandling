@@ -15,8 +15,8 @@ import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
@@ -92,13 +92,12 @@ internal class BehandlingMedBrevDaoTest(
         val klage =
             Klage
                 .ny(sak1, InnkommendeKlage(LocalDate.now(), "JP-24601", "Jean"))
-                .copy(status = KlageStatus.UTFALL_VURDERT)
 
         klageDao.lagreKlage(klage)
 
         behandlingMedBrevDao.erBehandlingRedigerbar(klage.id) shouldBe true
 
-        klageDao.lagreKlage(klage.copy(status = KlageStatus.AVBRUTT))
+        klageDao.lagreKlage(klage.avbryt(AarsakTilAvbrytelse.ANNET))
 
         behandlingMedBrevDao.erBehandlingRedigerbar(klage.id) shouldBe false
     }

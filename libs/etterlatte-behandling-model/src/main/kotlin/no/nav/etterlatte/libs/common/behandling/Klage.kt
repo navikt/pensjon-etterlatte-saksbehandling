@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -48,7 +49,7 @@ enum class KlageStatus {
     ;
 
     companion object {
-        fun kanOppdatereFormkrav(status: KlageStatus): Boolean = status !== FERDIGSTILT
+        fun kanOppdatereFormkrav(status: KlageStatus): Boolean = status !in listOf(FERDIGSTILT, AVBRUTT)
 
         fun kanOppdatereUtfall(status: KlageStatus): Boolean = status in listOf(FORMKRAV_IKKE_OPPFYLT, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
 
@@ -379,6 +380,38 @@ data class Klage private constructor(
                 aarsakTilAvbrytelse = null,
                 initieltUtfall = null,
             )
+
+        /**
+         * Skal kun brukes for å opprette et klage-objekt fra uthenting fra databasen
+         */
+        fun fraResultSet(
+            id: UUID,
+            sak: Sak,
+            opprettet: Tidspunkt,
+            status: KlageStatus,
+            kabalStatus: KabalStatus?,
+            formkrav: FormkravMedBeslutter?,
+            initieltUtfall: InitieltUtfallMedBegrunnelseOgSaksbehandler?,
+            utfall: KlageUtfallMedData?,
+            resultat: KlageResultat?,
+            kabalResultat: BehandlingResultat?,
+            innkommendeDokument: InnkommendeKlage?,
+            aarsakTilAvbrytelse: AarsakTilAvbrytelse?,
+        ): Klage =
+            Klage(
+                id = id,
+                sak = sak,
+                opprettet = opprettet,
+                status = status,
+                kabalStatus = kabalStatus,
+                formkrav = formkrav,
+                initieltUtfall = initieltUtfall,
+                utfall = utfall,
+                resultat = resultat,
+                kabalResultat = kabalResultat,
+                innkommendeDokument = innkommendeDokument,
+                aarsakTilAvbrytelse = aarsakTilAvbrytelse,
+            )
     }
 }
 
@@ -449,6 +482,7 @@ sealed class KlageUtfallMedData {
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev) = other is KlageUtfallUtenBrev.Omgjoering
 
+        @JsonIgnore
         override val erAvvisning: Boolean = false
     }
 
@@ -460,6 +494,7 @@ sealed class KlageUtfallMedData {
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.DelvisOmgjoering
 
+        @JsonIgnore
         override val erAvvisning: Boolean = false
     }
 
@@ -470,6 +505,7 @@ sealed class KlageUtfallMedData {
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.StadfesteVedtak
 
+        @JsonIgnore
         override val erAvvisning: Boolean = false
     }
 
@@ -481,6 +517,7 @@ sealed class KlageUtfallMedData {
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.Avvist
 
+        @JsonIgnore
         override val erAvvisning: Boolean = true
     }
 
@@ -491,6 +528,7 @@ sealed class KlageUtfallMedData {
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.AvvistMedOmgjoering
 
+        @JsonIgnore
         override val erAvvisning: Boolean = true
     }
 

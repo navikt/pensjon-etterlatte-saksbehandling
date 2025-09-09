@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerFilter
+import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerKonfigurasjon
 import java.time.YearMonth
 
 class BehandlingKlient(
@@ -83,8 +85,32 @@ class BehandlingKlient(
                     contentType(ContentType.Application.Json)
                 }.body()
         }
+
+    fun startOpprettelseAvEtteroppgjoerForbehandling(etteroppgjoerKonfigurasjon: EtteroppgjoerKonfigurasjon) {
+        runBlocking {
+            behandlingHttpClient.post("$behandlingUrl/etteroppgjoer") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(
+                    StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
+                        antall = etteroppgjoerKonfigurasjon.antall,
+                        etteroppgjoerFilter = etteroppgjoerKonfigurasjon.etteroppgjoerFilter,
+                        spesifikkeSaker = etteroppgjoerKonfigurasjon.spesifikkeSaker,
+                        ekskluderteSaker = etteroppgjoerKonfigurasjon.ekskluderteSaker,
+                    ),
+                )
+            }
+        }
+    }
 }
 
 data class SakerDto(
     val saker: Map<SakId, Sak>,
+)
+
+data class StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
+    val antall: Int,
+    val etteroppgjoerFilter: EtteroppgjoerFilter,
+    val spesifikkeSaker: List<SakId>,
+    val ekskluderteSaker: List<SakId>,
 )

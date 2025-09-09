@@ -28,8 +28,8 @@ class EtteroppgjoerService(
     private fun startOpprettelseAvEtteroppgjoerForbehandling(etteroppgjoerKonfigurasjon: EtteroppgjoerKonfigurasjon) {
         logger.info("Start opprettelse av etteroppgjoer job startet")
 
-        // TODO logikk for behandlings klient som ber behandling om å opprette etteroppgjør forbehandlinger
-        behandlingKlient.toString()
+        behandlingKlient.startOpprettelseAvEtteroppgjoerForbehandling(etteroppgjoerKonfigurasjon)
+
         logger.info("Start opprettelse av etteroppgjoer job startet")
     }
 }

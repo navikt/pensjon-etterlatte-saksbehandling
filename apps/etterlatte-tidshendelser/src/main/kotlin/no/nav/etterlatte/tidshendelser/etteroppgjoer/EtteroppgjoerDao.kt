@@ -8,17 +8,16 @@ import no.nav.etterlatte.libs.database.transaction
 import javax.sql.DataSource
 
 class EtteroppgjoerDao(
-    private val dataSource: DataSource
+    private val dataSource: DataSource,
 ) : Transactions<EtteroppgjoerDao> {
-    override fun <R> inTransaction(block: EtteroppgjoerDao.(TransactionalSession) -> R): R =
-        dataSource.transaction { this.block(it) }
+    override fun <R> inTransaction(block: EtteroppgjoerDao.(TransactionalSession) -> R): R = dataSource.transaction { this.block(it) }
 
     fun hentNyesteKonfigurasjon(): EtteroppgjoerKonfigurasjon =
         dataSource.transaction { tx ->
             with(Databasetabell) {
                 tx.hent(
                     "SELECT $ANTALL, $DATO, $ETTEROPPGJOER_FILTER, $SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER, $KJOERING_ID FROM $TABELLNAVN" +
-                    "WHERE $AKTIV=true ORDER BY $OPPRETTET DESC LIMIT 1"
+                        "WHERE $AKTIV=true ORDER BY $OPPRETTET DESC LIMIT 1",
                 ) { row ->
                     EtteroppgjoerKonfigurasjon(
                         antall = row.int(ANTALL),
@@ -26,7 +25,7 @@ class EtteroppgjoerDao(
                         etteroppgjoerFilter = enumValueOf<EtteroppgjoerFilter>(row.string(ETTEROPPGJOER_FILTER)),
                         spesifikkeSaker = row.arrayOrNull<Long>(SPESIFIKKE_SAKER)?.toList()?.map { SakId(it) } ?: emptyList(),
                         ekskluderteSaker = row.arrayOrNull<Long>(EKSKLUDERTE_SAKER)?.toList()?.map { SakId(it) } ?: emptyList(),
-                        kjoeringId = row.stringOrNull(KJOERING_ID)
+                        kjoeringId = row.stringOrNull(KJOERING_ID),
                     )
                 } ?: throw IllegalStateException("Det finnes ingen etteroppgjør konfigurasjon i databasen som er aktiv")
             }

@@ -142,13 +142,7 @@ class EtteroppgjoerForbehandlingService(
 
     fun lagreVarselbrevSendt(forbehandlingId: UUID) {
         val forbehandling = hentForbehandling(forbehandlingId)
-        if (!forbehandling.erUnderBehandling()) {
-            throw IkkeTillattException(
-                "FEIL_STATUS_FORBEHANDLING",
-                "Forbehandling med id=$forbehandlingId kan ikke oppdatere varselbrev sendt siden forbehandling har status ${forbehandling.status}",
-            )
-        }
-        lagreForbehandling(forbehandling.copy(varselbrevSendt = LocalDate.now()))
+        lagreForbehandling(forbehandling.medVarselbrevSendt())
     }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =

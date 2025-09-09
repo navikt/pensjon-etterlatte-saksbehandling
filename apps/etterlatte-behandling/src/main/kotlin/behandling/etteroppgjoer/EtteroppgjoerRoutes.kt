@@ -19,9 +19,9 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.isDev
-import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
+import no.nav.etterlatte.libs.ktor.route.forbehandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -79,13 +79,13 @@ fun Route.etteroppgjoerRoutes(
             }
         }
 
-        route("/forbehandling/{$ETTEROPPGJOER_CALL_PARAMETER}") {
+        route("/forbehandling/{$FORBEHANDLINGID_CALL_PARAMETER}") {
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            forbehandlingService.hentDetaljertForbehandling(etteroppgjoerId, brukerTokenInfo)
+                            forbehandlingService.hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
                         }
                     call.respond(etteroppgjoer)
                 }
@@ -95,7 +95,7 @@ fun Route.etteroppgjoerRoutes(
                 val request = call.receive<BeregnFaktiskInntektRequest>()
                 val response =
                     inTransaction {
-                        forbehandlingService.lagreOgBeregnFaktiskInntekt(etteroppgjoerId, request, brukerTokenInfo)
+                        forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
                     }
                 call.respond(response)
             }
@@ -104,14 +104,11 @@ fun Route.etteroppgjoerRoutes(
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
                     inTransaction {
-                        // Runblocking rundt ferdigstilling av brevet for å unngå å ferdigstille forbehandlingen uten at
-                        // brevet er ok.
                         runBlocking {
-                            forbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
-                                etteroppgjoerId,
+                            forbehandlingBrevService.ferdigstillForbehandlingOgDistribuerBrev(
+                                forbehandlingId,
                                 brukerTokenInfo,
                             )
-                            forbehandlingService.ferdigstillForbehandling(etteroppgjoerId, brukerTokenInfo)
                         }
                     }
                     call.respond(HttpStatusCode.OK)
@@ -124,7 +121,7 @@ fun Route.etteroppgjoerRoutes(
                     val body = call.receive<AvbrytForbehandlingRequest>()
                     inTransaction {
                         forbehandlingService.avbrytForbehandling(
-                            etteroppgjoerId,
+                            forbehandlingId,
                             brukerTokenInfo,
                             body.aarsakTilAvbrytelse,
                             body.kommentar,
@@ -140,7 +137,7 @@ fun Route.etteroppgjoerRoutes(
                 val response =
                     inTransaction {
                         forbehandlingService.lagreInformasjonFraBruker(
-                            forbehandlingId = etteroppgjoerId,
+                            forbehandlingId = forbehandlingId,
                             harMottattNyInformasjon = request.harMottattNyInformasjon,
                             endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
                             beskrivelseAvUgunst = request.beskrivelseAvUgunst,

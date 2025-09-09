@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -29,7 +30,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
         Kontekst.set(jobContext)
         if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB, false)) {
             logger.info("Starter periodiske jobber for opprette oppgave svarfrist utløpt etteroppgjoer")
-            runBlocking {
+            inTransaction {
                 opprettNyOppgaveSvarfristUtloept()
             }
         } else {

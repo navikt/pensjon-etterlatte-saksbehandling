@@ -9,8 +9,7 @@ export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: Summe
     <VStack gap="4">
       <Heading size="small">Opplysninger fra A-ordningen</Heading>
       <BodyShort>
-        Opplysningene er oppgitt som brutto inntekt og summert innenfor hver måned. Hvis man vil se hva som inngår i en
-        måned må man manuelt sjekke opp i A-ordningen.
+        Opplysningene er angitt som brutto inntekt og er summert per måned. For detaljer per måned, sjekk A-ordningen.
       </BodyShort>
 
       <Table>

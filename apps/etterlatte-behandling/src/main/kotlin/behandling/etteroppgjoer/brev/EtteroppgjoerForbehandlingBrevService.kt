@@ -65,10 +65,11 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillJournalfoerOgDistribuerBrev(
+    suspend fun ferdigstillForbehandlingOgDistribuerBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandlingId, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,

@@ -159,7 +159,7 @@ class BrevService(
                 tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
+                etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingOgDistribuerBrev(
                     behandlingId,
                     brukerTokenInfo,
                 )

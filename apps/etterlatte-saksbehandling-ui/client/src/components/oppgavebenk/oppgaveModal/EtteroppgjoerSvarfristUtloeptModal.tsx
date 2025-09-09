@@ -27,8 +27,9 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
 
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
 
-  const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
-    opprettRevurderingRequest({ sakId: oppgave.sakId, forbehandlingId: forbehandlingId }, () => {
+  const opprettRevurderingEtteroppgjoer = () => {
+    // TODO: burde vi heller opprette fra oppgave.referanse
+    opprettRevurderingRequest({ sakId: oppgave.sakId }, () => {
       ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
         oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
         setOpen(false)
@@ -79,7 +80,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
                 <Button
                   loading={isPending(opprettRevurderingResult)}
                   size="small"
-                  onClick={() => opprettRevurderingEtteroppgjoer(oppgave.referanse!!)}
+                  onClick={() => opprettRevurderingEtteroppgjoer()}
                 >
                   Opprett revurdering
                 </Button>

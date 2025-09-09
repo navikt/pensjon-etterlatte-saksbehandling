@@ -31,7 +31,7 @@ export const OpplysningerFraSkatteetaten = ({
               <Table.DataCell>
                 <HStack gap="1">
                   Lønnsinntekt
-                  <HelpText>Lønnsinntekt inkluderer også blant annet omstillingsstønad</HelpText>
+                  <HelpText>Lønnsinntekt inkluderer også omstillingsstønad</HelpText>
                 </HStack>
               </Table.DataCell>
               <Table.DataCell align="right">{NOK(inntektFraSkatteetatenSummert.loensinntekt)}</Table.DataCell>

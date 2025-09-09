@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -86,6 +87,7 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og oppdatere forbehandling`() {
+        val dato = LocalDate.now()
         val kopiertFra = UUID.randomUUID()
         val ny =
             EtteroppgjoerForbehandling(
@@ -102,9 +104,10 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = dato,
             )
 
-        etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
+        etteroppgjoerForbehandlingDao.lagreForbehandling(ny.copy())
         val lagret = etteroppgjoerForbehandlingDao.hentForbehandling(ny.id)
         with(lagret!!) {
             id shouldBe ny.id
@@ -113,6 +116,7 @@ class EtteroppgjoerForbehandlingDaoTest(
             opprettet shouldBe ny.opprettet
             innvilgetPeriode shouldBe ny.innvilgetPeriode
             kopiertFra shouldBe kopiertFra
+            varselbrevSendt shouldBe dato
         }
     }
 
@@ -133,6 +137,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             ),
         )
         etteroppgjoerForbehandlingDao.lagreForbehandling(
@@ -150,6 +155,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             ),
         )
 
@@ -267,6 +273,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningen)
@@ -292,6 +299,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         val afp =

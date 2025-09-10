@@ -6,12 +6,13 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelser
+import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -38,7 +39,17 @@ class SkatteoppgjoerHendelserService(
         inTransaction {
             val hendelsesliste = lesHendelsesliste(request)
 
-            behandleHendelser(hendelsesliste)
+            if (!hendelsesliste.hendelser.isEmpty()) {
+                behandleHendelser(hendelsesliste)
+            }
+        }
+    }
+
+    fun settSekvensnummerForLesingFraDato(dato: LocalDate) {
+        val sekvensnummer = runBlocking { sigrunKlient.hentSekvensnummerForLesingFraDato(dato) }
+
+        inTransaction {
+            dao.lagreKjoering(HendelserKjoering(sekvensnummer, 0, 0))
         }
     }
 
@@ -64,7 +75,7 @@ class SkatteoppgjoerHendelserService(
         }
     }
 
-    private fun behandleHendelse(hendelse: SkatteoppgjoerHendelser): Boolean {
+    private fun behandleHendelse(hendelse: SkatteoppgjoerHendelse): Boolean {
         val ident = hendelse.identifikator
         val inntektsaar = hendelse.gjelderPeriode.toInt()
 
@@ -110,4 +121,8 @@ class SkatteoppgjoerHendelserService(
 
 data class HendelseKjoeringRequest(
     val antall: Int,
+)
+
+data class HendelserSettSekvensnummerRequest(
+    val startdato: LocalDate,
 )

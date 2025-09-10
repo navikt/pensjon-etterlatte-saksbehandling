@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInn
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelserSettSekvensnummerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.forbehandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -170,11 +172,23 @@ fun Route.etteroppgjoerRoutes(
 
         post("/les-skatteoppgjoer-hendelser") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
-            val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
-            inTransaction {
+
+            kunSystembruker {
+                val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
                 skatteoppgjoerHendelserService.lesOgBehandleHendelser(hendelseKjoeringRequest)
+
+                call.respond(HttpStatusCode.OK)
             }
-            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/sett-skatteoppgjoer-sekvensnummer") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+
+            kunSystembruker {
+                val request: HendelserSettSekvensnummerRequest = call.receive()
+                skatteoppgjoerHendelserService.settSekvensnummerForLesingFraDato(request.startdato)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

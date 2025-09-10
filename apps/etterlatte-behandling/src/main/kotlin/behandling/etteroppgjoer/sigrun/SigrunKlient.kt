@@ -8,6 +8,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.etteroppgjoer.HendelserSekvensnummerFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -15,8 +16,11 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 enum class SigrunRettighetspakke(
     val rettighetspakke: String,
@@ -35,6 +39,8 @@ interface SigrunKlient {
         sekvensnummerStart: Long,
         brukAktoerId: Boolean = false,
     ): HendelseslisteFraSkatt
+
+    suspend fun hentSekvensnummerForLesingFraDato(dato: LocalDate): Long
 }
 
 class SigrunKlientImpl(
@@ -105,6 +111,34 @@ class SigrunKlientImpl(
                 is RetryResult.Success -> it.content.body<HendelseslisteFraSkatt>()
                 is RetryResult.Failure -> {
                     logger.error("Kall mot Sigrun for henting av Hendelsesliste feilet")
+                    throw it.samlaExceptions()
+                }
+            }
+        }
+    }
+
+    override suspend fun hentSekvensnummerForLesingFraDato(dato: LocalDate): Long {
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_HENDELSER, false)) {
+            return 1
+        }
+
+        return retry {
+            httpClient.get("$url/api/v1/pensjonsgivendeinntektforfolketrygden/hendelser/start") {
+                url {
+                    parameters.append("dato", DateTimeFormatter.ISO_LOCAL_DATE.withZone(norskTidssone).format(dato))
+                }
+                navConsumerId("etterlatte-behandling")
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(body)
+
+                headers.append("bruk-aktoerid", "false")
+            }
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content.body<HendelserSekvensnummerFraSkatt>().sekvensnummer
+                is RetryResult.Failure -> {
+                    logger.error("Kall mot Sigrun for henting av sekvensnummer feilet")
                     throw it.samlaExceptions()
                 }
             }

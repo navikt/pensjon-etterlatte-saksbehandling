@@ -21,9 +21,8 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlin
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.forbehandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo

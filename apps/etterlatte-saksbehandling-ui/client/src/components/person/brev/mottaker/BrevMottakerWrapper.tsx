@@ -6,7 +6,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettMottaker, tilbakestillMottakere } from '~shared/api/brev'
 import { isPending } from '~shared/api/apiUtils'
 import { ArrowCirclepathIcon, PlusIcon } from '@navikt/aksel-icons'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) => {
   const [mottakere, setMottakere] = useState(brev.mottakere)

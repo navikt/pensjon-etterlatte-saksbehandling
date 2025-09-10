@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.libs.common.sak.SakId
+import java.util.UUID
 
 data class Etteroppgjoer(
     val sakId: SakId,
@@ -12,6 +13,7 @@ data class Etteroppgjoer(
     val harAdressebeskyttelseEllerSkjermet: Boolean = false,
     val harAktivitetskrav: Boolean = false,
     val harBosattUtland: Boolean = false,
+    val sisteFerdigstilteForbehandling: UUID? = null,
 )
 
 enum class EtteroppgjoerStatus {

@@ -9,7 +9,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 interface GenerellOppgaveForm extends Omit<GenerellOppgaveDto, 'sakIds'> {
   sakIds: string

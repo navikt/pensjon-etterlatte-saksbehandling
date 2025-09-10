@@ -7,11 +7,11 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.revurdering.MaksEnAktivOppgavePaaBehandling
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -43,6 +43,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -78,11 +79,7 @@ class EtteroppgjoerForbehandlingService(
                 dao.lagreForbehandling(it)
             }
 
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-            forbehandling.sak.id,
-            forbehandling.aar,
-            EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
-        )
+        etteroppgjoerService.oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             forbehandling.id.toString(),
@@ -143,8 +140,32 @@ class EtteroppgjoerForbehandlingService(
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
 
+    fun lagreVarselbrevSendt(forbehandlingId: UUID) {
+        val forbehandling = hentForbehandling(forbehandlingId)
+        lagreForbehandling(forbehandling.medVarselbrevSendt())
+    }
+
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
+    fun hentSisteFerdigstillteForbehandlingPaaSak(sakId: SakId): EtteroppgjoerForbehandling {
+        val forbehandlinger = dao.hentForbehandlinger(sakId)
+
+        if (!forbehandlinger.isEmpty()) {
+            val ferdigstilteForbehandlinger =
+                forbehandlinger.filter { forbehandling ->
+                    forbehandling.erFerdigstilt()
+                }
+
+            if (!ferdigstilteForbehandlinger.isEmpty()) {
+                return ferdigstilteForbehandlinger.last()
+            } else {
+                throw IkkeFunnetException(code = "IKKE_FUNNET", detail = "Ingen ferdigstilte forbehandlinger på sak med id: ${sakId.sakId}")
+            }
+        } else {
+            throw IkkeFunnetException(code = "IKKE_FUNNET", detail = "Fant ingen forbehandlinger på sak med id: ${sakId.sakId}")
+        }
+    }
 
     fun hentDetaljertForbehandling(
         forbehandlingId: UUID,
@@ -186,11 +207,24 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
+        val pensjonsgivendeInntektSummert =
+            pensjonsgivendeInntekt.inntekter.fold(
+                initial = PensjonsgivendeInntektFraSkattSummert(pensjonsgivendeInntekt.inntektsaar, 0, 0, 0),
+                operation = { acc, inntekt ->
+                    PensjonsgivendeInntektFraSkattSummert(
+                        pensjonsgivendeInntekt.inntektsaar,
+                        acc.loensinntekt + inntekt.loensinntekt,
+                        acc.naeringsinntekt + inntekt.naeringsinntekt,
+                        acc.fiskeFangstFamiliebarnehage + inntekt.fiskeFangstFamiliebarnehage,
+                    )
+                },
+            )
+
         return DetaljertForbehandlingDto(
             behandling = forbehandling,
             opplysninger =
                 EtteroppgjoerOpplysninger(
-                    skatt = pensjonsgivendeInntekt,
+                    skatt = pensjonsgivendeInntektSummert,
                     ainntekt = aInntekt,
                     summerteInntekter = summerteInntekter,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,

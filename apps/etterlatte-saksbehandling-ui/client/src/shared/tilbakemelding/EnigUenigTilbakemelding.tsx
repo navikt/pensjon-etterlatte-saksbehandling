@@ -3,7 +3,7 @@ import { SinnaEmoji } from '~shared/tilbakemelding/emoji/SinnaEmoji'
 import { LeiEmoji } from '~shared/tilbakemelding/emoji/LeiEmoji'
 import { GladEmoji } from '~shared/tilbakemelding/emoji/GladEmoji'
 import { EkstatiskEmoji } from '~shared/tilbakemelding/emoji/EkstatiskEmoji'
-import { ClickEvent, trackClickMedSvar } from '~utils/amplitude'
+import { ClickEvent, trackClickMedSvar } from '~utils/analytics'
 import { useState } from 'react'
 import {
   leggTilbakemeldingGittILocalStorage,

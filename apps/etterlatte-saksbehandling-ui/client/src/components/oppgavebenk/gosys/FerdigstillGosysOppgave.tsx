@@ -5,7 +5,7 @@ import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOpp
 import Spinner from '~shared/Spinner'
 import { ferdigstilleGosysOppgave } from '~shared/api/gosys'
 import { GosysOppgave } from '~shared/types/Gosys'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const FerdigstillGosysOppgave = ({
   oppgave,

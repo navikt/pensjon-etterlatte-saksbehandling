@@ -17,7 +17,7 @@ import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { JaNei } from '~shared/types/ISvar'
 import { formaterSakstype } from '~utils/formatering/formatering'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 import { ApiError } from '~shared/api/apiClient'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {

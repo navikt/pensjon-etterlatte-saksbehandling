@@ -24,7 +24,7 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
       begrunnelse: klage.formkrav?.klagerHarIkkeSvartVurdering?.begrunnelse || '',
     },
   })
-  const vurdering = watch('begrunnelse') //klage.formkrav?.klagerHarIkkeSvart //|| { begrunnelse: 'De svarte ikke' }
+  const vurdering = watch('begrunnelse')
 
   if (!redigerbar && !vurdering) {
     return null

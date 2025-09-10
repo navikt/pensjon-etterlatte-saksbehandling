@@ -53,6 +53,53 @@ class EtteroppgjoerDao(
             }
         }
 
+    fun hentEtteroppgjoerSakerIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+    ): List<SakId> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT sak_id FROM etteroppgjoer e 
+                    WHERE e.status = 'MOTTATT_SKATTEOPPGJOER'
+                    AND e.inntektsaar = ?
+                    AND har_sanksjon = ?
+                    AND har_institusjonsopphold = ?
+                    AND har_opphoer = ?
+                    AND har_bosatt_utland = ?
+                    AND har_adressebeskyttelse_eller_skjermet = ?
+                    AND har_aktivitetskrav = ?
+                     ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
+                     ${if (ekskluderteSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
+                    ORDER BY sak_id
+                    LIMIT $antall
+                    """.trimIndent(),
+                ).apply {
+                    setInt(1, inntektsaar)
+                    setBoolean(2, etteroppgjoerFilter.harSanksjon)
+                    setBoolean(3, etteroppgjoerFilter.harInsitusjonsopphold)
+                    setBoolean(4, etteroppgjoerFilter.harOpphoer)
+                    setBoolean(5, etteroppgjoerFilter.harBosattUtland)
+                    setBoolean(6, etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
+                    setBoolean(7, etteroppgjoerFilter.harAktivitetskrav)
+
+                    if (spesifikkeSaker.isNotEmpty()) {
+                        setArray(8, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                    }
+                    if (ekskluderteSaker.isNotEmpty()) {
+                        setArray(9, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                    }
+                }.executeQuery()
+                    .toList {
+                        SakId(getLong("sak_id"))
+                    }
+            }
+        }
+
     fun hentEtteroppgjoerForFilter(
         filter: EtteroppgjoerFilter,
         inntektsaar: Int,

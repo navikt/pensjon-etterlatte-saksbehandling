@@ -12,24 +12,21 @@ import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlin
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
-import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.logger
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class EtteroppgjoerToggles(
@@ -167,6 +164,27 @@ fun Route.etteroppgjoerRoutes(
             }
         }
 
+        post("/forbehandling/bulk") {
+            val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
+            logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
+
+            inTransaction {
+                // TODO: ikke hardkode inntektsår
+                forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
+                    inntektsaar = 2024,
+                    antall = request.antall,
+                    etteroppgjoerFilter = request.etteroppgjoerFilter,
+                    spesifikkeSaker = request.spesifikkeSaker,
+                    ekskluderteSaker = request.ekskluderteSaker,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }
+
+            logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
+
+            call.respond(HttpStatusCode.OK)
+        }
+
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
@@ -180,3 +198,10 @@ private fun sjekkEtteroppgjoerEnabled(featureToggleService: FeatureToggleService
         throw IkkeTillattException("ETTEROPPGJOER_NOT_ENABLED", "Etteroppgjør er ikke skrudd på i miljøet.")
     }
 }
+
+data class EtteroppgjoerForbehandlingBulkRequest(
+    val antall: Int,
+    val etteroppgjoerFilter: EtteroppgjoerFilter,
+    val spesifikkeSaker: List<SakId>,
+    val ekskluderteSaker: List<SakId>,
+)

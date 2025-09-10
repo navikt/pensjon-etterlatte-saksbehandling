@@ -9,9 +9,9 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.revurdering.MaksEnAktivOppgavePaaBehandling
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -255,6 +255,36 @@ class EtteroppgjoerForbehandlingService(
                     merknad = "Etteroppgjør for $inntektsaar",
                 ),
         )
+    }
+
+    fun opprettEtteroppgjoerForbehandlingIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        // Hent liste med etteroppgjør saker som matcher kriterier
+        // Bruker den listen og mapper over for å opprette forbehandlinger
+        // Wrap rundt med try catch og error log de sakene som feilet og grunnen
+
+        val relevanteSaker: List<SakId> =
+            etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
+                inntektsaar = inntektsaar,
+                antall = antall,
+                etteroppgjoerFilter = etteroppgjoerFilter,
+                spesifikkeSaker = spesifikkeSaker,
+                ekskluderteSaker = ekskluderteSaker,
+            )
+
+        relevanteSaker.map { sakId ->
+            try {
+                opprettEtteroppgjoerForbehandling(sakId = sakId, inntektsaar = inntektsaar, brukerTokenInfo = brukerTokenInfo)
+            } catch (e: Error) {
+                logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId. Fordi: ${e.message}")
+            }
+        }
     }
 
     fun lagreOgBeregnFaktiskInntekt(

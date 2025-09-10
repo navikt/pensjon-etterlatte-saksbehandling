@@ -85,10 +85,6 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
                       value: true,
                       message: 'Du må legge til en kommentar',
                     },
-                    minLength: {
-                      value: 10,
-                      message: 'Kommentaren må bestå av minst 10 tegn',
-                    },
                   })}
                   label="Kommentar"
                   error={errors.kommentar?.message}

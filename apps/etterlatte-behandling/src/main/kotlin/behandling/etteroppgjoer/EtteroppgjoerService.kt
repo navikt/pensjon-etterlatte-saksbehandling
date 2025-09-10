@@ -22,6 +22,7 @@ enum class EtteroppgjoerSvarfrist(
     val value: String,
 ) {
     ETT_MINUTT("1 minute"),
+    FEMTEN_MINUTTER("15 minutes"),
     EN_MND("1 month"),
 }
 

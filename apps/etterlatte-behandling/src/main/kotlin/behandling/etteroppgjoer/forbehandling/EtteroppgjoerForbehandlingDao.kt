@@ -103,7 +103,8 @@ class EtteroppgjoerForbehandlingDao(
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
-                            brev_id = excluded.brev_id
+                            brev_id = excluded.brev_id,
+                            varselbrev_sendt = excluded.varselbrev_sendt
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)

@@ -3,6 +3,7 @@ package behandling.etteroppgjoer
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -118,6 +119,31 @@ class EtteroppgjoerForbehandlingDaoTest(
             kopiertFra shouldBe kopiertFra
             varselbrevSendt shouldBe dato
         }
+    }
+
+    @Test
+    fun `lagre med varselbrev sendt`() {
+        val forbehandling =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = null,
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
+            )
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
+        etteroppgjoerForbehandlingDao.hentForbehandling(forbehandling.id)!!.varselbrevSendt shouldBe null
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling.medVarselbrevSendt())
+        etteroppgjoerForbehandlingDao.hentForbehandling(forbehandling.id)!!.varselbrevSendt shouldNotBe null
     }
 
     @Test

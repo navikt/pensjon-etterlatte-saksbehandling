@@ -28,10 +28,10 @@ class EtteroppgjoerDao(
                         SELECT *  
                         FROM etteroppgjoer e INNER JOIN etteroppgjoer_behandling eb on e.siste_ferdigstilte_forbehandling = eb.id
                         WHERE e.status = 'FERDIGSTILT_FORBEHANDLING'
-                        AND t.varselbrev_sendt IS NOT NULL
-                          AND t.varselbrev_sendt < (now() - interval '${svarfrist.value}')
-                          AND t.status = 'FERDIGSTILT'
-                          AND t.aar = ?
+                        AND eb.varselbrev_sendt IS NOT NULL
+                          AND eb.varselbrev_sendt < (now() - interval '${svarfrist.value}')
+                          AND eb.status = 'FERDIGSTILT'
+                          AND eb.aar = ?
                         """.trimIndent(),
                     )
                 statement.setInt(1, inntektsaar)

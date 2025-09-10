@@ -16,7 +16,7 @@ class EtteroppgjoerDao(
         dataSource.transaction { tx ->
             with(Databasetabell) {
                 tx.hent(
-                    "SELECT $ANTALL, $DATO, $ETTEROPPGJOER_FILTER, $SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER, $KJOERING_ID FROM $TABELLNAVN" +
+                    "SELECT $ANTALL, $DATO, $ETTEROPPGJOER_FILTER, $SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER, $KJOERING_ID FROM $TABELLNAVN " +
                         "WHERE $AKTIV=true ORDER BY $OPPRETTET DESC LIMIT 1",
                 ) { row ->
                     EtteroppgjoerKonfigurasjon(

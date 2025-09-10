@@ -88,7 +88,7 @@ class BehandlingKlient(
 
     fun startOpprettelseAvEtteroppgjoerForbehandling(etteroppgjoerKonfigurasjon: EtteroppgjoerKonfigurasjon) {
         runBlocking {
-            behandlingHttpClient.post("$behandlingUrl/etteroppgjoer") {
+            behandlingHttpClient.post("$behandlingUrl/etteroppgjoer/forbehandling/bulk") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(

@@ -34,6 +34,13 @@ data class SkatteoppgjoerHendelser(
     val somAktoerid: Boolean,
 )
 
+data class PensjonsgivendeInntektFraSkattSummert(
+    val inntektsaar: Int,
+    val loensinntekt: Int,
+    val naeringsinntekt: Int,
+    val fiskeFangstFamiliebarnehage: Int,
+)
+
 data class PensjonsgivendeInntektFraSkatt(
     val inntektsaar: Int,
     val inntekter: List<PensjonsgivendeInntekt>,

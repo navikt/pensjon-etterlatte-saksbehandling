@@ -128,6 +128,7 @@ enum class OppgaveType {
     OPPFOELGING,
     MELDT_INN_ENDRING,
     ETTEROPPGJOER,
+    ETTEROPPGJOER_SVARFRIST_UTLOEPT,
     ;
 
     companion object {

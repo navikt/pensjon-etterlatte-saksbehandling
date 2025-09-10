@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -117,12 +116,12 @@ class EtteroppgjoerDao(
                     SELECT sak_id FROM etteroppgjoer e 
                     WHERE e.status = 'MOTTATT_SKATTEOPPGJOER'
                     AND e.inntektsaar = ?
-                    AND har_sanksjon = ?
-                    AND har_institusjonsopphold = ?
-                    AND har_opphoer = ?
-                    AND har_bosatt_utland = ?
-                    AND har_adressebeskyttelse_eller_skjermet = ?
-                    AND har_aktivitetskrav = ?
+                    AND e.har_sanksjon = ?
+                    AND e.har_institusjonsopphold = ?
+                    AND e.har_opphoer = ?
+                    AND e.har_bosatt_utland = ?
+                    AND e.har_adressebeskyttelse_eller_skjermet = ?
+                    AND e.har_aktivitetskrav = ?
                      ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
                      ${if (ekskluderteSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
                     ORDER BY sak_id

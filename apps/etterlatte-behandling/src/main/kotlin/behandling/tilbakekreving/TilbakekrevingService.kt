@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -421,11 +422,36 @@ class TilbakekrevingService(
                     tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT),
                 )
 
-            runBlocking {
-                logger.info("Sender vedtak til tilbakekrevingskomponenten for tilbakekreving=$tilbakekrevingId")
-                tilbakekrevingKlient.sendTilbakekrevingsvedtak(
-                    saksbehandler,
-                    tilbakekrevingVedtak(oppdatertTilbakekreving, vedtak),
+            try {
+                runBlocking {
+                    logger.info("Sender vedtak til tilbakekrevingskomponenten for tilbakekreving=$tilbakekrevingId")
+                    tilbakekrevingKlient.sendTilbakekrevingsvedtak(
+                        saksbehandler,
+                        tilbakekrevingVedtak(oppdatertTilbakekreving, vedtak),
+                    )
+                }
+            } catch (tilbakekrevingKlientFeil: Exception) {
+                try {
+                    // Prøver å rydde opp for vedtak
+                    runBlocking {
+                        vedtakKlient.angreAttesteringTilbakekreving(
+                            tilbakekrevingId = tilbakekreving.id,
+                            brukerTokenInfo = saksbehandler,
+                            enhet = tilbakekreving.sak.enhet,
+                        )
+                    }
+                } catch (tilbakestillingFeil: Exception) {
+                    logger.error(
+                        "Kunne ikke tilbakestille vedtaksstatus for tilbakekreving=$tilbakekrevingId i sak " +
+                            "${tilbakekreving.sak.id}. Dette betyr at tilbakekrevingen er låst mellom statusen i " +
+                            "behandling (fattet vedtak) og  vedtaksvurdering (attestert) og må manuelt " +
+                            "tilbakestilles i vedtaksvurdering",
+                        tilbakestillingFeil,
+                    )
+                }
+                throw InternfeilException(
+                    "Tilbakekrevingen ble ikke godkjent i tilbakekrevingskomponenten. Dobbeltsjekk om kravgrunnlaget er riktig behandlet.",
+                    tilbakekrevingKlientFeil,
                 )
             }
 

@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -99,6 +100,12 @@ interface VedtakKlient {
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<InnvilgetPeriodeDto>
+
+    suspend fun angreAttesteringTilbakekreving(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: Saksbehandler,
+        enhet: Enhetsnummer,
+    ): VedtakDto
 }
 
 class VedtakKlientException(
@@ -487,6 +494,30 @@ class VedtakKlientImpl(
                 "Kunne ikke hente innvilgede perioder i sak med id $sakId",
                 e,
             )
+        }
+    }
+
+    override suspend fun angreAttesteringTilbakekreving(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: Saksbehandler,
+        enhet: Enhetsnummer,
+    ): VedtakDto {
+        try {
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/vedtak/tilbakekreving/$tilbakekrevingId/tilbakestill",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = {},
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException("", e)
         }
     }
 }

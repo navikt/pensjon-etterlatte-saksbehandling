@@ -172,7 +172,7 @@ fun Route.etteroppgjoerRoutes(
             sjekkEtteroppgjoerEnabled(featureToggleService)
             val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
             inTransaction {
-                skatteoppgjoerHendelserService.startHendelsesKjoering(hendelseKjoeringRequest)
+                skatteoppgjoerHendelserService.lesOgBehandleHendelser(hendelseKjoeringRequest)
             }
             call.respond(HttpStatusCode.OK)
         }

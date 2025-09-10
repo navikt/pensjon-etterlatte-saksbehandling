@@ -1,5 +1,6 @@
 package no.nav.etterlatte.config
 
+import behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJob
 import behandling.jobs.uttrekk.UttrekkLoependeYtelseEtter67Job
 import behandling.jobs.uttrekk.UttrekkLoependeYtelseEtter67JobService
 import com.typesafe.config.Config
@@ -955,7 +956,24 @@ internal class ApplicationContext(
             dataSource = dataSource,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(10, ChronoUnit.MINUTES),
+            interval = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
+
+    val lesSkatteoppgjoerHendelserJob: LesSkatteoppgjoerHendelserJob by lazy {
+        LesSkatteoppgjoerHendelserJob(
+            skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
+            hendelserBatchSize =
+                if (isProd()) {
+                    1000
+                } else {
+                    10000
+                },
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

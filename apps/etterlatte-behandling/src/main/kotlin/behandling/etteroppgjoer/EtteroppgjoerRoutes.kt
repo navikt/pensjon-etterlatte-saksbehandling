@@ -12,6 +12,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlin
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -45,6 +47,7 @@ fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
     forbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     etteroppgjoerService: EtteroppgjoerService,
+    skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer") {
@@ -163,6 +166,15 @@ fun Route.etteroppgjoerRoutes(
             sjekkEtteroppgjoerEnabled(featureToggleService)
             val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
             call.respond(forbehandlinger)
+        }
+
+        post("/les-skatteoppgjoer-hendelser") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+            val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
+            inTransaction {
+                skatteoppgjoerHendelserService.startHendelsesKjoering(hendelseKjoeringRequest)
+            }
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
-import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.singleOrNull
 
 class SkatteoppgjoerHendelserDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -30,7 +30,7 @@ class SkatteoppgjoerHendelserDao(
             }
         }
 
-    fun hentSisteKjoering(): HendelserKjoering =
+    fun hentSisteKjoering(): HendelserKjoering? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -43,7 +43,7 @@ class SkatteoppgjoerHendelserDao(
                         """.trimIndent(),
                     )
 
-                statement.executeQuery().single {
+                statement.executeQuery().singleOrNull {
                     HendelserKjoering(
                         sisteSekvensnummer = getLong("siste_sekvensnummer"),
                         antallHendelser = getInt("antall_hendelser"),

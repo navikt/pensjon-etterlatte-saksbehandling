@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
@@ -43,7 +44,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -289,6 +289,32 @@ class EtteroppgjoerForbehandlingService(
                     merknad = "Etteroppgjør for $inntektsaar",
                 ),
         )
+    }
+
+    fun opprettEtteroppgjoerForbehandlingIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val relevanteSaker: List<SakId> =
+            etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
+                inntektsaar = inntektsaar,
+                antall = antall,
+                etteroppgjoerFilter = etteroppgjoerFilter,
+                spesifikkeSaker = spesifikkeSaker,
+                ekskluderteSaker = ekskluderteSaker,
+            )
+
+        relevanteSaker.map { sakId ->
+            try {
+                opprettEtteroppgjoerForbehandling(sakId = sakId, inntektsaar = inntektsaar, brukerTokenInfo = brukerTokenInfo)
+            } catch (e: Error) {
+                logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
+            }
+        }
     }
 
     fun lagreOgBeregnFaktiskInntekt(

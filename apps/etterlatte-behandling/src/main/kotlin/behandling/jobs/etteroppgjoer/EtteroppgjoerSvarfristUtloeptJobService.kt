@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
@@ -24,7 +23,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val svarfrist = if (isProd()) EtteroppgjoerSvarfrist.EN_MND else EtteroppgjoerSvarfrist.ETT_MINUTT
+    private val svarfrist = if (isProd()) EtteroppgjoerSvarfrist.EN_MND else EtteroppgjoerSvarfrist.FEMTEN_MINUTTER
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)

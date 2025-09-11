@@ -7,7 +7,6 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.Formkrav
-import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -16,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -27,7 +25,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -63,60 +60,35 @@ internal class KlageDaoImplTest(
         Assertions.assertEquals(klage, foersteHentedeKlage)
 
         val formkrav =
-            FormkravMedBeslutter(
-                Formkrav(
-                    vedtaketKlagenGjelder =
-                        VedtaketKlagenGjelder(
-                            id = "",
-                            behandlingId = "",
-                            datoAttestert = null,
-                            vedtakType = null,
-                        ),
-                    erKlagerPartISaken = JaNei.JA,
-                    erKlagenSignert = JaNei.JA,
-                    gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
-                    erKlagenFramsattInnenFrist = JaNei.JA,
-                    erFormkraveneOppfylt = JaNei.JA,
-                ),
-                Grunnlagsopplysning.Saksbehandler.create("en saksbehandler"),
+            Formkrav(
+                vedtaketKlagenGjelder =
+                    VedtaketKlagenGjelder(
+                        id = "",
+                        behandlingId = "",
+                        datoAttestert = null,
+                        vedtakType = null,
+                    ),
+                erKlagerPartISaken = JaNei.JA,
+                erKlagenSignert = JaNei.JA,
+                gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                erKlagenFramsattInnenFrist = JaNei.JA,
+                erFormkraveneOppfylt = JaNei.JA,
             )
 
         val andreDato = foersteMottattDato.minusMonths(1)
         val oppdatertKlage =
-            klage.copy(
-                status = KlageStatus.FORMKRAV_OPPFYLT,
-                formkrav = formkrav,
-                innkommendeDokument =
-                    klage.innkommendeDokument?.copy(
-                        mottattDato = andreDato,
-                    ),
-            )
+            klage
+                .oppdaterFormkrav(
+                    formkrav = formkrav,
+                    saksbehandlerIdent = "en saksbehandler",
+                ).oppdaterMottattDato(andreDato)
         klageDao.lagreKlage(oppdatertKlage)
 
         val hentetKlage = klageDao.hentKlage(oppdatertKlage.id)
 
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, hentetKlage?.status)
-        Assertions.assertEquals(formkrav, hentetKlage?.formkrav)
+        Assertions.assertEquals(formkrav, hentetKlage?.formkrav?.formkrav)
         Assertions.assertEquals(andreDato, hentetKlage?.innkommendeDokument?.mottattDato)
-    }
-
-    @Test
-    fun `lagreKlage oppdaterer ikke opprettet tidspunkt eller saken hvis klagen allerede eksisterer`() {
-        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enheter.PORSGRUNN.enhetNr)
-        val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = Enheter.STEINKJER.enhetNr)
-        val klage = Klage.ny(sak, null)
-        klageDao.lagreKlage(klage)
-
-        val foersteHentedeKlage = klageDao.hentKlage(klage.id)
-        Assertions.assertEquals(klage, foersteHentedeKlage)
-
-        val klageMedEndretSakOgOpprettet = klage.copy(sak = sak2, opprettet = klage.opprettet.plus(2, ChronoUnit.HOURS))
-        klageDao.lagreKlage(klageMedEndretSakOgOpprettet)
-
-        val andreHentedeKlage = klageDao.hentKlage(klageMedEndretSakOgOpprettet.id)
-        Assertions.assertEquals(foersteHentedeKlage, andreHentedeKlage)
-        Assertions.assertNotEquals(foersteHentedeKlage?.sak, klageMedEndretSakOgOpprettet.sak)
-        Assertions.assertNotEquals(foersteHentedeKlage?.opprettet, klageMedEndretSakOgOpprettet.opprettet)
     }
 
     @Test
@@ -137,7 +109,19 @@ internal class KlageDaoImplTest(
     @Test
     fun `Lagre initielt utfall og hent det ut`() {
         val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enheter.AALESUND.enhetNr)
-        val klage = Klage.ny(sak, null).copy(status = KlageStatus.FORMKRAV_OPPFYLT)
+        val klage =
+            Klage.ny(sak, null).oppdaterFormkrav(
+                Formkrav(
+                    vedtaketKlagenGjelder = null,
+                    erKlagerPartISaken = JaNei.JA,
+                    erKlagenSignert = JaNei.JA,
+                    gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                    erKlagenFramsattInnenFrist = JaNei.JA,
+                    erFormkraveneOppfylt = JaNei.JA,
+                    begrunnelse = "",
+                ),
+                "en saksbehandler",
+            )
 
         klageDao.lagreKlage(klage)
         val utfalldto = InitieltUtfallMedBegrunnelseDto(KlageUtfall.OMGJOERING, "begrunnelse")

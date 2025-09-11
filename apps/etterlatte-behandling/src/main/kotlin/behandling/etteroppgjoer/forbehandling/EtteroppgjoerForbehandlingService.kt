@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
@@ -78,11 +79,7 @@ class EtteroppgjoerForbehandlingService(
                 dao.lagreForbehandling(it)
             }
 
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-            forbehandling.sak.id,
-            forbehandling.aar,
-            EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
-        )
+        etteroppgjoerService.oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             forbehandling.id.toString(),
@@ -142,6 +139,11 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
+
+    fun lagreVarselbrevSendt(forbehandlingId: UUID) {
+        val forbehandling = hentForbehandling(forbehandlingId)
+        lagreForbehandling(forbehandling.medVarselbrevSendt())
+    }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
@@ -287,6 +289,32 @@ class EtteroppgjoerForbehandlingService(
                     merknad = "Etteroppgjør for $inntektsaar",
                 ),
         )
+    }
+
+    fun opprettEtteroppgjoerForbehandlingIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val relevanteSaker: List<SakId> =
+            etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
+                inntektsaar = inntektsaar,
+                antall = antall,
+                etteroppgjoerFilter = etteroppgjoerFilter,
+                spesifikkeSaker = spesifikkeSaker,
+                ekskluderteSaker = ekskluderteSaker,
+            )
+
+        relevanteSaker.map { sakId ->
+            try {
+                opprettEtteroppgjoerForbehandling(sakId = sakId, inntektsaar = inntektsaar, brukerTokenInfo = brukerTokenInfo)
+            } catch (e: Error) {
+                logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
+            }
+        }
     }
 
     fun lagreOgBeregnFaktiskInntekt(

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.time.LocalDate
 import java.util.UUID
 
 data class EtteroppgjoerForbehandling(
@@ -26,11 +27,13 @@ data class EtteroppgjoerForbehandling(
     val aar: Int,
     val innvilgetPeriode: Periode,
     val brevId: Long?,
-    val kopiertFra: UUID? = null, // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
-    val sisteIverksatteBehandlingId: UUID, // siste iverksatte behandling når forbehandling ble opprettet
+    val varselbrevSendt: LocalDate?,
+    val sisteIverksatteBehandlingId: UUID,
     val harMottattNyInformasjon: JaNei?,
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
+    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
+    val kopiertFra: UUID? = null,
 ) {
     companion object {
         fun opprett(
@@ -51,6 +54,7 @@ data class EtteroppgjoerForbehandling(
             harMottattNyInformasjon = null,
             endringErTilUgunstForBruker = null,
             beskrivelseAvUgunst = null,
+            varselbrevSendt = null,
         )
     }
 
@@ -78,23 +82,6 @@ data class EtteroppgjoerForbehandling(
         }
     }
 
-    fun kanAvbrytes() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
-
-    fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
-
-    fun erUnderBehandling() =
-        status in
-            listOf(
-                EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                EtteroppgjoerForbehandlingStatus.BEREGNET,
-            )
-
-    fun erFerdigstilt() =
-        status in
-            listOf(
-                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-            )
-
     fun tilDto(): EtteroppgjoerForbehandlingDto =
         EtteroppgjoerForbehandlingDto(
             id = id,
@@ -110,7 +97,32 @@ data class EtteroppgjoerForbehandling(
             harMottattNyInformasjon = harMottattNyInformasjon,
             endringErTilUgunstForBruker = endringErTilUgunstForBruker,
             beskrivelseAvUgunst = beskrivelseAvUgunst,
+            varselbrevSendt = varselbrevSendt,
         )
+
+    fun kanAvbrytes() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
+
+    fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
+
+    fun medVarselbrevSendt(): EtteroppgjoerForbehandling {
+        if (varselbrevSendt != null) {
+            throw InternfeilException("Forbehandling har allerede varselbrev sendt tidspunkt=$varselbrevSendt")
+        }
+        return this.copy(varselbrevSendt = LocalDate.now())
+    }
+
+    fun erUnderBehandling() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                EtteroppgjoerForbehandlingStatus.BEREGNET,
+            )
+
+    fun erFerdigstilt() =
+        status in
+            listOf(
+                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+            )
 }
 
 data class DetaljertForbehandlingDto(

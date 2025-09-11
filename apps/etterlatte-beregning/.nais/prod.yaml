@@ -80,6 +80,8 @@ spec:
             value: "true"
           - name: pgaudit.log
             value: 'write'
+          - name: pgaudit.log_parameter
+            value: "on"
   env:
     - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering

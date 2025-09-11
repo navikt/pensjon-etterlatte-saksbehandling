@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -17,6 +19,14 @@ import no.nav.etterlatte.sak.SakService
 import java.time.LocalDate
 import java.util.UUID
 
+enum class EtteroppgjoerSvarfrist(
+    val value: String,
+) {
+    ETT_MINUTT("1 minute"),
+    FEMTEN_MINUTTER("15 minutes"),
+    EN_MND("1 month"),
+}
+
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
     val sakLesDao: SakLesDao,
@@ -26,6 +36,11 @@ class EtteroppgjoerService(
     val beregningKlient: BeregningKlient,
 ) {
     fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentAlleAktiveEtteroppgjoerForSak(sakId)
+
+    fun hentEtteroppgjoerMedSvarfristUtloept(
+        inntektsaar: Int,
+        svarfrist: EtteroppgjoerSvarfrist,
+    ): List<Etteroppgjoer>? = dao.hentEtteroppgjoerMedSvarfristUtloept(inntektsaar, svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
@@ -42,12 +57,40 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForFilter(filter, inntektsaar)
 
+    fun hentEtteroppgjoerSakerIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+    ): List<SakId> =
+        dao.hentEtteroppgjoerSakerIBulk(
+            inntektsaar = inntektsaar,
+            antall = antall,
+            etteroppgjoerFilter = etteroppgjoerFilter,
+            spesifikkeSaker = spesifikkeSaker,
+            ekskluderteSaker = ekskluderteSaker,
+        )
+
     fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
         inntektsaar: Int,
         status: EtteroppgjoerStatus,
     ) {
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
+    }
+
+    fun oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING)
+        oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
+    }
+
+    fun oppdaterSisteFerdigstiltForbehandlingId(
+        sakId: SakId,
+        inntektsaar: Int,
+        forbehandlingId: UUID,
+    ) {
+        dao.oppdaterFerdigstiltForbehandlingId(sakId, inntektsaar, forbehandlingId)
     }
 
     suspend fun opprettEtteroppgjoer(
@@ -57,14 +100,7 @@ class EtteroppgjoerService(
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-
-        val etteroppgjoerForSak = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-        if (etteroppgjoerForSak != null && etteroppgjoerForSak.status != EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
-            logger.info(
-                "Etteroppgjoer for sakId=$sakId og inntektsaar=$inntektsaar er allerede opprettet med status ${etteroppgjoerForSak.status}.",
-            )
-            return null
-        }
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
 
         val sisteIverksatteVedtak =
             vedtakKlient
@@ -78,6 +114,46 @@ class EtteroppgjoerService(
                     "med id=${sisteIverksatteVedtak.behandlingId} som ikke finnes"
             }
 
+        return etteroppgjoer(sakId, inntektsaar, sisteIverksatteBehandling)
+            .also { dao.lagreEtteroppgjoer(it) }
+    }
+
+    suspend fun opprettEtteroppgjoer(
+        sistIverksatteBehandling: Behandling,
+        inntektsaar: Int,
+    ): Etteroppgjoer? {
+        val sakId = sistIverksatteBehandling.sak.id
+        logger.info(
+            """
+            Forsøker å opprette etteroppgjør for sakId=$sakId,
+            behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
+            """.trimIndent(),
+        )
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
+
+        return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling)
+            .also { dao.lagreEtteroppgjoer(it) }
+    }
+
+    private fun sjekkOmEtteroppgjoerFinnes(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Boolean {
+        val etteroppgjoerForSak = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+        if (etteroppgjoerForSak != null && etteroppgjoerForSak.status != EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
+            logger.info(
+                "Etteroppgjoer for sakId=$sakId og inntektsaar=$inntektsaar er allerede opprettet med status ${etteroppgjoerForSak.status}.",
+            )
+            return true
+        }
+        return false
+    }
+
+    private suspend fun etteroppgjoer(
+        sakId: SakId,
+        inntektsaar: Int,
+        sisteIverksatteBehandling: Behandling,
+    ): Etteroppgjoer {
         val etteroppgjoer =
             Etteroppgjoer(
                 sakId = sakId,
@@ -97,8 +173,6 @@ class EtteroppgjoerService(
                         inntektsaar,
                     ),
             )
-
-        dao.lagreEtteroppgjoer(etteroppgjoer)
         return etteroppgjoer
     }
 

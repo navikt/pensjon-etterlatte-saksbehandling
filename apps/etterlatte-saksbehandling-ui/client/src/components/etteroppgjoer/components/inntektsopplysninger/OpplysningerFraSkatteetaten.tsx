@@ -1,45 +1,60 @@
-import { Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import { PensjonsgivendeInntektFraSkatteetatenSummert } from '~shared/types/EtteroppgjoerForbehandling'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
 export const OpplysningerFraSkatteetaten = ({
   inntektFraSkatteetatenSummert,
 }: {
   inntektFraSkatteetatenSummert: PensjonsgivendeInntektFraSkatteetatenSummert
 }) => {
+  const etteroppgjoer = useEtteroppgjoer()
+
   return (
     <VStack gap="4">
       <Heading size="small">Opplysninger fra Skatteetaten</Heading>
+      <BodyShort>Pensjonsgivende inntekt for {etteroppgjoer.behandling.aar}.</BodyShort>
 
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell scope="col">Type inntekt</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Beløp</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          <Table.Row>
-            <Table.DataCell>Lønnsinntekt</Table.DataCell>
-            <Table.DataCell>{NOK(inntektFraSkatteetatenSummert.loensinntekt)}</Table.DataCell>
-          </Table.Row>
-          <Table.Row>
-            <Table.DataCell>
-              <HStack gap="1">
-                Næringsinntekt
-                <HelpText>Næringsinntekt inkluderer også næringsinntekt fra fiske, fangst og familiebarnehage</HelpText>
-              </HStack>
-            </Table.DataCell>
-            <Table.DataCell>
-              {NOK(
-                inntektFraSkatteetatenSummert.naeringsinntekt +
-                  inntektFraSkatteetatenSummert.fiskeFangstFamiliebarnehage
-              )}
-            </Table.DataCell>
-          </Table.Row>
-        </Table.Body>
-      </Table>
+      <Box width="40rem">
+        <Table>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell scope="col">Type inntekt</Table.HeaderCell>
+              <Table.HeaderCell scope="col" align="right">
+                Beløp
+              </Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            <Table.Row>
+              <Table.DataCell>
+                <HStack gap="1">
+                  Lønnsinntekt
+                  <HelpText>Lønnsinntekt inkluderer også omstillingsstønad</HelpText>
+                </HStack>
+              </Table.DataCell>
+              <Table.DataCell align="right">{NOK(inntektFraSkatteetatenSummert.loensinntekt)}</Table.DataCell>
+            </Table.Row>
+            <Table.Row>
+              <Table.DataCell>
+                <HStack gap="1">
+                  Næringsinntekt
+                  <HelpText>
+                    Næringsinntekt inkluderer også næringsinntekt fra fiske, fangst og familiebarnehage
+                  </HelpText>
+                </HStack>
+              </Table.DataCell>
+              <Table.DataCell align="right">
+                {NOK(
+                  inntektFraSkatteetatenSummert.naeringsinntekt +
+                    inntektFraSkatteetatenSummert.fiskeFangstFamiliebarnehage
+                )}
+              </Table.DataCell>
+            </Table.Row>
+          </Table.Body>
+        </Table>
+      </Box>
     </VStack>
   )
 }

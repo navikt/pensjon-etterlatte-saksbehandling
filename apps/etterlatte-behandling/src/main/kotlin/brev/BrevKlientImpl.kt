@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.Duration
 import java.util.UUID
@@ -42,6 +43,7 @@ interface BrevKlient {
 
     suspend fun kanFerdigstilleBrev(
         brevId: BrevID,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): KanFerdigstilleBrevResponse
 
@@ -159,10 +161,11 @@ class BrevKlientImpl(
 
     override suspend fun kanFerdigstilleBrev(
         brevId: BrevID,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): KanFerdigstilleBrevResponse {
         post(
-            url = "$resourceUrl/api/brev/$brevId/kan-ferdigstille",
+            url = "$resourceUrl/api/brev/$brevId/kan-ferdigstille?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
             onSuccess = { resource ->
                 resource.response?.let { deserialize(it.toJson()) }
                     ?: throw InternfeilException("Feil ved henting av kanFerdigstilleBrev")

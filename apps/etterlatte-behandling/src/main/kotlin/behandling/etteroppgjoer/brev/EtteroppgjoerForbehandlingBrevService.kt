@@ -78,7 +78,7 @@ class EtteroppgjoerForbehandlingBrevService(
                     detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
                 )
 
-        brevKlient.kanFerdigstilleBrev(brevId, brukerTokenInfo).let { response ->
+        brevKlient.kanFerdigstilleBrev(brevId, forbehandling.sak.id, brukerTokenInfo).let { response ->
             if (!response.kanFerdigstilles) {
                 throw UgyldigForespoerselException(
                     code = "KAN_IKKE_FERDIGSTILLE_BREV",

@@ -39,8 +39,8 @@ function EtteroppgjoerForbehandlingTabell({
   const relevanteForbehandlinger = forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
 
   // TODO disse revurderingene skal antageligvis ikke opprettes på denne måten, men vi trenger en måte å komme fra forbehandling
-  const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
-    opprettRevurderingRequest({ sakId: sakId, forbehandlingId: forbehandlingId }, () => {
+  const opprettRevurderingEtteroppgjoer = () => {
+    opprettRevurderingRequest({ sakId: sakId }, () => {
       window.location.reload()
     })
   }
@@ -75,7 +75,7 @@ function EtteroppgjoerForbehandlingTabell({
                   <Button
                     loading={isPending(opprettRevurderingResult)}
                     size="small"
-                    onClick={() => opprettRevurderingEtteroppgjoer(forbehandling.id)}
+                    onClick={opprettRevurderingEtteroppgjoer}
                   >
                     Opprett revurdering
                   </Button>

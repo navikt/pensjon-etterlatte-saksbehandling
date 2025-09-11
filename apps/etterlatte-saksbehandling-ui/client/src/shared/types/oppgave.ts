@@ -108,6 +108,7 @@ export enum Oppgavetype {
   OPPFOELGING = 'OPPFOELGING',
   MELDT_INN_ENDRING = 'MELDT_INN_ENDRING',
   ETTEROPPGJOER = 'ETTEROPPGJOER',
+  ETTEROPPGJOER_SVARFRIST_UTLOEPT = 'ETTEROPPGJOER_SVARFRIST_UTLOEPT',
 }
 
 export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [

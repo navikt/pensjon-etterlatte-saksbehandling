@@ -3,6 +3,7 @@ package behandling.etteroppgjoer
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -86,6 +88,7 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og oppdatere forbehandling`() {
+        val dato = LocalDate.now()
         val kopiertFra = UUID.randomUUID()
         val ny =
             EtteroppgjoerForbehandling(
@@ -102,9 +105,10 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = dato,
             )
 
-        etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
+        etteroppgjoerForbehandlingDao.lagreForbehandling(ny.copy())
         val lagret = etteroppgjoerForbehandlingDao.hentForbehandling(ny.id)
         with(lagret!!) {
             id shouldBe ny.id
@@ -113,7 +117,33 @@ class EtteroppgjoerForbehandlingDaoTest(
             opprettet shouldBe ny.opprettet
             innvilgetPeriode shouldBe ny.innvilgetPeriode
             kopiertFra shouldBe kopiertFra
+            varselbrevSendt shouldBe dato
         }
+    }
+
+    @Test
+    fun `lagre med varselbrev sendt`() {
+        val forbehandling =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = null,
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
+            )
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
+        etteroppgjoerForbehandlingDao.hentForbehandling(forbehandling.id)!!.varselbrevSendt shouldBe null
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling.medVarselbrevSendt())
+        etteroppgjoerForbehandlingDao.hentForbehandling(forbehandling.id)!!.varselbrevSendt shouldNotBe null
     }
 
     @Test
@@ -133,6 +163,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             ),
         )
         etteroppgjoerForbehandlingDao.lagreForbehandling(
@@ -150,6 +181,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             ),
         )
 
@@ -267,6 +299,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningen)
@@ -292,6 +325,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         val afp =

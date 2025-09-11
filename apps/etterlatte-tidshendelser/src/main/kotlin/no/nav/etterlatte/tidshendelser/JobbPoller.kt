@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.tidshendelser.JobbKategori
 import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
+import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
@@ -47,6 +48,7 @@ class JobbPoller(
     private val inntektsjusteringService: AarligInntektsjusteringService,
     private val oppfoelgingBpFylt18Service: OppfoelgingBpFylt18Service,
     private val oppdaterSkjermingBpService: OppdaterSkjermingBpService,
+    private val etteroppgjoerService: EtteroppgjoerService,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
@@ -69,6 +71,7 @@ class JobbPoller(
                         JobbKategori.OPPDATERING_SKJERMING_BP -> {
                             emptyList<Long>()
                         }
+                        JobbKategori.OPPRETT_ETTEROPPGJOER_FORBEHANDLING -> etteroppgjoerService.execute(it)
                     }
 
                 if (saker.isEmpty()) {

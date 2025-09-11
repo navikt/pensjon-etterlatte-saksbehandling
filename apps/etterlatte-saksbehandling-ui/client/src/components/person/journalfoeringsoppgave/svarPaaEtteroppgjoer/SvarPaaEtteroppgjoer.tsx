@@ -10,11 +10,10 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
+import { opprettRevurderingEtteroppgjoer } from '~shared/api/revurdering'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { PersonOversiktFane } from '~components/person/Person'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const SvarPaaEtteroppgjoer = () => {
@@ -32,12 +31,12 @@ export const SvarPaaEtteroppgjoer = () => {
   const [hentJournalpostResult, hentJournalpostFetch] = useApiCall(hentJournalpost)
 
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
-  const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
+  const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingEtteroppgjoer)
 
   const harEtteroppgjoer = true
 
   const opprettRevurdering = (oppgave: OppgaveDTO) => {
-    opprettRevurderingRequest({ sakId: oppgave.sakId, aarsak: Revurderingaarsak.ETTEROPPGJOER }, () => {
+    opprettRevurderingRequest({ sakId: oppgave.sakId }, () => {
       avsluttOppgave(oppgave)
     })
   }

@@ -5,7 +5,6 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
-import io.ktor.server.application.application
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
@@ -14,7 +13,6 @@ import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
-import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -28,7 +26,7 @@ import no.nav.etterlatte.libs.common.sak.tilSakId
 import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
+import no.nav.etterlatte.libs.ktor.route.forbehandlingId
 import no.nav.etterlatte.libs.ktor.route.generellBehandlingId
 import no.nav.etterlatte.libs.ktor.route.klageId
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
@@ -258,7 +256,7 @@ private fun RoutingContext.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsn
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId)?.enhetNr
 
             CallParamAuthId.ETTEROPPGJOERID ->
-                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(etteroppgjoerId)?.enhetNr
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(forbehandlingId)?.enhetNr
         }
     }
 }

@@ -21,6 +21,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
+import { EtteroppgjoerSvarfristUtloeptModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerSvarfristUtloeptModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -127,6 +128,13 @@ export const HandlingerForOppgave = ({
         <Button size="small" as="a" href={`/etteroppgjoer/${referanse}`}>
           Gå til etteroppgjør
         </Button>
+      )
+
+    case Oppgavetype.ETTEROPPGJOER_SVARFRIST_UTLOEPT:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <EtteroppgjoerSvarfristUtloeptModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
       )
 
     case Oppgavetype.KLAGE:

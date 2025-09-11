@@ -3,11 +3,9 @@ package no.nav.etterlatte.brev
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.HttpTimeoutConfig
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -45,7 +43,7 @@ interface BrevKlient {
         brevId: BrevID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): KanFerdigstilleBrevResponse
+    ): Boolean
 
     suspend fun genererPdf(
         brevID: BrevID,
@@ -163,8 +161,8 @@ class BrevKlientImpl(
         brevId: BrevID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): KanFerdigstilleBrevResponse {
-        post(
+    ): Boolean {
+        get(
             url = "$resourceUrl/api/brev/$brevId/kan-ferdigstille?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
             onSuccess = { resource ->
                 resource.response?.let { deserialize(it.toJson()) }

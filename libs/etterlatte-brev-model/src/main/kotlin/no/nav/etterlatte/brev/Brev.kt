@@ -178,13 +178,6 @@ data class BrevDistribusjonResponse(
     val erDistribuert: Boolean,
 )
 
-data class KanFerdigstilleBrevResponse(
-    val brevId: BrevID,
-    val kanFerdigstilles: Boolean,
-    val tidspunktPdfGenerert: Tidspunkt?,
-    val tidspunktPayloadEndret: Tidspunkt?,
-)
-
 class Pdf(
     val bytes: ByteArray,
 )

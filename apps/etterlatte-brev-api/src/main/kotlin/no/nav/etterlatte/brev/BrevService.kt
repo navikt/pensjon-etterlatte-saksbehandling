@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
-import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
@@ -420,21 +419,15 @@ class BrevService(
             Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         ).contains(brevkoder)
 
-    fun kanFerdigstilleBrev(id: BrevID): KanFerdigstilleBrevResponse {
+    fun kanFerdigstilleBrev(id: BrevID): Boolean {
         val brev = sjekkOmBrevKanEndres(id)
-        val pdf =
-            pdfService.hentPdfMedData(brev.id)
-                ?: throw UgyldigForespoerselException(
-                    "INGEN_PDF",
-                    "Fant ingen generert PDF for BrevId=${brev.id}, kan derfor ikke ferdigstille brev",
-                )
+        val pdf = pdfService.hentPdfMedData(brev.id)
+        val kanFerdigstille = pdf?.bytes != null && brev.statusEndret > pdf.opprettet
 
-        return KanFerdigstilleBrevResponse(
-            brevId = brev.id,
-            kanFerdigstilles = brev.statusEndret > pdf.opprettet,
-            tidspunktPdfGenerert = pdf.opprettet,
-            tidspunktPayloadEndret = brev.statusEndret,
+        logger.info(
+            "Sjekker om brev kan ferdigstilles. kanFerdigstilleBrev: $kanFerdigstille, pdfOppdatert: ${pdf?.opprettet}, brevStatusEndret: ${brev.statusEndret}",
         )
+        return pdf?.bytes != null && brev.statusEndret > pdf.opprettet
     }
 
     suspend fun ferdigstill(

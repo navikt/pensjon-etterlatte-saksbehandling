@@ -36,7 +36,6 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
-import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -704,8 +703,9 @@ class BrevKlientTest : BrevKlient {
 
     override suspend fun kanFerdigstilleBrev(
         brevId: BrevID,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): KanFerdigstilleBrevResponse {
+    ): Boolean {
         TODO("Not yet implemented")
     }
 

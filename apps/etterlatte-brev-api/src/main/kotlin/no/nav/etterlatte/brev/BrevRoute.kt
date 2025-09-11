@@ -184,6 +184,13 @@ fun Route.brevRoute(
             }
         }
 
+        post("kan-ferdigstille") {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                val kanBrevFerdigstillesDto = service.kanFerdigstilleBrev(brevId)
+                call.respond(kanBrevFerdigstillesDto)
+            }
+        }
+
         post("journalfoer") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val journalpostIder =

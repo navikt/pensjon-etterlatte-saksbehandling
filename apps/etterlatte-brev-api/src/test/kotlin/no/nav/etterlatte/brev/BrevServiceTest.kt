@@ -24,10 +24,12 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.PdfMedData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -54,7 +56,7 @@ internal class BrevServiceTest {
     private val journalfoerBrevService = mockk<JournalfoerBrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
     private val brevDataFacade = mockk<BrevdataFacade>()
-    private val pdfGenerator = mockk<PDFGenerator>()
+    private val pdfService = mockk<PDFService>()
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
@@ -68,7 +70,7 @@ internal class BrevServiceTest {
             db,
             brevoppretter,
             journalfoerBrevService,
-            pdfGenerator,
+            pdfService,
             mockk(),
             mockk(),
             mockk(),
@@ -351,7 +353,7 @@ internal class BrevServiceTest {
         }
 
         @Test
-        fun `Validere postnummer og poststed på utenlandskpostadresse`() {
+        fun `Validere postnummer og poststed paa utenlandskpostadresse`() {
             val brev = opprettBrev(Status.OPPDATERT, BrevProsessType.REDIGERBAR)
 
             every { db.hentBrev(any()) } returns brev
@@ -391,7 +393,6 @@ internal class BrevServiceTest {
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
         fun `Oppdater mottaker på brev som ikke kan endres`(status: Status) {
             val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
-
             every { db.hentBrev(any()) } returns brev
 
             assertThrows<BrevKanIkkeEndres> {
@@ -538,7 +539,7 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
             val pdf = Pdf(bytes = ByteArray(1))
-            coEvery { pdfGenerator.genererPdf(brev.id, any(), any(), any(), any()) } returns pdf
+            coEvery { pdfService.genererPdf(brev.id, any(), any(), any(), any()) } returns pdf
             runBlocking { brevService.ferdigstill(brev.id, bruker) }
 
             verify {
@@ -556,7 +557,7 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
             val pdf = Pdf(bytes = ByteArray(1))
-            coEvery { pdfGenerator.genererPdf(brev.id, any(), any(), any(), any()) } returns pdf
+            coEvery { pdfService.genererPdf(brev.id, any(), any(), any(), any()) } returns pdf
             assertThrows<UgyldigAntallMottakere> {
                 runBlocking { brevService.ferdigstill(brev.id, bruker) }
             }

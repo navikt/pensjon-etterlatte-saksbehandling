@@ -36,6 +36,7 @@ import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.PdfMedData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.opprettBrevFra
@@ -73,6 +74,11 @@ class BrevRepository(
     fun hentPdf(id: BrevID): Pdf? =
         using(sessionOf(ds)) {
             it.run(queryOf("SELECT bytes FROM pdf WHERE brev_id = ?", id).map(tilPdf).asSingle)
+        }
+
+    fun hentPdfMedData(id: BrevID): PdfMedData? =
+        using(sessionOf(ds)) {
+            it.run(queryOf("SELECT brev_id, bytes, opprettet FROM pdf WHERE brev_id = ?", id).map(tilPdfMedData).asSingle)
         }
 
     fun hentBrevPayload(id: BrevID): Slate? =
@@ -562,7 +568,19 @@ class BrevRepository(
         )
     }
 
-    private val tilPdf: (Row) -> Pdf? = { row -> Pdf(row.bytes("bytes")) }
+    private val tilPdfMedData: (Row) -> PdfMedData? = { row ->
+        PdfMedData(
+            row.long("brev_id"),
+            row.bytes("bytes"),
+            row.tidspunkt("opprettet"),
+        )
+    }
+
+    private val tilPdf: (Row) -> Pdf? = { row ->
+        Pdf(
+            row.bytes("bytes"),
+        )
+    }
 
     private val tilPayload: (Row) -> Slate? = { row ->
         row.stringOrNull("payload")?.let { deserialize<Slate>(it) }
@@ -688,14 +706,15 @@ class BrevRepository(
         """
 
         const val OPPRETT_PDF_QUERY = """
-            INSERT INTO pdf (brev_id, bytes) 
-            VALUES (:brev_id, :bytes)
+            INSERT INTO pdf (brev_id, bytes, opprettet) 
+            VALUES (:brev_id, :bytes, CURRENT_TIMESTAMP)
         """
 
         const val OPPRETT_ELLER_OPPDATER_PDF_QUERY = """
-            INSERT INTO pdf (brev_id, bytes) 
-            VALUES (:brev_id, :bytes)
-            ON CONFLICT (brev_id) DO UPDATE SET bytes = :bytes
+            INSERT INTO pdf (brev_id, bytes, opprettet) 
+            VALUES (:brev_id, :bytes, CURRENT_TIMESTAMP)
+            ON CONFLICT (brev_id) DO UPDATE SET bytes = :bytes,
+                opprettet = CURRENT_TIMESTAMP
         """
 
         const val OPPDATER_INNHOLD_PAYLOAD = """

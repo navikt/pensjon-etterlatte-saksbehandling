@@ -30,14 +30,15 @@ import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
@@ -698,6 +699,13 @@ class BrevKlientTest : BrevKlient {
         brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun kanFerdigstilleBrev(
+        brevId: BrevID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KanFerdigstilleBrevResponse {
         TODO("Not yet implemented")
     }
 

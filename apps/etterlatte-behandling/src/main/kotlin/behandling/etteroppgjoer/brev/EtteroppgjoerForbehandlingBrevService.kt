@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -19,10 +18,12 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -69,7 +70,27 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandlingId, brukerTokenInfo)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        val brevId =
+            forbehandling.brevId
+                ?: throw UgyldigForespoerselException(
+                    code = "MANGLER_BREVID",
+                    detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
+                )
+
+        brevKlient.kanFerdigstilleBrev(brevId, brukerTokenInfo).let { response ->
+            if (!response.kanFerdigstilles) {
+                throw UgyldigForespoerselException(
+                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                    detail =
+                        "Forbehandling $forbehandlingId kan ikke ferdigstilles fordi " +
+                            "brevet ikke er oppdatert (pdfGenerert=${response.tidspunktPdfGenerert}, " +
+                            "brevGenerert=${response.tidspunktPayloadEndret}.",
+                )
+            }
+        }
+
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,

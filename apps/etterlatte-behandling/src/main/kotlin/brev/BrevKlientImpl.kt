@@ -7,6 +7,8 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.HttpTimeoutConfig
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -17,10 +19,6 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.Duration
 import java.util.UUID
-
-class Pdf(
-    val bytes: ByteArray,
-)
 
 interface BrevKlient {
     suspend fun tilbakestillStrukturertBrev(
@@ -41,6 +39,11 @@ interface BrevKlient {
         brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun kanFerdigstilleBrev(
+        brevId: BrevID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KanFerdigstilleBrevResponse
 
     suspend fun genererPdf(
         brevID: BrevID,
@@ -150,6 +153,20 @@ class BrevKlientImpl(
         post(
             url = "$resourceUrl/api/brev/strukturert/$behandlingId/ferdigstill-journalfoer-distribuer?brevType=${brevType.name}",
             onSuccess = { _ -> },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    override suspend fun kanFerdigstilleBrev(
+        brevId: BrevID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KanFerdigstilleBrevResponse {
+        post(
+            url = "$resourceUrl/api/brev/$brevId/kan-ferdigstille",
+            onSuccess = { resource ->
+                resource.response?.let { deserialize(it.toJson()) }
+                    ?: throw InternfeilException("Feil ved henting av kanFerdigstilleBrev")
+            },
             brukerTokenInfo = brukerTokenInfo,
         )
     }

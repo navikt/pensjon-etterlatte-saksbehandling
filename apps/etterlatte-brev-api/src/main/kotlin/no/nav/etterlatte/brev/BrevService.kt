@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
@@ -22,7 +23,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.oppgave.OppgaveService
-import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -43,7 +44,7 @@ class BrevService(
     private val db: BrevRepository,
     private val brevoppretter: Brevoppretter,
     private val journalfoerBrevService: JournalfoerBrevService,
-    private val pdfGenerator: PDFGenerator,
+    private val pdfService: PDFService,
     private val distribuerer: Brevdistribuerer,
     private val dokDistKanalKlient: DokDistKanalKlient,
     private val oppgaveService: OppgaveService,
@@ -70,7 +71,7 @@ class BrevService(
             )
         val brevId = brev.id
         try {
-            pdfGenerator.ferdigstillOgGenererPDF(
+            pdfService.ferdigstillOgGenererPDF(
                 brevId,
                 bruker,
                 avsenderRequest = { _, _, _ ->
@@ -114,7 +115,7 @@ class BrevService(
         try {
             val brevStatus = hentBrev.status
             if (brevStatus.ikkeFerdigstilt()) {
-                pdfGenerator.ferdigstillOgGenererPDF(
+                pdfService.ferdigstillOgGenererPDF(
                     brevId,
                     bruker,
                     avsenderRequest = { _, _, _ ->
@@ -404,7 +405,7 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ): Pdf =
-        pdfGenerator.genererPdf(
+        pdfService.genererPdf(
             id,
             bruker,
             avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
@@ -418,6 +419,23 @@ class BrevService(
             Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
             Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         ).contains(brevkoder)
+
+    fun kanFerdigstilleBrev(id: BrevID): KanFerdigstilleBrevResponse {
+        val brev = sjekkOmBrevKanEndres(id)
+        val pdf =
+            pdfService.hentPdfMedData(brev.id)
+                ?: throw UgyldigForespoerselException(
+                    "INGEN_PDF",
+                    "Fant ingen generert PDF for BrevId=${brev.id}, kan derfor ikke ferdigstille brev",
+                )
+
+        return KanFerdigstilleBrevResponse(
+            brevId = brev.id,
+            kanFerdigstilles = brev.statusEndret > pdf.opprettet,
+            tidspunktPdfGenerert = pdf.opprettet,
+            tidspunktPayloadEndret = brev.statusEndret,
+        )
+    }
 
     suspend fun ferdigstill(
         id: BrevID,

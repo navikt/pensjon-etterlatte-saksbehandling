@@ -59,6 +59,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   }
 
   useEffect(() => {
+    console.log(etteroppgjoer)
     if (etteroppgjoer.behandling.brevId) {
       fetchBrev(etteroppgjoer.behandling.id, (brev) => {
         setVisAdvarselBehandlingEndret(etteroppgjoerBeregnetEtterOpprettetBrev(brev, etteroppgjoer))

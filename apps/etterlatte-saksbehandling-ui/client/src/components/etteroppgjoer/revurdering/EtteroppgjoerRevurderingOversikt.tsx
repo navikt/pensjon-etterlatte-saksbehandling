@@ -3,7 +3,7 @@ import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import React, { useEffect, useState } from 'react'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
@@ -85,10 +85,12 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </BodyShort>
         <Inntektsopplysninger />
 
-        <InformasjonFraBruker
-          behandling={behandling}
-          setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
-        />
+        {behandling.opprinnelse !== Opprinnelse.AUTOMATISK_JOBB && (
+          <InformasjonFraBruker
+            behandling={behandling}
+            setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
+          />
+        )}
 
         {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
           <>

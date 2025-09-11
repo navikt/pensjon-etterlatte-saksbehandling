@@ -3,6 +3,7 @@ CREATE TABLE etteroppgjoer_konfigurasjon (
     opprettet         TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC') NOT NULL,
     endret            TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC') NOT NULL,
     versjon           INTEGER                  NOT NULL DEFAULT 1,
+    inntektsaar       INTEGER                  NOT NULL,
     antall            INTEGER                  NOT NULL DEFAULT -1,
     dato              DATE                     NOT NULL,
     etteroppgjoer_filter VARCHAR NOT NULL DEFAULT 'ENKEL',

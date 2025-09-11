@@ -93,6 +93,7 @@ class BehandlingKlient(
                 contentType(ContentType.Application.Json)
                 setBody(
                     StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
+                        inntektsaar = etteroppgjoerKonfigurasjon.inntektsaar,
                         antall = etteroppgjoerKonfigurasjon.antall,
                         etteroppgjoerFilter = etteroppgjoerKonfigurasjon.etteroppgjoerFilter,
                         spesifikkeSaker = etteroppgjoerKonfigurasjon.spesifikkeSaker,
@@ -109,6 +110,7 @@ data class SakerDto(
 )
 
 data class StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
+    val inntektsaar: Int,
     val antall: Int,
     val etteroppgjoerFilter: EtteroppgjoerFilter,
     val spesifikkeSaker: List<SakId>,

@@ -299,10 +299,6 @@ class EtteroppgjoerForbehandlingService(
         ekskluderteSaker: List<SakId>,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        // Hent liste med etteroppgjør saker som matcher kriterier
-        // Bruker den listen og mapper over for å opprette forbehandlinger
-        // Wrap rundt med try catch og error log de sakene som feilet og grunnen
-
         val relevanteSaker: List<SakId> =
             etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
                 inntektsaar = inntektsaar,

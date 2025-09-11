@@ -16,10 +16,12 @@ class EtteroppgjoerDao(
         dataSource.transaction { tx ->
             with(Databasetabell) {
                 tx.hent(
-                    "SELECT $ANTALL, $DATO, $ETTEROPPGJOER_FILTER, $SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER, $KJOERING_ID FROM $TABELLNAVN " +
+                    "SELECT $INNNTEKTSAAR, $ANTALL, $DATO, $ETTEROPPGJOER_FILTER, $SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER, $KJOERING_ID " +
+                        "FROM $TABELLNAVN " +
                         "WHERE $AKTIV=true ORDER BY $OPPRETTET DESC LIMIT 1",
                 ) { row ->
                     EtteroppgjoerKonfigurasjon(
+                        inntektsaar = row.int(INNNTEKTSAAR),
                         antall = row.int(ANTALL),
                         dato = row.localDate(DATO),
                         etteroppgjoerFilter = enumValueOf<EtteroppgjoerFilter>(row.string(ETTEROPPGJOER_FILTER)),
@@ -33,6 +35,7 @@ class EtteroppgjoerDao(
 
     internal object Databasetabell {
         const val TABELLNAVN = "etteroppgjoer_konfigurasjon"
+        const val INNNTEKTSAAR = "inntektsaar"
         const val ANTALL = "antall"
         const val DATO = "dato"
         const val ETTEROPPGJOER_FILTER = "etteroppgjoer_filter"

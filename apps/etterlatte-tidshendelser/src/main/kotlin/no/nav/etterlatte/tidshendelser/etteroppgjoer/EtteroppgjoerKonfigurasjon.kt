@@ -8,6 +8,7 @@ enum class EtteroppgjoerFilter {
 }
 
 data class EtteroppgjoerKonfigurasjon(
+    val inntektsaar: Int,
     val antall: Int,
     val dato: LocalDate,
     val etteroppgjoerFilter: EtteroppgjoerFilter,

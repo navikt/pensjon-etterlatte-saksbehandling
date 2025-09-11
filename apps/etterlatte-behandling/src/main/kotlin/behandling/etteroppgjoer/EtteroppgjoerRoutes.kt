@@ -169,7 +169,7 @@ fun Route.etteroppgjoerRoutes(
             inTransaction {
                 // TODO: ikke hardkode inntektsår
                 forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
-                    inntektsaar = 2024,
+                    inntektsaar = request.inntektsaar,
                     antall = request.antall,
                     etteroppgjoerFilter = request.etteroppgjoerFilter,
                     spesifikkeSaker = request.spesifikkeSaker,
@@ -198,6 +198,7 @@ private fun sjekkEtteroppgjoerEnabled(featureToggleService: FeatureToggleService
 }
 
 data class EtteroppgjoerForbehandlingBulkRequest(
+    val inntektsaar: Int,
     val antall: Int,
     val etteroppgjoerFilter: EtteroppgjoerFilter,
     val spesifikkeSaker: List<SakId>,

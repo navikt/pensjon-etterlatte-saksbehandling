@@ -85,7 +85,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </BodyShort>
         <Inntektsopplysninger />
 
-        {behandling.opprinnelse !== Opprinnelse.AUTOMATISK_JOBB ? (
+        {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB ? (
           <InformasjonFraBruker
             behandling={behandling}
             setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
@@ -93,7 +93,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         ) : (
           <Box maxWidth="42.5rem">
             <Alert variant="info">
-              Bruker har ikke svart innen 2 ukers svarfrist, dermed skal du ikke ta stilling til informasjon fra bruker.
+              Bruker har svart innen 2 ukers svarfrist, dermed skal du ikke ta stilling til informasjon fra bruker.
             </Alert>
           </Box>
         )}

@@ -39,7 +39,7 @@ class LesSkatteoppgjoerHendelserJob(
         )
 
     override fun schedule(): Timer {
-        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
             logger.info(
                 "$jobbNavn er satt til å kjøre med skatteoppgjoerHendelserService=${skatteoppgjoerHendelserService::class.simpleName} og periode $interval",
             )
@@ -51,7 +51,7 @@ class LesSkatteoppgjoerHendelserJob(
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
         ) {
-            if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
+            if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
                 skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(hendelserBatchSize), jobContext)
             }
         }

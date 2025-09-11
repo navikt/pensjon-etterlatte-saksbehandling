@@ -115,12 +115,7 @@ class SkatteoppgjoerHendelserService(
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
         val sisteKjoering = dao.hentSisteKjoering()
 
-        if (sisteKjoering != null) {
-            return runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
-        } else {
-            logger.warn("Ikke notert noen siste kjøring i DB. Da henter vi ingenting for vi vet ikke hvor vi skal starte")
-            return HendelseslisteFraSkatt(emptyList())
-        }
+        return runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
     }
 }
 

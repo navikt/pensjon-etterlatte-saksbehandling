@@ -168,24 +168,28 @@ fun Route.etteroppgjoerRoutes(
         }
 
         post("/forbehandling/bulk") {
-            val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
-            logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
+            sjekkEtteroppgjoerEnabled(featureToggleService)
 
-            inTransaction {
-                // TODO: ikke hardkode inntektsår
-                forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
-                    inntektsaar = request.inntektsaar,
-                    antall = request.antall,
-                    etteroppgjoerFilter = request.etteroppgjoerFilter,
-                    spesifikkeSaker = request.spesifikkeSaker,
-                    ekskluderteSaker = request.ekskluderteSaker,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
+            kunSystembruker {
+                val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
+                logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
+
+                inTransaction {
+                    // TODO: ikke hardkode inntektsår
+                    forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
+                        inntektsaar = request.inntektsaar,
+                        antall = request.antall,
+                        etteroppgjoerFilter = request.etteroppgjoerFilter,
+                        spesifikkeSaker = request.spesifikkeSaker,
+                        ekskluderteSaker = request.ekskluderteSaker,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
+                }
+
+                logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
+
+                call.respond(HttpStatusCode.OK)
             }
-
-            logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
-
-            call.respond(HttpStatusCode.OK)
         }
 
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {

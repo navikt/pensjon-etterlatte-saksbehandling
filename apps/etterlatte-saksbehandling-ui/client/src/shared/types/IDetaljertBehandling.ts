@@ -31,7 +31,7 @@ export interface IDetaljertBehandling {
   viderefoertOpphoer: ViderefoertOpphoer | null
   tidligereFamiliepleier: ITidligereFamiliepleier | null
   erSluttbehandling: boolean
-  opprinnelse?: Opprinnelse
+  opprinnelse: Opprinnelse
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {

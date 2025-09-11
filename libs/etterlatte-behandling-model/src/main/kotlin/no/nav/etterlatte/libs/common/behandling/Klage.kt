@@ -175,7 +175,11 @@ data class Klage private constructor(
                 FormkravMedBeslutter(
                     formkrav = formkrav,
                     saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent),
-                    klagerHarIkkeSvartVurdering = this.formkrav?.klagerHarIkkeSvartVurdering,
+                    klagerHarIkkeSvartVurdering =
+                        this.formkrav?.klagerHarIkkeSvartVurdering?.takeIf {
+                            formkrav.erFormkraveneOppfylt ==
+                                JaNei.NEI
+                        },
                 ),
             status =
                 when (formkrav.erFormkraveneOppfylt) {

@@ -517,7 +517,7 @@ class VedtakKlientImpl(
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
-            throw VedtakKlientException("", e)
+            throw VedtakKlientException("Kunne ikke tilbakestille tilbakekrevingsvedtak", e)
         }
     }
 }

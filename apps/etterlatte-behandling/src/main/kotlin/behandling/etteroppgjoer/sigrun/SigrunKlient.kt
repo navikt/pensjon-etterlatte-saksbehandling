@@ -116,7 +116,7 @@ class SigrunKlientImpl(
                     val body = it.content.body<String>()
                     try {
                         return@let objectMapper.readValue(body)
-                    } catch (e: JsonConvertException) {
+                    } catch (e: Exception) {
                         sikkerlogg.error("Feilet i JSON-parsing. body: $body", e)
                         throw InternfeilException("Feilet i JSON-parsing.", e)
                     }

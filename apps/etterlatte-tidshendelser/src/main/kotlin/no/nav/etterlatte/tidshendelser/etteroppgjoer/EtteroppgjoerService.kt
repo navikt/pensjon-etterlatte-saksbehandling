@@ -30,6 +30,6 @@ class EtteroppgjoerService(
 
         behandlingKlient.startOpprettelseAvEtteroppgjoerForbehandling(etteroppgjoerKonfigurasjon)
 
-        logger.info("Start opprettelse av etteroppgjoer job startet")
+        logger.info("Jobb for opprettelse av etteroppgjoer ferdig")
     }
 }

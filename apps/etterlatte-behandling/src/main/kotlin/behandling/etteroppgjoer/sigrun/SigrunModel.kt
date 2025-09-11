@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 
 data class HendelseslisteFraSkatt(
-    val hendelser: List<SkatteoppgjoerHendelser>,
+    val hendelser: List<SkatteoppgjoerHendelse>,
 ) {
     companion object {
         fun stub(
@@ -13,7 +13,7 @@ data class HendelseslisteFraSkatt(
         ): HendelseslisteFraSkatt {
             val hendelser =
                 List(antall) { index ->
-                    SkatteoppgjoerHendelser(
+                    SkatteoppgjoerHendelse(
                         gjelderPeriode = aar.toString(),
                         hendelsetype = "NY", // TODO
                         identifikator = index.toString(), // TODO
@@ -26,7 +26,11 @@ data class HendelseslisteFraSkatt(
     }
 }
 
-data class SkatteoppgjoerHendelser(
+data class HendelserSekvensnummerFraSkatt(
+    val sekvensnummer: Long,
+)
+
+data class SkatteoppgjoerHendelse(
     val gjelderPeriode: String, // inntektsaar
     val hendelsetype: String,
     val identifikator: String,

@@ -333,6 +333,14 @@ class VedtakKlientTest : VedtakKlient {
                 vedtak = emptyList(),
             ),
         )
+
+    override suspend fun angreAttesteringTilbakekreving(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: Saksbehandler,
+        enhet: Enhetsnummer,
+    ): VedtakDto {
+        TODO("Not yet implemented")
+    }
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {

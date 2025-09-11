@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -57,7 +58,11 @@ class SkatteoppgjoerHendelserService(
         measureTimedValue {
             val antallRelevante =
                 hendelsesListe.hendelser.count { hendelse ->
-                    behandleHendelse(hendelse)
+                    try {
+                        behandleHendelse(hendelse)
+                    } catch (e: Exception) {
+                        throw InternfeilException("Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}", e)
+                    }
                 }
 
             dao.lagreKjoering(

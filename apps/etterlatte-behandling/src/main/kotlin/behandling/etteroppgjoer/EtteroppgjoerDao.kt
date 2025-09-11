@@ -123,24 +123,33 @@ class EtteroppgjoerDao(
                     AND e.har_adressebeskyttelse_eller_skjermet = ?
                     AND e.har_aktivitetskrav = ?
                      ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
-                     ${if (ekskluderteSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
+                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(sak_id = ANY(?))"}
                     ORDER BY sak_id
                     LIMIT $antall
                     """.trimIndent(),
                 ).apply {
-                    setInt(1, inntektsaar)
-                    setBoolean(2, etteroppgjoerFilter.harSanksjon)
-                    setBoolean(3, etteroppgjoerFilter.harInsitusjonsopphold)
-                    setBoolean(4, etteroppgjoerFilter.harOpphoer)
-                    setBoolean(5, etteroppgjoerFilter.harBosattUtland)
-                    setBoolean(6, etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
-                    setBoolean(7, etteroppgjoerFilter.harAktivitetskrav)
+                    var paramIndex = 1
+                    setInt(paramIndex, inntektsaar)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harSanksjon)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harInsitusjonsopphold)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harOpphoer)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harBosattUtland)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harAktivitetskrav)
+                    paramIndex += 1
 
                     if (spesifikkeSaker.isNotEmpty()) {
-                        setArray(8, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                        setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                        paramIndex += 1
                     }
                     if (ekskluderteSaker.isNotEmpty()) {
-                        setArray(9, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                        setArray(paramIndex, createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
                     }
                 }.executeQuery()
                     .toList {

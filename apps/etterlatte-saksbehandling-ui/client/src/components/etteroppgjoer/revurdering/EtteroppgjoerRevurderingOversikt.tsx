@@ -86,22 +86,32 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         <Inntektsopplysninger />
 
         {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB ? (
-          <InformasjonFraBruker
-            behandling={behandling}
-            setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
-          />
-        ) : (
-          <Box maxWidth="42.5rem">
-            <Alert variant="info">
-              Bruker har svart innen 2 ukers svarfrist, dermed skal du ikke ta stilling til informasjon fra bruker.
-            </Alert>
-          </Box>
-        )}
-
-        {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
           <>
+            <InformasjonFraBruker
+              behandling={behandling}
+              setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
+            />
+            {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
+              <>
+                <FastsettFaktiskInntekt
+                  erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+                  setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+                />
+                <TabellForBeregnetEtteroppgjoerResultat />
+                <ResultatAvForbehandling />
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <Box maxWidth="42.5rem">
+              <Alert variant="info">
+                Bruker har svart innen 2 ukers svarfrist, dermed skal du ikke ta stilling til informasjon fra bruker.
+              </Alert>
+            </Box>
+
             <FastsettFaktiskInntekt
-              erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+              erRedigerbar={erRedigerbar}
               setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
             />
             <TabellForBeregnetEtteroppgjoerResultat />

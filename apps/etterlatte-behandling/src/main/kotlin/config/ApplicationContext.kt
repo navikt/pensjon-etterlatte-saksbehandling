@@ -974,6 +974,7 @@ internal class ApplicationContext(
                 },
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
+            featureToggleService = featureToggleService,
         )
     }
 

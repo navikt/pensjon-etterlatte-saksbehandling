@@ -2,9 +2,11 @@ package behandling.jobs.etteroppgjoer
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
@@ -20,9 +22,10 @@ class LesSkatteoppgjoerHendelserJob(
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
-    val hendelserBatchSize: Int,
-    val dataSource: DataSource,
-    val sakTilgangDao: SakTilgangDao,
+    private val hendelserBatchSize: Int,
+    private val sakTilgangDao: SakTilgangDao,
+    private val featureToggleService: FeatureToggleService,
+    dataSource: DataSource,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -36,9 +39,11 @@ class LesSkatteoppgjoerHendelserJob(
         )
 
     override fun schedule(): Timer {
-        logger.info(
-            "$jobbNavn er satt til å kjøre med skatteoppgjoerHendelserService=${skatteoppgjoerHendelserService::class.simpleName} og periode $interval",
-        )
+        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
+            logger.info(
+                "$jobbNavn er satt til å kjøre med skatteoppgjoerHendelserService=${skatteoppgjoerHendelserService::class.simpleName} og periode $interval",
+            )
+        }
 
         return fixedRateCancellableTimer(
             name = jobbNavn,
@@ -46,7 +51,7 @@ class LesSkatteoppgjoerHendelserJob(
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
         ) {
-            if (erLeader()) {
+            if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
                 skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(hendelserBatchSize), jobContext)
             }
         }

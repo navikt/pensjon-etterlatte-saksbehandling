@@ -48,7 +48,7 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
       <Heading level="3" size="small">
         Klager har ikke kommet med nødvendig informasjon
       </Heading>
-      <BodyShort>Hvis klager ikke kommer med nødvendig informasjon, skal klagen avvises.</BodyShort>
+      <BodyShort>Dersom nødvendig informasjon ikke kommer fra klager innen fristen, kan klagen avvises.</BodyShort>
       {!!vurdering && !open && (
         <>
           <Label>Begrunnelse</Label>
@@ -69,7 +69,7 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
                 <Textarea
                   {...register('begrunnelse')}
                   label="Begrunnelse"
-                  description="Begrunn hvorfor klagen skal avvises"
+                  description="Beskriv når informasjonbrev ble sendt og når svarfristen utløpte."
                 />
                 <HStack gap="4">
                   <Button icon={<FileIcon />} type="submit" size="small" loading={isPending(klagerIkkeSvartResult)}>

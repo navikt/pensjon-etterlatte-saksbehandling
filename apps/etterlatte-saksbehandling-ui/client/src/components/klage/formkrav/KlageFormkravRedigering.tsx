@@ -344,7 +344,7 @@ export function KlageFormkravRedigering() {
         </Box>
       </form>
       <Box paddingBlock="8" paddingInline="16 8" maxWidth="42.5rem">
-        <VStack gap="4">
+        <VStack gap="12">
           {!kanVurdereUtfallUtenKontaktMedKlager(klage) && (
             <>
               <BeOmInfoFraKlager klage={klage} />

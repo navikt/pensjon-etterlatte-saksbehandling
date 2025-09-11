@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
@@ -82,7 +82,13 @@ export function KlageAvvisning(props: { klage: Klage }) {
               </BodyLong>
             )}
             {!!klage.formkrav?.klagerHarIkkeSvartVurdering?.begrunnelse && (
-              <BodyLong>Siden klager ikke har svart for å oppfylle formkravene skal klagen avvises.</BodyLong>
+              <>
+                <BodyLong>
+                  Klager har ikke svart på vår henvendelse om å oppfylle formkravene. Klagen skal avvises.
+                </BodyLong>
+                <Label>Begrunnelse</Label>
+                <BodyLong>{klage.formkrav.klagerHarIkkeSvartVurdering.begrunnelse}</BodyLong>
+              </>
             )}
 
             <ControlledRadioGruppe

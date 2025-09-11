@@ -12,6 +12,9 @@ import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlin
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelserSettSekvensnummerRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -24,6 +27,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.forbehandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
@@ -48,6 +52,7 @@ fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
     forbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     etteroppgjoerService: EtteroppgjoerService,
+    skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer") {
@@ -163,30 +168,55 @@ fun Route.etteroppgjoerRoutes(
         }
 
         post("/forbehandling/bulk") {
-            val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
-            logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
+            sjekkEtteroppgjoerEnabled(featureToggleService)
 
-            inTransaction {
-                // TODO: ikke hardkode inntektsår
-                forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
-                    inntektsaar = request.inntektsaar,
-                    antall = request.antall,
-                    etteroppgjoerFilter = request.etteroppgjoerFilter,
-                    spesifikkeSaker = request.spesifikkeSaker,
-                    ekskluderteSaker = request.ekskluderteSaker,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
+            kunSystembruker {
+                val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
+                logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
+
+                inTransaction {
+                    // TODO: ikke hardkode inntektsår
+                    forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
+                        inntektsaar = request.inntektsaar,
+                        antall = request.antall,
+                        etteroppgjoerFilter = request.etteroppgjoerFilter,
+                        spesifikkeSaker = request.spesifikkeSaker,
+                        ekskluderteSaker = request.ekskluderteSaker,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
+                }
+
+                logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
+
+                call.respond(HttpStatusCode.OK)
             }
-
-            logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
-
-            call.respond(HttpStatusCode.OK)
         }
 
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
             val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
             call.respond(forbehandlinger)
+        }
+
+        post("/les-skatteoppgjoer-hendelser") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+
+            kunSystembruker {
+                val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
+                skatteoppgjoerHendelserService.lesOgBehandleHendelser(hendelseKjoeringRequest)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("/sett-skatteoppgjoer-sekvensnummer") {
+            sjekkEtteroppgjoerEnabled(featureToggleService)
+
+            kunSystembruker {
+                val request: HendelserSettSekvensnummerRequest = call.receive()
+                skatteoppgjoerHendelserService.settSekvensnummerForLesingFraDato(request.startdato)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

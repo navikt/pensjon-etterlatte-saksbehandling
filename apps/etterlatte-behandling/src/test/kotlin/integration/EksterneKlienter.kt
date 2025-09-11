@@ -827,6 +827,8 @@ class SigrunKlienTest : SigrunKlient {
         sekvensnummerStart: Long,
         brukAktoerId: Boolean,
     ): HendelseslisteFraSkatt = HendelseslisteFraSkatt.stub()
+
+    override suspend fun hentSekvensnummerForLesingFraDato(dato: LocalDate): Long = 1
 }
 
 class InntektskomponentKlientTest : InntektskomponentKlient {

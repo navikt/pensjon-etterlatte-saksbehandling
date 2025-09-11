@@ -432,7 +432,10 @@ class TilbakekrevingService(
                 }
             } catch (tilbakekrevingKlientFeil: Exception) {
                 try {
-                    // Prøver å rydde opp for vedtak
+                    logger.info(
+                        "Fikk en feil mot tilbakekrevingskomponenten, så vi prøver å rydde opp " +
+                            "attesteringen i vedtaksvurdering.",
+                    )
                     runBlocking {
                         vedtakKlient.angreAttesteringTilbakekreving(
                             tilbakekrevingId = tilbakekreving.id,

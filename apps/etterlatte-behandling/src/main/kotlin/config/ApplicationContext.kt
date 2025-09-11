@@ -964,14 +964,9 @@ internal class ApplicationContext(
         LesSkatteoppgjoerHendelserJob(
             skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
             erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
-            hendelserBatchSize =
-                if (isProd()) {
-                    1000
-                } else {
-                    10000
-                },
+            hendelserBatchSize = 1000,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
             featureToggleService = featureToggleService,

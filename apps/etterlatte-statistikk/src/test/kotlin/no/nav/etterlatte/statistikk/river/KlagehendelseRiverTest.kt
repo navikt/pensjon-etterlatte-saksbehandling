@@ -8,7 +8,6 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
@@ -49,19 +48,9 @@ internal class KlagehendelseRiverTest {
                         KLAGE_STATISTIKK_RIVER_KEY to
                             StatistikkKlage(
                                 UUID.randomUUID(),
-                                Klage(
-                                    UUID.randomUUID(),
-                                    Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, null),
-                                    Tidspunkt.now(),
-                                    KlageStatus.OPPRETTET,
-                                    kabalResultat = null,
-                                    kabalStatus = null,
-                                    formkrav = null,
+                                Klage.ny(
+                                    sak = Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, null),
                                     innkommendeDokument = null,
-                                    resultat = null,
-                                    utfall = null,
-                                    aarsakTilAvbrytelse = null,
-                                    initieltUtfall = null,
                                 ),
                                 Tidspunkt.now(),
                                 null,

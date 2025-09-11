@@ -27,11 +27,9 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
@@ -86,10 +84,20 @@ class OversendelseBrevServiceImplTest(
                         Spraak.NN,
                         PersonerISak(
                             innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
-                            soeker = Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                            soeker =
+                                Soeker(
+                                    "GRØNN",
+                                    "MELLOMNAVN",
+                                    "KOPP",
+                                    Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                                ),
                             avdoede =
                                 listOf(
-                                    Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "DØD TESTPERSON", LocalDate.now().minusMonths(1)),
+                                    Avdoed(
+                                        Foedselsnummer(AVDOED_FOEDSELSNUMMER.value),
+                                        "DØD TESTPERSON",
+                                        LocalDate.now().minusMonths(1),
+                                    ),
                                 ),
                             verge = null,
                         ),
@@ -105,19 +113,9 @@ class OversendelseBrevServiceImplTest(
     }
 
     private fun klage(): Klage =
-        Klage(
-            behandlingId,
+        Klage.ny(
             Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr, null, null),
-            Tidspunkt.now(),
-            KlageStatus.OPPRETTET,
-            kabalResultat = null,
-            kabalStatus = null,
-            formkrav = null,
-            innkommendeDokument = null,
-            resultat = null,
-            utfall = null,
-            aarsakTilAvbrytelse = null,
-            initieltUtfall = null,
+            null,
         )
 
     private fun brevData() =

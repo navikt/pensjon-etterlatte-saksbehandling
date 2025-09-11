@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
@@ -47,7 +49,7 @@ enum class KlageStatus {
     ;
 
     companion object {
-        fun kanOppdatereFormkrav(status: KlageStatus): Boolean = status !== FERDIGSTILT
+        fun kanOppdatereFormkrav(status: KlageStatus): Boolean = status !in listOf(FERDIGSTILT, AVBRUTT)
 
         fun kanOppdatereUtfall(status: KlageStatus): Boolean = status in listOf(FORMKRAV_IKKE_OPPFYLT, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
 
@@ -122,7 +124,8 @@ enum class KlageUtfall {
     AVVIST_MED_OMGJOERING,
 }
 
-data class Klage(
+@ConsistentCopyVisibility
+data class Klage private constructor(
     val id: UUID,
     val sak: Sak,
     val opprettet: Tidspunkt,
@@ -161,10 +164,7 @@ data class Klage(
         saksbehandlerIdent: String,
     ): Klage {
         if (!this.kanOppdatereFormkrav()) {
-            throw IllegalStateException(
-                "Kan ikke oppdatere formkrav i klagen med id=${this.id}, på grunn av " +
-                    "tilstanden til klagen: ${this.status}",
-            )
+            throw UgyldigTilstandForKlage(this, "Form")
         }
         val utfallFortsattGyldig =
             this.erFormkraveneOppfylt() == formkrav.erFormkraveneOppfylt &&
@@ -175,6 +175,11 @@ data class Klage(
                 FormkravMedBeslutter(
                     formkrav = formkrav,
                     saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent),
+                    klagerHarIkkeSvartVurdering =
+                        this.formkrav?.klagerHarIkkeSvartVurdering?.takeIf {
+                            formkrav.erFormkraveneOppfylt ==
+                                JaNei.NEI
+                        },
                 ),
             status =
                 when (formkrav.erFormkraveneOppfylt) {
@@ -186,19 +191,39 @@ data class Klage(
         )
     }
 
-    fun oppdaterUtfall(utfallMedBrev: KlageUtfallMedData): Klage {
-        if (!this.kanOppdatereUtfall()) {
-            throw IllegalStateException(
-                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen " +
-                    "til klagen (${this.status})",
+    fun oppdaterKlagerIkkeSvartBegrunnelse(
+        begrunnelse: String,
+        saksbehandlerIdent: String,
+    ): Klage {
+        if (this.status != KlageStatus.FORMKRAV_IKKE_OPPFYLT) {
+            throw UgyldigTilstandForKlage(
+                this,
+                "Begrunnelse for at klager ikke har svart kan kun " +
+                    "oppdateres når klagen har vurdert formkrav som ikke gyldige.",
             )
         }
-        if (erKlagenFramsattInnenFrist() == JaNei.JA &&
-            initieltUtfall == null
-        ) {
-            throw IllegalStateException(
-                "Kan ikke oppdatere utfallet i klagen med id=${this.id} uten at initielt utfall er lagret først",
+        sjekkIkkeNull(this.formkrav) {
+            "Formkrav må være vurdert før vurdering for at bruker ikke har svart kan lagres"
+        }
+        val klagerHarIkkeSvartBegrunnelse =
+            KlagerHarIkkeSvartVurdering(
+                begrunnelse = begrunnelse,
+                saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent),
             )
+        return this.copy(
+            formkrav =
+                this.formkrav.copy(
+                    klagerHarIkkeSvartVurdering = klagerHarIkkeSvartBegrunnelse.takeIf { begrunnelse.isNotBlank() },
+                ),
+        )
+    }
+
+    fun oppdaterUtfall(utfallMedBrev: KlageUtfallMedData): Klage {
+        if (!this.kanOppdatereUtfall()) {
+            throw UgyldigTilstandForKlage(this)
+        }
+        if (initieltUtfall == null && !utfallMedBrev.erAvvisning) {
+            throw UgyldigTilstandForKlage(this, "Initielt utfall må lagres før utfall kan lagres")
         }
         val hjemmel =
             when (utfallMedBrev) {
@@ -225,10 +250,7 @@ data class Klage(
         saksbehandlerIdent: String,
     ): Klage {
         if (!this.kanOppdatereUtfall()) {
-            throw IllegalStateException(
-                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen " +
-                    "til klagen (${this.status})",
-            )
+            throw UgyldigTilstandForKlage(this)
         } else {
             return this.copy(
                 initieltUtfall =
@@ -243,10 +265,7 @@ data class Klage(
 
     fun ferdigstill(resultat: KlageResultat): Klage {
         if (!this.kanFerdigstille()) {
-            throw IllegalStateException(
-                "Kan ikke ferdigstille klagen med id=${this.id} med resultatet $resultat " +
-                    "på grunn av status til klagen (${this.status})",
-            )
+            throw UgyldigTilstandForKlage(this)
         }
         val harSendtTilKabal = resultat.sendtInnstillingsbrev?.sendtKabalTidspunkt != null
 
@@ -259,10 +278,7 @@ data class Klage(
 
     fun avbryt(aarsak: AarsakTilAvbrytelse): Klage {
         if (!this.kanAvbryte()) {
-            throw IllegalStateException(
-                "Kan ikke avbryte klagen med id=${this.id} " +
-                    "på grunn av status til klagen (${this.status})",
-            )
+            throw UgyldigTilstandForKlage(this)
         }
         return this.copy(
             status = KlageStatus.AVBRUTT,
@@ -330,30 +346,21 @@ data class Klage(
 
     fun fattVedtak(): Klage {
         if (!KlageStatus.kanFatteVedtak(this.status)) {
-            throw IllegalStateException(
-                "Kan ikke fatte vedtak for klagen med id=${this.id} " +
-                    "på grunn av status til klagen (${this.status})",
-            )
+            throw UgyldigTilstandForKlage(this)
         }
         return this.copy(status = KlageStatus.FATTET_VEDTAK)
     }
 
     fun attesterVedtak(): Klage {
         if (!KlageStatus.kanAttestereVedtak(this.status)) {
-            throw IllegalStateException(
-                "Kan ikke attestere vedtak for klagen med id=${this.id} " +
-                    "på grunn av status til klagen (${this.status})",
-            )
+            throw UgyldigTilstandForKlage(this)
         }
         return this.copy(status = KlageStatus.FERDIGSTILT)
     }
 
     fun underkjennVedtak(): Klage {
         if (!KlageStatus.kanUnderkjenneVedtak(this.status)) {
-            throw IllegalStateException(
-                "Kan ikke underkjenne vedtak for klagen med id=${this.id} " +
-                    "på grunn av status til klagen (${this.status})",
-            )
+            throw UgyldigTilstandForKlage(this)
         }
         return this.copy(status = KlageStatus.RETURNERT)
     }
@@ -376,6 +383,38 @@ data class Klage(
                 innkommendeDokument = innkommendeDokument,
                 aarsakTilAvbrytelse = null,
                 initieltUtfall = null,
+            )
+
+        /**
+         * Skal kun brukes for å opprette et klage-objekt fra uthenting fra databasen
+         */
+        fun fraResultSet(
+            id: UUID,
+            sak: Sak,
+            opprettet: Tidspunkt,
+            status: KlageStatus,
+            kabalStatus: KabalStatus?,
+            formkrav: FormkravMedBeslutter?,
+            initieltUtfall: InitieltUtfallMedBegrunnelseOgSaksbehandler?,
+            utfall: KlageUtfallMedData?,
+            resultat: KlageResultat?,
+            kabalResultat: BehandlingResultat?,
+            innkommendeDokument: InnkommendeKlage?,
+            aarsakTilAvbrytelse: AarsakTilAvbrytelse?,
+        ): Klage =
+            Klage(
+                id = id,
+                sak = sak,
+                opprettet = opprettet,
+                status = status,
+                kabalStatus = kabalStatus,
+                formkrav = formkrav,
+                initieltUtfall = initieltUtfall,
+                utfall = utfall,
+                resultat = resultat,
+                kabalResultat = kabalResultat,
+                innkommendeDokument = innkommendeDokument,
+                aarsakTilAvbrytelse = aarsakTilAvbrytelse,
             )
     }
 }
@@ -436,6 +475,7 @@ data class VedtakKlagenGjelderPdfgen(
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfallMedData {
     abstract val saksbehandler: Grunnlagsopplysning.Saksbehandler
+    abstract val erAvvisning: Boolean
 
     abstract fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean
 
@@ -445,6 +485,9 @@ sealed class KlageUtfallMedData {
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev) = other is KlageUtfallUtenBrev.Omgjoering
+
+        @JsonIgnore
+        override val erAvvisning: Boolean = false
     }
 
     @JsonTypeName("DELVIS_OMGJOERING")
@@ -454,6 +497,9 @@ sealed class KlageUtfallMedData {
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.DelvisOmgjoering
+
+        @JsonIgnore
+        override val erAvvisning: Boolean = false
     }
 
     @JsonTypeName("STADFESTE_VEDTAK")
@@ -462,6 +508,9 @@ sealed class KlageUtfallMedData {
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.StadfesteVedtak
+
+        @JsonIgnore
+        override val erAvvisning: Boolean = false
     }
 
     @JsonTypeName("AVVIST")
@@ -471,6 +520,9 @@ sealed class KlageUtfallMedData {
         val brev: KlageVedtaksbrev,
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.Avvist
+
+        @JsonIgnore
+        override val erAvvisning: Boolean = true
     }
 
     @JsonTypeName("AVVIST_MED_OMGJOERING")
@@ -479,6 +531,9 @@ sealed class KlageUtfallMedData {
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.AvvistMedOmgjoering
+
+        @JsonIgnore
+        override val erAvvisning: Boolean = true
     }
 
     fun innstilling(): InnstillingTilKabal? =
@@ -760,6 +815,12 @@ data class VedtaketKlagenGjelder(
 
 data class FormkravMedBeslutter(
     val formkrav: Formkrav,
+    val klagerHarIkkeSvartVurdering: KlagerHarIkkeSvartVurdering?,
+    val saksbehandler: Grunnlagsopplysning.Saksbehandler,
+)
+
+data class KlagerHarIkkeSvartVurdering(
+    val begrunnelse: String,
     val saksbehandler: Grunnlagsopplysning.Saksbehandler,
 )
 
@@ -791,3 +852,11 @@ data class EkstradataInnstilling(
 class KlageKanIkkeEndres(
     override val detail: String,
 ) : UgyldigForespoerselException(code = "KLAGE_KAN_IKKE_ENDRES", detail = detail)
+
+class UgyldigTilstandForKlage(
+    klage: Klage,
+    begrunnelse: String = "",
+) : UgyldigForespoerselException(
+        code = "KLAGE_HAR_FEIL_TILSTAND",
+        detail = "Klagen med id=${klage.id} og status ${klage.status} kan ikke oppdateres. $begrunnelse",
+    )

@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
@@ -14,6 +14,7 @@ import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny
 import { erSkjemaUtfylt, KlageOmgjoering } from '~components/klage/vurdering/KlageVurderingForms'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { JaNei } from '~shared/types/ISvar'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -74,10 +75,21 @@ export function KlageAvvisning(props: { klage: Klage }) {
       <form onSubmit={handleSubmit(sendInnVurdering)}>
         <Box paddingBlock="8" paddingInline="16 8">
           <VStack gap="4">
-            <BodyLong>
-              Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket
-              skal omgjøres.
-            </BodyLong>
+            {klage.formkrav?.formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI && (
+              <BodyLong>
+                Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket
+                skal omgjøres.
+              </BodyLong>
+            )}
+            {!!klage.formkrav?.klagerHarIkkeSvartVurdering?.begrunnelse && (
+              <>
+                <BodyLong>
+                  Klager har ikke svart på vår henvendelse om å oppfylle formkravene. Klagen skal avvises.
+                </BodyLong>
+                <Label>Begrunnelse</Label>
+                <BodyLong>{klage.formkrav.klagerHarIkkeSvartVurdering.begrunnelse}</BodyLong>
+              </>
+            )}
 
             <ControlledRadioGruppe
               name="utfall"

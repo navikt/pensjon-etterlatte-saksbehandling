@@ -27,7 +27,6 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
@@ -747,18 +746,8 @@ internal class VedtaksvurderingRouteTest {
     private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
 
     private fun klage(): Klage =
-        Klage(
-            UUID.randomUUID(),
-            Sak("ident", SakType.BARNEPENSJON, sakId1, ENHET_1, null, null),
-            Tidspunkt.now(),
-            KlageStatus.OPPRETTET,
-            kabalResultat = null,
-            kabalStatus = null,
-            formkrav = null,
+        Klage.ny(
+            sak = Sak("ident", SakType.BARNEPENSJON, sakId1, ENHET_1, null, null),
             innkommendeDokument = null,
-            resultat = null,
-            utfall = null,
-            aarsakTilAvbrytelse = null,
-            initieltUtfall = null,
         )
 }

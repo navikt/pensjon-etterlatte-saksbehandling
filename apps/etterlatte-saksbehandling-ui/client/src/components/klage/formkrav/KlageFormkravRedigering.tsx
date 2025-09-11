@@ -27,11 +27,16 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterVedtakType } from '~utils/formatering/formatering'
 import { formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { FieldOrNull } from '~shared/types/util'
-import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import {
+  kanVurdereUtfall,
+  kanVurdereUtfallUtenKontaktMedKlager,
+  nesteSteg,
+} from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { BeOmInfoFraKlager } from '~components/klage/formkrav/components/BeOmInfoFraKlager'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { KlagerHarIkkeSvart } from './KlagerHarIkkeSvart'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -122,7 +127,7 @@ export function KlageFormkravRedigering() {
       return
     }
     if (!isDirty) {
-      if (kanVurdereUtfall(klage)) {
+      if (kanVurdereUtfallUtenKontaktMedKlager(klage)) {
         navigate(`/klage/${klage.id}/vurdering`)
       } else {
         navigate(`/klage/${klage.id}/oppsummering`)
@@ -133,7 +138,7 @@ export function KlageFormkravRedigering() {
 
     lagreFormkrav({ klageId: klage.id, formkrav }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
-      if (kanVurdereUtfall(oppdatertKlage)) {
+      if (kanVurdereUtfallUtenKontaktMedKlager(oppdatertKlage)) {
         navigate(nesteSteg(oppdatertKlage, 'formkrav'))
       }
       setRedigerModus(false)
@@ -163,7 +168,7 @@ export function KlageFormkravRedigering() {
         </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnFormkrav)}>
-        <Box paddingBlock="8" paddingInline="16 8" maxWidth="42.5rem">
+        <Box paddingBlock="8 0" paddingInline="16 8" maxWidth="42.5rem">
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
@@ -326,15 +331,6 @@ export function KlageFormkravRedigering() {
                     Endre vurdering
                   </Button>
                 </div>
-                {kanVurdereUtfall(klage) ? (
-                  <HStack justify="center">
-                    <Button as="a" href={nesteSteg(klage, 'formkrav')}>
-                      Neste side
-                    </Button>
-                  </HStack>
-                ) : (
-                  <BeOmInfoFraKlager klage={klage} />
-                )}
               </VStack>
             )}
           </VStack>
@@ -347,6 +343,24 @@ export function KlageFormkravRedigering() {
           })}
         </Box>
       </form>
+      <Box paddingBlock="8" paddingInline="16 8" maxWidth="42.5rem">
+        <VStack gap="12">
+          {!kanVurdereUtfallUtenKontaktMedKlager(klage) && (
+            <>
+              <BeOmInfoFraKlager klage={klage} />
+              <KlagerHarIkkeSvart klage={klage} />
+            </>
+          )}
+
+          {kanVurdereUtfall(klage) && (
+            <HStack justify="center">
+              <Button as="a" href={nesteSteg(klage, 'formkrav')}>
+                Neste side
+              </Button>
+            </HStack>
+          )}
+        </VStack>
+      </Box>
     </>
   )
 }

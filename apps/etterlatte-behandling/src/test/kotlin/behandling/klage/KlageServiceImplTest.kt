@@ -46,6 +46,7 @@ import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
+import no.nav.etterlatte.libs.common.behandling.UgyldigTilstandForKlage
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -74,8 +75,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -111,11 +110,23 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         klageDao = applicationContext.klageDao
         hendelseDao = applicationContext.hendelseDao
 
-        coEvery { brevApiKlientMock.distribuerBrev(any(), any(), any()) } returns BestillingsIdDto(listOf(randomString()))
+        coEvery {
+            brevApiKlientMock.distribuerBrev(
+                any(),
+                any(),
+                any(),
+            )
+        } returns BestillingsIdDto(listOf(randomString()))
         coEvery { brevApiKlientMock.ferdigstillVedtaksbrev(any(), any()) } just runs
         coEvery { brevApiKlientMock.ferdigstillOversendelseBrev(any(), any(), any()) } just runs
         coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns randomOpprettetBrevDto()
-        coEvery { brevApiKlientMock.journalfoerBrev(any(), any(), any()) } returns JournalpostIdDto(listOf(randomString()))
+        coEvery {
+            brevApiKlientMock.journalfoerBrev(
+                any(),
+                any(),
+                any(),
+            )
+        } returns JournalpostIdDto(listOf(randomString()))
         coEvery { brevApiKlientMock.journalfoerNotatKa(any(), any()) } returns OpprettJournalpostDto(randomString())
         coEvery { brevApiKlientMock.opprettKlageOversendelsesbrevISak(any(), any()) } returns randomOpprettetBrevDto()
         coEvery { brevApiKlientMock.opprettVedtaksbrev(any(), any(), any()) } returns randomOpprettetBrevDto()
@@ -197,25 +208,17 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         }
     }
 
-    @ParameterizedTest
-    @EnumSource(
-        KlageStatus::class,
-        names = [
-            "OPPRETTET",
-            "FORMKRAV_OPPFYLT",
-            "FORMKRAV_IKKE_OPPFYLT",
-            "UTFALL_VURDERT",
-            "FATTET_VEDTAK",
-            "RETURNERT",
-        ],
-        mode = EnumSource.Mode.EXCLUDE,
-    )
-    fun `avbryt klage feiler hvis ulovlig status`(statusUnderTest: KlageStatus) {
+    @Test
+    fun `avbryt klage feiler hvis klagen er avbrutt`() {
         val klage =
             inTransaction {
                 val sak = oppprettOmsSak()
-                opprettKlage(sak, status = statusUnderTest)
+                opprettKlage(sak)
             }
+        inTransaction {
+            service.avbrytKlage(klage.id, AarsakTilAvbrytelse.ANNET, "", saksbehandler)
+        }
+
         shouldThrow<IkkeTillattException> {
             inTransaction {
                 service.avbrytKlage(
@@ -353,7 +356,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                 val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
                 service.lagreFormkravIKlage(klage.id, formkrav(), saksbehandler)
             }
-        shouldThrow<IllegalStateException> {
+        shouldThrow<UgyldigTilstandForKlage> {
             inTransaction {
                 service.lagreUtfallAvKlage(
                     klage.id,
@@ -596,17 +599,10 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
 
     private fun oppprettOmsSak() = sakSkrivDao.opprettSak(klagerFnr, SakType.OMSTILLINGSSTOENAD, enhet)
 
-    private fun opprettKlage(
-        sak: Sak,
-        status: KlageStatus? = null,
-    ): Klage {
+    private fun opprettKlage(sak: Sak): Klage {
         val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
         tildelOppgave(klage)
-        return if (status != null) {
-            klage.copy(status = status).also { klageDao.lagreKlage(it) }
-        } else {
-            klage
-        }
+        return klage
     }
 
     private fun tildelOppgave(klage: Klage) {

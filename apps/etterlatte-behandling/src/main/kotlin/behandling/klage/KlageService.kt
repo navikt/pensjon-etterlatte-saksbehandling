@@ -124,6 +124,12 @@ interface KlageService {
         valgtBegrunnelse: String,
         saksbehandler: Saksbehandler,
     ): Klage
+
+    fun oppdaterKlagerIkkeSvart(
+        klageId: UUID,
+        begrunnelse: String,
+        saksbehandler: Saksbehandler,
+    ): Klage
 }
 
 class ManglerSaksbehandlerException(
@@ -532,7 +538,11 @@ class KlageServiceImpl(
         saksbehandler: Saksbehandler,
     ): Klage {
         logger.info("Underkjenner vedtak for klage=$klageId")
-        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+        val klage =
+            klageDao.hentKlage(klageId) ?: throw IkkeFunnetException(
+                "KLAGE_IKKE_FUNNET",
+                "Klage med id=$klageId finnes ikke",
+            )
 
         val oppdatertKlage = klage.underkjennVedtak()
 
@@ -564,6 +574,21 @@ class KlageServiceImpl(
             "Vedtak er underkjent",
         )
 
+        return oppdatertKlage
+    }
+
+    override fun oppdaterKlagerIkkeSvart(
+        klageId: UUID,
+        begrunnelse: String,
+        saksbehandler: Saksbehandler,
+    ): Klage {
+        val klage =
+            klageDao.hentKlage(klageId) ?: throw IkkeFunnetException(
+                "KLAGE_IKKE_FUNNET",
+                "Klage med id=$klageId finnes ikke",
+            )
+        val oppdatertKlage = klage.oppdaterKlagerIkkeSvartBegrunnelse(begrunnelse, saksbehandler.ident)
+        klageDao.lagreKlage(oppdatertKlage)
         return oppdatertKlage
     }
 
@@ -614,7 +639,11 @@ class KlageServiceImpl(
             klage = klage,
             ekstradataInnstilling =
                 EkstradataInnstilling(
-                    mottakerInnstilling = mapMottakerInnstilling(klage.innkommendeDokument?.innsender, ferdigstillResultat),
+                    mottakerInnstilling =
+                        mapMottakerInnstilling(
+                            klage.innkommendeDokument?.innsender,
+                            ferdigstillResultat,
+                        ),
                     // TODO: Håndter verge
                     vergeEllerFullmektig = null,
                     journalpostInnstillingsbrev = ferdigstillResultat.notatTilKa.journalpostId,

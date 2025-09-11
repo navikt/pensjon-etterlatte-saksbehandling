@@ -5,7 +5,7 @@ import { lagreKlagerIkkeSvart } from '~shared/api/klage'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { BodyShort, Button, Heading, Label, Link, Textarea, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, HStack, Label, Textarea, VStack } from '@navikt/ds-react'
 import { FileIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 
@@ -36,7 +36,10 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
         klageId: klage.id,
         begrunnelse: formdata.begrunnelse,
       },
-      (klage) => dispatch(addKlage(klage))
+      (klage) => {
+        setOpen(false)
+        dispatch(addKlage(klage))
+      }
     )
   }
 
@@ -50,9 +53,6 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
         <>
           <Label>Begrunnelse</Label>
           <BodyShort>{vurdering}</BodyShort>
-          <Link as={Button} href={`/klage/${klage.id}/vurdering`}>
-            Avvis klage
-          </Link>
         </>
       )}
       {redigerbar && (
@@ -65,19 +65,27 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
             </div>
           ) : (
             <form onSubmit={handleSubmit(lagreVurdering)}>
-              <Textarea
-                {...register('begrunnelse')}
-                label="Begrunnelse"
-                description="Begrunn hvorfor klagen skal avvises"
-              />
-              <div>
-                <Button icon={<FileIcon />} type="submit" size="small" loading={isPending(klagerIkkeSvartResult)}>
-                  Lagre vurdering
-                </Button>
-                <Button onClick={() => setOpen(false)} type="button" disabled={isPending(klagerIkkeSvartResult)}>
-                  Avbryt
-                </Button>
-              </div>
+              <VStack gap="4">
+                <Textarea
+                  {...register('begrunnelse')}
+                  label="Begrunnelse"
+                  description="Begrunn hvorfor klagen skal avvises"
+                />
+                <HStack gap="4">
+                  <Button icon={<FileIcon />} type="submit" size="small" loading={isPending(klagerIkkeSvartResult)}>
+                    Lagre vurdering
+                  </Button>
+                  <Button
+                    onClick={() => setOpen(false)}
+                    size="small"
+                    variant="secondary"
+                    type="button"
+                    disabled={isPending(klagerIkkeSvartResult)}
+                  >
+                    Avbryt
+                  </Button>
+                </HStack>
+              </VStack>
             </form>
           )}
         </>

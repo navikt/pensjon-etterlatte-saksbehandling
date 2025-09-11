@@ -57,6 +57,21 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForFilter(filter, inntektsaar)
 
+    fun hentEtteroppgjoerSakerIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+    ): List<SakId> =
+        dao.hentEtteroppgjoerSakerIBulk(
+            inntektsaar = inntektsaar,
+            antall = antall,
+            etteroppgjoerFilter = etteroppgjoerFilter,
+            spesifikkeSaker = spesifikkeSaker,
+            ekskluderteSaker = ekskluderteSaker,
+        )
+
     fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
         inntektsaar: Int,

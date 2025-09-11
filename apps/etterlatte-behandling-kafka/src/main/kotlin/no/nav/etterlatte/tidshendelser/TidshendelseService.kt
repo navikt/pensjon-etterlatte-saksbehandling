@@ -223,7 +223,7 @@ class TidshendelseService(
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
             JobbType.OPPDATER_SKJERMING_BP,
-
+            JobbType.OPPRETT_ETTEROPPGJOER_FORBEHANDLING,
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: $type")
         }
 }

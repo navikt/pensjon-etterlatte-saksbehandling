@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -100,6 +99,62 @@ class EtteroppgjoerDao(
                 statement.setLong(1, sakId.sakId)
                 statement.setInt(2, inntektsaar)
                 statement.executeQuery().singleOrNull { toEtteroppgjoer() }
+            }
+        }
+
+    fun hentEtteroppgjoerSakerIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+    ): List<SakId> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT sak_id FROM etteroppgjoer e 
+                    WHERE e.status = 'MOTTATT_SKATTEOPPGJOER'
+                    AND e.inntektsaar = ?
+                    AND e.har_sanksjon = ?
+                    AND e.har_institusjonsopphold = ?
+                    AND e.har_opphoer = ?
+                    AND e.har_bosatt_utland = ?
+                    AND e.har_adressebeskyttelse_eller_skjermet = ?
+                    AND e.har_aktivitetskrav = ?
+                     ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
+                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(sak_id = ANY(?))"}
+                    ORDER BY sak_id
+                    LIMIT $antall
+                    """.trimIndent(),
+                ).apply {
+                    var paramIndex = 1
+                    setInt(paramIndex, inntektsaar)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harSanksjon)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harInsitusjonsopphold)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harOpphoer)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harBosattUtland)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harAktivitetskrav)
+                    paramIndex += 1
+
+                    if (spesifikkeSaker.isNotEmpty()) {
+                        setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                        paramIndex += 1
+                    }
+                    if (ekskluderteSaker.isNotEmpty()) {
+                        setArray(paramIndex, createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
+                    }
+                }.executeQuery()
+                    .toList {
+                        SakId(getLong("sak_id"))
+                    }
             }
         }
 

@@ -23,6 +23,8 @@ import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_INTERVAL
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_OPENING_HOURS
 import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
+import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePoller
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePollerTask
@@ -68,6 +70,9 @@ class AppContext(
     private val oppfoelgingBpFylt18Service = OppfoelgingBpFylt18Service(hendelseDao, behandlingKlient)
     private val oppdaterSkjermingBpService = OppdaterSkjermingBpService(hendelseDao, behandlingKlient)
 
+    private val etteroppgjoerDao = EtteroppgjoerDao(dataSource)
+    private val etteroppgjoerService = EtteroppgjoerService(etteroppgjoerDao, behandlingKlient)
+
     val jobbPollerTask =
         JobbPollerTask(
             initialDelaySeconds = env.requireEnvValue(JOBB_POLLER_INITIAL_DELAY).toLong(),
@@ -82,6 +87,7 @@ class AppContext(
                     inntektsjusteringService,
                     oppfoelgingBpFylt18Service,
                     oppdaterSkjermingBpService,
+                    etteroppgjoerService,
                 ),
         )
 
@@ -110,7 +116,6 @@ class AppContext(
 
 enum class TidshendelserKey : EnvEnum {
     ETTERLATTE_BEHANDLING_AZURE_SCOPE,
-    ETTERLATTE_GRUNNLAG_AZURE_SCOPE,
     HENDELSE_POLLER_INITIAL_DELAY,
     HENDELSE_POLLER_INTERVAL,
     HENDELSE_POLLER_MAX_ANTALL,

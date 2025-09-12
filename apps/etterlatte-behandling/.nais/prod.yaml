@@ -169,11 +169,10 @@ spec:
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.ikomp/.default
 
-    # TODO: bytte ut med prod config
     - name: SIGRUN_URL
-      value: https://sigrun-q2.dev.adeo.no
+      value: https://sigrun.nais.adeo.no/api/
     - name: SIGRUN_OUTBOUND_SCOPE
-      value: api://dev-fss.team-inntekt.sigrun-q2/.default
+      value: api://prod-fss.team-inntekt.sigrun/.default
 
   envFrom:
     - secret: my-application-unleash-api-token

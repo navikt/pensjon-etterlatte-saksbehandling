@@ -164,26 +164,30 @@ function GjenopprettKravpakkeBehandling(props: { sakId: number }) {
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setModalOpen(true)}>
-        Gjenopprett kravpakkebehandling
-      </Button>
+      <div>
+        <Button variant="secondary" onClick={() => setModalOpen(true)}>
+          Gjenopprett kravpakkebehandling
+        </Button>
+      </div>
       <Modal open={modalOpen} onClose={avbryt} header={{ heading: 'Gjenopprett kravpakke' }}>
         <Modal.Body>
-          <BodyShort>En avbrutt kravpakkebehandling kan opprettes på nytt.</BodyShort>
-          {isFailureHandler({
-            apiResult: opprettKravpakkeResult,
-            errorMessage: 'Kunne ikke opprette kravpakkebehandling',
-          })}
-          {mapSuccess(opprettKravpakkeResult, () => (
-            <Alert variant="success">Kravpakke opprettet</Alert>
-          ))}
+          <VStack gap="4">
+            <BodyShort>En avbrutt kravpakkebehandling kan opprettes på nytt.</BodyShort>
+            {isFailureHandler({
+              apiResult: opprettKravpakkeResult,
+              errorMessage: 'Kunne ikke opprette kravpakkebehandling',
+            })}
+            {mapSuccess(opprettKravpakkeResult, () => (
+              <Alert variant="success">Kravpakke opprettet!</Alert>
+            ))}
+          </VStack>
         </Modal.Body>
         <Modal.Footer>
           {isSuccess(opprettKravpakkeResult) ? (
             <>
-              <Link as={Button} href={`/generellbehandling/${opprettKravpakkeResult.data.id}`}>
+              <Button as="a" href={`/generellbehandling/${opprettKravpakkeResult.data.id}`}>
                 Gå til behandling
-              </Link>
+              </Button>
               <Button variant="secondary" onClick={avbryt}>
                 Lukk
               </Button>

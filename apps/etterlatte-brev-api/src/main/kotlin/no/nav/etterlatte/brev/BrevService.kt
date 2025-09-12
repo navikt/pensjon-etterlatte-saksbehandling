@@ -427,7 +427,7 @@ class BrevService(
         logger.info(
             "Sjekker om brev kan ferdigstilles. kanFerdigstilleBrev: $kanFerdigstille, pdfOppdatert: ${pdf?.opprettet}, brevStatusEndret: ${brev.statusEndret}",
         )
-        return pdf?.bytes != null && brev.statusEndret > pdf.opprettet
+        return pdf?.bytes != null && brev.statusEndret < pdf.opprettet
     }
 
     suspend fun ferdigstill(

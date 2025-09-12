@@ -250,7 +250,7 @@ class EtteroppgjoerDao(
                         INSERT INTO etteroppgjoer(
                             sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
                             har_institusjonsopphold = excluded.har_institusjonsopphold,
                             har_bosatt_utland = excluded.har_bosatt_utland,

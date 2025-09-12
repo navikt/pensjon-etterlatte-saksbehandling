@@ -83,7 +83,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 throw UgyldigForespoerselException(
                     code = "KAN_IKKE_FERDIGSTILLE_BREV",
                     detail =
-                        "Brev kan ikke ferdigstilles før forhåndsvisning av PDF er generert.",
+                        "Brev kan ikke ferdigstilles før du har sett over forhåndsvisning",
                 )
             }
         }

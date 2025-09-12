@@ -29,9 +29,8 @@ export function EtteroppgjoerForbehandlingBrev() {
   const [opprettBrevResult, opprettBrevApi] = useApiCall(opprettBrevTilBehandling)
   const [modalOpen, setModalOpen] = useState(false)
 
-  const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest] = useApiCall(
-    ferdigstillEtteroppgjoerForbehandlingBrev
-  )
+  const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest, resetFerdigstillForbehandlingStatus] =
+    useApiCall(ferdigstillEtteroppgjoerForbehandlingBrev)
 
   const kanRedigeres = kanRedigereEtteroppgjoerBehandling(etteroppgjoer.behandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)
@@ -58,6 +57,11 @@ export function EtteroppgjoerForbehandlingBrev() {
     })
   }
 
+  function lukkModal() {
+    resetFerdigstillForbehandlingStatus()
+    setModalOpen(false)
+  }
+
   useEffect(() => {
     if (etteroppgjoer.behandling.brevId) {
       fetchBrev(etteroppgjoer.behandling.id, (brev) => {
@@ -78,7 +82,7 @@ export function EtteroppgjoerForbehandlingBrev() {
     <HStack height="100%" minHeight="100%" wrap={false}>
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => lukkModal()}
         header={{
           heading: 'Ferdigstill forbehandling etteroppgjør',
         }}

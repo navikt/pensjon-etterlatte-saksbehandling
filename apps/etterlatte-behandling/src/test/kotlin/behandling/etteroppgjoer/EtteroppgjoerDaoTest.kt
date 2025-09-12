@@ -159,6 +159,7 @@ class EtteroppgjoerDaoTest(
                 true,
                 true,
                 true,
+                true,
                 uuid,
             ),
         )
@@ -174,6 +175,7 @@ class EtteroppgjoerDaoTest(
             harInstitusjonsopphold shouldBe true
             harAdressebeskyttelseEllerSkjermet shouldBe true
             harAktivitetskrav shouldBe true
+            harOverstyrtBeregning shouldBe true
         }
     }
 

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -87,6 +88,11 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningsGrunnlag
+
+    suspend fun hentOverstyrtBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregningDTO?
 }
 
 class BeregningKlientImpl(
@@ -109,7 +115,7 @@ class BeregningKlientImpl(
             logger.info("Henter beregningsgrunnlag for behandling=$behandlingId")
             return downstreamResourceClient
                 .get(
-                    Resource(clientId, ""),
+                    Resource(clientId, "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId"),
                     brukerTokenInfo,
                 ).mapBoth(
                     success = { resource -> deserialize(resource.response.toString()) },
@@ -117,6 +123,33 @@ class BeregningKlientImpl(
                 )
         } catch (e: ResponseException) {
             throw InternfeilException("Kunne ikke hente beregningsgrunnlag for behandlingen med id=$behandlingId", e)
+        }
+    }
+
+    override suspend fun hentOverstyrtBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregningDTO? {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/$behandlingId/overstyrt",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource ->
+                        when (resource.status) {
+                            HttpStatusCode.NoContent -> null
+                            else -> deserialize(resource.response.toString())
+                        }
+                    },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException("Kunne ikke hente om behandling hadde overstyrt beregning", e)
         }
     }
 

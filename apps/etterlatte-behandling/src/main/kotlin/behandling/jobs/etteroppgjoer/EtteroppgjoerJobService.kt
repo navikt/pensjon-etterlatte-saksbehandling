@@ -20,8 +20,9 @@ enum class EtteroppgjoerFilter(
     val harAdressebeskyttelseEllerSkjermet: Boolean,
     val harAktivitetskrav: Boolean,
     val harBosattUtland: Boolean,
+    val harOverstyrtBeregning: Boolean,
 ) {
-    ENKEL(false, false, false, false, false, false),
+    ENKEL(false, false, false, false, false, false, false),
 }
 
 @OptIn(DelicateCoroutinesApi::class)

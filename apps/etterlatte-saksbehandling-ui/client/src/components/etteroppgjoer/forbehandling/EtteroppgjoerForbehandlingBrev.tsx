@@ -82,7 +82,7 @@ export function EtteroppgjoerForbehandlingBrev() {
     <HStack height="100%" minHeight="100%" wrap={false}>
       <Modal
         open={modalOpen}
-        onClose={() => lukkModal()}
+        onClose={lukkModal}
         header={{
           heading: 'Ferdigstill forbehandling etteroppgjør',
         }}

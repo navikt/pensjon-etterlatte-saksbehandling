@@ -1,5 +1,5 @@
 import { Alert, BodyShort, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -15,11 +15,16 @@ import { OppgaveDTO } from '~shared/types/oppgave'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { PersonOversiktFane } from '~components/person/Person'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 export const SvarPaaEtteroppgjoer = () => {
   useSidetittel('Svar på etteroppgjør')
 
   const { oppgaveId } = useParams()
+
+  const {
+    state: { opprinnelse },
+  } = useLocation()
 
   if (!oppgaveId) {
     return <Alert variant="error">Oppgave ID ligger ikke med i URL</Alert>
@@ -36,9 +41,12 @@ export const SvarPaaEtteroppgjoer = () => {
   const harEtteroppgjoer = true
 
   const opprettRevurdering = (oppgave: OppgaveDTO) => {
-    opprettRevurderingRequest({ sakId: oppgave.sakId }, () => {
-      avsluttOppgave(oppgave)
-    })
+    opprettRevurderingRequest(
+      { sakId: oppgave.sakId, opprinnelse: !!opprinnelse ? opprinnelse : Opprinnelse.UKJENT },
+      () => {
+        avsluttOppgave(oppgave)
+      }
+    )
   }
 
   const avsluttOppgave = (oppgave: OppgaveDTO) => {

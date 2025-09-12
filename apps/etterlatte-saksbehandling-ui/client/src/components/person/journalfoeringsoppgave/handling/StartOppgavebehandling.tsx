@@ -19,6 +19,7 @@ import { PersonLink } from '~components/person/lenker/PersonLink'
 import { logger } from '~utils/logger'
 import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
 import { SakType } from '~shared/types/sak'
+import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -38,7 +39,10 @@ export default function StartOppgavebehandling() {
       case OppgaveHandling.NY_KLAGE:
         return navigate('oppretteklage', { relative: 'path' })
       case OppgaveHandling.SVAR_ETTEROPPGJOER:
-        return navigate(`/svar-paa-etteroppgjoer/${oppgave?.id}`, { relative: 'path' })
+        return navigate(`/svar-paa-etteroppgjoer/${oppgave?.id}`, {
+          relative: 'path',
+          state: { opprinnelse: Opprinnelse.JOURNALFOERING },
+        })
     }
   }
 

@@ -99,14 +99,11 @@ export const SvarPaaEtteroppgjoer = () => {
                   <Heading size="small" level="3">
                     Svaret er knyttet til en forbehandling
                   </Heading>
-                  <BodyShort>
-                    Svaret fra bruker er automatisk knyttet til forbehandlingen bla bla bla ukablad (her kommer det
-                    kanskje info om forbehandlingen?)
-                  </BodyShort>
 
                   <BodyShort>
                     Hvis bruker har gitt nok informasjon kan revurderingen for etteroppgjøret opprettes, ellers kan
-                    oppgaven avsluttes.
+                    oppgaven avsluttes. Ved opprettelse av revurdering vil den automatisk knyttes til den siste
+                    ferdigstilte forbehandlingen.
                   </BodyShort>
 
                   <Textarea

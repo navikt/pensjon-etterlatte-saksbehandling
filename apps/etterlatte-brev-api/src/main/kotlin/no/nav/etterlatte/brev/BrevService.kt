@@ -422,12 +422,12 @@ class BrevService(
     fun kanFerdigstilleBrev(id: BrevID): Boolean {
         val brev = sjekkOmBrevKanEndres(id)
         val pdf = pdfService.hentPdfMedData(brev.id)
-        val kanFerdigstille = pdf?.bytes != null && brev.statusEndret > pdf.opprettet
+        val kanFerdigstille = pdf?.bytes != null && pdf.opprettet > brev.statusEndret
 
         logger.info(
-            "Sjekker om brev kan ferdigstilles. kanFerdigstilleBrev: $kanFerdigstille, pdfOppdatert: ${pdf?.opprettet}, brevStatusEndret: ${brev.statusEndret}",
+            "Sjekker om brev kan ferdigstilles. kanFerdigstilles: $kanFerdigstille, pdfOppdatert: ${pdf?.opprettet}, brevStatusEndret: ${brev.statusEndret}",
         )
-        return pdf?.bytes != null && brev.statusEndret < pdf.opprettet
+        return kanFerdigstille
     }
 
     suspend fun ferdigstill(

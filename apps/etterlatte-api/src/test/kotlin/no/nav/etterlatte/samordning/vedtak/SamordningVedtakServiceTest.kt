@@ -3,9 +3,7 @@ package no.nav.etterlatte.samordning.vedtak
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.equalityMatcher
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldHave
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -108,21 +106,19 @@ class SamordningVedtakServiceTest {
         result.sakstype shouldBe "OMS"
         result.anvendtTrygdetid shouldBe 32
 
-        result.perioder shouldHave
-            equalityMatcher(
-                listOf(
-                    SamordningVedtakPeriode(
-                        fom = now().atStartOfMonth(),
-                        tom = now().atEndOfMonth(),
-                        omstillingsstoenadBrutto = 13000,
-                        omstillingsstoenadNetto = 12000,
-                    ),
-                    SamordningVedtakPeriode(
-                        fom = now().plusMonths(1).atStartOfMonth(),
-                        tom = null,
-                        omstillingsstoenadBrutto = 13000,
-                        omstillingsstoenadNetto = 12000,
-                    ),
+        result.perioder shouldBe
+            listOf(
+                SamordningVedtakPeriode(
+                    fom = now().atStartOfMonth(),
+                    tom = now().atEndOfMonth(),
+                    omstillingsstoenadBrutto = 13000,
+                    omstillingsstoenadNetto = 12000,
+                ),
+                SamordningVedtakPeriode(
+                    fom = now().plusMonths(1).atStartOfMonth(),
+                    tom = null,
+                    omstillingsstoenadBrutto = 13000,
+                    omstillingsstoenadNetto = 12000,
                 ),
             )
 

@@ -17,6 +17,7 @@ import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { MeldtInnEndringSkjema } from '~components/meldtInnEndring/MeldtInnEndringSkjema'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 export enum MeldtInnEndringHandlingValgt {
   AVSLUTT_OPPGAVE,
@@ -99,7 +100,13 @@ export const MeldtInnEndring = () => {
                               <Label>Endringen er svar på etteroppgjøret</Label>
 
                               <div>
-                                <Button onClick={() => navigate(`/svar-paa-etteroppgjoer/${oppgaveId}`)}>
+                                <Button
+                                  onClick={() =>
+                                    navigate(`/svar-paa-etteroppgjoer/${oppgaveId}`, {
+                                      state: { opprinnelse: Opprinnelse.MELD_INN_ENDRING_SKJEMA },
+                                    })
+                                  }
+                                >
                                   Behandle mottatt svar etteroppgjør
                                 </Button>
                               </div>

@@ -37,6 +37,7 @@ class EtteroppgjoerRevurderingService(
 ) {
     fun opprettEtteroppgjoerRevurdering(
         sakId: SakId,
+        opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val (revurdering, sisteIverksatte) =
@@ -101,8 +102,7 @@ class EtteroppgjoerRevurderingService(
                             mottattDato = null,
                             frist = null,
                             paaGrunnAvOppgave = null,
-                            // TODO: sett opprinnelse riktig avhengig av hvorfor vi lager revurderingen
-                            opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+                            opprinnelse = opprinnelse,
                         ).oppdater()
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(

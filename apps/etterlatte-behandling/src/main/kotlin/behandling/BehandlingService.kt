@@ -757,6 +757,7 @@ internal class BehandlingServiceImpl(
             viderefoertOpphoer = viderefoertOpphoer,
             tidligereFamiliepleier = behandling.tidligereFamiliepleier,
             erSluttbehandling = behandling.erSluttbehandling(),
+            opprinnelse = behandling.opprinnelse,
         )
     }
 

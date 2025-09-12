@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -362,6 +361,12 @@ fun Route.tilbakekrevingvedtakRoute(
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
                 call.respond(service.underkjennVedtak(behandlingId).toDto())
+            }
+        }
+        post("/tilbakestill-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Tilbakestiller vedtak fra attestert for tilbakekreving med id=$behandlingId")
+                call.respond(service.tilbakeStillAttestert(behandlingId).toDto())
             }
         }
     }

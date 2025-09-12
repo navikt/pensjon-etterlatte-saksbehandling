@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
@@ -63,6 +64,10 @@ class SkatteoppgjoerHendelserService(
         measureTimedValue {
             val antallRelevante =
                 hendelsesListe.count { hendelse ->
+                    if (hendelse.gjelderPeriode == null) {
+                        logger.error("Hendelse med sekvensnummer ${hendelse.sekvensnummer} mangler periode")
+                        return@count false
+                    }
                     if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
                         return@count false
                     }
@@ -94,15 +99,15 @@ class SkatteoppgjoerHendelserService(
      * @return true hvis hendelsen er relevant, dvs. at saken skal ha etteroppgjør.
      */
     private fun behandleHendelse(hendelse: SkatteoppgjoerHendelse): Boolean {
+        val inntektsaar = krevIkkeNull(hendelse.gjelderPeriode?.toInt(), { "Mangler inntektsår" })
         val ident = hendelse.identifikator
-        val inntektsaar = hendelse.gjelderPeriode.toInt()
 
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
         val etteroppgjoer =
             sak?.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
 
         if (etteroppgjoer != null) {
-            if (hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
+            if (hendelse.hendelsetype == null || hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
                 oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
             } else {
                 logger.warn(
@@ -131,7 +136,7 @@ class SkatteoppgjoerHendelserService(
         ) {
             logger.info(
                 "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør " +
-                    "for ${hendelse.gjelderPeriode.toInt()}, sakId=${sak.id}. " +
+                    "for ${hendelse.gjelderPeriode?.toInt()}, sakId=${sak.id}. " +
                     "Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
             )
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(

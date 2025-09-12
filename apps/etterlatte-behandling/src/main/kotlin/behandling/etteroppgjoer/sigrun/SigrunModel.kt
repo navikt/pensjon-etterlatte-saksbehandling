@@ -19,7 +19,6 @@ data class HendelseslisteFraSkatt(
                         hendelsetype = SigrunKlient.HENDELSETYPE_NY,
                         identifikator = index.toString(),
                         sekvensnummer = startSekvensnummer + index,
-                        somAktoerid = false,
                     )
                 }
             return HendelseslisteFraSkatt(hendelser)
@@ -32,11 +31,10 @@ data class HendelserSekvensnummerFraSkatt(
 )
 
 data class SkatteoppgjoerHendelse(
-    val gjelderPeriode: String, // inntektsaar
-    val hendelsetype: String,
+    val gjelderPeriode: String?, // inntektsaar
+    val hendelsetype: String?,
     val identifikator: String,
     val sekvensnummer: Long,
-    val somAktoerid: Boolean,
 )
 
 data class PensjonsgivendeInntektFraSkattSummert(

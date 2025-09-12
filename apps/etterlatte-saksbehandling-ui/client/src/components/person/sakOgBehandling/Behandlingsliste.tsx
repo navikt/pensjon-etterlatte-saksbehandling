@@ -1,9 +1,9 @@
-import { Alert, HStack, Link, Table } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, HStack, Link, Modal, Table, VStack } from '@navikt/ds-react'
 import { IBehandlingsammendrag, SakMedBehandlinger } from '../typer'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
-import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
+import { hentGenerelleBehandlingForSak, opprettGenerellBehandling } from '~shared/api/generellbehandling'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
 import {
   behandlingStatusTilLesbartnavn,
@@ -13,7 +13,7 @@ import {
 } from '~components/person/sakOgBehandling/behandlingsslistemappere'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
@@ -21,6 +21,15 @@ import { formaterDato } from '~utils/formatering/dato'
 import { formaterBehandlingstype, formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
+
+const kravpakkeKanGjenopprettes = (behandlinger: Generellbehandling[]): boolean => {
+  const kravpakkeBehandlinger = behandlinger.filter(
+    (behandling) => !isVanligBehandling(behandling) && behandling.type === 'KRAVPAKKE_UTLAND'
+  )
+  return (
+    kravpakkeBehandlinger.length > 0 && kravpakkeBehandlinger.every((behandling) => behandling.status === 'AVBRUTT')
+  )
+}
 
 function isVanligBehandling(behandling: alleBehandlingsTyper): behandling is IBehandlingsammendrag {
   return (behandling as IBehandlingsammendrag).soeknadMottattDato !== undefined
@@ -52,7 +61,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
   allebehandlinger.sort((a, b) => (new Date(hentDato(a)) < new Date(hentDato(b)) ? 1 : -1))
 
   return (
-    <>
+    <VStack gap="4">
       {!!allebehandlinger?.length ? (
         <Table zebraStripes>
           <Table.Header>
@@ -121,11 +130,80 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
       )}
 
       <Spinner visible={isPending(generellbehandlingStatus)} label="Henter generelle behandlinger" />
+      {mapSuccess(generellbehandlingStatus, (generelleBehandlinger) => {
+        return kravpakkeKanGjenopprettes(generelleBehandlinger) && <GjenopprettKravpakkeBehandling sakId={sak.id} />
+      })}
 
       {isFailureHandler({
         apiResult: generellbehandlingStatus,
         errorMessage: 'Vi klarte ikke å hente generelle behandligner',
       })}
+    </VStack>
+  )
+}
+
+function GjenopprettKravpakkeBehandling(props: { sakId: number }) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [opprettKravpakkeResult, opprettKravpakkeFetch, resetKravpakke] = useApiCall(opprettGenerellBehandling)
+
+  function avbryt() {
+    if (isSuccess(opprettKravpakkeResult)) {
+      window.location.reload()
+    } else {
+      setModalOpen(false)
+      resetKravpakke()
+    }
+  }
+
+  function opprettKravpakkeBehandling() {
+    opprettKravpakkeFetch({
+      sakId: props.sakId,
+      type: 'KRAVPAKKE_UTLAND',
+    })
+  }
+
+  return (
+    <>
+      <Button variant="secondary" onClick={() => setModalOpen(true)}>
+        Gjenopprett kravpakkebehandling
+      </Button>
+      <Modal open={modalOpen} onClose={avbryt} header={{ heading: 'Gjenopprett kravpakke' }}>
+        <Modal.Body>
+          <BodyShort>En avbrutt kravpakkebehandling kan opprettes på nytt.</BodyShort>
+          {isFailureHandler({
+            apiResult: opprettKravpakkeResult,
+            errorMessage: 'Kunne ikke opprette kravpakkebehandling',
+          })}
+          {mapSuccess(opprettKravpakkeResult, () => (
+            <Alert variant="success">Kravpakke opprettet</Alert>
+          ))}
+        </Modal.Body>
+        <Modal.Footer>
+          {isSuccess(opprettKravpakkeResult) ? (
+            <>
+              <Link as={Button} href={`/generellbehandling/${opprettKravpakkeResult.data.id}`}>
+                Gå til behandling
+              </Link>
+              <Button variant="secondary" onClick={avbryt}>
+                Lukk
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="primary"
+                onClick={opprettKravpakkeBehandling}
+                loading={isPending(opprettKravpakkeResult)}
+              >
+                Opprett kravpakkebehandling
+              </Button>
+              <Button variant="secondary" onClick={avbryt} disabled={isPending(opprettKravpakkeResult)}>
+                Avbryt
+              </Button>
+            </>
+          )}
+        </Modal.Footer>
+      </Modal>
     </>
   )
 }

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -35,16 +34,17 @@ internal fun Route.generellbehandlingRoutes(
             val sak =
                 inTransaction { sakService.finnSak(sakId) }
                     ?: throw SakIkkeFunnetException("Sak med id=$sakId finnes ikke")
-            inTransaction {
-                generellBehandlingService.opprettBehandling(
-                    GenerellBehandling.opprettFraType(request.type, sakId),
-                    saksbehandler,
-                )
-            }
+            val behandling =
+                inTransaction {
+                    generellBehandlingService.opprettBehandling(
+                        GenerellBehandling.opprettFraType(request.type, sakId),
+                        saksbehandler,
+                    )
+                }
             logger.info(
                 "Opprettet generell behandling for sak ${sak.id} av typen ${request.type}",
             )
-            call.respond(HttpStatusCode.OK)
+            call.respond(behandling)
         }
     }
 

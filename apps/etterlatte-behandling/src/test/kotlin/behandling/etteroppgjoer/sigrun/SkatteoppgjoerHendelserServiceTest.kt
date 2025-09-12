@@ -55,7 +55,7 @@ class SkatteoppgjoerHendelserServiceTest {
         coEvery { etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any()) } just runs
 
         runBlocking {
-            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
+            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall, listOf(2024)))
         }
 
         coVerify {

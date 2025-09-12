@@ -33,6 +33,10 @@ enum class SigrunRettighetspakke(
 }
 
 interface SigrunKlient {
+    companion object {
+        const val HENDELSETYPE_NY = "ny"
+    }
+
     suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,

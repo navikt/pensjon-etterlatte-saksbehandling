@@ -41,7 +41,7 @@ class SkatteoppgjoerHendelserService(
             val hendelsesliste = lesHendelsesliste(request)
 
             if (!hendelsesliste.hendelser.isEmpty()) {
-                behandleHendelser(hendelsesliste)
+                behandleHendelser(hendelsesliste.hendelser, request)
             }
         }
     }
@@ -54,12 +54,18 @@ class SkatteoppgjoerHendelserService(
         }
     }
 
-    private fun behandleHendelser(hendelsesListe: HendelseslisteFraSkatt) {
+    private fun behandleHendelser(
+        hendelsesListe: List<SkatteoppgjoerHendelse>,
+        request: HendelseKjoeringRequest,
+    ) {
         measureTimedValue {
             val antallRelevante =
-                hendelsesListe.hendelser.count { hendelse ->
+                hendelsesListe.count { hendelse ->
+                    if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
+                        return@count false
+                    }
                     try {
-                        behandleHendelse(hendelse)
+                        return@count behandleHendelse(hendelse)
                     } catch (e: Exception) {
                         throw InternfeilException("Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}", e)
                     }
@@ -67,19 +73,24 @@ class SkatteoppgjoerHendelserService(
 
             dao.lagreKjoering(
                 HendelserKjoering(
-                    sisteSekvensnummer = hendelsesListe.hendelser.last().sekvensnummer,
-                    antallHendelser = hendelsesListe.hendelser.size,
+                    sisteSekvensnummer = hendelsesListe.last().sekvensnummer,
+                    antallHendelser = hendelsesListe.size,
                     antallRelevante = antallRelevante,
                 ),
             )
         }.let { (antallRelevante, varighet) ->
             logger.info(
-                "Behandling av ${hendelsesListe.hendelser.size} ($antallRelevante relevante) " +
+                "Behandling av ${hendelsesListe.size} ($antallRelevante relevante) " +
                     "tok ${varighet.toString(DurationUnit.SECONDS, 2)}",
             )
         }
     }
 
+    /**
+     * Behandler hendelse, det vil si oppdaterer status på etteroppgjøret.
+     *
+     * @return true hvis hendelsen er relevant, dvs. at saken skal ha etteroppgjør.
+     */
     private fun behandleHendelse(hendelse: SkatteoppgjoerHendelse): Boolean {
         val ident = hendelse.identifikator
         val inntektsaar = hendelse.gjelderPeriode.toInt()
@@ -89,32 +100,45 @@ class SkatteoppgjoerHendelserService(
             sak?.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
 
         if (etteroppgjoer != null) {
-            if (etteroppgjoer.status in
-                listOf(
-                    EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                    EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                )
-            ) {
-                logger.info(
-                    "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør for $inntektsaar, sakId=${sak.id}. Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
-                )
-                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                    sak.id,
-                    etteroppgjoer.inntektsaar,
-                    EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                )
+            if (hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
+                if (etteroppgjoer.status in
+                    listOf(
+                        EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    )
+                ) {
+                    logger.info(
+                        "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør " +
+                            "for ${hendelse.gjelderPeriode.toInt()}, sakId=${sak.id}. " +
+                            "Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
+                    )
+                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                        sak.id,
+                        etteroppgjoer.inntektsaar,
+                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    )
+                } else {
+                    logger.error(
+                        "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede " +
+                            "opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
+                    )
+                    sikkerLogg.error(
+                        "Person med fnr=${hendelse.identifikator} har mottatt ny hendelse fra skatt om nytt skatteoppgjør, " +
+                            "men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
+                    )
+                }
             } else {
-                logger.error(
-                    "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
-                )
-                sikkerLogg.error(
-                    "Person med fnr=$ident har mottatt ny hendelse fra skatt om nytt skatteoppgjør, men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
+                logger.warn(
+                    """
+                    Mottok hendelse av type ${hendelse.hendelsetype} på sak ${sak.id}, 
+                    som skal ha etteroppgjør. Sekvensnummer: ${hendelse.sekvensnummer}, 
+                    inntektsår: $inntektsaar
+                    """.trimIndent(),
                 )
             }
         }
 
-        val relevantHendelse = etteroppgjoer != null
-        return relevantHendelse
+        return etteroppgjoer != null
     }
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
@@ -126,6 +150,7 @@ class SkatteoppgjoerHendelserService(
 
 data class HendelseKjoeringRequest(
     val antall: Int,
+    val inntektsaarListe: List<Int>,
 )
 
 data class HendelserSettSekvensnummerRequest(

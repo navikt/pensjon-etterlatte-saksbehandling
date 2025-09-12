@@ -1,10 +1,8 @@
-import { Alert, BodyShort, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
-import { Link, useLocation, useParams } from 'react-router-dom'
-import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
+import { useLocation, useParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad, hentOppgave } from '~shared/api/oppgaver'
-import { hentJournalpost } from '~shared/api/dokument'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -16,6 +14,8 @@ import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPe
 import { PersonOversiktFane } from '~components/person/Person'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
+import { Sidebar } from '~shared/components/Sidebar'
+import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 
 export const SvarPaaEtteroppgjoer = () => {
   useSidetittel('Svar på etteroppgjør')
@@ -33,7 +33,6 @@ export const SvarPaaEtteroppgjoer = () => {
   const [begrunnelse, setBegrunnelse] = useState<string>('')
 
   const [hentOppgaveResult, hentOppgaveFetch] = useApiCall(hentOppgave)
-  const [hentJournalpostResult, hentJournalpostFetch] = useApiCall(hentJournalpost)
 
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingEtteroppgjoer)
@@ -56,7 +55,7 @@ export const SvarPaaEtteroppgjoer = () => {
   }
 
   useEffect(() => {
-    hentOppgaveFetch(oppgaveId!, (oppgave) => hentJournalpostFetch(oppgave.referanse!))
+    hentOppgaveFetch(oppgaveId!)
   }, [oppgaveId])
 
   return harEtteroppgjoer ? (
@@ -64,40 +63,18 @@ export const SvarPaaEtteroppgjoer = () => {
       {mapResult(hentOppgaveResult, {
         pending: <Spinner label="Henter oppgaver..." />,
         error: (error) => <ApiErrorAlert>Kunne ikke hente oppgave, på grunn av feil: {error.detail}</ApiErrorAlert>,
-        success: (oppgave) =>
-          mapResult(hentJournalpostResult, {
-            pending: <Spinner label="Henter journalpost..." />,
-            error: (error) => (
-              <ApiErrorAlert>Kunne ikke hente journalpost, på grunn av feil: {error.detail}</ApiErrorAlert>
-            ),
-            success: (journalpost) => (
-              <>
-                <StatusBar ident={oppgave.fnr} />
-                <VStack gap="4" paddingInline="16" paddingBlock="16 4" maxWidth="50rem">
+        success: (oppgave) => (
+          <>
+            <StatusBar ident={oppgave.fnr} />
+            <HStack height="100%" minHeight="100vh" wrap={false}>
+              <Box paddingInline="16" paddingBlock="16 4" width="100%">
+                <VStack gap="4" maxWidth="50rem">
                   <Heading size="medium" spacing>
                     Behandling av svar på etteroppgjøret
                   </Heading>
 
-                  <Alert variant="info">
-                    <VStack gap="2">
-                      <BodyShort>Bruker har meldt inn svar på etteroppgjøret</BodyShort>
-
-                      <div>
-                        <Button
-                          as={Link}
-                          icon={<ExternalLinkIcon aria-hidden />}
-                          size="small"
-                          to={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
-                          target="_blank"
-                        >
-                          Åpne dokument (åpnes i ny fane)
-                        </Button>
-                      </div>
-                    </VStack>
-                  </Alert>
-
                   <Heading size="small" level="3">
-                    Svaret er knyttet til en forbehandling
+                    Revurdering blir knyttet til en forbehandling
                   </Heading>
 
                   <BodyShort>
@@ -144,9 +121,13 @@ export const SvarPaaEtteroppgjoer = () => {
                     </HStack>
                   </HStack>
                 </VStack>
-              </>
-            ),
-          }),
+              </Box>
+              <Sidebar>
+                <DokumentlisteLiten fnr={oppgave.fnr!} />
+              </Sidebar>
+            </HStack>
+          </>
+        ),
       })}
     </>
   ) : (

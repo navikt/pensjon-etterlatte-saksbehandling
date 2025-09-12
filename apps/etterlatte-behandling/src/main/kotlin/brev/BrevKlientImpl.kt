@@ -161,16 +161,15 @@ class BrevKlientImpl(
         brevId: BrevID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
+    ): Boolean =
         get(
             url = "$resourceUrl/api/brev/$brevId/kan-ferdigstille?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
             onSuccess = { resource ->
-                resource.response?.let { deserialize(it.toJson()) }
-                    ?: throw InternfeilException("Feil ved henting av kanFerdigstilleBrev")
+                resource.response?.let { deserialize<Boolean>(it.toJson()) }
+                    ?: throw InternfeilException("Feil oppstod ved sjekk om brev med id $brevId kan ferdigstilles for sak $sakId")
             },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,

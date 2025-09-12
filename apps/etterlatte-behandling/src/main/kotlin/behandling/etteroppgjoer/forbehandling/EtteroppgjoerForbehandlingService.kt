@@ -63,13 +63,13 @@ class EtteroppgjoerForbehandlingService(
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
     suspend fun ferdigstillForbehandling(
-        behandlingId: UUID,
+        forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        logger.info("Ferdigstiller forbehandling med id=$behandlingId")
+        logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
         val forbehandling =
-            dao.hentForbehandling(behandlingId)
-                ?: throw FantIkkeForbehandling(behandlingId)
+            dao.hentForbehandling(forbehandling.id)
+                ?: throw FantIkkeForbehandling(forbehandling.id)
 
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
         sjekkAtForbehandlingKanFerdigstilles(forbehandling)

@@ -83,7 +83,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 throw UgyldigForespoerselException(
                     code = "KAN_IKKE_FERDIGSTILLE_BREV",
                     detail =
-                        "Kan ikke ferdigstille brev med id $brevId for forbehandling $forbehandlingId.",
+                        "Brev kan ikke ferdigstilles før forhåndsvisning av PDF er generert.",
                 )
             }
         }

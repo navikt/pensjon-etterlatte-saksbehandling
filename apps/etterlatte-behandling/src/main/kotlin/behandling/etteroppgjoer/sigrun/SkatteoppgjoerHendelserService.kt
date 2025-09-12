@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
@@ -10,6 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -101,32 +103,7 @@ class SkatteoppgjoerHendelserService(
 
         if (etteroppgjoer != null) {
             if (hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
-                if (etteroppgjoer.status in
-                    listOf(
-                        EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                    )
-                ) {
-                    logger.info(
-                        "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør " +
-                            "for ${hendelse.gjelderPeriode.toInt()}, sakId=${sak.id}. " +
-                            "Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
-                    )
-                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                        sak.id,
-                        etteroppgjoer.inntektsaar,
-                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                    )
-                } else {
-                    logger.error(
-                        "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede " +
-                            "opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
-                    )
-                    sikkerLogg.error(
-                        "Person med fnr=${hendelse.identifikator} har mottatt ny hendelse fra skatt om nytt skatteoppgjør, " +
-                            "men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
-                    )
-                }
+                oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
             } else {
                 logger.warn(
                     """
@@ -139,6 +116,39 @@ class SkatteoppgjoerHendelserService(
         }
 
         return etteroppgjoer != null
+    }
+
+    private fun oppdaterEtteroppgjoerStatus(
+        etteroppgjoer: Etteroppgjoer,
+        hendelse: SkatteoppgjoerHendelse,
+        sak: Sak,
+    ) {
+        if (etteroppgjoer.status in
+            listOf(
+                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+        ) {
+            logger.info(
+                "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør " +
+                    "for ${hendelse.gjelderPeriode.toInt()}, sakId=${sak.id}. " +
+                    "Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
+            )
+            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sak.id,
+                etteroppgjoer.inntektsaar,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+        } else {
+            logger.error(
+                "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede " +
+                    "opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
+            )
+            sikkerLogg.error(
+                "Person med fnr=${hendelse.identifikator} har mottatt ny hendelse fra skatt om nytt skatteoppgjør, " +
+                    "men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
+            )
+        }
     }
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {

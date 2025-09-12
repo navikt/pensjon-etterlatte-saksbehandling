@@ -8,7 +8,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.serialization.JsonConvertException
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelserSekvensnummerFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt

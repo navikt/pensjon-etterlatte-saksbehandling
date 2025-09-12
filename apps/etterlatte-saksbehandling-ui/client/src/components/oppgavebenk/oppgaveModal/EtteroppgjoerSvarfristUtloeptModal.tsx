@@ -106,7 +106,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
               </Button>
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button variant="danger" onClick={handleSubmit(avslutt)} loading={isPending(ferdigstillOppgaveStatus)}>
+                <Button variant="primary" onClick={handleSubmit(avslutt)} loading={isPending(ferdigstillOppgaveStatus)}>
                   Avslutt oppgave
                 </Button>
               )}

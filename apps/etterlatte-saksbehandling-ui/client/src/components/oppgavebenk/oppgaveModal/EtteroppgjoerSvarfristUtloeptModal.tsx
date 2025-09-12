@@ -12,6 +12,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
+import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -36,7 +37,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
 
   const opprettRevurderingEtteroppgjoer = () => {
-    opprettRevurderingRequest({ sakId: oppgave.sakId }, () => {
+    opprettRevurderingRequest({ sakId: oppgave.sakId, opprinnelse: Opprinnelse.AUTOMATISK_JOBB }, () => {
       ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
         oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
         setOpen(false)

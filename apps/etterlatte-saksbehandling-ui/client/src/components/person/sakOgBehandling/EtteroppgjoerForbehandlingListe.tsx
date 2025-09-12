@@ -13,6 +13,7 @@ import {
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 function lenkeTilForbehandlingMedId(id: string): string {
   return `/etteroppgjoer/${id}/`
@@ -40,7 +41,7 @@ function EtteroppgjoerForbehandlingTabell({
 
   // TODO disse revurderingene skal antageligvis ikke opprettes på denne måten, men vi trenger en måte å komme fra forbehandling
   const opprettRevurderingEtteroppgjoer = () => {
-    opprettRevurderingRequest({ sakId: sakId }, () => {
+    opprettRevurderingRequest({ sakId: sakId, opprinnelse: Opprinnelse.SAKSBEHANDLER }, () => {
       window.location.reload()
     })
   }

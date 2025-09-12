@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
+import { Generellbehandling, GenerellBehandlingType, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { IPdlPerson } from '~shared/types/Person'
 
 export function hentGenerelleBehandlingForSak(sakId: number): Promise<ApiResponse<Generellbehandling[]>> {
@@ -22,6 +22,13 @@ export function sendTilAttesteringGenerellBehandling(
   generellbehandling: Generellbehandling
 ): Promise<ApiResponse<void>> {
   return apiClient.put(`/generellbehandling/sendtilattestering/${generellbehandling.sakId}`, { ...generellbehandling })
+}
+
+export function opprettGenerellBehandling(args: {
+  sakId: number
+  type: GenerellBehandlingType
+}): Promise<ApiResponse<Generellbehandling>> {
+  return apiClient.post(`/generellbehandling/${args.sakId}`, { type: args.type })
 }
 
 export function attesterGenerellbehandling(generellbehandling: Generellbehandling): Promise<ApiResponse<void>> {

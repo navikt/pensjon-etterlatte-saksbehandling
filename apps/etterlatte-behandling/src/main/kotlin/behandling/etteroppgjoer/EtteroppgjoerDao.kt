@@ -122,6 +122,7 @@ class EtteroppgjoerDao(
                     AND e.har_bosatt_utland = ?
                     AND e.har_adressebeskyttelse_eller_skjermet = ?
                     AND e.har_aktivitetskrav = ?
+                    AND e.har_overstyrt_beregning = ?
                      ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
                      ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(sak_id = ANY(?))"}
                     ORDER BY sak_id
@@ -142,6 +143,8 @@ class EtteroppgjoerDao(
                     setBoolean(paramIndex, etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
                     paramIndex += 1
                     setBoolean(paramIndex, etteroppgjoerFilter.harAktivitetskrav)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harOverstyrtBeregning)
                     paramIndex += 1
 
                     if (spesifikkeSaker.isNotEmpty()) {
@@ -175,6 +178,7 @@ class EtteroppgjoerDao(
                       AND har_bosatt_utland = ?
                       AND har_adressebeskyttelse_eller_skjermet = ?
                       AND har_aktivitetskrav = ?
+                      AND har_overstyrt_beregning = ?
                     """.trimIndent()
 
                 prepareStatement(sql)
@@ -186,6 +190,7 @@ class EtteroppgjoerDao(
                         setBoolean(5, filter.harBosattUtland)
                         setBoolean(6, filter.harAdressebeskyttelseEllerSkjermet)
                         setBoolean(7, filter.harAktivitetskrav)
+                        setBoolean(8, filter.harOverstyrtBeregning)
                     }.executeQuery()
                     .toList { toEtteroppgjoer() }
             }
@@ -243,7 +248,7 @@ class EtteroppgjoerDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer(
-                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, endret, siste_ferdigstilte_forbehandling
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
                         ) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
@@ -253,6 +258,7 @@ class EtteroppgjoerDao(
                             har_opphoer = excluded.har_opphoer,
                             har_adressebeskyttelse_eller_skjermet = excluded.har_adressebeskyttelse_eller_skjermet,
                             har_aktivitetskrav = excluded.har_aktivitetskrav,
+                            har_overstyrt_beregning = excluded.har_overstyrt_beregning,
                             status = excluded.status,
                             endret = excluded.endret,
                             siste_ferdigstilte_forbehandling  = excluded.siste_ferdigstilte_forbehandling
@@ -270,8 +276,9 @@ class EtteroppgjoerDao(
                     statement.setBoolean(8, harBosattUtland)
                     statement.setBoolean(9, harAdressebeskyttelseEllerSkjermet)
                     statement.setBoolean(10, harAktivitetskrav)
-                    statement.setTidspunkt(11, Tidspunkt.now())
-                    statement.setObject(12, sisteFerdigstilteForbehandling)
+                    statement.setBoolean(11, harOverstyrtBeregning)
+                    statement.setTidspunkt(12, Tidspunkt.now())
+                    statement.setObject(13, sisteFerdigstilteForbehandling)
 
                     statement.executeUpdate().also {
                         krev(it == 1) {
@@ -293,6 +300,7 @@ class EtteroppgjoerDao(
             harBosattUtland = getBoolean("har_bosatt_utland"),
             harAdressebeskyttelseEllerSkjermet = getBoolean("har_adressebeskyttelse_eller_skjermet"),
             harAktivitetskrav = getBoolean("har_aktivitetskrav"),
+            harOverstyrtBeregning = getBoolean("har_overstyrt_beregning"),
             sisteFerdigstilteForbehandling = getObject("siste_ferdigstilte_forbehandling")?.let { it as UUID },
         )
 }

@@ -172,8 +172,14 @@ class EtteroppgjoerService(
                         sisteIverksatteBehandling.sak.sakType,
                         inntektsaar,
                     ),
+                harOverstyrtBeregning = utledOverstyrtBeregning(sisteIverksatteBehandling.id),
             )
         return etteroppgjoer
+    }
+
+    private suspend fun utledOverstyrtBeregning(behandlingId: UUID): Boolean {
+        val overstyrtBeregningsgrunnlag = beregningKlient.hentOverstyrtBeregning(behandlingId, HardkodaSystembruker.etteroppgjoer)
+        return overstyrtBeregningsgrunnlag != null
     }
 
     private fun utledAktivitetskrav(

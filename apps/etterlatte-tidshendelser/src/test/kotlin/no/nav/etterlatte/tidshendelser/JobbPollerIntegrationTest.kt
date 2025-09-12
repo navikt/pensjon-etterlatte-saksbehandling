@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
+import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
 import no.nav.etterlatte.tidshendelser.hendelser.Steg
@@ -45,6 +46,7 @@ class JobbPollerIntegrationTest(
     private val inntektsjusteringService = mockk<AarligInntektsjusteringService>()
     private val oppfoelgingBpFylt18Service = mockk<OppfoelgingBpFylt18Service>()
     private val oppdaterSkjermingBpService = mockk<OppdaterSkjermingBpService>()
+    private val etteroppgjoerService = mockk<EtteroppgjoerService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val jobbPoller =
@@ -56,6 +58,7 @@ class JobbPollerIntegrationTest(
             inntektsjusteringService,
             oppfoelgingBpFylt18Service,
             oppdaterSkjermingBpService,
+            etteroppgjoerService,
         )
 
     @BeforeEach

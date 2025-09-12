@@ -1,13 +1,13 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -23,13 +23,13 @@ class EtteroppgjoerSvarfristUtloeptJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val svarfrist = if (isProd()) EtteroppgjoerSvarfrist.EN_MND else EtteroppgjoerSvarfrist.ETT_MINUTT
+    private val svarfrist = if (isProd()) EtteroppgjoerSvarfrist.EN_MND else EtteroppgjoerSvarfrist.FEMTEN_MINUTTER
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
         if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB, false)) {
             logger.info("Starter periodiske jobber for opprette oppgave svarfrist utløpt etteroppgjoer")
-            runBlocking {
+            inTransaction {
                 opprettNyOppgaveSvarfristUtloept()
             }
         } else {

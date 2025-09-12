@@ -1,8 +1,9 @@
 import { Alert, BodyLong, Box, Heading, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { harPerioderMedBarnepensjonSkattetrekk, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingPerioderSkjema } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderSkjema'
 import { TilbakekrevingVurderingPerioderVisning } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderVisning'
+import { SakType } from '~shared/types/sak'
 
 export function TilbakekrevingUtbetalinger({
   behandling,
@@ -17,7 +18,7 @@ export function TilbakekrevingUtbetalinger({
         <Heading level="1" size="large">
           Utbetalinger
         </Heading>
-        {harPerioderMedBarnepensjonSkattetrekk(behandling) && (
+        {behandling.sak.sakType === SakType.BARNEPENSJON && (
           <Box marginBlock="10 0" maxWidth="45em">
             <Alert variant="info">
               <VStack gap="5">

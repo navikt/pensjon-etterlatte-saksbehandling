@@ -4,8 +4,8 @@ import io.kotest.matchers.equals.shouldBeEqual
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -35,9 +35,9 @@ class KlageTest {
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, oppdatertKlage.status)
         Assertions.assertEquals("en saksbehandler", oppdatertKlage.formkrav?.saksbehandler?.ident)
 
-        val klageFerdigstilt = oppdatertKlage.copy(status = KlageStatus.FERDIGSTILT)
+        val klageAvbrutt = oppdatertKlage.avbryt(AarsakTilAvbrytelse.ANNET)
         assertThrows<Exception> {
-            klageFerdigstilt.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
+            klageAvbrutt.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
         }
     }
 
@@ -71,7 +71,26 @@ class KlageTest {
                 adressebeskyttelse = null,
                 erSkjermet = null,
             )
-        val klage = Klage.ny(sak, null).copy(status = KlageStatus.UTFALL_VURDERT)
+        val klage =
+            Klage
+                .ny(sak, null)
+                .oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
+                .oppdaterInitieltUtfallMedBegrunnelse(
+                    InitieltUtfallMedBegrunnelseDto(utfall = KlageUtfall.OMGJOERING, ""),
+                    "en saksbehandler",
+                ).oppdaterUtfall(
+                    KlageUtfallMedData.StadfesteVedtak(
+                        innstilling =
+                            InnstillingTilKabal(
+                                lovhjemmel = KabalHjemmel.FTRL_1_3,
+                                internKommentar = "",
+                                innstillingTekst = "",
+                                brev = KlageOversendelsebrev(brevId = 1L),
+                            ),
+                        saksbehandler = Grunnlagsopplysning.automatiskSaksbehandler,
+                    ),
+                )
+        Assertions.assertEquals(KlageStatus.UTFALL_VURDERT, klage.status)
         val klageMedFormkravOppfylt = klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, klageMedFormkravOppfylt.status)
     }
@@ -98,27 +117,20 @@ class KlageTest {
         val klage =
             Klage
                 .ny(sak, null)
-                .copy(
-                    utfall =
-                        KlageUtfallMedData.Omgjoering(
-                            KlageOmgjoering(GrunnForOmgjoering.PROSESSUELL_FEIL, "svada"),
-                            saksbehandler,
-                        ),
-                    initieltUtfall =
-                        InitieltUtfallMedBegrunnelseOgSaksbehandler(
-                            InitieltUtfallMedBegrunnelseDto(KlageUtfall.AVVIST, ""),
-                            "SB",
-                            Tidspunkt.now(),
-                        ),
-                    formkrav =
-                        FormkravMedBeslutter(
-                            formkrav =
-                                formkrav(
-                                    erFormkraveneOppfylt = formkravOppfyltGammel,
-                                    erKlagenFramsattInnenFrist = klagenFramsattInnenFristGammel,
-                                ),
-                            saksbehandler = saksbehandler,
-                        ),
+                .oppdaterFormkrav(
+                    formkrav(
+                        erFormkraveneOppfylt = formkravOppfyltGammel,
+                        erKlagenFramsattInnenFrist = klagenFramsattInnenFristGammel,
+                    ),
+                    saksbehandler.ident,
+                ).oppdaterInitieltUtfallMedBegrunnelse(
+                    InitieltUtfallMedBegrunnelseDto(KlageUtfall.AVVIST, ""),
+                    "SB",
+                ).oppdaterUtfall(
+                    KlageUtfallMedData.Omgjoering(
+                        KlageOmgjoering(GrunnForOmgjoering.PROSESSUELL_FEIL, "svada"),
+                        saksbehandler,
+                    ),
                 )
         val oppdatertKlage =
             klage.oppdaterFormkrav(formkrav(formkravOppfyltNy, klagenFramsattInnenFristNy), "en saksbehandler")

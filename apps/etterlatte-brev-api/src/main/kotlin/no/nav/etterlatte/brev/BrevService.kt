@@ -22,7 +22,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.oppgave.OppgaveService
-import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -43,7 +43,7 @@ class BrevService(
     private val db: BrevRepository,
     private val brevoppretter: Brevoppretter,
     private val journalfoerBrevService: JournalfoerBrevService,
-    private val pdfGenerator: PDFGenerator,
+    private val pdfService: PDFService,
     private val distribuerer: Brevdistribuerer,
     private val dokDistKanalKlient: DokDistKanalKlient,
     private val oppgaveService: OppgaveService,
@@ -70,7 +70,7 @@ class BrevService(
             )
         val brevId = brev.id
         try {
-            pdfGenerator.ferdigstillOgGenererPDF(
+            pdfService.ferdigstillOgGenererPDF(
                 brevId,
                 bruker,
                 avsenderRequest = { _, _, _ ->
@@ -114,7 +114,7 @@ class BrevService(
         try {
             val brevStatus = hentBrev.status
             if (brevStatus.ikkeFerdigstilt()) {
-                pdfGenerator.ferdigstillOgGenererPDF(
+                pdfService.ferdigstillOgGenererPDF(
                     brevId,
                     bruker,
                     avsenderRequest = { _, _, _ ->
@@ -404,7 +404,7 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ): Pdf =
-        pdfGenerator.genererPdf(
+        pdfService.genererPdf(
             id,
             bruker,
             avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
@@ -418,6 +418,17 @@ class BrevService(
             Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
             Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         ).contains(brevkoder)
+
+    fun kanFerdigstilleBrev(id: BrevID): Boolean {
+        val brev = sjekkOmBrevKanEndres(id)
+        val pdf = pdfService.hentPdfMedData(brev.id)
+        val kanFerdigstille = pdf?.bytes != null && brev.statusEndret > pdf.opprettet
+
+        logger.info(
+            "Sjekker om brev kan ferdigstilles. kanFerdigstilleBrev: $kanFerdigstille, pdfOppdatert: ${pdf?.opprettet}, brevStatusEndret: ${brev.statusEndret}",
+        )
+        return pdf?.bytes != null && brev.statusEndret > pdf.opprettet
+    }
 
     suspend fun ferdigstill(
         id: BrevID,

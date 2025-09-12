@@ -6,11 +6,15 @@ import { Klage, KlageStatus, Utfall } from '~shared/types/Klage'
 import { JaNei } from '~shared/types/ISvar'
 import { HStack } from '@navikt/ds-react'
 
-export function kanVurdereUtfall(klage: Klage | null): boolean {
+export function kanVurdereUtfallUtenKontaktMedKlager(klage: Klage | null): boolean {
   return (
     klage?.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA ||
     klage?.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.NEI
   )
+}
+
+export function kanVurdereUtfall(klage: Klage | null): boolean {
+  return kanVurdereUtfallUtenKontaktMedKlager(klage) || !!klage?.formkrav?.klagerHarIkkeSvartVurdering
 }
 
 export function kanSeOppsummering(klage: Klage | null): boolean {

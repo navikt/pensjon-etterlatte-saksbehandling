@@ -66,6 +66,11 @@ enum class JobbType(
         JobbKategori.OPPDATERING_SKJERMING_BP,
         sakType = SakType.BARNEPENSJON,
     ),
+    OPPRETT_ETTEROPPGJOER_FORBEHANDLING(
+        beskrivelse = "Opprettelse av forbehandlinger for etteroppgjør",
+        kategori = JobbKategori.OPPRETT_ETTEROPPGJOER_FORBEHANDLING,
+        sakType = SakType.OMSTILLINGSSTOENAD,
+    ),
 }
 
 enum class JobbKategori {
@@ -75,4 +80,5 @@ enum class JobbKategori {
     AARLIG_INNTEKTSJUSTERING,
     OPPFOELGING_BP_FYLT_18,
     OPPDATERING_SKJERMING_BP,
+    OPPRETT_ETTEROPPGJOER_FORBEHANDLING,
 }

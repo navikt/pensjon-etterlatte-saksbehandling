@@ -7,6 +7,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  Opprinnelse,
   Vedtaksloesning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
@@ -189,6 +190,7 @@ const opprettBehandling = (
     viderefoertOpphoer: null,
     tidligereFamiliepleier: null,
     erSluttbehandling: false,
+    opprinnelse: Opprinnelse.UKJENT,
   }
 }
 

@@ -198,22 +198,22 @@ internal class ApplicationContext {
 
     val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
+    val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))
+    val virusScanService = VirusScanService(clamAvClient)
+    val pdfService = PDFService(db, virusScanService, pdfGenerator)
+
     val brevService =
         BrevService(
             db,
             brevoppretter,
             journalfoerBrevService,
-            pdfGenerator,
+            pdfService,
             brevdistribuerer,
             dokdistKanalKlient,
             oppgaveService,
             brevdataFacade,
             adresseService,
         )
-
-    val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))
-    val virusScanService = VirusScanService(clamAvClient)
-    val pdfService = PDFService(db, virusScanService)
 
     val safService =
         SafService(

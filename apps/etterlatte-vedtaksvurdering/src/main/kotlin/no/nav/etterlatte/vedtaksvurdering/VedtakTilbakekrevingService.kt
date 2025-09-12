@@ -101,6 +101,21 @@ class VedtakTilbakekrevingService(
         }
     }
 
+    fun tilbakeStillAttestert(behandlingId: UUID): Vedtak {
+        val vedtak =
+            krevIkkeNull(repository.hentVedtak(behandlingId)) {
+                "Fant ikke tilbakekrevingsvedtak som skal tilbakestilles"
+            }
+        verifiserGyldigVedtakStatus(vedtak.behandlingId, listOf(VedtakStatus.ATTESTERT))
+
+        return repository.inTransaction { tx ->
+            repository.tilbakestillTilbakekrevingsvedtak(tilbakekrevingId = behandlingId, tx)
+            krevIkkeNull(repository.hentVedtak(behandlingId, tx)) {
+                "Tilbakekrevingen vi akkurat tilbakestilte fins ikke lengre"
+            }
+        }
+    }
+
     fun underkjennVedtak(tilbakekrevingId: UUID): Vedtak {
         logger.info("Underkjenner vedtak for tilbakekreving=$tilbakekrevingId")
         verifiserGyldigVedtakStatus(tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))

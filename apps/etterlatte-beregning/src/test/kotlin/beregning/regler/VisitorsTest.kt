@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.beregning.regler
 
-import io.kotest.assertions.fail
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
@@ -21,6 +20,7 @@ import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
+import kotlin.test.fail
 
 class VisitorsTest {
     @Test

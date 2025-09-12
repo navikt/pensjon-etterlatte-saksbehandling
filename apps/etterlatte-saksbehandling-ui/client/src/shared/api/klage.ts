@@ -12,6 +12,10 @@ export function opprettNyKlage(nyKlageRequest: NyKlageRequest): Promise<ApiRespo
   return apiClient.post(`/klage/opprett/${nyKlageRequest.sakId}`, { ...nyKlageRequest })
 }
 
+export function lagreKlagerIkkeSvart(args: { begrunnelse: string; klageId: string }): Promise<ApiResponse<Klage>> {
+  return apiClient.put(`/klage/${args.klageId}/klager-ikke-svart`, { begrunnelse: args.begrunnelse })
+}
+
 export function hentKlage(klageId: string): Promise<ApiResponse<Klage>> {
   return apiClient.get(`/klage/${klageId}`)
 }

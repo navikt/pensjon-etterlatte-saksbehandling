@@ -55,8 +55,11 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 }
 
 function skalAvvises(klage: Klage) {
-  const formkrav = klage.formkrav?.formkrav
-  return formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI
+  const formkravOgBeslutter = klage.formkrav
+  return (
+    formkravOgBeslutter?.formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI ||
+    !!formkravOgBeslutter?.klagerHarIkkeSvartVurdering?.begrunnelse
+  )
 }
 
 function Navigeringsknapper({ klage, navigate }: { klage: Klage; navigate: NavigateFunction }) {

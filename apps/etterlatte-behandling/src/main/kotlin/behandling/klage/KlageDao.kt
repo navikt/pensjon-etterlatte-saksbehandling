@@ -132,7 +132,7 @@ class KlageDaoImpl(
     }
 
     private fun ResultSet.somKlage(): Klage =
-        Klage(
+        Klage.fraResultSet(
             id = getString("id").let { UUID.fromString(it) },
             sak =
                 Sak(

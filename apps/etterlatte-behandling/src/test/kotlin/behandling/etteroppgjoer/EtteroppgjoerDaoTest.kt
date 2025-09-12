@@ -9,10 +9,16 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -21,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -31,6 +39,7 @@ class EtteroppgjoerDaoTest(
 ) {
     private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var etteroppgjoerDao: EtteroppgjoerDao
+    private lateinit var etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao
 
     private lateinit var sak: Sak
     private lateinit var sak2: Sak
@@ -39,6 +48,7 @@ class EtteroppgjoerDaoTest(
     fun setup() {
         sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         etteroppgjoerDao = EtteroppgjoerDao(ConnectionAutoclosingTest(dataSource))
+        etteroppgjoerForbehandlingDao = EtteroppgjoerForbehandlingDao(ConnectionAutoclosingTest(dataSource))
 
         nyKontekstMedBrukerOgDatabase(
             mockk<User>().also { every { it.name() } returns this::class.java.simpleName },
@@ -65,6 +75,54 @@ class EtteroppgjoerDaoTest(
                 type = SakType.OMSTILLINGSSTOENAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
+    }
+
+    @Test
+    fun `oppdater ferdigstilt forbehandlingId`() {
+        val inntektsaar = 2024
+
+        val forbehandling =
+            EtteroppgjoerForbehandling(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+                hendelseId = UUID.randomUUID(),
+                aar = inntektsaar,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(inntektsaar, 1), YearMonth.of(inntektsaar, 12)),
+                kopiertFra = null,
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+                varselbrevSendt = LocalDate.now().minusMonths(1),
+            )
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
+
+        etteroppgjoerDao.lagreEtteroppgjoer(
+            Etteroppgjoer(
+                sakId = sak.id,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
+                sisteFerdigstilteForbehandling = forbehandling.id,
+            ),
+        )
+
+        // negative test
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling.copy(varselbrevSendt = LocalDate.now()))
+
+        val svarfristUtloept =
+            etteroppgjoerDao.hentEtteroppgjoerMedSvarfristUtloept(
+                inntektsaar,
+                EtteroppgjoerSvarfrist.ETT_MINUTT,
+            )
+
+        svarfristUtloept!!.size shouldBe 1
+        svarfristUtloept.first().sakId shouldBe sak.id
+        svarfristUtloept.first().inntektsaar shouldBe inntektsaar
+        svarfristUtloept.first().status shouldBe EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
+        svarfristUtloept.first().sisteFerdigstilteForbehandling shouldBe forbehandling.id
     }
 
     @Test

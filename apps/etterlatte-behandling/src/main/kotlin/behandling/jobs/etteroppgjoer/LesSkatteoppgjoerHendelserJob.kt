@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.time.LocalDate
 import java.util.Timer
 import javax.sql.DataSource
 
@@ -52,8 +53,20 @@ class LesSkatteoppgjoerHendelserJob(
             period = interval.toMillis(),
         ) {
             if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
-                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(hendelserBatchSize), jobContext)
+                val inntektsaar = inntektsaarListe()
+                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(hendelserBatchSize, inntektsaar), jobContext)
             }
         }
+    }
+
+    private fun inntektsaarListe(): List<Int> {
+        val startaarOmstillingsstoenad = 2024
+        val sisteInntektsaar = LocalDate.now().year - 1
+        val inntektsaar =
+            IntRange(
+                start = (sisteInntektsaar - 3).coerceAtLeast(startaarOmstillingsstoenad),
+                endInclusive = sisteInntektsaar,
+            ).toList()
+        return inntektsaar
     }
 }

@@ -106,17 +106,13 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
               </Button>
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button variant="danger" onClick={handleSubmit(avslutt)} loading={isPending(ferdigstillOppgaveStatus)}>
+                <Button variant="primary" onClick={handleSubmit(avslutt)} loading={isPending(ferdigstillOppgaveStatus)}>
                   Avslutt oppgave
                 </Button>
               )}
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button
-                  loading={isPending(opprettRevurderingResult)}
-                  size="small"
-                  onClick={() => opprettRevurderingEtteroppgjoer()}
-                >
+                <Button loading={isPending(opprettRevurderingResult)} onClick={() => opprettRevurderingEtteroppgjoer()}>
                   Opprett revurdering
                 </Button>
               )}

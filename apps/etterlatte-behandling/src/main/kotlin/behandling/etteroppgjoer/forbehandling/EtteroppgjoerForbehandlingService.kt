@@ -628,7 +628,7 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val detaljertBehandling = hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
-        if (detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType != EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING) {
+        if (detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType != EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
             throw UgyldigForespoerselException(
                 "ETTEROPPGJOER_RESULTAT_TRENGER_BREV",
                 "Etteroppgjøret kan kun ferdigstilles uten utsendt brev hvis resultatet er ingen utbetaling " +

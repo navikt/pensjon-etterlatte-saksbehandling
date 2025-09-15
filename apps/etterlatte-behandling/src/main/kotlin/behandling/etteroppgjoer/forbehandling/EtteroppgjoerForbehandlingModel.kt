@@ -67,7 +67,7 @@ data class EtteroppgjoerForbehandling(
             brevId =
                 this.brevId?.takeIf {
                     beregnetEtteroppgjoerResultatDto.resultatType !=
-                        EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING
+                        EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
                 },
         )
     }

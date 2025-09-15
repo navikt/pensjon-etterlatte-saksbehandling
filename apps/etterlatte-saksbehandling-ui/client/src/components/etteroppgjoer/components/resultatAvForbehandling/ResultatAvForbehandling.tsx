@@ -14,7 +14,7 @@ export const ResultatAvForbehandling = () => {
     TILBAKEKREVING: 'Tilbakekreving',
     ETTERBETALING: 'Etterbetaling',
     INGEN_ENDRING: 'Ingen endring',
-    INGEN_ENDRING_INGEN_UTBETALING: 'Ikke utbetalt stønad og ingen endring',
+    INGEN_ENDRING_UTEN_UTBETALING: 'Ikke utbetalt stønad og ingen endring',
   }
 
   const beskrivelse = (() => {
@@ -37,7 +37,7 @@ export const ResultatAvForbehandling = () => {
 
       return `Resultatet viser ingen endring, bruker fikk utbetalt rett stønad i ${behandling.aar}.`
     }
-    if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING) {
+    if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
       return `Resultatet viser at bruker ikke fikk utbetalt stønad i ${behandling.aar}, og de skulle heller ikke få noe stønad utbetalt. Derfor skal ikke bruker ha noen brev, og etteroppgjøret kan ferdigstilles.`
     }
   })()

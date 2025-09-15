@@ -142,7 +142,7 @@ class EtteroppgjoerForbehandlingBrevService(
             }
 
             if (detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType ==
-                EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING
+                EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
             ) {
                 throw UgyldigForespoerselException(
                     "ETTEROPPGJOER_SKAL_IKKE_HA_BREV",
@@ -192,7 +192,7 @@ class EtteroppgjoerForbehandlingBrevService(
         krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
         }
-        if (data.beregnetEtteroppgjoerResultat.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING) {
+        if (data.beregnetEtteroppgjoerResultat.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
             throw UgyldigForespoerselException(
                 "SKAL_IKKE_HA_BREV",
                 "Resultatet i etteroppgjøret er ingen endring og ingen utbetaling, så bruker skal ikke ha et varselbrev.",

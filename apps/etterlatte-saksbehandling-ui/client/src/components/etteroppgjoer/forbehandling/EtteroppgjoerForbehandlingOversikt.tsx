@@ -59,7 +59,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">
-          {beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING ? (
+          {beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ? (
             <FerdigstillEtteroppgjoerUtenBrev />
           ) : (
             <div>

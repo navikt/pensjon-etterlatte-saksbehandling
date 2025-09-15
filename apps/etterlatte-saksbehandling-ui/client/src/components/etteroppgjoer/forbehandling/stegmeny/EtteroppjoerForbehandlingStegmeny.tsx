@@ -13,8 +13,7 @@ export enum EtteroppjoerForbehandlingSteg {
 function kanGaaTilEtteroppgjoerBrev(forbehandling?: EtteroppgjoerForbehandling): boolean {
   return (
     !!forbehandling?.beregnetEtteroppgjoerResultat &&
-    forbehandling.beregnetEtteroppgjoerResultat.resultatType !==
-      EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING
+    forbehandling.beregnetEtteroppgjoerResultat.resultatType !== EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
   )
 }
 

@@ -7,13 +7,14 @@ import { Link } from 'react-router-dom'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
-import { kanRedigereEtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { EtteroppgjoerResultatType, kanRedigereEtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
 import React, { useState } from 'react'
 import { FieldErrors } from 'react-hook-form'
 import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
+import { FerdigstillEtteroppgjoerUtenBrev } from '~components/etteroppgjoer/components/FerdigstillEtteroppgjoerUtenBrev'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -58,11 +59,15 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">
-          <div>
-            <Button as={Link} to={`/etteroppgjoer/${behandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`}>
-              Gå til brev
-            </Button>
-          </div>
+          {beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_INGEN_UTBETALING ? (
+            <FerdigstillEtteroppgjoerUtenBrev />
+          ) : (
+            <div>
+              <Button as={Link} to={`/etteroppgjoer/${behandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`}>
+                Gå til brev
+              </Button>
+            </div>
+          )}
         </HStack>
       </Box>
     </VStack>

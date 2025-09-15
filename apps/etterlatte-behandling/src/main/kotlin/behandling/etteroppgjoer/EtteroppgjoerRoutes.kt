@@ -101,11 +101,18 @@ fun Route.etteroppgjoerRoutes(
 
             post("beregn-faktisk-inntekt") {
                 val request = call.receive<BeregnFaktiskInntektRequest>()
-                val response =
+                val (etteroppgjoerResultatDto, brevSomskalSlettes) =
                     inTransaction {
                         forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
                     }
-                call.respond(response)
+                if (brevSomskalSlettes != null) {
+                    forbehandlingBrevService.slettVarselbrev(
+                        brevSomskalSlettes = brevSomskalSlettes.first,
+                        sakId = brevSomskalSlettes.second,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
+                }
+                call.respond(etteroppgjoerResultatDto)
             }
 
             post("ferdigstill") {
@@ -120,6 +127,17 @@ fun Route.etteroppgjoerRoutes(
                         }
                     }
                     call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("ferdigstill-uten-brev") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    inTransaction {
+                        runBlocking {
+                            forbehandlingService.ferdigstillForbehandlingUtenBrev(forbehandlingId, brukerTokenInfo)
+                        }
+                    }
                 }
             }
 

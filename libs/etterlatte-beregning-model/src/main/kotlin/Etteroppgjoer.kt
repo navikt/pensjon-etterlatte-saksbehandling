@@ -32,4 +32,5 @@ enum class EtteroppgjoerResultatType {
     TILBAKEKREVING,
     ETTERBETALING,
     INGEN_ENDRING,
+    INGEN_ENDRING_INGEN_UTBETALING,
 }

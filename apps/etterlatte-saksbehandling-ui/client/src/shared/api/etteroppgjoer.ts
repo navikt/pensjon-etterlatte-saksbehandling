@@ -1,12 +1,12 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
-  EtteroppgjoerForbehandling,
-  EtteroppgjoerBehandling,
-  FaktiskInntekt,
+  AvbrytEtteroppgjoerForbehandlingRequest,
   BeregnetEtteroppgjoerResultatDto,
   Etteroppgjoer,
+  EtteroppgjoerBehandling,
+  EtteroppgjoerForbehandling,
+  FaktiskInntekt,
   IInformasjonFraBruker,
-  AvbrytEtteroppgjoerForbehandlingRequest,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
@@ -64,6 +64,12 @@ export const lagreInformasjonFraBruker = async (args: {
 
 export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
   forbehandlingId: string
-}): Promise<ApiResponse<any>> => {
-  return apiClient.post(`etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill`, {})
+}): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill`, {})
+}
+
+export const ferdigstillEtteroppgjoerForbehandlingUtenBrev = async (args: {
+  forbehandlingId: string
+}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill-uten-brev`, {})
 }

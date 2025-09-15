@@ -157,7 +157,9 @@ class BrevService(
 
         when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING ->
-                tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                videresendInterneFeil {
+                    tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                }
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
                 etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingOgDistribuerBrev(

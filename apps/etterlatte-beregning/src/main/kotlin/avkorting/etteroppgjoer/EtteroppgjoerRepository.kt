@@ -22,10 +22,10 @@ class EtteroppgjoerRepository(
                 statement =
                     """
                     INSERT INTO etteroppgjoer_beregnet_resultat(id, aar, siste_iverksatte_behandling_id, forbehandling_id, utbetalt_stoenad, ny_brutto_stoenad, differanse, grense, resultat_type,
-                            tidspunkt, regel_resultat, kilde, referanse_avkorting_sist_iverksatte,
+                            tidspunkt, regel_resultat, kilde, referanse_avkorting_sist_iverksatte, har_ingen_inntekt,
                             referanse_avkorting_forbehandling)
                     VALUES (:id, :aar, :siste_iverksatte_behandling_id, :forbehandling_id, :utbetalt_stoenad, :ny_brutto_stoenad, :differanse, :grense, :resultat_type, :tidspunkt, :regel_resultat,
-                            :kilde, :referanse_avkorting_sist_iverksatte, :referanse_avkorting_forbehandling)
+                            :kilde, :referanse_avkorting_sist_iverksatte, :har_ingen_inntekt, :referanse_avkorting_forbehandling)
                     ON CONFLICT (
                         aar, siste_iverksatte_behandling_id, forbehandling_id
                         ) DO UPDATE SET utbetalt_stoenad = excluded.utbetalt_stoenad,
@@ -34,6 +34,7 @@ class EtteroppgjoerRepository(
                                 grense = excluded.grense,
                                 resultat_type = excluded.resultat_type,
                                 tidspunkt = excluded.tidspunkt,
+                                har_ingen_inntekt = excluded.har_ingen_inntekt,
                                 regel_resultat = excluded.regel_resultat,
                                 kilde = excluded.kilde
                     """.trimIndent(),
@@ -51,6 +52,7 @@ class EtteroppgjoerRepository(
                         "tidspunkt" to resultat.tidspunkt.toTimestamp(),
                         "regel_resultat" to resultat.regelResultat.toJson(),
                         "kilde" to resultat.kilde.toJson(),
+                        "har_ingen_inntekt" to resultat.harIngenInntekt,
                         "referanse_avkorting_sist_iverksatte" to resultat.referanseAvkorting.avkortingSisteIverksatte,
                         "referanse_avkorting_forbehandling" to resultat.referanseAvkorting.avkortingForbehandling,
                     ),
@@ -109,6 +111,7 @@ class EtteroppgjoerRepository(
             tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
             regelResultat = objectMapper.readValue(this.string("regel_resultat")),
             kilde = objectMapper.readValue(this.string("kilde")),
+            harIngenInntekt = boolean("har_ingen_inntekt"),
             referanseAvkorting =
                 ReferanseEtteroppgjoer(
                     avkortingForbehandling = uuid("referanse_avkorting_forbehandling"),

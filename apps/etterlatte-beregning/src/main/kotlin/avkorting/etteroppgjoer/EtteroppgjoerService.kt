@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -129,11 +130,16 @@ class EtteroppgjoerService(
 
         val sisteIverksatteAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, sisteIverksatteBehandlingId)
         val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, forbehandlingId)
+        val inntektsgrunnlag =
+            krevIkkeNull(avkortingRepository.hentFaktiskInntekt(nyForbehandlingAvkorting.id)) {
+                "Avkortingen for etteroppgjøret må ha lagret et inntektsgrunnlag"
+            }
 
         val differanseGrunnlag =
             EtteroppgjoerDifferanseGrunnlag(
                 FaktumNode(sisteIverksatteAvkorting, sisteIverksatteBehandlingId, ""),
                 FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
+                FaktumNode(inntektsgrunnlag, nyForbehandlingAvkorting.id, ""),
             )
 
         return when (
@@ -168,6 +174,7 @@ class EtteroppgjoerService(
                             avkortingForbehandling = nyForbehandlingAvkorting.id,
                             avkortingSisteIverksatte = sisteIverksatteAvkorting.id,
                         ),
+                    harIngenInntekt = data.harIngenInntekt,
                     aar = aar,
                 )
             }
@@ -225,6 +232,7 @@ data class BeregnetEtteroppgjoerResultat(
     val differanse: Long,
     val grense: EtteroppgjoerGrense,
     val resultatType: EtteroppgjoerResultatType,
+    val harIngenInntekt: Boolean,
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.Kilde,
@@ -241,6 +249,7 @@ data class BeregnetEtteroppgjoerResultat(
             differanse = this.differanse,
             grense = this.grense.toDto(),
             resultatType = this.resultatType,
+            harIngenInntekt = this.harIngenInntekt,
             tidspunkt = this.tidspunkt,
             kilde = this.kilde,
             avkortingForbehandlingId = this.referanseAvkorting.avkortingForbehandling,

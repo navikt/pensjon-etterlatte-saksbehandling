@@ -47,7 +47,6 @@ class AvkortingRepository(
                     tx.run(
                         query
                             .map { row ->
-
                                 val aarsoppgjoerId = row.uuid("id")
                                 val erEtteroppgjoer = row.boolean("er_etteroppgjoer")
 
@@ -152,6 +151,8 @@ class AvkortingRepository(
                 }.asList,
         )
     }
+
+    fun hentFaktiskInntekt(aarsoppgjoerId: UUID) = dataSource.transaction { tx -> selectFaktiskInntekt(aarsoppgjoerId, tx) }
 
     private fun selectFaktiskInntekt(
         aarsoppgjoerId: UUID,

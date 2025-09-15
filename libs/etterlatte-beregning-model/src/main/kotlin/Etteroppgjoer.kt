@@ -15,6 +15,7 @@ data class BeregnetEtteroppgjoerResultatDto(
     val differanse: Long,
     val grense: EtteroppgjoerGrenseDto,
     val resultatType: EtteroppgjoerResultatType,
+    val harIngenInntekt: Boolean,
     val tidspunkt: Tidspunkt,
     val kilde: Grunnlagsopplysning.Kilde,
     val avkortingForbehandlingId: UUID,

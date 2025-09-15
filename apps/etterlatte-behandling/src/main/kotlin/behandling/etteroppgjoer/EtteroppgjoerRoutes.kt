@@ -106,6 +106,10 @@ fun Route.etteroppgjoerRoutes(
                         forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
                     }
                 if (brevSomskalSlettes != null) {
+                    logger.info(
+                        "Sletter brevet koblet til forbehandlingen med brevId=${brevSomskalSlettes.first} " +
+                            "i sak=${brevSomskalSlettes.second}",
+                    )
                     forbehandlingBrevService.slettVarselbrev(
                         brevSomskalSlettes = brevSomskalSlettes.first,
                         sakId = brevSomskalSlettes.second,

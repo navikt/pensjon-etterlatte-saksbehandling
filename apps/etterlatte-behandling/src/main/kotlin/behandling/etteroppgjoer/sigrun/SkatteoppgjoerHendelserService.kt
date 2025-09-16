@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -53,7 +54,7 @@ class SkatteoppgjoerHendelserService(
         val sekvensnummer = runBlocking { sigrunKlient.hentSekvensnummerForLesingFraDato(dato) }
 
         inTransaction {
-            dao.lagreKjoering(HendelserKjoering(sekvensnummer, 0, 0))
+            dao.lagreKjoering(HendelserKjoering(sekvensnummer, 0, 0, null))
         }
     }
 
@@ -70,7 +71,7 @@ class SkatteoppgjoerHendelserService(
                         return@count false
                     }
                     if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
-                        logger.info("Har ikke periode som er i lista")
+                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant perioe")
                         return@count false
                     }
                     try {
@@ -84,6 +85,7 @@ class SkatteoppgjoerHendelserService(
                             sisteSekvensnummer = hendelsesListe.last().sekvensnummer,
                             antallHendelser = hendelsesListe.size,
                             antallRelevante = antallRelevante,
+                            sisteRegistreringstidspunkt = hendelsesListe.last().registreringstidspunkt,
                         ),
                     )
                 }

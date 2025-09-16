@@ -2,6 +2,8 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.single
 
 class SkatteoppgjoerHendelserDao(
@@ -48,6 +50,7 @@ class SkatteoppgjoerHendelserDao(
                         sisteSekvensnummer = getLong("siste_sekvensnummer"),
                         antallHendelser = getInt("antall_hendelser"),
                         antallRelevante = getInt("antall_relevante"),
+                        sisteRegistreringstidspunkt = getTidspunktOrNull("siste_registreringstidspunkt"),
                     )
                 }
             }
@@ -58,6 +61,7 @@ data class HendelserKjoering(
     val sisteSekvensnummer: Long,
     val antallHendelser: Int, // antall vi har etterspurt
     val antallRelevante: Int, // antall vi er interessert i (opprettet etteroppgjoer)
+    val sisteRegistreringstidspunkt: Tidspunkt?,
 ) {
     fun nesteSekvensnummer() = sisteSekvensnummer + 1
 }

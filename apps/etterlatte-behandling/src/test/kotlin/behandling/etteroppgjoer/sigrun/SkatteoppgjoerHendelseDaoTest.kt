@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -50,6 +51,7 @@ class SkatteoppgjoerHendelseDaoTest(
                     sisteSekvensnummer = sekvensnummer.toLong(),
                     antallHendelser = 100 + sekvensnummer,
                     antallRelevante = 10 + sekvensnummer,
+                    sisteRegistreringstidspunkt = Tidspunkt.now(),
                 )
 
             skatteoppgjoerHendelserDao.lagreKjoering(kjoering)

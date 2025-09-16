@@ -19,9 +19,11 @@ import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 class SkatteoppgjoerHendelserServiceTest {
@@ -40,12 +42,13 @@ class SkatteoppgjoerHendelserServiceTest {
         val skatteoppgjoerHendelserService = SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService)
 
         val sisteSekvensnummer = 10.toLong()
-        val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0)
+        val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0, Tidspunkt.now())
         val antall = 10
         val harOms1 = "123"
         val harOms2 = "456"
 
         coEvery { dao.hentSisteKjoering() } returns sisteKjoering
+        val registreringstidspunktSisteHendelse = Tidspunkt.now().minus(5, ChronoUnit.HOURS)
         coEvery { sigrunKlient.hentHendelsesliste(antall, sisteSekvensnummer + 1, any()) } returns
             HendelseslisteFraSkatt(
                 listOf(
@@ -53,7 +56,7 @@ class SkatteoppgjoerHendelserServiceTest {
                     hendelse("963", 2024, sisteSekvensnummer + 2),
                     hendelse(harOms1, 2024, sisteSekvensnummer + 3),
                     hendelse(harOms1, 2025, sisteSekvensnummer + 4),
-                    hendelse(harOms2, 2024, sisteSekvensnummer + 5),
+                    hendelse(harOms2, 2024, sisteSekvensnummer + 5, registreringstidspunktSisteHendelse),
                 ),
             )
 
@@ -82,6 +85,7 @@ class SkatteoppgjoerHendelserServiceTest {
                     kjoering.antallHendelser shouldBe 5
                     kjoering.antallRelevante shouldBe 3
                     kjoering.nesteSekvensnummer().toInt() shouldBe 16
+                    kjoering.sisteRegistreringstidspunkt shouldBe registreringstidspunktSisteHendelse
                 },
             )
         }
@@ -101,5 +105,13 @@ class SkatteoppgjoerHendelserServiceTest {
         ident: String,
         periode: Int,
         sekvensnummer: Long,
-    ): SkatteoppgjoerHendelse = SkatteoppgjoerHendelse(periode.toString(), SigrunKlient.HENDELSETYPE_NY, ident, sekvensnummer)
+        registreringstidspunkt: Tidspunkt? = Tidspunkt.now(),
+    ): SkatteoppgjoerHendelse =
+        SkatteoppgjoerHendelse(
+            periode.toString(),
+            SigrunKlient.HENDELSETYPE_NY,
+            ident,
+            sekvensnummer,
+            registreringstidspunkt,
+        )
 }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 data class HendelseslisteFraSkatt(
     val hendelser: List<SkatteoppgjoerHendelse>,
@@ -19,6 +20,7 @@ data class HendelseslisteFraSkatt(
                         hendelsetype = SigrunKlient.HENDELSETYPE_NY,
                         identifikator = index.toString(),
                         sekvensnummer = startSekvensnummer + index,
+                        registreringstidspunkt = Tidspunkt.now(),
                     )
                 }
             return HendelseslisteFraSkatt(hendelser)
@@ -35,6 +37,7 @@ data class SkatteoppgjoerHendelse(
     val hendelsetype: String?,
     val identifikator: String,
     val sekvensnummer: Long,
+    val registreringstidspunkt: Tidspunkt?,
 )
 
 data class PensjonsgivendeInntektFraSkattSummert(

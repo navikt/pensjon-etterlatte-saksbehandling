@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.brev.model.Brev
@@ -10,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbe
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -58,28 +58,32 @@ data class EtteroppgjoerForbehandling(
         )
     }
 
-    fun tilBeregnet(): EtteroppgjoerForbehandling {
-        if (status in listOf(EtteroppgjoerForbehandlingStatus.OPPRETTET, EtteroppgjoerForbehandlingStatus.BEREGNET)) {
-            return copy(status = EtteroppgjoerForbehandlingStatus.BEREGNET)
-        } else {
-            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.BEREGNET}")
+    fun tilBeregnet(beregnetEtteroppgjoerResultatDto: BeregnetEtteroppgjoerResultatDto): EtteroppgjoerForbehandling {
+        if (!erUnderBehandling()) {
+            throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.BEREGNET)
         }
+        return copy(
+            status = EtteroppgjoerForbehandlingStatus.BEREGNET,
+            brevId =
+                this.brevId?.takeIf {
+                    beregnetEtteroppgjoerResultatDto.resultatType !=
+                        EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+                },
+        )
     }
 
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
-        if (status == EtteroppgjoerForbehandlingStatus.BEREGNET) {
-            return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
-        } else {
-            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.FERDIGSTILT}")
+        if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
+            throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
+        return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }
 
     fun tilAvbrutt(): EtteroppgjoerForbehandling {
-        if (kanAvbrytes()) {
-            return copy(status = EtteroppgjoerForbehandlingStatus.AVBRUTT)
-        } else {
-            throw InternfeilException("Kunne ikke endre status fra $status til ${EtteroppgjoerForbehandlingStatus.AVBRUTT}")
+        if (!kanAvbrytes()) {
+            throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.AVBRUTT)
         }
+        return copy(status = EtteroppgjoerForbehandlingStatus.AVBRUTT)
     }
 
     fun tilDto(): EtteroppgjoerForbehandlingDto =
@@ -124,6 +128,13 @@ data class EtteroppgjoerForbehandling(
                 EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
             )
 }
+
+class EtteroppgjoerForbehandlingStatusException(
+    forbehandling: EtteroppgjoerForbehandling,
+    statusNy: EtteroppgjoerForbehandlingStatus,
+) : InternfeilException(
+        "Kunne ikke endre status fra ${forbehandling.status} til $statusNy, for behandling med id=${forbehandling.id}",
+    )
 
 data class DetaljertForbehandlingDto(
     val behandling: EtteroppgjoerForbehandling,

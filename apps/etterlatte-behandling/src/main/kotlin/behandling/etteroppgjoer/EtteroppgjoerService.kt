@@ -81,7 +81,12 @@ class EtteroppgjoerService(
     }
 
     fun oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
-        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING)
+        val ferdigstiltStatus =
+            when (forbehandling.brevId) {
+                null -> EtteroppgjoerStatus.FERDIGSTILT_UTEN_VARSEL
+                else -> EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
+            }
+        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, ferdigstiltStatus)
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
     }
 

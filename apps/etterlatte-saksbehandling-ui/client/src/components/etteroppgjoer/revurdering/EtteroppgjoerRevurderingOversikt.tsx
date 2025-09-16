@@ -70,7 +70,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   }
 
   useEffect(() => {
-    if (!etteroppgjoerForbehandlingId) return
+    if (!etteroppgjoerForbehandlingId || etteroppgjoer) return
     hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })

@@ -13,7 +13,8 @@ export const ResultatAvForbehandling = () => {
   const resultatTekst: Record<EtteroppgjoerResultatType, string> = {
     TILBAKEKREVING: 'Tilbakekreving',
     ETTERBETALING: 'Etterbetaling',
-    INGEN_ENDRING: 'Ingen endring',
+    INGEN_ENDRING_MED_UTBETALING: 'Ingen endring',
+    INGEN_ENDRING_UTEN_UTBETALING: 'Ikke utbetalt stønad og ingen endring',
   }
 
   const beskrivelse = (() => {
@@ -25,7 +26,7 @@ export const ResultatAvForbehandling = () => {
       return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}. Beløpet blir derfor etterbetalt.`
     }
 
-    if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING) {
+    if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING) {
       if (differanse > 0) {
         return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
       }
@@ -35,6 +36,9 @@ export const ResultatAvForbehandling = () => {
       }
 
       return `Resultatet viser ingen endring, bruker fikk utbetalt rett stønad i ${behandling.aar}.`
+    }
+    if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
+      return `Resultatet viser at bruker ikke fikk utbetalt stønad i ${behandling.aar}, og de skulle heller ikke få noe stønad utbetalt. Derfor skal ikke bruker ha noen brev, og etteroppgjøret kan ferdigstilles.`
     }
   })()
 

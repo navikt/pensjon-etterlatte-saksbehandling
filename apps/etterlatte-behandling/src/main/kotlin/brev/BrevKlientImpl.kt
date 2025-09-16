@@ -68,6 +68,12 @@ interface BrevKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
+
+    suspend fun slettBrev(
+        brevSomskalSlettes: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BrevKlientImpl(
@@ -186,6 +192,25 @@ class BrevKlientImpl(
             brukerTokenInfo = brukerTokenInfo,
             putBody = brevRequest,
         )
+
+    override suspend fun slettBrev(
+        brevSomskalSlettes: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient
+            .delete(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/$brevSomskalSlettes?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { },
+                failure = { errorResponse -> throw errorResponse },
+            )
+    }
 
     private suspend fun <T> get(
         url: String,

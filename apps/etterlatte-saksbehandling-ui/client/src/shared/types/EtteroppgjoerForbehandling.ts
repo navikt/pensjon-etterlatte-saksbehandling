@@ -112,6 +112,7 @@ export enum EtteroppgjoerResultatType {
   TILBAKEKREVING = 'TILBAKEKREVING',
   ETTERBETALING = 'ETTERBETALING',
   INGEN_ENDRING = 'INGEN_ENDRING',
+  INGEN_ENDRING_UTEN_UTBETALING = 'INGEN_ENDRING_UTEN_UTBETALING',
 }
 
 export interface BeregnetEtteroppgjoerResultatDto {

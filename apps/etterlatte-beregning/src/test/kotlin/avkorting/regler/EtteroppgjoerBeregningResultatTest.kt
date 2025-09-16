@@ -122,7 +122,7 @@ class EtteroppgjoerBeregningResultatTest {
             )
 
         resultat.verdi.differanse.differanse shouldBe 0
-        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING.name
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING.name
     }
 
     private fun grunnlag(

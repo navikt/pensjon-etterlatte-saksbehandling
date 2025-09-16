@@ -40,7 +40,7 @@ val harIngenInntekt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-NY-BRUTTO-STOENAD"),
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-INGEN-INNTEKT"),
     ) benytter inntektIEtteroppgjoerAar med { inntekt ->
         inntekt.afp == 0 &&
             inntekt.loennsinntekt == 0 &&

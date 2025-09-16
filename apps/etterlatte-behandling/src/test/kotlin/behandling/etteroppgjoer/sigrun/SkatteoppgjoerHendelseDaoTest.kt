@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -44,12 +45,16 @@ class SkatteoppgjoerHendelseDaoTest(
 
     @Test
     fun `skal lagre kjoering og hente siste kjoering`() {
+        val sisteRegistreringstidspunkt = Tidspunkt.now()
+
         for (sekvensnummer in 1..5) {
             val kjoering =
                 HendelserKjoering(
                     sisteSekvensnummer = sekvensnummer.toLong(),
                     antallHendelser = 100 + sekvensnummer,
                     antallRelevante = 10 + sekvensnummer,
+                    sisteRegistreringstidspunkt =
+                        if (sekvensnummer == 5) sisteRegistreringstidspunkt else null,
                 )
 
             skatteoppgjoerHendelserDao.lagreKjoering(kjoering)
@@ -60,6 +65,7 @@ class SkatteoppgjoerHendelseDaoTest(
             antallHendelser shouldBe 105
             antallRelevante shouldBe 15
             nesteSekvensnummer() shouldBe 6
+            sisteRegistreringstidspunkt shouldBe sisteRegistreringstidspunkt
         }
     }
 }

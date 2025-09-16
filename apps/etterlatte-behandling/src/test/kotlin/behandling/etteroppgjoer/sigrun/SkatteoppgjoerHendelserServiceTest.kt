@@ -16,10 +16,14 @@ import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 class SkatteoppgjoerHendelserServiceTest {
@@ -37,33 +41,51 @@ class SkatteoppgjoerHendelserServiceTest {
     fun `skal behandle hendelser fra Sigrun og oppdatere status for relevante etteroppgjoer`() {
         val skatteoppgjoerHendelserService = SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService)
 
-        val sisteKjoering = HendelserKjoering(10, 10, 0)
+        val sisteSekvensnummer = 10.toLong()
+        val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0, Tidspunkt.now())
         val antall = 10
+        val harOms1 = "123"
+        val harOms2 = "456"
 
         coEvery { dao.hentSisteKjoering() } returns sisteKjoering
-        coEvery { sigrunKlient.hentHendelsesliste(antall, sisteKjoering.nesteSekvensnummer(), any()) } returns
-            HendelseslisteFraSkatt.stub(sisteKjoering.nesteSekvensnummer())
+        val registreringstidspunktSisteHendelse = Tidspunkt.now().minus(5, ChronoUnit.HOURS)
+        coEvery { sigrunKlient.hentHendelsesliste(antall, sisteSekvensnummer + 1, any()) } returns
+            HendelseslisteFraSkatt(
+                listOf(
+                    hendelse("789", 2024, sisteSekvensnummer + 1),
+                    hendelse("963", 2024, sisteSekvensnummer + 2),
+                    hendelse(harOms1, 2024, sisteSekvensnummer + 3),
+                    hendelse(harOms1, 2025, sisteSekvensnummer + 4),
+                    hendelse(harOms2, 2024, sisteSekvensnummer + 5, registreringstidspunktSisteHendelse),
+                ),
+            )
 
         coEvery { sakService.finnSak(any(), any()) } returns mockk { every { id } returns SakId(1L) }
+        coEvery { sakService.finnSak(harOms1, any<SakType>()) } returns mockk { every { id } returns SakId(2L) }
+        coEvery { sakService.finnSak(harOms2, any<SakType>()) } returns mockk { every { id } returns SakId(3L) }
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(any()), any()) } returns null
 
-        coEvery { sakService.finnSak("5", any()) } returns mockk { every { id } returns SakId(2L) }
-        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), any()) } returns
+        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2024) } returns
             Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
+        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2025) } returns
+            Etteroppgjoer(SakId(2L), 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
+        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(3L), any()) } returns
+            Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
 
         coEvery { dao.lagreKjoering(any()) } returns 1
         coEvery { etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any()) } just runs
 
         runBlocking {
-            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
+            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall, listOf(2024, 2025)))
         }
 
         coVerify {
             dao.lagreKjoering(
                 withArg { kjoering ->
-                    kjoering.antallHendelser shouldBe 10
-                    kjoering.antallRelevante shouldBe 1
-                    kjoering.nesteSekvensnummer().toInt() shouldBe 21
+                    kjoering.antallHendelser shouldBe 5
+                    kjoering.antallRelevante shouldBe 3
+                    kjoering.nesteSekvensnummer().toInt() shouldBe 16
+                    kjoering.sisteRegistreringstidspunkt shouldBe registreringstidspunktSisteHendelse
                 },
             )
         }
@@ -78,4 +100,18 @@ class SkatteoppgjoerHendelserServiceTest {
             )
         }
     }
+
+    private fun hendelse(
+        ident: String,
+        periode: Int,
+        sekvensnummer: Long,
+        registreringstidspunkt: Tidspunkt? = Tidspunkt.now(),
+    ): SkatteoppgjoerHendelse =
+        SkatteoppgjoerHendelse(
+            periode.toString(),
+            SigrunKlient.HENDELSETYPE_NY,
+            ident,
+            sekvensnummer,
+            registreringstidspunkt,
+        )
 }

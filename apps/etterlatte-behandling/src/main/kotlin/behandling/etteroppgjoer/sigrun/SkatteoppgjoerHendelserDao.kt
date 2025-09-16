@@ -4,6 +4,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.single
 
 class SkatteoppgjoerHendelserDao(
@@ -16,14 +17,15 @@ class SkatteoppgjoerHendelserDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_hendelse_kjoering(
-                            siste_sekvensnummer, antall_hendelser, antall_relevante
+                            siste_sekvensnummer, antall_hendelser, antall_relevante, siste_registreringstidspunkt
                         ) 
-                        VALUES (?, ?, ?) 
+                        VALUES (?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setLong(1, kjoering.sisteSekvensnummer)
                 statement.setInt(2, kjoering.antallHendelser)
                 statement.setInt(3, kjoering.antallRelevante)
+                statement.setTidspunkt(4, kjoering.sisteRegistreringstidspunkt)
                 statement.executeUpdate().also {
                     krev(it == 1) {
                         "Kunne ikke lagre kjoering for skatteoppgjoerHendelser=$kjoering"

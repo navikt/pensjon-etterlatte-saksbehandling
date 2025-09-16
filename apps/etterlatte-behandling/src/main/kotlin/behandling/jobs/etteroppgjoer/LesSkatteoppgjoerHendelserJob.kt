@@ -25,6 +25,7 @@ class LesSkatteoppgjoerHendelserJob(
     private val interval: Duration,
     private val hendelserBatchSize: Int,
     private val sakTilgangDao: SakTilgangDao,
+    private val sisteInntektsaar: Int,
     private val featureToggleService: FeatureToggleService,
     dataSource: DataSource,
 ) : TimerJob {
@@ -54,14 +55,17 @@ class LesSkatteoppgjoerHendelserJob(
         ) {
             if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
                 val inntektsaar = inntektsaarListe()
-                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(hendelserBatchSize, inntektsaar), jobContext)
+                skatteoppgjoerHendelserService.setupKontekstAndRun(
+                    HendelseKjoeringRequest(hendelserBatchSize, inntektsaar),
+                    jobContext,
+                    startDato = LocalDate.of(sisteInntektsaar + 1, 1, 1),
+                )
             }
         }
     }
 
     private fun inntektsaarListe(): List<Int> {
         val startaarOmstillingsstoenad = 2024
-        val sisteInntektsaar = LocalDate.now().year - 1
         val inntektsaar =
             IntRange(
                 start = (sisteInntektsaar - 3).coerceAtLeast(startaarOmstillingsstoenad),

@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -32,9 +31,12 @@ class SkatteoppgjoerHendelserService(
     fun setupKontekstAndRun(
         request: HendelseKjoeringRequest,
         context: Context,
+        startDato: LocalDate,
     ) {
         Kontekst.set(context)
-
+        if (dao.hentSisteKjoering() == null) {
+            settSekvensnummerForLesingFraDato(startDato)
+        }
         lesOgBehandleHendelser(request)
     }
 
@@ -53,8 +55,16 @@ class SkatteoppgjoerHendelserService(
     fun settSekvensnummerForLesingFraDato(dato: LocalDate) {
         val sekvensnummer = runBlocking { sigrunKlient.hentSekvensnummerForLesingFraDato(dato) }
 
+        logger.info("Lagrer en initiell første kjøring for å starte fra $dato (sekvensnummer $sekvensnummer)")
         inTransaction {
-            dao.lagreKjoering(HendelserKjoering(sekvensnummer, 0, 0, null))
+            dao.lagreKjoering(
+                HendelserKjoering(
+                    sisteSekvensnummer = sekvensnummer - 1,
+                    antallHendelser = 0,
+                    antallRelevante = 0,
+                    sisteRegistreringstidspunkt = null,
+                ),
+            )
         }
     }
 
@@ -71,7 +81,7 @@ class SkatteoppgjoerHendelserService(
                         return@count false
                     }
                     if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
-                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant perioe")
+                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har ikke relevant periode")
                         return@count false
                     }
                     try {
@@ -162,7 +172,7 @@ class SkatteoppgjoerHendelserService(
     }
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
-        val sisteKjoering = dao.hentSisteKjoering()
+        val sisteKjoering = krevIkkeNull(dao.hentSisteKjoering()) { "Må ha en siste kjøring for å kunne lese hendelser" }
 
         return runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
     }

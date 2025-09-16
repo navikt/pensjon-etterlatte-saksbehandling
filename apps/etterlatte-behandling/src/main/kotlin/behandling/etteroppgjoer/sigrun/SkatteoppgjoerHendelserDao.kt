@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.singleOrNull
 
 class SkatteoppgjoerHendelserDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -34,7 +34,7 @@ class SkatteoppgjoerHendelserDao(
             }
         }
 
-    fun hentSisteKjoering(): HendelserKjoering =
+    fun hentSisteKjoering(): HendelserKjoering? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -47,7 +47,7 @@ class SkatteoppgjoerHendelserDao(
                         """.trimIndent(),
                     )
 
-                statement.executeQuery().single {
+                statement.executeQuery().singleOrNull {
                     HendelserKjoering(
                         sisteSekvensnummer = getLong("siste_sekvensnummer"),
                         antallHendelser = getInt("antall_hendelser"),
@@ -60,9 +60,13 @@ class SkatteoppgjoerHendelserDao(
 }
 
 data class HendelserKjoering(
+    // Sekvensnummeret til den siste hendelsen som ble lest
     val sisteSekvensnummer: Long,
-    val antallHendelser: Int, // antall vi har etterspurt
-    val antallRelevante: Int, // antall vi er interessert i (opprettet etteroppgjoer)
+    // antall vi har etterspurt
+    val antallHendelser: Int,
+    // antall vi er interessert i (opprettet etteroppgjoer)
+    val antallRelevante: Int,
+    // Når den siste hendelsen ble registrert hos Skatt. Pekepinn på hvor langt vi har lest
     val sisteRegistreringstidspunkt: Tidspunkt?,
 ) {
     fun nesteSekvensnummer() = sisteSekvensnummer + 1

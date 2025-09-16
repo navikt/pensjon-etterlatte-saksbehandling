@@ -191,6 +191,7 @@ import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 private fun pdlHttpClient(config: Config) =
@@ -965,10 +966,11 @@ internal class ApplicationContext(
             skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(5, ChronoUnit.MINUTES),
+            interval = Duration.of(3, ChronoUnit.MINUTES),
             hendelserBatchSize = 1000,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
+            sisteInntektsaar = YearMonth.now().year - 1,
             featureToggleService = featureToggleService,
         )
     }

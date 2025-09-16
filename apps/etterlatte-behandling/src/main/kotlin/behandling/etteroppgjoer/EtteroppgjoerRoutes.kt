@@ -137,11 +137,13 @@ fun Route.etteroppgjoerRoutes(
             post("ferdigstill-uten-brev") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    inTransaction {
-                        runBlocking {
-                            forbehandlingService.ferdigstillForbehandlingUtenBrev(forbehandlingId, brukerTokenInfo)
+                    val forbehandling =
+                        inTransaction {
+                            runBlocking {
+                                forbehandlingService.ferdigstillForbehandlingUtenBrev(forbehandlingId, brukerTokenInfo)
+                            }
                         }
-                    }
+                    call.respond(forbehandling)
                 }
             }
 

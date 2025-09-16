@@ -62,13 +62,15 @@ class SkatteoppgjoerHendelserService(
         request: HendelseKjoeringRequest,
     ) {
         measureTimedValue {
-            val antallRelevante =
-                hendelsesListe.count { hendelse ->
+            hendelsesListe
+                .count { hendelse ->
+                    logger.info("Behandler hendelse ${hendelse.sekvensnummer}")
                     if (hendelse.gjelderPeriode == null) {
                         logger.error("Hendelse med sekvensnummer ${hendelse.sekvensnummer} mangler periode")
                         return@count false
                     }
                     if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
+                        logger.info("Har ikke periode som er i lista")
                         return@count false
                     }
                     try {
@@ -76,15 +78,15 @@ class SkatteoppgjoerHendelserService(
                     } catch (e: Exception) {
                         throw InternfeilException("Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}", e)
                     }
+                }.also { antallRelevante ->
+                    dao.lagreKjoering(
+                        HendelserKjoering(
+                            sisteSekvensnummer = hendelsesListe.last().sekvensnummer,
+                            antallHendelser = hendelsesListe.size,
+                            antallRelevante = antallRelevante,
+                        ),
+                    )
                 }
-
-            dao.lagreKjoering(
-                HendelserKjoering(
-                    sisteSekvensnummer = hendelsesListe.last().sekvensnummer,
-                    antallHendelser = hendelsesListe.size,
-                    antallRelevante = antallRelevante,
-                ),
-            )
         }.let { (antallRelevante, varighet) ->
             logger.info(
                 "Behandling av ${hendelsesListe.size} ($antallRelevante relevante) " +
@@ -103,11 +105,12 @@ class SkatteoppgjoerHendelserService(
         val ident = hendelse.identifikator
 
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
-        val etteroppgjoer =
+        val etteroppgjoer: Etteroppgjoer? =
             sak?.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
 
         if (etteroppgjoer != null) {
             if (hendelse.hendelsetype == null || hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
+                logger.info("Oppdaterer etteroppgjør for sak ${sak.id}, år $inntektsaar")
                 oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
             } else {
                 logger.warn(

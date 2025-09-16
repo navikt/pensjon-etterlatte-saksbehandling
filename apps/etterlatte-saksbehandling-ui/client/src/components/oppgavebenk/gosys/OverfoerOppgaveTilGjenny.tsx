@@ -12,7 +12,7 @@ import { formaterSakstype } from '~utils/formatering/formatering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GOSYS_TEMA_FILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,

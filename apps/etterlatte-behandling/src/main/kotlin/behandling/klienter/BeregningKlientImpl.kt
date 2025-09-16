@@ -6,6 +6,8 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -14,6 +16,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -79,7 +82,17 @@ interface BeregningKlient {
     suspend fun hentSanksjoner(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Sanksjon>
+    ): List<Sanksjon>?
+
+    suspend fun hentBeregningsgrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningsGrunnlag
+
+    suspend fun hentOverstyrtBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregningDTO?
 }
 
 class BeregningKlientImpl(
@@ -93,6 +106,52 @@ class BeregningKlientImpl(
 
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
+
+    override suspend fun hentBeregningsgrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningsGrunnlag {
+        try {
+            logger.info("Henter beregningsgrunnlag for behandling=$behandlingId")
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: ResponseException) {
+            throw InternfeilException("Kunne ikke hente beregningsgrunnlag for behandlingen med id=$behandlingId", e)
+        }
+    }
+
+    override suspend fun hentOverstyrtBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregningDTO? {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/$behandlingId/overstyrt",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource ->
+                        when (resource.status) {
+                            HttpStatusCode.NoContent -> null
+                            else -> deserialize(resource.response.toString())
+                        }
+                    },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException("Kunne ikke hente om behandling hadde overstyrt beregning", e)
+        }
+    }
 
     override suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
@@ -323,7 +382,7 @@ class BeregningKlientImpl(
     override suspend fun hentSanksjoner(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Sanksjon> {
+    ): List<Sanksjon>? {
         try {
             logger.info("Henter sanksjoner for behandlingId=$behandlingId")
 
@@ -332,7 +391,12 @@ class BeregningKlientImpl(
                     Resource(clientId, "$resourceUrl/api/beregning/sanksjon/$behandlingId"),
                     brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> deserialize(resource.response.toString()) },
+                    success = { resource ->
+                        when (resource.status) {
+                            HttpStatusCode.NoContent -> null
+                            else -> deserialize(resource.response.toString())
+                        }
+                    },
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (re: ResponseException) {

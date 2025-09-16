@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBeloeperDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingDataNy

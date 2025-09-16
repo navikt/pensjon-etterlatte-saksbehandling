@@ -10,10 +10,59 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
+import java.util.UUID
 
 class EtteroppgjoerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    fun hentEtteroppgjoerMedSvarfristUtloept(
+        inntektsaar: Int,
+        svarfrist: EtteroppgjoerSvarfrist,
+    ): List<Etteroppgjoer>? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *  
+                        FROM etteroppgjoer e INNER JOIN etteroppgjoer_behandling eb on e.siste_ferdigstilte_forbehandling = eb.id
+                        WHERE e.status = 'FERDIGSTILT_FORBEHANDLING'
+                        AND eb.varselbrev_sendt IS NOT NULL
+                          AND eb.varselbrev_sendt < (now() - interval '${svarfrist.value}')
+                          AND eb.status = 'FERDIGSTILT'
+                          AND eb.aar = ?
+                        """.trimIndent(),
+                    )
+                statement.setInt(1, inntektsaar)
+
+                statement.executeQuery().toList { toEtteroppgjoer() }
+            }
+        }
+
+    fun oppdaterFerdigstiltForbehandlingId(
+        sakId: SakId,
+        inntektsaar: Int,
+        forbehandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE etteroppgjoer
+                    SET siste_ferdigstilte_forbehandling = ?
+                    WHERE sak_id = ? AND inntektsaar = ?
+                    """.trimIndent(),
+                )
+
+            statement.setObject(1, forbehandlingId)
+            statement.setSakId(2, sakId)
+            statement.setInt(3, inntektsaar)
+
+            val updated = statement.executeUpdate()
+            krev(updated == 1) { "Kunne ikke oppdatere siste ferdigstilte forbehandling etteroppgjør for sakid $sakId" }
+        }
+    }
+
     fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -53,6 +102,65 @@ class EtteroppgjoerDao(
             }
         }
 
+    fun hentEtteroppgjoerSakerIBulk(
+        inntektsaar: Int,
+        antall: Int,
+        etteroppgjoerFilter: EtteroppgjoerFilter,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
+    ): List<SakId> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT sak_id FROM etteroppgjoer e 
+                    WHERE e.status = 'MOTTATT_SKATTEOPPGJOER'
+                    AND e.inntektsaar = ?
+                    AND e.har_sanksjon = ?
+                    AND e.har_institusjonsopphold = ?
+                    AND e.har_opphoer = ?
+                    AND e.har_bosatt_utland = ?
+                    AND e.har_adressebeskyttelse_eller_skjermet = ?
+                    AND e.har_aktivitetskrav = ?
+                    AND e.har_overstyrt_beregning = ?
+                     ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
+                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(sak_id = ANY(?))"}
+                    ORDER BY sak_id
+                    LIMIT $antall
+                    """.trimIndent(),
+                ).apply {
+                    var paramIndex = 1
+                    setInt(paramIndex, inntektsaar)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harSanksjon)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harInsitusjonsopphold)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harOpphoer)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harBosattUtland)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harAktivitetskrav)
+                    paramIndex += 1
+                    setBoolean(paramIndex, etteroppgjoerFilter.harOverstyrtBeregning)
+                    paramIndex += 1
+
+                    if (spesifikkeSaker.isNotEmpty()) {
+                        setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                        paramIndex += 1
+                    }
+                    if (ekskluderteSaker.isNotEmpty()) {
+                        setArray(paramIndex, createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
+                    }
+                }.executeQuery()
+                    .toList {
+                        SakId(getLong("sak_id"))
+                    }
+            }
+        }
+
     fun hentEtteroppgjoerForFilter(
         filter: EtteroppgjoerFilter,
         inntektsaar: Int,
@@ -70,6 +178,7 @@ class EtteroppgjoerDao(
                       AND har_bosatt_utland = ?
                       AND har_adressebeskyttelse_eller_skjermet = ?
                       AND har_aktivitetskrav = ?
+                      AND har_overstyrt_beregning = ?
                     """.trimIndent()
 
                 prepareStatement(sql)
@@ -81,6 +190,7 @@ class EtteroppgjoerDao(
                         setBoolean(5, filter.harBosattUtland)
                         setBoolean(6, filter.harAdressebeskyttelseEllerSkjermet)
                         setBoolean(7, filter.harAktivitetskrav)
+                        setBoolean(8, filter.harOverstyrtBeregning)
                     }.executeQuery()
                     .toList { toEtteroppgjoer() }
             }
@@ -138,9 +248,9 @@ class EtteroppgjoerDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer(
-                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, endret
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
                             har_institusjonsopphold = excluded.har_institusjonsopphold,
                             har_bosatt_utland = excluded.har_bosatt_utland,
@@ -148,8 +258,10 @@ class EtteroppgjoerDao(
                             har_opphoer = excluded.har_opphoer,
                             har_adressebeskyttelse_eller_skjermet = excluded.har_adressebeskyttelse_eller_skjermet,
                             har_aktivitetskrav = excluded.har_aktivitetskrav,
+                            har_overstyrt_beregning = excluded.har_overstyrt_beregning,
                             status = excluded.status,
-                            endret = excluded.endret
+                            endret = excluded.endret,
+                            siste_ferdigstilte_forbehandling  = excluded.siste_ferdigstilte_forbehandling
                         """.trimIndent(),
                     )
 
@@ -164,7 +276,10 @@ class EtteroppgjoerDao(
                     statement.setBoolean(8, harBosattUtland)
                     statement.setBoolean(9, harAdressebeskyttelseEllerSkjermet)
                     statement.setBoolean(10, harAktivitetskrav)
-                    statement.setTidspunkt(11, Tidspunkt.now())
+                    statement.setBoolean(11, harOverstyrtBeregning)
+                    statement.setTidspunkt(12, Tidspunkt.now())
+                    statement.setObject(13, sisteFerdigstilteForbehandling)
+
                     statement.executeUpdate().also {
                         krev(it == 1) {
                             "Kunne ikke lagre etteroppgjør for sakId=$sakId"
@@ -185,5 +300,7 @@ class EtteroppgjoerDao(
             harBosattUtland = getBoolean("har_bosatt_utland"),
             harAdressebeskyttelseEllerSkjermet = getBoolean("har_adressebeskyttelse_eller_skjermet"),
             harAktivitetskrav = getBoolean("har_aktivitetskrav"),
+            harOverstyrtBeregning = getBoolean("har_overstyrt_beregning"),
+            sisteFerdigstilteForbehandling = getObject("siste_ferdigstilte_forbehandling")?.let { it as UUID },
         )
 }

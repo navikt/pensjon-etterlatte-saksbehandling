@@ -118,8 +118,14 @@ export interface Formkrav {
   begrunnelse: string | null
 }
 
+export interface KlagerHarIkkeSvart {
+  begrunnelse: string
+  saksbehandler: KildeSaksbehandler
+}
+
 export interface FormkravMedSaksbehandler {
   saksbehandler: KildeSaksbehandler
+  klagerHarIkkeSvartVurdering?: KlagerHarIkkeSvart
   formkrav: Formkrav
 }
 

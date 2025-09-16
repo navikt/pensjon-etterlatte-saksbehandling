@@ -2,11 +2,9 @@ package no.nav.etterlatte.libs.ktor.route
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -30,7 +28,7 @@ const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
 const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
-const val ETTEROPPGJOER_CALL_PARAMETER = "etteroppgjoerId"
+const val FORBEHANDLINGID_CALL_PARAMETER = "etteroppgjoerId"
 
 enum class CallParamAuthId(
     val value: String,
@@ -41,7 +39,7 @@ enum class CallParamAuthId(
     KLAGEID(KLAGEID_CALL_PARAMETER),
     GENERELLBEHANDLINGID(GENERELLBEHANDLINGID_CALL_PARAMETER),
     TILBAKEKREVINGID(TILBAKEKREVINGID_CALL_PARAMETER),
-    ETTEROPPGJOERID(ETTEROPPGJOER_CALL_PARAMETER),
+    ETTEROPPGJOERID(FORBEHANDLINGID_CALL_PARAMETER),
 }
 
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
@@ -89,14 +87,16 @@ inline val RoutingContext.gosysOppgaveId: String
 
 inline val RoutingContext.tilbakekrevingId: UUID
     get() =
-        call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+        call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
+            "TILBAKEKREVINGID_MANGLER",
             "TilbakekrevingId er ikke i path params",
         )
 
-inline val RoutingContext.etteroppgjoerId: UUID
+inline val RoutingContext.forbehandlingId: UUID
     get() =
-        call.parameters[ETTEROPPGJOER_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
-            "EtteroppgjoerId er ikke i path params",
+        call.parameters[FORBEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
+            "FORBEHANDLINGID_MANGLER",
+            "ForbehandlingId er ikke i path params",
         )
 
 val logger = LoggerFactory.getLogger("TilgangsSjekk")

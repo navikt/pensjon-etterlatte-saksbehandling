@@ -1,5 +1,6 @@
 package no.nav.etterlatte.config
 
+import behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJob
 import behandling.jobs.uttrekk.UttrekkLoependeYtelseEtter67Job
 import behandling.jobs.uttrekk.UttrekkLoependeYtelseEtter67JobService
 import com.typesafe.config.Config
@@ -57,6 +58,8 @@ import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveU
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteropppgjoerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
@@ -761,6 +764,13 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
+    val etteroppgjoerSvarfristUtloeptJobService =
+        EtteroppgjoerSvarfristUtloeptJobService(
+            etteroppgjoerService,
+            oppgaveService,
+            featureToggleService,
+        )
+
     private val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
             aktivitetspliktDao,
@@ -913,6 +923,17 @@ internal class ApplicationContext(
         )
     }
 
+    val etteroppgjoerSvarfristUtloeptJob: EtteroppgjoerSvarfristUtloeptJob by lazy {
+        EtteroppgjoerSvarfristUtloeptJob(
+            etteroppgjoerSvarfristUtloeptJobService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(10, ChronoUnit.MINUTES),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+        )
+    }
+
     val sjekkAdressebeskyttelseJobDao: SjekkAdressebeskyttelseJobDao by lazy {
         SjekkAdressebeskyttelseJobDao(autoClosingDatabase)
     }
@@ -935,7 +956,20 @@ internal class ApplicationContext(
             dataSource = dataSource,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(10, ChronoUnit.MINUTES),
+            interval = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
+
+    val lesSkatteoppgjoerHendelserJob: LesSkatteoppgjoerHendelserJob by lazy {
+        LesSkatteoppgjoerHendelserJob(
+            skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
+            hendelserBatchSize = 1000,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            featureToggleService = featureToggleService,
         )
     }
 

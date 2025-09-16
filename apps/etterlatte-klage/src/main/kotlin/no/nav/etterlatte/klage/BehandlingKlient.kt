@@ -121,6 +121,7 @@ class BehandlingKlient(
 fun KlageinstansUtfall.tilResultat(): BehandlingResultat =
     when (this) {
         KlageinstansUtfall.TRUKKET -> BehandlingResultat.HENLAGT
+        KlageinstansUtfall.HENLAGT -> BehandlingResultat.HENLAGT
         KlageinstansUtfall.HEVET -> BehandlingResultat.HEVET
         KlageinstansUtfall.RETUR -> BehandlingResultat.MEDHOLD
         KlageinstansUtfall.OPPHEVET -> BehandlingResultat.MEDHOLD

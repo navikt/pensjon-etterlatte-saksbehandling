@@ -57,7 +57,7 @@ class SkatteoppgjoerHendelserDao(
 data class HendelserKjoering(
     val sisteSekvensnummer: Long,
     val antallHendelser: Int, // antall vi har etterspurt
-    var antallRelevante: Int, // antall vi er interessert i (opprettet forbehandling)
+    val antallRelevante: Int, // antall vi er interessert i (opprettet etteroppgjoer)
 ) {
     fun nesteSekvensnummer() = sisteSekvensnummer + 1
 }

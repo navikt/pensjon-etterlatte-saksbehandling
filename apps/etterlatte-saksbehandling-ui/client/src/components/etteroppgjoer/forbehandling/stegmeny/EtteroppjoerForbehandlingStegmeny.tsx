@@ -2,13 +2,23 @@ import { StegMenyBox } from '~components/behandling/stegmeny/StegMeny'
 import { HStack } from '@navikt/ds-react'
 import { EtteroppgjoerForbehandlingStegLenke } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppgjoerForbehandlingStegLenke'
 import React from 'react'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { EtteroppgjoerForbehandling, EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
 
 export enum EtteroppjoerForbehandlingSteg {
   OVERSIKT = 'oversikt',
   BREV = 'oppsummering',
 }
 
+function kanGaaTilEtteroppgjoerBrev(forbehandling?: EtteroppgjoerForbehandling): boolean {
+  return (
+    !!forbehandling?.beregnetEtteroppgjoerResultat &&
+    forbehandling.beregnetEtteroppgjoerResultat.resultatType !== EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+  )
+}
+
 export function EtteroppjoerForbehandlingStegmeny() {
+  const etteroppgjoer = useEtteroppgjoer()
   return (
     <StegMenyBox>
       <HStack gap="6" align="center">
@@ -20,7 +30,7 @@ export function EtteroppjoerForbehandlingStegmeny() {
         <EtteroppgjoerForbehandlingStegLenke
           path={EtteroppjoerForbehandlingSteg.BREV}
           description="Brev"
-          enabled={true}
+          enabled={kanGaaTilEtteroppgjoerBrev(etteroppgjoer)}
           erSisteRoute
         />
       </HStack>

@@ -31,7 +31,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
-import { ClickEvent, trackClickMedSvar } from '~utils/amplitude'
+import { ClickEvent, trackClickMedSvar } from '~utils/analytics'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>

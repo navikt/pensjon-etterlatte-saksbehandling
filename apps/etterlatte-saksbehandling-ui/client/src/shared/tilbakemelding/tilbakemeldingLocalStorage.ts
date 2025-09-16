@@ -1,4 +1,4 @@
-import { ClickEvent } from '~utils/amplitude'
+import { ClickEvent } from '~utils/analytics'
 import { logger } from '~utils/logger'
 
 const BEHANDLINGER_HVOR_TILBAKEMELDING_ER_GITT_KEY = 'behandlingerHvorTilbakemeldingErGitt'

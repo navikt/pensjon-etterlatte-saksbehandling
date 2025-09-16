@@ -23,13 +23,13 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -37,6 +37,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
@@ -57,14 +58,18 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -191,6 +196,25 @@ class BeregningKlientTest :
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Sanksjon> = emptyList()
+
+    override suspend fun hentBeregningsgrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningsGrunnlag =
+        BeregningsGrunnlag(
+            behandlingId = behandlingId,
+            kilde = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now()),
+            institusjonsopphold = listOf(),
+            beregningsMetode = BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
+            beregningsMetodeFlereAvdoede = listOf(),
+            soeskenMedIBeregning = listOf(),
+            kunEnJuridiskForelder = null,
+        )
+
+    override suspend fun hentOverstyrtBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregningDTO? = null
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {
@@ -315,6 +339,14 @@ class VedtakKlientTest : VedtakKlient {
                 vedtak = emptyList(),
             ),
         )
+
+    override suspend fun angreAttesteringTilbakekreving(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: Saksbehandler,
+        enhet: Enhetsnummer,
+    ): VedtakDto {
+        TODO("Not yet implemented")
+    }
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {
@@ -683,6 +715,14 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
+    override suspend fun kanFerdigstilleBrev(
+        brevId: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
@@ -712,6 +752,14 @@ class BrevKlientTest : BrevKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettBrev(
+        brevSomskalSlettes: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         TODO("Not yet implemented")
     }
 }
@@ -809,6 +857,8 @@ class SigrunKlienTest : SigrunKlient {
         sekvensnummerStart: Long,
         brukAktoerId: Boolean,
     ): HendelseslisteFraSkatt = HendelseslisteFraSkatt.stub()
+
+    override suspend fun hentSekvensnummerForLesingFraDato(dato: LocalDate): Long = 1
 }
 
 class InntektskomponentKlientTest : InntektskomponentKlient {

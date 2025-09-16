@@ -68,7 +68,7 @@ export interface SummerteInntekterAOrdningen {
 }
 
 export interface EtteroppgjoerOpplysninger {
-  skatt: PensjonsgivendeInntektFraSkatteetaten
+  skatt: PensjonsgivendeInntektFraSkatteetatenSummert
   ainntekt: AInntekt
   summerteInntekter?: SummerteInntekterAOrdningen
   tidligereAvkorting: Avkorting
@@ -88,15 +88,10 @@ export interface FaktiskInntekt {
   spesifikasjon: string
 }
 
-export interface PensjonsgivendeInntektFraSkatteetaten {
-  inntekter: PensjonsgivendeInntekt[]
-}
-
-export interface PensjonsgivendeInntekt {
-  skatteordning: string
+export interface PensjonsgivendeInntektFraSkatteetatenSummert {
   loensinntekt: number
   naeringsinntekt: number
-  annet: number
+  fiskeFangstFamiliebarnehage: number
 }
 
 export interface AInntekt {
@@ -116,7 +111,8 @@ export interface Avkorting {
 export enum EtteroppgjoerResultatType {
   TILBAKEKREVING = 'TILBAKEKREVING',
   ETTERBETALING = 'ETTERBETALING',
-  INGEN_ENDRING = 'INGEN_ENDRING',
+  INGEN_ENDRING_MED_UTBETALING = 'INGEN_ENDRING_MED_UTBETALING',
+  INGEN_ENDRING_UTEN_UTBETALING = 'INGEN_ENDRING_UTEN_UTBETALING',
 }
 
 export interface BeregnetEtteroppgjoerResultatDto {

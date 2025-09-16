@@ -18,6 +18,8 @@ import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/form
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { logger } from '~utils/logger'
 import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
+import { SakType } from '~shared/types/sak'
+import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -36,6 +38,11 @@ export default function StartOppgavebehandling() {
         return navigate('ferdigstill', { relative: 'path' })
       case OppgaveHandling.NY_KLAGE:
         return navigate('oppretteklage', { relative: 'path' })
+      case OppgaveHandling.SVAR_ETTEROPPGJOER:
+        return navigate(`/svar-paa-etteroppgjoer/${oppgave?.id}`, {
+          relative: 'path',
+          state: { opprinnelse: Opprinnelse.JOURNALFOERING },
+        })
     }
   }
 
@@ -101,10 +108,10 @@ export default function StartOppgavebehandling() {
       >
         <Radio
           value={OppgaveHandling.NY_BEHANDLING}
-          description="Oppretter en ny behandling"
+          description="Oppretter en ny revurdering i saken"
           disabled={!journalpost || !tilhoererBruker}
         >
-          Opprett behandling
+          Opprett revurdering
         </Radio>
         <Radio
           value={OppgaveHandling.NY_KLAGE}
@@ -119,6 +126,11 @@ export default function StartOppgavebehandling() {
         >
           Ferdigstill oppgaven
         </Radio>
+        {sakMedBehandlinger?.sak.sakType === SakType.OMSTILLINGSSTOENAD && (
+          <Radio value={OppgaveHandling.SVAR_ETTEROPPGJOER} description="Hvis bruker har svart på etteroppgjøret">
+            Mottatt svar etteroppgjør
+          </Radio>
+        )}
       </RadioGroup>
       <VStack gap="2">
         <HStack justify="center">

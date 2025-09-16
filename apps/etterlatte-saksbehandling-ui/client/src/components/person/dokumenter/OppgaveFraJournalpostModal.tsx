@@ -15,7 +15,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { flyttTilGjenny, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
 import { GosysOppgave } from '~shared/types/Gosys'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const OppgaveFraJournalpostModal = ({
   isOpen,

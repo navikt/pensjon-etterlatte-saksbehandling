@@ -10,15 +10,14 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.ETTEROPPGJOER_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.etteroppgjoerId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -82,16 +81,19 @@ internal fun Route.revurderingRoutes(
                 }
             }
 
-            post("/etteroppgjoer/{$ETTEROPPGJOER_CALL_PARAMETER}") {
+            post("/etteroppgjoer") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
-                    val revurdering =
-                        etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
-                            sakId,
-                            etteroppgjoerId,
-                            brukerTokenInfo,
-                        )
-                    call.respond(revurdering.id)
+
+                    medBody<OpprettEtteroppgjoerRevurderingRequest> {
+                        val revurdering =
+                            etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
+                                sakId,
+                                it.opprinnelse,
+                                brukerTokenInfo,
+                            )
+                        call.respond(revurdering.id)
+                    }
                 }
             }
 
@@ -190,4 +192,8 @@ data class OpprettManuellInntektsjustering(
 data class RevurderingInfoDto(
     val begrunnelse: String?,
     val info: RevurderingInfo,
+)
+
+data class OpprettEtteroppgjoerRevurderingRequest(
+    val opprinnelse: BehandlingOpprinnelse,
 )

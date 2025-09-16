@@ -10,7 +10,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 export const OpprettJournalfoeringsoppgave = ({
   journalpost,

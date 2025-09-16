@@ -17,14 +17,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
-import java.util.UUID
 
 class EtteroppgjoerRevurderingService(
     private val behandlingService: BehandlingService,
@@ -39,15 +37,15 @@ class EtteroppgjoerRevurderingService(
 ) {
     fun opprettEtteroppgjoerRevurdering(
         sakId: SakId,
-        forbehandlingId: UUID,
+        opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val (revurdering, sisteIverksatte) =
             inTransaction {
-                val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-                if (forbehandling.status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT)) {
-                    throw InternfeilException("Forbehandlingen har ikke riktig status: ${forbehandling.status}")
-                }
+                val sisteFerdigstilteForbehandling =
+                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
+                        sakId = sakId,
+                    )
 
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
 
@@ -83,7 +81,7 @@ class EtteroppgjoerRevurderingService(
 
                 val virkningstidspunkt =
                     Virkningstidspunkt(
-                        dato = forbehandling.innvilgetPeriode.fom,
+                        dato = sisteFerdigstilteForbehandling.innvilgetPeriode.fom,
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                         begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
                     )
@@ -93,19 +91,18 @@ class EtteroppgjoerRevurderingService(
                         .opprettRevurdering(
                             sakId = sakId,
                             forrigeBehandling = sisteIverksatte,
-                            relatertBehandlingId = forbehandling.id.toString(),
+                            relatertBehandlingId = sisteFerdigstilteForbehandling.id.toString(),
                             persongalleri = persongalleri,
                             prosessType = Prosesstype.MANUELL,
                             kilde = Vedtaksloesning.GJENNY,
                             revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                             virkningstidspunkt = virkningstidspunkt,
                             saksbehandlerIdent = brukerTokenInfo.ident(),
-                            begrunnelse = "Etteroppgjør ${forbehandling.aar}",
+                            begrunnelse = "Etteroppgjør ${sisteFerdigstilteForbehandling.aar}",
                             mottattDato = null,
                             frist = null,
                             paaGrunnAvOppgave = null,
-                            // TODO: sett opprinnelse riktig avhengig av hvorfor vi lager revurderingen
-                            opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+                            opprinnelse = opprinnelse,
                         ).oppdater()
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
@@ -114,7 +111,11 @@ class EtteroppgjoerRevurderingService(
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
-                etteroppgjoerService.oppdaterEtteroppgjoerStatus(sakId, forbehandling.aar, EtteroppgjoerStatus.UNDER_REVURDERING)
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                    sakId,
+                    sisteFerdigstilteForbehandling.aar,
+                    EtteroppgjoerStatus.UNDER_REVURDERING,
+                )
 
                 revurdering to sisteIverksatte
             }

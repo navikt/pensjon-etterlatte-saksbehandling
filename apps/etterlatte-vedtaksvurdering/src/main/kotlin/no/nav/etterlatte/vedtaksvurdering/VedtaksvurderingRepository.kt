@@ -506,6 +506,22 @@ class VedtaksvurderingRepository(
         )
     }
 
+    fun tilbakestillTilbakekrevingsvedtak(
+        tilbakekrevingId: UUID,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        oppdater(
+            query =
+                """
+                UPDATE vedtak 
+                SET status = 'FATTET_VEDTAK', attestertvedtakenhet = null, attestant = null, datoattestert = null 
+                WHERE behandlingId = :behandlingId AND vedtaktype = 'TILBAKEKREVING' AND status = 'ATTESTERT'
+                """.trimIndent(),
+            params = mapOf("behandlingId" to tilbakekrevingId),
+            loggtekst = "Tilbakestiller tilbakerkreving fra attestert siden den feilet mot tilbakekrevingskomponenten",
+        )
+    }
+
     private fun hentVedtakNonNull(
         behandlingId: UUID,
         tx: TransactionalSession? = null,

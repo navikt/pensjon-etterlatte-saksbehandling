@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
@@ -21,8 +20,9 @@ enum class EtteroppgjoerFilter(
     val harAdressebeskyttelseEllerSkjermet: Boolean,
     val harAktivitetskrav: Boolean,
     val harBosattUtland: Boolean,
+    val harOverstyrtBeregning: Boolean,
 ) {
-    ENKEL(false, false, false, false, false, false),
+    ENKEL(false, false, false, false, false, false, false),
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -37,10 +37,8 @@ class EtteroppgjoerJobService(
         Kontekst.set(jobContext)
         if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_PERIODISK_JOBB, false)) {
             logger.info("Starter periodiske jobber for etteroppgjoer")
-            inTransaction {
-                runBlocking {
-                    startEtteroppgjoerKjoering()
-                }
+            runBlocking {
+                startEtteroppgjoerKjoering()
             }
         } else {
             logger.info("Periodisk jobber for etteroppgjoer er deaktivert")
@@ -48,8 +46,8 @@ class EtteroppgjoerJobService(
     }
 
     suspend fun startEtteroppgjoerKjoering() {
-        val forrigeAar = YearMonth.now().year - 1
-        finnOgOpprettEtteroppgjoer(forrigeAar)
+        val etteroppgjoersAar = YearMonth.now().year - 1
+        finnOgOpprettEtteroppgjoer(etteroppgjoersAar)
     }
 
     // finn saker som skal ha etteroppgjør for inntektsår og opprett etteroppgjør
@@ -64,14 +62,20 @@ class EtteroppgjoerJobService(
         val antallOpprettet =
             sakerMedUtbetaling.count { sakId ->
                 try {
-                    etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar)
-                    true
+                    inTransaction {
+                        runBlocking {
+                            etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
+                        }
+                    }
                 } catch (e: Exception) {
-                    logger.error("Feil ved oppretting av etteroppgjør. ${e.message}")
+                    logger.warn("Feil ved oppretting av etteroppgjør", e)
                     false
                 }
             }
 
-        logger.info("Opprettet totalt $antallOpprettet etteroppgjoer for inntektsaar=$inntektsaar")
+        logger.info(
+            "Opprettet totalt $antallOpprettet av ${sakerMedUtbetaling.size} " +
+                "etteroppgjoer for inntektsaar=$inntektsaar",
+        )
     }
 }

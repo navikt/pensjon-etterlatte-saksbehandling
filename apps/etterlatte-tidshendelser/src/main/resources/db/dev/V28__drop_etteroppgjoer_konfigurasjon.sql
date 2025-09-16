@@ -1,0 +1,1 @@
+DROP table etteroppgjoer_konfigurasjon;

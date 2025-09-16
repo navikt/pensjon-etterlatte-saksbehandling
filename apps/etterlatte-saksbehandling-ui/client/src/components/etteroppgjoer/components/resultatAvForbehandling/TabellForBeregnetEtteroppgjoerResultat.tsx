@@ -1,4 +1,4 @@
-import { Box, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
+import { BodyLong, Box, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
@@ -16,6 +16,12 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
       <Heading size="large">
         <HStack gap="2">Resultat</HStack>
       </Heading>
+      <Box maxWidth="42.5rem">
+        <BodyLong>
+          Tabellen viser beregningen av etteroppgjøret ut fra de opplysningene som er lagt inn. Sjekk at du har lagt inn
+          riktig inntekt for perioden omstillingsstønaden er innvilget/utbetalt.
+        </BodyLong>
+      </Box>
       <Box maxWidth="25rem">
         <Table>
           <Table.Header>

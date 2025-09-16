@@ -177,3 +177,13 @@ data class BrevDistribusjonResponse(
     val brevId: BrevID,
     val erDistribuert: Boolean,
 )
+
+class Pdf(
+    val bytes: ByteArray,
+)
+
+class PdfMedData(
+    val brevId: BrevID,
+    val bytes: ByteArray,
+    val opprettet: Tidspunkt,
+)

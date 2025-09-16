@@ -21,6 +21,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.YearMonth
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
@@ -71,7 +74,7 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
     fun `run skal opprette etteroppgjoer for aar hvor saken har utbetalinger`() {
         val currentYear = YearMonth.now().year
         val sak = opprettSak()
-        opprettBehandling(sak)
+        val behandlingId = opprettBehandling(sak)
 
         coEvery {
             vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear - 1, any())
@@ -82,12 +85,29 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
         coEvery {
             vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear, any())
         } returns emptyList()
+        coEvery {
+            vedtakKlientMock.hentIverksatteVedtak(sak.id, any())
+        } returns
+            listOf(
+                VedtakSammendragDto(
+                    id = UUID.randomUUID().toString(),
+                    behandlingId = behandlingId,
+                    vedtakType = VedtakType.INNVILGELSE,
+                    behandlendeSaksbehandler = "",
+                    datoFattet = null,
+                    attesterendeSaksbehandler = "",
+                    datoAttestert = null,
+                    virkningstidspunkt = null,
+                    opphoerFraOgMed = null,
+                    iverksettelsesTidspunkt = null,
+                ),
+            )
+
+        runBlocking {
+            applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering()
+        }
 
         inTransaction {
-            runBlocking {
-                applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering()
-            }
-
             val etteroppgjoerForForrigeAar =
                 applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear - 1)!!
             with(etteroppgjoerForForrigeAar) {
@@ -126,7 +146,7 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
         }
     }
 
-    private fun opprettBehandling(sak: Sak) {
+    private fun opprettBehandling(sak: Sak): UUID =
         inTransaction {
             val behandlingFactory = applicationContext.behandlingFactory
             val behandlingOgOppgave =
@@ -139,8 +159,8 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
                     opprinnelse = BehandlingOpprinnelse.JOURNALFOERING,
                 )
             iverksett(behandlingOgOppgave.behandling)
+            behandlingOgOppgave.behandling.id
         }
-    }
 
     private fun opprettSak(): Sak =
         inTransaction {

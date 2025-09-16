@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -156,10 +157,12 @@ class BrevService(
 
         when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING ->
-                tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                videresendInterneFeil {
+                    tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                }
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.ferdigstillJournalfoerOgDistribuerBrev(
+                etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingOgDistribuerBrev(
                     behandlingId,
                     brukerTokenInfo,
                 )

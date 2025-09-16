@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.brev.Pdf
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -19,14 +18,19 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingBrevService(
@@ -35,6 +39,8 @@ class EtteroppgjoerForbehandlingBrevService(
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val behandlingService: BehandlingService,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingBrevService::class.java)
+
     suspend fun opprettVarselBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -66,16 +72,35 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillJournalfoerOgDistribuerBrev(
+    suspend fun ferdigstillForbehandlingOgDistribuerBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        val brevId =
+            forbehandling.brevId
+                ?: throw UgyldigForespoerselException(
+                    code = "MANGLER_BREVID",
+                    detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
+                )
+
+        brevKlient.kanFerdigstilleBrev(brevId, forbehandling.sak.id, brukerTokenInfo).let { kanFerdigstilles ->
+            if (!kanFerdigstilles) {
+                throw UgyldigForespoerselException(
+                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                    detail =
+                        "Brev kan ikke ferdigstilles før du har sett over forhåndsvisning",
+                )
+            }
+        }
+
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
         )
+        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(forbehandlingId)
     }
 
     suspend fun genererPdf(
@@ -112,6 +137,19 @@ class EtteroppgjoerForbehandlingBrevService(
                     forbehandlingId,
                     brukerTokenInfo,
                 )
+            krevIkkeNull(detaljertForbehandling.beregnetEtteroppgjoerResultat) {
+                "Forbehandlingen må ha et utregnet resultat for å sende et varselbrev"
+            }
+
+            if (detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType ==
+                EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+            ) {
+                throw UgyldigForespoerselException(
+                    "ETTEROPPGJOER_SKAL_IKKE_HA_BREV",
+                    "Varselbrev skal ikke sendes ut for etteroppgjør " +
+                        "forbehandlinger som har resultat ingen endring med ingen utbetaling.",
+                )
+            }
 
             val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(forbehandlingId)
 
@@ -154,9 +192,17 @@ class EtteroppgjoerForbehandlingBrevService(
         krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
         }
+        if (data.beregnetEtteroppgjoerResultat.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
+            throw UgyldigForespoerselException(
+                "SKAL_IKKE_HA_BREV",
+                "Resultatet i etteroppgjøret er ingen endring og ingen utbetaling, så bruker skal ikke ha et varselbrev.",
+            )
+        }
 
         val bosattUtland = sisteIverksatteBehandling.erBosattUtland()
-        val grunnlag = data.faktiskInntekt ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
+        val grunnlag =
+            data.faktiskInntekt
+                ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
         // TODO: usikker om dette blir rett, følge opp ifm testing
         val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
@@ -190,5 +236,21 @@ class EtteroppgjoerForbehandlingBrevService(
                 ),
             sak = sisteIverksatteBehandling.sak,
         )
+    }
+
+    suspend fun slettVarselbrev(
+        brevSomskalSlettes: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        try {
+            brevKlient.slettBrev(brevSomskalSlettes, sakId, brukerTokenInfo)
+        } catch (ex: Exception) {
+            logger.error(
+                "Kunne ikke slette varselbrev etteroppgjør med id=$brevSomskalSlettes i sak $sakId. " +
+                    "Forbehandlingen vet ikke lengre om brevet, og brevet bør settes til utgått manuelt.",
+                ex,
+            )
+        }
     }
 }

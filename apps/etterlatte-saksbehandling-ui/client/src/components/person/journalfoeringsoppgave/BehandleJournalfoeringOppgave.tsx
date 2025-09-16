@@ -16,7 +16,7 @@ import { hentOppgave } from '~shared/api/oppgaver'
 import { useAppDispatch } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isPending, isPendingOrInitial, isSuccess, mapSuccess } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import { OppdaterJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import StartOppgavebehandling, {
   OppgaveDetaljer,
@@ -95,30 +95,32 @@ export default function BehandleJournalfoeringOppgave() {
 
       <HStack height="100%" minHeight="100vh" wrap={false}>
         <Box padding="8" minWidth="40rem">
-          {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
-            <Spinner label="Laster journalpost" />
-          ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
-            <OppdaterJournalpost
-              initialJournalpost={journalpostStatus.data}
-              sak={sakMedBehandlinger.sak}
-              oppgaveId={oppgaveId!!}
-            />
-          ) : (
-            <Routes>
-              <Route index element={<StartOppgavebehandling />} />
+          {mapResult(journalpostStatus, {
+            pending: <Spinner label="Laster journalpost..." />,
+            success: (journalpost) =>
+              !!sakMedBehandlinger && kanEndreJournalpost(journalpost) ? (
+                <OppdaterJournalpost
+                  initialJournalpost={journalpost}
+                  sak={sakMedBehandlinger.sak}
+                  oppgaveId={oppgaveId!!}
+                />
+              ) : (
+                <Routes>
+                  <Route index element={<StartOppgavebehandling />} />
 
-              <Route path="nybehandling">
-                <Route index element={<OpprettNyBehandling />} />
-                <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
-              </Route>
-              <Route path="oppretteklage">
-                <Route index element={<OpprettKlagebehandling />} />
-                <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
-              </Route>
+                  <Route path="nybehandling">
+                    <Route index element={<OpprettNyBehandling />} />
+                    <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
+                  </Route>
+                  <Route path="oppretteklage">
+                    <Route index element={<OpprettKlagebehandling />} />
+                    <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
+                  </Route>
 
-              <Route path="ferdigstill" element={<FerdigstillOppgave />} />
-            </Routes>
-          )}
+                  <Route path="ferdigstill" element={<FerdigstillOppgave />} />
+                </Routes>
+              ),
+          })}
         </Box>
 
         <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">

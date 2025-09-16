@@ -80,7 +80,6 @@ class SakLesDao(
                 }
                 if (sakType != null) {
                     statement.setString(paramIndex, sakType.name)
-                    paramIndex += 1
                 }
 
                 statement

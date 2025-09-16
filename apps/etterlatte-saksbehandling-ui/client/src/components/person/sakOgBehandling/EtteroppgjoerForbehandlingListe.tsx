@@ -13,6 +13,7 @@ import {
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 function lenkeTilForbehandlingMedId(id: string): string {
   return `/etteroppgjoer/${id}/`
@@ -39,8 +40,8 @@ function EtteroppgjoerForbehandlingTabell({
   const relevanteForbehandlinger = forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
 
   // TODO disse revurderingene skal antageligvis ikke opprettes på denne måten, men vi trenger en måte å komme fra forbehandling
-  const opprettRevurderingEtteroppgjoer = (forbehandlingId: string) => {
-    opprettRevurderingRequest({ sakId: sakId, forbehandlingId: forbehandlingId }, () => {
+  const opprettRevurderingEtteroppgjoer = () => {
+    opprettRevurderingRequest({ sakId: sakId, opprinnelse: Opprinnelse.SAKSBEHANDLER }, () => {
       window.location.reload()
     })
   }
@@ -75,7 +76,7 @@ function EtteroppgjoerForbehandlingTabell({
                   <Button
                     loading={isPending(opprettRevurderingResult)}
                     size="small"
-                    onClick={() => opprettRevurderingEtteroppgjoer(forbehandling.id)}
+                    onClick={opprettRevurderingEtteroppgjoer}
                   >
                     Opprett revurdering
                   </Button>

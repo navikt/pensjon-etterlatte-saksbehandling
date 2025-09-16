@@ -27,6 +27,7 @@ export enum OppgaveHandling {
   NY_BEHANDLING = 'NY_BEHANDLING',
   FERDIGSTILL_OPPGAVE = 'FERDIGSTILL_OPPGAVE',
   NY_KLAGE = 'NY_KLAGE',
+  SVAR_ETTEROPPGJOER = 'SVAR_ETTEROPPGJOER',
 }
 
 const initialState: IJournalfoeringOppgaveReducer = {}

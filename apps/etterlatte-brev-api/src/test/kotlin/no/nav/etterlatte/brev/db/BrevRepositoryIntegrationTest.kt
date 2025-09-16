@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.db
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
@@ -155,6 +156,9 @@ internal class BrevRepositoryIntegrationTest(
 
         val pdf = db.hentPdf(brev.id)!!
         pdf.bytes.contentEquals(PDF_BYTES) shouldBe true
+
+        val pdfMedData = db.hentPdfMedData(brev.id)!!
+        pdfMedData.opprettet shouldNotBe null
 
         val hentetBrev = db.hentBrev(brev.id)
 

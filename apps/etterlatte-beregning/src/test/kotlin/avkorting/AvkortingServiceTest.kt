@@ -1,6 +1,8 @@
 package no.nav.etterlatte.avkorting
 
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -116,7 +118,7 @@ internal class AvkortingServiceTest {
             mockkObject(AvkortingValider)
             every { AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any()) } returns emptyList()
             runBlocking {
-                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker) shouldBe avkortingFrontend
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker) shouldBeSameInstanceAs avkortingFrontend
             }
             coVerify {
                 beregningService.hentBeregningNonnull(behandlingId)
@@ -172,7 +174,7 @@ internal class AvkortingServiceTest {
             every { AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any()) } returns emptyList()
 
             runBlocking {
-                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker) shouldBe avkortingFrontend
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker) shouldBeSameInstanceAs avkortingFrontend
             }
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
@@ -484,7 +486,7 @@ internal class AvkortingServiceTest {
                     behandlingId,
                     listOf(endretGrunnlag),
                     bruker,
-                ) shouldBe avkortingFrontend
+                ) shouldBeSameInstanceAs avkortingFrontend
             }
 
             coVerify(exactly = 1) {
@@ -567,7 +569,7 @@ internal class AvkortingServiceTest {
                     revurderingId,
                     listOf(endretGrunnlag),
                     bruker,
-                ) shouldBe avkortingFrontend
+                ) shouldBeSameInstanceAs avkortingFrontend
             }
 
             coVerify(exactly = 1) {
@@ -670,7 +672,7 @@ internal class AvkortingServiceTest {
                     behandlingId,
                     listOf(endretGrunnlag),
                     bruker,
-                ) shouldBe avkortingFrontend
+                ) shouldBeSameInstanceAs avkortingFrontend
             }
 
             coVerify(exactly = 1) {

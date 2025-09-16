@@ -9,7 +9,7 @@ import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { isToday } from 'date-fns'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 const KEY = 'release_id_list'
 const lagreLesteIder = (ider: number[]) => localStorage.setItem(KEY, JSON.stringify(ider))

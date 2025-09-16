@@ -24,13 +24,11 @@ import { mapResult } from '~shared/api/apiUtils'
 import { setDefaultOptions } from 'date-fns'
 import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
-import { initAmplitude } from '~utils/amplitude'
 import { Unleashcontext, useUnleash } from '~useUnleash'
 import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandling'
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
 import { useLastUmami } from '~shared/umami/useLastUmami'
-
-initAmplitude()
+import { SvarPaaEtteroppgjoer } from '~components/person/journalfoeringsoppgave/svarPaaEtteroppgjoer/SvarPaaEtteroppgjoer'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -75,6 +73,7 @@ function App() {
                     <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                     <Route path="/aktivitet-vurdering/:oppgaveId/*" element={<VurderAktivitetspliktOppgave />} />
                     <Route path="/etteroppgjoer/:etteroppgjoerId/*" element={<EtteroppgjoerForbehandling />} />
+                    <Route path="/svar-paa-etteroppgjoer/:oppgaveId/*" element={<SvarPaaEtteroppgjoer />} />
                     <Route path="/meldt-inn-endring/:oppgaveId/*" element={<MeldtInnEndring />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>

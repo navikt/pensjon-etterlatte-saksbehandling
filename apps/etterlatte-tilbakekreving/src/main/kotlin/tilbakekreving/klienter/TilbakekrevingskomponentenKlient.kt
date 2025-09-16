@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
@@ -231,7 +232,8 @@ class TilbakekrevingskomponentenKlient(
             -> {
                 val err = "Tilbakekrevingsvedtak feilet med alvorlighetsgrad $alvorlighetsgrad"
                 sikkerLogg.error(err, kv("response", response.toJson()))
-                throw Exception(err)
+                response.mmel.beskrMelding
+                throw InternfeilException(err)
             }
         }
 

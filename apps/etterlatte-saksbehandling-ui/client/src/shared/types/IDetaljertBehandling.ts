@@ -31,6 +31,7 @@ export interface IDetaljertBehandling {
   viderefoertOpphoer: ViderefoertOpphoer | null
   tidligereFamiliepleier: ITidligereFamiliepleier | null
   erSluttbehandling: boolean
+  opprinnelse: Opprinnelse
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {
@@ -151,4 +152,15 @@ export enum Vedtaksloesning {
   GJENNY = 'GJENNY',
   PESYS = 'PESYS',
   GJENOPPRETTA = 'GJENOPPRETTA',
+}
+
+export enum Opprinnelse {
+  UKJENT = 'UKJENT',
+  SAKSBEHANDLER = 'SAKSBEHANDLER',
+  MELD_INN_ENDRING_SKJEMA = 'MELD_INN_ENDRING_SKJEMA',
+  BARNEPENSJON_SOEKNAD = 'BARNEPENSJON_SOEKNAD',
+  OMSTILLINGSSTOENAD_SOEKNAD = 'OMSTILLINGSSTOENAD_SOEKNAD',
+  JOURNALFOERING = 'JOURNALFOERING',
+  AUTOMATISK_JOBB = 'AUTOMATISK_JOBB',
+  HENDELSE = 'HENDELSE',
 }

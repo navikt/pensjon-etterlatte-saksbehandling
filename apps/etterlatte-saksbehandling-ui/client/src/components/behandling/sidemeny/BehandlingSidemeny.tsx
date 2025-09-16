@@ -39,7 +39,7 @@ import { useAttesterbarBehandlingOppgave } from '~shared/hooks/useAttesterbarBeh
 import { OppgaveEndring } from './OppgaveEndring'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/analytics'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {

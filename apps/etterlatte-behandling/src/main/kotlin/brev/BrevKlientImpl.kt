@@ -3,10 +3,10 @@ package no.nav.etterlatte.brev
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.HttpTimeoutConfig
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -14,13 +14,10 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.Duration
 import java.util.UUID
-
-class Pdf(
-    val bytes: ByteArray,
-)
 
 interface BrevKlient {
     suspend fun tilbakestillStrukturertBrev(
@@ -41,6 +38,12 @@ interface BrevKlient {
         brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun kanFerdigstilleBrev(
+        brevId: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 
     suspend fun genererPdf(
         brevID: BrevID,
@@ -65,6 +68,12 @@ interface BrevKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
+
+    suspend fun slettBrev(
+        brevSomskalSlettes: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BrevKlientImpl(
@@ -154,6 +163,20 @@ class BrevKlientImpl(
         )
     }
 
+    override suspend fun kanFerdigstilleBrev(
+        brevId: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean =
+        get(
+            url = "$resourceUrl/api/brev/$brevId/kan-ferdigstille?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
+            onSuccess = { resource ->
+                resource.response?.let { deserialize<Boolean>(it.toJson()) }
+                    ?: throw InternfeilException("Feil oppstod ved sjekk om brev med id $brevId kan ferdigstilles for sak $sakId")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
     override suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
@@ -169,6 +192,25 @@ class BrevKlientImpl(
             brukerTokenInfo = brukerTokenInfo,
             putBody = brevRequest,
         )
+
+    override suspend fun slettBrev(
+        brevSomskalSlettes: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient
+            .delete(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/$brevSomskalSlettes?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { },
+                failure = { errorResponse -> throw errorResponse },
+            )
+    }
 
     private suspend fun <T> get(
         url: String,

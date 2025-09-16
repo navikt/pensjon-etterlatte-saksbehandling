@@ -3,7 +3,7 @@ import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import React, { useEffect, useState } from 'react'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
@@ -34,11 +34,13 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     innloggetSaksbehandler.skriveEnheter
   )
 
-  const etteroppgjoerForbehandlingId = behandling.relatertBehandlingId
   const etteroppgjoer = useEtteroppgjoer()
 
-  const dispatch = useAppDispatch()
+  // bruk forbehandlingId fra etteroppgjør hvis tilgjengelig, ellers relatertBehandlingId
+  // ny id opprettes når forbehandling kopieres ved endring av inntekt
+  const etteroppgjoerForbehandlingId = etteroppgjoer?.behandling?.id ?? behandling.relatertBehandlingId
 
+  const dispatch = useAppDispatch()
   const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
   const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
@@ -72,7 +74,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })
-  }, [etteroppgjoerForbehandlingId])
+  }, [etteroppgjoerForbehandlingId, etteroppgjoer])
 
   return (
     !!etteroppgjoer && (
@@ -85,15 +87,33 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </BodyShort>
         <Inntektsopplysninger />
 
-        <InformasjonFraBruker
-          behandling={behandling}
-          setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
-        />
-
-        {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
+        {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB ? (
           <>
+            <InformasjonFraBruker
+              behandling={behandling}
+              setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
+            />
+            {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
+              <>
+                <FastsettFaktiskInntekt
+                  erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+                  setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+                />
+                <TabellForBeregnetEtteroppgjoerResultat />
+                <ResultatAvForbehandling />
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <Box maxWidth="42.5rem">
+              <Alert variant="info">
+                Bruker har svart innen 2 ukers svarfrist, dermed skal du ikke ta stilling til informasjon fra bruker.
+              </Alert>
+            </Box>
+
             <FastsettFaktiskInntekt
-              erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+              erRedigerbar={erRedigerbar}
               setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
             />
             <TabellForBeregnetEtteroppgjoerResultat />

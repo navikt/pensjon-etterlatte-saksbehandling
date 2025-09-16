@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -44,4 +45,5 @@ data class DetaljertBehandlingDto(
     val viderefoertOpphoer: ViderefoertOpphoer?,
     val tidligereFamiliepleier: TidligereFamiliepleier?,
     val erSluttbehandling: Boolean,
+    val opprinnelse: BehandlingOpprinnelse,
 )

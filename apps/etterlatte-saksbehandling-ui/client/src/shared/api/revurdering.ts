@@ -2,7 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { RevurderingInfo, RevurderinginfoMedIdOgOpprettet } from '~shared/types/RevurderingInfo'
 import { SakType } from '~shared/types/sak'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingsammendrag } from '~components/person/typer'
 
 export const lagreRevurderingInfo = ({
@@ -45,12 +45,12 @@ export const opprettRevurdering = async ({
 
 export const opprettRevurderingEtteroppgjoer = async ({
   sakId,
-  forbehandlingId,
+  opprinnelse,
 }: {
   sakId: number
-  forbehandlingId: string
+  opprinnelse: Opprinnelse
 }): Promise<ApiResponse<string>> => {
-  return apiClient.post(`/revurdering/${sakId}/etteroppgjoer/${forbehandlingId}`, {})
+  return apiClient.post(`/revurdering/${sakId}/etteroppgjoer`, { opprinnelse })
 }
 
 export const opprettManuellInntektsjustering = async (args: {

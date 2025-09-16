@@ -253,6 +253,37 @@ class OppdatererTilgangServiceTest {
     }
 
     @Test
+    fun `Skal opprettholde skjerming hvis soeker BP er under 18 aar og selv ikke er skjermet`() {
+        val soekerUnder18Aar = soekerPerson(soeker, foedselsdato = LocalDate.now().minusYears(17))
+        coEvery {
+            pdltjenesterKlient.hentPerson(soeker, any(), any())
+        } returns soekerUnder18Aar
+        coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
+        coEvery { skjermingKlient.personErSkjermet(persongalleri.gjenlevende.first()) } returns true
+
+        val sak =
+            bpSak(
+                enhet = Enheter.EGNE_ANSATTE.enhetNr,
+                gradering = AdressebeskyttelseGradering.UGRADERT,
+                erSkjermet = true,
+            )
+        every { sakLesDao.hentSak(sak.id) } returns sak
+
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+
+        verify(exactly = 0) {
+            sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
+        }
+        verify(exactly = 1) {
+            sakTilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
+            sakTilgang.oppdaterSkjerming(sak.id, true)
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.EGNE_ANSATTE.enhetNr))
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(SakMedEnhet(sak.id, Enheter.EGNE_ANSATTE.enhetNr)))
+        }
+    }
+
+    @Test
     fun `Skal ikke fjerne gradering og skjerming hvis soeker er fylt 18 aar og andre i saken har adressebeskyttelse`() {
         val soeker18Aar = soekerPerson(soeker, foedselsdato = LocalDate.now().minusYears(18))
         coEvery {

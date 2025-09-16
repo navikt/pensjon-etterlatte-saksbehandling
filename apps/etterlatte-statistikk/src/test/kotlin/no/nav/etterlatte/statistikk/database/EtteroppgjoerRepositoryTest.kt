@@ -45,7 +45,7 @@ class EtteroppgjoerRepositoryTest(
                 rettsgebyrGyldigFra = LocalDate.of(2024, 1, 1),
                 tilbakekrevingGrense = 40.0,
                 etterbetalingGrense = 20.0,
-                resultatType = EtteroppgjoerResultatType.INGEN_ENDRING,
+                resultatType = EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING,
                 summerteInntekter =
                     SummerteInntekterAOrdningenStatistikkDto(
                         afp = InntektSummert("Filter", listOf(Inntektsmaaned(YearMonth.now(), BigDecimal(123)))),

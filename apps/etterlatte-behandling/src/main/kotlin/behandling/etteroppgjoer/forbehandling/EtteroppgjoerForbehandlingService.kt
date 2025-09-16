@@ -200,7 +200,8 @@ class EtteroppgjoerForbehandlingService(
         val summerteInntekter =
             try {
                 dao.hentSummerteInntekter(forbehandling.id, null)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                logger.error("Kunne ikke hente summerte inntekter", e)
                 null
             }
 

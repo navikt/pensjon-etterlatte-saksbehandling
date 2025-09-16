@@ -30,6 +30,9 @@ enum class KjenteSkjemaKoder(
     ANKE("NAV 90-00.08 A"),
     ETTERSENDELSE_ANKE("NAVe 90-00.08 A"),
     ETTERSENDELSE_KLAGE("NAVe 90-00.08 K"),
+    ;
+
+    val navn = name.lowercase().replace("_", " ")
 }
 
 /**
@@ -111,11 +114,12 @@ class JoarkHendelseHandler(
             val kjentSkjemakode =
                 KjenteSkjemaKoder.entries.find { kjentSkjema -> kjentSkjema.skjemaKode in journalpost.dokumenter.map { it.brevkode } }
             if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr) {
-                logger.warn(
-                    "Hopper over behandling av journalpost med id=$journalpostId, " +
+                logger.info(
+                    "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
                         "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
                         "brevkoden brukt er $kjentSkjemakode",
                 )
+                oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
                 return
             } else {
                 // team klage ruter journalposter som de ikke vil vi skal plukke opp ved å sette journalførende enhet

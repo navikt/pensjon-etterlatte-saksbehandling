@@ -34,11 +34,13 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     innloggetSaksbehandler.skriveEnheter
   )
 
-  const etteroppgjoerForbehandlingId = behandling.relatertBehandlingId
   const etteroppgjoer = useEtteroppgjoer()
 
-  const dispatch = useAppDispatch()
+  // bruk forbehandlingId fra etteroppgjør hvis tilgjengelig, ellers relatertBehandlingId
+  // ny id opprettes når forbehandling kopieres ved endring av inntekt
+  const etteroppgjoerForbehandlingId = etteroppgjoer?.behandling?.id ?? behandling.relatertBehandlingId
 
+  const dispatch = useAppDispatch()
   const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
   const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
@@ -72,7 +74,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })
-  }, [etteroppgjoerForbehandlingId])
+  }, [etteroppgjoerForbehandlingId, etteroppgjoer])
 
   return (
     !!etteroppgjoer && (

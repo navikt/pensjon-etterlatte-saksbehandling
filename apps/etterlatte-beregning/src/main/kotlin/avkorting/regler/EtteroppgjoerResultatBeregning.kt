@@ -121,7 +121,9 @@ val beregneEtteroppgjoerRegel =
             when {
                 Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKEKREVING
                 Beregningstall(differanse.differanse * -1) > grenser.etterbetaling -> EtteroppgjoerResultatType.ETTERBETALING
-                else -> EtteroppgjoerResultatType.INGEN_ENDRING
+                differanse.differanse == 0L && differanse.utbetaltStoenad == 0L &&
+                    differanse.nyBruttoStoenad == 0L -> EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+                else -> EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING
             }
 
         EtteroppgjoerRegelResultat(

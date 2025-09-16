@@ -754,6 +754,14 @@ class BrevKlientTest : BrevKlient {
     ): Brev {
         TODO("Not yet implemented")
     }
+
+    override suspend fun slettBrev(
+        brevSomskalSlettes: BrevID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        TODO("Not yet implemented")
+    }
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {

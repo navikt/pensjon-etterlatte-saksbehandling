@@ -1,10 +1,10 @@
-import { Box, VStack, List } from '@navikt/ds-react'
+import { Box, List, VStack } from '@navikt/ds-react'
 import { isSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
-import { CheckmarkCircleIcon, CircleIcon, ArrowRightIcon } from '@navikt/aksel-icons'
+import { ArrowRightIcon, CheckmarkCircleIcon, CircleIcon } from '@navikt/aksel-icons'
 
 const steps = [
   {
@@ -24,21 +24,26 @@ const steps = [
   },
   {
     index: 4,
+    status: 'FERDIGSTILT_UTEN_VARSEL',
+    text: () => 'Etteroppgjøret er ferdigstilt uten varselbrev siden bruker ikke fikk utbetalt stønad',
+  },
+  {
+    index: 5,
     status: 'FERDIGSTILT_FORBEHANDLING',
     text: () => 'Varselbrev sendt, venter på svar fra bruker',
   },
   {
-    index: 5,
+    index: 6,
     status: 'UNDER_REVURDERING',
     text: () => 'Behandler mottatt svar',
   },
   {
-    index: 6,
+    index: 7,
     status: 'FERDIGSTILT_REVURDERING',
     text: () => 'Etteroppgjøret er ferdig behandlet',
   },
   {
-    index: 7,
+    index: 8,
     status: 'FERDIGSTILT',
     text: () => 'Etteroppgjøret er ferdigstilt',
   },
@@ -65,12 +70,16 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
         {isSuccess(hentEtteroppgjoerResponse) &&
           hentEtteroppgjoerResponse.data.map((etteroppgjoer, index) => {
             const currentLevel = steps.find((s) => s.status === etteroppgjoer.status)?.index ?? 0
+            const aktuelleSteg =
+              etteroppgjoer.status !== 'FERDIGSTILT_UTEN_VARSEL'
+                ? steps.filter((step) => step.status !== 'FERDIGSTILT_UTEN_VARSEL')
+                : steps
 
             return (
               <div key={index}>
                 <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
                 <List as="ul">
-                  {steps.map(({ status, text, index: stepIndex }) => (
+                  {aktuelleSteg.map(({ status, text, index: stepIndex }) => (
                     <List.Item
                       key={status}
                       icon={getIcon(currentLevel, stepIndex)}

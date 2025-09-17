@@ -9,6 +9,7 @@ data class TilbakekrevingBehandling(
     val status: TilbakekrevingStatus,
     val sak: Sak,
     val opprettet: Tidspunkt,
+    val aarsakForAvbrytelse: TilbakekrevingAvbruttAarsak?,
     val tilbakekreving: Tilbakekreving,
     val sendeBrev: Boolean,
 ) {
@@ -41,6 +42,12 @@ data class TilbakekrevingBehandling(
 
     fun underBehandlingEllerFattetVedtak() = underBehandling() || status == TilbakekrevingStatus.FATTET_VEDTAK
 
+    fun avbryt(aarsakForAvbrytelse: TilbakekrevingAvbruttAarsak): TilbakekrevingBehandling =
+        this.copy(
+            status = TilbakekrevingStatus.AVBRUTT,
+            aarsakForAvbrytelse = aarsakForAvbrytelse,
+        )
+
     companion object {
         fun ny(
             kravgrunnlag: Kravgrunnlag,
@@ -57,8 +64,13 @@ data class TilbakekrevingBehandling(
                     kravgrunnlag = kravgrunnlag,
                 ),
             sendeBrev = true,
+            aarsakForAvbrytelse = null,
         )
     }
+}
+
+enum class TilbakekrevingAvbruttAarsak {
+    IKKE_NOE_KRAVGRUNNLAG,
 }
 
 enum class TilbakekrevingStatus {

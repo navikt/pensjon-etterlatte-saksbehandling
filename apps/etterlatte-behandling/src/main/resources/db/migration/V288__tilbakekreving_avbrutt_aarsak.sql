@@ -1,0 +1,1 @@
+alter table tilbakekreving add column aarsak_for_avbrytelse text;

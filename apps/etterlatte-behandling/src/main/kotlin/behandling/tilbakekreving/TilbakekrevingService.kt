@@ -14,12 +14,14 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAvbruttAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
@@ -294,6 +296,31 @@ class TilbakekrevingService(
                     )
                 }
 
+            if (oppdatertKravgrunnlag == null) {
+                // Kravgrunnlaget har utgått. Vi må avbryte tilbakekrevingen, siden det ikke lengre foreligger et kravgrunnlag
+                val oppdatertTilbakekreving =
+                    tilbakekreving.avbryt(aarsakForAvbrytelse = TilbakekrevingAvbruttAarsak.IKKE_NOE_KRAVGRUNNLAG)
+                tilbakekrevingDao.lagreTilbakekreving(oppdatertTilbakekreving)
+                val oppgaveForTilbakekreving =
+                    krevIkkeNull(oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).singleOrNull()) {
+                        "Fant ikke oppgaven som hører til tilbakekrevingen med id $tilbakekrevingId i sak ${tilbakekreving.sak.id}"
+                    }
+                oppgaveService.oppdaterStatusOgMerknad(
+                    oppgaveForTilbakekreving.id,
+                    "Tilbakekrevingen er avbrutt siden kravgrunnlaget ikke lengre foreligger",
+                    Status.AVBRUTT,
+                )
+                lagreTilbakekrevingHendelse(
+                    tilbakekreving = oppdatertTilbakekreving,
+                    hendelseType = TilbakekrevingHendelseType.AVBRUTT,
+                    begrunnelse = TilbakekrevingAvbruttAarsak.IKKE_NOE_KRAVGRUNNLAG.name,
+                )
+                tilbakekrevinghendelser.sendTilbakekreving(
+                    statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
+                    type = TilbakekrevingHendelseType.AVBRUTT,
+                )
+                return@inTransaction oppdatertTilbakekreving
+            }
             // Dersom kontrollfeltet er forskjellig betyr det at kravgrunnlaget har blitt endret hos økonomi
             if (oppdatertKravgrunnlag.kontrollFelt.value != tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value) {
                 logger.info("Oppdaterer kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId")

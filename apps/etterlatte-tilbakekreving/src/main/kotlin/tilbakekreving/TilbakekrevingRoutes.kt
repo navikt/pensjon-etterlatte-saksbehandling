@@ -1,7 +1,6 @@
 package no.nav.etterlatte.tilbakekreving
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -41,7 +40,10 @@ fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
                         kravgrunnlagId = kravgrunnlagId,
                         sakId = sakId,
                     )
-                call.respond(oppdatertKravgrunnlag)
+                when (oppdatertKravgrunnlag) {
+                    null -> call.respond(HttpStatusCode.NoContent)
+                    else -> call.respond(oppdatertKravgrunnlag)
+                }
             }
         }
     }

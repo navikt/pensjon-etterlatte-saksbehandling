@@ -138,7 +138,7 @@ export const formaterJournalpostSakstype = (sakstype: Sakstype) => {
   }
 }
 
-const norskKroneFormat = new Intl.NumberFormat('NO-nb', {
+const norskKroneFormat = new Intl.NumberFormat('nb', {
   currency: 'nok',
 })
 

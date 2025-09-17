@@ -48,21 +48,15 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
             <Table.Row>
               <Table.HeaderCell scope="row">
                 <HStack gap="2">
-                  Avviksbeløp +/-
-                  <HelpText>
-                    {resultat.differanse > 0
-                      ? 'Avviksbeløpet viser at det er utbetalt for mye.'
-                      : resultat.differanse < 0
-                        ? 'Avviksbeløpet viser at det er utbetalt for lite.'
-                        : 'Avviksbeløpet viser at utbetalingen har vært korrekt.'}
-                  </HelpText>
+                  {resultat.differanse > 0
+                    ? 'For mye utbetalt'
+                    : resultat.differanse < 0
+                      ? 'For lite utbetalt'
+                      : 'Riktig beløp utbetalt'}
                 </HStack>
               </Table.HeaderCell>
               <Table.DataCell>
-                <HStack justify="end">
-                  {resultat.differanse > 0 && '+'}
-                  {NOK(resultat.differanse)}
-                </HStack>
+                <HStack justify="end">{NOK(resultat.differanse)}</HStack>
               </Table.DataCell>
             </Table.Row>
             <Table.Row>

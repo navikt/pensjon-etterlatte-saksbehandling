@@ -5,6 +5,8 @@ import { ferdigstillEtteroppgjoerForbehandlingUtenBrev } from '~shared/api/etter
 import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Button, Modal, VStack } from '@navikt/ds-react'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
+import { kanRedigereEtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 
 export function FerdigstillEtteroppgjoerUtenBrev() {
   const { behandling } = useEtteroppgjoer()
@@ -13,6 +15,7 @@ export function FerdigstillEtteroppgjoerUtenBrev() {
     ferdigstillEtteroppgjoerForbehandlingUtenBrev
   )
   const dispatch = useAppDispatch()
+  const redigerbar = kanRedigereEtteroppgjoerBehandling(behandling.status)
 
   function avbryt() {
     setModalOpen(false)
@@ -29,7 +32,11 @@ export function FerdigstillEtteroppgjoerUtenBrev() {
   return (
     <>
       <div>
-        <Button onClick={() => setModalOpen(true)}>Ferdigstill etteroppgjør</Button>
+        {redigerbar ? (
+          <Button onClick={() => setModalOpen(true)}>Ferdigstill etteroppgjør</Button>
+        ) : (
+          <PersonButtonLink fnr={behandling.sak.ident}>Tilbake til saksoversikten</PersonButtonLink>
+        )}
       </div>
       <Modal open={modalOpen} onClose={avbryt} header={{ heading: 'Ferdigstill etteroppgjør uten brev' }}>
         <Modal.Body>

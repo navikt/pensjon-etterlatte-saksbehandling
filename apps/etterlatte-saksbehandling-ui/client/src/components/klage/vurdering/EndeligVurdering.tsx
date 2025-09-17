@@ -31,7 +31,7 @@ type FilledFormDataVurdering = {
 
 export type FormdataVurdering = FieldOrNull<FilledFormDataVurdering>
 
-function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurdering {
+function erSkjemaUtfylt(skjema: FormdataVurdering): boolean {
   if (skjema.utfall === null) {
     return false
   }
@@ -50,7 +50,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   return true
 }
 
-function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtfallUtenBrev {
+function mapFraFormdataTilKlageUtfall(skjema: FieldOrNull<FilledFormDataVurdering>): KlageUtfallUtenBrev {
   switch (skjema.utfall) {
     case Utfall.DELVIS_OMGJOERING:
       return { utfall: 'DELVIS_OMGJOERING', omgjoering: skjema.omgjoering!!, innstilling: skjema.innstilling!! }

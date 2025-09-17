@@ -1,7 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.klienter
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -15,6 +14,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
@@ -105,9 +105,10 @@ internal class TilbakekrevingskomponentenKlientTest {
         val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
         val sakId = sakId1
 
-        val kravgrunnlagResponse = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, 123L)
-
-        kravgrunnlagResponse shouldNotBe null
+        val kravgrunnlagResponse =
+            krevIkkeNull(tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, 123L)) {
+                "Vi har satt opp en respons med kravgrunnlag"
+            }
 
         kravgrunnlagResponse.perioder.first().periode.let {
             it.fraOgMed shouldBe YearMonth.of(2022, Month.APRIL)

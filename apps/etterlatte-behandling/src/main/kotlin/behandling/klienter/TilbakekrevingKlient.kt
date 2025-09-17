@@ -6,6 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -27,7 +28,7 @@ interface TilbakekrevingKlient : Pingable {
         brukerTokenInfo: BrukerTokenInfo,
         sakId: SakId,
         kravgrunnlagId: Long,
-    ): Kravgrunnlag
+    ): Kravgrunnlag?
 }
 
 class TilbakekrevingKlientImpl(
@@ -59,19 +60,22 @@ class TilbakekrevingKlientImpl(
         brukerTokenInfo: BrukerTokenInfo,
         sakId: SakId,
         kravgrunnlagId: Long,
-    ): Kravgrunnlag {
+    ): Kravgrunnlag? {
         logger.info("Henter oppdatert kravgrunnlag tilknyttet tilbakekreving for sak $sakId")
         val response =
             client.get("$url/api/tilbakekreving/${sakId.sakId}/kravgrunnlag/$kravgrunnlagId") {
                 contentType(ContentType.Application.Json)
             }
+        if (response.status == HttpStatusCode.NoContent) {
+            return null
+        }
         if (!response.status.isSuccess()) {
             throw TilbakekrevingKlientException(
                 "Henting av kravgrunnlag tilknyttet tilbakekreving for sak $sakId feilet",
             )
         }
 
-        return response.body()
+        return response.body<Kravgrunnlag>()
     }
 
     override val serviceName: String

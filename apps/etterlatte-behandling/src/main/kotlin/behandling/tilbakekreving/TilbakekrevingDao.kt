@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAvbruttAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
@@ -56,7 +57,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ?
                     """.trimIndent(),
@@ -99,7 +100,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ? 
                     ORDER BY t.opprettet DESC LIMIT 1
@@ -117,7 +118,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse  
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -179,14 +180,15 @@ class TilbakekrevingDao(
             prepareStatement(
                 """
                 INSERT INTO tilbakekreving(
-                    id, status, sak_id, opprettet, kravgrunnlag, vurdering, sende_brev
+                    id, status, sak_id, opprettet, kravgrunnlag, vurdering, sende_brev, aarsak_for_avbrytelse
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?, ?) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
                 ON CONFLICT (id) DO UPDATE SET
                     status = excluded.status,
                     kravgrunnlag = excluded.kravgrunnlag,
                     vurdering = excluded.vurdering,
-                    sende_brev = excluded.sende_brev
+                    sende_brev = excluded.sende_brev,
+                    aarsak_for_avbrytelse = excluded.aarsak_for_avbrytelse
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekrevingBehandling.id)
@@ -198,6 +200,7 @@ class TilbakekrevingDao(
             statement.setJsonb(6, vurdering)
         }
         statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
+        statement.setString(8, tilbakekrevingBehandling.aarsakForAvbrytelse?.name)
         statement.executeUpdate().also {
             krev(it == 1) {
                 "Kunne ikke lagre tilbaekreving behandling for sakid ${tilbakekrevingBehandling.sak.id}"
@@ -313,6 +316,7 @@ class TilbakekrevingDao(
                     kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
                 ),
             sendeBrev = getBoolean("sende_brev"),
+            aarsakForAvbrytelse = getString("aarsak_for_avbrytelse")?.let { enumValueOf<TilbakekrevingAvbruttAarsak>(it) },
         )
 
     private fun ResultSet.toTilbakekrevingsperiode(): Pair<YearMonth, Tilbakekrevingsbelop> =

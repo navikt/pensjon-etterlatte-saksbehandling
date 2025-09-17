@@ -14,5 +14,5 @@ class TilbakekrevingService(
     fun hentKravgrunnlag(
         kravgrunnlagId: Long,
         sakId: SakId,
-    ): Kravgrunnlag = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, kravgrunnlagId)
+    ): Kravgrunnlag? = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, kravgrunnlagId)
 }

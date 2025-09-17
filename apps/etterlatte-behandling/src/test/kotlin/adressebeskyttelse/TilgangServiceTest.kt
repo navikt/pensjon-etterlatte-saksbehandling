@@ -173,6 +173,7 @@ internal class TilgangServiceTest(
                 TilbakekrevingStatus.OPPRETTET,
                 sak,
                 Tidspunkt.now(),
+                aarsakForAvbrytelse = null,
                 Tilbakekreving(tilbakekrevingVurdering(), emptyList(), kravgrunnlag(sak)),
                 true,
             )

@@ -8,6 +8,7 @@ import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.Error
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
+import no.nav.etterlatte.joarkhendelser.joark.Journalstatus
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
 import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.joark.erGammeltTemaEtterlatte
@@ -115,11 +116,16 @@ class JoarkHendelseHandler(
                 KjenteSkjemaKoder.entries.find { kjentSkjema -> kjentSkjema.skjemaKode in journalpost.dokumenter.map { it.brevkode } }
             if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr) {
                 logger.info(
-                    "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
-                        "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
-                        "brevkoden brukt er $kjentSkjemakode",
+                    "Behandler en journalpost som skal til Kabal (id=${journalpost.journalpostId}, status=${journalpost.journalstatus})",
                 )
-                oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
+                if (journalpost.journalstatus == Journalstatus.MOTTATT) {
+                    logger.info(
+                        "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
+                            "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
+                            "brevkoden brukt er $kjentSkjemakode",
+                    )
+                    oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
+                }
                 return
             } else {
                 // team klage ruter journalposter som de ikke vil vi skal plukke opp ved å sette journalførende enhet

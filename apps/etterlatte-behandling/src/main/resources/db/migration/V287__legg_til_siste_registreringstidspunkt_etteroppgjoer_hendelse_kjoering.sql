@@ -1,0 +1,3 @@
+
+ALTER TABLE etteroppgjoer_hendelse_kjoering
+    ADD COLUMN SISTE_REGISTRERINGSTIDSPUNKT TIMESTAMP;

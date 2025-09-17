@@ -9,19 +9,19 @@ export const FaktiskInntektVisning = () => {
     <VStack gap="4">
       <VStack gap="2">
         <Label>Lønnsinntekt</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt)}</BodyShort>
+        <BodyShort>{`${new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt)} kr`}</BodyShort>
       </VStack>
       <VStack gap="2">
         <Label>Avtalefestet pensjon</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.afp)}</BodyShort>
+        <BodyShort>{`${new Intl.NumberFormat('nb').format(faktiskInntekt.afp)} kr`}</BodyShort>
       </VStack>
       <VStack gap="2">
         <Label>Næringsinntekt</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt)}</BodyShort>
+        <BodyShort>{`${new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt)} kr`}</BodyShort>
       </VStack>
       <VStack gap="2">
         <Label>Inntekt fra utland</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.utlandsinntekt)}</BodyShort>
+        <BodyShort>{`${new Intl.NumberFormat('nb').format(faktiskInntekt.utlandsinntekt)} kr`}</BodyShort>
       </VStack>
 
       <SumAvFaktiskInntekt faktiskInntekt={faktiskInntekt} />

@@ -117,14 +117,14 @@ class JoarkHendelseHandler(
                 logger.info(
                     "Behandler en journalpost som skal til Kabal (id=${journalpost.journalpostId}, status=${journalpost.journalstatus})",
                 )
-//                if (journalpost.journalstatus == Journalstatus.MOTTATT) {
-                logger.info(
-                    "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
-                        "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
-                        "brevkoden brukt er $kjentSkjemakode",
-                )
-                oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
-//                }
+                if (hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT) {
+                    logger.info(
+                        "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
+                            "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
+                            "brevkoden brukt er $kjentSkjemakode",
+                    )
+                    oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
+                }
                 return
             } else {
                 // team klage ruter journalposter som de ikke vil vi skal plukke opp ved å sette journalførende enhet

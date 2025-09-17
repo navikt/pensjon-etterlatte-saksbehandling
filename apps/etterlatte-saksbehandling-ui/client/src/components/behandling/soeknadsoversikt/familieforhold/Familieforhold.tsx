@@ -67,12 +67,17 @@ export const Familieforhold = ({ behandling, redigerbar, personopplysninger }: P
                   <TabellOverGjenlevende
                     gjenlevende={!!personopplysninger?.soeker ? [personopplysninger?.soeker] : []}
                     alleLand={alleLand}
+                    sakType={behandling.sakType}
                   />
                   <TabellOverAvdoedesBarn sakType={behandling.sakType} />
                 </>
               ) : (
                 <>
-                  <TabellOverGjenlevende gjenlevende={personopplysninger?.gjenlevende} alleLand={alleLand} />
+                  <TabellOverGjenlevende
+                    sakType={behandling.sakType}
+                    gjenlevende={personopplysninger?.gjenlevende}
+                    alleLand={alleLand}
+                  />
                   <TabellOverAvdoedesBarn sakType={behandling.sakType} />
                 </>
               )}

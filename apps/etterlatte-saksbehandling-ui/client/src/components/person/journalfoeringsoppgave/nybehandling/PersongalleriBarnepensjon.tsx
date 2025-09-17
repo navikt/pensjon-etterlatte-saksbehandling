@@ -43,8 +43,8 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
 
       <Box padding="4" borderWidth="1" borderRadius="small">
         <Heading size="small" spacing>
-          Gjenlevende forelder
-          <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
+          Biologisk forelder
+          <BodyShort textColor="subtle">Legg til biologisk forelder hvis tilgjengelig</BodyShort>
         </Heading>
 
         <VStack gap="4" align="start">
@@ -54,7 +54,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
                 <TextField
                   {...register(`persongalleri.gjenlevende.${index}.value`, { validate: validateFnrObligatorisk })}
                   key={field.id}
-                  label="Gjenlevende forelder"
+                  label="Biologisk forelder"
                   description="Oppgi fødselsnummer"
                   error={errors?.persongalleri?.gjenlevende?.[index]?.value?.message}
                 />
@@ -74,7 +74,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
             disabled={!kanLeggeTil}
             type="button"
           >
-            Legg til gjenlevende
+            Legg til biologisk forelder
           </Button>
         </VStack>
       </Box>

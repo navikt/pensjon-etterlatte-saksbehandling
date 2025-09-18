@@ -133,12 +133,7 @@ class SkatteoppgjoerHendelserService(
         hendelse: SkatteoppgjoerHendelse,
         sak: Sak,
     ) {
-        if (etteroppgjoer.status in
-            listOf(
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-            )
-        ) {
+        if (etteroppgjoer.status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
             logger.info(
                 "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør " +
                     "for ${hendelse.gjelderPeriode?.toInt()}, sakId=${sak.id}. " +

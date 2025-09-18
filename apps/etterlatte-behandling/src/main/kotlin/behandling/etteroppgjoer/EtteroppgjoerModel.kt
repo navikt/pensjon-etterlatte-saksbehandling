@@ -28,4 +28,11 @@ enum class EtteroppgjoerStatus {
 
     FERDIGSTILT_UTEN_VARSEL,
     FERDIGSTILT,
+    ;
+
+    companion object {
+        // TODO: må være strengere her når vi går i prod
+        val KLAR_TIL_FORBEHANDLING = setOf(VENTER_PAA_SKATTEOPPGJOER, AVBRUTT_FORBEHANDLING, MOTTATT_SKATTEOPPGJOER)
+        val ETTEROPPGJOER_ER_FERDIGSTILT = setOf(FERDIGSTILT, FERDIGSTILT_UTEN_VARSEL)
+    }
 }

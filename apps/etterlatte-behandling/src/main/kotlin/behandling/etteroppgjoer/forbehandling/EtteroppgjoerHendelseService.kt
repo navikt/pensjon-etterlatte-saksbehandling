@@ -52,7 +52,7 @@ class EtteroppgjoerHendelseService(
             // TODO: nullable?
             val summerteInntekter =
                 etteroppgjoerForbehandlingDao
-                    .hentSummerteInntekter(etteroppgjoerForbehandling.id, null) // TODO: revurderingId
+                    .hentSummerteInntekter(etteroppgjoerForbehandling.id)
             val pensjonsgivendeInntektFraSkatt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!
 
             sendKafkaMelding(

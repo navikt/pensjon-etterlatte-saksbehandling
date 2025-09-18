@@ -199,7 +199,7 @@ class EtteroppgjoerForbehandlingService(
         }
         val summerteInntekter =
             try {
-                dao.hentSummerteInntekter(forbehandling.id, null)
+                dao.hentSummerteInntekter(forbehandling.id)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente summerte inntekter", e)
                 null
@@ -273,7 +273,7 @@ class EtteroppgjoerForbehandlingService(
         try {
             val summerteInntekter =
                 runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
-            dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
+            dao.lagreSummerteInntekter(nyForbehandling.id, summerteInntekter)
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId",
@@ -571,7 +571,9 @@ class EtteroppgjoerForbehandlingService(
             )
 
         dao.lagreForbehandling(forbehandlingCopy)
+
         dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.kopierSummerteInntekter(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
         dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
 

@@ -302,9 +302,9 @@ class EtteroppgjoerForbehandlingDaoTest(
                 varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
-        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningen)
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningen)
 
-        val hentetInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        val hentetInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id)
         summerteInntekterAOrdningen.shouldBeEqualToIgnoringFields(hentetInntekter, SummerteInntekterAOrdningen::regelresultat)
     }
 
@@ -376,12 +376,12 @@ class EtteroppgjoerForbehandlingDaoTest(
                     ),
             )
 
-        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningenEn)
-        val hentetInntekterEn = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningenEn)
+        val hentetInntekterEn = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id)
         summerteInntekterAOrdningenEn.shouldBeEqualToIgnoringFields(hentetInntekterEn, SummerteInntekterAOrdningen::regelresultat)
 
-        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningenTo)
-        val hentetInntekterTo = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningenTo)
+        val hentetInntekterTo = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id)
         summerteInntekterAOrdningenTo.shouldBeEqualToIgnoringFields(hentetInntekterTo, SummerteInntekterAOrdningen::regelresultat)
         hentetInntekterEn shouldNotBeEqual hentetInntekterTo
     }

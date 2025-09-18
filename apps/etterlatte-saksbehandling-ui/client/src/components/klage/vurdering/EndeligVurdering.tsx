@@ -114,6 +114,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
     }
     if (!erSkjemaUtfylt(skjema)) {
       setSkjemaErFyltUtFeilmelding('Skjema er ikke fylt ut riktig, vennligst se igjennom og prøv på nytt')
+      return
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre

@@ -42,12 +42,15 @@ internal class EtteroppgjoerRepositoryTest(
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerBeregnetResultat)
         with(etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)!!) {
             utbetaltStoenad shouldBe 1000
+            harIngenInntekt shouldBe false
         }
 
-        val nyEtteroppgjoerBeregnetResultat = beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, 2000, 2000)
+        val nyEtteroppgjoerBeregnetResultat =
+            beregnetEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, 2000, 2000, harIngenInntekt = true)
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(nyEtteroppgjoerBeregnetResultat)
         with(etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)!!) {
             utbetaltStoenad shouldBe 2000
+            harIngenInntekt shouldBe true
         }
     }
 
@@ -72,6 +75,7 @@ internal class EtteroppgjoerRepositoryTest(
         sisteIverksatteBehandlingId: UUID,
         utbetaltStoenad: Long,
         nyBruttoStoenad: Long,
+        harIngenInntekt: Boolean = false,
     ): BeregnetEtteroppgjoerResultat =
         BeregnetEtteroppgjoerResultat(
             id = UUID.randomUUID(),
@@ -92,6 +96,7 @@ internal class EtteroppgjoerRepositoryTest(
                         ),
                 ),
             resultatType = EtteroppgjoerResultatType.TILBAKEKREVING,
+            harIngenInntekt = harIngenInntekt,
             tidspunkt = Tidspunkt.now(),
             regelResultat = mapOf("regel" to "resultat").toObjectNode(),
             kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),

@@ -29,4 +29,6 @@ enum class EtteroppgjoerStatus {
 
     FERDIGSTILT_REVURDERING, // TODO: endre til FERDIGSTILT ?
     FERDIGSTILT_UTEN_VARSEL,
+
+    FERDIGSTILT, // TODO: fjernes?
 }

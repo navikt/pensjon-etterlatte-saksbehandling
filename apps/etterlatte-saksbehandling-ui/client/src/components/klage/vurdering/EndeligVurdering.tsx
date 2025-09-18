@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   InnstillingTilKabalUtenBrev,
@@ -31,7 +31,7 @@ type FilledFormDataVurdering = {
 
 export type FormdataVurdering = FieldOrNull<FilledFormDataVurdering>
 
-function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurdering {
+function erSkjemaUtfylt(skjema: FormdataVurdering): boolean {
   if (skjema.utfall === null) {
     return false
   }
@@ -50,7 +50,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   return true
 }
 
-function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtfallUtenBrev {
+function mapFraFormdataTilKlageUtfall(skjema: FieldOrNull<FilledFormDataVurdering>): KlageUtfallUtenBrev {
   switch (skjema.utfall) {
     case Utfall.DELVIS_OMGJOERING:
       return { utfall: 'DELVIS_OMGJOERING', omgjoering: skjema.omgjoering!!, innstilling: skjema.innstilling!! }
@@ -92,6 +92,8 @@ export function EndeligVurdering(props: { klage: Klage }) {
   const dispatch = useAppDispatch()
   const stoetterDelvisOmgjoering = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering)
 
+  const [skjemaErFyltUtFeilmelding, setSkjemaErFyltUtFeilmelding] = useState<string>('')
+
   const {
     control,
     handleSubmit,
@@ -105,11 +107,14 @@ export function EndeligVurdering(props: { klage: Klage }) {
   const valgtUtfall = watch('utfall')
 
   function haandterLagringVurdering(skjema: FormdataVurdering, naviger: boolean) {
+    setSkjemaErFyltUtFeilmelding('')
+
     if (!klage) {
       return
     }
     if (!erSkjemaUtfylt(skjema)) {
-      throw new Error('Ufullstendig validering av skjemadata i RHF')
+      setSkjemaErFyltUtFeilmelding('Skjema er ikke fylt ut riktig, vennligst se igjennom og prøv på nytt')
+      return
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
@@ -167,6 +172,9 @@ export function EndeligVurdering(props: { klage: Klage }) {
             errorMessage:
               'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
           })}
+
+          {!!skjemaErFyltUtFeilmelding && <Alert variant="error">{skjemaErFyltUtFeilmelding}</Alert>}
+
           {!!valgtUtfall && (
             <>
               <Box>

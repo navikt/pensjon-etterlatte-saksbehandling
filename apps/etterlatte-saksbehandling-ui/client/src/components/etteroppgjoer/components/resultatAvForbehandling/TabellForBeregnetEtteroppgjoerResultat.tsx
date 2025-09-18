@@ -56,7 +56,8 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
                 </HStack>
               </Table.HeaderCell>
               <Table.DataCell>
-                <HStack justify="end">{NOK(resultat.differanse)}</HStack>
+                {/* Vi vil kun vise tallet uten fortegn for saksbehandler, men det kan komme som negativt tall fra backend */}
+                <HStack justify="end">{NOK(Math.abs(resultat.differanse))}</HStack>
               </Table.DataCell>
             </Table.Row>
             <Table.Row>

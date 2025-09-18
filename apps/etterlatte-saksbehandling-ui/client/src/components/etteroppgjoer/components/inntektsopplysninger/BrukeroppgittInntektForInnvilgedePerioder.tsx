@@ -1,7 +1,7 @@
 import { BodyShort, Detail, Heading, HStack, Label, Table, VStack } from '@navikt/ds-react'
 import { ForventetInntektGrunnlag, IAvkortingGrunnlag, erForventetInntekt } from '~shared/types/IAvkorting'
 import { NOK } from '~utils/formatering/formatering'
-import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
+import { formaterDato, formaterDatoMedFallback, formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { lastDayOfMonth } from 'date-fns'
 
 export const BrukeroppgittInntektForInnvilgedePerioder = ({
@@ -52,7 +52,7 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
                         <VStack gap="2">
                           <Label>Kilde</Label>
                           <BodyShort>{grunnlag.kilde.ident}</BodyShort>
-                          <Detail>Saksbehandler: {grunnlag.kilde.tidspunkt}</Detail>
+                          <Detail>Saksbehandler: {formaterDatoMedKlokkeslett(grunnlag.kilde.tidspunkt)}</Detail>
                         </VStack>
                       </HStack>
                     }

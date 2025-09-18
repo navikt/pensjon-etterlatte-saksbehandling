@@ -152,28 +152,17 @@ class EtteroppgjoerForbehandlingService(
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
     fun hentSisteFerdigstillteForbehandlingPaaSak(sakId: SakId): EtteroppgjoerForbehandling {
-        val forbehandlinger = dao.hentForbehandlinger(sakId)
+        val sisteFerdigstilteForbehandling =
+            dao
+                .hentForbehandlinger(sakId)
+                .filter { it.erFerdigstilt() }
+                .maxByOrNull { it.opprettet }
 
-        if (!forbehandlinger.isEmpty()) {
-            val ferdigstilteForbehandlinger =
-                forbehandlinger.filter { forbehandling ->
-                    forbehandling.erFerdigstilt()
-                }
-
-            if (!ferdigstilteForbehandlinger.isEmpty()) {
-                return ferdigstilteForbehandlinger.last()
-            } else {
-                throw IkkeFunnetException(
-                    code = "IKKE_FUNNET",
-                    detail = "Ingen ferdigstilte forbehandlinger på sak med id: ${sakId.sakId}",
-                )
-            }
-        } else {
-            throw IkkeFunnetException(
+        return sisteFerdigstilteForbehandling
+            ?: throw IkkeFunnetException(
                 code = "IKKE_FUNNET",
-                detail = "Fant ingen forbehandlinger på sak med id: ${sakId.sakId}",
+                detail = "Fant ingen ferdigstilte forbehandlinger på sak med id=${sakId.sakId}",
             )
-        }
     }
 
     fun hentDetaljertForbehandling(

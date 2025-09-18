@@ -72,11 +72,12 @@ class EtteroppgjoerDao(
                         SELECT *
                         FROM etteroppgjoer 
                         WHERE sak_id = ?
-                        AND status != ?
+                        AND status NOT IN (?, ?)
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId.sakId)
-                statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
+                statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT_REVURDERING.name)
+                statement.setString(3, EtteroppgjoerStatus.FERDIGSTILT_UTEN_VARSEL.name)
                 statement.executeQuery().toList { toEtteroppgjoer() }
             }
         }

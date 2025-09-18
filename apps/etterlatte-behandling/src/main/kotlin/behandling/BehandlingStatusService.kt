@@ -327,7 +327,6 @@ class BehandlingStatusServiceImpl(
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
 
         haandterEtteroppgjoerIverksattVedtak(behandling)
-
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
         haandterAktivitetspliktOppgave(behandling)

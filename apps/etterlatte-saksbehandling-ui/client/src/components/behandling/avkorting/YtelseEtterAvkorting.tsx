@@ -40,6 +40,7 @@ export const YtelseEtterAvkorting = ({
   const tidligereYtelser = [...tidligereAvkortetYtelse].sort(sorterNyligsteFoerstOgBakover)
 
   const finnTidligereTidligereYtelseIPeriode = (ytelse: IAvkortetYtelse) => {
+    if (behandling?.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER) return undefined
     return tidligereYtelser.find(
       (tidligere) => ytelse.fom >= tidligere.fom && (tidligere.tom == null || ytelse.tom <= tidligere.tom)
     )
@@ -93,9 +94,7 @@ export const YtelseEtterAvkorting = ({
                           tekst={NOK(ytelse.ytelseFoerAvkorting)}
                           label=""
                           undertekst={
-                            tidligereYtelse
-                              ? `${NOK(tidligereYtelse.ytelseFoerAvkorting)} ${behandling?.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER ? '(Forrige vedtak)' : ''}`
-                              : ''
+                            tidligereYtelse ? `${NOK(tidligereYtelse.ytelseFoerAvkorting)} (Forrige vedtak)` : ''
                           }
                         />
                       </SmalCelle>
@@ -106,9 +105,7 @@ export const YtelseEtterAvkorting = ({
                           tekst={NOK(ytelse.avkortingsbeloep)}
                           label=""
                           undertekst={
-                            tidligereYtelse
-                              ? `${NOK(tidligereYtelse.avkortingsbeloep)} ${behandling?.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER ? '(Forrige vedtak)' : ''}`
-                              : ''
+                            tidligereYtelse ? `${NOK(tidligereYtelse.avkortingsbeloep)} (Forrige vedtak)` : ''
                           }
                         />
                       </SmalCelle>
@@ -118,11 +115,7 @@ export const YtelseEtterAvkorting = ({
                         <Info
                           tekst={restanseOgSanksjon(ytelse)}
                           label=""
-                          undertekst={
-                            tidligereYtelse
-                              ? `${restanseOgSanksjon(tidligereYtelse)} ${behandling?.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER ? '(Forrige vedtak)' : ''}`
-                              : ''
-                          }
+                          undertekst={tidligereYtelse ? `${restanseOgSanksjon(tidligereYtelse)} (Forrige vedtak)` : ''}
                         />
                       </SmalCelle>
                     </Table.DataCell>
@@ -131,11 +124,7 @@ export const YtelseEtterAvkorting = ({
                         <Info
                           tekst={NOK(ytelse.ytelseEtterAvkorting)}
                           label=""
-                          undertekst={
-                            tidligereYtelse
-                              ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} ${behandling?.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER ? '(Forrige vedtak)' : ''}`
-                              : ''
-                          }
+                          undertekst={tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)}` : ''}
                         />
                       </BredCelle>
                     </Table.DataCell>

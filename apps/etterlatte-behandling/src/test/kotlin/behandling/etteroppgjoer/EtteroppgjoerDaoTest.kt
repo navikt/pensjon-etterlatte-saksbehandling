@@ -94,7 +94,7 @@ class EtteroppgjoerDaoTest(
     @ParameterizedTest
     @EnumSource(
         value = EtteroppgjoerStatus::class,
-        names = ["FERDIGSTILT_REVURDERING", "FERDIGSTILT_UTEN_VARSEL"],
+        names = ["FERDIGSTILT", "FERDIGSTILT_UTEN_VARSEL"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `skal hente aktive etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
@@ -105,7 +105,7 @@ class EtteroppgjoerDaoTest(
     @ParameterizedTest
     @EnumSource(
         value = EtteroppgjoerStatus::class,
-        names = ["FERDIGSTILT_REVURDERING", "FERDIGSTILT_UTEN_VARSEL"],
+        names = ["FERDIGSTILT", "FERDIGSTILT_UTEN_VARSEL"],
         mode = EnumSource.Mode.INCLUDE,
     )
     fun `skal ikke hente ferdigstilte etteroppgjoer for sak`(status: EtteroppgjoerStatus) {

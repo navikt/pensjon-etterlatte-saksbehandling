@@ -71,7 +71,7 @@ class EtteroppgjoerHendelseService(
         etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
         hendelseType: EtteroppgjoerHendelseType,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
-        summerteInntekter: SummerteInntekterAOrdningen,
+        summerteInntekter: SummerteInntekterAOrdningen?,
         pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt,
         utlandstilknytningType: UtlandstilknytningType?,
         saksbehandler: String?,
@@ -87,12 +87,16 @@ class EtteroppgjoerHendelseService(
                         utlandstilknytningType = utlandstilknytningType,
                         saksbehandler = saksbehandler,
                         summerteInntekter =
-                            SummerteInntekterAOrdningenStatistikkDto(
-                                afp = summerteInntekter.afp,
-                                loenn = summerteInntekter.loenn,
-                                oms = summerteInntekter.oms,
-                                tidspunktBeregnet = summerteInntekter.tidspunktBeregnet,
-                            ),
+                            if (summerteInntekter != null) {
+                                SummerteInntekterAOrdningenStatistikkDto(
+                                    afp = summerteInntekter.afp,
+                                    loenn = summerteInntekter.loenn,
+                                    oms = summerteInntekter.oms,
+                                    tidspunktBeregnet = summerteInntekter.tidspunktBeregnet,
+                                )
+                            } else {
+                                null
+                            },
                         pensjonsgivendeInntekt =
                             PensjonsgivendeInntektFraSkattStatistikkDto(
                                 inntektsaar = pensjonsgivendeInntekt.inntektsaar,

@@ -190,11 +190,10 @@ class EtteroppgjoerForbehandlingService(
         val avkorting = hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
 
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
-        val aInntekt = dao.hentAInntekt(forbehandlingId)
 
-        if (pensjonsgivendeInntekt == null || aInntekt == null) {
+        if (pensjonsgivendeInntekt == null) {
             throw InternfeilException(
-                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$forbehandlingId",
+                "Mangler pensjonsgivendeInntekt for behandlingId=$forbehandlingId",
             )
         }
         val summerteInntekter =
@@ -235,7 +234,6 @@ class EtteroppgjoerForbehandlingService(
             opplysninger =
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntektSummert,
-                    ainntekt = aInntekt,
                     summerteInntekter = summerteInntekter,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
@@ -572,7 +570,6 @@ class EtteroppgjoerForbehandlingService(
 
         dao.lagreForbehandling(forbehandlingCopy)
 
-        dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
         dao.kopierSummerteInntekter(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
         dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
@@ -607,7 +604,7 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // verifisere at vi har siste summerte inntekter fra A-inntekt
-        dao.hentSummerteInntekter(forbehandling.id).let { summerteInntekter ->
+        dao.hentSummerteInntekterNonNull(forbehandling.id).let { summerteInntekter ->
             if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
                 throw InternfeilException(
                     "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",

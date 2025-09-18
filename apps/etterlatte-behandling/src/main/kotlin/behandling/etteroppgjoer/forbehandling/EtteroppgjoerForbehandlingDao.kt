@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
-import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
@@ -296,35 +295,6 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun kopierAInntekt(
-        forbehandlingId: UUID,
-        nyForbehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    INSERT INTO etteroppgjoer_ainntekt(
-                        id, forbehandling_id, aar, inntektsmaaneder
-                    )
-                    SELECT ?, ?, aar, inntektsmaaneder
-                    FROM etteroppgjoer_ainntekt
-                    WHERE forbehandling_id = ?
-                    """.trimIndent(),
-                )
-
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, nyForbehandlingId)
-            statement.setObject(3, forbehandlingId)
-
-            statement.executeUpdate().also {
-                krev(it == 1) {
-                    "Kunne ikke kopiere aInntekt fra behandling=$forbehandlingId til $nyForbehandlingId"
-                }
-            }
-        }
-    }
-
     fun lagreSummerteInntekter(
         forbehandlingId: UUID,
         summerteInntekterAOrdningen: SummerteInntekterAOrdningen,
@@ -358,7 +328,9 @@ class EtteroppgjoerForbehandlingDao(
         logger.info("Lagret inntekter for forbehandling $forbehandlingId")
     }
 
-    fun hentSummerteInntekter(forbehandlingId: UUID): SummerteInntekterAOrdningen =
+    fun hentSummerteInntekterNonNull(forbehandlingId: UUID) = krevIkkeNull(hentSummerteInntekter(forbehandlingId)) { "Må ha en verdi" }
+
+    fun hentSummerteInntekter(forbehandlingId: UUID): SummerteInntekterAOrdningen? =
         connectionAutoclosing.hentConnection { connection ->
             val statement =
                 connection.prepareStatement(
@@ -368,7 +340,7 @@ class EtteroppgjoerForbehandlingDao(
                     """.trimIndent(),
                 )
             statement.setObject(1, forbehandlingId)
-            statement.executeQuery().single {
+            statement.executeQuery().singleOrNull {
                 toSummerteInntekter()
             }
         }
@@ -428,27 +400,6 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
     }
-
-    fun hentAInntekt(behandlingId: UUID): AInntekt? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT *
-                        FROM etteroppgjoer_ainntekt
-                        WHERE forbehandling_id = ?
-                        """.trimIndent(),
-                    )
-                statement.setObject(1, behandlingId)
-                statement.executeQuery().singleOrNull {
-                    AInntekt(
-                        aar = getInt("aar"),
-                        inntektsmaaneder = getString("inntektsmaaneder").let { objectMapper.readValue(it) },
-                    )
-                }
-            }
-        }
 
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(

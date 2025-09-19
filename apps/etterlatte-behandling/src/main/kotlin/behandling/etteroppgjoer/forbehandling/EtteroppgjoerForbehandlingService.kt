@@ -152,28 +152,17 @@ class EtteroppgjoerForbehandlingService(
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
     fun hentSisteFerdigstillteForbehandlingPaaSak(sakId: SakId): EtteroppgjoerForbehandling {
-        val forbehandlinger = dao.hentForbehandlinger(sakId)
+        val sisteFerdigstilteForbehandling =
+            dao
+                .hentForbehandlinger(sakId)
+                .filter { it.erFerdigstilt() }
+                .maxByOrNull { it.opprettet }
 
-        if (!forbehandlinger.isEmpty()) {
-            val ferdigstilteForbehandlinger =
-                forbehandlinger.filter { forbehandling ->
-                    forbehandling.erFerdigstilt()
-                }
-
-            if (!ferdigstilteForbehandlinger.isEmpty()) {
-                return ferdigstilteForbehandlinger.last()
-            } else {
-                throw IkkeFunnetException(
-                    code = "IKKE_FUNNET",
-                    detail = "Ingen ferdigstilte forbehandlinger på sak med id: ${sakId.sakId}",
-                )
-            }
-        } else {
-            throw IkkeFunnetException(
+        return sisteFerdigstilteForbehandling
+            ?: throw IkkeFunnetException(
                 code = "IKKE_FUNNET",
-                detail = "Fant ingen forbehandlinger på sak med id: ${sakId.sakId}",
+                detail = "Fant ingen ferdigstilte forbehandlinger på sak med id=${sakId.sakId}",
             )
-        }
     }
 
     fun hentDetaljertForbehandling(
@@ -467,13 +456,7 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
-        if (etteroppgjoer.status !in
-            listOf(
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.AVBRUTT_FORBEHANDLING,
-            )
-        ) {
+        if (etteroppgjoer.status !in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
             throw InternfeilException(
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",

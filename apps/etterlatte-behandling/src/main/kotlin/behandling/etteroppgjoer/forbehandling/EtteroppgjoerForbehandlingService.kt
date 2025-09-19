@@ -254,7 +254,7 @@ class EtteroppgjoerForbehandlingService(
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar)
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
-        val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+
         val nyForbehandling = opprettOgLagreNyForbehandling(sak, inntektsaar, brukerTokenInfo)
 
         try {
@@ -269,7 +269,6 @@ class EtteroppgjoerForbehandlingService(
         }
 
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
-        dao.lagreAInntekt(aInntekt, nyForbehandling.id) // TODO: fjerne?
 
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 

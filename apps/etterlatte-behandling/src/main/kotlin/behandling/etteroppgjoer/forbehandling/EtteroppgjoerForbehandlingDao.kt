@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull

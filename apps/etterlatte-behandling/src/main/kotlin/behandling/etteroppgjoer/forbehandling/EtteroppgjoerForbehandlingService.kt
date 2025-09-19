@@ -265,7 +265,7 @@ class EtteroppgjoerForbehandlingService(
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar)
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
-        val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+
         val nyForbehandling = opprettOgLagreNyForbehandling(sak, inntektsaar, brukerTokenInfo)
 
         try {

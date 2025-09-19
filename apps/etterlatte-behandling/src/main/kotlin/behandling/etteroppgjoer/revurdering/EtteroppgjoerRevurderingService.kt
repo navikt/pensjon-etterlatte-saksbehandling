@@ -45,39 +45,44 @@ class EtteroppgjoerRevurderingService(
     ): Revurdering {
         revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
 
-        val sisteFerdigstilteForbehandling =
-            etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
-                sakId = sakId,
-            )
+        val (revurdering, sisteIverksatteBehandling) =
+            inTransaction {
+                val sisteFerdigstilteForbehandling =
+                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
+                        sakId = sakId,
+                    )
 
-        // TODO: er dette nok for å unngå mismatch ... ?
-        etteroppgjoerService
-            .hentAlleAktiveEtteroppgjoerForSak(sakId)
-            .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandling.id }
-            ?: throw InternfeilException(
-                "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling ${sisteFerdigstilteForbehandling.id}",
-            )
+                // TODO: er dette nok for å unngå mismatch ... ?
+                etteroppgjoerService
+                    .hentAlleAktiveEtteroppgjoerForSak(sakId)
+                    .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandling.id }
+                    ?: throw InternfeilException(
+                        "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling ${sisteFerdigstilteForbehandling.id}",
+                    )
 
-        val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
+                val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
 
-        val sisteIverksatteBehandling =
-            behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
-                ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
+                val sisteIverksatteBehandling =
+                    behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
+                        ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
 
-        val revurdering =
-            opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, sisteFerdigstilteForbehandling, brukerTokenInfo)
+                val revurdering =
+                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, sisteFerdigstilteForbehandling, brukerTokenInfo)
 
-        vilkaarsvurderingService.kopierVilkaarsvurdering(
-            behandlingId = revurdering.id,
-            kopierFraBehandling = sisteIverksatteBehandling.id,
-            brukerTokenInfo = brukerTokenInfo,
-        )
+                vilkaarsvurderingService.kopierVilkaarsvurdering(
+                    behandlingId = revurdering.id,
+                    kopierFraBehandling = sisteIverksatteBehandling.id,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
 
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-            sakId,
-            sisteFerdigstilteForbehandling.aar,
-            EtteroppgjoerStatus.UNDER_REVURDERING,
-        )
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                    sakId,
+                    sisteFerdigstilteForbehandling.aar,
+                    EtteroppgjoerStatus.UNDER_REVURDERING,
+                )
+
+                revurdering to sisteIverksatteBehandling
+            }
 
         // TODO her må noe gjøres da feil her medfører en "halvveis behandling"
         runBlocking {

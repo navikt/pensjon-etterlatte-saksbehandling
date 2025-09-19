@@ -60,10 +60,10 @@ spec:
     pool: nav-dev
   resources:
     limits:
-      memory: 1024Mi
+      memory: 2048Mi
     requests:
       cpu: 20m
-      memory: 1024Mi
+      memory: 2048Mi
   replicas:
     max: 4
     min: 2

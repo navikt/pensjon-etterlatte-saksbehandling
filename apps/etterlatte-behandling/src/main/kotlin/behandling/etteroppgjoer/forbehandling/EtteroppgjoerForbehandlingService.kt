@@ -280,7 +280,6 @@ class EtteroppgjoerForbehandlingService(
         }
 
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
-        dao.lagreAInntekt(aInntekt, nyForbehandling.id) // TODO: fjerne?
 
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 

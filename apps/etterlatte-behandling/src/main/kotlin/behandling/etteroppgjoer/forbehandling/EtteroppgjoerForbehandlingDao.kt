@@ -373,34 +373,6 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
-    fun lagreAInntekt(
-        aInntekt: AInntekt,
-        behandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    INSERT INTO etteroppgjoer_ainntekt(
-                        id, forbehandling_id, aar, inntektsmaaneder
-                    ) 
-                    VALUES (?, ?, ?, ?) 
-                    """.trimIndent(),
-                )
-
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, behandlingId)
-            statement.setInt(3, aInntekt.aar)
-            statement.setJsonb(4, aInntekt.inntektsmaaneder)
-
-            statement.executeUpdate().also {
-                krev(it == 1) {
-                    "Kunne ikke lagre aInntekt for behandling=$behandlingId"
-                }
-            }
-        }
-    }
-
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(
             id = getString("id").let { UUID.fromString(it) },

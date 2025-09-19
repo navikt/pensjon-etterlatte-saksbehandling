@@ -152,28 +152,17 @@ class EtteroppgjoerForbehandlingService(
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
     fun hentSisteFerdigstillteForbehandlingPaaSak(sakId: SakId): EtteroppgjoerForbehandling {
-        val forbehandlinger = dao.hentForbehandlinger(sakId)
+        val sisteFerdigstilteForbehandling =
+            dao
+                .hentForbehandlinger(sakId)
+                .filter { it.erFerdigstilt() }
+                .maxByOrNull { it.opprettet }
 
-        if (!forbehandlinger.isEmpty()) {
-            val ferdigstilteForbehandlinger =
-                forbehandlinger.filter { forbehandling ->
-                    forbehandling.erFerdigstilt()
-                }
-
-            if (!ferdigstilteForbehandlinger.isEmpty()) {
-                return ferdigstilteForbehandlinger.last()
-            } else {
-                throw IkkeFunnetException(
-                    code = "IKKE_FUNNET",
-                    detail = "Ingen ferdigstilte forbehandlinger på sak med id: ${sakId.sakId}",
-                )
-            }
-        } else {
-            throw IkkeFunnetException(
+        return sisteFerdigstilteForbehandling
+            ?: throw IkkeFunnetException(
                 code = "IKKE_FUNNET",
-                detail = "Fant ingen forbehandlinger på sak med id: ${sakId.sakId}",
+                detail = "Fant ingen ferdigstilte forbehandlinger på sak med id=${sakId.sakId}",
             )
-        }
     }
 
     fun hentDetaljertForbehandling(
@@ -190,17 +179,17 @@ class EtteroppgjoerForbehandlingService(
         val avkorting = hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
 
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
-        val aInntekt = dao.hentAInntekt(forbehandlingId)
 
-        if (pensjonsgivendeInntekt == null || aInntekt == null) {
+        if (pensjonsgivendeInntekt == null) {
             throw InternfeilException(
-                "Mangler ${if (pensjonsgivendeInntekt == null) "pensjonsgivendeInntekt" else "aInntekt"} for behandlingId=$forbehandlingId",
+                "Mangler pensjonsgivendeInntekt for behandlingId=$forbehandlingId",
             )
         }
         val summerteInntekter =
             try {
-                dao.hentSummerteInntekter(forbehandling.id, null)
-            } catch (_: Exception) {
+                dao.hentSummerteInntekter(forbehandling.id)
+            } catch (e: Exception) {
+                logger.error("Kunne ikke hente summerte inntekter", e)
                 null
             }
 
@@ -234,7 +223,6 @@ class EtteroppgjoerForbehandlingService(
             opplysninger =
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntektSummert,
-                    ainntekt = aInntekt,
                     summerteInntekter = summerteInntekter,
                     tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
                 ),
@@ -266,13 +254,13 @@ class EtteroppgjoerForbehandlingService(
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar)
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
-        val aInntekt = runBlocking { inntektskomponentService.hentInntektFraAInntekt(sak.ident, inntektsaar) }
+
         val nyForbehandling = opprettOgLagreNyForbehandling(sak, inntektsaar, brukerTokenInfo)
 
         try {
             val summerteInntekter =
                 runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
-            dao.lagreSummerteInntekter(nyForbehandling.id, null, summerteInntekter)
+            dao.lagreSummerteInntekter(nyForbehandling.id, summerteInntekter)
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId",
@@ -281,7 +269,6 @@ class EtteroppgjoerForbehandlingService(
         }
 
         dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
-        dao.lagreAInntekt(aInntekt, nyForbehandling.id) // TODO: fjerne?
 
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
@@ -468,13 +455,7 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
-        if (etteroppgjoer.status !in
-            listOf(
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.AVBRUTT_FORBEHANDLING,
-            )
-        ) {
+        if (etteroppgjoer.status !in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
             throw InternfeilException(
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
@@ -570,7 +551,8 @@ class EtteroppgjoerForbehandlingService(
             )
 
         dao.lagreForbehandling(forbehandlingCopy)
-        dao.kopierAInntekt(forbehandling.id, forbehandlingCopy.id)
+
+        dao.kopierSummerteInntekter(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
         dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
 
@@ -604,7 +586,7 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // verifisere at vi har siste summerte inntekter fra A-inntekt
-        dao.hentSummerteInntekter(forbehandling.id).let { summerteInntekter ->
+        dao.hentSummerteInntekterNonNull(forbehandling.id).let { summerteInntekter ->
             if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
                 throw InternfeilException(
                     "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",

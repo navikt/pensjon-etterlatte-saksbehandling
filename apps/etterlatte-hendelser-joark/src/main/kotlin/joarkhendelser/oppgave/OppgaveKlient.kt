@@ -64,7 +64,7 @@ class OppgaveKlient(
 }
 
 @Suppress("unused")
-data class OpprettOppgaveRequest(
+data class OpprettOppgaveRequest private constructor(
     val journalpostId: String,
     val tema: String,
     val aktoerId: String?,

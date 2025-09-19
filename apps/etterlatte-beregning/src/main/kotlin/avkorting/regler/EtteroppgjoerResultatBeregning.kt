@@ -2,6 +2,7 @@ package no.nav.etterlatte.avkorting.regler
 
 import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
+import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
@@ -24,7 +25,28 @@ import java.time.temporal.ChronoUnit
 data class EtteroppgjoerDifferanseGrunnlag(
     val utbetaltStoenad: FaktumNode<Aarsoppgjoer>,
     val nyBruttoStoenad: FaktumNode<Aarsoppgjoer>,
+    val grunnlagForEtteroppgjoer: FaktumNode<FaktiskInntekt>,
 )
+
+val inntektIEtteroppgjoerAar: Regel<EtteroppgjoerDifferanseGrunnlag, FaktiskInntekt> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        finnFaktum = EtteroppgjoerDifferanseGrunnlag::grunnlagForEtteroppgjoer,
+        finnFelt = { it },
+    )
+
+val harIngenInntekt =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-INGEN-INNTEKT"),
+    ) benytter inntektIEtteroppgjoerAar med { inntekt ->
+        inntekt.afp == 0 &&
+            inntekt.loennsinntekt == 0 &&
+            inntekt.naeringsinntekt == 0 &&
+            inntekt.utlandsinntekt == 0
+    }
 
 val nyBruttoStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>> =
     finnFaktumIGrunnlag(
@@ -116,7 +138,7 @@ val beregneEtteroppgjoerRegel =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-RESULTAT"),
-    ) benytter etteroppgjoerDifferanse og etteroppgjoerGrense med { differanse, grenser ->
+    ) benytter etteroppgjoerDifferanse og etteroppgjoerGrense og harIngenInntekt med { differanse, grenser, ingenInntekt ->
         val status =
             when {
                 Beregningstall(differanse.differanse) > grenser.tilbakekreving -> EtteroppgjoerResultatType.TILBAKEKREVING
@@ -127,9 +149,10 @@ val beregneEtteroppgjoerRegel =
             }
 
         EtteroppgjoerRegelResultat(
-            status,
-            grenser,
-            differanse,
+            resultatType = status,
+            grense = grenser,
+            harIngenInntekt = ingenInntekt,
+            differanse = differanse,
         )
     }
 
@@ -142,6 +165,7 @@ data class EtteroppgjoerDifferanse(
 data class EtteroppgjoerRegelResultat(
     val resultatType: EtteroppgjoerResultatType,
     val grense: EtteroppgjoerGrense,
+    val harIngenInntekt: Boolean,
     val differanse: EtteroppgjoerDifferanse,
     val tidspunkt: Tidspunkt = Tidspunkt.now(),
 )

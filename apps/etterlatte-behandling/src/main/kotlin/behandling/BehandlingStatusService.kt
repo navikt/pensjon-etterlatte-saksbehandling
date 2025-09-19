@@ -327,7 +327,6 @@ class BehandlingStatusServiceImpl(
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
 
         haandterEtteroppgjoerIverksattVedtak(behandling)
-
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
         haandterAktivitetspliktOppgave(behandling)
@@ -364,7 +363,7 @@ class BehandlingStatusServiceImpl(
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                 behandling.sak.id,
                 virk.dato.year,
-                EtteroppgjoerStatus.FERDIGSTILT_REVURDERING,
+                EtteroppgjoerStatus.FERDIGSTILT,
             )
         }
     }

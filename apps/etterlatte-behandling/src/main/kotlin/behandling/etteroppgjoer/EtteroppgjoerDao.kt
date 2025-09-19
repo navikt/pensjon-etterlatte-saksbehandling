@@ -72,12 +72,20 @@ class EtteroppgjoerDao(
                         SELECT *
                         FROM etteroppgjoer 
                         WHERE sak_id = ?
-                        AND status != ?
+                        AND status NOT IN (?, ?)
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId.sakId)
-                statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
-                statement.executeQuery().toList { toEtteroppgjoer() }
+
+                var index = 2
+                for (status in EtteroppgjoerStatus.ETTEROPPGJOER_ER_FERDIGSTILT) {
+                    statement.setString(index++, status.name)
+                }
+
+                val etteroppgjoer = statement.executeQuery().toList { toEtteroppgjoer() }
+                // TODO: vi har ikke testet eller vet om flere etteorppgjør fungerer
+                krev(etteroppgjoer.size < 2) { "Fant ${etteroppgjoer.size} aktive etteroppgjoer for sak $sakId, forventet 1" }
+                etteroppgjoer
             }
         }
 

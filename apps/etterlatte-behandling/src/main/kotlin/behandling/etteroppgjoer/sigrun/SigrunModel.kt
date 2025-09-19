@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 data class HendelseslisteFraSkatt(
     val hendelser: List<SkatteoppgjoerHendelse>,
@@ -15,10 +17,10 @@ data class HendelseslisteFraSkatt(
                 List(antall) { index ->
                     SkatteoppgjoerHendelse(
                         gjelderPeriode = aar.toString(),
-                        hendelsetype = "NY", // TODO
-                        identifikator = index.toString(), // TODO
+                        hendelsetype = SigrunKlient.HENDELSETYPE_NY,
+                        identifikator = index.toString(),
                         sekvensnummer = startSekvensnummer + index,
-                        somAktoerid = false,
+                        registreringstidspunkt = Tidspunkt.now(),
                     )
                 }
             return HendelseslisteFraSkatt(hendelser)
@@ -31,11 +33,11 @@ data class HendelserSekvensnummerFraSkatt(
 )
 
 data class SkatteoppgjoerHendelse(
-    val gjelderPeriode: String, // inntektsaar
-    val hendelsetype: String,
+    val gjelderPeriode: String?, // inntektsaar
+    val hendelsetype: String?,
     val identifikator: String,
     val sekvensnummer: Long,
-    val somAktoerid: Boolean,
+    val registreringstidspunkt: Tidspunkt?,
 )
 
 data class PensjonsgivendeInntektFraSkattSummert(

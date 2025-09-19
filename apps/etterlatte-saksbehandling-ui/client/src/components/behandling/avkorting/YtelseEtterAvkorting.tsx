@@ -10,6 +10,8 @@ import { lastDayOfMonth } from 'date-fns'
 import { tekstSanksjon } from '~shared/types/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { useBehandling } from '~components/behandling/useBehandling'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 const sorterNyligsteFoerstOgBakover = (a: IAvkortetYtelse, b: IAvkortetYtelse) =>
   new Date(b.fom).getTime() - new Date(a.fom).getTime()
@@ -32,10 +34,13 @@ export const YtelseEtterAvkorting = ({
 }) => {
   const sanksjonTilgjengelig = useFeaturetoggle(FeatureToggle.sanksjon)
 
+  const behandling = useBehandling()
+
   const ytelser = [...avkortetYtelse].sort(sorterNyligsteFoerstOgBakover)
   const tidligereYtelser = [...tidligereAvkortetYtelse].sort(sorterNyligsteFoerstOgBakover)
 
   const finnTidligereTidligereYtelseIPeriode = (ytelse: IAvkortetYtelse) => {
+    if (behandling?.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER) return undefined
     return tidligereYtelser.find(
       (tidligere) => ytelse.fom >= tidligere.fom && (tidligere.tom == null || ytelse.tom <= tidligere.tom)
     )
@@ -119,9 +124,7 @@ export const YtelseEtterAvkorting = ({
                         <Info
                           tekst={NOK(ytelse.ytelseEtterAvkorting)}
                           label=""
-                          undertekst={
-                            tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} (Forrige vedtak)` : ''
-                          }
+                          undertekst={tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)}` : ''}
                         />
                       </BredCelle>
                     </Table.DataCell>

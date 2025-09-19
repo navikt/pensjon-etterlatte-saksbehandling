@@ -10,19 +10,21 @@ import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
 import React from 'react'
 import { PersonopplysningAktivEllerSisteAdresse } from '~components/behandling/soeknadsoversikt/familieforhold/AktivEllerSisteAdresse'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
+import { SakType } from '~shared/types/sak'
 
 interface Props {
   gjenlevende: Personopplysning[] | undefined
   alleLand: ILand[]
+  sakType: SakType
 }
 
-export const TabellOverGjenlevende = ({ gjenlevende, alleLand }: Props) => {
+export const TabellOverGjenlevende = ({ gjenlevende, alleLand, sakType }: Props) => {
   return (
     <VStack gap="4">
       <HStack gap="4" justify="start" align="center" wrap={false}>
         <PersonIcon fontSize="1.5rem" aria-hidden />
         <Heading size="small" level="3">
-          Gjenlevende
+          {sakType === SakType.OMSTILLINGSSTOENAD ? 'Gjenlevende' : 'Biologisk forelder'}
         </Heading>
       </HStack>
       <Table size="small">
@@ -74,7 +76,9 @@ export const TabellOverGjenlevende = ({ gjenlevende, alleLand }: Props) => {
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={7}>
-                <Heading size="small">Ingen gjenlevende</Heading>
+                <Heading size="small">
+                  Ingen {sakType === SakType.OMSTILLINGSSTOENAD ? 'gjenlevende' : 'biologisk forelder'}
+                </Heading>
               </Table.DataCell>
             </Table.Row>
           )}

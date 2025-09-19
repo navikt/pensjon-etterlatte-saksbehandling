@@ -1,5 +1,6 @@
 import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
 import { Label, VStack } from '@navikt/ds-react'
+import { NOK } from '~utils/formatering/formatering'
 
 export const SumAvFaktiskInntekt = ({ faktiskInntekt }: { faktiskInntekt: FaktiskInntekt }) => {
   const sumAvFaktiskInntektStringBulder = (faktiskInntekt: FaktiskInntekt) => {
@@ -17,7 +18,7 @@ export const SumAvFaktiskInntekt = ({ faktiskInntekt }: { faktiskInntekt: Faktis
     if (isNaN(faktiskInntekt.utlandsinntekt)) inntekt += 0
     else inntekt += faktiskInntekt.utlandsinntekt
 
-    return `${new Intl.NumberFormat('nb').format(inntekt)} kr`
+    return NOK(inntekt)
   }
 
   return (

@@ -1,6 +1,7 @@
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { NOK } from '~utils/formatering/formatering'
 
 export const FaktiskInntektVisning = () => {
   const { faktiskInntekt } = useEtteroppgjoer()
@@ -9,19 +10,19 @@ export const FaktiskInntektVisning = () => {
     <VStack gap="4">
       <VStack gap="2">
         <Label>Lønnsinntekt</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt)}</BodyShort>
+        <BodyShort>{NOK(faktiskInntekt.loennsinntekt)}</BodyShort>
       </VStack>
       <VStack gap="2">
         <Label>Avtalefestet pensjon</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.afp)}</BodyShort>
+        <BodyShort>{NOK(faktiskInntekt.afp)}</BodyShort>
       </VStack>
       <VStack gap="2">
         <Label>Næringsinntekt</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt)}</BodyShort>
+        <BodyShort>{NOK(faktiskInntekt.naeringsinntekt)}</BodyShort>
       </VStack>
       <VStack gap="2">
         <Label>Inntekt fra utland</Label>
-        <BodyShort>{new Intl.NumberFormat('nb').format(faktiskInntekt.utlandsinntekt)}</BodyShort>
+        <BodyShort>{NOK(faktiskInntekt.utlandsinntekt)}</BodyShort>
       </VStack>
 
       <SumAvFaktiskInntekt faktiskInntekt={faktiskInntekt} />

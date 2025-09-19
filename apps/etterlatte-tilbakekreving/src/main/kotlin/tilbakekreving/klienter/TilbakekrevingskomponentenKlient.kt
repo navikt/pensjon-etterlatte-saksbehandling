@@ -90,7 +90,7 @@ class TilbakekrevingskomponentenKlient(
     fun hentKravgrunnlag(
         sakId: SakId,
         kravgrunnlagId: Long,
-    ): Kravgrunnlag {
+    ): Kravgrunnlag? {
         logger.info(
             "Henter kravgrunnlag for tilbakekreving på sak $sakId med kravgrunnlagId $kravgrunnlagId " +
                 "fra tilbakekrevingskomponenten",
@@ -121,6 +121,9 @@ class TilbakekrevingskomponentenKlient(
             type = TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_KVITTERING,
         )
 
+        if (response.detaljertkravgrunnlag == null) {
+            return null
+        }
         val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(response.detaljertkravgrunnlag)
 
         return kravgrunnlag

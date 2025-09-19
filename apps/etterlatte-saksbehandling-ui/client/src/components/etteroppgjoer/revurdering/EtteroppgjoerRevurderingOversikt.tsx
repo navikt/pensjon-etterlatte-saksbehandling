@@ -70,7 +70,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   }
 
   useEffect(() => {
-    if (!etteroppgjoerForbehandlingId) return
+    if (!etteroppgjoerForbehandlingId || etteroppgjoer) return
     hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })
@@ -99,27 +99,18 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
                   erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
                   setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
                 />
-                <TabellForBeregnetEtteroppgjoerResultat />
-                <ResultatAvForbehandling />
               </>
             )}
           </>
         ) : (
-          <>
-            <Box maxWidth="42.5rem">
-              <Alert variant="info">
-                Bruker har svart innen 2 ukers svarfrist, dermed skal du ikke ta stilling til informasjon fra bruker.
-              </Alert>
-            </Box>
-
-            <FastsettFaktiskInntekt
-              erRedigerbar={erRedigerbar}
-              setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-            />
-            <TabellForBeregnetEtteroppgjoerResultat />
-            <ResultatAvForbehandling />
-          </>
+          <FastsettFaktiskInntekt
+            erRedigerbar={erRedigerbar}
+            setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+          />
         )}
+
+        <TabellForBeregnetEtteroppgjoerResultat />
+        <ResultatAvForbehandling />
 
         <Box maxWidth="42.5rem">
           <VStack gap="8">

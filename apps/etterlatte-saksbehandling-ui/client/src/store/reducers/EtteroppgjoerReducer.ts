@@ -1,5 +1,9 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
-import { BeregnetEtteroppgjoerResultatDto, EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import {
+  BeregnetEtteroppgjoerResultatDto,
+  EtteroppgjoerBehandling,
+  EtteroppgjoerForbehandling,
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { useAppSelector } from '~store/Store'
 import { IBrev } from '~shared/types/Brev'
@@ -9,7 +13,7 @@ export const addEtteroppgjoerOppgave = createAction<OppgaveDTO>('etteroppgjoer/o
 export const addEtteroppgjoerBrev = createAction<IBrev>('etteroppgjoer/brev/add')
 export const resetEtteroppgjoer = createAction('etteroppgjoer/reset')
 export const addResultatEtteroppgjoer = createAction<BeregnetEtteroppgjoerResultatDto>('etteroppgjoer/resultat/add')
-
+export const updateEtteroppgjoerBehandling = createAction<EtteroppgjoerBehandling>('etteroppgjoer/behandling/update')
 const initialState: {
   etteroppgjoer: EtteroppgjoerForbehandling | null
   oppgave: OppgaveDTO | null
@@ -25,6 +29,11 @@ export const etteroppgjoerReducer = createReducer(initialState, (builder) => {
   builder.addCase(addEtteroppgjoerBrev, (state, action) => {
     if (state.etteroppgjoer?.behandling) {
       state.etteroppgjoer.behandling.brevId = action.payload.id
+    }
+  })
+  builder.addCase(updateEtteroppgjoerBehandling, (state, action) => {
+    if (state.etteroppgjoer?.behandling) {
+      state.etteroppgjoer.behandling = action.payload
     }
   })
   builder.addCase(addEtteroppgjoerOppgave, (state, action) => {

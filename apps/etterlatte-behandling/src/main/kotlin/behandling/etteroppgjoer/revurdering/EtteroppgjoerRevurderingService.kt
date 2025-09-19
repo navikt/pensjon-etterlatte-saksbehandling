@@ -43,10 +43,10 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
-
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
+                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+
                 val sisteFerdigstilteForbehandling =
                     etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
                         sakId = sakId,

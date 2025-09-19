@@ -108,23 +108,18 @@ class JoarkHendelseHandler(
         if (journalpostErFerdigstilt(journalpost)) {
             return
         }
-        if (journalpost.journalfoerendeEnhet != null) {
+        if (journalpost.journalfoerendeEnhet != null && hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT) {
             // Journalposten har allerede satt en journalførende enhet, og vi vil ikke plukke den opp hvis den skal
             // sendes rett til kabal (når det gjelder en anke på våre tema)
             val kjentSkjemakode =
                 KjenteSkjemaKoder.entries.find { kjentSkjema -> kjentSkjema.skjemaKode in journalpost.dokumenter.map { it.brevkode } }
             if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr) {
                 logger.info(
-                    "Behandler en journalpost som skal til Kabal (id=${journalpost.journalpostId}, status=${journalpost.journalstatus})",
+                    "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
+                        "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
+                        "brevkoden brukt er $kjentSkjemakode",
                 )
-                if (hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT) {
-                    logger.info(
-                        "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
-                            "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
-                            "brevkoden brukt er $kjentSkjemakode",
-                    )
-                    oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
-                }
+                oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
                 return
             } else {
                 // team klage ruter journalposter som de ikke vil vi skal plukke opp ved å sette journalførende enhet

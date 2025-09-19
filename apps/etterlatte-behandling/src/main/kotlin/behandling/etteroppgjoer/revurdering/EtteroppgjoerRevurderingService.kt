@@ -58,31 +58,26 @@ class EtteroppgjoerRevurderingService(
                 "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling ${sisteFerdigstilteForbehandling.id}",
             )
 
-        val (revurdering, sisteIverksatteBehandling) =
-            inTransaction {
-                val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
+        val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
 
-                val sisteIverksatteBehandling =
-                    behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
-                        ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
+        val sisteIverksatteBehandling =
+            behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
+                ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
 
-                val revurdering =
-                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, sisteFerdigstilteForbehandling, brukerTokenInfo)
+        val revurdering =
+            opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, sisteFerdigstilteForbehandling, brukerTokenInfo)
 
-                vilkaarsvurderingService.kopierVilkaarsvurdering(
-                    behandlingId = revurdering.id,
-                    kopierFraBehandling = sisteIverksatteBehandling.id,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
+        vilkaarsvurderingService.kopierVilkaarsvurdering(
+            behandlingId = revurdering.id,
+            kopierFraBehandling = sisteIverksatteBehandling.id,
+            brukerTokenInfo = brukerTokenInfo,
+        )
 
-                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                    sakId,
-                    sisteFerdigstilteForbehandling.aar,
-                    EtteroppgjoerStatus.UNDER_REVURDERING,
-                )
-
-                revurdering to sisteIverksatteBehandling
-            }
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            sakId,
+            sisteFerdigstilteForbehandling.aar,
+            EtteroppgjoerStatus.UNDER_REVURDERING,
+        )
 
         // TODO her må noe gjøres da feil her medfører en "halvveis behandling"
         runBlocking {

@@ -43,7 +43,11 @@ function hvemErBarnetsForeldre(sakType: SakType, personopplysninger: Personopply
       erBarnTilPerson(gjenlevende.opplysning, barn.foedselsnummer)
     )
     if (harGjenlevendeSomForelder) {
-      return 'Avdød og gjenlevende'
+      if (sakType === SakType.BARNEPENSJON) {
+        return 'Avdød og biologisk forelder'
+      } else {
+        return 'Avdød og gjenlevende'
+      }
     } else {
       return 'Kun avdød'
     }

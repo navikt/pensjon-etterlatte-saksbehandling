@@ -1,13 +1,16 @@
 package no.nav.etterlatte.beregning.regler.avkorting.regler
 
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
+import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import java.util.UUID
 
 class EtteroppgjoerBeregningResultatTest {
     val aar = 2025
@@ -135,6 +139,23 @@ class EtteroppgjoerBeregningResultatTest {
         return EtteroppgjoerDifferanseGrunnlag(
             utbetaltStoenad = FaktumNode(aarsoppgjoer, "", ""),
             nyBruttoStoenad = FaktumNode(nyttAarsoppgjoer, "", ""),
+            grunnlagForEtteroppgjoer =
+                FaktumNode(
+                    FaktiskInntekt(
+                        id = UUID.randomUUID(),
+                        periode = mockk(),
+                        innvilgaMaaneder = 0,
+                        loennsinntekt = 0,
+                        naeringsinntekt = 0,
+                        afp = 0,
+                        utlandsinntekt = 0,
+                        spesifikasjon = "",
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        inntektInnvilgetPeriode = mockk(),
+                    ),
+                    "",
+                    "",
+                ),
         )
     }
 

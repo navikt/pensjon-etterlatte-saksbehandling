@@ -1,5 +1,6 @@
 package behandling.etteroppgjoer
 
+import com.fasterxml.jackson.databind.node.TextNode
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
@@ -10,7 +11,6 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
@@ -29,6 +29,8 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -148,42 +150,8 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `hent forbehandlinger`() {
-        etteroppgjoerForbehandlingDao.lagreForbehandling(
-            EtteroppgjoerForbehandling(
-                id = UUID.randomUUID(),
-                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                hendelseId = UUID.randomUUID(),
-                aar = 2024,
-                opprettet = Tidspunkt.now(),
-                sak = sak,
-                brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
-                kopiertFra = UUID.randomUUID(),
-                sisteIverksatteBehandlingId = UUID.randomUUID(),
-                harMottattNyInformasjon = null,
-                endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
-                varselbrevSendt = null,
-            ),
-        )
-        etteroppgjoerForbehandlingDao.lagreForbehandling(
-            EtteroppgjoerForbehandling(
-                id = UUID.randomUUID(),
-                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                hendelseId = UUID.randomUUID(),
-                aar = 2024,
-                opprettet = Tidspunkt.now(),
-                sak = sak,
-                brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
-                kopiertFra = null,
-                sisteIverksatteBehandlingId = UUID.randomUUID(),
-                harMottattNyInformasjon = null,
-                endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
-                varselbrevSendt = null,
-            ),
-        )
+        opprettForbehandling(UUID.randomUUID())
+        opprettForbehandling(UUID.randomUUID())
 
         with(etteroppgjoerForbehandlingDao.hentForbehandlinger(sak.id)) {
             size shouldBe 2
@@ -227,25 +195,6 @@ class EtteroppgjoerForbehandlingDaoTest(
         with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
             this.inntektsaar shouldBe inntektsaar
             inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
-        }
-    }
-
-    @Test
-    fun `lagre og hente aInntekt`() {
-        val inntektsaar = 2024
-        val forbehandlingId = UUID.randomUUID()
-
-        // negative returnere null hvis tomt
-        etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId) shouldBe null
-
-        etteroppgjoerForbehandlingDao.lagreAInntekt(
-            AInntekt.stub(inntektsaar),
-            forbehandlingId,
-        )
-
-        with(etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId)!!) {
-            inntektsaar shouldBe inntektsaar
-            inntektsmaaneder shouldBe AInntekt.stub(inntektsaar).inntektsmaaneder
         }
     }
 
@@ -302,9 +251,9 @@ class EtteroppgjoerForbehandlingDaoTest(
                 varselbrevSendt = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
-        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningen)
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningen)
 
-        val hentetInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        val hentetInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(ny.id)
         summerteInntekterAOrdningen.shouldBeEqualToIgnoringFields(hentetInntekter, SummerteInntekterAOrdningen::regelresultat)
     }
 
@@ -376,35 +325,72 @@ class EtteroppgjoerForbehandlingDaoTest(
                     ),
             )
 
-        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningenEn)
-        val hentetInntekterEn = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningenEn)
+        val hentetInntekterEn = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(ny.id)
         summerteInntekterAOrdningenEn.shouldBeEqualToIgnoringFields(hentetInntekterEn, SummerteInntekterAOrdningen::regelresultat)
 
-        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, null, summerteInntekterAOrdningenTo)
-        val hentetInntekterTo = etteroppgjoerForbehandlingDao.hentSummerteInntekter(ny.id, null)
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningenTo)
+        val hentetInntekterTo = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(ny.id)
         summerteInntekterAOrdningenTo.shouldBeEqualToIgnoringFields(hentetInntekterTo, SummerteInntekterAOrdningen::regelresultat)
         hentetInntekterEn shouldNotBeEqual hentetInntekterTo
     }
 
     @Test
-    fun `kopier aInntekt til ny forbehandling`() {
+    fun `kopier summerte inntekter til ny forbehandling`() {
         val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
         val nyForbehandlingId = UUID.randomUUID()
-        etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId) shouldBe null
-        etteroppgjoerForbehandlingDao.hentAInntekt(nyForbehandlingId) shouldBe null
-        etteroppgjoerForbehandlingDao.lagreAInntekt(
-            AInntekt.stub(inntektsaar),
+        opprettForbehandling(forbehandlingId)
+
+        etteroppgjoerForbehandlingDao.hentSummerteInntekter(forbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.lagreSummerteInntekter(
             forbehandlingId,
+            SummerteInntekterAOrdningen(
+                afp = InntektSummert("A", tolvMndInntekter(2024, 5000.toBigDecimal())),
+                loenn = InntektSummert("B", tolvMndInntekter(2024, 6000.toBigDecimal())),
+                oms = InntektSummert("C", tolvMndInntekter(2024, 7000.toBigDecimal())),
+                tidspunktBeregnet = Tidspunkt.now(),
+                regelresultat =
+                    mapOf(
+                        InntektskomponentenFilter.ETTEROPPGJOER_LOENN to TextNode("test"),
+                        InntektskomponentenFilter.ETTEROPPGJOER_AFP to TextNode("test"),
+                        InntektskomponentenFilter.ETTEROPPGJOER_OMS to TextNode("test"),
+                    ),
+            ),
         )
+        opprettForbehandling(nyForbehandlingId)
 
-        etteroppgjoerForbehandlingDao.kopierAInntekt(forbehandlingId, nyForbehandlingId)
+        etteroppgjoerForbehandlingDao.kopierSummerteInntekter(forbehandlingId, nyForbehandlingId)
 
-        val aInntekt = etteroppgjoerForbehandlingDao.hentAInntekt(forbehandlingId)!!
-        val aInntektKopi = etteroppgjoerForbehandlingDao.hentAInntekt(nyForbehandlingId)!!
+        val summerteInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(forbehandlingId)
+        val summerteInntekterKopi = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(nyForbehandlingId)
 
-        aInntekt.inntektsmaaneder shouldBe aInntektKopi.inntektsmaaneder
-        aInntekt.aar shouldBe aInntektKopi.aar
+        summerteInntekterKopi.loenn shouldBe summerteInntekter.loenn
+        summerteInntekterKopi.afp shouldBe summerteInntekter.afp
+        summerteInntekterKopi.oms shouldBe summerteInntekter.oms
+        summerteInntekterKopi.regelresultat shouldBe summerteInntekter.regelresultat
+        summerteInntekterKopi.tidspunktBeregnet shouldBe summerteInntekter.tidspunktBeregnet
+    }
+
+    private fun opprettForbehandling(forbehandlingId: UUID) {
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            EtteroppgjoerForbehandling(
+                id = forbehandlingId,
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                hendelseId = UUID.randomUUID(),
+                aar = 2024,
+                opprettet = Tidspunkt.now(),
+                sak = sak,
+                brevId = null,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                kopiertFra = UUID.randomUUID(),
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+                varselbrevSendt = null,
+            ),
+        )
     }
 
     @Test
@@ -428,4 +414,12 @@ class EtteroppgjoerForbehandlingDaoTest(
         pensjonsgivendeInntekt.inntekter shouldBe pensjonsgivendeInntektKopi.inntekter
         pensjonsgivendeInntekt.inntektsaar shouldBe pensjonsgivendeInntektKopi.inntektsaar
     }
+
+    private fun tolvMndInntekter(
+        aar: Int,
+        beloep: BigDecimal,
+    ): List<Inntektsmaaned> =
+        (1..12).map { mnd ->
+            Inntektsmaaned(YearMonth.of(aar, mnd), beloep)
+        }
 }

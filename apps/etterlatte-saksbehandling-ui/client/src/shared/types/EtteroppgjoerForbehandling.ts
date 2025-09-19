@@ -69,7 +69,6 @@ export interface SummerteInntekterAOrdningen {
 
 export interface EtteroppgjoerOpplysninger {
   skatt: PensjonsgivendeInntektFraSkatteetatenSummert
-  ainntekt: AInntekt
   summerteInntekter?: SummerteInntekterAOrdningen
   tidligereAvkorting: Avkorting
 }
@@ -92,15 +91,6 @@ export interface PensjonsgivendeInntektFraSkatteetatenSummert {
   loensinntekt: number
   naeringsinntekt: number
   fiskeFangstFamiliebarnehage: number
-}
-
-export interface AInntekt {
-  inntektsmaaneder: AInntektMaaned[]
-}
-
-export interface AInntektMaaned {
-  maaned: string
-  summertBeloep: number
 }
 
 export interface Avkorting {

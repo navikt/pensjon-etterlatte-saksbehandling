@@ -131,11 +131,13 @@ class OppdaterTilgangService(
         persongalleri: Persongalleri,
         grunnlag: Grunnlag?,
     ): Boolean {
-        val relevanteIdenterForSkjerming =
+        val relevanteIPersongalleri =
             when (sak.sakType == SakType.BARNEPENSJON && persongalleri.soekerErOver18Aar()) {
                 true -> listOf(persongalleri.soeker)
-                false -> (persongalleri.hentAlleIdentifikatorer() + vergerFnr(grunnlag)).distinct()
+                false -> persongalleri.hentAlleIdentifikatorer()
             }
+        val relevanteIdenterForSkjerming =
+            (relevanteIPersongalleri + vergersFodeselsenummer(grunnlag)).distinct()
 
         return relevanteIdenterForSkjerming.any { fnr -> sjekkOmIdentErSkjermet(fnr) }
     }
@@ -181,7 +183,7 @@ class OppdaterTilgangService(
         return LocalDate.now() >= foedselsdatoSoeker.plusYears(18)
     }
 
-    fun vergerFnr(grunnlag: Grunnlag?): List<String> =
+    fun vergersFodeselsenummer(grunnlag: Grunnlag?): List<String> =
         grunnlag
             ?.vergemaalellerfremtidsfullmakt(Saksrolle.SOEKER)
             ?.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident?.value }

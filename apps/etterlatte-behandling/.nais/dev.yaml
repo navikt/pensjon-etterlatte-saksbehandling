@@ -167,8 +167,6 @@ spec:
       value: api://dev-fss.team-inntekt.sigrun-q4/.default
     - name: ARBEID_OG_INNTEKT_URL
       value: https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io
-    - name: ARBEID_OG_INNTEKT_OUTBOUND_SCOPE
-      value: api://dev-fss.team-inntekt.arbeid-og-inntekt-q2/.default
 
   envFrom:
     - secret: my-application-unleash-api-token

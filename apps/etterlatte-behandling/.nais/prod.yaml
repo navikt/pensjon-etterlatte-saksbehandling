@@ -170,8 +170,6 @@ spec:
       value: api://prod-fss.team-inntekt.ikomp/.default
     - name: ARBEID_OG_INNTEKT_URL
       value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
-    - name: ARBEID_OG_INNTEKT_OUTBOUND_SCOPE
-      value: api://prod-fss.team-inntekt.arbeid-og-inntekt/.default
 
     - name: SIGRUN_URL
       value: https://sigrun.nais.adeo.no/api/

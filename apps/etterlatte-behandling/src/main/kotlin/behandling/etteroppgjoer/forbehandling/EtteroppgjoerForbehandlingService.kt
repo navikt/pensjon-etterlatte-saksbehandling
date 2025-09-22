@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -60,6 +61,7 @@ class EtteroppgjoerForbehandlingService(
     private val sigrunKlient: SigrunKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
+    private val behandlingStatusService: BehandlingStatusService,
     private val vedtakKlient: VedtakKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
@@ -326,12 +328,10 @@ class EtteroppgjoerForbehandlingService(
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetResultatOgBrevSomSkalSlettes {
-        var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling
-        if (forbehandling.erFerdigstilt()) {
-            logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
-            forbehandling = kopierOgLagreNyForbehandling(forbehandling)
+        if (!forbehandling.kanEndres()) {
+            throw ForbehandlingKanIkkeEndres()
         }
 
         val beregningRequest =
@@ -353,9 +353,12 @@ class EtteroppgjoerForbehandlingService(
         val beregnetForbehandling =
             forbehandling
                 .tilBeregnet(beregnetEtteroppgjoerResultat)
-                .also {
+                .also { it ->
                     dao.lagreForbehandling(it)
-                    behandlingService.oppdaterRelatertBehandlingIdStatusTilBeregnet(it)
+                    behandlingService
+                        .hentBehandlingerForSak(it.sak.id)
+                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id.toString() }
+                        ?.let { behandlingStatusService.settBeregnet(it.id, brukerTokenInfo, false) }
                 }
         // Hvis forbehandlingen ikke lengre henviser til brevet når den er beregnet skal brevet slettes
         val brevSomSkalSlettes = forbehandling.brevId?.takeIf { beregnetForbehandling.brevId == null }
@@ -534,7 +537,7 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+    fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
                 ?: throw InternfeilException(
@@ -652,4 +655,10 @@ class FantIkkeForbehandling(
 ) : IkkeFunnetException(
         code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
+    )
+
+class ForbehandlingKanIkkeEndres :
+    IkkeTillattException(
+        code = "FORBEHANDLINGEN_KAN_IKKE_ENDRES",
+        detail = "Forbehandlingen kan ikke endres",
     )

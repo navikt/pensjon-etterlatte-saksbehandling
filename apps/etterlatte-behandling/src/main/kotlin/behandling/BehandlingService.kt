@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -291,8 +290,6 @@ interface BehandlingService {
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
-
-    fun oppdaterRelatertBehandlingIdStatusTilBeregnet(forbehandling: EtteroppgjoerForbehandling)
 }
 
 data class SakMedBehandlingerOgOppgaver(
@@ -986,15 +983,6 @@ internal class BehandlingServiceImpl(
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
-
-    override fun oppdaterRelatertBehandlingIdStatusTilBeregnet(forbehandling: EtteroppgjoerForbehandling) {
-        val revurderingForbehandling =
-            hentBehandlingerForSak(sakId = forbehandling.sak.id)
-                .firstOrNull { it.relatertBehandlingId == forbehandling.id.toString() && it.status.kanEndres() }
-        if (revurderingForbehandling != null) {
-            behandlingDao.lagreStatus(revurderingForbehandling.tilBeregnet())
-        }
-    }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

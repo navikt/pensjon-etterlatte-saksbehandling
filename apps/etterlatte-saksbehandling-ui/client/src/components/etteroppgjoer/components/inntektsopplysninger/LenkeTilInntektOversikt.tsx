@@ -1,8 +1,19 @@
 import { Box, HStack, Link, Tag } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentUrlForInntektOversikt } from '~shared/api/arbeidOgInntekt'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
 export function LenkeTilInntektOversikt() {
+  const etteroppgjoer = useEtteroppgjoer()
+
+  const [urlForInntektOversiktResult, urlForInntektOversiktRequest] = useApiCall(hentUrlForInntektOversikt)
+
+  useEffect(() => {
+    urlForInntektOversiktRequest(etteroppgjoer.behandling.sak.ident)
+  }, [])
+
   return (
     <Box
       borderWidth="2"

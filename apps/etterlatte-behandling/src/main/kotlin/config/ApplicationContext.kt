@@ -172,8 +172,8 @@ import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
-import no.nav.etterlatte.person.krr.KrrKlient
-import no.nav.etterlatte.person.krr.KrrKlientImpl
+import no.nav.etterlatte.krr.KrrKlient
+import no.nav.etterlatte.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao

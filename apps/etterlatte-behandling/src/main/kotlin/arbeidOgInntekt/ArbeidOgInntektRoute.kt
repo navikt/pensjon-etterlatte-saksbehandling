@@ -7,7 +7,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 
 fun Route.arbeidOgInntekt(arbeidOgInntektKlient: ArbeidOgInntektKlient) {
-    route("api/arbeid-og-inntekt") {
+    route("/api/arbeid-og-inntekt") {
         post("/url-for-inntekt-oversikt") {
             val request = call.receive<UrlForInntektOversiktRequest>()
 

@@ -14,6 +14,7 @@ import no.nav.etterlatte.EnvKey.NAVANSATT_URL
 import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.SKJERMING_URL
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.arbeidOgInntekt.ArbeidOgInntektKlient
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
@@ -336,6 +337,7 @@ internal class ApplicationContext(
             config.getString("sigrun.url"),
             featureToggleService,
         ),
+    val arbeidOgInntektKlient: ArbeidOgInntektKlient = ArbeidOgInntektKlient(httpClient(), config.getString("arbeidOgInntekt.url")),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {

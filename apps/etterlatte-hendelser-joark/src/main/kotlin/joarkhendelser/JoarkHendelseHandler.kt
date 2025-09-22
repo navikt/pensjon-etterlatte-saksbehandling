@@ -192,13 +192,9 @@ class JoarkHendelseHandler(
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
-            if (journalpost.journalpostId != "454019481") {
-                logger.error("Feil ved behandling av hendelse=$hendelseId (se sikkerlogg for mer info)", e)
-                sikkerlogger().error("Feil oppsto ved behandling av journalpost: \n${journalpost.toJson()}: ")
-                throw e
-            } else {
-                logger.info("Hopper over journalpost som feilet med id=$journalpostId", e)
-            }
+            logger.error("Feil ved behandling av hendelse=$hendelseId (se sikkerlogg for mer info)", e)
+            sikkerlogger().error("Feil oppsto ved behandling av journalpost: \n${journalpost.toJson()}: ")
+            throw e
         }
     }
 

@@ -43,23 +43,23 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
-
-        val sisteFerdigstilteForbehandling =
-            etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
-                sakId = sakId,
-            )
-
-        // TODO: er dette nok for å unngå mismatch ... ?
-        etteroppgjoerService
-            .hentAlleAktiveEtteroppgjoerForSak(sakId)
-            .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandling.id }
-            ?: throw InternfeilException(
-                "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling ${sisteFerdigstilteForbehandling.id}",
-            )
-
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
+                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+
+                val sisteFerdigstilteForbehandling =
+                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
+                        sakId = sakId,
+                    )
+
+                // TODO: er dette nok for å unngå mismatch ... ?
+                etteroppgjoerService
+                    .hentAlleAktiveEtteroppgjoerForSak(sakId)
+                    .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandling.id }
+                    ?: throw InternfeilException(
+                        "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling ${sisteFerdigstilteForbehandling.id}",
+                    )
+
                 val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
 
                 val sisteIverksatteBehandling =

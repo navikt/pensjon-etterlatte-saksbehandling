@@ -108,12 +108,18 @@ class JoarkHendelseHandler(
         if (journalpostErFerdigstilt(journalpost)) {
             return
         }
-        if (journalpost.journalfoerendeEnhet != null && hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT) {
+        if (journalpost.journalfoerendeEnhet != null) {
             // Journalposten har allerede satt en journalførende enhet, og vi vil ikke plukke den opp hvis den skal
             // sendes rett til kabal (når det gjelder en anke på våre tema)
+            logger.info(
+                "Håndterer en journalpost som har satt journalførende enhet (id=${journalpost.journalpostId}, " +
+                    "enhet=${journalpost.journalfoerendeEnhet}, hendelse=${hendelse.hendelsesType})",
+            )
             val kjentSkjemakode =
                 KjenteSkjemaKoder.entries.find { kjentSkjema -> kjentSkjema.skjemaKode in journalpost.dokumenter.map { it.brevkode } }
-            if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr) {
+            if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr &&
+                hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT
+            ) {
                 logger.info(
                     "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
                         "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +

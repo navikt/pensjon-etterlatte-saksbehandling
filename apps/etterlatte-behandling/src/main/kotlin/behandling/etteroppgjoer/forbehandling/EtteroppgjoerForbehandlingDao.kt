@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.etteroppgjoer.AInntekt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
@@ -26,7 +25,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
-import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
@@ -237,7 +235,7 @@ class EtteroppgjoerForbehandlingDao(
             statement.setString(1, nyForbehandlingId.toString())
             statement.setString(2, forbehandlingId.toString())
             statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
-            statement.setString(4, BehandlingStatus.IVERKSATT.name)
+            statement.setString(4, BehandlingStatus.IVERKSATT.name) // TODO: Bør være strengere -tillate færre statuser?
 
             statement.executeUpdate()
         }
@@ -296,38 +294,8 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun kopierAInntekt(
-        forbehandlingId: UUID,
-        nyForbehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    INSERT INTO etteroppgjoer_ainntekt(
-                        id, forbehandling_id, aar, inntektsmaaneder
-                    )
-                    SELECT ?, ?, aar, inntektsmaaneder
-                    FROM etteroppgjoer_ainntekt
-                    WHERE forbehandling_id = ?
-                    """.trimIndent(),
-                )
-
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, nyForbehandlingId)
-            statement.setObject(3, forbehandlingId)
-
-            statement.executeUpdate().also {
-                krev(it == 1) {
-                    "Kunne ikke kopiere aInntekt fra behandling=$forbehandlingId til $nyForbehandlingId"
-                }
-            }
-        }
-    }
-
     fun lagreSummerteInntekter(
         forbehandlingId: UUID,
-        revurderingId: UUID?,
         summerteInntekterAOrdningen: SummerteInntekterAOrdningen,
     ) {
         krevIkkeNull(summerteInntekterAOrdningen.regelresultat) {
@@ -338,9 +306,9 @@ class EtteroppgjoerForbehandlingDao(
                 connection.prepareStatement(
                     """
                     INSERT INTO etteroppgjoer_summerte_inntekter (
-                        forbehandling_id, behandling_id, afp, loenn, oms, tidspunkt_beregnet, regel_resultat
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT (forbehandling_id, behandling_id) DO UPDATE SET
+                        forbehandling_id, afp, loenn, oms, tidspunkt_beregnet, regel_resultat
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (forbehandling_id) DO UPDATE SET
                         afp = excluded.afp,
                         loenn = excluded.loenn,
                         oms = excluded.oms,
@@ -349,84 +317,60 @@ class EtteroppgjoerForbehandlingDao(
                     """.trimIndent(),
                 )
             statement.setObject(1, forbehandlingId)
-            statement.setObject(2, revurderingId ?: forbehandlingId)
-            statement.setJsonb(3, summerteInntekterAOrdningen.afp)
-            statement.setJsonb(4, summerteInntekterAOrdningen.loenn)
-            statement.setJsonb(5, summerteInntekterAOrdningen.oms)
-            statement.setTidspunkt(6, summerteInntekterAOrdningen.tidspunktBeregnet)
-            statement.setJsonb(7, summerteInntekterAOrdningen.regelresultat)
+            statement.setJsonb(2, summerteInntekterAOrdningen.afp)
+            statement.setJsonb(3, summerteInntekterAOrdningen.loenn)
+            statement.setJsonb(4, summerteInntekterAOrdningen.oms)
+            statement.setTidspunkt(5, summerteInntekterAOrdningen.tidspunktBeregnet)
+            statement.setJsonb(6, summerteInntekterAOrdningen.regelresultat)
             statement.executeUpdate()
         }
-        logger.info("Lagret inntekter for forbehandling $forbehandlingId knyttet til behandling $revurderingId")
+        logger.info("Lagret inntekter for forbehandling $forbehandlingId")
     }
 
-    fun hentSummerteInntekter(
-        forbehandlingId: UUID,
-        revurderingId: UUID? = null,
-    ): SummerteInntekterAOrdningen =
+    fun hentSummerteInntekterNonNull(forbehandlingId: UUID) = krevIkkeNull(hentSummerteInntekter(forbehandlingId)) { "Må ha en verdi" }
+
+    fun hentSummerteInntekter(forbehandlingId: UUID): SummerteInntekterAOrdningen? =
         connectionAutoclosing.hentConnection { connection ->
             val statement =
                 connection.prepareStatement(
                     """
-                    SELECT afp, loenn, oms, tidspunkt_beregnet, forbehandling_id, behandling_id FROM etteroppgjoer_summerte_inntekter
-                    WHERE forbehandling_id = ? and behandling_id = ?
+                    SELECT afp, loenn, oms, tidspunkt_beregnet, forbehandling_id FROM etteroppgjoer_summerte_inntekter
+                    WHERE forbehandling_id = ?
                     """.trimIndent(),
                 )
             statement.setObject(1, forbehandlingId)
-            statement.setObject(2, revurderingId ?: forbehandlingId)
-            statement.executeQuery().single {
+            statement.executeQuery().singleOrNull {
                 toSummerteInntekter()
             }
         }
 
-    fun lagreAInntekt(
-        aInntekt: AInntekt,
-        behandlingId: UUID,
+    fun kopierSummerteInntekter(
+        forbehandlingId: UUID,
+        nyForbehandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO etteroppgjoer_ainntekt(
-                        id, forbehandling_id, aar, inntektsmaaneder
-                    ) 
-                    VALUES (?, ?, ?, ?) 
+                    INSERT INTO etteroppgjoer_summerte_inntekter (
+                        forbehandling_id, afp, loenn, oms, tidspunkt_beregnet, regel_resultat
+                    )
+                    SELECT ?, afp, loenn, oms, tidspunkt_beregnet, regel_resultat
+                    FROM etteroppgjoer_summerte_inntekter
+                    WHERE forbehandling_id = ?
                     """.trimIndent(),
                 )
 
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, behandlingId)
-            statement.setInt(3, aInntekt.aar)
-            statement.setJsonb(4, aInntekt.inntektsmaaneder)
+            statement.setObject(1, nyForbehandlingId)
+            statement.setObject(2, forbehandlingId)
 
             statement.executeUpdate().also {
                 krev(it == 1) {
-                    "Kunne ikke lagre aInntekt for behandling=$behandlingId"
+                    "Kunne ikke kopiere summerter inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
                 }
             }
         }
     }
-
-    fun hentAInntekt(behandlingId: UUID): AInntekt? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT *
-                        FROM etteroppgjoer_ainntekt
-                        WHERE forbehandling_id = ?
-                        """.trimIndent(),
-                    )
-                statement.setObject(1, behandlingId)
-                statement.executeQuery().singleOrNull {
-                    AInntekt(
-                        aar = getInt("aar"),
-                        inntektsmaaneder = getString("inntektsmaaneder").let { objectMapper.readValue(it) },
-                    )
-                }
-            }
-        }
 
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(

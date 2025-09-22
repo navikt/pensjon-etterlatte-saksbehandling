@@ -862,15 +862,6 @@ class SigrunKlienTest : SigrunKlient {
 }
 
 class InntektskomponentKlientTest : InntektskomponentKlient {
-    override suspend fun hentInntekt(
-        personident: String,
-        maanedFom: YearMonth,
-        maanedTom: YearMonth,
-    ): AInntektReponsData =
-        AInntektReponsData(
-            emptyList(),
-        )
-
     override suspend fun hentInntektFlereFilter(
         personident: String,
         maanedFom: YearMonth,

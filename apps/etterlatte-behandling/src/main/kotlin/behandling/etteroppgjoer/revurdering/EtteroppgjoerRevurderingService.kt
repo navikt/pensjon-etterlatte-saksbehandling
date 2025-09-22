@@ -2,9 +2,11 @@ package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -20,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
@@ -40,74 +43,35 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val (revurdering, sisteIverksatte) =
+        val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
+                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+
                 val sisteFerdigstilteForbehandling =
                     etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
                         sakId = sakId,
                     )
 
-                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+                // TODO: er dette nok for å unngå mismatch ... ?
+                etteroppgjoerService
+                    .hentAlleAktiveEtteroppgjoerForSak(sakId)
+                    .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandling.id }
+                    ?: throw InternfeilException(
+                        "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling ${sisteFerdigstilteForbehandling.id}",
+                    )
 
-                val iverksatteVedtak =
-                    runBlocking {
-                        vedtakKlient
-                            .hentIverksatteVedtak(sakId, brukerTokenInfo)
-                            .sortedByDescending { it.datoFattet }
-                    }
+                val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
 
-                if (iverksatteVedtak.isEmpty()) {
-                    throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
-                }
-
-                // TODO vedtak med opphør støttes ikke enda da vi må tenke litt rundt hvordan dette skal håndteres mtp etteroppgjør
-                if (iverksatteVedtak.first().vedtakType === VedtakType.OPPHOER) {
-                    throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
-                }
-
-                val sisteIverksatteIkkeOpphoer = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
-
-                if (sisteIverksatteIkkeOpphoer.opphoerFraOgMed != null) {
-                    throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
-                }
-
-                val sisteIverksatte =
+                val sisteIverksatteBehandling =
                     behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
                         ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
 
-                val persongalleri =
-                    grunnlagService.hentPersongalleri(sakId)
-                        ?: throw InternfeilException("Fant ikke persongalleri for sak $sakId")
-
-                val virkningstidspunkt =
-                    Virkningstidspunkt(
-                        dato = sisteFerdigstilteForbehandling.innvilgetPeriode.fom,
-                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-                        begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
-                    )
-
                 val revurdering =
-                    revurderingService
-                        .opprettRevurdering(
-                            sakId = sakId,
-                            forrigeBehandling = sisteIverksatte,
-                            relatertBehandlingId = sisteFerdigstilteForbehandling.id.toString(),
-                            persongalleri = persongalleri,
-                            prosessType = Prosesstype.MANUELL,
-                            kilde = Vedtaksloesning.GJENNY,
-                            revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
-                            virkningstidspunkt = virkningstidspunkt,
-                            saksbehandlerIdent = brukerTokenInfo.ident(),
-                            begrunnelse = "Etteroppgjør ${sisteFerdigstilteForbehandling.aar}",
-                            mottattDato = null,
-                            frist = null,
-                            paaGrunnAvOppgave = null,
-                            opprinnelse = opprinnelse,
-                        ).oppdater()
+                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, sisteFerdigstilteForbehandling, brukerTokenInfo)
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = revurdering.id,
-                    kopierFraBehandling = sisteIverksatte.id,
+                    kopierFraBehandling = sisteIverksatteBehandling.id,
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
@@ -117,19 +81,19 @@ class EtteroppgjoerRevurderingService(
                     EtteroppgjoerStatus.UNDER_REVURDERING,
                 )
 
-                revurdering to sisteIverksatte
+                revurdering to sisteIverksatteBehandling
             }
 
         // TODO her må noe gjøres da feil her medfører en "halvveis behandling"
         runBlocking {
             trygdetidKlient.kopierTrygdetidFraForrigeBehandling(
                 behandlingId = revurdering.id,
-                forrigeBehandlingId = sisteIverksatte.id,
+                forrigeBehandlingId = sisteIverksatteBehandling.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
             beregningKlient.opprettBeregningsgrunnlagFraForrigeBehandling(
                 behandlingId = revurdering.id,
-                forrigeBehandlingId = sisteIverksatte.id,
+                forrigeBehandlingId = sisteIverksatteBehandling.id,
                 brukerTokenInfo = brukerTokenInfo,
             )
             beregningKlient.beregnBehandling(
@@ -140,4 +104,65 @@ class EtteroppgjoerRevurderingService(
 
         return revurdering
     }
+
+    private fun opprettRevurdering(
+        sakId: SakId,
+        sisteIverksatteBehandling: Behandling,
+        opprinnelse: BehandlingOpprinnelse,
+        sisteFerdigstilteForbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Revurdering {
+        val persongalleri =
+            grunnlagService.hentPersongalleri(sakId)
+                ?: throw InternfeilException("Fant ikke persongalleri for sak $sakId")
+
+        val virkningstidspunkt =
+            Virkningstidspunkt(
+                dato = sisteFerdigstilteForbehandling.innvilgetPeriode.fom,
+                kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
+            )
+
+        return revurderingService
+            .opprettRevurdering(
+                sakId = sakId,
+                forrigeBehandling = sisteIverksatteBehandling,
+                relatertBehandlingId = sisteFerdigstilteForbehandling.id.toString(),
+                persongalleri = persongalleri,
+                prosessType = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+                virkningstidspunkt = virkningstidspunkt,
+                saksbehandlerIdent = brukerTokenInfo.ident(),
+                begrunnelse = "Etteroppgjør ${sisteFerdigstilteForbehandling.aar}",
+                mottattDato = null,
+                frist = null,
+                paaGrunnAvOppgave = null,
+                opprinnelse = opprinnelse,
+            ).oppdater()
+    }
+
+    private fun hentSisteIverksatteVedtakIkkeOpphoer(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakSammendragDto =
+        runBlocking {
+            val iverksatteVedtak =
+                vedtakKlient
+                    .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                    .sortedByDescending { it.datoFattet }
+
+            val sisteIverksatteVedtak =
+                iverksatteVedtak.firstOrNull()
+                    ?: throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
+
+            if (sisteIverksatteVedtak.vedtakType == VedtakType.OPPHOER) {
+                throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
+            }
+            if (sisteIverksatteVedtak.opphoerFraOgMed != null) {
+                throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
+            }
+
+            sisteIverksatteVedtak
+        }
 }

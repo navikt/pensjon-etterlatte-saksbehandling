@@ -27,12 +27,6 @@ enum class InntektskomponentenFilter(
 }
 
 interface InntektskomponentKlient {
-    suspend fun hentInntekt(
-        personident: String,
-        maanedFom: YearMonth,
-        maanedTom: YearMonth,
-    ): AInntektReponsData
-
     suspend fun hentInntektFlereFilter(
         personident: String,
         maanedFom: YearMonth,
@@ -51,39 +45,6 @@ class InntektskomponentKlientImpl(
     companion object {
         const val ETTERLATTEYTELSER = "Etterlatteytelser"
     }
-
-    override suspend fun hentInntekt(
-        personident: String,
-        maanedFom: YearMonth,
-        maanedTom: YearMonth,
-    ): AInntektReponsData =
-        retry {
-            httpClient.post("$url/rest/v2/inntekt") {
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                val body =
-                    InntektRequest(
-                        personident = personident,
-                        filter = ETTERLATTEYTELSER,
-                        formaal = ETTERLATTEYTELSER,
-                        maanedFom = maanedFom.toString(),
-                        maanedTom = maanedTom.toString(),
-                    ).toJson()
-                setBody(body)
-            }
-        }.let {
-            when (it) {
-                is RetryResult.Success -> {
-                    it.content.body<AInntektReponsData>()
-                }
-
-                is RetryResult.Failure -> {
-                    logger.error("Kall mot inntektskomponent feilet")
-                    sikkerlogg.error("Kall mot inntektskomponent feilet for $personident")
-                    throw it.samlaExceptions()
-                }
-            }
-        }
 
     override suspend fun hentInntektFlereFilter(
         personident: String,

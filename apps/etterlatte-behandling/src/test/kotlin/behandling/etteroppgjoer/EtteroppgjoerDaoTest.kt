@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -26,7 +27,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -75,6 +79,38 @@ class EtteroppgjoerDaoTest(
                 type = SakType.OMSTILLINGSSTOENAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
+    }
+
+    @Test
+    fun `skal kaste feil hvis flere aktive etteroppgjoer for samme sak `() {
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+
+        assertThrows<InternfeilException> {
+            etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id)
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["FERDIGSTILT", "FERDIGSTILT_UTEN_VARSEL"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `skal hente aktive etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, status))
+        etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id).map { it.status } shouldBe listOf(status)
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["FERDIGSTILT", "FERDIGSTILT_UTEN_VARSEL"],
+        mode = EnumSource.Mode.INCLUDE,
+    )
+    fun `skal ikke hente ferdigstilte etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, status))
+        etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id) shouldBe emptyList()
     }
 
     @Test

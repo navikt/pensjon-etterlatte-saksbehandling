@@ -181,7 +181,7 @@ internal class EgenAnsattServiceTest(
             )
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
-        every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(any(), any()) } just Runs
+        every { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(any(), any(), any()) } just Runs
         val bruktSak =
             sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
@@ -193,6 +193,6 @@ internal class EgenAnsattServiceTest(
         val egenAnsattSkjermet = EgenAnsattSkjermet(fnr, Tidspunkt.now(), true)
         egenAnsattService.haandterSkjerming(egenAnsattSkjermet)
 
-        verify(exactly = 3) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any()) }
+        verify(exactly = 3) { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(bruktSak.id, any(), any()) }
     }
 }

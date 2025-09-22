@@ -486,7 +486,11 @@ class GrunnlagServiceImpl(
             /*
                 For å ha konsistens i beskyttelser ved endringer i persongalleriet.
              */
-            oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+            oppdaterTilgangService.haandtergraderingOgEgenAnsatt(
+                sakId,
+                persongalleri,
+                hentOpplysningsgrunnlagForSak(sakId),
+            )
         }
     }
 

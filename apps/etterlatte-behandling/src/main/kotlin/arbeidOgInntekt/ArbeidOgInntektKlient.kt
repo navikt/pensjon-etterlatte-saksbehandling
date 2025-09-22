@@ -29,9 +29,9 @@ class ArbeidOgInntektKlient(
     suspend fun hentURLForInntektOversikt(fnr: String): String? {
         logger.info("Henter url for inntekt oversikt")
 
-        val url = cache.getIfPresent(fnr)
+        val urlForInntektOversikt = cache.getIfPresent(fnr)
 
-        if (url != null) return url
+        if (urlForInntektOversikt != null) return urlForInntektOversikt
 
         return try {
             val response =

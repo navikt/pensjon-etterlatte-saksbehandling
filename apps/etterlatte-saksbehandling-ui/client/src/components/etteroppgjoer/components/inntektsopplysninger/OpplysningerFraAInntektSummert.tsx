@@ -1,8 +1,9 @@
 import { SummerteInntekterAOrdningen } from '~shared/types/EtteroppgjoerForbehandling'
-import { BodyShort, Heading, Label, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Heading, Label, VStack, Table } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
+import { LenkeTilInntektOversikt } from '~components/etteroppgjoer/components/inntektsopplysninger/LenkeTilInntektOversikt'
 
 export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: SummerteInntekterAOrdningen }) {
   return (
@@ -11,6 +12,8 @@ export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: Summe
       <BodyShort>
         Opplysningene er angitt som brutto inntekt og er summert per måned. For detaljer per måned, sjekk A-ordningen.
       </BodyShort>
+
+      <LenkeTilInntektOversikt />
 
       <Table>
         <Table.Header>

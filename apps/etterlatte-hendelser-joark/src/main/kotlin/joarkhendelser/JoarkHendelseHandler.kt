@@ -127,8 +127,9 @@ class JoarkHendelseHandler(
                     oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
                 } else {
                     logger.info(
-                        "Journalposthendelsen (${hendelse.hendelsesType} er ikke mottatt, så vi oppretter " +
-                            "ikke en oppgave til Kabal for journalpost $journalpostId, tema=$temaNytt, enhet=${journalpost.journalfoerendeEnhet}",
+                        "Journalposthendelsen (${hendelse.hendelsesType}) er ikke mottatt, så vi oppretter " +
+                            "ikke en oppgave til Kabal for journalpost $journalpostId, tema=$temaNytt, " +
+                            "enhet=${journalpost.journalfoerendeEnhet}",
                     )
                 }
                 return

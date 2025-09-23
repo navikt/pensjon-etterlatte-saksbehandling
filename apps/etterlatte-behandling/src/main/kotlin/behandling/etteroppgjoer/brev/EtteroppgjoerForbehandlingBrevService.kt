@@ -109,7 +109,6 @@ class EtteroppgjoerForbehandlingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
-
         return brevKlient.genererPdf(brevID, forbehandlingId, brevRequest, brukerTokenInfo)
     }
 

@@ -22,6 +22,8 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -35,8 +37,6 @@ import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService

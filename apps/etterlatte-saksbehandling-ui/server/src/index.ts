@@ -88,6 +88,7 @@ app.use(
     '/api/kodeverk',
     '/api/vilkaarsvurdering',
     '/api/grunnlag',
+    '/api/arbeid-og-inntekt',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

@@ -168,6 +168,8 @@ spec:
       value: https://ikomp.prod-fss-pub.nais.io
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.ikomp/.default
+    - name: ARBEID_OG_INNTEKT_URL
+      value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
 
     - name: SIGRUN_URL
       value: https://sigrun.nais.adeo.no/api/
@@ -202,6 +204,7 @@ spec:
         - host: pensjon-pen.prod-fss-pub.nais.io
         - host: axsys.prod-fss-pub.nais.io
         - host: team-inntekt-proxy.prod-fss-pub.nais.io
+        - host: arbeid-og-inntekt.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

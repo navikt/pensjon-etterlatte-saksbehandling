@@ -125,7 +125,7 @@ export default function OpprettNyBehandling() {
       <FormProvider {...methods}>
         <VStack gap="4">
           <Heading size="medium" spacing>
-            Opprett revurdering
+            Opprett behandling
           </Heading>
 
           {harAapneBehandlinger && (

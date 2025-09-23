@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -290,6 +291,11 @@ interface BehandlingService {
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
+
+    fun settAvkortet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 data class SakMedBehandlingerOgOppgaver(
@@ -983,6 +989,20 @@ internal class BehandlingServiceImpl(
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
+
+    override fun settAvkortet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val behandling = hentBehandling(behandlingId) ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
+
+        behandling
+            .tilAvkortet()
+            .let {
+                behandlingDao.lagreStatus(it)
+                registrerBehandlingHendelse(it, brukerTokenInfo.ident())
+            }
+    }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

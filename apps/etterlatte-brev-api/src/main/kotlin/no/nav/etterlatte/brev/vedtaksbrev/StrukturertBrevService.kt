@@ -128,7 +128,7 @@ class StrukturertBrevService(
     ): Pdf {
         val brev = db.hentBrev(brevId)
 
-        if (brev.erFerdigstilt()) {
+        if (!brev.kanEndres()) {
             logger.info("Brev (id=${brev.id}) er allerede ferdigstilt. Henter PDF...")
             return db.hentPdf(brevId) ?: throw BrevManglerPDF(brev.id)
         }

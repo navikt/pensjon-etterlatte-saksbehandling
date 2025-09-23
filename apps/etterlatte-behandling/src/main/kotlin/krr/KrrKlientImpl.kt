@@ -1,4 +1,4 @@
-package no.nav.etterlatte.person.krr
+package no.nav.etterlatte.krr
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient

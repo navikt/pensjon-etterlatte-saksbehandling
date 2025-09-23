@@ -1,4 +1,4 @@
-package no.nav.etterlatte.person.krr
+package no.nav.etterlatte.krr
 
 data class DigitalKontaktinformasjon(
     val personident: String,

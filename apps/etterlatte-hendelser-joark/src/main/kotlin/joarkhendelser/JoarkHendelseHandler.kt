@@ -117,15 +117,20 @@ class JoarkHendelseHandler(
             )
             val kjentSkjemakode =
                 KjenteSkjemaKoder.entries.find { kjentSkjema -> kjentSkjema.skjemaKode in journalpost.dokumenter.map { it.brevkode } }
-            if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr &&
-                hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT
-            ) {
-                logger.info(
-                    "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
-                        "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
-                        "brevkoden brukt er $kjentSkjemakode",
-                )
-                oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
+            if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr) {
+                if (hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT) {
+                    logger.info(
+                        "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
+                            "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
+                            "brevkoden brukt er $kjentSkjemakode",
+                    )
+                    oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
+                } else {
+                    logger.info(
+                        "Journalposthendelsen (${hendelse.hendelsesType} er ikke mottatt, så vi oppretter " +
+                            "ikke en oppgave til Kabal for journalpost $journalpostId, tema=$temaNytt, enhet=${journalpost.journalfoerendeEnhet}",
+                    )
+                }
                 return
             } else {
                 // team klage ruter journalposter som de ikke vil vi skal plukke opp ved å sette journalførende enhet

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.vedtaksbrev
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -10,7 +9,6 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.brevId
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
@@ -48,7 +46,7 @@ fun Route.strukturertBrevRoute(
                     val request = call.receive<BrevRequest>()
 
                     logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
-                    val pdf = service.genererPdf(brevId, brukerTokenInfo, request)
+                    val pdf = service.genererEllerHentPdf(brevId, brukerTokenInfo, request)
                     call.respond(pdf)
                 }
             }
@@ -101,7 +99,7 @@ fun Route.strukturertBrevRoute(
                 val request = call.receive<BrevRequest>()
 
                 logger.info("Genererer PDF for tilbakekreving vedtaksbrev (id=$brevId)")
-                val pdf = service.genererPdf(brevId, brukerTokenInfo, request)
+                val pdf = service.genererEllerHentPdf(brevId, brukerTokenInfo, request)
                 call.respond(pdf)
             }
         }

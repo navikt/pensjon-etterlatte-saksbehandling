@@ -52,9 +52,6 @@ class EtteroppgjoerRevurderingService(
                         sakId = sakId,
                     )
 
-                val forbehandling =
-                    etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(sisteFerdigstilteForbehandling)
-
                 // TODO: er dette nok for å unngå mismatch ... ?
                 etteroppgjoerService
                     .hentAlleAktiveEtteroppgjoerForSak(sakId)
@@ -68,6 +65,9 @@ class EtteroppgjoerRevurderingService(
                 val sisteIverksatteBehandling =
                     behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
                         ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
+
+                val forbehandling =
+                    etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(sisteFerdigstilteForbehandling)
 
                 val revurdering =
                     opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, forbehandling, brukerTokenInfo)

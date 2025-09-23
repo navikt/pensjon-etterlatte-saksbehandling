@@ -19,7 +19,7 @@ import { PersonLink } from '~components/person/lenker/PersonLink'
 import { logger } from '~utils/logger'
 import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
 import { SakType } from '~shared/types/sak'
-import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -43,6 +43,17 @@ export default function StartOppgavebehandling() {
           relative: 'path',
           state: { opprinnelse: Opprinnelse.JOURNALFOERING },
         })
+    }
+  }
+
+  const harIverksattBehandlingPaaSak = () => {
+    if (!!sakMedBehandlinger?.behandlinger?.length) {
+      return (
+        sakMedBehandlinger?.behandlinger.filter((behandling) => behandling.status === IBehandlingStatus.IVERKSATT)
+          .length > 0
+      )
+    } else {
+      return false
     }
   }
 
@@ -108,10 +119,14 @@ export default function StartOppgavebehandling() {
       >
         <Radio
           value={OppgaveHandling.NY_BEHANDLING}
-          description="Oppretter en ny revurdering i saken"
+          description={
+            harIverksattBehandlingPaaSak()
+              ? 'Oppretter en ny revurdering i saken'
+              : 'Opprett en ny førstegangsbehandling i saken'
+          }
           disabled={!journalpost || !tilhoererBruker}
         >
-          Opprett revurdering
+          {harIverksattBehandlingPaaSak() ? 'Opprett revurdering' : 'Opprett førstegangsbehandling'}
         </Radio>
         <Radio
           value={OppgaveHandling.NY_KLAGE}

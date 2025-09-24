@@ -45,7 +45,7 @@ class OpprettForbehandlingJobService(
                     oppgaveService.opprettOppgave(
                         referanse = "", // viktig for å få opp modal for opprette forbehandling
                         sakId = etteroppgjoer.sakId,
-                        kilde = OppgaveKilde.HENDELSE,
+                        kilde = OppgaveKilde.BEHANDLING,
                         type = OppgaveType.ETTEROPPGJOER,
                         merknad = "Etteroppgjøret er nå klar til å behandles",
                     )

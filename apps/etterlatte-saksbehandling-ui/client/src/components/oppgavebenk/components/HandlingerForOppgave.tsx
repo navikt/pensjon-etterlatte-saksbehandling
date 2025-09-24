@@ -127,12 +127,15 @@ export const HandlingerForOppgave = ({
     case Oppgavetype.ETTEROPPGJOER:
       return (
         <>
-          erInnloggetSaksbehandlerOppgave && referanse && (
-          <Button size="small" as="a" href={`/etteroppgjoer/${referanse}`}>
-            Gå til etteroppgjør
-          </Button>
-          ) erInnloggetSaksbehandlerOppgave && !referanse && (
-          <OpprettEtteroppgjoerForbehandlingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />)
+          {erInnloggetSaksbehandlerOppgave && referanse && (
+            <Button size="small" as="a" href={`/etteroppgjoer/${referanse}`}>
+              Gå til etteroppgjør
+            </Button>
+          )}
+
+          {erInnloggetSaksbehandlerOppgave && !referanse && (
+            <OpprettEtteroppgjoerForbehandlingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+          )}
         </>
       )
 

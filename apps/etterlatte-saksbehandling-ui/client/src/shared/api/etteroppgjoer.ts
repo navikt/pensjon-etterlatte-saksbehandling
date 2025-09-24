@@ -70,6 +70,6 @@ export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
 
 export const ferdigstillEtteroppgjoerForbehandlingUtenBrev = async (args: {
   forbehandlingId: string
-}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+}): Promise<ApiResponse<EtteroppgjoerBehandling>> => {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill-uten-brev`, {})
 }

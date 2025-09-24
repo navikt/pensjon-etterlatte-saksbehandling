@@ -246,10 +246,14 @@ class EtteroppgjoerForbehandlingService(
     fun opprettEtteroppgjoerForbehandling(
         sakId: SakId,
         inntektsaar: Int,
+        oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandlingOgOppgave {
         logger.info("Oppretter forbehandling for etteroppgjør sakId=$sakId, inntektsår=$inntektsaar")
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Kunne ikke hente sak=$sakId")
+
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        sjekkAtOppgaveErGyldigForForbehandling(oppgave, sakId)
 
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar)
 
@@ -276,17 +280,37 @@ class EtteroppgjoerForbehandlingService(
             saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
         )
 
+        val oppdatertOppgave =
+            oppgaveService.oppdaterReferanseOgMerknad(
+                oppgave.id,
+                nyForbehandling.id.toString(),
+                "Etteroppgjør for $inntektsaar",
+            )
+
         return EtteroppgjoerForbehandlingOgOppgave(
             etteroppgjoerForbehandling = nyForbehandling,
-            oppgave =
-                oppgaveService.opprettOppgave(
-                    referanse = nyForbehandling.id.toString(),
-                    sakId = sakId,
-                    kilde = OppgaveKilde.BEHANDLING,
-                    type = OppgaveType.ETTEROPPGJOER,
-                    merknad = "Etteroppgjør for $inntektsaar",
-                ),
+            oppgave = oppdatertOppgave,
         )
+    }
+
+    private fun sjekkAtOppgaveErGyldigForForbehandling(
+        oppgave: OppgaveIntern,
+        sakId: SakId,
+    ) {
+        if (oppgave.sakId != sakId) {
+            throw UgyldigForespoerselException("OPPGAVE_IKKE_I_SAK", "OppgaveId=${oppgave.id} matcher ikke sakId=$sakId")
+        }
+
+        if (oppgave.erAvsluttet()) {
+            throw UgyldigForespoerselException("OPPGAVE_AVSLUTTET", "Oppgaven tilknyttet forbehandling er avsluttet og kan ikke behandles")
+        }
+
+        if (oppgave.type != OppgaveType.ETTEROPPGJOER) {
+            throw UgyldigForespoerselException(
+                "OPPGAVE_FEIL_TYPE",
+                "Oppgaven har feil oppgaveType=${oppgave.type} til å opprette forbehandling",
+            )
+        }
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(
@@ -295,7 +319,6 @@ class EtteroppgjoerForbehandlingService(
         etteroppgjoerFilter: EtteroppgjoerFilter,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
-        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val relevanteSaker: List<SakId> =
             etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
@@ -308,11 +331,17 @@ class EtteroppgjoerForbehandlingService(
 
         relevanteSaker.map { sakId ->
             try {
-                opprettEtteroppgjoerForbehandling(
-                    sakId = sakId,
-                    inntektsaar = inntektsaar,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
+                // TODO: håndtere etteroppgjoer neste år
+                val eksisterendeOppgaver = oppgaveService.hentOppgaverForSakAvType(sakId, listOf(OppgaveType.ETTEROPPGJOER))
+                if (eksisterendeOppgaver.isEmpty()) {
+                    oppgaveService.opprettOppgave(
+                        referanse = "", // viktig for å få opp modal for opprette forbehandling
+                        sakId = sakId,
+                        kilde = OppgaveKilde.BEHANDLING,
+                        type = OppgaveType.ETTEROPPGJOER,
+                        merknad = "Etteroppgjøret er nå klar til å behandles",
+                    )
+                }
             } catch (e: Error) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }

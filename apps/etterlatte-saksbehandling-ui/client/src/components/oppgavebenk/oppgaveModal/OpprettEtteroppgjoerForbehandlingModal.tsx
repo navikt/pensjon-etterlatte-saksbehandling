@@ -12,6 +12,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { opprettEtteroppgoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
+import { useNavigate } from 'react-router-dom'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -21,11 +22,13 @@ type Props = {
 export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const [ferdigstillStatus, ferdigstill] = useApiCall(ferdigstillOppgaveMedMerknad)
+  const [ferdigstillStatus] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
+
+  const navigate = useNavigate()
 
   const {
     formState: { errors },
@@ -36,11 +39,8 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
   const [opprettForbehandlingResult, opprettForbehandlingRequest] = useApiCall(opprettForbehandlingApi)
 
   const opprettForbehandling = () => {
-    opprettForbehandlingRequest(oppgave.sakId, () => {
-      ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
-        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-        setOpen(false)
-      })
+    opprettForbehandlingRequest({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (result) => {
+      navigate(`/etteroppgjoer/${result.etteroppgjoerBehandling.behandling.id}`)
     })
   }
 

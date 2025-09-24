@@ -414,7 +414,8 @@ internal class BehandlingServiceImpl(
                 )
             }
 
-            haandterHandlingEtterAvbrytelse(behandling, aarsak)
+            haandterEtteroppgjoerRevurderingErTilUgunst(behandling, aarsak)
+            haandterOmgjoeringEtterKlage(behandling)
 
             hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident(), kommentar, aarsak.toString())
             grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
@@ -428,17 +429,17 @@ internal class BehandlingServiceImpl(
         )
     }
 
-    private fun haandterHandlingEtterAvbrytelse(
+    private fun haandterEtteroppgjoerRevurderingErTilUgunst(
         behandling: Behandling,
         aarsak: AarsakTilAvbrytelse?,
     ) {
-        // etteroppgjør revurdering avbrutt pga ugunst
         if (behandling.type == BehandlingType.REVURDERING && aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
             val eksisterendeOppgaver =
-                oppgaveService.hentOppgaverForSakAvType(
-                    behandling.sak.id,
-                    listOf(OppgaveType.ETTEROPPGJOER),
-                )
+                oppgaveService
+                    .hentOppgaverForSakAvType(
+                        behandling.sak.id,
+                        listOf(OppgaveType.ETTEROPPGJOER),
+                    ).filter { it.erIkkeAvsluttet() }
 
             if (eksisterendeOppgaver.isEmpty()) {
                 oppgaveService.opprettOppgave(
@@ -455,8 +456,9 @@ internal class BehandlingServiceImpl(
                 )
             }
         }
+    }
 
-        // Omgjøring etter klage
+    private fun haandterOmgjoeringEtterKlage(behandling: Behandling) {
         val erBehandlingOmgjoeringEtterKlage =
             when (behandling) {
                 is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE

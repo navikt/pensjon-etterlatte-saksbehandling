@@ -62,8 +62,6 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtl
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettForbehandlingJob
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettForbehandlingJobService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
@@ -768,13 +766,6 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
-    val opprettForbehandlingJobService =
-        OpprettForbehandlingJobService(
-            etteroppgjoerService,
-            oppgaveService,
-            featureToggleService,
-        )
-
     val etteroppgjoerSvarfristUtloeptJobService =
         EtteroppgjoerSvarfristUtloeptJobService(
             etteroppgjoerService,
@@ -926,17 +917,6 @@ internal class ApplicationContext(
     val etteroppgjoerJob: OpprettEtteroppgjoerJob by lazy {
         OpprettEtteroppgjoerJob(
             opprettEtteroppgjoerJobService = opprettEtteroppgjoerJobService,
-            { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(10, ChronoUnit.MINUTES),
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-        )
-    }
-
-    val forbehandlingJob: OpprettForbehandlingJob by lazy {
-        OpprettForbehandlingJob(
-            opprettForbehandlingJobService = opprettForbehandlingJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(10, ChronoUnit.MINUTES),

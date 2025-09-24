@@ -119,7 +119,11 @@ class RevurderingService(
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
         if (oppgaverForSak
                 .filter {
-                    it.kilde == OppgaveKilde.BEHANDLING && it.type != OppgaveType.OMGJOERING
+                    it.kilde == OppgaveKilde.BEHANDLING &&
+                        it.type != OppgaveType.OMGJOERING &&
+
+                        // oppgave om opprette forbehandling for EO skal ikke hindre vanlig revurdering
+                        !(it.type == OppgaveType.ETTEROPPGJOER && it.referanse.isEmpty())
                 }.any { !it.erAvsluttet() }
         ) {
             throw MaksEnAktivOppgavePaaBehandling(sakId)

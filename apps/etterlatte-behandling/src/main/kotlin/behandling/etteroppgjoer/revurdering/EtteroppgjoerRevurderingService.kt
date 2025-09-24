@@ -66,8 +66,11 @@ class EtteroppgjoerRevurderingService(
                     behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
                         ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
 
+                val forbehandling =
+                    etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(sisteFerdigstilteForbehandling)
+
                 val revurdering =
-                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, sisteFerdigstilteForbehandling, brukerTokenInfo)
+                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, forbehandling, brukerTokenInfo)
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = revurdering.id,
@@ -77,7 +80,7 @@ class EtteroppgjoerRevurderingService(
 
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                     sakId,
-                    sisteFerdigstilteForbehandling.aar,
+                    forbehandling.aar,
                     EtteroppgjoerStatus.UNDER_REVURDERING,
                 )
 
@@ -109,7 +112,7 @@ class EtteroppgjoerRevurderingService(
         sakId: SakId,
         sisteIverksatteBehandling: Behandling,
         opprinnelse: BehandlingOpprinnelse,
-        sisteFerdigstilteForbehandling: EtteroppgjoerForbehandling,
+        forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val persongalleri =
@@ -118,7 +121,7 @@ class EtteroppgjoerRevurderingService(
 
         val virkningstidspunkt =
             Virkningstidspunkt(
-                dato = sisteFerdigstilteForbehandling.innvilgetPeriode.fom,
+                dato = forbehandling.innvilgetPeriode.fom,
                 kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                 begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
             )
@@ -127,14 +130,14 @@ class EtteroppgjoerRevurderingService(
             .opprettRevurdering(
                 sakId = sakId,
                 forrigeBehandling = sisteIverksatteBehandling,
-                relatertBehandlingId = sisteFerdigstilteForbehandling.id.toString(),
+                relatertBehandlingId = forbehandling.id.toString(),
                 persongalleri = persongalleri,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                 virkningstidspunkt = virkningstidspunkt,
                 saksbehandlerIdent = brukerTokenInfo.ident(),
-                begrunnelse = "Etteroppgjør ${sisteFerdigstilteForbehandling.aar}",
+                begrunnelse = "Etteroppgjør ${forbehandling.aar}",
                 mottattDato = null,
                 frist = null,
                 paaGrunnAvOppgave = null,

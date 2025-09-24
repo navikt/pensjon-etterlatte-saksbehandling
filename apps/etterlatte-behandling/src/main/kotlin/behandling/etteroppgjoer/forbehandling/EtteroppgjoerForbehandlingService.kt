@@ -326,12 +326,10 @@ class EtteroppgjoerForbehandlingService(
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetResultatOgBrevSomSkalSlettes {
-        var forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        // hvis ferdigstilt, ikke overskriv men opprett ny kopi forbehandling
-        if (forbehandling.erFerdigstilt()) {
-            logger.info("Oppretter ny kopi av forbehandling for behandlingId=$forbehandlingId")
-            forbehandling = kopierOgLagreNyForbehandling(forbehandling)
+        if (!forbehandling.kanEndres()) {
+            throw ForbehandlingKanIkkeEndres()
         }
 
         val beregningRequest =
@@ -353,9 +351,12 @@ class EtteroppgjoerForbehandlingService(
         val beregnetForbehandling =
             forbehandling
                 .tilBeregnet(beregnetEtteroppgjoerResultat)
-                .also {
+                .also { it ->
                     dao.lagreForbehandling(it)
-                    behandlingService.oppdaterRelatertBehandlingIdStatusTilBeregnet(it)
+                    behandlingService
+                        .hentBehandlingerForSak(it.sak.id)
+                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id.toString() }
+                        ?.let { revurdering -> behandlingService.settAvkortet(revurdering.id, brukerTokenInfo) }
                 }
         // Hvis forbehandlingen ikke lengre henviser til brevet når den er beregnet skal brevet slettes
         val brevSomSkalSlettes = forbehandling.brevId?.takeIf { beregnetForbehandling.brevId == null }
@@ -534,7 +535,7 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+    fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
                 ?: throw InternfeilException(
@@ -652,4 +653,10 @@ class FantIkkeForbehandling(
 ) : IkkeFunnetException(
         code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
+    )
+
+class ForbehandlingKanIkkeEndres :
+    IkkeTillattException(
+        code = "FORBEHANDLINGEN_KAN_IKKE_ENDRES",
+        detail = "Forbehandlingen kan ikke endres",
     )

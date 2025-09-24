@@ -86,13 +86,13 @@ internal fun Route.revurderingRoutes(
                     logger.info("Oppretter ny revurdering på sak $sakId")
 
                     medBody<OpprettEtteroppgjoerRevurderingRequest> {
-                        val revurdering =
+                        val revurderingId =
                             etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
                                 sakId,
                                 it.opprinnelse,
                                 brukerTokenInfo,
                             )
-                        call.respond(revurdering.id)
+                        call.respond(revurderingId)
                     }
                 }
             }

@@ -104,7 +104,7 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
             )
 
         runBlocking {
-            applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering()
+            applicationContext.opprettEtteroppgjoerJobService.startEtteroppgjoerKjoering()
         }
 
         inTransaction {
@@ -133,7 +133,7 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
         } returns emptyList()
 
         runBlocking {
-            applicationContext.etteroppgjoerJobService.startEtteroppgjoerKjoering()
+            applicationContext.opprettEtteroppgjoerJobService.startEtteroppgjoerKjoering()
         }
 
         inTransaction {

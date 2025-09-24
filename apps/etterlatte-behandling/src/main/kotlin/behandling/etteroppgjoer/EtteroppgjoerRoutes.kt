@@ -43,6 +43,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_PERIODISK_JOBB("etteroppgjoer_periodisk_jobb"),
     ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
+    ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
     ;
 
     override fun key(): String = toggle
@@ -56,24 +57,6 @@ fun Route.etteroppgjoerRoutes(
     featureToggleService: FeatureToggleService,
 ) {
     route("/api/etteroppgjoer") {
-        post("/kundev/{$SAKID_CALL_PARAMETER}") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            if (appIsInGCP() && !isDev()) {
-                call.respond(HttpStatusCode.NotFound)
-            }
-            kunSkrivetilgang {
-                val eo =
-                    inTransaction {
-                        forbehandlingService.opprettEtteroppgjoerForbehandling(
-                            sakId,
-                            2024,
-                            brukerTokenInfo,
-                        )
-                    }
-                call.respond(eo)
-            }
-        }
-
         route("/{$SAKID_CALL_PARAMETER}") {
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
@@ -83,6 +66,21 @@ fun Route.etteroppgjoerRoutes(
                             etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
                         }
                     call.respond(etteroppgjoer)
+                }
+            }
+
+            post("opprett-forbehandling") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    val eo =
+                        inTransaction {
+                            forbehandlingService.opprettEtteroppgjoerForbehandling(
+                                sakId,
+                                2024,
+                                brukerTokenInfo,
+                            )
+                        }
+                    call.respond(eo)
                 }
             }
         }

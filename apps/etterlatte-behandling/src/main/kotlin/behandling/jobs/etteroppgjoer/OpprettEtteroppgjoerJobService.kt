@@ -26,7 +26,7 @@ enum class EtteroppgjoerFilter(
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-class EtteroppgjoerJobService(
+class OpprettEtteroppgjoerJobService(
     private val etteroppgjoerService: EtteroppgjoerService,
     private val vedtakKlient: VedtakKlient,
     private val featureToggleService: FeatureToggleService,

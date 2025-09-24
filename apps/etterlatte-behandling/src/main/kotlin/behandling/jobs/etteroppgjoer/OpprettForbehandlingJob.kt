@@ -13,8 +13,8 @@ import java.time.Duration
 import java.util.Timer
 import javax.sql.DataSource
 
-class EtteropppgjoerJob(
-    private val etteroppgjoerJobService: EtteroppgjoerJobService,
+class OpprettForbehandlingJob(
+    private val opprettForbehandlingJobService: OpprettForbehandlingJobService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
@@ -26,7 +26,7 @@ class EtteropppgjoerJob(
 
     private var jobContext: Context =
         Context(
-            Self(etteroppgjoerJobService::class.java.simpleName),
+            Self(opprettForbehandlingJobService::class.java.simpleName),
             DatabaseContext(dataSource),
             sakTilgangDao,
             HardkodaSystembruker.etteroppgjoer,
@@ -42,7 +42,7 @@ class EtteropppgjoerJob(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
-                etteroppgjoerJobService.startKjoering(jobContext)
+                opprettForbehandlingJobService.startKjoering(jobContext)
             }
         }
     }

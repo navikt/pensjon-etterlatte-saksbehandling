@@ -37,6 +37,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
@@ -406,6 +407,8 @@ internal class ApplicationContext(
         OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
     val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
+    val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
+
     private val aldersovergangDao = AldersovergangDao(dataSource)
 
     val opplysningDao = OpplysningDao(dataSource)
@@ -444,6 +447,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
             beregningKlient = beregningKlient,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -667,6 +671,7 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
 
     val behandlingsStatusService =

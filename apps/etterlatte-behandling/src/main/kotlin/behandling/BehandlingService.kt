@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -315,6 +316,7 @@ internal class BehandlingServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val beregningKlient: BeregningKlient,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -437,27 +439,8 @@ internal class BehandlingServiceImpl(
         aarsak: AarsakTilAvbrytelse?,
     ) {
         if (behandling.type == BehandlingType.REVURDERING && aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
-            val eksisterendeOppgaver =
-                oppgaveService
-                    .hentOppgaverForSakAvType(
-                        behandling.sak.id,
-                        listOf(OppgaveType.ETTEROPPGJOER),
-                    ).filter { it.erIkkeAvsluttet() }
-
-            if (eksisterendeOppgaver.isEmpty()) {
-                oppgaveService.opprettOppgave(
-                    referanse = "", // viktig for å få opp modal for opprette forbehandling
-                    sakId = behandling.sak.id,
-                    kilde = OppgaveKilde.BEHANDLING,
-                    type = OppgaveType.ETTEROPPGJOER,
-                    merknad = "Ny forbehandling for etteroppgjør siden revurderingen er avbrutt pga endring er til ugunst for bruker",
-                )
-            } else {
-                throw InternfeilException(
-                    "Forsøker å opprette ny oppgave pga endring er til ugunst for bruker, " +
-                        "men det eksisterer allerede ${eksisterendeOppgaver.size} oppgave(r) for sak ${behandling.sak.id}",
-                )
-            }
+            val merknad = "Ny forbehandling for etteroppgjør siden revurderingen er avbrutt pga endring er til ugunst for bruker"
+            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(behandling.sak.id, merknad)
         }
     }
 

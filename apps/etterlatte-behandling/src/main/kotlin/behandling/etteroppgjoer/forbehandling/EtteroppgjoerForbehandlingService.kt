@@ -4,6 +4,7 @@ import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
@@ -63,6 +64,7 @@ class EtteroppgjoerForbehandlingService(
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
@@ -283,10 +285,9 @@ class EtteroppgjoerForbehandlingService(
         )
 
         val oppdatertOppgave =
-            oppgaveService.oppdaterReferanseOgMerknad(
-                oppgave.id,
-                nyForbehandling.id.toString(),
-                "Etteroppgjør for $inntektsaar",
+            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(
+                oppgaveId = oppgave.id,
+                referanse = nyForbehandling.id.toString(),
             )
 
         return EtteroppgjoerForbehandlingOgOppgave(
@@ -319,14 +320,7 @@ class EtteroppgjoerForbehandlingService(
         if (appIsInGCP() && !isDev()) {
             throw InternfeilException("Forsøker å opprette forbehandling via dev-funksjon i produksjon")
         }
-
-        oppgaveService.opprettOppgave(
-            referanse = "",
-            sakId = sakId,
-            kilde = OppgaveKilde.BEHANDLING,
-            type = OppgaveType.ETTEROPPGJOER,
-            merknad = "Automatisk oppgave for opprette forbehandling manuelt i dev",
-        )
+        etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(
@@ -347,17 +341,7 @@ class EtteroppgjoerForbehandlingService(
 
         relevanteSaker.map { sakId ->
             try {
-                // TODO: håndtere etteroppgjoer neste år
-                val eksisterendeOppgaver = oppgaveService.hentOppgaverForSakAvType(sakId, listOf(OppgaveType.ETTEROPPGJOER))
-                if (eksisterendeOppgaver.isEmpty()) {
-                    oppgaveService.opprettOppgave(
-                        referanse = "", // viktig for å få opp modal for opprette forbehandling
-                        sakId = sakId,
-                        kilde = OppgaveKilde.BEHANDLING,
-                        type = OppgaveType.ETTEROPPGJOER,
-                        merknad = "Etteroppgjøret er nå klar til å behandles",
-                    )
-                }
+                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
             } catch (e: Error) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }

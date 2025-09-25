@@ -169,7 +169,7 @@ class OppgaveService(
     fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
-    ) {
+    ): OppgaveIntern {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
 
@@ -182,6 +182,7 @@ class OppgaveService(
             )
         }
         oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+        return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
     fun oppdaterReferanseOgMerknad(

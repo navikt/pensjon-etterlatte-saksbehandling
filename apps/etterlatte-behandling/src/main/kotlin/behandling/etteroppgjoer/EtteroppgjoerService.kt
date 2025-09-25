@@ -84,11 +84,8 @@ class EtteroppgjoerService(
     fun oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         val ferdigstiltStatus =
             when (forbehandling.etteroppgjoerResultatType) {
-                EtteroppgjoerResultatType.ETTERBETALING,
-                EtteroppgjoerResultatType.TILBAKEKREVING,
-                ->
-                    EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
-
+                EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+                EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
                 else -> EtteroppgjoerStatus.FERDIGSTILT
             }
         oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, ferdigstiltStatus)

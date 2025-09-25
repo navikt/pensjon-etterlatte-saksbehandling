@@ -34,11 +34,6 @@ const steps = [
   },
   {
     index: 6,
-    status: 'FERDIGSTILT_REVURDERING',
-    text: () => 'Etteroppgjøret er ferdig behandlet',
-  },
-  {
-    index: 7,
     status: 'FERDIGSTILT',
     text: () => 'Etteroppgjøret er ferdigstilt',
   },

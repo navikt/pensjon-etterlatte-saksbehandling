@@ -71,7 +71,7 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("/kundev") {
+            post("/kundev-opprett-forbehandling") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 if (appIsInGCP() && !isDev()) {
                     call.respond(HttpStatusCode.NotFound)

@@ -292,7 +292,7 @@ interface BehandlingService {
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
-    fun settAvkortet(
+    fun settBeregnet(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
@@ -990,14 +990,14 @@ internal class BehandlingServiceImpl(
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
 
-    override fun settAvkortet(
+    override fun settBeregnet(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = hentBehandling(behandlingId) ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
 
         behandling
-            .tilAvkortet()
+            .tilBeregnet()
             .let {
                 behandlingDao.lagreStatus(it)
                 registrerBehandlingHendelse(it, brukerTokenInfo.ident())

@@ -356,7 +356,7 @@ class EtteroppgjoerForbehandlingService(
                     behandlingService
                         .hentBehandlingerForSak(it.sak.id)
                         .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id.toString() }
-                        ?.let { revurdering -> behandlingService.settAvkortet(revurdering.id, brukerTokenInfo) }
+                        ?.let { revurdering -> behandlingService.settBeregnet(revurdering.id, brukerTokenInfo) }
                 }
         // Hvis forbehandlingen ikke lengre henviser til brevet når den er beregnet skal brevet slettes
         val brevSomSkalSlettes = forbehandling.brevId?.takeIf { beregnetForbehandling.brevId == null }

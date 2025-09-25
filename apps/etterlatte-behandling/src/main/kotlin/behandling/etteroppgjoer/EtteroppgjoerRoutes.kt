@@ -81,8 +81,6 @@ fun Route.etteroppgjoerRoutes(
                         inTransaction {
                             forbehandlingService.opprettEtteroppgjoerForbehandlingIDev(
                                 sakId,
-                                2024,
-                                brukerTokenInfo,
                             )
                         }
                     call.respond(eo)

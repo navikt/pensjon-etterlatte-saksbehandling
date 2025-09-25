@@ -315,24 +315,18 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun opprettEtteroppgjoerForbehandlingIDev(
-        sakId: SakId,
-        inntektsaar: Int,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    fun opprettEtteroppgjoerForbehandlingIDev(sakId: SakId) {
         if (appIsInGCP() && !isDev()) {
             throw InternfeilException("Forsøker å opprette forbehandling via dev-funksjon i produksjon")
         }
 
-        val oppgave =
-            oppgaveService.opprettOppgave(
-                referanse = "",
-                sakId = sakId,
-                kilde = OppgaveKilde.BEHANDLING,
-                type = OppgaveType.ETTEROPPGJOER,
-                merknad = "Automatisk oppgave for opprette forbehandling manuelt i dev",
-            )
-        opprettEtteroppgjoerForbehandling(sakId, inntektsaar, oppgave.id, brukerTokenInfo)
+        oppgaveService.opprettOppgave(
+            referanse = "",
+            sakId = sakId,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.ETTEROPPGJOER,
+            merknad = "Automatisk oppgave for opprette forbehandling manuelt i dev",
+        )
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(
@@ -479,19 +473,19 @@ class EtteroppgjoerForbehandlingService(
         if (oppgaveService
                 .hentOppgaverForSak(sak.id)
                 .filter { it.kilde == OppgaveKilde.BEHANDLING }
-                .any { !it.erAvsluttet() }
+                .any { it.erIkkeAvsluttet() }
         ) {
             logger.info("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger")
             throw IkkeTillattException(
                 "ALLEREDE_AAPEN_BEHANDLING",
-                "Kan ikke opprette forbehandling, sakId=${sak.id} har allerede behandling under arbeid",
+                "Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger",
             )
         }
 
         if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
             throw InternfeilException(
-                "Kan ikke opprette forbehandling, mangler sist iverksatte behandling for sak=${sak.id}",
+                "Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling",
             )
         }
 

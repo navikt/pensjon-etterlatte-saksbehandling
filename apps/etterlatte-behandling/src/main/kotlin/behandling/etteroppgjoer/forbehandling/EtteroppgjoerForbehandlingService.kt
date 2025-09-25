@@ -555,8 +555,6 @@ class EtteroppgjoerForbehandlingService(
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
                 sisteIverksatteBehandlingId = sisteIverksatteBehandling.id,
-                brevId = null,
-                varselbrevSendt = null,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

@@ -127,7 +127,7 @@ class EtteroppgjoerForbehandlingService(
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                 forbehandling.sak.id,
                 forbehandling.aar,
-                EtteroppgjoerStatus.AVBRUTT_FORBEHANDLING,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
             )
         }
 

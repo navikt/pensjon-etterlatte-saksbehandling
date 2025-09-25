@@ -18,7 +18,6 @@ data class Etteroppgjoer(
 )
 
 enum class EtteroppgjoerStatus {
-    AVBRUTT_FORBEHANDLING,
     VENTER_PAA_SKATTEOPPGJOER,
     MOTTATT_SKATTEOPPGJOER,
 
@@ -32,7 +31,7 @@ enum class EtteroppgjoerStatus {
 
     companion object {
         // TODO: må være strengere her når vi går i prod
-        val KLAR_TIL_FORBEHANDLING = setOf(VENTER_PAA_SKATTEOPPGJOER, AVBRUTT_FORBEHANDLING, MOTTATT_SKATTEOPPGJOER)
+        val KLAR_TIL_FORBEHANDLING = setOf(VENTER_PAA_SKATTEOPPGJOER, MOTTATT_SKATTEOPPGJOER)
         val ETTEROPPGJOER_ER_FERDIGSTILT = setOf(FERDIGSTILT, FERDIGSTILT_UTEN_VARSEL)
     }
 }

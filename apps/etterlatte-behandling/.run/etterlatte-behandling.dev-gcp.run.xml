@@ -58,6 +58,7 @@
                  value="api://dev-fss.team-inntekt.inntektskomponenten/.default"/>
           <env name="SIGRUN_URL" value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-ske" />
           <env name="SIGRUN_OUTBOUND_SCOPE" value="api://dev-fss.team-inntekt.sigrun-q4/.default" />
+          <env name="ARBEID_OG_INNTEKT_URL" value="https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io"/>
         </envs>
         <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt"/>
         <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main"/>

@@ -70,9 +70,7 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(etteroppgjoer)
                 }
             }
-        }
 
-        route("/forbehandling") {
             post("/kundev") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 if (appIsInGCP() && !isDev()) {
@@ -90,7 +88,9 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(eo)
                 }
             }
+        }
 
+        route("/forbehandling") {
             post("/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {

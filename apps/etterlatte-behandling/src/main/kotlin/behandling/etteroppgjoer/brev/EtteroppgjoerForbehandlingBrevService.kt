@@ -94,7 +94,6 @@ class EtteroppgjoerForbehandlingBrevService(
             }
         }
 
-        // TODO: slå sammen noe her..
         etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
@@ -151,6 +150,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 )
             }
 
+            // TODO: hente når vi henter ut detaljertForbehandling i stede
             val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(forbehandlingId)
 
             val sisteIverksatteBehandling =

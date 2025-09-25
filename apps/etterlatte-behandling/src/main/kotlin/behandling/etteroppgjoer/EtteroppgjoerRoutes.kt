@@ -86,10 +86,8 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(eo)
                 }
             }
-        }
 
-        route("/forbehandling") {
-            post("/{$OPPGAVEID_CALL_PARAMETER}") {
+            post("/forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
                     val eo =
@@ -99,7 +97,9 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(eo)
                 }
             }
+        }
 
+        route("/forbehandling") {
             route("/{$FORBEHANDLINGID_CALL_PARAMETER}") {
                 get {
                     sjekkEtteroppgjoerEnabled(featureToggleService)

@@ -1,6 +1,7 @@
 import React from 'react'
 import { ITrygdetidGrunnlag } from '~shared/api/trygdetid'
 import { BodyShort, Box, HStack, Label } from '@navikt/ds-react'
+import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 export const FaktiskTrygdetidExpandableRowContent = ({
   trygdetidPeriode,
@@ -11,7 +12,7 @@ export const FaktiskTrygdetidExpandableRowContent = ({
     <HStack gap="8">
       <Box maxWidth="7rem">
         <Label>Begrunnelse</Label>
-        <BodyShort>{trygdetidPeriode.begrunnelse}</BodyShort>
+        <TekstMedMellomrom>{trygdetidPeriode.begrunnelse}</TekstMedMellomrom>
       </Box>
       <div>
         <Label>Poeng i inn år</Label>

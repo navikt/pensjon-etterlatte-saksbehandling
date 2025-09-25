@@ -535,12 +535,18 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun kopierOgLagreNyForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerForbehandling {
+    fun kopierOgLagreNyForbehandling(
+        forbehandlingId: UUID,
+        sakId: SakId,
+    ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
+            behandlingService.hentSisteIverksatteBehandling(sakId)
                 ?: throw InternfeilException(
-                    "Fant ikke siste iverksatte behandling for sak=${forbehandling.sak.id} ved kopiering av forbehandling",
+                    "Fant ikke siste iverksatte behandling for sak=$sakId ved kopiering av forbehandling",
                 )
+
+        val forbehandling =
+            dao.hentForbehandling(forbehandlingId) ?: throw NotFoundException("Fant ikke forbehandling med id $forbehandlingId")
 
         val forbehandlingCopy =
             forbehandling.copy(
@@ -549,6 +555,8 @@ class EtteroppgjoerForbehandlingService(
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
                 sisteIverksatteBehandlingId = sisteIverksatteBehandling.id,
+                brevId = null,
+                varselbrevSendt = null,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

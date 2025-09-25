@@ -13,6 +13,7 @@ import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~share
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
+import { useNavigate } from 'react-router-dom'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -21,6 +22,9 @@ type Props = {
 
 export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
+
+  const navigate = useNavigate()
+
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [ferdigstillStatus, ferdigstill] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
@@ -37,10 +41,10 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
 
   const opprettRevurderingEtteroppgjoer = () => {
-    opprettRevurderingRequest({ sakId: oppgave.sakId, opprinnelse: Opprinnelse.AUTOMATISK_JOBB }, () => {
+    opprettRevurderingRequest({ sakId: oppgave.sakId, opprinnelse: Opprinnelse.AUTOMATISK_JOBB }, (result) => {
       ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
         oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-        setOpen(false)
+        navigate(`/behandling/${result}/etteroppgjoeroversikt`)
       })
     })
   }

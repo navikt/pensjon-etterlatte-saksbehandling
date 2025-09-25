@@ -563,7 +563,6 @@ class EtteroppgjoerForbehandlingService(
 
         dao.kopierSummerteInntekter(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
-        dao.oppdaterRelatertBehandling(forbehandling.id, forbehandlingCopy.id)
 
         return forbehandlingCopy
     }

@@ -161,27 +161,6 @@ class EtteroppgjoerForbehandlingDaoTest(
     }
 
     @Test
-    fun `oppdater relatert behandling id`() {
-        val relatertForbehandlingId = UUID.randomUUID()
-
-        val sak1 = sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling =
-            opprettBehandling(
-                type = BehandlingType.REVURDERING,
-                sakId = sak1,
-                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
-                prosesstype = Prosesstype.MANUELL,
-                relatertBehandlingId = relatertForbehandlingId.toString(),
-            )
-        behandlingRepo.opprettBehandling(opprettBehandling)
-
-        val nyRelatertForbehandlingId = UUID.randomUUID()
-        etteroppgjoerForbehandlingDao.oppdaterRelatertBehandling(relatertForbehandlingId, nyRelatertForbehandlingId)
-
-        behandlingRepo.hentBehandling(opprettBehandling.id)!!.relatertBehandlingId shouldBe nyRelatertForbehandlingId.toString()
-    }
-
-    @Test
     fun `lagre og hente pensjonsgivendeInntekt`() {
         val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()

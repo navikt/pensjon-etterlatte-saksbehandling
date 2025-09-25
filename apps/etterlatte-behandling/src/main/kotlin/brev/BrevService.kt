@@ -162,7 +162,7 @@ class BrevService(
                 }
 
             BehandlingMedBrevType.ETTEROPPGJOER ->
-                etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingOgDistribuerBrev(
+                etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingMedBrev(
                     behandlingId,
                     brukerTokenInfo,
                 )

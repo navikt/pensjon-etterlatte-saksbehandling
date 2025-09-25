@@ -19,6 +19,12 @@ export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Ette
   return apiClient.get(`/etteroppgjoer/${sakId}`)
 }
 
+export const opprettEtteroppgjoerForbehandlingIDev = async (
+  sakId: number
+): Promise<ApiResponse<EtteroppgjoerOgOppgave>> => {
+  return apiClient.post(`/etteroppgjoer/${sakId}/forbehandling/kundev`, {})
+}
+
 export const opprettEtteroppgoerForbehandling = async (args: {
   sakId: number
   oppgaveId: string

@@ -48,7 +48,7 @@ class EtteroppgjoerRevurderingService(
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
 
                 val sisteFerdigstilteForbehandling =
-                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
+                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandling(
                         sakId = sakId,
                     )
 

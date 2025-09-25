@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
@@ -32,6 +33,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -151,7 +153,7 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun hentSisteFerdigstillteForbehandlingPaaSak(sakId: SakId): EtteroppgjoerForbehandling {
+    fun hentSisteFerdigstillteForbehandling(sakId: SakId): EtteroppgjoerForbehandling {
         val sisteFerdigstilteForbehandling =
             dao
                 .hentForbehandlinger(sakId)
@@ -258,7 +260,7 @@ class EtteroppgjoerForbehandlingService(
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar)
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
-        val nyForbehandling = opprettOgLagreNyForbehandling(sak, inntektsaar, brukerTokenInfo)
+        val nyForbehandling = opprettOgLagreForbehandling(sak, inntektsaar, brukerTokenInfo)
 
         try {
             val summerteInntekter =
@@ -311,6 +313,26 @@ class EtteroppgjoerForbehandlingService(
                 "Oppgaven har feil oppgaveType=${oppgave.type} til å opprette forbehandling",
             )
         }
+    }
+
+    fun opprettEtteroppgjoerForbehandlingIDev(
+        sakId: SakId,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        if (appIsInGCP() && !isDev()) {
+            throw InternfeilException("Forsøker å opprette forbehandling via dev-funksjon i produksjon")
+        }
+
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                referanse = "",
+                sakId = sakId,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = "Automatisk oppgave for opprette forbehandling manuelt i dev",
+            )
+        opprettEtteroppgjoerForbehandling(sakId, inntektsaar, oppgave.id, brukerTokenInfo)
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(
@@ -448,7 +470,6 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
     ) {
         // Sak
-
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
             throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
@@ -474,7 +495,6 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // Etteroppgjør
-
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
         if (etteroppgjoer == null) {
             logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
@@ -490,7 +510,6 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // Forbehandling
-
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
         if (forbehandlinger.any { it.aar == inntektsaar && it.erUnderBehandling() }) {
             throw InternfeilException(
@@ -499,7 +518,7 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun opprettOgLagreNyForbehandling(
+    private fun opprettOgLagreForbehandling(
         sak: Sak,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,

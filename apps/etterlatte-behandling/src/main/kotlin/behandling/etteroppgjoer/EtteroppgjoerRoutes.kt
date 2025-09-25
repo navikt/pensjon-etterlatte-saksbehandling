@@ -19,8 +19,10 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
@@ -71,6 +73,24 @@ fun Route.etteroppgjoerRoutes(
         }
 
         route("/forbehandling") {
+            post("/kundev") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                if (appIsInGCP() && !isDev()) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+                kunSkrivetilgang {
+                    val eo =
+                        inTransaction {
+                            forbehandlingService.opprettEtteroppgjoerForbehandlingIDev(
+                                sakId,
+                                2024,
+                                brukerTokenInfo,
+                            )
+                        }
+                    call.respond(eo)
+                }
+            }
+
             post("/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
@@ -119,7 +139,7 @@ fun Route.etteroppgjoerRoutes(
                     kunSkrivetilgang {
                         inTransaction {
                             runBlocking {
-                                forbehandlingBrevService.ferdigstillForbehandlingOgDistribuerBrev(
+                                forbehandlingBrevService.ferdigstillForbehandlingMedBrev(
                                     forbehandlingId,
                                     brukerTokenInfo,
                                 )

@@ -72,7 +72,7 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillForbehandlingOgDistribuerBrev(
+    suspend fun ferdigstillForbehandlingMedBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
@@ -94,6 +94,7 @@ class EtteroppgjoerForbehandlingBrevService(
             }
         }
 
+        // TODO: slå sammen noe her..
         etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,

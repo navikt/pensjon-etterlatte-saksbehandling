@@ -21,7 +21,7 @@ import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
 import { OpprettOppfoelgingsoppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OpprettOppfoelgingsoppgaveModal'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
-import { opprettEtteroppgoerForbehandling } from '~shared/api/etteroppgjoer'
+import { opprettEtteroppgjoerForbehandlingIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
@@ -64,7 +64,7 @@ export const SakOversikt = ({
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
-  const [opprettForbehandlingStatus, opprettForbehandlingFetch] = useApiCall(opprettEtteroppgoerForbehandling)
+  const [opprettForbehandlingStatus, opprettForbehandlingFetch] = useApiCall(opprettEtteroppgjoerForbehandlingIDev)
 
   const person = usePerson()
 

@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -108,6 +109,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = dato,
+                etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny.copy())

@@ -111,14 +111,14 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        inTransaction {
+        return inTransaction {
             kopierFaktiskInntekt(
                 fraForbehandlingId = sisteFerdigstilteForbehandlingId,
                 tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
                 brukerTokenInfo = brukerTokenInfo,
             )
+            krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Revurdering finnes ikke etter oppretting" }
         }
-        return krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Revurdering finnes ikke etter oppretting" }
     }
 
     private fun opprettRevurdering(

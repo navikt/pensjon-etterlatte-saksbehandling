@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
@@ -45,7 +46,7 @@ class EtteroppgjoerRevurderingService(
         sakId: SakId,
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
-    ): UUID {
+    ): Revurdering {
         val sisteFerdigstilteForbehandlingId =
             inTransaction {
                 etteroppgjoerForbehandlingService
@@ -117,7 +118,7 @@ class EtteroppgjoerRevurderingService(
                 brukerTokenInfo = brukerTokenInfo,
             )
         }
-        return revurdering.id
+        return krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Revurdering finnes ikke etter oppretting" }
     }
 
     private fun opprettRevurdering(

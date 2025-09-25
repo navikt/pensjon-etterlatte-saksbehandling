@@ -33,6 +33,7 @@ data class EtteroppgjoerForbehandling(
     val beskrivelseAvUgunst: String?,
     // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val kopiertFra: UUID? = null,
+    val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
 ) {
     companion object {
         fun opprett(
@@ -63,6 +64,7 @@ data class EtteroppgjoerForbehandling(
         }
         return copy(
             status = EtteroppgjoerForbehandlingStatus.BEREGNET,
+            etteroppgjoerResultatType = beregnetEtteroppgjoerResultatDto.resultatType,
             brevId =
                 this.brevId?.takeIf {
                     beregnetEtteroppgjoerResultatDto.resultatType !=

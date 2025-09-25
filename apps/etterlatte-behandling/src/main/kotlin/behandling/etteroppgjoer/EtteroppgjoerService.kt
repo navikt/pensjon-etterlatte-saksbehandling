@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -82,9 +83,13 @@ class EtteroppgjoerService(
 
     fun oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         val ferdigstiltStatus =
-            when (forbehandling.brevId) {
-                null -> EtteroppgjoerStatus.FERDIGSTILT_UTEN_VARSEL
-                else -> EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
+            when (forbehandling.etteroppgjoerResultatType) {
+                EtteroppgjoerResultatType.ETTERBETALING,
+                EtteroppgjoerResultatType.TILBAKEKREVING,
+                ->
+                    EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
+
+                else -> EtteroppgjoerStatus.FERDIGSTILT
             }
         oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, ferdigstiltStatus)
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)

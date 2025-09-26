@@ -60,6 +60,7 @@ export const SakOversikt = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const etteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer)
+  const etteroppgjoerForbehandlingKnappEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer_dev_opprett_forbehandling)
   const byttTilAnnenSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
@@ -193,20 +194,22 @@ export const SakOversikt = ({
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingListe sakId={sak.id} />
-                  <Box>
-                    {mapResult(opprettForbehandlingStatus, {
-                      pending: <Spinner label="Oppretter etteroppgjør" />,
-                      error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                    })}
+                  {etteroppgjoerForbehandlingKnappEnabled && (
+                    <Box>
+                      {mapResult(opprettForbehandlingStatus, {
+                        pending: <Spinner label="Oppretter etteroppgjør" />,
+                        error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                      })}
 
-                    <Button
-                      loading={isPending(opprettForbehandlingStatus)}
-                      variant="secondary"
-                      onClick={() => opprettForbehandlingFetch(sak.id)}
-                    >
-                      Opprett etteroppgjør forbehandling
-                    </Button>
-                  </Box>
+                      <Button
+                        loading={isPending(opprettForbehandlingStatus)}
+                        variant="secondary"
+                        onClick={() => opprettForbehandlingFetch(sak.id)}
+                      >
+                        Opprett etteroppgjør forbehandling
+                      </Button>
+                    </Box>
+                  )}
                 </VStack>
               )}
             </VStack>

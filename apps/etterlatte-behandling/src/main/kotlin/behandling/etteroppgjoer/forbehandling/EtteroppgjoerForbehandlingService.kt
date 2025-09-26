@@ -124,8 +124,7 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        dao.lagreForbehandling(forbehandling.tilAvbrutt()).let {
-            dao.lagreAvbruttAarsak(forbehandlingId, aarsak, kommentar.orEmpty())
+        dao.lagreForbehandling(forbehandling.tilAvbrutt(aarsak, kommentar.orEmpty())).let {
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                 forbehandling.sak.id,
                 forbehandling.aar,
@@ -402,16 +401,13 @@ class EtteroppgjoerForbehandlingService(
         endringErTilUgunstForBruker: JaNei?,
         beskrivelseAvUgunst: String?,
     ) {
-        dao.oppdaterInformasjonFraBruker(
-            forbehandlingId = forbehandlingId,
-            harMottattNyInformasjon = harMottattNyInformasjon,
-            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon == JaNei.JA },
-            beskrivelseAvUgunst =
-                beskrivelseAvUgunst?.takeIf {
-                    harMottattNyInformasjon == JaNei.JA &&
-                        endringErTilUgunstForBruker == JaNei.JA
-                },
-        )
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        if (!forbehandling.kanEndres()) {
+            throw ForbehandlingKanIkkeEndres()
+        }
+
+        forbehandling.oppdaterBrukerHarSvart(harMottattNyInformasjon, endringErTilUgunstForBruker, beskrivelseAvUgunst)
+        lagreForbehandling(forbehandling)
     }
 
     fun sjekkAtOppgavenErTildeltSaksbehandler(

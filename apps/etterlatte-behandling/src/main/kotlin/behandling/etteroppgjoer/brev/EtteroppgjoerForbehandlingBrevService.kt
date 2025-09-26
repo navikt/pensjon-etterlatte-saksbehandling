@@ -72,7 +72,7 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillForbehandlingOgDistribuerBrev(
+    suspend fun ferdigstillForbehandlingMedBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
@@ -150,6 +150,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 )
             }
 
+            // TODO: hente når vi henter ut detaljertForbehandling i stede
             val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(forbehandlingId)
 
             val sisteIverksatteBehandling =

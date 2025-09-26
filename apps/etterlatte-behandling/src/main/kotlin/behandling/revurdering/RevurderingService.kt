@@ -119,7 +119,8 @@ class RevurderingService(
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
         if (oppgaverForSak
                 .filter {
-                    it.kilde == OppgaveKilde.BEHANDLING && it.type != OppgaveType.OMGJOERING
+                    it.kilde == OppgaveKilde.BEHANDLING &&
+                        it.type != OppgaveType.OMGJOERING
                 }.any { !it.erAvsluttet() }
         ) {
             throw MaksEnAktivOppgavePaaBehandling(sakId)

@@ -113,6 +113,7 @@ class SkatteoppgjoerHendelserService(
         if (etteroppgjoer != null) {
             if (hendelse.hendelsetype == null || hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
                 logger.info("Oppdaterer etteroppgjør for sak ${sak.id}, år $inntektsaar")
+
                 oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
             } else {
                 logger.warn(

@@ -129,7 +129,7 @@ class StrukturertBrevService(
         val brev = db.hentBrev(brevId)
 
         if (!brev.kanEndres()) {
-            logger.info("Brev (id=${brev.id}) er allerede ferdigstilt. Henter PDF...")
+            logger.info("Brev (id=${brev.id}) har status=${brev.status} og kan ikke endres. Henter PDF...")
             return db.hentPdf(brevId) ?: throw BrevManglerPDF(brev.id)
         }
 

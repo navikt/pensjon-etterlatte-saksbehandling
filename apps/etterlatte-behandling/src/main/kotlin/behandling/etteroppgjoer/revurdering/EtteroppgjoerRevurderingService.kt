@@ -50,13 +50,18 @@ class EtteroppgjoerRevurderingService(
         val sisteFerdigstilteForbehandlingId =
             inTransaction {
                 etteroppgjoerForbehandlingService
-                    .hentSisteFerdigstillteForbehandlingPaaSak(
+                    .hentSisteFerdigstillteForbehandling(
                         sakId = sakId,
                     ).id
             }
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+
+                val sisteFerdigstilteForbehandling =
+                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandling(
+                        sakId = sakId,
+                    )
 
                 // TODO: er dette nok for å unngå mismatch ... ?
                 etteroppgjoerService

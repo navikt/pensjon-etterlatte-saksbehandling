@@ -37,6 +37,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
@@ -58,10 +59,10 @@ import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveU
 import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveUnntakUtloeperJobService
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteropppgjoerJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJobService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
@@ -147,6 +148,8 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkKlientImpl
 import no.nav.etterlatte.kodeverk.KodeverkService
+import no.nav.etterlatte.krr.KrrKlient
+import no.nav.etterlatte.krr.KrrKlientImpl
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
@@ -172,8 +175,6 @@ import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
-import no.nav.etterlatte.krr.KrrKlient
-import no.nav.etterlatte.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
@@ -406,6 +407,8 @@ internal class ApplicationContext(
         OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
     val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
+    val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
+
     private val aldersovergangDao = AldersovergangDao(dataSource)
 
     val opplysningDao = OpplysningDao(dataSource)
@@ -444,6 +447,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
             beregningKlient = beregningKlient,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -667,6 +671,7 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
 
     val behandlingsStatusService =
@@ -759,8 +764,8 @@ internal class ApplicationContext(
 
     private val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
-    val etteroppgjoerJobService =
-        EtteroppgjoerJobService(
+    val opprettEtteroppgjoerJobService =
+        OpprettEtteroppgjoerJobService(
             etteroppgjoerService,
             vedtakKlient,
             featureToggleService,
@@ -914,9 +919,9 @@ internal class ApplicationContext(
         )
     }
 
-    val etteroppgjoerJob: EtteropppgjoerJob by lazy {
-        EtteropppgjoerJob(
-            etteroppgjoerJobService = etteroppgjoerJobService,
+    val etteroppgjoerJob: OpprettEtteroppgjoerJob by lazy {
+        OpprettEtteroppgjoerJob(
+            opprettEtteroppgjoerJobService = opprettEtteroppgjoerJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(10, ChronoUnit.MINUTES),

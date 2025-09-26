@@ -169,7 +169,7 @@ class OppgaveService(
     fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
-    ) {
+    ): OppgaveIntern {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
 
@@ -182,13 +182,14 @@ class OppgaveService(
             )
         }
         oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+        return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
     fun oppdaterReferanseOgMerknad(
         oppgaveId: UUID,
         referanse: String,
         merknad: String,
-    ) {
+    ): OppgaveIntern {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
 
@@ -196,6 +197,7 @@ class OppgaveService(
 
         // Krever ikke at saksbehandler er tildelt for dette
         oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
+        return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
     fun endrePaaVent(

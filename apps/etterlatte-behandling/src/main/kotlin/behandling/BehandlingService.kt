@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -315,6 +316,7 @@ internal class BehandlingServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val beregningKlient: BeregningKlient,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -417,36 +419,8 @@ internal class BehandlingServiceImpl(
                 )
             }
 
-            val erBehandlingOmgjoeringEtterKlage =
-                when (behandling) {
-                    is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
-
-                    is Foerstegangsbehandling ->
-                        behandling.relatertBehandlingId?.let { klageId ->
-                            oppgaveService
-                                .hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE)
-                                .any { it.id.toString() == klageId }
-                        } ?: false
-                }
-
-            if (erBehandlingOmgjoeringEtterKlage) {
-                val omgjoeringsoppgaveForKlage =
-                    oppgaveService
-                        .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
-                        .find { it.referanse == behandling.relatertBehandlingId }
-                        ?: throw InternfeilException(
-                            "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
-                                "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
-                        )
-                oppgaveService.opprettOppgave(
-                    referanse = omgjoeringsoppgaveForKlage.referanse,
-                    sakId = omgjoeringsoppgaveForKlage.sakId,
-                    kilde = omgjoeringsoppgaveForKlage.kilde,
-                    type = omgjoeringsoppgaveForKlage.type,
-                    merknad = omgjoeringsoppgaveForKlage.merknad,
-                    frist = omgjoeringsoppgaveForKlage.frist,
-                )
-            }
+            haandterEtteroppgjoerRevurderingErTilUgunst(behandling, aarsak)
+            haandterOmgjoeringEtterKlage(behandling)
 
             hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident(), kommentar, aarsak.toString())
             grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
@@ -458,6 +432,49 @@ internal class BehandlingServiceImpl(
             behandling.toStatistikkBehandling(persongalleri = persongalleri),
             BehandlingHendelseType.AVBRUTT,
         )
+    }
+
+    private fun haandterEtteroppgjoerRevurderingErTilUgunst(
+        behandling: Behandling,
+        aarsak: AarsakTilAvbrytelse?,
+    ) {
+        if (behandling.type == BehandlingType.REVURDERING && aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
+            val merknad = "Ny forbehandling for etteroppgjør siden revurderingen er avbrutt pga endring er til ugunst for bruker"
+            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(behandling.sak.id, merknad)
+        }
+    }
+
+    private fun haandterOmgjoeringEtterKlage(behandling: Behandling) {
+        val erBehandlingOmgjoeringEtterKlage =
+            when (behandling) {
+                is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+
+                is Foerstegangsbehandling ->
+                    behandling.relatertBehandlingId?.let { klageId ->
+                        oppgaveService
+                            .hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE)
+                            .any { it.id.toString() == klageId }
+                    } ?: false
+            }
+
+        if (erBehandlingOmgjoeringEtterKlage) {
+            val omgjoeringsoppgaveForKlage =
+                oppgaveService
+                    .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
+                    .find { it.referanse == behandling.relatertBehandlingId }
+                    ?: throw InternfeilException(
+                        "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
+                            "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
+                    )
+            oppgaveService.opprettOppgave(
+                referanse = omgjoeringsoppgaveForKlage.referanse,
+                sakId = omgjoeringsoppgaveForKlage.sakId,
+                kilde = omgjoeringsoppgaveForKlage.kilde,
+                type = omgjoeringsoppgaveForKlage.type,
+                merknad = omgjoeringsoppgaveForKlage.merknad,
+                frist = omgjoeringsoppgaveForKlage.frist,
+            )
+        }
     }
 
     override suspend fun hentStatistikkBehandling(

@@ -21,7 +21,7 @@ import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
 import { OpprettOppfoelgingsoppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OpprettOppfoelgingsoppgaveModal'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
-import { opprettEtteroppgjoerIDev } from '~shared/api/etteroppgjoer'
+import { opprettEtteroppgjoerForbehandlingIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
@@ -64,7 +64,7 @@ export const SakOversikt = ({
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
-  const [opprettEtteroppgjoerStatus, apiOpprettEtteroppjoer] = useApiCall(opprettEtteroppgjoerIDev)
+  const [opprettForbehandlingStatus, opprettForbehandlingFetch] = useApiCall(opprettEtteroppgjoerForbehandlingIDev)
 
   const person = usePerson()
 
@@ -194,15 +194,15 @@ export const SakOversikt = ({
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingListe sakId={sak.id} />
                   <Box>
-                    {mapResult(opprettEtteroppgjoerStatus, {
+                    {mapResult(opprettForbehandlingStatus, {
                       pending: <Spinner label="Oppretter etteroppgjør" />,
                       error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
                     })}
 
                     <Button
-                      loading={isPending(opprettEtteroppgjoerStatus)}
+                      loading={isPending(opprettForbehandlingStatus)}
                       variant="secondary"
-                      onClick={() => apiOpprettEtteroppjoer(sak.id)}
+                      onClick={() => opprettForbehandlingFetch(sak.id)}
                     >
                       Opprett etteroppgjør forbehandling
                     </Button>

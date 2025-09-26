@@ -16,7 +16,7 @@ export const OpplysningerFraSkatteetaten = ({
       <Heading size="small">Opplysninger fra Skatteetaten</Heading>
       <BodyShort>Pensjonsgivende inntekt for {etteroppgjoer.behandling.aar}.</BodyShort>
 
-      <Box width="40rem">
+      <Box width="25rem">
         <Table>
           <Table.Header>
             <Table.Row>

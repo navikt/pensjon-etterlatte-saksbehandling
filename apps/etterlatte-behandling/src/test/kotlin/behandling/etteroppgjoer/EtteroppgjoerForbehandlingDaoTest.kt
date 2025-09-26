@@ -375,6 +375,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 varselbrevSendt = null,
                 aarsakTilAvbrytelse = AarsakTilAvbryteForbehandling.FEILREGISTRERT,
                 aarsakTilAvbrytelseBeskrivelse = "test",
+                beskrivelseAvUgunst = "test",
+                etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
             ),
         )
     }

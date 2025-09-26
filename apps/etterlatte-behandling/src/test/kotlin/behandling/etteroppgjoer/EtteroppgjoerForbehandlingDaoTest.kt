@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
@@ -157,6 +158,9 @@ class EtteroppgjoerForbehandlingDaoTest(
 
         with(etteroppgjoerForbehandlingDao.hentForbehandlinger(sak.id)) {
             size shouldBe 2
+            forEach {
+                it.aarsakTilAvbrytelse shouldBe AarsakTilAvbryteForbehandling.FEILREGISTRERT
+            }
         }
     }
 
@@ -368,8 +372,11 @@ class EtteroppgjoerForbehandlingDaoTest(
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
+                aarsakTilAvbrytelse = AarsakTilAvbryteForbehandling.FEILREGISTRERT,
+                aarsakTilAvbrytelseBeskrivelse = "test",
+                beskrivelseAvUgunst = "test",
+                etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
             ),
         )
     }

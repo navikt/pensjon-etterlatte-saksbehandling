@@ -2,32 +2,17 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Alert, Button, Link, Table } from '@navikt/ds-react'
+import { Alert, Link, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
-import {
-  EtteroppgjoerBehandling,
-  EtteroppgjoerBehandlingStatus,
-  teksterEtteroppgjoerBehandlingStatus,
-} from '~shared/types/EtteroppgjoerForbehandling'
-import { isPending, mapResult } from '~shared/api/apiUtils'
-import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
+import { EtteroppgjoerBehandling, teksterEtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
+import { mapResult } from '~shared/api/apiUtils'
 
 function lenkeTilForbehandlingMedId(id: string): string {
   return `/etteroppgjoer/${id}/`
 }
 
-function EtteroppgjoerForbehandlingTabell({
-  sakId,
-  forbehandlinger,
-}: {
-  sakId: number
-  forbehandlinger: Array<EtteroppgjoerBehandling>
-}) {
-  const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
-
+function EtteroppgjoerForbehandlingTabell({ forbehandlinger }: { forbehandlinger: Array<EtteroppgjoerBehandling> }) {
   if (!forbehandlinger?.length) {
     return (
       <Alert variant="info" inline>
@@ -39,13 +24,6 @@ function EtteroppgjoerForbehandlingTabell({
   // TODO toggle visning av kopier eller ikke?
   const relevanteForbehandlinger = forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
 
-  // TODO disse revurderingene skal antageligvis ikke opprettes på denne måten, men vi trenger en måte å komme fra forbehandling
-  const opprettRevurderingEtteroppgjoer = () => {
-    opprettRevurderingRequest({ sakId: sakId, opprinnelse: Opprinnelse.SAKSBEHANDLER }, () => {
-      window.location.reload()
-    })
-  }
-
   return (
     <>
       <Table zebraStripes>
@@ -56,7 +34,6 @@ function EtteroppgjoerForbehandlingTabell({
             <Table.HeaderCell>År</Table.HeaderCell>
             <Table.HeaderCell>Periode</Table.HeaderCell>
             <Table.HeaderCell>Handling</Table.HeaderCell>
-            <Table.HeaderCell>Revurdering</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -71,26 +48,10 @@ function EtteroppgjoerForbehandlingTabell({
               <Table.DataCell>
                 <Link href={lenkeTilForbehandlingMedId(forbehandling.id)}>Se behandling</Link>
               </Table.DataCell>
-              <Table.DataCell>
-                {forbehandling.status == EtteroppgjoerBehandlingStatus.FERDIGSTILT && (
-                  <Button
-                    loading={isPending(opprettRevurderingResult)}
-                    size="small"
-                    onClick={opprettRevurderingEtteroppgjoer}
-                  >
-                    Opprett revurdering
-                  </Button>
-                )}
-              </Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>
       </Table>
-
-      {isFailureHandler({
-        apiResult: opprettRevurderingResult,
-        errorMessage: `Kunne ikke opprette revurdering`,
-      })}
     </>
   )
 }
@@ -108,7 +69,7 @@ export function EtteroppgjoerForbehandlingListe(props: { sakId: number }) {
   return mapResult(hentEtteroppgjoerForbehandlingerResult, {
     pending: <Spinner label="Henter forbehandlinger til saken"></Spinner>,
     success: (forbehandlinger: EtteroppgjoerBehandling[]) => {
-      return <EtteroppgjoerForbehandlingTabell sakId={sakId} forbehandlinger={forbehandlinger} />
+      return <EtteroppgjoerForbehandlingTabell forbehandlinger={forbehandlinger} />
     },
     error: () => {
       return <ApiErrorAlert>Kunne ikke hente forbehandlinger</ApiErrorAlert>

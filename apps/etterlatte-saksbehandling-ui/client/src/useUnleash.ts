@@ -25,6 +25,7 @@ export const enum FeatureToggle {
   etteroppgjoer = 'etteroppgjoer-frontend',
   bytt_til_annen_sak = 'bytt-til-annen-sak',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
+  etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
 }
 
 export interface Toggle {
@@ -97,6 +98,11 @@ const etteroppgjoer: Toggle = {
   enabled: false,
 }
 
+const etteroppgjoer_dev_opprett_forbehandling: Toggle = {
+  togglename: FeatureToggle.etteroppgjoer_dev_opprett_forbehandling,
+  enabled: false,
+}
+
 const bytt_til_annen_sak: Toggle = {
   togglename: FeatureToggle.bytt_til_annen_sak,
   enabled: false,
@@ -121,6 +127,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.etteroppgjoer]: etteroppgjoer,
   [FeatureToggle.bytt_til_annen_sak]: bytt_til_annen_sak,
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
+  [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
 }
 
 export const Unleashcontext = createContext<{

@@ -6,11 +6,14 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.grunnlagsendring.vergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
@@ -70,6 +73,7 @@ class OppdaterTilgangService(
     fun haandtergraderingOgEgenAnsatt(
         sakId: SakId,
         persongalleri: Persongalleri,
+        grunnlag: Grunnlag?,
     ) {
         logger.info("Håndterer tilganger for sakid $sakId")
         val sak = sakLesDao.hentSak(sakId) ?: throw PersonManglerSak()
@@ -104,7 +108,7 @@ class OppdaterTilgangService(
             }
         } else {
             sakTilgang.oppdaterAdressebeskyttelse(sakId, identerMedGradering.hentPrioritertGradering())
-            if (harRelevanteSkjermedePersoner(sak, persongalleri)) {
+            if (harRelevanteSkjermedePersoner(sak, persongalleri, grunnlag)) {
                 sakTilgang.oppdaterSkjerming(sakId, true)
                 val sakMedEnhet = SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)
                 sakSkrivDao.oppdaterEnhet(sakMedEnhet)
@@ -125,12 +129,15 @@ class OppdaterTilgangService(
     private fun harRelevanteSkjermedePersoner(
         sak: Sak,
         persongalleri: Persongalleri,
+        grunnlag: Grunnlag?,
     ): Boolean {
-        val relevanteIdenterForSkjerming =
+        val relevanteIPersongalleri =
             when (sak.sakType == SakType.BARNEPENSJON && persongalleri.soekerErOver18Aar()) {
                 true -> listOf(persongalleri.soeker)
                 false -> persongalleri.hentAlleIdentifikatorer()
             }
+        val relevanteIdenterForSkjerming =
+            (relevanteIPersongalleri + vergersFodeselsenummer(grunnlag)).distinct()
 
         return relevanteIdenterForSkjerming.any { fnr -> sjekkOmIdentErSkjermet(fnr) }
     }
@@ -175,4 +182,10 @@ class OppdaterTilgangService(
 
         return LocalDate.now() >= foedselsdatoSoeker.plusYears(18)
     }
+
+    fun vergersFodeselsenummer(grunnlag: Grunnlag?): List<String> =
+        grunnlag
+            ?.vergemaalellerfremtidsfullmakt(Saksrolle.SOEKER)
+            ?.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident?.value }
+            ?: emptyList()
 }

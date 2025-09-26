@@ -268,7 +268,11 @@ class SakServiceImpl(
          */
         val persongalleri = grunnlagService.hentPersongalleri(sak.id)
         if (persongalleri != null) {
-            tilgangsService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+            tilgangsService.haandtergraderingOgEgenAnsatt(
+                sak.id,
+                persongalleri,
+                grunnlagService.hentOpplysningsgrunnlagForSak(sak.id),
+            )
         }
         return sak
     }
@@ -355,9 +359,7 @@ class SakServiceImpl(
             .map { SakId(it.toLong()) }
     }
 
-    override fun hentSakerMedSkjerming(sakType: SakType): List<SakId> {
-        return lesDao.finnSakerMedSkjerming(sakType).map { it.id }
-    }
+    override fun hentSakerMedSkjerming(sakType: SakType): List<SakId> = lesDao.finnSakerMedSkjerming(sakType).map { it.id }
 
     private suspend fun hentSpraak(fnr: String): Spraak {
         val kontaktInfo = krrKlient.hentDigitalKontaktinformasjon(fnr)

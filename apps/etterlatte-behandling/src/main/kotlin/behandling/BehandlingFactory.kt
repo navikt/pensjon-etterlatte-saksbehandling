@@ -232,7 +232,9 @@ class BehandlingFactory(
                     soeknadMottattDato = behandling.soeknadMottattDato,
                 )
 
-            tilgangsService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+            val grunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId)
+            tilgangsService.haandtergraderingOgEgenAnsatt(sakId, persongalleri, grunnlag)
+
             return BehandlingOgOppgave(behandling, oppgave) {
                 behandlingHendelser.sendMeldingForHendelseStatistikk(
                     behandling.toStatistikkBehandling(persongalleri),

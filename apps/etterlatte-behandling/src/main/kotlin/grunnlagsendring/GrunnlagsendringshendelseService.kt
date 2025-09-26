@@ -181,7 +181,13 @@ class GrunnlagsendringshendelseService(
                 krevIkkeNull(grunnlagService.hentPersongalleri(it)) {
                     "Mangler persongalleri for sak=$it"
                 }
-            inTransaction { tilgangsService.haandtergraderingOgEgenAnsatt(it, pg) }
+            inTransaction {
+                tilgangsService.haandtergraderingOgEgenAnsatt(
+                    it,
+                    pg,
+                    grunnlagService.hentOpplysningsgrunnlagForSak(it),
+                )
+            }
         }
     }
 

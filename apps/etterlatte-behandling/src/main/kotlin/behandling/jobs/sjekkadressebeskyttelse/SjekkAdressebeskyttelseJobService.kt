@@ -60,6 +60,7 @@ class SjekkAdressebeskyttelseJobService(
                         tilgangService.haandtergraderingOgEgenAnsatt(
                             aktuellSak,
                             persongalleriPdl ?: persongalleriGrunnlag!!,
+                            grunnlagService.hentOpplysningsgrunnlagForSak(aktuellSak),
                         )
                     }
                 } else {

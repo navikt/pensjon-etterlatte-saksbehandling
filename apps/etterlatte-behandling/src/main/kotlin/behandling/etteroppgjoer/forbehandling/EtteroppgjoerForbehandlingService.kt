@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
@@ -34,7 +33,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
-import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -316,10 +314,7 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun opprettEtteroppgjoerForbehandlingIDev(sakId: SakId) {
-        if (appIsInGCP() && !isDev()) {
-            throw InternfeilException("Forsøker å opprette forbehandling via dev-funksjon i produksjon")
-        }
+    fun opprettOppgaveForOpprettForbehandling(sakId: SakId) {
         etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
     }
 

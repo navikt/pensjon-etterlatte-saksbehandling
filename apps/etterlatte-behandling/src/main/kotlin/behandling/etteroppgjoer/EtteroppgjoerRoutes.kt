@@ -79,7 +79,7 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val eo =
                         inTransaction {
-                            forbehandlingService.opprettEtteroppgjoerForbehandlingIDev(
+                            forbehandlingService.opprettOppgaveForOpprettForbehandling(
                                 sakId,
                             )
                         }

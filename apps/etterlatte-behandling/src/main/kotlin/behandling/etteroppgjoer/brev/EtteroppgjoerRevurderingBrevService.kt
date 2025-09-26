@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.brev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.time.LocalDate
 import java.util.UUID
 
 class EtteroppgjoerRevurderingBrevService(
@@ -136,13 +138,13 @@ class EtteroppgjoerRevurderingBrevService(
 
             val sak = detaljertForbehandling.behandling.sak
 
-            val forhaandsvarselBrev =
-                brevApiKlient
-                    .hentBrev(sak.id, detaljertForbehandling.behandling.brevId!!, brukerTokenInfo)
-
-            krev(forhaandsvarselBrev.erDistribuert()) {
-                "Finner ingen distribuerte forhåndsvarsel om etteroppgjør"
-            }
+            val forhaandsvarsel =
+                hentForhaandsvarsel(detaljertForbehandling, behandlingId, brukerTokenInfo)
+                    .also {
+                        krev(it.brev.erDistribuert()) {
+                            "Finner ingen distribuerte forhåndsvarsel om etteroppgjør"
+                        }
+                    }
 
             BrevRequest(
                 sak = sak,
@@ -168,7 +170,7 @@ class EtteroppgjoerRevurderingBrevService(
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(
                         etteroppgjoersAar = detaljertForbehandling.behandling.aar,
-                        forhaandsvarselSendtDato = detaljertForbehandling.behandling.varselbrevSendt!!,
+                        forhaandsvarselSendtDato = forhaandsvarsel.varselbrevSendt,
                         mottattSvarDato = null, // TODO: legg til dato for mottatt journalpost
                     ),
                 brevVedleggData =
@@ -177,4 +179,37 @@ class EtteroppgjoerRevurderingBrevService(
                     ),
             )
         }
+
+    /**
+     * Brevet er knyttet til den opprinnelige forbehandlingen (via "kopiertFra")
+     */
+    private suspend fun hentForhaandsvarsel(
+        detaljertForbehandling: DetaljertForbehandlingDto,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Forhaandsvarsel {
+        val forbehandlingMedVarselbrev =
+            detaljertForbehandling.behandling.kopiertFra
+                ?.let { etteroppgjoerForbehandlingService.hentForbehandling(it) }
+                ?: throw InternfeilException("Mangler opprinnelig forbehandling for behandlingId=$behandlingId")
+
+        val brevId = (
+            forbehandlingMedVarselbrev.brevId
+                ?: throw InternfeilException("Mangler varselbrev for behandlingId=$behandlingId")
+        )
+
+        val forhaandsvarselBrev =
+            brevApiKlient.hentBrev(detaljertForbehandling.behandling.sak.id, brevId, brukerTokenInfo)
+
+        return Forhaandsvarsel(
+            forhaandsvarselBrev,
+            forbehandlingMedVarselbrev.varselbrevSendt
+                ?: throw InternfeilException("Mangler dato sendt på varselbrev for behandlingId=$behandlingId"),
+        )
+    }
 }
+
+data class Forhaandsvarsel(
+    val brev: Brev,
+    val varselbrevSendt: LocalDate,
+)

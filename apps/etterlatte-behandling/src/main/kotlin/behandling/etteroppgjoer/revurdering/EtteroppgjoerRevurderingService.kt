@@ -50,7 +50,7 @@ class EtteroppgjoerRevurderingService(
         val sisteFerdigstilteForbehandlingId =
             inTransaction {
                 etteroppgjoerForbehandlingService
-                    .hentSisteFerdigstillteForbehandlingPaaSak(
+                    .hentSisteFerdigstillteForbehandling(
                         sakId = sakId,
                     ).id
             }

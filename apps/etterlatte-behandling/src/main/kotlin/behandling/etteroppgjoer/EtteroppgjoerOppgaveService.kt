@@ -16,7 +16,11 @@ class EtteroppgjoerOppgaveService(
     ) {
         val defaultMerknad = "Etteroppgjøret for ${2024} er klart til behandling"
 
-        val eksisterendeOppgaver = oppgaveService.hentOppgaverForSakAvType(sakId, listOf(OppgaveType.ETTEROPPGJOER))
+        val eksisterendeOppgaver =
+            oppgaveService
+                .hentOppgaverForSakAvType(sakId, listOf(OppgaveType.ETTEROPPGJOER))
+                .filter { it.erIkkeAvsluttet() && it.referanse.isEmpty() }
+
         if (eksisterendeOppgaver.isEmpty()) {
             oppgaveService.opprettOppgave(
                 referanse = "",

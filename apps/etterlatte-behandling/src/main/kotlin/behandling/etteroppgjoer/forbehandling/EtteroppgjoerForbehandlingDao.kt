@@ -219,30 +219,6 @@ class EtteroppgjoerForbehandlingDao(
         }
     }
 
-    fun oppdaterRelatertBehandling(
-        forbehandlingId: UUID,
-        nyForbehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE behandling b
-                    SET relatert_behandling = ?
-                    WHERE b.relatert_behandling = ?
-                    AND b.revurdering_aarsak = ?
-                    AND b.status != ?
-                    """.trimIndent(),
-                )
-            statement.setString(1, nyForbehandlingId.toString())
-            statement.setString(2, forbehandlingId.toString())
-            statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
-            statement.setString(4, BehandlingStatus.IVERKSATT.name) // TODO: Bør være strengere -tillate færre statuser?
-
-            statement.executeUpdate()
-        }
-    }
-
     fun oppdaterInformasjonFraBruker(
         forbehandlingId: UUID,
         harMottattNyInformasjon: JaNei,

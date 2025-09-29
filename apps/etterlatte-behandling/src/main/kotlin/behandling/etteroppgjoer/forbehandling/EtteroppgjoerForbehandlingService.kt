@@ -281,9 +281,10 @@ class EtteroppgjoerForbehandlingService(
             saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
         )
 
-        oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(
+        oppgaveService.endreTilKildeBehandlingOgOppdaterReferanseOgMerknad(
             oppgaveId = oppgave.id,
             referanse = nyForbehandling.id.toString(),
+            merknad = "Etteroppgjør for ${nyForbehandling.aar}",
         )
 
         return nyForbehandling

@@ -77,13 +77,13 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(HttpStatusCode.NotFound)
                 }
                 kunSkrivetilgang {
-                    val eo =
-                        inTransaction {
-                            forbehandlingService.opprettOppgaveForOpprettForbehandling(
-                                sakId,
-                            )
-                        }
-                    call.respond(eo)
+                    inTransaction {
+                        forbehandlingService.opprettOppgaveForOpprettForbehandling(
+                            sakId,
+                        )
+                    }
+                    // TODO: returnere oppgave?
+                    call.respond(HttpStatusCode.OK)
                 }
             }
 

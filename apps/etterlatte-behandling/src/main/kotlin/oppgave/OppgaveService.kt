@@ -166,9 +166,10 @@ class OppgaveService(
         oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
     }
 
-    fun endreTilKildeBehandlingOgOppdaterReferanse(
+    fun endreTilKildeBehandlingOgOppdaterReferanseOgMerknad(
         oppgaveId: UUID,
         referanse: String,
+        merknad: String? = null,
     ): OppgaveIntern {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
@@ -182,6 +183,11 @@ class OppgaveService(
             )
         }
         oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+
+        if (!merknad.isNullOrEmpty()) {
+            oppgaveDao.oppdaterMerknad(oppgaveId, merknad)
+        }
+
         return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 

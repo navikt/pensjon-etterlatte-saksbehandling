@@ -240,7 +240,7 @@ class RevurderingService(
                 opprettOgTildelOppgave = {
                     if (paaGrunnAvOppgave != null) {
                         (
-                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(
+                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanseOgMerknad(
                                 paaGrunnAvOppgave,
                                 it.id.toString(),
                             )

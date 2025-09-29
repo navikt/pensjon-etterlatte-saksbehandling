@@ -39,8 +39,8 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
   const [opprettForbehandlingResult, opprettForbehandlingRequest] = useApiCall(opprettForbehandlingApi)
 
   const opprettForbehandling = () => {
-    opprettForbehandlingRequest({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (result) => {
-      navigate(`/etteroppgjoer/${result.etteroppgjoerBehandling.id}`)
+    opprettForbehandlingRequest({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (forbehandling) => {
+      navigate(`/etteroppgjoer/${forbehandling.id}`)
     })
   }
 

@@ -50,7 +50,7 @@ spec:
           - name: cloudsql.enable_pgaudit
             value: "true"
           - name: pgaudit.log
-            value: 'write'
+            value: 'write,ddl,role'
           - name: pgaudit.log_parameter
             value: "on"
   azure:

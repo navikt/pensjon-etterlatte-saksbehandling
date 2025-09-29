@@ -1,6 +1,6 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { EtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
+import { EtteroppgjoerForbehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React from 'react'
@@ -8,8 +8,8 @@ import React from 'react'
 export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
   const etteroppgjoer = useEtteroppgjoer()
 
-  const forbehandlingErFerdigstilt = etteroppgjoer.behandling.status === EtteroppgjoerBehandlingStatus.FERDIGSTILT
-  const forbehandlingErAvbrutt = etteroppgjoer.behandling.status === EtteroppgjoerBehandlingStatus.AVBRUTT
+  const forbehandlingErFerdigstilt = etteroppgjoer.behandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
+  const forbehandlingErAvbrutt = etteroppgjoer.behandling.status === EtteroppgjoerForbehandlingStatus.AVBRUTT
 
   return (
     <SidebarPanel $border>

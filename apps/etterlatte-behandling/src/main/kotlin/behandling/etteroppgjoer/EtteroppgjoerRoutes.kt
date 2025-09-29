@@ -90,11 +90,11 @@ fun Route.etteroppgjoerRoutes(
             post("/forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    val eo =
+                    val forbehandling =
                         inTransaction {
                             forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, oppgaveId, brukerTokenInfo)
                         }
-                    call.respond(eo)
+                    call.respond(forbehandling)
                 }
             }
         }
@@ -118,6 +118,7 @@ fun Route.etteroppgjoerRoutes(
                         inTransaction {
                             forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
                         }
+
                     if (brevSomskalSlettes != null) {
                         logger.info(
                             "Sletter brevet koblet til forbehandlingen med brevId=${brevSomskalSlettes.first} " +
@@ -129,6 +130,7 @@ fun Route.etteroppgjoerRoutes(
                             brukerTokenInfo = brukerTokenInfo,
                         )
                     }
+
                     call.respond(etteroppgjoerResultatDto)
                 }
 

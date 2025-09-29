@@ -249,7 +249,7 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerForbehandlingOgOppgave {
+    ): EtteroppgjoerForbehandling {
         logger.info("Oppretter forbehandling for etteroppgjør sakId=$sakId, inntektsår=$inntektsaar")
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Kunne ikke hente sak=$sakId")
 
@@ -281,16 +281,12 @@ class EtteroppgjoerForbehandlingService(
             saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
         )
 
-        val oppdatertOppgave =
-            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(
-                oppgaveId = oppgave.id,
-                referanse = nyForbehandling.id.toString(),
-            )
-
-        return EtteroppgjoerForbehandlingOgOppgave(
-            etteroppgjoerForbehandling = nyForbehandling,
-            oppgave = oppdatertOppgave,
+        oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(
+            oppgaveId = oppgave.id,
+            referanse = nyForbehandling.id.toString(),
         )
+
+        return nyForbehandling
     }
 
     private fun sjekkAtOppgaveErGyldigForForbehandling(
@@ -379,6 +375,7 @@ class EtteroppgjoerForbehandlingService(
                         .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id.toString() }
                         ?.let { revurdering -> behandlingService.settBeregnet(revurdering.id, brukerTokenInfo) }
                 }
+
         // Hvis forbehandlingen ikke lengre henviser til brevet når den er beregnet skal brevet slettes
         val brevSomSkalSlettes = forbehandling.brevId?.takeIf { beregnetForbehandling.brevId == null }
 
@@ -645,11 +642,6 @@ class EtteroppgjoerForbehandlingService(
         return ferdigstillForbehandling(detaljertBehandling.behandling, brukerTokenInfo)
     }
 }
-
-data class EtteroppgjoerForbehandlingOgOppgave(
-    val etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
-    val oppgave: OppgaveIntern,
-)
 
 data class BeregnFaktiskInntektRequest(
     val loennsinntekt: Int,

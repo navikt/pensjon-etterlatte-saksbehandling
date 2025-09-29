@@ -40,7 +40,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
 
   const opprettForbehandling = () => {
     opprettForbehandlingRequest({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (result) => {
-      navigate(`/etteroppgjoer/${result.etteroppgjoerBehandling.behandling.id}`)
+      navigate(`/etteroppgjoer/${result.etteroppgjoerBehandling.id}`)
     })
   }
 

@@ -53,10 +53,11 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
   const nesteSteg = () => {
-    if (
+    const ingenFeilISkjemaer =
       (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
       (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
-    ) {
+
+    if (ingenFeilISkjemaer) {
       if (
         etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
         etteroppgjoer.behandling.kopiertFra === undefined
@@ -93,6 +94,18 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
               behandling={behandling}
               setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
             />
+
+            {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
+              !erFerdigBehandlet(behandling.status) && (
+                <Alert variant="info">
+                  <Heading spacing size="small" level="3">
+                    Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+                  </Heading>
+                  Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
+                  ny forbehandling for etteroppgjøret skal opprettes.
+                </Alert>
+              )}
+
             {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
               <>
                 <FastsettFaktiskInntekt
@@ -122,17 +135,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             )}
 
             {!!oversiktValideringFeilmelding && <Alert variant="error">{oversiktValideringFeilmelding}</Alert>}
-
-            {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
-              !erFerdigBehandlet(behandling.status) && (
-                <Alert variant="info">
-                  <Heading spacing size="small" level="3">
-                    Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
-                  </Heading>
-                  Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
-                  ny forbehandling for etteroppgjøret skal opprettes.
-                </Alert>
-              )}
           </VStack>
         </Box>
 

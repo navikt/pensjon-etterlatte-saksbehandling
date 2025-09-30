@@ -1,5 +1,5 @@
-import { FaktiskInntekt, IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
-import { FieldErrors, useForm } from 'react-hook-form'
+import { EtteroppgjoerOversiktSkjemaer, FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
+import { useFormContext } from 'react-hook-form'
 import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
@@ -37,13 +37,9 @@ export interface FastsettFaktiskInntektSkjema {
 
 interface Props {
   setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
-  setFastsettFaktiskInntektSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
 }
 
-export const FaktiskInntektSkjema = ({
-  setFaktiskInntektSkjemaErAapen,
-  setFastsettFaktiskInntektSkjemaErrors,
-}: Props) => {
+export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
   const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
 
@@ -56,31 +52,9 @@ export const FaktiskInntektSkjema = ({
     watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<FastsettFaktiskInntektSkjema>({
-    defaultValues: faktiskInntekt
-      ? {
-          loennsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.loennsinntekt),
-          afp: new Intl.NumberFormat('nb').format(faktiskInntekt.afp),
-          naeringsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.naeringsinntekt),
-          utlandsinntekt: new Intl.NumberFormat('nb').format(faktiskInntekt.utlandsinntekt),
-          spesifikasjon: faktiskInntekt.spesifikasjon,
-        }
-      : {
-          loennsinntekt: '0',
-          afp: '0',
-          naeringsinntekt: '0',
-          utlandsinntekt: '0',
-          spesifikasjon: '',
-        },
-  })
-
-  const avbryt = () => {
-    setFastsettFaktiskInntektSkjemaErrors(errors)
-    setFaktiskInntektSkjemaErAapen(false)
-  }
+  } = useFormContext<EtteroppgjoerOversiktSkjemaer>()
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    setFastsettFaktiskInntektSkjemaErrors(errors)
     lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
       dispatch(addResultatEtteroppgjoer(resultat))
       hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
@@ -96,25 +70,31 @@ export const FaktiskInntektSkjema = ({
       <VStack gap="4">
         <VStack gap="4" width="fit-content">
           <ControlledInntektTextField
-            name="loennsinntekt"
+            name="faktiskInntekt.loennsinntekt"
             control={control}
             label="Lønnsinntekt"
             description="Ekskluder omstillingsstønaden"
           />
-          <ControlledInntektTextField name="afp" control={control} label="Avtalefestet pensjon" />
-          <ControlledInntektTextField name="naeringsinntekt" control={control} label="Næringsinntekt" />
-          <ControlledInntektTextField name="utlandsinntekt" control={control} label="Inntekt fra utland" />
+          <ControlledInntektTextField name="faktiskInntekt.afp" control={control} label="Avtalefestet pensjon" />
+          <ControlledInntektTextField name="faktiskInntekt.naeringsinntekt" control={control} label="Næringsinntekt" />
+          <ControlledInntektTextField
+            name="faktiskInntekt.utlandsinntekt"
+            control={control}
+            label="Inntekt fra utland"
+          />
         </VStack>
 
-        <SumAvFaktiskInntekt faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch())} />
+        <SumAvFaktiskInntekt
+          faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch('faktiskInntekt'))}
+        />
         <Box maxWidth="fit-content">
           <Textarea
-            {...register('spesifikasjon', {
+            {...register('faktiskInntekt.spesifikasjon', {
               required: { value: true, message: 'Du må spesifisere inntekten' },
             })}
             label="Spesifikasjon av inntekt"
             description="Beskriv inntekt lagt til grunn og eventuelle beløp som er trukket fra."
-            error={errors.spesifikasjon?.message}
+            error={errors.faktiskInntekt?.spesifikasjon?.message}
           />
         </Box>
 
@@ -129,12 +109,9 @@ export const FaktiskInntektSkjema = ({
 
         <HStack gap="4">
           <Button
-            onClick={handleSubmit(
-              (data) => {
-                submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data))
-              },
-              () => setFastsettFaktiskInntektSkjemaErrors(errors)
-            )}
+            onClick={handleSubmit((data) => {
+              submitFaktiskInntekt(fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(data.faktiskInntekt))
+            })}
             size="small"
             loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
           >
@@ -146,7 +123,7 @@ export const FaktiskInntektSkjema = ({
               variant="secondary"
               size="small"
               disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
-              onClick={avbryt}
+              onClick={() => setFaktiskInntektSkjemaErAapen(false)}
             >
               Avbryt
             </Button>

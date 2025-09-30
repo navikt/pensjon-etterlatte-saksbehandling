@@ -87,6 +87,19 @@ export interface FaktiskInntekt {
   spesifikasjon: string
 }
 
+export interface FastsettFaktiskInntektSkjema {
+  loennsinntekt: string
+  afp: string
+  naeringsinntekt: string
+  utlandsinntekt: string
+  spesifikasjon: string
+}
+
+export interface EtteroppgjoerOversiktSkjemaer {
+  informasjonFraBruker: IInformasjonFraBruker
+  faktiskInntekt: FastsettFaktiskInntektSkjema
+}
+
 export interface PensjonsgivendeInntektFraSkatteetatenSummert {
   loensinntekt: number
   naeringsinntekt: number

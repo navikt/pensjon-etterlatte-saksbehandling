@@ -1,6 +1,6 @@
 import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
-import { FieldErrors, useForm } from 'react-hook-form'
-import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
+import { useFormContext } from 'react-hook-form'
+import { EtteroppgjoerOversiktSkjemaer } from '~shared/types/EtteroppgjoerForbehandling'
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -15,14 +15,12 @@ interface Props {
   behandling: IDetaljertBehandling
   setInformasjonFraBrukerSkjemaErAapen: (erAapen: boolean) => void
   erRedigerbar: boolean
-  setInformasjonFraBrukerSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
 }
 
 export const InformasjonFraBrukerSkjema = ({
   behandling,
   setInformasjonFraBrukerSkjemaErAapen,
   erRedigerbar,
-  setInformasjonFraBrukerSkjemaErrors,
 }: Props) => {
   const etteroppgjoer = useEtteroppgjoer()
 
@@ -37,34 +35,25 @@ export const InformasjonFraBrukerSkjema = ({
     watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<IInformasjonFraBruker>({
-    defaultValues: {
-      harMottattNyInformasjon: etteroppgjoer.behandling.harMottattNyInformasjon,
-      endringErTilUgunstForBruker: etteroppgjoer.behandling.endringErTilUgunstForBruker,
-      beskrivelseAvUgunst: etteroppgjoer.behandling.beskrivelseAvUgunst,
-    },
-  })
+  } = useFormContext<EtteroppgjoerOversiktSkjemaer>()
 
-  const avbryt = () => {
-    setInformasjonFraBrukerSkjemaErrors(errors)
-    setInformasjonFraBrukerSkjemaErAapen(false)
-  }
-
-  const submitEndringFraBruker = (data: IInformasjonFraBruker) => {
-    setInformasjonFraBrukerSkjemaErrors(errors)
-    informasjonFraBrukerRequest({ forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data }, () => {
-      hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
-        dispatch(addEtteroppgjoer(etteroppgjoer))
-        setInformasjonFraBrukerSkjemaErAapen(false)
-      })
-    })
+  const submitEndringFraBruker = (data: EtteroppgjoerOversiktSkjemaer) => {
+    informasjonFraBrukerRequest(
+      { forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data.informasjonFraBruker! },
+      () => {
+        hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
+          dispatch(addEtteroppgjoer(etteroppgjoer))
+          setInformasjonFraBrukerSkjemaErAapen(false)
+        })
+      }
+    )
   }
 
   return (
     <form>
       <VStack gap="4">
         <ControlledRadioGruppe
-          name="harMottattNyInformasjon"
+          name="informasjonFraBruker.harMottattNyInformasjon"
           control={control}
           legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
           errorVedTomInput="Du må ta stilling til om bruker har gitt ny informasjon"
@@ -77,10 +66,10 @@ export const InformasjonFraBrukerSkjema = ({
           }
         />
 
-        {watch('harMottattNyInformasjon') === JaNei.JA && (
+        {watch('informasjonFraBruker.harMottattNyInformasjon') === JaNei.JA && (
           <>
             <ControlledRadioGruppe
-              name="endringErTilUgunstForBruker"
+              name="informasjonFraBruker.endringErTilUgunstForBruker"
               control={control}
               legend="Er endringen til ugunst for bruker?"
               errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
@@ -92,10 +81,10 @@ export const InformasjonFraBrukerSkjema = ({
                 </>
               }
             />
-            {watch('endringErTilUgunstForBruker') === JaNei.JA && (
+            {watch('informasjonFraBruker.endringErTilUgunstForBruker') === JaNei.JA && (
               <Box maxWidth="30rem">
                 <Textarea
-                  {...register('beskrivelseAvUgunst', {
+                  {...register('informasjonFraBruker.beskrivelseAvUgunst', {
                     required: {
                       value: true,
                       message: 'Du må beskrive hvorfor endringen har kommet til ugunst for bruker',
@@ -103,7 +92,7 @@ export const InformasjonFraBrukerSkjema = ({
                   })}
                   label="Beskriv hvorfor endringen er til ugunst for bruker"
                   readOnly={!erRedigerbar}
-                  error={errors.beskrivelseAvUgunst?.message}
+                  error={errors.informasjonFraBruker?.beskrivelseAvUgunst?.message}
                 />
               </Box>
             )}
@@ -124,7 +113,7 @@ export const InformasjonFraBrukerSkjema = ({
           <Button
             size="small"
             loading={isPending(informasjonFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
-            onClick={handleSubmit(submitEndringFraBruker, () => setInformasjonFraBrukerSkjemaErrors(errors))}
+            onClick={handleSubmit(submitEndringFraBruker)}
           >
             Lagre
           </Button>
@@ -135,7 +124,7 @@ export const InformasjonFraBrukerSkjema = ({
               variant="secondary"
               size="small"
               disabled={isPending(informasjonFraBrukerResult) || isPending(hentEtteroppgjoerResult)}
-              onClick={avbryt}
+              onClick={() => setInformasjonFraBrukerSkjemaErAapen(false)}
             >
               Avbryt
             </Button>

@@ -7,15 +7,12 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { InformasjonFraBrukerVisning } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerVisning'
 import { InformasjonFraBrukerSkjema } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerSkjema'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { FieldErrors } from 'react-hook-form'
-import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 
 interface Props {
   behandling: IDetaljertBehandling
-  setInformasjonFraBrukerSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
 }
 
-export const InformasjonFraBruker = ({ behandling, setInformasjonFraBrukerSkjemaErrors }: Props) => {
+export const InformasjonFraBruker = ({ behandling }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const etteroppgjoer = useEtteroppgjoer()
@@ -39,7 +36,6 @@ export const InformasjonFraBruker = ({ behandling, setInformasjonFraBrukerSkjema
           behandling={behandling}
           setInformasjonFraBrukerSkjemaErAapen={setInformasjonFraBrukerSkjemaErAapen}
           erRedigerbar={erRedigerbar}
-          setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
         />
       ) : (
         <VStack gap="4">

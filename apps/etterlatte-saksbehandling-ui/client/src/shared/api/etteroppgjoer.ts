@@ -3,17 +3,11 @@ import {
   AvbrytEtteroppgjoerForbehandlingRequest,
   BeregnetEtteroppgjoerResultatDto,
   Etteroppgjoer,
-  EtteroppgjoerBehandling,
   EtteroppgjoerForbehandling,
+  EtteroppgjoerDetaljertForbehandling,
   FaktiskInntekt,
   IInformasjonFraBruker,
 } from '~shared/types/EtteroppgjoerForbehandling'
-import { OppgaveDTO } from '~shared/types/oppgave'
-
-interface EtteroppgjoerOgOppgave {
-  etteroppgjoerBehandling: EtteroppgjoerForbehandling
-  oppgave: OppgaveDTO
-}
 
 export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer[]>> => {
   return apiClient.get(`/etteroppgjoer/${sakId}`)
@@ -21,20 +15,20 @@ export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Ette
 
 export const opprettEtteroppgjoerForbehandlingIDev = async (
   sakId: number
-): Promise<ApiResponse<EtteroppgjoerOgOppgave>> => {
+): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
   return apiClient.post(`/etteroppgjoer/${sakId}/kundev-opprett-forbehandling`, {})
 }
 
 export const opprettEtteroppgoerForbehandling = async (args: {
   sakId: number
   oppgaveId: string
-}): Promise<ApiResponse<EtteroppgjoerOgOppgave>> => {
+}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
   return apiClient.post(`/etteroppgjoer/${args.sakId}/forbehandling/${args.oppgaveId}`, {})
 }
 
 export const hentEtteroppgjoerForbehandling = async (
   behandlingId: string
-): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+): Promise<ApiResponse<EtteroppgjoerDetaljertForbehandling>> => {
   return apiClient.get(`/etteroppgjoer/forbehandling/${behandlingId}`)
 }
 
@@ -49,7 +43,7 @@ export const avbrytEtteroppgjoerForbehandling = async (args: {
 
 export const hentEtteroppgjoerForbehandlinger = async (
   sakId: number
-): Promise<ApiResponse<EtteroppgjoerBehandling[]>> => {
+): Promise<ApiResponse<EtteroppgjoerForbehandling[]>> => {
   return apiClient.get(`/etteroppgjoer/forbehandlinger/${sakId}`)
 }
 
@@ -79,6 +73,6 @@ export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
 
 export const ferdigstillEtteroppgjoerForbehandlingUtenBrev = async (args: {
   forbehandlingId: string
-}): Promise<ApiResponse<EtteroppgjoerBehandling>> => {
+}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill-uten-brev`, {})
 }

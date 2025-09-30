@@ -406,8 +406,9 @@ class EtteroppgjoerForbehandlingService(
             throw ForbehandlingKanIkkeEndres()
         }
 
-        forbehandling.oppdaterBrukerHarSvart(harMottattNyInformasjon, endringErTilUgunstForBruker, beskrivelseAvUgunst)
-        lagreForbehandling(forbehandling)
+        forbehandling
+            .oppdaterBrukerHarSvart(harMottattNyInformasjon, endringErTilUgunstForBruker, beskrivelseAvUgunst)
+            .also { dao.lagreForbehandling(it) }
     }
 
     fun sjekkAtOppgavenErTildeltSaksbehandler(

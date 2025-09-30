@@ -23,6 +23,9 @@ import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { addEtteroppgjoer, resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -33,6 +36,7 @@ export const Behandling = () => {
   const routedata = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
   const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
+  const [, fetchForbehandling] = useApiCall(hentEtteroppgjoerForbehandling)
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const person = usePerson()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -60,6 +64,18 @@ export const Behandling = () => {
       )
     } else {
       dispatch(resetPersonopplysninger())
+    }
+    if (
+      behandlingFraRedux?.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER &&
+      !!behandlingFraRedux?.relatertBehandlingId
+    ) {
+      fetchForbehandling(
+        behandlingFraRedux?.relatertBehandlingId,
+        (result) => dispatch(addEtteroppgjoer(result)),
+        () => dispatch(resetEtteroppgjoer())
+      )
+    } else {
+      dispatch(resetEtteroppgjoer())
     }
   }, [behandlingFraRedux])
 

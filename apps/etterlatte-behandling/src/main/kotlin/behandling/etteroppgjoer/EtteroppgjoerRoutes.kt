@@ -77,24 +77,24 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(HttpStatusCode.NotFound)
                 }
                 kunSkrivetilgang {
-                    val eo =
-                        inTransaction {
-                            forbehandlingService.opprettOppgaveForOpprettForbehandling(
-                                sakId,
-                            )
-                        }
-                    call.respond(eo)
+                    inTransaction {
+                        forbehandlingService.opprettOppgaveForOpprettForbehandling(
+                            sakId,
+                        )
+                    }
+                    // TODO: returnere oppgave?
+                    call.respond(HttpStatusCode.OK)
                 }
             }
 
             post("/forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    val eo =
+                    val forbehandling =
                         inTransaction {
                             forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, oppgaveId, brukerTokenInfo)
                         }
-                    call.respond(eo)
+                    call.respond(forbehandling)
                 }
             }
         }
@@ -118,6 +118,7 @@ fun Route.etteroppgjoerRoutes(
                         inTransaction {
                             forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
                         }
+
                     if (brevSomskalSlettes != null) {
                         logger.info(
                             "Sletter brevet koblet til forbehandlingen med brevId=${brevSomskalSlettes.first} " +
@@ -129,6 +130,7 @@ fun Route.etteroppgjoerRoutes(
                             brukerTokenInfo = brukerTokenInfo,
                         )
                     }
+
                     call.respond(etteroppgjoerResultatDto)
                 }
 
@@ -179,17 +181,16 @@ fun Route.etteroppgjoerRoutes(
                 post("informasjon-fra-bruker") {
                     val request = call.receive<InformasjonFraBrukerRequest>()
 
-                    val response =
-                        inTransaction {
-                            forbehandlingService.lagreInformasjonFraBruker(
-                                forbehandlingId = forbehandlingId,
-                                harMottattNyInformasjon = request.harMottattNyInformasjon,
-                                endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
-                                beskrivelseAvUgunst = request.beskrivelseAvUgunst,
-                            )
-                        }
+                    inTransaction {
+                        forbehandlingService.lagreInformasjonFraBruker(
+                            forbehandlingId = forbehandlingId,
+                            harMottattNyInformasjon = request.harMottattNyInformasjon,
+                            endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
+                            beskrivelseAvUgunst = request.beskrivelseAvUgunst,
+                        )
+                    }
 
-                    call.respond(response)
+                    call.respond(HttpStatusCode.OK)
                 }
 
                 post("bulk") {

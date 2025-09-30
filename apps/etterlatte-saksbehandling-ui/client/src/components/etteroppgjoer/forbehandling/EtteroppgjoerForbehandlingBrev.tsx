@@ -14,7 +14,7 @@ import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottak
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
 import {
-  EtteroppgjoerForbehandling,
+  EtteroppgjoerDetaljertForbehandling,
   kanRedigereEtteroppgjoerBehandling,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
@@ -40,7 +40,7 @@ export function EtteroppgjoerForbehandlingBrev() {
     setVisAdvarselBehandlingEndret(false)
   }
 
-  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: EtteroppgjoerForbehandling) => {
+  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: EtteroppgjoerDetaljertForbehandling) => {
     if (etteroppgjoer.beregnetEtteroppgjoerResultat != undefined) {
       return (
         new Date(etteroppgjoer.beregnetEtteroppgjoerResultat?.tidspunkt).getTime() >

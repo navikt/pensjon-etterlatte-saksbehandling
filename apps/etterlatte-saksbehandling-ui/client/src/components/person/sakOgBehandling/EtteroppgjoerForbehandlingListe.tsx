@@ -5,14 +5,17 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Alert, Link, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
-import { EtteroppgjoerBehandling, teksterEtteroppgjoerBehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
+import {
+  EtteroppgjoerForbehandling,
+  teksterEtteroppgjoerBehandlingStatus,
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { mapResult } from '~shared/api/apiUtils'
 
 function lenkeTilForbehandlingMedId(id: string): string {
   return `/etteroppgjoer/${id}/`
 }
 
-function EtteroppgjoerForbehandlingTabell({ forbehandlinger }: { forbehandlinger: Array<EtteroppgjoerBehandling> }) {
+function EtteroppgjoerForbehandlingTabell({ forbehandlinger }: { forbehandlinger: Array<EtteroppgjoerForbehandling> }) {
   if (!forbehandlinger?.length) {
     return (
       <Alert variant="info" inline>
@@ -68,7 +71,7 @@ export function EtteroppgjoerForbehandlingListe(props: { sakId: number }) {
 
   return mapResult(hentEtteroppgjoerForbehandlingerResult, {
     pending: <Spinner label="Henter forbehandlinger til saken"></Spinner>,
-    success: (forbehandlinger: EtteroppgjoerBehandling[]) => {
+    success: (forbehandlinger: EtteroppgjoerForbehandling[]) => {
       return <EtteroppgjoerForbehandlingTabell forbehandlinger={forbehandlinger} />
     },
     error: () => {

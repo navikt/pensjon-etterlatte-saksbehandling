@@ -57,16 +57,21 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
       (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
 
-    if (ingenFeilISkjemaer) {
-      if (
-        etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
-        etteroppgjoer.behandling.kopiertFra === undefined
-      ) {
-        setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
-        return
+    // Hvis revurderingen stammer fra svarfrist utløpt oppgave, som er automatisk opprettet
+    if (behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !!etteroppgjoer.behandling.harMottattNyInformasjon) {
+      if (ingenFeilISkjemaer) {
+        if (
+          etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+          etteroppgjoer.behandling.kopiertFra === undefined
+        ) {
+          setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+          return
+        }
+        setOversiktValideringFeilmelding('')
+        next()
       }
-      setOversiktValideringFeilmelding('')
-      next()
+    } else {
+      setOversiktValideringFeilmelding('Du må svare på informasjon fra bruker')
     }
   }
 

@@ -1,8 +1,5 @@
-import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { useAppDispatch } from '~store/Store'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
-import React, { useEffect, useState } from 'react'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import React, { useState } from 'react'
 import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
@@ -36,13 +33,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const etteroppgjoer = useEtteroppgjoer()
 
-  // bruk forbehandlingId fra etteroppgjør hvis tilgjengelig, ellers relatertBehandlingId
-  // ny id opprettes når forbehandling kopieres ved endring av inntekt
-  const etteroppgjoerForbehandlingId = etteroppgjoer?.behandling?.id ?? behandling.relatertBehandlingId
-
-  const dispatch = useAppDispatch()
-  const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
-
   const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
     FieldErrors<IInformasjonFraBruker> | undefined
   >()
@@ -68,13 +58,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       next()
     }
   }
-
-  useEffect(() => {
-    if (!etteroppgjoerForbehandlingId || etteroppgjoer) return
-    hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
-      dispatch(addEtteroppgjoer(etteroppgjoer))
-    })
-  }, [etteroppgjoerForbehandlingId, etteroppgjoer])
 
   return (
     !!etteroppgjoer && (

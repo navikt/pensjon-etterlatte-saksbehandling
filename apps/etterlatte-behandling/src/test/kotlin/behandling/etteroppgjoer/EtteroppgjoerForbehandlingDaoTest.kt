@@ -25,6 +25,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -123,6 +124,24 @@ class EtteroppgjoerForbehandlingDaoTest(
             innvilgetPeriode shouldBe ny.innvilgetPeriode
             kopiertFra shouldBe kopiertFra
             varselbrevSendt shouldBe dato
+        }
+    }
+
+    @Test
+    fun `skal oppdatere svar fra bruker`() {
+        val forbehandlingId = UUID.randomUUID()
+        val forbehandling = opprettForbehandling(forbehandlingId)
+        forbehandling
+            .oppdaterBrukerHarSvart(
+                JaNei.JA,
+                JaNei.JA,
+                "beskrivelse",
+            ).also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.harMottattNyInformasjon shouldBe JaNei.JA
+            this?.endringErTilUgunstForBruker shouldBe JaNei.JA
+            this?.beskrivelseAvUgunst shouldBe "beskrivelse"
         }
     }
 
@@ -357,8 +376,8 @@ class EtteroppgjoerForbehandlingDaoTest(
         summerteInntekterKopi.tidspunktBeregnet shouldBe summerteInntekter.tidspunktBeregnet
     }
 
-    private fun opprettForbehandling(forbehandlingId: UUID) {
-        etteroppgjoerForbehandlingDao.lagreForbehandling(
+    private fun opprettForbehandling(forbehandlingId: UUID): EtteroppgjoerForbehandling {
+        val forbehandling =
             EtteroppgjoerForbehandling(
                 id = forbehandlingId,
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
@@ -377,8 +396,13 @@ class EtteroppgjoerForbehandlingDaoTest(
                 aarsakTilAvbrytelseBeskrivelse = "test",
                 beskrivelseAvUgunst = "test",
                 etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
-            ),
+            )
+
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            forbehandling,
         )
+
+        return forbehandling
     }
 
     @Test

@@ -179,17 +179,16 @@ fun Route.etteroppgjoerRoutes(
                 post("informasjon-fra-bruker") {
                     val request = call.receive<InformasjonFraBrukerRequest>()
 
-                    val response =
-                        inTransaction {
-                            forbehandlingService.lagreInformasjonFraBruker(
-                                forbehandlingId = forbehandlingId,
-                                harMottattNyInformasjon = request.harMottattNyInformasjon,
-                                endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
-                                beskrivelseAvUgunst = request.beskrivelseAvUgunst,
-                            )
-                        }
+                    inTransaction {
+                        forbehandlingService.lagreInformasjonFraBruker(
+                            forbehandlingId = forbehandlingId,
+                            harMottattNyInformasjon = request.harMottattNyInformasjon,
+                            endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
+                            beskrivelseAvUgunst = request.beskrivelseAvUgunst,
+                        )
+                    }
 
-                    call.respond(response)
+                    call.respond(HttpStatusCode.OK)
                 }
 
                 post("bulk") {

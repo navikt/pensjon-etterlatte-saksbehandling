@@ -1376,7 +1376,7 @@ internal class OppgaveServiceTest(
         oppgaveService.tildelSaksbehandler(oppgave.id, "Z123456")
 
         val nyReferanse = UUID.randomUUID().toString()
-        oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId = oppgave.id, referanse = nyReferanse)
+        oppgaveService.endreTilKildeBehandlingOgOppdaterReferanseOgMerknad(oppgaveId = oppgave.id, referanse = nyReferanse)
 
         with(oppgaveService.hentOppgave(oppgave.id)) {
             kilde shouldBe OppgaveKilde.BEHANDLING

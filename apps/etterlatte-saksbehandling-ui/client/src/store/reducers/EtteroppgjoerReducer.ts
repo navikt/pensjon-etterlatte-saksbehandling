@@ -1,21 +1,21 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import {
   BeregnetEtteroppgjoerResultatDto,
-  EtteroppgjoerBehandling,
   EtteroppgjoerForbehandling,
+  EtteroppgjoerDetaljertForbehandling,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { useAppSelector } from '~store/Store'
 import { IBrev } from '~shared/types/Brev'
 
-export const addEtteroppgjoer = createAction<EtteroppgjoerForbehandling>('etteroppgjoer/add')
+export const addEtteroppgjoer = createAction<EtteroppgjoerDetaljertForbehandling>('etteroppgjoer/add')
 export const addEtteroppgjoerOppgave = createAction<OppgaveDTO>('etteroppgjoer/oppgave/add')
 export const addEtteroppgjoerBrev = createAction<IBrev>('etteroppgjoer/brev/add')
 export const resetEtteroppgjoer = createAction('etteroppgjoer/reset')
 export const addResultatEtteroppgjoer = createAction<BeregnetEtteroppgjoerResultatDto>('etteroppgjoer/resultat/add')
-export const updateEtteroppgjoerBehandling = createAction<EtteroppgjoerBehandling>('etteroppgjoer/behandling/update')
+export const updateEtteroppgjoerBehandling = createAction<EtteroppgjoerForbehandling>('etteroppgjoer/behandling/update')
 const initialState: {
-  etteroppgjoer: EtteroppgjoerForbehandling | null
+  etteroppgjoer: EtteroppgjoerDetaljertForbehandling | null
   oppgave: OppgaveDTO | null
 } = {
   etteroppgjoer: null,

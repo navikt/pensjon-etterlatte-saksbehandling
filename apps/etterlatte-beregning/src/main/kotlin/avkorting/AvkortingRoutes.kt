@@ -169,7 +169,7 @@ fun Route.avkorting(
                 call.respond(dto)
             }
 
-            post("beregn_faktisk_inntekt") {
+            post("beregn-faktisk-inntekt") {
                 val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
                 logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
                 etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)

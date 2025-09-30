@@ -74,7 +74,7 @@ export interface EtteroppgjoerOpplysninger {
 }
 
 export interface IInformasjonFraBruker {
-  harMottattNyInformasjon: JaNei
+  harMottattNyInformasjon?: JaNei
   endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string
 }

@@ -83,7 +83,6 @@ export const FaktiskInntektSkjema = ({ setFaktiskInntektSkjemaErAapen }: Props) 
             label="Inntekt fra utland"
           />
         </VStack>
-
         <SumAvFaktiskInntekt
           faktiskInntekt={fastsettFaktiskInntektSkjemaValuesTilFaktiskInntekt(watch('faktiskInntekt'))}
         />

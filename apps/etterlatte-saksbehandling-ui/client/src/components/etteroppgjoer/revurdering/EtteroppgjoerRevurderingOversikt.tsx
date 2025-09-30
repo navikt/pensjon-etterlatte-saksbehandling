@@ -21,6 +21,7 @@ import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/re
 import { AvsluttEtteroppgjoerRevurderingModal } from '~components/etteroppgjoer/revurdering/AvsluttEtteroppgjoerRevurderingModal'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+  const etteroppgjoer = useEtteroppgjoer()
   // const { next } = useBehandlingRoutes()
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -31,8 +32,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     innloggetSaksbehandler.skriveEnheter
   )
 
-  const etteroppgjoer = useEtteroppgjoer()
-
   // bruk forbehandlingId fra etteroppgjør hvis tilgjengelig, ellers relatertBehandlingId
   // ny id opprettes når forbehandling kopieres ved endring av inntekt
   const etteroppgjoerForbehandlingId = etteroppgjoer?.behandling?.id ?? behandling.relatertBehandlingId
@@ -41,37 +40,17 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
 
   const methods = useForm<EtteroppgjoerOversiktSkjemaer>({
-    defaultValues: {
-      informasjonFraBruker: {
-        harMottattNyInformasjon: etteroppgjoer?.behandling.harMottattNyInformasjon,
-        endringErTilUgunstForBruker: etteroppgjoer?.behandling.endringErTilUgunstForBruker,
-        beskrivelseAvUgunst: etteroppgjoer?.behandling.beskrivelseAvUgunst,
-      },
-      faktiskInntekt: etteroppgjoer?.faktiskInntekt
-        ? {
-            loennsinntekt: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.loennsinntekt),
-            afp: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.afp),
-            naeringsinntekt: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.naeringsinntekt),
-            utlandsinntekt: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.utlandsinntekt),
-            spesifikasjon: etteroppgjoer.faktiskInntekt.spesifikasjon,
-          }
-        : {
-            loennsinntekt: '0',
-            afp: '0',
-            naeringsinntekt: '0',
-            utlandsinntekt: '0',
-            spesifikasjon: '',
-          },
-    },
+    shouldUnregister: true,
   })
 
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
   const nesteSteg = () => {
     setOversiktValideringFeilmelding('')
-    const ingenFeil = isEmpty(methods.formState.errors.informasjonFraBruker)
 
     methods.trigger()
+
+    const ingenFeil = isEmpty(methods.formState.errors.informasjonFraBruker)
 
     console.log(ingenFeil)
 
@@ -97,6 +76,29 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     if (!etteroppgjoerForbehandlingId || etteroppgjoer) return
     hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
+      methods.setValue('informasjonFraBruker', {
+        harMottattNyInformasjon: etteroppgjoer?.behandling.harMottattNyInformasjon,
+        endringErTilUgunstForBruker: etteroppgjoer?.behandling.endringErTilUgunstForBruker,
+        beskrivelseAvUgunst: etteroppgjoer?.behandling.beskrivelseAvUgunst,
+      })
+      methods.setValue(
+        'faktiskInntekt',
+        etteroppgjoer.faktiskInntekt
+          ? {
+              loennsinntekt: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.loennsinntekt),
+              afp: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.afp),
+              naeringsinntekt: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.naeringsinntekt),
+              utlandsinntekt: new Intl.NumberFormat('nb').format(etteroppgjoer.faktiskInntekt.utlandsinntekt),
+              spesifikasjon: etteroppgjoer.faktiskInntekt.spesifikasjon,
+            }
+          : {
+              loennsinntekt: '0',
+              afp: '0',
+              naeringsinntekt: '0',
+              utlandsinntekt: '0',
+              spesifikasjon: '',
+            }
+      )
     })
   }, [etteroppgjoerForbehandlingId, etteroppgjoer])
 

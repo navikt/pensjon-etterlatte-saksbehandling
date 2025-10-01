@@ -256,7 +256,7 @@ class EtteroppgjoerForbehandlingService(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         sjekkAtOppgaveErGyldigForForbehandling(oppgave, sakId)
 
-        kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar)
+        kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId)
 
         val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val nyForbehandling = opprettOgLagreForbehandling(sak, inntektsaar, brukerTokenInfo)
@@ -437,6 +437,7 @@ class EtteroppgjoerForbehandlingService(
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
+        oppgaveId: UUID,
     ) {
         // Sak
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
@@ -446,7 +447,7 @@ class EtteroppgjoerForbehandlingService(
 
         if (oppgaveService
                 .hentOppgaverForSak(sak.id)
-                .filter { it.kilde == OppgaveKilde.BEHANDLING }
+                .filter { it.kilde == OppgaveKilde.BEHANDLING && it.id != oppgaveId }
                 .any { it.erIkkeAvsluttet() }
         ) {
             logger.info("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger")

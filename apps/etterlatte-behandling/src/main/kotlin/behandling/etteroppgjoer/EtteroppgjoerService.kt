@@ -15,8 +15,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
-import no.nav.etterlatte.sak.SakLesDao
-import no.nav.etterlatte.sak.SakService
 import java.time.LocalDate
 import java.util.UUID
 
@@ -30,8 +28,6 @@ enum class EtteroppgjoerSvarfrist(
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
-    val sakLesDao: SakLesDao,
-    val sakService: SakService,
     val vedtakKlient: VedtakKlient,
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,

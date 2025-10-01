@@ -4,9 +4,9 @@ import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
@@ -62,7 +62,7 @@ class EtteroppgjoerForbehandlingService(
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
-    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
+    private val etteroppgjoerTempService: EtteroppgjoerTempService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
@@ -311,7 +311,7 @@ class EtteroppgjoerForbehandlingService(
     }
 
     fun opprettOppgaveForOpprettForbehandling(sakId: SakId) {
-        etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
+        etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(sakId)
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(
@@ -332,7 +332,7 @@ class EtteroppgjoerForbehandlingService(
 
         relevanteSaker.map { sakId ->
             try {
-                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
+                etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(sakId)
             } catch (e: Error) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }

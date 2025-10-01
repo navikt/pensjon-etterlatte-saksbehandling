@@ -43,11 +43,17 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
   const nesteSteg = () => {
+    setOversiktValideringFeilmelding('')
+
     if (
       (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
       (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
     ) {
-      if (
+      // Hvis revurderingen stammer fra svarfrist utløpt
+      if (behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !etteroppgjoer.behandling.harMottattNyInformasjon) {
+        setOversiktValideringFeilmelding('Du må ta stilling til informasjon fra bruker')
+        return
+      } else if (
         etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
         etteroppgjoer.behandling.kopiertFra === undefined
       ) {

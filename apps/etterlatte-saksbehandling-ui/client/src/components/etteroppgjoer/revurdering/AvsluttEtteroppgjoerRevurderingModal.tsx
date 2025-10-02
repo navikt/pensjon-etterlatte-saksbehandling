@@ -68,7 +68,7 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
               </Modal.Header>
               <Modal.Body>
                 <VStack gap="4">
-                  <BodyShort>Husk å opprette ny forbehandling når du har avsluttet revurderingen.</BodyShort>
+                  <BodyShort>Du får oppgave om ny forbehandling når du avslutter revurderingen.</BodyShort>
 
                   {isFailureHandler({
                     apiResult: avbrytBehandlingResult,

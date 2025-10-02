@@ -37,8 +37,8 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
@@ -407,8 +407,6 @@ internal class ApplicationContext(
         OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
     val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
-    val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
-
     private val aldersovergangDao = AldersovergangDao(dataSource)
 
     val opplysningDao = OpplysningDao(dataSource)
@@ -437,6 +435,8 @@ internal class ApplicationContext(
             oppdaterTilgangService,
         )
 
+    val etteroppgjoerTempService = EtteroppgjoerTempService(oppgaveService, etteroppgjoerDao, etteroppgjoerForbehandlingDao)
+
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
@@ -447,7 +447,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
             beregningKlient = beregningKlient,
-            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+            etteroppgjoerTempService = etteroppgjoerTempService,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -578,8 +578,6 @@ internal class ApplicationContext(
     val etteroppgjoerService =
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
-            sakLesDao = sakLesDao,
-            sakService = sakService,
             vedtakKlient = vedtakKlient,
             behandlingService = behandlingService,
             beregningKlient = beregningKlient,
@@ -671,7 +669,7 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
-            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+            etteroppgjoerTempService = etteroppgjoerTempService,
         )
 
     val behandlingsStatusService =

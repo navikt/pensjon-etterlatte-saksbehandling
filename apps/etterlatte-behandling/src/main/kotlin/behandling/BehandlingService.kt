@@ -439,7 +439,7 @@ internal class BehandlingServiceImpl(
         aarsak: AarsakTilAvbrytelse?,
     ) {
         if (behandling.type == BehandlingType.REVURDERING && aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
-            val merknad = "Ny forbehandling for etteroppgjør siden revurderingen er avbrutt pga endring er til ugunst for bruker"
+            val merknad = "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring"
             etteroppgjoerTempService.tilbakestillEtteroppgjoerStatusPgaUgunst(behandling)
             etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(behandling.sak.id, merknad)
         }

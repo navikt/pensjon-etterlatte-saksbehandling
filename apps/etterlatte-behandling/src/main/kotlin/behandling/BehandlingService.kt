@@ -12,7 +12,7 @@ import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerOppgaveService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -316,7 +316,7 @@ internal class BehandlingServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val beregningKlient: BeregningKlient,
-    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
+    private val etteroppgjoerTempService: EtteroppgjoerTempService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -440,7 +440,8 @@ internal class BehandlingServiceImpl(
     ) {
         if (behandling.type == BehandlingType.REVURDERING && aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
             val merknad = "Ny forbehandling for etteroppgjør siden revurderingen er avbrutt pga endring er til ugunst for bruker"
-            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(behandling.sak.id, merknad)
+            etteroppgjoerTempService.tilbakestillEtteroppgjoerStatusPgaUgunst(behandling)
+            etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(behandling.sak.id, merknad)
         }
     }
 

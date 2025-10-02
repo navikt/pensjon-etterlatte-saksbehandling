@@ -74,7 +74,7 @@ metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_
 
 messaginghub-pooled-jms = { module = "org.messaginghub:pooled-jms", version = "3.1.7" }
 
-mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.3.0" }
+mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.3.1" }
 
 navfelles-rapidsandriversktor = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapidsandrivers-version" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }

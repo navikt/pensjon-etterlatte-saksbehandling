@@ -23,7 +23,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val svarfrist = if (isProd()) EtteroppgjoerSvarfrist.EN_MND else EtteroppgjoerSvarfrist.FEMTEN_MINUTTER
+    private val svarfrist = if (isProd()) EtteroppgjoerSvarfrist.EN_MND else EtteroppgjoerSvarfrist.FEM_MINUTT
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)

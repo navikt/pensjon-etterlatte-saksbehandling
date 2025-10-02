@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, HelpText, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 
@@ -91,7 +91,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
                       message: 'Du må legge til en kommentar',
                     },
                   })}
-                  label="Kommentar"
+                  label={<TextAreaLabel />}
                   error={errors.kommentar?.message}
                 />
               ) : (
@@ -127,3 +127,12 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
     </>
   )
 }
+
+const TextAreaLabel = () => (
+  <HStack gap="1">
+    Kommentar
+    <HelpText>
+      Legg til kommentar hvis du avslutter oppgaven. Det er ikke nødvendig dersom du oppretter revurdering.
+    </HelpText>
+  </HStack>
+)

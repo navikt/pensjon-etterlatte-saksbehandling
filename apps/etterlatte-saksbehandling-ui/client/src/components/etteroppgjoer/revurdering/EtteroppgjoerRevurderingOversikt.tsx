@@ -96,14 +96,15 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
                 </Box>
               )}
 
-            {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
-              <>
-                <FastsettFaktiskInntekt
-                  erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
-                  setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-                />
-              </>
-            )}
+            {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+              etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
+                <>
+                  <FastsettFaktiskInntekt
+                    erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+                    setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+                  />
+                </>
+              )}
           </>
         ) : (
           <FastsettFaktiskInntekt
@@ -112,8 +113,12 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           />
         )}
 
-        <TabellForBeregnetEtteroppgjoerResultat />
-        <ResultatAvForbehandling />
+        {etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
+          <>
+            <TabellForBeregnetEtteroppgjoerResultat />
+            <ResultatAvForbehandling />
+          </>
+        )}
 
         <Box maxWidth="42.5rem">
           <VStack gap="8">

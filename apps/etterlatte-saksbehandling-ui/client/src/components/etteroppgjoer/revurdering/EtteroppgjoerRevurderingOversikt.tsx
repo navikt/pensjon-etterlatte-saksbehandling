@@ -85,23 +85,26 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
             {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
               !erFerdigBehandlet(behandling.status) && (
-                <Alert variant="info">
-                  <Heading spacing size="small" level="3">
-                    Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
-                  </Heading>
-                  Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
-                  ny forbehandling for etteroppgjøret skal opprettes.
-                </Alert>
+                <Box maxWidth="42.5rem">
+                  <Alert variant="info">
+                    <Heading spacing size="small" level="3">
+                      Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+                    </Heading>
+                    Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
+                    ny forbehandling for etteroppgjøret skal opprettes.
+                  </Alert>
+                </Box>
               )}
 
-            {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
-              <>
-                <FastsettFaktiskInntekt
-                  erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
-                  setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-                />
-              </>
-            )}
+            {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+              etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
+                <>
+                  <FastsettFaktiskInntekt
+                    erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+                    setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+                  />
+                </>
+              )}
           </>
         ) : (
           <FastsettFaktiskInntekt
@@ -110,8 +113,12 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
           />
         )}
 
-        <TabellForBeregnetEtteroppgjoerResultat />
-        <ResultatAvForbehandling />
+        {etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
+          <>
+            <TabellForBeregnetEtteroppgjoerResultat />
+            <ResultatAvForbehandling />
+          </>
+        )}
 
         <Box maxWidth="42.5rem">
           <VStack gap="8">

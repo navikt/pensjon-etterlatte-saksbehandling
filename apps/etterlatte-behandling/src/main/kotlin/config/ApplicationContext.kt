@@ -14,6 +14,7 @@ import no.nav.etterlatte.EnvKey.NAVANSATT_URL
 import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.SKJERMING_URL
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.arbeidOgInntekt.ArbeidOgInntektKlient
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
@@ -37,6 +38,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
@@ -57,10 +59,10 @@ import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveU
 import no.nav.etterlatte.behandling.jobs.aktivitetsplikt.AktivitetspliktOppgaveUnntakUtloeperJobService
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteropppgjoerJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJobService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
@@ -146,6 +148,8 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkKlientImpl
 import no.nav.etterlatte.kodeverk.KodeverkService
+import no.nav.etterlatte.krr.KrrKlient
+import no.nav.etterlatte.krr.KrrKlientImpl
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
@@ -171,8 +175,6 @@ import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
-import no.nav.etterlatte.person.krr.KrrKlient
-import no.nav.etterlatte.person.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
@@ -336,6 +338,7 @@ internal class ApplicationContext(
             config.getString("sigrun.url"),
             featureToggleService,
         ),
+    val arbeidOgInntektKlient: ArbeidOgInntektKlient = ArbeidOgInntektKlient(httpClient(), config.getString("arbeidOgInntekt.url")),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
@@ -432,6 +435,8 @@ internal class ApplicationContext(
             oppdaterTilgangService,
         )
 
+    val etteroppgjoerTempService = EtteroppgjoerTempService(oppgaveService, etteroppgjoerDao, etteroppgjoerForbehandlingDao)
+
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
@@ -442,6 +447,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
             beregningKlient = beregningKlient,
+            etteroppgjoerTempService = etteroppgjoerTempService,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -572,8 +578,6 @@ internal class ApplicationContext(
     val etteroppgjoerService =
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
-            sakLesDao = sakLesDao,
-            sakService = sakService,
             vedtakKlient = vedtakKlient,
             behandlingService = behandlingService,
             beregningKlient = beregningKlient,
@@ -665,6 +669,7 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
+            etteroppgjoerTempService = etteroppgjoerTempService,
         )
 
     val behandlingsStatusService =
@@ -757,8 +762,8 @@ internal class ApplicationContext(
 
     private val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
-    val etteroppgjoerJobService =
-        EtteroppgjoerJobService(
+    val opprettEtteroppgjoerJobService =
+        OpprettEtteroppgjoerJobService(
             etteroppgjoerService,
             vedtakKlient,
             featureToggleService,
@@ -912,9 +917,9 @@ internal class ApplicationContext(
         )
     }
 
-    val etteroppgjoerJob: EtteropppgjoerJob by lazy {
-        EtteropppgjoerJob(
-            etteroppgjoerJobService = etteroppgjoerJobService,
+    val etteroppgjoerJob: OpprettEtteroppgjoerJob by lazy {
+        OpprettEtteroppgjoerJob(
+            opprettEtteroppgjoerJobService = opprettEtteroppgjoerJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(10, ChronoUnit.MINUTES),
@@ -928,7 +933,7 @@ internal class ApplicationContext(
             etteroppgjoerSvarfristUtloeptJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(10, ChronoUnit.MINUTES),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(6, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

@@ -50,6 +50,8 @@ import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkNavn
 import no.nav.etterlatte.kodeverk.KodeverkResponse
+import no.nav.etterlatte.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -104,8 +106,6 @@ import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
-import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
 import java.time.YearMonth

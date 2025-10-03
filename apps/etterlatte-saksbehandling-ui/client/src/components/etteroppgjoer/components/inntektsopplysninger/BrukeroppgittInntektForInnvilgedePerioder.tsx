@@ -1,4 +1,4 @@
-import { BodyShort, Detail, Heading, HStack, Label, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Detail, Heading, HelpText, HStack, Label, Table, VStack } from '@navikt/ds-react'
 import { ForventetInntektGrunnlag, IAvkortingGrunnlag, erForventetInntekt } from '~shared/types/IAvkorting'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato, formaterDatoMedFallback, formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
@@ -26,7 +26,15 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
           <Table.Row>
             <Table.HeaderCell />
             <Table.HeaderCell scope="col">Forventet inntekt</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Innvilgede måneder</Table.HeaderCell>
+            <Table.HeaderCell scope="col">
+              <HStack gap="1">
+                Innvilgede måneder
+                <HelpText>
+                  Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Antallet endres ikke selv om man
+                  har hatt inntektsendring i løpet av året.
+                </HelpText>
+              </HStack>
+            </Table.HeaderCell>
             <Table.HeaderCell scope="col">Fra</Table.HeaderCell>
             <Table.HeaderCell scope="col">Til</Table.HeaderCell>
             <Table.HeaderCell scope="col">Spesifikasjon</Table.HeaderCell>

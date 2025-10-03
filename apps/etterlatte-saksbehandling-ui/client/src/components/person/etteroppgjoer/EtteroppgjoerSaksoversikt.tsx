@@ -24,26 +24,16 @@ const steps = [
   },
   {
     index: 4,
-    status: 'FERDIGSTILT_UTEN_VARSEL',
-    text: () => 'Etteroppgjøret er ferdigstilt uten varselbrev siden bruker ikke fikk utbetalt stønad',
-  },
-  {
-    index: 5,
-    status: 'FERDIGSTILT_FORBEHANDLING',
+    status: 'VENTER_PAA_SVAR',
     text: () => 'Varselbrev sendt, venter på svar fra bruker',
   },
   {
-    index: 6,
+    index: 5,
     status: 'UNDER_REVURDERING',
     text: () => 'Behandler mottatt svar',
   },
   {
-    index: 7,
-    status: 'FERDIGSTILT_REVURDERING',
-    text: () => 'Etteroppgjøret er ferdig behandlet',
-  },
-  {
-    index: 8,
+    index: 6,
     status: 'FERDIGSTILT',
     text: () => 'Etteroppgjøret er ferdigstilt',
   },
@@ -70,16 +60,12 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
         {isSuccess(hentEtteroppgjoerResponse) &&
           hentEtteroppgjoerResponse.data.map((etteroppgjoer, index) => {
             const currentLevel = steps.find((s) => s.status === etteroppgjoer.status)?.index ?? 0
-            const aktuelleSteg =
-              etteroppgjoer.status !== 'FERDIGSTILT_UTEN_VARSEL'
-                ? steps.filter((step) => step.status !== 'FERDIGSTILT_UTEN_VARSEL')
-                : steps
 
             return (
               <div key={index}>
                 <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
                 <List as="ul">
-                  {aktuelleSteg.map(({ status, text, index: stepIndex }) => (
+                  {steps.map(({ status, text, index: stepIndex }) => (
                     <List.Item
                       key={status}
                       icon={getIcon(currentLevel, stepIndex)}

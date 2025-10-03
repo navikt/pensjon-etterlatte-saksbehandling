@@ -94,7 +94,7 @@ class EtteroppgjoerDaoTest(
     @ParameterizedTest
     @EnumSource(
         value = EtteroppgjoerStatus::class,
-        names = ["FERDIGSTILT", "FERDIGSTILT_UTEN_VARSEL"],
+        names = ["FERDIGSTILT"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `skal hente aktive etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
@@ -105,7 +105,7 @@ class EtteroppgjoerDaoTest(
     @ParameterizedTest
     @EnumSource(
         value = EtteroppgjoerStatus::class,
-        names = ["FERDIGSTILT", "FERDIGSTILT_UTEN_VARSEL"],
+        names = ["FERDIGSTILT"],
         mode = EnumSource.Mode.INCLUDE,
     )
     fun `skal ikke hente ferdigstilte etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
@@ -140,7 +140,7 @@ class EtteroppgjoerDaoTest(
             Etteroppgjoer(
                 sakId = sak.id,
                 inntektsaar = inntektsaar,
-                status = EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING,
+                status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
                 sisteFerdigstilteForbehandling = forbehandling.id,
             ),
         )
@@ -157,7 +157,7 @@ class EtteroppgjoerDaoTest(
         svarfristUtloept!!.size shouldBe 1
         svarfristUtloept.first().sakId shouldBe sak.id
         svarfristUtloept.first().inntektsaar shouldBe inntektsaar
-        svarfristUtloept.first().status shouldBe EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
+        svarfristUtloept.first().status shouldBe EtteroppgjoerStatus.VENTER_PAA_SVAR
         svarfristUtloept.first().sisteFerdigstilteForbehandling shouldBe forbehandling.id
     }
 

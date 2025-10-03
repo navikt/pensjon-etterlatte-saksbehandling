@@ -1,8 +1,5 @@
-import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { useAppDispatch } from '~store/Store'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
-import React, { useEffect, useState } from 'react'
+import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import React, { useState } from 'react'
 import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
@@ -36,13 +33,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const etteroppgjoer = useEtteroppgjoer()
 
-  // bruk forbehandlingId fra etteroppgjør hvis tilgjengelig, ellers relatertBehandlingId
-  // ny id opprettes når forbehandling kopieres ved endring av inntekt
-  const etteroppgjoerForbehandlingId = etteroppgjoer?.behandling?.id ?? behandling.relatertBehandlingId
-
-  const dispatch = useAppDispatch()
-  const [, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
-
   const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
     FieldErrors<IInformasjonFraBruker> | undefined
   >()
@@ -53,11 +43,17 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
 
   const nesteSteg = () => {
+    setOversiktValideringFeilmelding('')
+
     if (
       (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
       (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
     ) {
-      if (
+      // Hvis revurderingen stammer fra svarfrist utløpt
+      if (behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !etteroppgjoer.behandling.harMottattNyInformasjon) {
+        setOversiktValideringFeilmelding('Du må ta stilling til informasjon fra bruker')
+        return
+      } else if (
         etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
         etteroppgjoer.behandling.kopiertFra === undefined
       ) {
@@ -68,13 +64,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       next()
     }
   }
-
-  useEffect(() => {
-    if (!etteroppgjoerForbehandlingId || etteroppgjoer) return
-    hentEtteroppgjoerRequest(etteroppgjoerForbehandlingId, (etteroppgjoer) => {
-      dispatch(addEtteroppgjoer(etteroppgjoer))
-    })
-  }, [etteroppgjoerForbehandlingId, etteroppgjoer])
 
   return (
     !!etteroppgjoer && (
@@ -93,6 +82,18 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
               behandling={behandling}
               setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
             />
+
+            {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
+              !erFerdigBehandlet(behandling.status) && (
+                <Alert variant="info">
+                  <Heading spacing size="small" level="3">
+                    Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+                  </Heading>
+                  Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
+                  ny forbehandling for etteroppgjøret skal opprettes.
+                </Alert>
+              )}
+
             {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && (
               <>
                 <FastsettFaktiskInntekt
@@ -122,17 +123,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             )}
 
             {!!oversiktValideringFeilmelding && <Alert variant="error">{oversiktValideringFeilmelding}</Alert>}
-
-            {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
-              !erFerdigBehandlet(behandling.status) && (
-                <Alert variant="info">
-                  <Heading spacing size="small" level="3">
-                    Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
-                  </Heading>
-                  Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
-                  ny forbehandling for etteroppgjøret skal opprettes.
-                </Alert>
-              )}
           </VStack>
         </Box>
 

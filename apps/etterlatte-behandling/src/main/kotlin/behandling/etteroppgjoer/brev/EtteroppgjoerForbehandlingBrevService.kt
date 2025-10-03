@@ -72,7 +72,7 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillForbehandlingOgDistribuerBrev(
+    suspend fun ferdigstillForbehandlingMedBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
@@ -109,7 +109,6 @@ class EtteroppgjoerForbehandlingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
-
         return brevKlient.genererPdf(brevID, forbehandlingId, brevRequest, brukerTokenInfo)
     }
 
@@ -151,6 +150,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 )
             }
 
+            // TODO: hente når vi henter ut detaljertForbehandling i stede
             val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(forbehandlingId)
 
             val sisteIverksatteBehandling =

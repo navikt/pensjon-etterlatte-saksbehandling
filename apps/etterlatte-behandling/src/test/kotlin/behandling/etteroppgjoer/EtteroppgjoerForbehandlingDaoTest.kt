@@ -25,12 +25,15 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -108,6 +111,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = dato,
+                etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny.copy())
@@ -120,6 +124,24 @@ class EtteroppgjoerForbehandlingDaoTest(
             innvilgetPeriode shouldBe ny.innvilgetPeriode
             kopiertFra shouldBe kopiertFra
             varselbrevSendt shouldBe dato
+        }
+    }
+
+    @Test
+    fun `skal oppdatere svar fra bruker`() {
+        val forbehandlingId = UUID.randomUUID()
+        val forbehandling = opprettForbehandling(forbehandlingId)
+        forbehandling
+            .oppdaterBrukerHarSvart(
+                JaNei.JA,
+                JaNei.JA,
+                "beskrivelse",
+            ).also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.harMottattNyInformasjon shouldBe JaNei.JA
+            this?.endringErTilUgunstForBruker shouldBe JaNei.JA
+            this?.beskrivelseAvUgunst shouldBe "beskrivelse"
         }
     }
 
@@ -155,28 +177,10 @@ class EtteroppgjoerForbehandlingDaoTest(
 
         with(etteroppgjoerForbehandlingDao.hentForbehandlinger(sak.id)) {
             size shouldBe 2
+            forEach {
+                it.aarsakTilAvbrytelse shouldBe AarsakTilAvbryteForbehandling.FEILREGISTRERT
+            }
         }
-    }
-
-    @Test
-    fun `oppdater relatert behandling id`() {
-        val relatertForbehandlingId = UUID.randomUUID()
-
-        val sak1 = sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling =
-            opprettBehandling(
-                type = BehandlingType.REVURDERING,
-                sakId = sak1,
-                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
-                prosesstype = Prosesstype.MANUELL,
-                relatertBehandlingId = relatertForbehandlingId.toString(),
-            )
-        behandlingRepo.opprettBehandling(opprettBehandling)
-
-        val nyRelatertForbehandlingId = UUID.randomUUID()
-        etteroppgjoerForbehandlingDao.oppdaterRelatertBehandling(relatertForbehandlingId, nyRelatertForbehandlingId)
-
-        behandlingRepo.hentBehandling(opprettBehandling.id)!!.relatertBehandlingId shouldBe nyRelatertForbehandlingId.toString()
     }
 
     @Test
@@ -372,8 +376,8 @@ class EtteroppgjoerForbehandlingDaoTest(
         summerteInntekterKopi.tidspunktBeregnet shouldBe summerteInntekter.tidspunktBeregnet
     }
 
-    private fun opprettForbehandling(forbehandlingId: UUID) {
-        etteroppgjoerForbehandlingDao.lagreForbehandling(
+    private fun opprettForbehandling(forbehandlingId: UUID): EtteroppgjoerForbehandling {
+        val forbehandling =
             EtteroppgjoerForbehandling(
                 id = forbehandlingId,
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
@@ -387,10 +391,18 @@ class EtteroppgjoerForbehandlingDaoTest(
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
-            ),
+                aarsakTilAvbrytelse = AarsakTilAvbryteForbehandling.FEILREGISTRERT,
+                aarsakTilAvbrytelseBeskrivelse = "test",
+                beskrivelseAvUgunst = "test",
+                etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
+            )
+
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            forbehandling,
         )
+
+        return forbehandling
     }
 
     @Test

@@ -95,6 +95,7 @@ internal class BehandlingServiceImplTest {
             oppgaveService = oppgaveServiceMock,
             grunnlagService = grunnlagService,
             beregningKlient = mockk(),
+            etteroppgjoerTempService = mockk(),
         )
 
     @AfterEach

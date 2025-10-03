@@ -111,6 +111,11 @@ interface OppgaveDao {
         merknad: String,
     )
 
+    fun oppdaterMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+    )
+
     fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
@@ -590,6 +595,28 @@ class OppgaveDaoImpl(
                         """.trimIndent(),
                     )
                 statement.setTidspunkt(1, frist)
+                statement.setObject(2, oppgaveId)
+
+                statement.executeUpdate()
+            }
+        }
+    }
+
+    override fun oppdaterMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE oppgave
+                        SET merknad = ?
+                        where id = ?::UUID
+                        """.trimIndent(),
+                    )
+                statement.setString(1, merknad)
                 statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()

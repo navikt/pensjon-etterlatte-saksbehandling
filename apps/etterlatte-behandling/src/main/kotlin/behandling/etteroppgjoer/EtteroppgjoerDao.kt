@@ -26,7 +26,7 @@ class EtteroppgjoerDao(
                         """
                         SELECT *  
                         FROM etteroppgjoer e INNER JOIN etteroppgjoer_behandling eb on e.siste_ferdigstilte_forbehandling = eb.id
-                        WHERE e.status = 'FERDIGSTILT_FORBEHANDLING'
+                        WHERE e.status = 'VENTER_PAA_SVAR'
                         AND eb.varselbrev_sendt IS NOT NULL
                           AND eb.varselbrev_sendt < (now() - interval '${svarfrist.value}')
                           AND eb.status = 'FERDIGSTILT'
@@ -72,17 +72,14 @@ class EtteroppgjoerDao(
                         SELECT *
                         FROM etteroppgjoer 
                         WHERE sak_id = ?
-                        AND status NOT IN (?, ?)
+                        AND status != ?
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId.sakId)
-
-                var index = 2
-                for (status in EtteroppgjoerStatus.ETTEROPPGJOER_ER_FERDIGSTILT) {
-                    statement.setString(index++, status.name)
-                }
+                statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
 
                 val etteroppgjoer = statement.executeQuery().toList { toEtteroppgjoer() }
+
                 // TODO: vi har ikke testet eller vet om flere etteorppgjør fungerer
                 krev(etteroppgjoer.size < 2) { "Fant ${etteroppgjoer.size} aktive etteroppgjoer for sak $sakId, forventet 1" }
                 etteroppgjoer

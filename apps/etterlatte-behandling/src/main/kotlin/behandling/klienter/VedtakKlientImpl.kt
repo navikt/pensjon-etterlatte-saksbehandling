@@ -508,7 +508,7 @@ class VedtakKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/tilbakekreving/$tilbakekrevingId/tilbakestill",
+                            url = "$resourceUrl/tilbakekreving/$tilbakekrevingId/tilbakestill-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = {},

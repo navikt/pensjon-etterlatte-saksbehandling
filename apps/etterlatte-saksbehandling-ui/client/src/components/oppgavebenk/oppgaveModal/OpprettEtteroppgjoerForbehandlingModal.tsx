@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, HelpText, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 
@@ -9,10 +9,9 @@ import { isPending, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterDato } from '~utils/formatering/dato'
-import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
-import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
+import { opprettEtteroppgoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
 import { useNavigate } from 'react-router-dom'
 
 type Props = {
@@ -20,17 +19,16 @@ type Props = {
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
-export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: Props) => {
+export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
-
-  const navigate = useNavigate()
-
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const [ferdigstillStatus, ferdigstill] = useApiCall(ferdigstillOppgaveMedMerknad)
+  const [ferdigstillStatus] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
+
+  const navigate = useNavigate()
 
   const {
     formState: { errors },
@@ -38,14 +36,11 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
     register,
   } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
 
-  const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
+  const [opprettForbehandlingResult, opprettForbehandlingRequest] = useApiCall(opprettForbehandlingApi)
 
-  const opprettRevurderingEtteroppgjoer = () => {
-    opprettRevurderingRequest({ sakId: oppgave.sakId, opprinnelse: Opprinnelse.AUTOMATISK_JOBB }, (result) => {
-      ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
-        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-        navigate(`/behandling/${result}/etteroppgjoeroversikt`)
-      })
+  const opprettForbehandling = () => {
+    opprettForbehandlingRequest({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (forbehandling) => {
+      navigate(`/etteroppgjoer/${forbehandling.id}`)
     })
   }
 
@@ -69,7 +64,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: 'Etteroppgjør – svarfrist utløpt' }}
+        header={{ heading: 'Etteroppgjør – opprett forbehandling' }}
       >
         <Modal.Body>
           <VStack gap="4">
@@ -80,8 +75,6 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
 
             {oppgave.merknad && <Alert variant="info">{oppgave.merknad}</Alert>}
 
-            <BodyShort>Etteroppgjøret kan ferdigstilles</BodyShort>
-
             {kanRedigeres &&
               (erTildeltSaksbehandler ? (
                 <Textarea
@@ -91,16 +84,16 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
                       message: 'Du må legge til en kommentar',
                     },
                   })}
-                  label={<TextAreaLabel />}
+                  label="Kommentar"
                   error={errors.kommentar?.message}
                 />
               ) : (
                 <BodyShort>Du må tildele deg oppgaven for å endre den.</BodyShort>
               ))}
 
-            {mapResult(opprettRevurderingResult, {
+            {mapResult(opprettForbehandlingResult, {
               error: (error) => (
-                <ApiErrorAlert>Kunne ikke opprette revurdering for etteroppgjør. {error.detail}</ApiErrorAlert>
+                <ApiErrorAlert>Kunne ikke opprette forbehandling for etteroppgjør. {error.detail}</ApiErrorAlert>
               ),
             })}
 
@@ -116,8 +109,8 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
               )}
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button loading={isPending(opprettRevurderingResult)} onClick={() => opprettRevurderingEtteroppgjoer()}>
-                  Opprett revurdering
+                <Button loading={isPending(opprettForbehandlingResult)} onClick={() => opprettForbehandling()}>
+                  Opprett forbehandling
                 </Button>
               )}
             </HStack>
@@ -127,12 +120,3 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
     </>
   )
 }
-
-const TextAreaLabel = () => (
-  <HStack gap="1">
-    Kommentar
-    <HelpText>
-      Legg til kommentar hvis du avslutter oppgaven. Det er ikke nødvendig dersom du oppretter revurdering.
-    </HelpText>
-  </HStack>
-)

@@ -40,7 +40,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.etterlatte.person.krr.KrrKlient
+import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.slf4j.LoggerFactory

@@ -35,6 +35,8 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -50,13 +52,10 @@ import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
-import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup

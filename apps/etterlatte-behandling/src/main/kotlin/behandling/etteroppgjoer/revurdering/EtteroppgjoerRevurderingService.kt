@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -19,13 +20,16 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import java.util.UUID
 
 class EtteroppgjoerRevurderingService(
     private val behandlingService: BehandlingService,
@@ -43,21 +47,28 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
+        val sisteFerdigstilteForbehandlingId =
+            inTransaction {
+                etteroppgjoerForbehandlingService
+                    .hentSisteFerdigstillteForbehandling(
+                        sakId = sakId,
+                    ).id
+            }
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
 
                 val sisteFerdigstilteForbehandling =
-                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandlingPaaSak(
+                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandling(
                         sakId = sakId,
                     )
 
                 // TODO: er dette nok for å unngå mismatch ... ?
                 etteroppgjoerService
                     .hentAlleAktiveEtteroppgjoerForSak(sakId)
-                    .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandling.id }
+                    .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandlingId }
                     ?: throw InternfeilException(
-                        "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling ${sisteFerdigstilteForbehandling.id}",
+                        "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling $sisteFerdigstilteForbehandlingId",
                     )
 
                 val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
@@ -66,8 +77,11 @@ class EtteroppgjoerRevurderingService(
                     behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
                         ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
 
+                val nyForbehandling =
+                    etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(sisteFerdigstilteForbehandlingId, sakId)
+
                 val revurdering =
-                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, sisteFerdigstilteForbehandling, brukerTokenInfo)
+                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, nyForbehandling, brukerTokenInfo)
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = revurdering.id,
@@ -77,7 +91,7 @@ class EtteroppgjoerRevurderingService(
 
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                     sakId,
-                    sisteFerdigstilteForbehandling.aar,
+                    nyForbehandling.aar,
                     EtteroppgjoerStatus.UNDER_REVURDERING,
                 )
 
@@ -102,14 +116,21 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        return revurdering
+        return inTransaction {
+            kopierFaktiskInntekt(
+                fraForbehandlingId = sisteFerdigstilteForbehandlingId,
+                tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
+                brukerTokenInfo = brukerTokenInfo,
+            )
+            krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Revurdering finnes ikke etter oppretting" }
+        }
     }
 
     private fun opprettRevurdering(
         sakId: SakId,
         sisteIverksatteBehandling: Behandling,
         opprinnelse: BehandlingOpprinnelse,
-        sisteFerdigstilteForbehandling: EtteroppgjoerForbehandling,
+        forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val persongalleri =
@@ -118,7 +139,7 @@ class EtteroppgjoerRevurderingService(
 
         val virkningstidspunkt =
             Virkningstidspunkt(
-                dato = sisteFerdigstilteForbehandling.innvilgetPeriode.fom,
+                dato = forbehandling.innvilgetPeriode.fom,
                 kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                 begrunnelse = "Satt automatisk ved opprettelse av revurdering med årsak etteroppgjør.",
             )
@@ -127,14 +148,14 @@ class EtteroppgjoerRevurderingService(
             .opprettRevurdering(
                 sakId = sakId,
                 forrigeBehandling = sisteIverksatteBehandling,
-                relatertBehandlingId = sisteFerdigstilteForbehandling.id.toString(),
+                relatertBehandlingId = forbehandling.id.toString(),
                 persongalleri = persongalleri,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
                 virkningstidspunkt = virkningstidspunkt,
                 saksbehandlerIdent = brukerTokenInfo.ident(),
-                begrunnelse = "Etteroppgjør ${sisteFerdigstilteForbehandling.aar}",
+                begrunnelse = "Etteroppgjør ${forbehandling.aar}",
                 mottattDato = null,
                 frist = null,
                 paaGrunnAvOppgave = null,
@@ -165,4 +186,29 @@ class EtteroppgjoerRevurderingService(
 
             sisteIverksatteVedtak
         }
+
+    private fun kopierFaktiskInntekt(
+        fraForbehandlingId: UUID,
+        tilForbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FaktiskInntektDto? {
+        val sisteFerdigstilteForbehandling =
+            etteroppgjoerForbehandlingService
+                .hentDetaljertForbehandling(fraForbehandlingId, brukerTokenInfo)
+
+        return sisteFerdigstilteForbehandling.faktiskInntekt?.apply {
+            etteroppgjoerForbehandlingService.lagreOgBeregnFaktiskInntekt(
+                forbehandlingId = tilForbehandlingId,
+                request =
+                    BeregnFaktiskInntektRequest(
+                        loennsinntekt,
+                        afp,
+                        naeringsinntekt,
+                        utlandsinntekt,
+                        spesifikasjon,
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            )
+        }
+    }
 }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -25,6 +26,7 @@ import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.time.Duration
 
 private typealias RequestWrapper = no.nav.system.os.tjenester.simulerfpservice.simulerfpservicegrensesnitt.SimulerBeregningRequest
 private typealias ResponseWrapper = no.nav.system.os.tjenester.simulerfpservice.simulerfpservicegrensesnitt.SimulerBeregningResponse
@@ -55,6 +57,11 @@ class SimuleringOsKlient(
                         this.request = request
                     },
                 )
+                timeout {
+                    requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                    socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                    connectTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                }
             }
         if (!response.status.isSuccess()) {
             sikkerlogg.error("Simulering mot oppdrag feilet med status ${response.status}: ${response.bodyAsText()}")

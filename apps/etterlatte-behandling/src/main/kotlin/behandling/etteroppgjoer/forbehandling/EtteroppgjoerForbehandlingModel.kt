@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -31,8 +32,11 @@ data class EtteroppgjoerForbehandling(
     val harMottattNyInformasjon: JaNei?,
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
+    val aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling? = null,
+    val aarsakTilAvbrytelseBeskrivelse: String? = null,
     // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val kopiertFra: UUID? = null,
+    val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
 ) {
     companion object {
         fun opprett(
@@ -63,6 +67,7 @@ data class EtteroppgjoerForbehandling(
         }
         return copy(
             status = EtteroppgjoerForbehandlingStatus.BEREGNET,
+            etteroppgjoerResultatType = beregnetEtteroppgjoerResultatDto.resultatType,
             brevId =
                 this.brevId?.takeIf {
                     beregnetEtteroppgjoerResultatDto.resultatType !=
@@ -71,6 +76,21 @@ data class EtteroppgjoerForbehandling(
         )
     }
 
+    fun oppdaterBrukerHarSvart(
+        harMottattNyInformasjon: JaNei?,
+        endringErTilUgunstForBruker: JaNei?,
+        beskrivelseAvUgunst: String?,
+    ): EtteroppgjoerForbehandling =
+        copy(
+            harMottattNyInformasjon = harMottattNyInformasjon,
+            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon == JaNei.JA },
+            beskrivelseAvUgunst =
+                beskrivelseAvUgunst?.takeIf {
+                    harMottattNyInformasjon == JaNei.JA &&
+                        endringErTilUgunstForBruker == JaNei.JA
+                },
+        )
+
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
         if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
@@ -78,11 +98,18 @@ data class EtteroppgjoerForbehandling(
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }
 
-    fun tilAvbrutt(): EtteroppgjoerForbehandling {
+    fun tilAvbrutt(
+        aarsak: AarsakTilAvbryteForbehandling,
+        kommentar: String?,
+    ): EtteroppgjoerForbehandling {
         if (!kanAvbrytes()) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.AVBRUTT)
         }
-        return copy(status = EtteroppgjoerForbehandlingStatus.AVBRUTT)
+        return copy(
+            status = EtteroppgjoerForbehandlingStatus.AVBRUTT,
+            aarsakTilAvbrytelse = aarsak,
+            aarsakTilAvbrytelseBeskrivelse = kommentar,
+        )
     }
 
     fun tilDto(): EtteroppgjoerForbehandlingDto =
@@ -104,6 +131,8 @@ data class EtteroppgjoerForbehandling(
         )
 
     fun kanAvbrytes() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
+
+    fun kanEndres() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 

@@ -11,6 +11,7 @@ import io.ktor.server.routing.route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
+import no.nav.etterlatte.arbeidOgInntekt.arbeidOgInntekt
 import no.nav.etterlatte.behandling.aktivitetsplikt.aktivitetspliktRoutes
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
@@ -245,6 +246,8 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     kodeverk(applicationContext.kodeverkService)
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
+
+    arbeidOgInntekt(applicationContext.arbeidOgInntektKlient)
 
     route("/api/grunnlag") {
         behandlingGrunnlagRoute(applicationContext.grunnlagService)

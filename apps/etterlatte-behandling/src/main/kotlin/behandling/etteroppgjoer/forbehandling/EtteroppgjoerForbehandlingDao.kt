@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -96,13 +97,20 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt, etteroppgjoer_resultat_type,
+                            aarsak_til_avbrytelse, kommentar_til_avbrytelse
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id,
-                            varselbrev_sendt = excluded.varselbrev_sendt
+                            varselbrev_sendt = excluded.varselbrev_sendt,
+                            har_mottatt_ny_informasjon = excluded.har_mottatt_ny_informasjon,
+                            endring_er_til_ugunst_for_bruker = excluded.endring_er_til_ugunst_for_bruker,
+                            beskrivelse_av_ugunst = excluded.beskrivelse_av_ugunst,
+                            etteroppgjoer_resultat_type = excluded.etteroppgjoer_resultat_type,
+                            aarsak_til_avbrytelse = excluded.aarsak_til_avbrytelse,
+                            kommentar_til_avbrytelse = excluded.kommentar_til_avbrytelse
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
@@ -125,6 +133,9 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(12, forbehandling.endringErTilUgunstForBruker?.name)
                 statement.setString(13, forbehandling.beskrivelseAvUgunst)
                 statement.setDate(14, forbehandling.varselbrevSendt?.let { Date.valueOf(it) })
+                statement.setString(15, forbehandling.etteroppgjoerResultatType?.name)
+                statement.setString(16, forbehandling.aarsakTilAvbrytelse?.name)
+                statement.setString(17, forbehandling.aarsakTilAvbrytelseBeskrivelse.orEmpty())
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -214,55 +225,6 @@ class EtteroppgjoerForbehandlingDao(
             krev(result.size == inntekterFraSkatt.inntekter.size) {
                 "Kunne ikke lagre alle pensjonsgivendeInntekter for behandlingId=$behandlingId"
             }
-        }
-    }
-
-    fun oppdaterRelatertBehandling(
-        forbehandlingId: UUID,
-        nyForbehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE behandling b
-                    SET relatert_behandling = ?
-                    WHERE b.relatert_behandling = ?
-                    AND b.revurdering_aarsak = ?
-                    AND b.status != ?
-                    """.trimIndent(),
-                )
-            statement.setString(1, nyForbehandlingId.toString())
-            statement.setString(2, forbehandlingId.toString())
-            statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
-            statement.setString(4, BehandlingStatus.IVERKSATT.name) // TODO: Bør være strengere -tillate færre statuser?
-
-            statement.executeUpdate()
-        }
-    }
-
-    fun oppdaterInformasjonFraBruker(
-        forbehandlingId: UUID,
-        harMottattNyInformasjon: JaNei,
-        endringErTilUgunstForBruker: JaNei?,
-        beskrivelseAvUgunst: String?,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE etteroppgjoer_behandling
-                    SET har_mottatt_ny_informasjon = ?, endring_er_til_ugunst_for_bruker = ?, beskrivelse_av_ugunst = ?
-                    WHERE id = ?
-                    """.trimIndent(),
-                )
-
-            statement.setString(1, harMottattNyInformasjon.name)
-            statement.setString(2, endringErTilUgunstForBruker?.name)
-            statement.setString(3, beskrivelseAvUgunst)
-            statement.setObject(4, forbehandlingId)
-
-            statement.executeUpdate()
         }
     }
 
@@ -400,7 +362,10 @@ class EtteroppgjoerForbehandlingDao(
             harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { enumValueOf<JaNei>(it) },
             endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { enumValueOf<JaNei>(it) },
             beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
-            varselbrevSendt = getDate("varselbrev_sendt")?.let { it.toLocalDate() },
+            varselbrevSendt = getDate("varselbrev_sendt")?.toLocalDate(),
+            etteroppgjoerResultatType = getString("etteroppgjoer_resultat_type")?.let { enumValueOf<EtteroppgjoerResultatType>(it) },
+            aarsakTilAvbrytelse = getString("aarsak_til_avbrytelse")?.let { enumValueOf<AarsakTilAvbryteForbehandling>(it) },
+            aarsakTilAvbrytelseBeskrivelse = getString("kommentar_til_avbrytelse"),
         )
 
     private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =

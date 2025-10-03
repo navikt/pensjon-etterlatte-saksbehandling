@@ -8,14 +8,13 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
-import no.nav.etterlatte.sak.SakLesDao
-import no.nav.etterlatte.sak.SakService
 import java.time.LocalDate
 import java.util.UUID
 
@@ -23,14 +22,12 @@ enum class EtteroppgjoerSvarfrist(
     val value: String,
 ) {
     ETT_MINUTT("1 minute"),
-    FEMTEN_MINUTTER("15 minutes"),
+    FEM_MINUTT("5 minutes"),
     EN_MND("1 month"),
 }
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
-    val sakLesDao: SakLesDao,
-    val sakService: SakService,
     val vedtakKlient: VedtakKlient,
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
@@ -82,9 +79,13 @@ class EtteroppgjoerService(
 
     fun oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         val ferdigstiltStatus =
-            when (forbehandling.brevId) {
-                null -> EtteroppgjoerStatus.FERDIGSTILT_UTEN_VARSEL
-                else -> EtteroppgjoerStatus.FERDIGSTILT_FORBEHANDLING
+            when (forbehandling.etteroppgjoerResultatType) {
+                EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+                EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+                EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+                EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+
+                null -> throw InternfeilException("Mangler beregnetResultatType for forbehandling ${forbehandling.id}")
             }
         oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, ferdigstiltStatus)
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)

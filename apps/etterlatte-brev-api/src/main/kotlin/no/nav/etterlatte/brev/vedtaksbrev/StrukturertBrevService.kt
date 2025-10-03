@@ -121,18 +121,25 @@ class StrukturertBrevService(
         return db.opprettBrev(nyttBrev, bruker, true)
     }
 
-    suspend fun genererPdf(
+    suspend fun genererEllerHentPdf(
         brevId: BrevID,
         bruker: BrukerTokenInfo,
         brevRequest: BrevRequest,
     ): Pdf {
         val brev = db.hentBrev(brevId)
+
+        if (!brev.kanEndres()) {
+            logger.info("Brev (id=${brev.id}) har status=${brev.status} og kan ikke endres. Henter PDF...")
+            return db.hentPdf(brevId) ?: throw BrevManglerPDF(brev.id)
+        }
+
+        logger.info("Genererer PDF for brev med id=$brevId, skalLagres=${brevRequest.skalLagre}")
         val brevInnholdData = utledBrevInnholdData(brev, brevRequest)
         val avsender = utledAvsender(bruker, brevRequest.saksbehandlerIdent, brevRequest.attestantIdent, brevRequest.sak.enhet)
         val pdf = opprettPdf(brev, brevRequest, brevInnholdData, avsender)
 
-        logger.info("PDF generert ok. ${if (brevRequest.skalLagre) "Skal lagres" else "Skal ikke lagres"}")
         brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
+
         if (brevRequest.skalLagre) {
             logger.info("Lagrer PDF for brev med id=$brevId")
             db.lagrePdf(brevId, pdf)

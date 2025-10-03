@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, HelpText, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 
@@ -14,6 +14,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
+import { KommentarLabel } from '~components/oppgavebenk/oppgaveModal/KommentarLabel'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -91,7 +92,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
                       message: 'Du må legge til en kommentar',
                     },
                   })}
-                  label={<TextAreaLabel />}
+                  label={<KommentarLabel />}
                   error={errors.kommentar?.message}
                 />
               ) : (
@@ -127,12 +128,3 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
     </>
   )
 }
-
-const TextAreaLabel = () => (
-  <HStack gap="1">
-    Kommentar
-    <HelpText>
-      Legg til kommentar hvis du avslutter oppgaven. Det er ikke nødvendig dersom du oppretter revurdering.
-    </HelpText>
-  </HStack>
-)

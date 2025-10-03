@@ -13,6 +13,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { opprettEtteroppgoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
 import { useNavigate } from 'react-router-dom'
+import { KommentarLabel } from '~components/oppgavebenk/oppgaveModal/KommentarLabel'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -84,7 +85,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
                       message: 'Du må legge til en kommentar',
                     },
                   })}
-                  label="Kommentar"
+                  label={<KommentarLabel />}
                   error={errors.kommentar?.message}
                 />
               ) : (

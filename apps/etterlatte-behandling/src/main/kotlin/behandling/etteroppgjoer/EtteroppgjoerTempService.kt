@@ -79,7 +79,7 @@ class EtteroppgjoerTempService(
         etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
             sakId,
             etteroppgjoer.inntektsaar,
-            EtteroppgjoerStatus.VENTER_PAA_SVAR,
+            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
         )
     }
 }

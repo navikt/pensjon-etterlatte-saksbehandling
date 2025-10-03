@@ -83,6 +83,7 @@ object EtteroppgjoerBrevData {
         val stoenad: Kroner,
         val faktiskStoenad: Kroner,
         val grunnlag: EtteroppgjoerBrevGrunnlag,
+        val rettsgebyrBeloep: Kroner,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_VEDTAK"
 

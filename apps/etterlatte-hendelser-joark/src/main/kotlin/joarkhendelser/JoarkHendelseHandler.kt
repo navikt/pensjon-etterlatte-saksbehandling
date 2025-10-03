@@ -138,7 +138,7 @@ class JoarkHendelseHandler(
                 // det er mulig at vi har ander tilfeller der noen prøver å rute en journalpost utenfor Gjenny
                 // så legger på en error slik at vi kan fange det opp og se om vi må håndtere disse journalpostene
                 // annerledes.
-                logger.error(
+                logger.warn(
                     "Behandler en journalpost med id=$journalpostId og tema $temaNytt, " +
                         "som har journalførende enhet ${journalpost.journalfoerendeEnhet} satt. " +
                         "Brevkoden brukt er ikke en av de kjente kodene for anke / klager som skal til kabal, " +

@@ -7,6 +7,11 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.joarkhendelser.KjenteSkjemaKoder
+import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
+import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -27,23 +32,105 @@ class OppgaveKlient(
             httpClient
                 .post("$url/api/v1/oppgaver") {
                     contentType(ContentType.Application.Json)
-                    setBody(OpprettOppgaveRequest(journalpostId.toString(), tema))
+                    setBody(OpprettOppgaveRequest.journalpostManglerBruker(journalpostId.toString(), tema))
                 }.body<JsonNode>()
 
         logger.info("Opprettet oppgave (id=${response["id"]}, status=${response["status"]}, tema=${response["tema"]})")
         sikkerlogger().info("Opprettet oppgave med respons: \n$response")
     }
+
+    suspend fun opprettOppgaveForKabal(
+        journalpost: Journalpost,
+        tema: String,
+        kjentSkjemaKode: KjenteSkjemaKoder,
+    ) {
+        val opprettOppgaveRequest = OpprettOppgaveRequest.journalpostSkalTilKabal(journalpost, tema, kjentSkjemaKode)
+        try {
+            val response =
+                httpClient
+                    .post("$url/api/v1/oppgaver") {
+                        contentType(ContentType.Application.Json)
+                        setBody(opprettOppgaveRequest)
+                    }.body<JsonNode>()
+            logger.info("Opprettet oppgave for kabal (id=${response["id"]}, status=${response["status"]}, tema=${response["tema"]})")
+            sikkerlogger().info("Opprettet oppgave for kabal med respons", kv("response", response))
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke opprette oppgave for journalpost med id=${journalpost.journalpostId} til kabal, på grunn av feil. Se sikkerlogg for detaljer.",
+            )
+            sikkerlogger().error("Kunne ikke opprette oppgave for journalpost med id=${journalpost.journalpostId}", e)
+        }
+    }
 }
 
 @Suppress("unused")
-data class OpprettOppgaveRequest(
+data class OpprettOppgaveRequest private constructor(
     val journalpostId: String,
     val tema: String,
+    val aktoerId: String?,
+    val prioritet: String,
+    val fristFerdigstillelse: String?,
+    val beskrivelse: String,
+    val personident: String?,
+    val orgnr: String?,
+    val tildeltEnhetsnr: String?,
 ) {
-    val aktoerId: String? = null
-    val oppgavetype = "JFR" // JFR = Journalføring
-    val prioritet = "NORM"
-    val aktivDato = LocalDate.now().toString()
-    val fristFerdigstillelse = LocalDate.now().plusDays(30).toString()
-    val beskrivelse = "Journalpost $journalpostId mangler bruker"
+    // JFR = Journalføring
+    val oppgavetype: String = "JFR"
+    val aktivDato: String = LocalDate.now().toString()
+
+    companion object {
+        fun journalpostManglerBruker(
+            journalpostId: String,
+            tema: String,
+        ): OpprettOppgaveRequest =
+            OpprettOppgaveRequest(
+                journalpostId = journalpostId,
+                tema = tema,
+                aktoerId = null,
+                prioritet = "NORM",
+                fristFerdigstillelse = LocalDate.now().plusDays(30).toString(),
+                beskrivelse = "Journalpost $journalpostId mangler bruker",
+                personident = null,
+                orgnr = null,
+                tildeltEnhetsnr = null,
+            )
+
+        fun journalpostSkalTilKabal(
+            journalpost: Journalpost,
+            tema: String,
+            kjentSkjemaKode: KjenteSkjemaKoder,
+        ): OpprettOppgaveRequest {
+            val (aktoerId, personident, orgnr) = utledMottaker(journalpost)
+
+            return OpprettOppgaveRequest(
+                journalpostId = journalpost.journalpostId,
+                tema = tema,
+                aktoerId = aktoerId,
+                prioritet = "NORM",
+                fristFerdigstillelse = null,
+                beskrivelse = "Innsendt ${kjentSkjemaKode.navn} for tema $tema",
+                personident = personident,
+                orgnr = orgnr,
+                tildeltEnhetsnr = Enheter.KLAGE_VEST.enhetNr.enhetNr,
+            )
+        }
+
+        private fun utledMottaker(journalpost: Journalpost): OpprettOppgaveRequestBruker {
+            if (journalpost.bruker == null) {
+                return OpprettOppgaveRequestBruker()
+            }
+            return when (journalpost.bruker.type) {
+                BrukerIdType.AKTOERID -> OpprettOppgaveRequestBruker(aktoerId = journalpost.bruker.id)
+                BrukerIdType.FNR -> OpprettOppgaveRequestBruker(personident = journalpost.bruker.id)
+                BrukerIdType.ORGNR -> OpprettOppgaveRequestBruker(orgnr = journalpost.bruker.id)
+            }
+        }
+
+        private data class OpprettOppgaveRequestBruker(
+            val aktoerId: String? = null,
+            val personident: String? = null,
+            val orgnr: String? = null,
+        )
+    }
 }

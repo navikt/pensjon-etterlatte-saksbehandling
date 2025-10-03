@@ -436,7 +436,7 @@ class AvkortingValiderTest {
                 beregning,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
             )
-        krav shouldContainExactly listOf(2024, 2025)
+        krav shouldContainExactly listOf(2024, 2025, 2026)
     }
 
     private fun behandling(

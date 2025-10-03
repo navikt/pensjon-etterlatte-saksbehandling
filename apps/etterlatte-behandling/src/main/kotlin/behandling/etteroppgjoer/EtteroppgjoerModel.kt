@@ -20,9 +20,9 @@ data class Etteroppgjoer(
 enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
     MOTTATT_SKATTEOPPGJOER,
+    VENTER_PAA_SVAR,
 
     UNDER_FORBEHANDLING,
-    VENTER_PAA_SVAR,
     UNDER_REVURDERING,
 
     FERDIGSTILT,

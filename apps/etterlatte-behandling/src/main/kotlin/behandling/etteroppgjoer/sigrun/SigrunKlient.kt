@@ -83,9 +83,8 @@ class SigrunKlientImpl(
                 }
 
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet. Se sikkerlogg")
-                    sikkerlogg.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet for ident=$ident")
-                    throw it.samlaExceptions()
+                    sikkerlogg.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet for ident=$ident", it.samlaExceptions())
+                    throw InternfeilException("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet. Se sikkerlogg")
                 }
             }
         }
@@ -125,8 +124,8 @@ class SigrunKlientImpl(
                     }
                 }
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun for henting av Hendelsesliste feilet")
-                    throw it.samlaExceptions()
+                    sikkerlogg.error("Kall mot Sigrun for henting av Hendelsesliste feilet.", it.samlaExceptions())
+                    throw InternfeilException("Kall mot Sigrun for henting av Hendelsesliste feilet. Se sikkerlogg")
                 }
             }
         }
@@ -153,8 +152,8 @@ class SigrunKlientImpl(
             when (it) {
                 is RetryResult.Success -> it.content.body<HendelserSekvensnummerFraSkatt>().sekvensnummer
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun for henting av sekvensnummer feilet")
-                    throw it.samlaExceptions()
+                    sikkerlogg.error("Kall mot Sigrun for henting av sekvensnummer feilet", it.samlaExceptions())
+                    throw InternfeilException("Kall mot Sigrun for henting av sekvensnummer feilet")
                 }
             }
         }

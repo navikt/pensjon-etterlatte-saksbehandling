@@ -48,20 +48,20 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
     (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
 
-  const revurderingStammerFraSvarfristUtløpt =
+  const revurderingStammerFraSvarfristUtloept =
     behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !etteroppgjoer.behandling.harMottattNyInformasjon
 
   const erForbehandling = etteroppgjoer.behandling.kopiertFra === undefined
 
-  const manglerFastsattInntektPåForbehandling =
+  const manglerFastsattInntektPaaForbehandling =
     etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erForbehandling
 
   const navigerTilNesteSteg = () => {
     if (harIngenSkjemaErrors) {
-      if (revurderingStammerFraSvarfristUtløpt) {
+      if (revurderingStammerFraSvarfristUtloept) {
         setValideringFeilmelding('Du må ta stilling til informasjon fra bruker')
         return
-      } else if (manglerFastsattInntektPåForbehandling) {
+      } else if (manglerFastsattInntektPaaForbehandling) {
         setValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
         return
       }

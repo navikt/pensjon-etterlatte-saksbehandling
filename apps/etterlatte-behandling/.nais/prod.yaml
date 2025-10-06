@@ -172,7 +172,7 @@ spec:
       value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
 
     - name: SIGRUN_URL
-      value: https://sigrun.nais.adeo.no/api/
+      value: https://team-inntekt-proxy.prod-fss-pub.nais.io/proxy/sigrun
     - name: SIGRUN_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.sigrun/.default
 

@@ -332,7 +332,7 @@ internal class ApplicationContext(
         InntektskomponentKlientImpl(
             inntektskomponentKlient(config),
             config.getString("inntektskomponenten.url"),
-        ), // TODO interface og stub osv...
+        ),
     val sigrunKlient: SigrunKlient =
         SigrunKlientImpl(
             sigrunKlient(config),

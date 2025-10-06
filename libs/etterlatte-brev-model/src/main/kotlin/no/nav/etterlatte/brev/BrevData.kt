@@ -100,7 +100,7 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
 @JsonSubTypes(
     JsonSubTypes.Type(
         value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
-        name = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD",
+        name = "OMS_EO_BEREGNINGVEDLEGG_INNHOLD",
     ),
 )
 abstract class BrevVedleggInnholdData : BrevDataRedigerbar {
@@ -119,5 +119,5 @@ enum class BrevVedleggKey {
     OMS_FORHAANDSVARSEL_FEILUTBETALING,
     BP_BEREGNING_TRYGDETID,
     BP_FORHAANDSVARSEL_FEILUTBETALING,
-    OMS_EO_FORHAANDSVARSEL_BEREGNING,
+    OMS_EO_BEREGNINGSVEDLEGG,
 }

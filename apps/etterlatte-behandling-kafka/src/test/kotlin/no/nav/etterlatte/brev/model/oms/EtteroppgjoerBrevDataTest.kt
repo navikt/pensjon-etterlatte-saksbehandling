@@ -45,7 +45,7 @@ class EtteroppgjoerBrevDataTest {
 
     @Test
     fun `tester serialisering og deserialisering av brevVedleggData`() {
-        val vedleggData = EtteroppgjoerBrevData.beregningsVedlegg(2024)
+        val vedleggData = EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = 2024, erVedtak = true)
         val json = vedleggData.toJson()
         val gjenskapt = objectMapper.readValue<BrevVedleggRedigerbarNy>(json)
         assertInstanceOf<EtteroppgjoerBrevData.BeregningsVedleggInnhold>(gjenskapt.data)

@@ -232,7 +232,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 ),
             vedlegg =
                 listOf(
-                    EtteroppgjoerBrevData.beregningsVedlegg(data.behandling.aar),
+                    EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = data.behandling.aar, erVedtak = false),
                 ),
             sak = sisteIverksatteBehandling.sak,
         )

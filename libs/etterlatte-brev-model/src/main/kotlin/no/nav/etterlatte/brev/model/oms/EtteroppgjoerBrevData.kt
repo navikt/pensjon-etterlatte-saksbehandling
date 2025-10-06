@@ -18,11 +18,11 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object EtteroppgjoerBrevData {
-    fun beregningsVedlegg(etteroppgjoersAar: Int): BrevVedleggRedigerbarNy =
+    fun beregningsVedlegg(etteroppgjoersAar: Int, erVedtak: Boolean): BrevVedleggRedigerbarNy =
         BrevVedleggRedigerbarNy(
-            data = BeregningsVedleggInnhold(etteroppgjoersAar),
-            vedlegg = Vedlegg.OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD,
-            vedleggId = BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING,
+            data = BeregningsVedleggInnhold(etteroppgjoersAar, erVedtak),
+            vedlegg = Vedlegg.OMS_EO_BEREGNINGVEDLEGG_INNHOLD,
+            vedleggId = BrevVedleggKey.OMS_EO_BEREGNINGSVEDLEGG,
         )
 
     data class Forhaandsvarsel(
@@ -45,7 +45,7 @@ object EtteroppgjoerBrevData {
                 vedleggInnhold =
                     innhold()
                         .single {
-                            it.key == BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING
+                            it.key == BrevVedleggKey.OMS_EO_BEREGNINGSVEDLEGG
                         }.payload!!
                         .elements,
             )
@@ -68,9 +68,10 @@ object EtteroppgjoerBrevData {
 
     data class BeregningsVedleggInnhold(
         val etteroppgjoersAar: Int,
+        val erVedtak: Boolean
     ) : BrevVedleggInnholdData() {
-        override val type: String = "OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD"
-        override val brevKode: Vedlegg = Vedlegg.OMS_EO_FORHAANDSVARSEL_BEREGNINGVEDLEGG_INNHOLD
+        override val type: String = "OMS_EO_BEREGNINGVEDLEGG_INNHOLD"
+        override val brevKode: Vedlegg = Vedlegg.OMS_EO_BEREGNINGVEDLEGG_INNHOLD
     }
 
     data class Vedtak(
@@ -93,7 +94,7 @@ object EtteroppgjoerBrevData {
                     krevIkkeNull(
                         innhold()
                             .singleOrNull {
-                                it.key == BrevVedleggKey.OMS_EO_FORHAANDSVARSEL_BEREGNING
+                                it.key == BrevVedleggKey.OMS_EO_BEREGNINGSVEDLEGG
                             }?.payload,
                     ) {
                         "Mangler påkrevd vedlegg for etteroppgjør beregningsvedlegg"

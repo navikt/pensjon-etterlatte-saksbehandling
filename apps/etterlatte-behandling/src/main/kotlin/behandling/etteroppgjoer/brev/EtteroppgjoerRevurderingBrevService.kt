@@ -176,7 +176,7 @@ class EtteroppgjoerRevurderingBrevService(
                     ),
                 brevVedleggData =
                     listOf(
-                        EtteroppgjoerBrevData.beregningsVedlegg(detaljertForbehandling.behandling.aar),
+                        EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = detaljertForbehandling.behandling.aar, erVedtak = true),
                     ),
             )
         }

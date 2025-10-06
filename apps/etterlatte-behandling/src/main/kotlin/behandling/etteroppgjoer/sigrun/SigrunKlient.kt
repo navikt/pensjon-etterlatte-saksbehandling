@@ -121,7 +121,7 @@ class SigrunKlientImpl(
                         return@let objectMapper.readValue(body)
                     } catch (e: Exception) {
                         sikkerlogg.error("Feilet i JSON-parsing. body: $body", e)
-                        throw InternfeilException("Feilet i JSON-parsing.", e)
+                        throw InternfeilException("Feilet i JSON-parsing. Se sikkerlogg")
                     }
                 }
                 is RetryResult.Failure -> {

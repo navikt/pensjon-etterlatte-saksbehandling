@@ -183,6 +183,10 @@ class BrevApiKlientObo(
             },
             brukerTokenInfo = brukerTokenInfo,
             postBody = req,
+            timeoutConfig = {
+                socketTimeoutMillis = Duration.ofSeconds(20).toMillis()
+                requestTimeoutMillis = Duration.ofSeconds(20).toMillis()
+            },
         )
 
     override suspend fun opprettSpesifiktBrev(

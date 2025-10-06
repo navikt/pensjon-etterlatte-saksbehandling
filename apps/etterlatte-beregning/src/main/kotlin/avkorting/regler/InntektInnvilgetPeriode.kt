@@ -60,10 +60,11 @@ val faktiskInntektInnvilgetPeriode =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregner faktisk inntekt i innvilget periode",
-        regelReferanse = RegelReferanse(id = "REGEL-FAKTISK-INNTEKT", versjon = "1"),
+        regelReferanse = RegelReferanse(id = "REGEL-FAKTISK-INNTEKT", versjon = "1.2"),
     ) benytter faktiskInntektGrunnlag med { grunnlagFaktiskInntekt ->
         grunnlagFaktiskInntekt.loennsinntekt
             .plus(grunnlagFaktiskInntekt.afp)
             .plus(grunnlagFaktiskInntekt.naeringsinntekt)
             .plus(grunnlagFaktiskInntekt.utland)
+            .round(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt)
     }

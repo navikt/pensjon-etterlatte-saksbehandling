@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 class StatistikkDatabaseExtension :
     GenerellDatabaseExtension(),
     AfterEachCallback {
-    override fun afterEach(p0: ExtensionContext?) {
+    override fun afterEach(p0: ExtensionContext) {
         resetDb()
     }
 }

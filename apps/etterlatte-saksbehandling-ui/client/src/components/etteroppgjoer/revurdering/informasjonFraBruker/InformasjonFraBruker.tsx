@@ -1,5 +1,5 @@
 import { Button, Heading, VStack } from '@navikt/ds-react'
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -13,9 +13,14 @@ import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 interface Props {
   behandling: IDetaljertBehandling
   setInformasjonFraBrukerSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
+  setValideringFeilmedling: Dispatch<SetStateAction<string>>
 }
 
-export const InformasjonFraBruker = ({ behandling, setInformasjonFraBrukerSkjemaErrors }: Props) => {
+export const InformasjonFraBruker = ({
+  behandling,
+  setInformasjonFraBrukerSkjemaErrors,
+  setValideringFeilmedling,
+}: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const etteroppgjoer = useEtteroppgjoer()
@@ -40,6 +45,7 @@ export const InformasjonFraBruker = ({ behandling, setInformasjonFraBrukerSkjema
           setInformasjonFraBrukerSkjemaErAapen={setInformasjonFraBrukerSkjemaErAapen}
           erRedigerbar={erRedigerbar}
           setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
+          setValideringFeilmedling={setValideringFeilmedling}
         />
       ) : (
         <VStack gap="4">

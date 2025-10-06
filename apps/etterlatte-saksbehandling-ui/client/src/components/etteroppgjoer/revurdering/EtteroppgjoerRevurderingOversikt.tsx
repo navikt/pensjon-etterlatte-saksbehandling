@@ -19,11 +19,12 @@ import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/Sammendra
 import { isEmpty } from 'lodash'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
 import { AvsluttEtteroppgjoerRevurderingModal } from '~components/etteroppgjoer/revurdering/AvsluttEtteroppgjoerRevurderingModal'
+import Spinner from '~shared/Spinner'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
-
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const etteroppgjoer = useEtteroppgjoer()
 
   const erRedigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -31,128 +32,129 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     innloggetSaksbehandler.skriveEnheter
   )
 
-  const etteroppgjoer = useEtteroppgjoer()
-
   const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
     FieldErrors<IInformasjonFraBruker> | undefined
   >()
   const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
     FieldErrors<FastsettFaktiskInntektSkjema> | undefined
   >()
+  const [valideringFeilmelding, setValideringFeilmelding] = useState<string>('')
 
-  const [oversiktValideringFeilmelding, setOversiktValideringFeilmelding] = useState<string>('')
+  if (!etteroppgjoer) {
+    return <Spinner label="Laster etteroppgjør" />
+  }
 
-  const nesteSteg = () => {
-    setOversiktValideringFeilmelding('')
+  const harIngenSkjemaErrors =
+    (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
+    (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
 
-    if (
-      (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
-      (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
-    ) {
-      // Hvis revurderingen stammer fra svarfrist utløpt
-      if (behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !etteroppgjoer.behandling.harMottattNyInformasjon) {
-        setOversiktValideringFeilmelding('Du må ta stilling til informasjon fra bruker')
+  const revurderingStammerFraSvarfristUtløpt =
+    behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !etteroppgjoer.behandling.harMottattNyInformasjon
+
+  const erForbehandling = etteroppgjoer.behandling.kopiertFra === undefined
+
+  const manglerFastsattInntektPåForbehandling =
+    etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erForbehandling
+
+  const navigerTilNesteSteg = () => {
+    if (harIngenSkjemaErrors) {
+      if (revurderingStammerFraSvarfristUtløpt) {
+        setValideringFeilmelding('Du må ta stilling til informasjon fra bruker')
         return
-      } else if (
-        etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
-        etteroppgjoer.behandling.kopiertFra === undefined
-      ) {
-        setOversiktValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
+      } else if (manglerFastsattInntektPåForbehandling) {
+        setValideringFeilmelding('Du må gjøre en endring i fastsatt inntekt')
         return
       }
-      setOversiktValideringFeilmelding('')
+      setValideringFeilmelding('')
       next()
     }
   }
 
   return (
-    !!etteroppgjoer && (
-      <VStack gap="10" paddingInline="16" paddingBlock="16 4">
-        <Heading size="xlarge" level="1">
-          Etteroppgjør for {etteroppgjoer.behandling.aar}
-        </Heading>
-        <BodyShort>
-          <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
-        </BodyShort>
-        <Inntektsopplysninger />
+    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+      <Heading size="xlarge" level="1">
+        Etteroppgjør for {etteroppgjoer.behandling.aar}
+      </Heading>
+      <BodyShort>
+        <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
+      </BodyShort>
+      <Inntektsopplysninger />
 
-        {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB ? (
-          <>
-            <InformasjonFraBruker
-              behandling={behandling}
-              setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
-            />
-
-            {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
-              !erFerdigBehandlet(behandling.status) && (
-                <Box maxWidth="42.5rem">
-                  <Alert variant="info">
-                    <Heading spacing size="small" level="3">
-                      Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
-                    </Heading>
-                    Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
-                    ny forbehandling for etteroppgjøret skal opprettes.
-                  </Alert>
-                </Box>
-              )}
-
-            {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
-              etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
-                <>
-                  <FastsettFaktiskInntekt
-                    erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
-                    setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-                  />
-                </>
-              )}
-          </>
-        ) : (
-          <FastsettFaktiskInntekt
-            erRedigerbar={erRedigerbar}
-            setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+      {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB ? (
+        <>
+          <InformasjonFraBruker
+            behandling={behandling}
+            setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
+            setValideringFeilmedling={setValideringFeilmelding}
           />
-        )}
 
-        {etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
-          <>
-            <TabellForBeregnetEtteroppgjoerResultat />
-            <ResultatAvForbehandling />
-          </>
-        )}
-
-        <Box maxWidth="42.5rem">
-          <VStack gap="8">
-            {/* TODO: prøve å se og merge disse 2 sammen */}
-            {!!informasjonFraBrukerSkjemaErrors && <SammendragAvSkjemaFeil errors={informasjonFraBrukerSkjemaErrors} />}
-
-            {!!fastsettFaktiskInntektSkjemaErrors && (
-              <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
+          {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
+            !erFerdigBehandlet(behandling.status) && (
+              <Box maxWidth="42.5rem">
+                <Alert variant="info">
+                  <Heading spacing size="small" level="3">
+                    Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+                  </Heading>
+                  Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
+                  ny forbehandling for etteroppgjøret skal opprettes.
+                </Alert>
+              </Box>
             )}
 
-            {!!oversiktValideringFeilmelding && <Alert variant="error">{oversiktValideringFeilmelding}</Alert>}
-          </VStack>
-        </Box>
+          {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+            etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
+              <FastsettFaktiskInntekt
+                erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
+                setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+              />
+            )}
+        </>
+      ) : (
+        <FastsettFaktiskInntekt
+          erRedigerbar={erRedigerbar}
+          setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+        />
+      )}
 
-        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
-          <HStack width="100%" justify="center">
-            <VStack gap="4" align="center">
-              {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA ? (
-                <AvsluttEtteroppgjoerRevurderingModal
-                  behandling={behandling}
-                  beskrivelseAvUgunst={etteroppgjoer.behandling.beskrivelseAvUgunst}
-                />
-              ) : (
-                <div>
-                  <Button type="button" onClick={nesteSteg}>
-                    Neste side
-                  </Button>
-                </div>
-              )}
-              <AvbrytBehandling />
-            </VStack>
-          </HStack>
-        </Box>
-      </VStack>
-    )
+      {etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
+        <>
+          <TabellForBeregnetEtteroppgjoerResultat />
+          <ResultatAvForbehandling />
+        </>
+      )}
+
+      <Box maxWidth="42.5rem">
+        <VStack gap="8">
+          {/* TODO: prøve å se og merge disse 2 sammen */}
+          {!!informasjonFraBrukerSkjemaErrors && <SammendragAvSkjemaFeil errors={informasjonFraBrukerSkjemaErrors} />}
+
+          {!!fastsettFaktiskInntektSkjemaErrors && (
+            <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
+          )}
+
+          {!!valideringFeilmelding && <Alert variant="error">{valideringFeilmelding}</Alert>}
+        </VStack>
+      </Box>
+
+      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+        <HStack width="100%" justify="center">
+          <VStack gap="4" align="center">
+            {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA ? (
+              <AvsluttEtteroppgjoerRevurderingModal
+                behandling={behandling}
+                beskrivelseAvUgunst={etteroppgjoer.behandling.beskrivelseAvUgunst}
+              />
+            ) : (
+              <div>
+                <Button type="button" onClick={navigerTilNesteSteg}>
+                  Neste side
+                </Button>
+              </div>
+            )}
+            <AvbrytBehandling />
+          </VStack>
+        </HStack>
+      </Box>
+    </VStack>
   )
 }

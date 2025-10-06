@@ -13,7 +13,7 @@ TRUNCATE grunnlagshendelse
 class GrunnlagDbExtension :
     GenerellDatabaseExtension(),
     AfterEachCallback {
-    override fun afterEach(context: ExtensionContext?) {
+    override fun afterEach(context: ExtensionContext) {
         resetDb()
     }
 }

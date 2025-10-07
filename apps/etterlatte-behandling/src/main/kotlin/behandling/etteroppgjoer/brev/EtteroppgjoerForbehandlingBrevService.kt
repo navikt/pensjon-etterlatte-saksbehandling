@@ -139,9 +139,6 @@ class EtteroppgjoerForbehandlingBrevService(
                     brukerTokenInfo,
                 )
 
-            val sakId = detaljertForbehandling.behandling.sak.id
-            val brevId = detaljertForbehandling.behandling.brevId
-
             krevIkkeNull(detaljertForbehandling.beregnetEtteroppgjoerResultat) {
                 "Forbehandlingen må ha et utregnet resultat for å sende et varselbrev"
             }
@@ -174,18 +171,13 @@ class EtteroppgjoerForbehandlingBrevService(
                 grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)
                     ?: throw InternfeilException("Fant ikke grunnlag med sakId=${sak.id}")
 
-            val spraak =
-                brevId?.let {
-                    brevKlient.hentBrev(sakId, it, brukerTokenInfo).spraak
-                } ?: grunnlag.mapSpraak()
-
             return@coroutineScope BrevRequest(
                 sak = sak,
                 innsender = grunnlag.mapInnsender(),
                 soeker = grunnlag.mapSoeker(null),
                 avdoede = grunnlag.mapAvdoede(),
                 verge = hentVergeForSak(sak.sakType, null, grunnlag),
-                spraak = spraak,
+                spraak = grunnlag.mapSpraak(),
                 saksbehandlerIdent = brukerTokenInfo.ident(),
                 attestantIdent = null,
                 skalLagre = true, // TODO: vurder riktig logikk for lagring

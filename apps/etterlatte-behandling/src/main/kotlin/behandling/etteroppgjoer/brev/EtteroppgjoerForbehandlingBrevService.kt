@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -63,7 +64,9 @@ class EtteroppgjoerForbehandlingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
+
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
+
         return brevKlient.tilbakestillStrukturertBrev(
             brevID = brevId,
             behandlingId = forbehandlingId,
@@ -76,25 +79,34 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        val detaljertForbehandling = etteroppgjoerForbehandlingService.hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
+        val sakId = detaljertForbehandling.behandling.sak.id
         val brevId =
-            forbehandling.brevId
+            detaljertForbehandling.behandling.brevId
                 ?: throw UgyldigForespoerselException(
                     code = "MANGLER_BREVID",
                     detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
                 )
 
-        brevKlient.kanFerdigstilleBrev(brevId, forbehandling.sak.id, brukerTokenInfo).let { kanFerdigstilles ->
+        val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
+        if (detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt > brev.statusEndret) {
+            throw IkkeTillattException(
+                "KAN_IKKE_FERDIGSTILLE_BREV",
+                "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
+            )
+        }
+
+        brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { kanFerdigstilles ->
             if (!kanFerdigstilles) {
                 throw UgyldigForespoerselException(
                     code = "KAN_IKKE_FERDIGSTILLE_BREV",
                     detail =
-                        "Brev kan ikke ferdigstilles før du har sett over forhåndsvisning",
+                        "Brevet kan ikke ferdigstilles før du har gjennomgått forhåndsvisningen.",
                 )
             }
         }
 
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(detaljertForbehandling.behandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
@@ -136,6 +148,7 @@ class EtteroppgjoerForbehandlingBrevService(
                     forbehandlingId,
                     brukerTokenInfo,
                 )
+
             krevIkkeNull(detaljertForbehandling.beregnetEtteroppgjoerResultat) {
                 "Forbehandlingen må ha et utregnet resultat for å sende et varselbrev"
             }

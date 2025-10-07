@@ -63,6 +63,14 @@ class SkatteoppgjoerHendelserService(
         }
     }
 
+    fun setupContextAndSettSekvensnummerForLesingFraDato(
+        dato: LocalDate,
+        context: Context,
+    ) {
+        Kontekst.set(context)
+        settSekvensnummerForLesingFraDato(dato)
+    }
+
     fun settSekvensnummerForLesingFraDato(dato: LocalDate) {
         val sekvensnummer = runBlocking { sigrunKlient.hentSekvensnummerForLesingFraDato(dato) }
 
@@ -84,7 +92,7 @@ class SkatteoppgjoerHendelserService(
                         return@count false
                     }
                     if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
-                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant perioe")
+                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant periode")
                         return@count false
                     }
                     try {

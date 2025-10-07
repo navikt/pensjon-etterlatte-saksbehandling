@@ -44,6 +44,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_PERIODISK_JOBB("etteroppgjoer_periodisk_jobb"),
     ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),
+    ETTEROPPGJOER_STARTPUNKT_SKATTEHENDELSES_JOBB("etteroppgjoer_startpunkt_skattehendelses_jobb"),
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
     ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
     ;

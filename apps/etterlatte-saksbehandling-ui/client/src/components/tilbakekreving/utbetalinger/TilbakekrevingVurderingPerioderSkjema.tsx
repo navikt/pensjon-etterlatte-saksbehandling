@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router'
 import { FixedAlert } from '~shared/alerts/FixedAlert'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
-import { formaterMaanedDato } from '~utils/formatering/dato'
+import { formaterMaanednavnAar } from '~utils/formatering/dato'
 import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
 
 export function TilbakekrevingVurderingPerioderSkjema({
@@ -143,7 +143,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
                   if (klasseTypeYtelse(beloep)) {
                     return (
                       <Table.Row key={`beloepRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
-                        <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
+                        <Table.DataCell key="maaned">{formaterMaanednavnAar(periode.maaned)}</Table.DataCell>
                         <Table.DataCell key="klasseKode">
                           {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
                         </Table.DataCell>

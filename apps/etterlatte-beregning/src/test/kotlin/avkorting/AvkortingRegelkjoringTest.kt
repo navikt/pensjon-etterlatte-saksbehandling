@@ -151,15 +151,15 @@ class AvkortingRegelkjoringTest {
             val periode = RegelPeriode(fraDato = LocalDate.of(2024, 1, 1), tilDato = LocalDate.of(2024, 12, 31))
             val faktiskInntekt =
                 AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt(
-                    loennsinntekt = 1,
-                    afp = 10,
-                    naeringsinntekt = 100,
-                    utland = 1000,
+                    loennsinntekt = 1000,
+                    afp = 10000,
+                    naeringsinntekt = 100000,
+                    utland = 1000000,
                     periode = periode,
                     kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                 )
 
-            faktiskInntekt.verdi shouldBe 1111
+            faktiskInntekt.verdi shouldBe 1111000
         }
 
         @Test
@@ -175,6 +175,36 @@ class AvkortingRegelkjoringTest {
                     kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                 )
             faktiskInntekt.verdi shouldBe 0
+        }
+
+        @Test
+        fun `runder inntekter ned til nærmeste 1000 kr`() {
+            val periode = RegelPeriode(fraDato = LocalDate.of(2024, 1, 1), tilDato = LocalDate.of(2024, 12, 31))
+            val faktiskInntekt =
+                AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt(
+                    loennsinntekt = 1999,
+                    afp = 0,
+                    naeringsinntekt = 0,
+                    utland = 0,
+                    periode = periode,
+                    kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                )
+            faktiskInntekt.verdi shouldBe 1000
+        }
+
+        @Test
+        fun `runder ikke av inntekter som allerede er på nærmeste 1000 kr`() {
+            val periode = RegelPeriode(fraDato = LocalDate.of(2024, 1, 1), tilDato = LocalDate.of(2024, 12, 31))
+            val faktiskInntekt =
+                AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt(
+                    loennsinntekt = 2000,
+                    afp = 0,
+                    naeringsinntekt = 0,
+                    utland = 0,
+                    periode = periode,
+                    kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                )
+            faktiskInntekt.verdi shouldBe 2000
         }
     }
 }

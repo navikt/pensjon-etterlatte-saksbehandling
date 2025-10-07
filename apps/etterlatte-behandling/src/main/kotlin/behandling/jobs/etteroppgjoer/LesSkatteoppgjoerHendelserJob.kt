@@ -54,7 +54,10 @@ class LesSkatteoppgjoerHendelserJob(
         ) {
             if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
                 val inntektsaar = inntektsaarListe()
-                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(hendelserBatchSize, inntektsaar), jobContext)
+                skatteoppgjoerHendelserService.setupKontekstAndRun(
+                    HendelseKjoeringRequest(hendelserBatchSize, inntektsaar, true, 100),
+                    jobContext,
+                )
             }
         }
     }

@@ -45,9 +45,9 @@ class SkatteoppgjoerHendelserService(
     }
 
     fun lesOgBehandleHendelser(request: HendelseKjoeringRequest) {
-        logger.info("Starter med å be om ${request.antall} hendelser fra skatt - 100 ganger")
+        logger.info("Starter med å be om ${request.antallHendelser} hendelser fra skatt - ${request.antallKjoeringer} ganger")
         try {
-            repeat(100) {
+            repeat(request.antallKjoeringer) {
                 inTransaction {
                     val hendelsesliste = lesHendelsesliste(request)
 
@@ -55,9 +55,11 @@ class SkatteoppgjoerHendelserService(
                         behandleHendelser(hendelsesliste.hendelser, request)
                     }
                 }
-                Thread.sleep(2000)
+                if (request.venteMellomKjoeringer) {
+                    Thread.sleep(2000)
+                }
             }
-            logger.info("Ferdig med å lese 100 * 1000 hendelser fra skatt")
+            logger.info("Ferdig med å lese ${request.antallKjoeringer} * ${request.antallHendelser} hendelser fra skatt")
         } catch (e: Exception) {
             logger.error("Feilet under aggresiv lesing av hendelser fra skatt", e)
         }
@@ -189,13 +191,15 @@ class SkatteoppgjoerHendelserService(
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
         val sisteKjoering = dao.hentSisteKjoering()
 
-        return runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
+        return runBlocking { sigrunKlient.hentHendelsesliste(request.antallHendelser, sisteKjoering.nesteSekvensnummer()) }
     }
 }
 
 data class HendelseKjoeringRequest(
-    val antall: Int,
+    val antallHendelser: Int,
     val inntektsaarListe: List<Int>,
+    val venteMellomKjoeringer: Boolean,
+    val antallKjoeringer: Int,
 )
 
 data class HendelserSettSekvensnummerRequest(

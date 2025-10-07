@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -50,6 +49,14 @@ class SkatteoppgjoerHendelserService(
         }
     }
 
+    fun setupContextAndSettSekvensnummerForLesingFraDato(
+        dato: LocalDate,
+        context: Context,
+    ) {
+        Kontekst.set(context)
+        settSekvensnummerForLesingFraDato(dato)
+    }
+
     fun settSekvensnummerForLesingFraDato(dato: LocalDate) {
         val sekvensnummer = runBlocking { sigrunKlient.hentSekvensnummerForLesingFraDato(dato) }
 
@@ -71,7 +78,7 @@ class SkatteoppgjoerHendelserService(
                         return@count false
                     }
                     if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
-                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant perioe")
+                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant periode")
                         return@count false
                     }
                     try {

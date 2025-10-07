@@ -90,7 +90,7 @@ class EtteroppgjoerForbehandlingBrevService(
         if (detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt > brev.statusEndret) {
             throw IkkeTillattException(
                 "KAN_IKKE_FERDIGSTILLE_BREV",
-                "Beregningen i brevet er utdatert, brevet kan ikke ferdigstilles. Tilbakestill brevet.",
+                "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
             )
         }
 
@@ -99,7 +99,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 throw UgyldigForespoerselException(
                     code = "KAN_IKKE_FERDIGSTILLE_BREV",
                     detail =
-                        "Brev kan ikke ferdigstilles før du har sett over forhåndsvisning",
+                        "Brevet kan ikke ferdigstilles før du har gjennomgått forhåndsvisningen.",
                 )
             }
         }

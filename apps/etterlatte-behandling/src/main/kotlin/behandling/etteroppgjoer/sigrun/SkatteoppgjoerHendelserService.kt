@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -48,6 +47,14 @@ class SkatteoppgjoerHendelserService(
                 behandleHendelser(hendelsesliste.hendelser, request)
             }
         }
+    }
+
+    fun setupContextAndSettSekvensnummerForLesingFraDato(
+        dato: LocalDate,
+        context: Context,
+    ) {
+        Kontekst.set(context)
+        settSekvensnummerForLesingFraDato(dato)
     }
 
     fun settSekvensnummerForLesingFraDato(dato: LocalDate) {

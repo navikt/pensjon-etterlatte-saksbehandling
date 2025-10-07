@@ -54,7 +54,7 @@ class StartpunktSkatteoppgjoerHendelserJob(
             period = interval.toMillis(),
         ) {
             if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STARTPUNKT_SKATTEHENDELSES_JOBB, false)) {
-                skatteoppgjoerHendelserService.settSekvensnummerForLesingFraDato(LocalDate.of(2025, 1, 1))
+                skatteoppgjoerHendelserService.setupContextAndSettSekvensnummerForLesingFraDato(LocalDate.of(2025, 1, 1), jobContext)
 
                 val inntektsaar = inntektsaarListe()
                 skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(1, inntektsaar), jobContext)

@@ -10,12 +10,14 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
+import { Dispatch, SetStateAction } from 'react'
 
 interface Props {
   behandling: IDetaljertBehandling
   setInformasjonFraBrukerSkjemaErAapen: (erAapen: boolean) => void
   erRedigerbar: boolean
   setInformasjonFraBrukerSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
+  setValideringFeilmedling: Dispatch<SetStateAction<string>>
 }
 
 export const InformasjonFraBrukerSkjema = ({
@@ -23,6 +25,7 @@ export const InformasjonFraBrukerSkjema = ({
   setInformasjonFraBrukerSkjemaErAapen,
   erRedigerbar,
   setInformasjonFraBrukerSkjemaErrors,
+  setValideringFeilmedling,
 }: Props) => {
   const etteroppgjoer = useEtteroppgjoer()
 
@@ -52,6 +55,7 @@ export const InformasjonFraBrukerSkjema = ({
 
   const submitEndringFraBruker = (data: IInformasjonFraBruker) => {
     setInformasjonFraBrukerSkjemaErrors(errors)
+    setValideringFeilmedling('')
     informasjonFraBrukerRequest({ forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data }, () => {
       hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
         dispatch(addEtteroppgjoer(etteroppgjoer))

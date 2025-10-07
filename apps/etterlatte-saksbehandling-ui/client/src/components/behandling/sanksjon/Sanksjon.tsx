@@ -21,7 +21,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { aarFraDatoString, formaterDato, formaterMaanedDato } from '~utils/formatering/dato'
+import { aarFraDatoString, formaterDato, formaterMaanednavnAar } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
@@ -237,9 +237,9 @@ export const Sanksjon = ({
                     <>
                       {sanksjoner.map((lagretSanksjon, index) => (
                         <Table.Row key={index}>
-                          <Table.DataCell>{formaterMaanedDato(lagretSanksjon.fom)}</Table.DataCell>
+                          <Table.DataCell>{formaterMaanednavnAar(lagretSanksjon.fom)}</Table.DataCell>
                           <Table.DataCell>
-                            {lagretSanksjon.tom ? formaterMaanedDato(lagretSanksjon.tom) : '-'}
+                            {lagretSanksjon.tom ? formaterMaanednavnAar(lagretSanksjon.tom) : '-'}
                           </Table.DataCell>
                           <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
                           <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>

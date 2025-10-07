@@ -4,7 +4,8 @@ import { nb } from 'date-fns/locale'
 export enum DatoFormat {
   AAR_MAANED_DAG = 'yyyy-MM-dd',
   DAG_MAANED_AAR = 'dd.MM.yyyy',
-  MAANED_AAR = 'MMMM yyyy',
+  MAANED_AAR = 'MM.yyyy',
+  MAANEDNAVN_AAR = 'MMMM yyyy',
 }
 
 export const formaterDato = (dato: string | Date) => format(dato, DatoFormat.DAG_MAANED_AAR).toString()
@@ -18,7 +19,9 @@ export const formaterTilISOString = (date: Date | string): string => {
   return format(date, DatoFormat.AAR_MAANED_DAG)
 }
 
-export const formaterMaanedDato = (dato: string | Date) => format(dato, DatoFormat.MAANED_AAR).toString()
+export const formaterMaanedAar = (dato: string | Date) => format(dato, DatoFormat.MAANED_AAR).toString()
+
+export const formaterMaanednavnAar = (dato: string | Date) => format(dato, DatoFormat.MAANEDNAVN_AAR).toString()
 
 export const formaterKanskjeStringDato = (dato?: string): string =>
   formaterKanskjeStringDatoMedFallback('Ukjent dato', dato)

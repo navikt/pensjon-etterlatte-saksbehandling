@@ -2,7 +2,7 @@ import { SummerteInntekterAOrdningen } from '~shared/types/EtteroppgjoerForbehan
 import { BodyShort, Heading, Label, VStack, Table } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
-import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
+import { formaterDatoMedKlokkeslett, formaterMaanedAar } from '~utils/formatering/dato'
 import { LenkeTilInntektOversikt } from '~components/etteroppgjoer/components/inntektsopplysninger/LenkeTilInntektOversikt'
 
 export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: SummerteInntekterAOrdningen }) {
@@ -21,7 +21,7 @@ export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: Summe
             <Table.HeaderCell>Type inntekt</Table.HeaderCell>
             {inntekter.afp.inntekter.map((maaned) => (
               <Table.HeaderCell key={maaned.maaned} scope="col" align="right">
-                {formaterDato(maaned.maaned)}
+                {formaterMaanedAar(maaned.maaned)}
               </Table.HeaderCell>
             ))}
           </Table.Row>

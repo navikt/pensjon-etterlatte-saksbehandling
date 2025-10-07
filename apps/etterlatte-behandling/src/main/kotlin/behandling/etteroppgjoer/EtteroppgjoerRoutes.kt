@@ -193,29 +193,28 @@ fun Route.etteroppgjoerRoutes(
 
                     call.respond(HttpStatusCode.OK)
                 }
+            }
 
-                post("bulk") {
-                    sjekkEtteroppgjoerEnabled(featureToggleService)
+            post("bulk") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
 
-                    kunSystembruker {
-                        val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
-                        logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
+                kunSystembruker {
+                    val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
+                    logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
 
-                        inTransaction {
-                            // TODO: ikke hardkode inntektsår
-                            forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
-                                inntektsaar = request.inntektsaar,
-                                antall = request.antall,
-                                etteroppgjoerFilter = request.etteroppgjoerFilter,
-                                spesifikkeSaker = request.spesifikkeSaker,
-                                ekskluderteSaker = request.ekskluderteSaker,
-                            )
-                        }
-
-                        logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
-
-                        call.respond(HttpStatusCode.OK)
+                    inTransaction {
+                        forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
+                            inntektsaar = request.inntektsaar,
+                            antall = request.antall,
+                            etteroppgjoerFilter = request.etteroppgjoerFilter,
+                            spesifikkeSaker = request.spesifikkeSaker,
+                            ekskluderteSaker = request.ekskluderteSaker,
+                        )
                     }
+
+                    logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
+
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

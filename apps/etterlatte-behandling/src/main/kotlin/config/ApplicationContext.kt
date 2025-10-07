@@ -971,7 +971,7 @@ internal class ApplicationContext(
             skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(5, ChronoUnit.MINUTES),
+            interval = Duration.of(1, ChronoUnit.MINUTES),
             hendelserBatchSize = 1000,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,

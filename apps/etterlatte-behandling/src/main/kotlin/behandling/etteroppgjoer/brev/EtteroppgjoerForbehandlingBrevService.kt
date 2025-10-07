@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -76,15 +77,24 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        val detaljertForbehandling = etteroppgjoerForbehandlingService.hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
+        val sakId = detaljertForbehandling.behandling.sak.id
         val brevId =
-            forbehandling.brevId
+            detaljertForbehandling.behandling.brevId
                 ?: throw UgyldigForespoerselException(
                     code = "MANGLER_BREVID",
                     detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
                 )
 
-        brevKlient.kanFerdigstilleBrev(brevId, forbehandling.sak.id, brukerTokenInfo).let { kanFerdigstilles ->
+        val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
+        if (detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt > brev.statusEndret) {
+            throw IkkeTillattException(
+                "KAN_IKKE_FERDIGSTILLE_BREV",
+                "Beregningen i brevet er utdatert, brevet kan ikke ferdigstilles. Tilbakestill brevet.",
+            )
+        }
+
+        brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { kanFerdigstilles ->
             if (!kanFerdigstilles) {
                 throw UgyldigForespoerselException(
                     code = "KAN_IKKE_FERDIGSTILLE_BREV",
@@ -94,7 +104,7 @@ class EtteroppgjoerForbehandlingBrevService(
             }
         }
 
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(detaljertForbehandling.behandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,

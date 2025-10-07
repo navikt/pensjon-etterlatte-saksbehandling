@@ -64,7 +64,9 @@ class EtteroppgjoerForbehandlingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
+
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
+
         return brevKlient.tilbakestillStrukturertBrev(
             brevID = brevId,
             behandlingId = forbehandlingId,
@@ -146,6 +148,7 @@ class EtteroppgjoerForbehandlingBrevService(
                     forbehandlingId,
                     brukerTokenInfo,
                 )
+
             krevIkkeNull(detaljertForbehandling.beregnetEtteroppgjoerResultat) {
                 "Forbehandlingen må ha et utregnet resultat for å sende et varselbrev"
             }

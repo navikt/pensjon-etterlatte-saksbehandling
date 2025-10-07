@@ -57,7 +57,7 @@ class StartpunktSkatteoppgjoerHendelserJob(
                 skatteoppgjoerHendelserService.setupContextAndSettSekvensnummerForLesingFraDato(LocalDate.of(2025, 1, 1), jobContext)
 
                 val inntektsaar = inntektsaarListe()
-                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(1, inntektsaar), jobContext)
+                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(1, inntektsaar, true, 1), jobContext)
             }
         }
     }

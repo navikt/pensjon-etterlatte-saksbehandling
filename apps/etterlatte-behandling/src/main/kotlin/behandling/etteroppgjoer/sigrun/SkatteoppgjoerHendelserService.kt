@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
@@ -27,25 +28,38 @@ class SkatteoppgjoerHendelserService(
     private val sakService: SakService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val lock = Semaphore(1, 0)
 
     fun setupKontekstAndRun(
         request: HendelseKjoeringRequest,
         context: Context,
     ) {
-        Kontekst.set(context)
+        if (lock.tryAcquire()) {
+            Kontekst.set(context)
 
-        lesOgBehandleHendelser(request)
+            lesOgBehandleHendelser(request)
+            lock.release()
+        } else {
+            logger.info("Jobben kjører allerede, vi gidder ikke starte enda en kjøring")
+        }
     }
 
     fun lesOgBehandleHendelser(request: HendelseKjoeringRequest) {
-        logger.info("Starter med å be om ${request.antall} hendelser fra skatt")
+        logger.info("Starter med å be om ${request.antall} hendelser fra skatt - 100 ganger")
+        try {
+            repeat(100) {
+                inTransaction {
+                    val hendelsesliste = lesHendelsesliste(request)
 
-        inTransaction {
-            val hendelsesliste = lesHendelsesliste(request)
-
-            if (!hendelsesliste.hendelser.isEmpty()) {
-                behandleHendelser(hendelsesliste.hendelser, request)
+                    if (!hendelsesliste.hendelser.isEmpty()) {
+                        behandleHendelser(hendelsesliste.hendelser, request)
+                    }
+                }
+                Thread.sleep(2000)
             }
+            logger.info("Ferdig med å lese 100 * 1000 hendelser fra skatt")
+        } catch (e: Exception) {
+            logger.error("Feilet under aggresiv lesing av hendelser fra skatt", e)
         }
     }
 
@@ -84,7 +98,10 @@ class SkatteoppgjoerHendelserService(
                     try {
                         return@count behandleHendelse(hendelse)
                     } catch (e: Exception) {
-                        throw InternfeilException("Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}", e)
+                        throw InternfeilException(
+                            "Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}",
+                            e,
+                        )
                     }
                 }.also { antallRelevante ->
                     dao.lagreKjoering(

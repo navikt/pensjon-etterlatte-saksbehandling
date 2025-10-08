@@ -16,8 +16,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
@@ -266,12 +264,14 @@ class StatistikkService(
                 resultat = resultat,
             )
 
-        val sakRad =
-            etteroppgjoerRadTilSakRad(
-                etteroppgjoerRad = etteroppgjoerStatistikk,
-                statistikkDto = statistikkDto,
-            )
-        sakRepository.lagreRad(sakRad)
+        if (hendelse.skalSendeStatistikk) {
+            val sakRad =
+                etteroppgjoerRadTilSakRad(
+                    etteroppgjoerRad = etteroppgjoerStatistikk,
+                    statistikkDto = statistikkDto,
+                )
+            sakRepository.lagreRad(sakRad)
+        }
         logger.info("Registrerte saksstatistikk og etteroppgjoersstatistikk for forbehandling")
     }
 

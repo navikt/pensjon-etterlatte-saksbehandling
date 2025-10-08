@@ -46,25 +46,24 @@ class EtteroppgjoerHendelseService(
             begrunnelse = null,
         )
 
-        if (hendelseType.skalSendeStatistikk) {
-            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(etteroppgjoerForbehandling.sak.id)
+        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(etteroppgjoerForbehandling.sak.id)
 
-            // TODO: nullable?
-            val summerteInntekter =
-                etteroppgjoerForbehandlingDao
-                    .hentSummerteInntekter(etteroppgjoerForbehandling.id)
-            val pensjonsgivendeInntektFraSkatt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!
+        // TODO: nullable?
+        val summerteInntekter =
+            etteroppgjoerForbehandlingDao
+                .hentSummerteInntekter(etteroppgjoerForbehandling.id)
+        val pensjonsgivendeInntektFraSkatt =
+            etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!
 
-            sendKafkaMelding(
-                etteroppgjoerForbehandling = etteroppgjoerForbehandling,
-                hendelseType = hendelseType,
-                etteroppgjoerResultat = etteroppgjoerResultat,
-                summerteInntekter = summerteInntekter,
-                pensjonsgivendeInntekt = pensjonsgivendeInntektFraSkatt,
-                utlandstilknytningType = utlandstilknytning?.type,
-                saksbehandler = saksbehandler,
-            )
-        }
+        sendKafkaMelding(
+            etteroppgjoerForbehandling = etteroppgjoerForbehandling,
+            hendelseType = hendelseType,
+            etteroppgjoerResultat = etteroppgjoerResultat,
+            summerteInntekter = summerteInntekter,
+            pensjonsgivendeInntekt = pensjonsgivendeInntektFraSkatt,
+            utlandstilknytningType = utlandstilknytning?.type,
+            saksbehandler = saksbehandler,
+        )
     }
 
     private fun sendKafkaMelding(

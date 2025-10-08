@@ -4,7 +4,6 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
-import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.OMS_GYLDIG_FRA
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.common.DatabaseContext
@@ -58,20 +57,8 @@ class StartpunktSkatteoppgjoerHendelserJob(
             if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STARTPUNKT_SKATTEHENDELSES_JOBB, false)) {
                 skatteoppgjoerHendelserService.setupContextAndSettSekvensnummerForLesingFraDato(LocalDate.of(2025, 1, 1), jobContext)
 
-                val inntektsaar = inntektsaarListe()
-                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(1, inntektsaar, true, 1), jobContext)
+                skatteoppgjoerHendelserService.setupKontekstAndRun(HendelseKjoeringRequest(1, ETTEROPPGJOER_AAR, true, 1), jobContext)
             }
         }
-    }
-
-    private fun inntektsaarListe(): List<Int> {
-        val startaarOmstillingsstoenad = OMS_GYLDIG_FRA
-        val sisteInntektsaar = ETTEROPPGJOER_AAR
-        val inntektsaar =
-            IntRange(
-                start = (sisteInntektsaar - 3).coerceAtLeast(startaarOmstillingsstoenad.year),
-                endInclusive = sisteInntektsaar,
-            ).toList()
-        return inntektsaar
     }
 }

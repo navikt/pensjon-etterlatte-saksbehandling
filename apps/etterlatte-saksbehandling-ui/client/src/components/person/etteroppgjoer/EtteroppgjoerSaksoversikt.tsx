@@ -1,4 +1,4 @@
-import { Box, VStack } from '@navikt/ds-react'
+import { Box, List, VStack } from '@navikt/ds-react'
 import { isFailure, isSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
@@ -47,18 +47,17 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
       <Box padding="8" maxWidth="70rem">
         <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
 
-        <div className="flex flex-col gap-2">
+        <List as="ul">
           {steg.map(({ status, text, index: stepIndex }) => (
-            <div
+            <List.Item
               key={status}
-              className="flex items-center gap-2"
+              icon={getIcon(currentIndex, stepIndex)}
               style={{ color: currentIndex >= stepIndex ? 'black' : 'gray' }}
             >
-              {getIcon(currentIndex, stepIndex)}
-              <span>{text()}</span>
-            </div>
+              {text()}
+            </List.Item>
           ))}
-        </div>
+        </List>
       </Box>
     </VStack>
   )

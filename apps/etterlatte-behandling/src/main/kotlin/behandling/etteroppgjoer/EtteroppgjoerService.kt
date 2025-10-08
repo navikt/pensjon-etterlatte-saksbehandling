@@ -137,6 +137,11 @@ class EtteroppgjoerService(
         )
         if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
 
+        logger.error(
+            "☢️☢️☢️DENNE MÅ RYDDES OPP I! Vi har opprettet et etteroppgjør for $inntektsaar i sak" +
+                " ${sistIverksatteBehandling.sak.id}, som potensielt kan ha feil status mtp. skatteoppgjøret. " +
+                "DENNE MÅ RYDDES OPP I!☢️☢️☢️",
+        )
         return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling)
             .also { dao.lagreEtteroppgjoer(it) }
     }

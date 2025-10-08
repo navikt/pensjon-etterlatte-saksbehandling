@@ -30,6 +30,6 @@ enum class EtteroppgjoerStatus {
 
     companion object {
         // TODO: må være strengere her når vi går i prod
-        val KLAR_TIL_FORBEHANDLING = setOf(VENTER_PAA_SKATTEOPPGJOER, MOTTATT_SKATTEOPPGJOER)
+        val KLAR_TIL_FORBEHANDLING = setOf(MOTTATT_SKATTEOPPGJOER)
     }
 }

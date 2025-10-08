@@ -99,7 +99,7 @@ class EtteroppgjoerDaoTest(
     )
     fun `skal hente aktive etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, status))
-        etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id).status shouldBe listOf(status)
+        etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id)!!.status shouldBe listOf(status)
     }
 
     @ParameterizedTest

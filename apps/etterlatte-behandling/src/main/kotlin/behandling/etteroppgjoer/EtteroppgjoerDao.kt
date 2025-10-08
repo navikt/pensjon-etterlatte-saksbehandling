@@ -63,7 +63,7 @@ class EtteroppgjoerDao(
         }
     }
 
-    fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer =
+    fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -82,7 +82,7 @@ class EtteroppgjoerDao(
 
                 // TODO: håndtere flere aktive etteroppgjoer for sak
                 krev(etteroppgjoer.size < 2) { "Fant ${etteroppgjoer.size} aktive etteroppgjoer for sak $sakId, forventet 1" }
-                etteroppgjoer.first()
+                etteroppgjoer.firstOrNull()
             }
         }
 

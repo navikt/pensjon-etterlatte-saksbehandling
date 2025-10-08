@@ -88,7 +88,7 @@ fun Route.etteroppgjoerRoutes(
                                 ?: throw InternfeilException("Fant ikke etteroppgjør for sak $sakId")
 
                         krev(etteroppgjoer.status in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING_I_DEV) {
-                            "Etteroppgjør for sak $sakId er ikke i status ${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}"
+                            "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"
                         }
 
                         etteroppgjoerService.oppdaterEtteroppgjoerStatus(

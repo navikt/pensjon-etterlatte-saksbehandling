@@ -63,7 +63,7 @@ class EtteroppgjoerRevurderingService(
                         sakId = sakId,
                     )
 
-                val etteroppgjoer = etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
+                val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
                 if (etteroppgjoer!!.sisteFerdigstilteForbehandling != sisteFerdigstilteForbehandling.id) {
                     throw InternfeilException(
                         "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling $sisteFerdigstilteForbehandlingId",

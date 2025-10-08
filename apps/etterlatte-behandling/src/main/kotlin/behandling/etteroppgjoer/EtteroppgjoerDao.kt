@@ -63,7 +63,7 @@ class EtteroppgjoerDao(
         }
     }
 
-    fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? =
+    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

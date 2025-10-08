@@ -66,7 +66,7 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
+                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
                         }
 
                     if (etteroppgjoer == null) {
@@ -84,7 +84,7 @@ fun Route.etteroppgjoerRoutes(
                 }
                 kunSkrivetilgang {
                     inTransaction {
-                        val etteroppgjoer = etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
+                        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
                         if (etteroppgjoer?.status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
                             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                                 sakId,

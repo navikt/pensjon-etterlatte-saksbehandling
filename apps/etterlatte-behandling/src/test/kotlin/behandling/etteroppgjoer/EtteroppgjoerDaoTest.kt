@@ -87,7 +87,7 @@ class EtteroppgjoerDaoTest(
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
 
         assertThrows<InternfeilException> {
-            etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id)
+            etteroppgjoerDao.hentAktivtEtteroppgjoerForSak(sak.id)
         }
     }
 
@@ -99,7 +99,7 @@ class EtteroppgjoerDaoTest(
     )
     fun `skal hente aktive etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, status))
-        etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id)!!.status shouldBe status
+        etteroppgjoerDao.hentAktivtEtteroppgjoerForSak(sak.id)!!.status shouldBe status
     }
 
     @ParameterizedTest
@@ -110,7 +110,7 @@ class EtteroppgjoerDaoTest(
     )
     fun `skal ikke hente ferdigstilte etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, status))
-        etteroppgjoerDao.hentAlleAktiveEtteroppgjoerForSak(sak.id) shouldBe null
+        etteroppgjoerDao.hentAktivtEtteroppgjoerForSak(sak.id) shouldBe null
     }
 
     @Test

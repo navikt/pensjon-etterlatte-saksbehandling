@@ -68,7 +68,12 @@ fun Route.etteroppgjoerRoutes(
                         inTransaction {
                             etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
                         }
-                    call.respond(etteroppgjoer)
+
+                    if (etteroppgjoer == null) {
+                        call.respond(HttpStatusCode.NotFound, "Fant ikke etteroppgjør for sak $sakId")
+                    } else {
+                        call.respond(etteroppgjoer)
+                    }
                 }
             }
 

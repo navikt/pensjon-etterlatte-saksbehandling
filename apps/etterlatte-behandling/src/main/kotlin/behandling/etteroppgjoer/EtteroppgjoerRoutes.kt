@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
@@ -88,10 +89,9 @@ fun Route.etteroppgjoerRoutes(
                         val etteroppgjoer =
                             etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
                                 ?: throw InternfeilException("Fant ikke etteroppgjør for sak $sakId")
-                        if (etteroppgjoer.status != EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
-                            throw InternfeilException(
-                                "Etteroppgjør for sak $sakId er ikke i status ${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}",
-                            )
+
+                        krev(etteroppgjoer.status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
+                            "Etteroppgjør for sak $sakId er ikke i status ${EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER}"
                         }
 
                         etteroppgjoerService.oppdaterEtteroppgjoerStatus(

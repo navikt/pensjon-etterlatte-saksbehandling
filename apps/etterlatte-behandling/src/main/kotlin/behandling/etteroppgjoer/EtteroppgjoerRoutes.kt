@@ -79,6 +79,15 @@ fun Route.etteroppgjoerRoutes(
                 }
                 kunSkrivetilgang {
                     inTransaction {
+                        val etteroppgjoer = etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
+                        if (etteroppgjoer.status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
+                            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                                sakId,
+                                etteroppgjoer.inntektsaar,
+                                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                            )
+                        }
+
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(
                             sakId,
                         )

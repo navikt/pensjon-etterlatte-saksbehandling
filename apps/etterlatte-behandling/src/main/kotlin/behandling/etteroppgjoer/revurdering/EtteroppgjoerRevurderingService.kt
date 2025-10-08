@@ -63,13 +63,12 @@ class EtteroppgjoerRevurderingService(
                         sakId = sakId,
                     )
 
-                // TODO: er dette nok for å unngå mismatch ... ?
-                etteroppgjoerService
-                    .hentAlleAktiveEtteroppgjoerForSak(sakId)
-                    .firstOrNull { it.sisteFerdigstilteForbehandling == sisteFerdigstilteForbehandlingId }
-                    ?: throw InternfeilException(
+                val etteroppgjoer = etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
+                if (etteroppgjoer.sisteFerdigstilteForbehandling != sisteFerdigstilteForbehandling.id) {
+                    throw InternfeilException(
                         "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling $sisteFerdigstilteForbehandlingId",
                     )
+                }
 
                 val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
 

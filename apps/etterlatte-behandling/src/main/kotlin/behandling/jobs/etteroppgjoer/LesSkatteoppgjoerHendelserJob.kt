@@ -43,7 +43,7 @@ class LesSkatteoppgjoerHendelserJob(
         )
 
     override fun schedule(): Timer {
-        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
+        if (jobbenErAktivert()) {
             logger.info(
                 "$jobbNavn er satt til å kjøre med skatteoppgjoerHendelserService=${skatteoppgjoerHendelserService::class.simpleName} og periode $interval",
             )
@@ -55,21 +55,21 @@ class LesSkatteoppgjoerHendelserJob(
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
         ) {
-            if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
+            if (erLeader() && jobbenErAktivert()) {
                 if (lock.tryAcquire()) {
                     Kontekst.set(jobContext)
                     val inntektsaar = inntektsaarListe()
-
                     val antallKjoeringer = 100
-                    logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
 
-                    repeat(antallKjoeringer) { currentIteration ->
-                        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
+                    logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
+                    for (kjoeringIndex in 0 until antallKjoeringer) {
+                        if (jobbenErAktivert()) {
                             skatteoppgjoerHendelserService.lesOgBehandleHendelser(
                                 HendelseKjoeringRequest(hendelserBatchSize, inntektsaar, true),
                             )
                         } else {
-                            logger.info("Avbryter pga feature togglet av etter $currentIteration kjøringer")
+                            logger.info("Avbryter etter $kjoeringIndex kjøringer fordi feature toggle er av")
+                            break
                         }
                     }
                     logger.info("Ferdig med å lese og behandle hendelser fra skatt")
@@ -80,6 +80,8 @@ class LesSkatteoppgjoerHendelserJob(
             }
         }
     }
+
+    private fun jobbenErAktivert(): Boolean = featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)
 
     private fun inntektsaarListe(): List<Int> {
         val startaarOmstillingsstoenad = 2024

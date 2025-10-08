@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
@@ -13,7 +14,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 @OptIn(DelicateCoroutinesApi::class)
 class EtteroppgjoerSvarfristUtloeptJobService(
@@ -38,10 +38,8 @@ class EtteroppgjoerSvarfristUtloeptJobService(
     }
 
     private fun opprettNyOppgaveSvarfristUtloept() {
-        // TODO: trekke ut til felles for alle etteroppgjør jobber
-        val inntektsaar = YearMonth.now().year - 1
-
-        val relevanteEtteroppgjoer = etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(inntektsaar, svarfrist)
+        val etteroppgjoersAar = ETTEROPPGJOER_AAR
+        val relevanteEtteroppgjoer = etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(etteroppgjoersAar, svarfrist)
 
         val antallOppgaverOpprettet =
             relevanteEtteroppgjoer?.count { etteroppgjoer ->
@@ -65,13 +63,13 @@ class EtteroppgjoerSvarfristUtloeptJobService(
                         referanse = etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
                         sakId = etteroppgjoer.sakId,
                         type = OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT,
-                        merknad = "Svarfrist for etteroppgjør $inntektsaar er utløpt",
+                        merknad = "Svarfrist for etteroppgjør $etteroppgjoersAar er utløpt",
                         kilde = OppgaveKilde.HENDELSE,
                     )
                     true
                 }
             }
 
-        logger.info("Opprettet $antallOppgaverOpprettet oppgaver for etteroppgjør med svarfrist utløpt for $inntektsaar")
+        logger.info("Opprettet $antallOppgaverOpprettet oppgaver for etteroppgjør med svarfrist utløpt for $etteroppgjoersAar")
     }
 }

@@ -2,7 +2,9 @@ package no.nav.etterlatte.behandling.jobs.etteroppgjoer.behandling.jobs.etteropp
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.OMS_GYLDIG_FRA
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.common.DatabaseContext
@@ -63,11 +65,11 @@ class StartpunktSkatteoppgjoerHendelserJob(
     }
 
     private fun inntektsaarListe(): List<Int> {
-        val startaarOmstillingsstoenad = 2024
-        val sisteInntektsaar = LocalDate.now().year - 1
+        val startaarOmstillingsstoenad = OMS_GYLDIG_FRA
+        val sisteInntektsaar = ETTEROPPGJOER_AAR
         val inntektsaar =
             IntRange(
-                start = (sisteInntektsaar - 3).coerceAtLeast(startaarOmstillingsstoenad),
+                start = (sisteInntektsaar - 3).coerceAtLeast(startaarOmstillingsstoenad.year),
                 endInclusive = sisteInntektsaar,
             ).toList()
         return inntektsaar

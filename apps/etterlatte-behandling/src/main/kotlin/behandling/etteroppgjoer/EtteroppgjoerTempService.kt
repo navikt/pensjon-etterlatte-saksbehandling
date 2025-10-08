@@ -20,7 +20,7 @@ class EtteroppgjoerTempService(
         sakId: SakId,
         merknad: String? = null,
     ) {
-        val defaultMerknad = "Etteroppgjøret for ${2024} er klart til behandling"
+        val defaultMerknad = "Etteroppgjøret for ${ETTEROPPGJOER_AAR} er klart til behandling"
 
         val eksisterendeOppgaver =
             oppgaveService

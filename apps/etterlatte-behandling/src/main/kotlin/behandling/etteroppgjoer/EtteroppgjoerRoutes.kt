@@ -111,7 +111,7 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val forbehandling =
                         inTransaction {
-                            forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, oppgaveId, brukerTokenInfo)
+                            forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, ETTEROPPGJOER_AAR, oppgaveId, brukerTokenInfo)
                         }
                     call.respond(forbehandling)
                 }

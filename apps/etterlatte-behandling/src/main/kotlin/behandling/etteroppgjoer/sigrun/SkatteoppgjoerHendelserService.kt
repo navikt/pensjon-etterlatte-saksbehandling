@@ -95,8 +95,8 @@ class SkatteoppgjoerHendelserService(
                         logger.error("Hendelse med sekvensnummer ${hendelse.sekvensnummer} mangler periode")
                         return@count false
                     }
-                    if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
-                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant periode")
+                    if (hendelse.gjelderPeriode.toInt() != request.etteroppgjoerAar) {
+                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har ikke relevant periode")
                         return@count false
                     }
                     try {
@@ -209,7 +209,7 @@ class SkatteoppgjoerHendelserService(
 
 data class HendelseKjoeringRequest(
     val antallHendelser: Int,
-    val inntektsaarListe: List<Int>,
+    val etteroppgjoerAar: Int,
     val venteMellomKjoeringer: Boolean,
     val antallKjoeringer: Int,
 )

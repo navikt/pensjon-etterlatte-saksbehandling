@@ -26,6 +26,9 @@ enum class EtteroppgjoerSvarfrist(
     EN_MND("1 month"),
 }
 
+// TODO: finne en bedre plass for denne, evnt i config
+const val ETTEROPPGJOER_AAR = 2024
+
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
     val vedtakKlient: VedtakKlient,

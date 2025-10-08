@@ -11,7 +11,7 @@ data class HendelseslisteFraSkatt(
         fun stub(
             startSekvensnummer: Long = 0,
             antall: Int = 10,
-            aar: Int = 2024,
+            aar: Int = ETTEROPPGJOER_AAR,
         ): HendelseslisteFraSkatt {
             val hendelser =
                 List(antall) { index ->
@@ -59,7 +59,7 @@ data class PensjonsgivendeInntektFraSkatt(
 
     companion object {
         fun stub(
-            aar: Int = 2024,
+            aar: Int = ETTEROPPGJOER_AAR,
             aarsinntekt: Int = 300000,
         ) = PensjonsgivendeInntektFraSkatt(
             inntektsaar = aar,

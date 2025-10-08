@@ -1,6 +1,8 @@
 package behandling.jobs.etteroppgjoer
 
+import kotlinx.coroutines.sync.Semaphore
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
@@ -30,6 +32,7 @@ class LesSkatteoppgjoerHendelserJob(
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
+    private val lock = Semaphore(1, 0)
 
     private var jobContext: Context =
         Context(
@@ -53,11 +56,27 @@ class LesSkatteoppgjoerHendelserJob(
             period = interval.toMillis(),
         ) {
             if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
-                val inntektsaar = inntektsaarListe()
-                skatteoppgjoerHendelserService.setupKontekstAndRun(
-                    HendelseKjoeringRequest(hendelserBatchSize, inntektsaar, true, 100),
-                    jobContext,
-                )
+                if (lock.tryAcquire()) {
+                    Kontekst.set(jobContext)
+                    val inntektsaar = inntektsaarListe()
+
+                    val antallKjoeringer = 100
+                    logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
+
+                    repeat(antallKjoeringer) { currentIteration ->
+                        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
+                            skatteoppgjoerHendelserService.lesOgBehandleHendelser(
+                                HendelseKjoeringRequest(hendelserBatchSize, inntektsaar, true),
+                            )
+                        } else {
+                            logger.info("Avbryter pga feature togglet av etter $currentIteration kjøringer")
+                        }
+                    }
+                    logger.info("Ferdig med å lese og behandle hendelser fra skatt")
+                    lock.release()
+                } else {
+                    logger.info("Jobben kjører allerede, vi starter ikke en ny kjøring")
+                }
             }
         }
     }

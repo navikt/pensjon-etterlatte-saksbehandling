@@ -1,9 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Semaphore
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -17,7 +14,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -28,56 +24,21 @@ class SkatteoppgjoerHendelserService(
     private val sakService: SakService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val lock = Semaphore(1, 0)
-
-    fun setupKontekstAndRun(
-        request: HendelseKjoeringRequest,
-        context: Context,
-    ) {
-        if (lock.tryAcquire()) {
-            Kontekst.set(context)
-
-            lesOgBehandleHendelser(request)
-            lock.release()
-        } else {
-            logger.info("Jobben kjører allerede, vi gidder ikke starte enda en kjøring")
-        }
-    }
 
     fun lesOgBehandleHendelser(request: HendelseKjoeringRequest) {
-        logger.info("Starter med å be om ${request.antallHendelser} hendelser fra skatt - ${request.antallKjoeringer} ganger")
         try {
-            repeat(request.antallKjoeringer) {
-                inTransaction {
-                    val hendelsesliste = lesHendelsesliste(request)
+            inTransaction {
+                val hendelsesliste = lesHendelsesliste(request)
 
-                    if (!hendelsesliste.hendelser.isEmpty()) {
-                        behandleHendelser(hendelsesliste.hendelser, request)
-                    }
-                }
-                if (request.venteMellomKjoeringer) {
-                    Thread.sleep(2000)
+                if (!hendelsesliste.hendelser.isEmpty()) {
+                    behandleHendelser(hendelsesliste.hendelser, request)
                 }
             }
-            logger.info("Ferdig med å lese ${request.antallKjoeringer} * ${request.antallHendelser} hendelser fra skatt")
+            if (request.venteMellomKjoeringer) {
+                Thread.sleep(2000)
+            }
         } catch (e: Exception) {
             logger.error("Feilet under aggresiv lesing av hendelser fra skatt", e)
-        }
-    }
-
-    fun setupContextAndSettSekvensnummerForLesingFraDato(
-        dato: LocalDate,
-        context: Context,
-    ) {
-        Kontekst.set(context)
-        settSekvensnummerForLesingFraDato(dato)
-    }
-
-    fun settSekvensnummerForLesingFraDato(dato: LocalDate) {
-        val sekvensnummer = runBlocking { sigrunKlient.hentSekvensnummerForLesingFraDato(dato) }
-
-        inTransaction {
-            dao.lagreKjoering(HendelserKjoering(sekvensnummer, 0, 0, null))
         }
     }
 
@@ -199,9 +160,4 @@ data class HendelseKjoeringRequest(
     val antallHendelser: Int,
     val inntektsaarListe: List<Int>,
     val venteMellomKjoeringer: Boolean,
-    val antallKjoeringer: Int,
-)
-
-data class HendelserSettSekvensnummerRequest(
-    val startdato: LocalDate,
 )

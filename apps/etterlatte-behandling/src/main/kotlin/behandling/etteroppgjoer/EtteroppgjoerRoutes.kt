@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInn
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelserSettSekvensnummerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -232,16 +231,6 @@ fun Route.etteroppgjoerRoutes(
                 val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
                 skatteoppgjoerHendelserService.lesOgBehandleHendelser(hendelseKjoeringRequest)
 
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        post("/sett-skatteoppgjoer-sekvensnummer") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-
-            kunSystembruker {
-                val request: HendelserSettSekvensnummerRequest = call.receive()
-                skatteoppgjoerHendelserService.settSekvensnummerForLesingFraDato(request.startdato)
                 call.respond(HttpStatusCode.OK)
             }
         }

@@ -21,7 +21,10 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
@@ -66,8 +69,9 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
-                        }
+                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                        } ?: throw IkkeFunnetException("INGEN_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
+
                     call.respond(etteroppgjoer)
                 }
             }
@@ -79,11 +83,25 @@ fun Route.etteroppgjoerRoutes(
                 }
                 kunSkrivetilgang {
                     inTransaction {
+                        val etteroppgjoer =
+                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                                ?: throw InternfeilException("Fant ikke etteroppgjør for sak $sakId")
+
+                        krev(etteroppgjoer.status in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING_I_DEV) {
+                            "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"
+                        }
+
+                        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                            sakId,
+                            etteroppgjoer.inntektsaar,
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                        )
+
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(
                             sakId,
                         )
                     }
-                    // TODO: returnere oppgave?
+
                     call.respond(HttpStatusCode.OK)
                 }
             }

@@ -9,7 +9,7 @@ import {
   IInformasjonFraBruker,
 } from '~shared/types/EtteroppgjoerForbehandling'
 
-export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer[]>> => {
+export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer>> => {
   return apiClient.get(`/etteroppgjoer/${sakId}`)
 }
 

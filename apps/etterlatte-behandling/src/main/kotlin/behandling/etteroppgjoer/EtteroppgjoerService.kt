@@ -32,7 +32,7 @@ class EtteroppgjoerService(
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
 ) {
-    fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentAlleAktiveEtteroppgjoerForSak(sakId)
+    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? = dao.hentAktivtEtteroppgjoerForSak(sakId)
 
     fun hentEtteroppgjoerMedSvarfristUtloept(
         inntektsaar: Int,

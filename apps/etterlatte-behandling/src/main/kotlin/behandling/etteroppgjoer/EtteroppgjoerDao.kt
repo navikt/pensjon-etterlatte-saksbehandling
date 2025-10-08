@@ -63,7 +63,7 @@ class EtteroppgjoerDao(
         }
     }
 
-    fun hentAlleAktiveEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> =
+    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -80,9 +80,9 @@ class EtteroppgjoerDao(
 
                 val etteroppgjoer = statement.executeQuery().toList { toEtteroppgjoer() }
 
-                // TODO: vi har ikke testet eller vet om flere etteorppgjør fungerer
+                // TODO: håndtere flere aktive etteroppgjoer for sak
                 krev(etteroppgjoer.size < 2) { "Fant ${etteroppgjoer.size} aktive etteroppgjoer for sak $sakId, forventet 1" }
-                etteroppgjoer
+                etteroppgjoer.firstOrNull()
             }
         }
 

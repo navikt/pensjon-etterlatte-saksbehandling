@@ -1,42 +1,19 @@
 import { Box, List, VStack } from '@navikt/ds-react'
-import { isSuccess, Result } from '~shared/api/apiUtils'
+import { isFailure, isSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
 import { ArrowRightIcon, CheckmarkCircleIcon, CircleIcon } from '@navikt/aksel-icons'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
-const steps = [
-  {
-    index: 1,
-    status: 'VENTER_PAA_SKATTEOPPGJOER',
-    text: () => 'Venter på skatteoppgjøret',
-  },
-  {
-    index: 2,
-    status: 'MOTTATT_SKATTEOPPGJOER',
-    text: () => 'Mottatt skatteoppgjør',
-  },
-  {
-    index: 3,
-    status: 'UNDER_FORBEHANDLING',
-    text: () => 'Etteroppgjøret er under forbehandling',
-  },
-  {
-    index: 4,
-    status: 'VENTER_PAA_SVAR',
-    text: () => 'Varselbrev sendt, venter på svar fra bruker',
-  },
-  {
-    index: 5,
-    status: 'UNDER_REVURDERING',
-    text: () => 'Behandler mottatt svar',
-  },
-  {
-    index: 6,
-    status: 'FERDIGSTILT',
-    text: () => 'Etteroppgjøret er ferdigstilt',
-  },
+const steg = [
+  { index: 1, status: 'VENTER_PAA_SKATTEOPPGJOER', text: () => 'Venter på skatteoppgjøret' },
+  { index: 2, status: 'MOTTATT_SKATTEOPPGJOER', text: () => 'Mottatt skatteoppgjør' },
+  { index: 3, status: 'UNDER_FORBEHANDLING', text: () => 'Etteroppgjøret er under forbehandling' },
+  { index: 4, status: 'VENTER_PAA_SVAR', text: () => 'Varselbrev sendt, venter på svar fra bruker' },
+  { index: 5, status: 'UNDER_REVURDERING', text: () => 'Behandler mottatt svar fra bruker' },
+  { index: 6, status: 'FERDIGSTILT', text: () => 'Etteroppgjøret er ferdigstilt' },
 ]
 
 const getIcon = (current: number, target: number) => {
@@ -54,30 +31,33 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
     }
   }, [sakResult])
 
+  if (isFailure(hentEtteroppgjoerResponse)) {
+    return <ApiErrorAlert>{hentEtteroppgjoerResponse.error.detail}</ApiErrorAlert>
+  }
+
+  if (!isSuccess(hentEtteroppgjoerResponse) || !hentEtteroppgjoerResponse.data) {
+    return null
+  }
+
+  const etteroppgjoer = hentEtteroppgjoerResponse.data
+  const currentIndex = steg.find((s) => s.status === etteroppgjoer.status)?.index ?? 0
+
   return (
     <VStack gap="4">
       <Box padding="8" maxWidth="70rem">
-        {isSuccess(hentEtteroppgjoerResponse) &&
-          hentEtteroppgjoerResponse.data.map((etteroppgjoer, index) => {
-            const currentLevel = steps.find((s) => s.status === etteroppgjoer.status)?.index ?? 0
+        <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
 
-            return (
-              <div key={index}>
-                <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
-                <List as="ul">
-                  {steps.map(({ status, text, index: stepIndex }) => (
-                    <List.Item
-                      key={status}
-                      icon={getIcon(currentLevel, stepIndex)}
-                      style={{ color: currentLevel >= stepIndex ? 'black' : 'gray' }}
-                    >
-                      {text()}
-                    </List.Item>
-                  ))}
-                </List>
-              </div>
-            )
-          })}
+        <List as="ul">
+          {steg.map(({ status, text, index: stepIndex }) => (
+            <List.Item
+              key={status}
+              icon={getIcon(currentIndex, stepIndex)}
+              style={{ color: currentIndex >= stepIndex ? 'black' : 'gray' }}
+            >
+              {text()}
+            </List.Item>
+          ))}
+        </List>
       </Box>
     </VStack>
   )

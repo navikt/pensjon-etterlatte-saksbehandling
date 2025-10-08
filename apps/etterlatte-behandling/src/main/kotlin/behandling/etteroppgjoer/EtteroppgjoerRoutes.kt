@@ -21,6 +21,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -69,13 +70,9 @@ fun Route.etteroppgjoerRoutes(
                     val etteroppgjoer =
                         inTransaction {
                             etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
-                        }
+                        } ?: throw IkkeFunnetException("INGEN_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
 
-                    if (etteroppgjoer == null) {
-                        call.respond(HttpStatusCode.NotFound, "Fant ikke etteroppgjør for sak $sakId")
-                    } else {
-                        call.respond(etteroppgjoer)
-                    }
+                    call.respond(etteroppgjoer)
                 }
             }
 

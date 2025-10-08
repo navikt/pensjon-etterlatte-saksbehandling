@@ -5,7 +5,8 @@ export const KommentarLabel = () => (
   <HStack gap="1">
     Kommentar
     <HelpText>
-      Legg til kommentar hvis du avslutter oppgaven. Det er ikke nødvendig dersom du oppretter revurdering.
+      Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter en revurdering eller
+      forbehandling.
     </HelpText>
   </HStack>
 )

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -167,10 +169,20 @@ class SkatteoppgjoerHendelserService(
             )
         ) {
             logger.info(
-                "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør " +
+                "Vi har mottatt hendelse ${hendelse.hendelsetype} fra skatt med sekvensnummer=" +
+                    "${hendelse.sekvensnummer} om tilgjengelig skatteoppgjør " +
                     "for ${hendelse.gjelderPeriode?.toInt()}, sakId=${sak.id}. " +
                     "Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
             )
+            if (etteroppgjoer.status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
+                logger.warn(
+                    "Vi fikk ny hendelse (type=${hendelse.hendelsetype}) om skatteoppgjør i sak ${sak.id}, " +
+                        "sekvensnummer: ${hendelse.sekvensnummer}, etter at vi allerede har oppdatert status til " +
+                        "MOTTATT_SKATTEOPPJOER. Se sikkerlogg for full hendelse fra skatt",
+                )
+                sikkerLogg.info("Full hendelse for dobbel oppdatering fra skatt: ", kv("hendelse", hendelse.toJson()))
+            }
+
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                 sak.id,
                 etteroppgjoer.inntektsaar,

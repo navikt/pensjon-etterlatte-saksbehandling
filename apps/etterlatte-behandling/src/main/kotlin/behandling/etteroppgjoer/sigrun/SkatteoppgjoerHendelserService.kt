@@ -27,21 +27,20 @@ class SkatteoppgjoerHendelserService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun lesOgBehandleHendelser(request: HendelseKjoeringRequest) {
-        try {
+    fun lesOgBehandleHendelser(request: HendelseKjoeringRequest): Int {
+        val antallLest =
             inTransaction {
                 val hendelsesliste = lesHendelsesliste(request)
 
                 if (!hendelsesliste.hendelser.isEmpty()) {
                     behandleHendelser(hendelsesliste.hendelser, request)
                 }
+                hendelsesliste.hendelser.size
             }
-            if (request.venteMellomKjoeringer) {
-                Thread.sleep(2000)
-            }
-        } catch (e: Exception) {
-            logger.error("Feilet under aggresiv lesing av hendelser fra skatt", e)
+        if (request.venteMellomKjoeringer) {
+            Thread.sleep(2000)
         }
+        return antallLest
     }
 
     private fun behandleHendelser(

@@ -33,6 +33,7 @@ class LesSkatteoppgjoerHendelserJob(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
     private val lock = Semaphore(1, 0)
+    private val antallKjoeringer = 100
 
     private var jobContext: Context =
         Context(
@@ -58,24 +59,31 @@ class LesSkatteoppgjoerHendelserJob(
             if (erLeader() && jobbenErAktivert()) {
                 if (lock.tryAcquire()) {
                     Kontekst.set(jobContext)
-                    val antallKjoeringer = 100
 
-                    logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
-                    for (kjoeringIndex in 0 until antallKjoeringer) {
-                        if (jobbenErAktivert()) {
-                            skatteoppgjoerHendelserService.lesOgBehandleHendelser(
-                                HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),
-                            )
-                        } else {
-                            logger.info("Avbryter etter $kjoeringIndex kjøringer fordi feature toggle er av")
-                            break
-                        }
+                    try {
+                        lesOgBehandleFlereGanger()
+                    } catch (e: Exception) {
+                        logger.error("Feilet under lesing og behandling av hendelser fra Skatt", e)
                     }
-                    logger.info("Ferdig med å lese og behandle hendelser fra skatt")
                     lock.release()
                 } else {
                     logger.info("Jobben kjører allerede, vi starter ikke en ny kjøring")
                 }
+            }
+        }
+    }
+
+    private fun lesOgBehandleFlereGanger() {
+        logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
+        for (i in 0 until antallKjoeringer) {
+            if (jobbenErAktivert()) {
+                skatteoppgjoerHendelserService.lesOgBehandleHendelser(
+                    HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),
+                )
+                logger.info("Ferdig med å lese og behandle hendelser fra skatt")
+            } else {
+                logger.info("Avslutter fordi feature toggle er av")
+                break
             }
         }
     }

@@ -4,6 +4,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -11,7 +12,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 enum class EtteroppgjoerFilter(
     val harSanksjon: Boolean,
@@ -46,7 +46,7 @@ class OpprettEtteroppgjoerJobService(
     }
 
     suspend fun startEtteroppgjoerKjoering() {
-        val etteroppgjoersAar = YearMonth.now().year - 1
+        val etteroppgjoersAar = ETTEROPPGJOER_AAR
         finnOgOpprettEtteroppgjoer(etteroppgjoersAar)
     }
 

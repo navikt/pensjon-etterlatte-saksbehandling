@@ -4,6 +4,7 @@ import kotlinx.coroutines.sync.Semaphore
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
@@ -16,7 +17,6 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.LocalDate
 import java.util.Timer
 import javax.sql.DataSource
 
@@ -58,14 +58,13 @@ class LesSkatteoppgjoerHendelserJob(
             if (erLeader() && jobbenErAktivert()) {
                 if (lock.tryAcquire()) {
                     Kontekst.set(jobContext)
-                    val inntektsaar = inntektsaarListe()
                     val antallKjoeringer = 100
 
                     logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
                     for (kjoeringIndex in 0 until antallKjoeringer) {
                         if (jobbenErAktivert()) {
                             skatteoppgjoerHendelserService.lesOgBehandleHendelser(
-                                HendelseKjoeringRequest(hendelserBatchSize, inntektsaar, true),
+                                HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),
                             )
                         } else {
                             logger.info("Avbryter etter $kjoeringIndex kjøringer fordi feature toggle er av")
@@ -82,15 +81,4 @@ class LesSkatteoppgjoerHendelserJob(
     }
 
     private fun jobbenErAktivert(): Boolean = featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)
-
-    private fun inntektsaarListe(): List<Int> {
-        val startaarOmstillingsstoenad = 2024
-        val sisteInntektsaar = LocalDate.now().year - 1
-        val inntektsaar =
-            IntRange(
-                start = (sisteInntektsaar - 3).coerceAtLeast(startaarOmstillingsstoenad),
-                endInclusive = sisteInntektsaar,
-            ).toList()
-        return inntektsaar
-    }
 }

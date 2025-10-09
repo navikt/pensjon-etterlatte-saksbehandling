@@ -20,7 +20,10 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
@@ -43,7 +46,6 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_PERIODISK_JOBB("etteroppgjoer_periodisk_jobb"),
     ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),
-    ETTEROPPGJOER_STARTPUNKT_SKATTEHENDELSES_JOBB("etteroppgjoer_startpunkt_skattehendelses_jobb"),
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
     ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
     ;
@@ -65,8 +67,9 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            etteroppgjoerService.hentAlleAktiveEtteroppgjoerForSak(sakId)
-                        }
+                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                        } ?: throw IkkeFunnetException("INGEN_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
+
                     call.respond(etteroppgjoer)
                 }
             }
@@ -78,11 +81,25 @@ fun Route.etteroppgjoerRoutes(
                 }
                 kunSkrivetilgang {
                     inTransaction {
+                        val etteroppgjoer =
+                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                                ?: throw InternfeilException("Fant ikke etteroppgjør for sak $sakId")
+
+                        krev(etteroppgjoer.status in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING_I_DEV) {
+                            "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"
+                        }
+
+                        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                            sakId,
+                            etteroppgjoer.inntektsaar,
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                        )
+
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(
                             sakId,
                         )
                     }
-                    // TODO: returnere oppgave?
+
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -92,7 +109,7 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val forbehandling =
                         inTransaction {
-                            forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, 2024, oppgaveId, brukerTokenInfo)
+                            forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, ETTEROPPGJOER_AAR, oppgaveId, brukerTokenInfo)
                         }
                     call.respond(forbehandling)
                 }

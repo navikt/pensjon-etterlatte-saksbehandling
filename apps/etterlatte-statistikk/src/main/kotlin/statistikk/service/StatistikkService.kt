@@ -16,8 +16,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
@@ -127,6 +125,7 @@ class StatistikkService(
                 aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto)
             }
         } catch (e: Exception) {
+            // TODO bruke exceptionen?
             logger.error(
                 "Kunne ikke hente og oppdatere aktivitetspliktstatusen for OMS-sak med id=${vedtak.sak.id}" +
                     "Dette betyr at vi ikke kjenner til den oppdaterte aktivitetspliktstatusen for saken," +
@@ -153,6 +152,7 @@ class StatistikkService(
             try {
                 runBlocking { retry(3) { behandlingKlient.hentStatistikkBehandling(statistikkBehandling.id) } }
             } catch (e: Exception) {
+                // TODO bruke exceptionen?
                 logger.error(
                     "Kunne ikke hente behandling med id ${statistikkBehandling.id} fra behandling. " +
                         "Hvis opprettelse av behandlingen ble rullet tilbake og behandlingen med id=" +
@@ -281,7 +281,8 @@ class StatistikkService(
     ): SakRad {
         val sisteResultat =
             when (etteroppgjoerRad.hendelse) {
-                EtteroppgjoerHendelseType.FERDIGSTILT -> etteroppgjoerService.hentNyesteRad(etteroppgjoerRad.forbehandlingId)
+                EtteroppgjoerHendelseType.FERDIGSTILT ->
+                    etteroppgjoerService.hentNyesteBeregnedeResultat(etteroppgjoerRad.forbehandlingId)
                 else -> null
             }
         val foersteMaanedIEtteroppgjoer = etteroppgjoerRad.maanederYtelse.min()
@@ -301,7 +302,7 @@ class StatistikkService(
             vedtakTidspunkt = null,
             type = "ETTEROPPGJOER_FORBEHANDLING",
             status = etteroppgjoerRad.hendelse.name,
-            resultat = etteroppgjoerRad.resultatType?.name ?: sisteResultat?.resultatType?.name,
+            resultat = etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name,
             resultatBegrunnelse = null,
             behandlingMetode = BehandlingMetode.MANUELL, // TODO: hvis vi setter på automatisering her må vi skille her
             soeknadFormat = SoeknadFormat.DIGITAL,

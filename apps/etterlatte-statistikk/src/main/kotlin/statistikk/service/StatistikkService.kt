@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.service
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -17,7 +18,9 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -393,7 +396,7 @@ class StatistikkService(
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
             type = vedtakInnhold.behandling.type.name,
             status = hendelse.name,
-            resultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling.status)?.name,
+            resultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling)?.name,
             resultatBegrunnelse = null,
             behandlingMetode =
                 hentBehandlingMetode(
@@ -706,42 +709,59 @@ class StatistikkService(
         }
         return fellesRad
     }
-}
 
-internal fun behandlingResultatFraVedtak(
-    vedtak: VedtakDto,
-    vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
-    behandligStatus: BehandlingStatus,
-): BehandlingResultat? {
-    if (behandligStatus == BehandlingStatus.AVBRUTT) {
-        return BehandlingResultat.AVBRUTT
-    }
-    if (vedtakKafkaHendelseType !in
-        listOf(
-            VedtakKafkaHendelseHendelseType.ATTESTERT,
-            VedtakKafkaHendelseHendelseType.IVERKSATT,
-        )
-    ) {
-        return null
-    }
-    return when (vedtak.type) {
-        VedtakType.INNVILGELSE -> BehandlingResultat.INNVILGELSE
-        VedtakType.OPPHOER -> BehandlingResultat.OPPHOER
-        VedtakType.AVSLAG -> BehandlingResultat.AVSLAG
-        VedtakType.ENDRING -> {
-            when (
-                (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
-                    it.type == UtbetalingsperiodeType.OPPHOER
-                }
-            ) {
-                true -> BehandlingResultat.OPPHOER
-                false -> BehandlingResultat.ENDRING
-            }
+    internal fun behandlingResultatFraVedtak(
+        vedtak: VedtakDto,
+        vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
+        behandling: StatistikkBehandling,
+    ): BehandlingResultat? {
+        if (behandling.status == BehandlingStatus.AVBRUTT) {
+            return BehandlingResultat.AVBRUTT
         }
+        if (vedtakKafkaHendelseType !in
+            listOf(
+                VedtakKafkaHendelseHendelseType.ATTESTERT,
+                VedtakKafkaHendelseHendelseType.IVERKSATT,
+            )
+        ) {
+            return null
+        }
+        if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+            return hentResultatFraEtteroppgjoerStatistikk(behandling)
+        }
+        return when (vedtak.type) {
+            VedtakType.INNVILGELSE -> BehandlingResultat.INNVILGELSE
+            VedtakType.OPPHOER -> BehandlingResultat.OPPHOER
+            VedtakType.AVSLAG -> BehandlingResultat.AVSLAG
+            VedtakType.ENDRING -> {
+                when (
+                    (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
+                        it.type == UtbetalingsperiodeType.OPPHOER
+                    }
+                ) {
+                    true -> BehandlingResultat.OPPHOER
+                    false -> BehandlingResultat.ENDRING
+                }
+            }
 
-        VedtakType.TILBAKEKREVING,
-        VedtakType.AVVIST_KLAGE,
-        -> throw InternfeilException("Skal ikke mappe vedtak")
+            VedtakType.TILBAKEKREVING,
+            VedtakType.AVVIST_KLAGE,
+            -> throw InternfeilException("Skal ikke mappe vedtak")
+        }
+    }
+
+    private fun hentResultatFraEtteroppgjoerStatistikk(behandling: StatistikkBehandling): BehandlingResultat? {
+        val etteroppgjoerRad = etteroppgjoerService.hentNyesteRad(behandling.relatertBehandlingId!!.toUUID())
+        val resultat =
+            krevIkkeNull(etteroppgjoerRad?.resultatType) {
+                "Kan ikke sette resultat når det mangler i etteroppgjørsstatistikken"
+            }
+        return when (resultat) {
+            EtteroppgjoerResultatType.TILBAKEKREVING -> BehandlingResultat.ETTEROPPGJOER_TILBAKEKREVING
+            EtteroppgjoerResultatType.ETTERBETALING -> BehandlingResultat.ETTEROPPGJOER_ETTERBETALING
+            EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_MED_UTBETALING
+            EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_UTEN_UTBETALING
+        }
     }
 }
 

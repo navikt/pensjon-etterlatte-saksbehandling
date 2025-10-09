@@ -330,6 +330,7 @@ class BehandlingStatusServiceImpl(
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
         haandterAktivitetspliktOppgave(behandling)
+
         if (behandling.type == BehandlingType.REVURDERING) {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
@@ -351,7 +352,7 @@ class BehandlingStatusServiceImpl(
             // TODO: litt for enkelt, må kanskje sjekke mer
             if (aar > virkAar) {
                 try {
-                    etteroppgjoerService.opprettEtteroppgjoer(behandling, virkAar)
+                    etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, virkAar)
                 } catch (e: Exception) {
                     logger.error("Kunne ikke opprette etteroppgjør ved iverksettelse av sak", e)
                 }

@@ -91,6 +91,7 @@ class ApplicationContext {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             trygdetidKlient = trygdetidKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
+            featureToggleService = featureToggleService,
         )
 
     val beregnOverstyrBeregningService =

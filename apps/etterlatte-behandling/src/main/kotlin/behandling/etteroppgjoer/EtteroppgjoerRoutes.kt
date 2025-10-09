@@ -50,6 +50,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_STARTPUNKT_SKATTEHENDELSES_JOBB("etteroppgjoer_startpunkt_skattehendelses_jobb"),
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
     ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
+    ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING("etteroppgjoer_kan_ferdigstille_forbehandling"),
     ;
 
     override fun key(): String = toggle
@@ -155,6 +156,9 @@ fun Route.etteroppgjoerRoutes(
 
                 post("ferdigstill") {
                     sjekkEtteroppgjoerEnabled(featureToggleService)
+                    if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING, false)) {
+                        throw InternfeilException("Forbehandlinger er sperret for å ferdigstilles")
+                    }
                     kunSkrivetilgang {
                         inTransaction {
                             runBlocking {
@@ -170,6 +174,9 @@ fun Route.etteroppgjoerRoutes(
 
                 post("ferdigstill-uten-brev") {
                     sjekkEtteroppgjoerEnabled(featureToggleService)
+                    if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING, false)) {
+                        throw InternfeilException("Forbehandlinger er sperret for å ferdigstilles")
+                    }
                     kunSkrivetilgang {
                         val forbehandling =
                             inTransaction {

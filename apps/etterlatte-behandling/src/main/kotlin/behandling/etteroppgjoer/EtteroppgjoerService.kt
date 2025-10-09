@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -34,6 +35,7 @@ class EtteroppgjoerService(
     val vedtakKlient: VedtakKlient,
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
+    val sigrunKlient: SigrunKlient,
 ) {
     fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? = dao.hentAktivtEtteroppgjoerForSak(sakId)
 
@@ -123,11 +125,15 @@ class EtteroppgjoerService(
                     "med id=${sisteIverksatteVedtak.behandlingId} som ikke finnes"
             }
 
-        return etteroppgjoer(sakId, inntektsaar, sisteIverksatteBehandling)
-            .also { dao.lagreEtteroppgjoer(it) }
+        return etteroppgjoer(
+            sakId,
+            inntektsaar,
+            sisteIverksatteBehandling,
+            EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+        ).also { dao.lagreEtteroppgjoer(it) }
     }
 
-    suspend fun opprettEtteroppgjoer(
+    suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
         sistIverksatteBehandling: Behandling,
         inntektsaar: Int,
     ): Etteroppgjoer? {
@@ -140,12 +146,21 @@ class EtteroppgjoerService(
         )
         if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
 
-        logger.error(
-            "☢️☢️☢️DENNE MÅ RYDDES OPP I! Vi har opprettet et etteroppgjør for $inntektsaar i sak" +
-                " ${sistIverksatteBehandling.sak.id}, som potensielt kan ha feil status mtp. skatteoppgjøret. " +
-                "DENNE MÅ RYDDES OPP I!☢️☢️☢️",
-        )
-        return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling)
+        val status =
+            try {
+                sigrunKlient.hentPensjonsgivendeInntekt(sistIverksatteBehandling.sak.ident, inntektsaar)
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+            } catch (e: Exception) {
+                logger.error(
+                    "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${sistIverksatteBehandling.sak.id}, " +
+                        "om vi ikke klarte å hente skatteoppgjør for, vi antar at dette er fordi skatteoppgjøret ikke er " +
+                        "tilgjengelig, hvis annen feil må saken ryddes opp manuelt",
+                    e,
+                )
+                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+            }
+
+        return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling, status)
             .also { dao.lagreEtteroppgjoer(it) }
     }
 
@@ -167,12 +182,13 @@ class EtteroppgjoerService(
         sakId: SakId,
         inntektsaar: Int,
         sisteIverksatteBehandling: Behandling,
+        etteroppgjoerStatus: EtteroppgjoerStatus,
     ): Etteroppgjoer {
         val etteroppgjoer =
             Etteroppgjoer(
                 sakId = sakId,
                 inntektsaar = inntektsaar,
-                status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                status = etteroppgjoerStatus,
                 harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
                 harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id, inntektsaar),
                 harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,

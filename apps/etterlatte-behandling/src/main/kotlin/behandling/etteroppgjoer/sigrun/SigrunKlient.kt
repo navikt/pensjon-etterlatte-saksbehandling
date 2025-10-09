@@ -55,7 +55,6 @@ class SigrunKlientImpl(
     val url: String,
     val featureToggleService: FeatureToggleService,
 ) : SigrunKlient {
-    private val logger = LoggerFactory.getLogger(SigrunKlientImpl::class.java)
     private val sikkerlogg = sikkerlogger()
 
     override suspend fun hentPensjonsgivendeInntekt(

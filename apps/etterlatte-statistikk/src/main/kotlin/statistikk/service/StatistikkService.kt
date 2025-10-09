@@ -128,11 +128,11 @@ class StatistikkService(
                 aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto)
             }
         } catch (e: Exception) {
-            // TODO bruke exceptionen?
             logger.error(
                 "Kunne ikke hente og oppdatere aktivitetspliktstatusen for OMS-sak med id=${vedtak.sak.id}" +
                     "Dette betyr at vi ikke kjenner til den oppdaterte aktivitetspliktstatusen for saken," +
                     "og trenger å følges opp for å få de riktig med i statistikken.",
+                e,
             )
         }
     }
@@ -155,12 +155,12 @@ class StatistikkService(
             try {
                 runBlocking { retry(3) { behandlingKlient.hentStatistikkBehandling(statistikkBehandling.id) } }
             } catch (e: Exception) {
-                // TODO bruke exceptionen?
                 logger.error(
                     "Kunne ikke hente behandling med id ${statistikkBehandling.id} fra behandling. " +
                         "Hvis opprettelse av behandlingen ble rullet tilbake og behandlingen med id=" +
                         "${statistikkBehandling.id} ikke finnes i behandlingsbasen lengre, må det også legges inn " +
                         "en avbrytelsesmelding til statistikk. ",
+                    e,
                 )
             }
         }

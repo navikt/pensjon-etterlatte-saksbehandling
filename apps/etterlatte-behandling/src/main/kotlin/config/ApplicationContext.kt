@@ -582,6 +582,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             behandlingService = behandlingService,
             beregningKlient = beregningKlient,
+            sigrunKlient = sigrunKlient,
         )
 
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)

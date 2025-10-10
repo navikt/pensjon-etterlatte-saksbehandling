@@ -140,14 +140,34 @@ data class DetaljertBeregnetTrygdetidResultat(
 data class FaktiskTrygdetid(
     val periode: Period,
     val antallMaaneder: Long,
-)
+) {
+    fun avrundet(): FaktiskTrygdetid {
+        val avrundetPeriode = this.periode.justertForDager()
+        return this.copy(periode = avrundetPeriode, antallMaaneder = avrundetPeriode.toTotalMonths())
+    }
+}
+
+fun Period.justertForDager(): Period {
+    val antallMaaneder =
+        if (this.normalized().days > 0) {
+            this.toTotalMonths() + 1L
+        } else {
+            this.toTotalMonths()
+        }
+    return Period.ofMonths(antallMaaneder.toInt()).normalized()
+}
 
 data class FremtidigTrygdetid(
     val periode: Period,
     val antallMaaneder: Long,
     val opptjeningstidIMaaneder: Long,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
-)
+) {
+    fun avrundet(): FremtidigTrygdetid {
+        val avrundetPeriode = this.periode.justertForDager()
+        return this.copy(periode = avrundetPeriode, antallMaaneder = avrundetPeriode.toTotalMonths())
+    }
+}
 
 data class OpplysningerDifferanse(
     val differanse: Boolean,

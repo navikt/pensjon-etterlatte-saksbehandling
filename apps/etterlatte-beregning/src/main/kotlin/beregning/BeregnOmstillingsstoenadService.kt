@@ -12,6 +12,8 @@ import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstill
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.toSamlet
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -41,12 +43,22 @@ import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
 
+enum class BeregningToggles(
+    val value: String,
+) : FeatureToggle {
+    BEREGNING_BRUK_NYE_BEREGNINGSREGLER("beregning_bruk_nye_beregningsregler"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 class BeregnOmstillingsstoenadService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val trygdetidKlient: TrygdetidKlient,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
 
@@ -118,11 +130,21 @@ class BeregnOmstillingsstoenadService(
         virkningstidspunkt: YearMonth,
         tilDato: LocalDate? = null,
     ): Beregning {
+        val skalBrukeNyeBeregningsregler = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false)
+
         val resultat =
-            kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
-                grunnlag = beregningsgrunnlag,
-                periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
-            )
+            if (skalBrukeNyeBeregningsregler) {
+                logger.info("Beregner omstillingsstønad med nye beregningsregler")
+                kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
+                    grunnlag = beregningsgrunnlag,
+                    periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
+                )
+            } else {
+                kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
+                    grunnlag = beregningsgrunnlag,
+                    periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
+                )
+            }
 
         val beregnetDato = Tidspunkt.now()
         return when (resultat) {

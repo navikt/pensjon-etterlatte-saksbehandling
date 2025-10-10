@@ -14,6 +14,7 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -43,6 +44,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private lateinit var beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService
 
     private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
@@ -55,7 +57,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 vilkaarsvurderingKlient = vilkaarsvurderingKlient,
                 trygdetidKlient = trygdetidKlient,
                 beregningsGrunnlagService = beregningsGrunnlagService,
+                featureToggleService = featureToggleService,
             )
+
+        every { featureToggleService.isEnabled(any(), any()) } returns false
     }
 
     @Test

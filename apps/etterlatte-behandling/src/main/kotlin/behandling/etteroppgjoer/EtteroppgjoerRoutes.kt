@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInn
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelserSettSekvensnummerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -47,7 +46,6 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_PERIODISK_JOBB("etteroppgjoer_periodisk_jobb"),
     ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),
-    ETTEROPPGJOER_STARTPUNKT_SKATTEHENDELSES_JOBB("etteroppgjoer_startpunkt_skattehendelses_jobb"),
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
     ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
     ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING("etteroppgjoer_kan_ferdigstille_forbehandling"),
@@ -257,16 +255,6 @@ fun Route.etteroppgjoerRoutes(
                 val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
                 skatteoppgjoerHendelserService.lesOgBehandleHendelser(hendelseKjoeringRequest)
 
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        post("/sett-skatteoppgjoer-sekvensnummer") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-
-            kunSystembruker {
-                val request: HendelserSettSekvensnummerRequest = call.receive()
-                skatteoppgjoerHendelserService.settSekvensnummerForLesingFraDato(request.startdato)
                 call.respond(HttpStatusCode.OK)
             }
         }

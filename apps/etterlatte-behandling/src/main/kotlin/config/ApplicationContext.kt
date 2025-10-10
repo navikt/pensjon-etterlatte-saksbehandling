@@ -63,7 +63,6 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtl
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.behandling.jobs.etteroppgjoer.StartpunktSkatteoppgjoerHendelserJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
@@ -974,18 +973,6 @@ internal class ApplicationContext(
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(5, ChronoUnit.MINUTES),
             hendelserBatchSize = 1000,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            featureToggleService = featureToggleService,
-        )
-    }
-
-    val startpunktSkatteoppgjoerHendelserJob: StartpunktSkatteoppgjoerHendelserJob by lazy {
-        StartpunktSkatteoppgjoerHendelserJob(
-            skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(8, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
             featureToggleService = featureToggleService,

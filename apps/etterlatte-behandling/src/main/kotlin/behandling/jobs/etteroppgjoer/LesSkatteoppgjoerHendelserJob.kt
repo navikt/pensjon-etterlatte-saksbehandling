@@ -1,6 +1,8 @@
 package behandling.jobs.etteroppgjoer
 
+import kotlinx.coroutines.sync.Semaphore
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
@@ -15,7 +17,6 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.LocalDate
 import java.util.Timer
 import javax.sql.DataSource
 
@@ -31,6 +32,8 @@ class LesSkatteoppgjoerHendelserJob(
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
+    private val lock = Semaphore(1, 0)
+    private val antallKjoeringer = 100
 
     private var jobContext: Context =
         Context(
@@ -41,7 +44,7 @@ class LesSkatteoppgjoerHendelserJob(
         )
 
     override fun schedule(): Timer {
-        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
+        if (jobbenErAktivert()) {
             logger.info(
                 "$jobbNavn er satt til å kjøre med skatteoppgjoerHendelserService=${skatteoppgjoerHendelserService::class.simpleName} og periode $interval",
             )
@@ -53,12 +56,37 @@ class LesSkatteoppgjoerHendelserJob(
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
         ) {
-            if (erLeader() && featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)) {
-                skatteoppgjoerHendelserService.setupKontekstAndRun(
-                    HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true, 100),
-                    jobContext,
-                )
+            if (erLeader() && jobbenErAktivert()) {
+                if (lock.tryAcquire()) {
+                    Kontekst.set(jobContext)
+
+                    try {
+                        lesOgBehandleFlereGanger()
+                    } catch (e: Exception) {
+                        logger.error("Feilet under lesing og behandling av hendelser fra Skatt", e)
+                    }
+                    lock.release()
+                } else {
+                    logger.info("Jobben kjører allerede, vi starter ikke en ny kjøring")
+                }
             }
         }
     }
+
+    private fun lesOgBehandleFlereGanger() {
+        logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
+        for (i in 0 until antallKjoeringer) {
+            if (jobbenErAktivert()) {
+                skatteoppgjoerHendelserService.lesOgBehandleHendelser(
+                    HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),
+                )
+                logger.info("Ferdig med å lese og behandle hendelser fra skatt")
+            } else {
+                logger.info("Avslutter fordi feature toggle er av")
+                break
+            }
+        }
+    }
+
+    private fun jobbenErAktivert(): Boolean = featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SKATTEHENDELSES_JOBB, false)
 }

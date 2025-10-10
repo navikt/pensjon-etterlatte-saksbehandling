@@ -353,7 +353,7 @@ class OppgaveService(
             ?.ident
 
     // TODO: Slå sammen med de 3 andre "ferdigstill"-funksjonene
-    fun ferdigStillOppgaveUnderBehandling(
+    fun ferdigstillOppgaveUnderBehandling(
         referanse: String,
         type: OppgaveType,
         saksbehandler: BrukerTokenInfo,

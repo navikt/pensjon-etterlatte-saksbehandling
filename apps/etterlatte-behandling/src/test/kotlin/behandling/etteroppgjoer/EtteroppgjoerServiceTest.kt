@@ -1,118 +1,267 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
-
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 class EtteroppgjoerServiceTest {
-    private val dao: EtteroppgjoerDao = mockk()
-    private val sigrunKlient: SigrunKlient = mockk()
-    private val beregningKlient: BeregningKlient = mockk()
-    private val behandlingService: BehandlingService = mockk()
+    private val sakId = sakId1
 
-    private val etteroppgjoerService: EtteroppgjoerService = EtteroppgjoerService(
-        dao = dao,
-        vedtakKlient = mockk(),
-        behandlingService = behandlingService,
-        beregningKlient = beregningKlient,
-        sigrunKlient = sigrunKlient,
-    )
+    private class TestContext(
+        val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    ) {
+        val dao: EtteroppgjoerDao = mockk()
+        val sigrunKlient: SigrunKlient = mockk()
+        val beregningKlient: BeregningKlient = mockk()
+        val behandlingService: BehandlingService = mockk()
+        val vedtakKlient: VedtakKlient = mockk()
 
-    val sakId = sakId1
+        val service =
+            EtteroppgjoerService(
+                dao = dao,
+                vedtakKlient = vedtakKlient,
+                behandlingService = behandlingService,
+                beregningKlient = beregningKlient,
+                sigrunKlient = sigrunKlient,
+            )
 
-    @BeforeEach
-    fun setup() {
-        every {
-            dao.hentEtteroppgjoerForInntektsaar(sakId, any())
-        } returns mockk {
-            every { status } returns EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+        init {
+            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns
+                mockk {
+                    every { status } returns EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+                }
+            coEvery { dao.lagreEtteroppgjoer(any()) } returns 1
+            every { dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) } returns Unit
+            every { dao.oppdaterFerdigstiltForbehandlingId(any(), any(), any()) } returns Unit
+
+            coEvery { beregningKlient.hentSanksjoner(any(), any()) } returns emptyList()
+            coEvery { beregningKlient.hentBeregningsgrunnlag(any(), any()) } returns
+                mockk {
+                    every { institusjonsopphold } returns emptyList()
+                }
+            coEvery { beregningKlient.hentOverstyrtBeregning(any(), any()) } returns mockk()
+            every { behandlingService.hentFoersteDoedsdato(any(), any()) } returns null
         }
 
-        coEvery {
-            dao.lagreEtteroppgjoer(any())
-        } returns 1
+        fun sigrunGirSvar() {
+            coEvery {
+                sigrunKlient.hentPensjonsgivendeInntekt(
+                    any(),
+                    any(),
+                )
+            } returns PensjonsgivendeInntektFraSkatt.stub()
+        }
+
+        fun sigrunKasterFeil() {
+            coEvery {
+                sigrunKlient.hentPensjonsgivendeInntekt(
+                    any(),
+                    any(),
+                )
+            } throws Exception("Ingen skatteoppgjør funnet :/")
+        }
     }
 
     @Test
     fun `skal opprette etteroppgjør med status MOTTATT_SKATTEOPPGJOER hvis vi får svar fra sigrun`() {
-        val foerstegangsBehandling = foerstegangsbehandling(sakId = sakId,
-            sakType = SakType.OMSTILLINGSSTOENAD,
-            status = BehandlingStatus.ATTESTERT,
-            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato= YearMonth.now().minusYears(1))
-        )
+        val ctx = TestContext(sakId)
+        ctx.sigrunGirSvar()
 
-        mockOpprettEtteroppgjoer()
+        val foerstegangsBehandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
 
-        coEvery {
-            sigrunKlient.hentPensjonsgivendeInntekt(any(), any())} returns PensjonsgivendeInntektFraSkatt.stub()
+        val etteroppgjoer =
+            runBlocking {
+                ctx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+                    sistIverksatteBehandling = foerstegangsBehandling,
+                    inntektsaar = 2023,
+                )
+            }
 
-
-
-        val etteroppgjoer = runBlocking {
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                sistIverksatteBehandling = foerstegangsBehandling,
-                inntektsaar = 2023)
-        }
-
-        assertEquals(etteroppgjoer!!.status, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
+        assertEquals(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, etteroppgjoer!!.status)
     }
 
     @Test
     fun `skal opprette etteroppgjør med status VENTER_PAA_SKATTEOPPGJOER hvis vi ikke får svar fra sigrun`() {
-        val sakId = sakId1
-        val foerstegangsBehandling = foerstegangsbehandling(sakId = sakId,
-            sakType = SakType.OMSTILLINGSSTOENAD,
-            status = BehandlingStatus.ATTESTERT,
-            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato= YearMonth.now().minusYears(1))
-        )
+        val cx = TestContext(sakId)
+        cx.sigrunKasterFeil()
 
-        mockOpprettEtteroppgjoer()
+        val foerstegangsBehandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
 
+        val etteroppgjoer =
+            runBlocking {
+                cx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+                    sistIverksatteBehandling = foerstegangsBehandling,
+                    inntektsaar = 2023,
+                )
+            }
 
-
-        coEvery {
-            sigrunKlient.hentPensjonsgivendeInntekt(any(), any())} throws Exception("Ingen skatteoppgjør funnet :/")
-
-        val etteroppgjoer = runBlocking {
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                sistIverksatteBehandling = foerstegangsBehandling,
-                inntektsaar = 2023)
-        }
-
-        assertEquals(etteroppgjoer!!.status, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+        assertEquals(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, etteroppgjoer!!.status)
     }
 
-    private fun mockOpprettEtteroppgjoer() {
-        coEvery {
-            beregningKlient.hentSanksjoner(any(), any())
-        } returns emptyList()
+    @Test
+    fun `etteroppgjør settes til VENTER_PAA_SVAR ved etterbetaling eller tilbakekreving`() {
+        val ctx = TestContext(sakId)
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = behandling.sak,
+                innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
+                sisteIverksatteBehandling = behandling.id,
+            )
 
-        coEvery {
-            beregningKlient.hentBeregningsgrunnlag(any(), any())
-        } returns mockk {
-            every { institusjonsopphold } returns emptyList()
+        val etteropgjoerResultat = listOf(EtteroppgjoerResultatType.ETTERBETALING, EtteroppgjoerResultatType.TILBAKEKREVING)
+
+        etteropgjoerResultat.forEach { type ->
+            val forbehandlingMedresultat =
+                forbehandling.copy(
+                    etteroppgjoerResultatType = type,
+                    status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+                )
+            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandlingMedresultat)
+            verify {
+                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedresultat.aar, EtteroppgjoerStatus.VENTER_PAA_SVAR)
+            }
+            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedresultat.aar, forbehandlingMedresultat.id) }
         }
+    }
 
-        coEvery {
-            beregningKlient.hentOverstyrtBeregning(any(), any())
-        } returns mockk()
+    @Test
+    fun `etteroppgjør settes til FERDIGSTILT ved ingen endring`() {
+        val ctx = TestContext(sakId)
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = behandling.sak,
+                innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
+                sisteIverksatteBehandling = behandling.id,
+            )
 
-        every {
-            behandlingService.hentFoersteDoedsdato(any(), any())
-        } returns null
+        val etteroppgjoerResultat =
+            listOf(
+                EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING,
+                EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING,
+            )
+
+        etteroppgjoerResultat.forEach { type ->
+            val forbehandlingMedResultat =
+                forbehandling.copy(
+                    etteroppgjoerResultatType = type,
+                    status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+                )
+            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandlingMedResultat)
+            verify {
+                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedResultat.aar, EtteroppgjoerStatus.FERDIGSTILT)
+            }
+            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedResultat.aar, forbehandlingMedResultat.id) }
+        }
+    }
+
+    @Test
+    fun `etteroppgjør kaster feil hvis resultat mangler`() {
+        val ctx = TestContext(sakId)
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+        val forbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(
+                    sak = behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
+                    sisteIverksatteBehandling = behandling.id,
+                ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
+
+        assertThrows(InternfeilException::class.java) {
+            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
+        }
+    }
+
+    @Test
+    fun `kan ikke oppdatere status for ferdigstilt etteroppgjør hvis forbehandlingen ikke er ferdigstilt`() {
+        val ctx = TestContext(sakId)
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = behandling.sak,
+                innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
+                sisteIverksatteBehandling = behandling.id,
+            )
+
+        assertThrows(IkkeTillattException::class.java) {
+            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
+        }
+    }
+
+    @Test
+    fun `opprettEtteroppgjoer returnerer null dersom etteroppgjør allerede finnes for år`() {
+        val ctx = TestContext(sakId)
+        every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.FERDIGSTILT,
+            )
+
+        val resultat = runBlocking { ctx.service.opprettEtteroppgjoer(sakId, 2024) }
+
+        assertNull(resultat)
+        coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
+        coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
 }

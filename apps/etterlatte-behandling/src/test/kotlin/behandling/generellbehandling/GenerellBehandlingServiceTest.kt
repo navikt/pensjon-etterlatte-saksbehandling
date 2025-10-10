@@ -280,7 +280,7 @@ internal class GenerellBehandlingServiceTest(
 
         val tokenInfo = simpleSaksbehandler(saksbehandler)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             behandlingId.toString(),
             OppgaveType.FOERSTEGANGSBEHANDLING,
             tokenInfo,

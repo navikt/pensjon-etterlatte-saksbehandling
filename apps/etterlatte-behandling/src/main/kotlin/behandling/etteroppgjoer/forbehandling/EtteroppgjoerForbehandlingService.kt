@@ -152,6 +152,7 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
+    // TODO: denne kan løses i sql
     fun hentSisteFerdigstillteForbehandling(sakId: SakId): EtteroppgjoerForbehandling {
         val sisteFerdigstilteForbehandling =
             dao
@@ -442,7 +443,7 @@ class EtteroppgjoerForbehandlingService(
         // Sak
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
-            throw InternfeilException("Kan ikke opprette forbehandling for sakType=${sak.sakType}")
+            throw IkkeTillattException("FEIL_SAKTYPE", "Kan ikke opprette forbehandling for sakType=${sak.sakType}")
         }
 
         if (oppgaveService
@@ -468,13 +469,17 @@ class EtteroppgjoerForbehandlingService(
         val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
         if (etteroppgjoer == null) {
             logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
-            throw InternfeilException("Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør")
+            throw IkkeTillattException(
+                "MANGLER_ETTEROPPGJOER",
+                "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
+            )
         }
 
         // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
         if (etteroppgjoer.status !in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
-            throw InternfeilException(
+            throw IkkeTillattException(
+                "FEIL_ETTEROPPGJOERS_STATUS",
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
             )
         }
@@ -482,7 +487,8 @@ class EtteroppgjoerForbehandlingService(
         // Forbehandling
         val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
         if (forbehandlinger.any { it.aar == inntektsaar && it.erUnderBehandling() }) {
-            throw InternfeilException(
+            throw IkkeTillattException(
+                "FORBEHANDLING_FINNES_ALLEREDE",
                 "Kan ikke opprette forbehandling fordi det allerede eksisterer en forbehandling som ikke er ferdigstilt",
             )
         }

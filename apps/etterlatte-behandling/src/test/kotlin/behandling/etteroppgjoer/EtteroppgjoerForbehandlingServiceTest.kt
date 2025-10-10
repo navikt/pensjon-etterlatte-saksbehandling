@@ -1,8 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import io.mockk.Awaits
-import io.mockk.Runs
-import io.mockk.awaits
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -22,13 +19,23 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak
 import no.nav.etterlatte.sak.SakLesDao
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -72,10 +79,35 @@ class EtteroppgjoerForbehandlingServiceTest {
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
             )
 
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId1,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                harSanksjon = false,
+                harInstitusjonsopphold = false,
+                harOpphoer = false,
+                harAdressebeskyttelseEllerSkjermet = false,
+                harAktivitetskrav = false,
+                harBosattUtland = false,
+                harOverstyrtBeregning = false,
+                sisteFerdigstilteForbehandling = UUID.randomUUID(),
+            )
+
         init {
             coEvery {
                 behandlingService.hentSisteIverksatteBehandling(sakId1)
             } returns behandling
+
+            coEvery { sakDao.hentSak(any()) } returns sak(sakId = sakId1, sakType = SakType.OMSTILLINGSSTOENAD)
+            coEvery { oppgaveService.hentOppgave(any()) } returns
+                mockk {
+                    every { sakId } returns sakId1
+                    every { erAvsluttet() } returns false
+                    every { type } returns OppgaveType.ETTEROPPGJOER
+                }
+            coEvery { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+            coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
 
             every { dao.lagreForbehandling(any()) } returns 1
             every { dao.kopierSummerteInntekter(any(), any()) } returns 1
@@ -86,6 +118,106 @@ class EtteroppgjoerForbehandlingServiceTest {
             coEvery {
                 dao.hentForbehandling(any())
             } returns forbehandling
+        }
+
+        fun returnsOppgave(oppgave: OppgaveIntern) {
+            coEvery { oppgaveService.hentOppgave(any()) } returns oppgave
+        }
+
+        fun returnsSak(sak: Sak) {
+            coEvery { sakDao.hentSak(any()) } returns sak
+        }
+
+        fun returnsEtteroppgjoer(etteroppgjoer: Etteroppgjoer?) {
+            coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
+        }
+    }
+
+    @ParameterizedTest(name = "skal ikke opprette forbehandling for status={0}")
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["MOTTATT_SKATTEOPPGJOER"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `skal ikke opprette forbehandling hvis etteroppgjoer ikke har rett status status`(status: EtteroppgjoerStatus) {
+        val ctx = TestContext()
+        val oppgaveId = UUID.randomUUID()
+
+        ctx.returnsEtteroppgjoer(ctx.etteroppgjoer.copy(status = status))
+
+        val exception =
+            assertThrows(IkkeTillattException::class.java) {
+                ctx.service.opprettEtteroppgjoerForbehandling(
+                    sakId1,
+                    2024,
+                    oppgaveId,
+                    mockk(),
+                )
+            }
+
+        assertEquals(exception.code, "FEIL_ETTEROPPGJOERS_STATUS")
+    }
+
+    @Test
+    fun `skal ikke opprette forbehandling hvis etteroppgjoer ikke finnes`() {
+        val ctx = TestContext()
+        val oppgaveId = UUID.randomUUID()
+
+        ctx.returnsEtteroppgjoer(null)
+
+        val exception =
+            assertThrows(IkkeTillattException::class.java) {
+                ctx.service.opprettEtteroppgjoerForbehandling(
+                    sakId1,
+                    2024,
+                    oppgaveId,
+                    mockk(),
+                )
+            }
+
+        assertEquals(exception.code, "MANGLER_ETTEROPPGJOER")
+    }
+
+    @Test
+    fun `skal ikke opprette forbehandling hvis ikke sakType er OMS`() {
+        val ctx = TestContext()
+        val oppgaveId = UUID.randomUUID()
+
+        ctx.returnsSak(sak(sakId = sakId1, sakType = SakType.BARNEPENSJON))
+
+        val exception =
+            assertThrows(IkkeTillattException::class.java) {
+                ctx.service.opprettEtteroppgjoerForbehandling(
+                    sakId1,
+                    2024,
+                    oppgaveId,
+                    mockk(),
+                )
+            }
+
+        assertEquals(exception.code, "FEIL_SAKTYPE")
+    }
+
+    @Test
+    fun `skal ikke opprette forbehandling hvis oppgave for opprette forbehandling ikke er gyldig`() {
+        val ctx = TestContext()
+        val oppgaveId = UUID.randomUUID()
+
+        ctx.returnsOppgave(
+            mockk {
+                every { sakId } returns sakId1
+                every { erAvsluttet() } returns false
+                every { type } returns OppgaveType.FOERSTEGANGSBEHANDLING
+            },
+        )
+
+        assertThrows(UgyldigForespoerselException::class.java) {
+            ctx.service.opprettEtteroppgjoerForbehandling(
+                sakId1,
+                2024,
+                oppgaveId,
+                mockk(),
+            )
         }
     }
 

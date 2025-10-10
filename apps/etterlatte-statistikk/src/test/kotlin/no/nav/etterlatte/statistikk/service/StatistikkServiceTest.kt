@@ -20,9 +20,13 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -43,12 +47,14 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
+import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.domain.AvkortetYtelse
 import no.nav.etterlatte.statistikk.domain.Avkorting
 import no.nav.etterlatte.statistikk.domain.AvkortingGrunnlag
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
+import no.nav.etterlatte.statistikk.domain.BehandlingResultat
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
@@ -58,6 +64,9 @@ import no.nav.etterlatte.statistikk.domain.stoenadRad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -65,6 +74,7 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class StatistikkServiceTest {
     private val stoenadRepo = mockk<StoenadRepository>()
     private val sakRepo = mockk<SakRepository>()
@@ -420,6 +430,65 @@ class StatistikkServiceTest {
         assertNull(registrertStatistikk.saksbehandler)
     }
 
+    @ParameterizedTest
+    @MethodSource("forventetMapping")
+    fun `mapper til BehandlingResultat for etteroppgjoer`(mapping: Pair<EtteroppgjoerResultatType, BehandlingResultat>) {
+        val (resultatTypeEtteroppgjoer, forventetBehandlingResultat) = mapping
+        val forbehandlingId = UUID.randomUUID()
+        val revurdering =
+            behandling(
+                revurderingsaarsak = Revurderingaarsak.ETTEROPPGJOER,
+                relatertBehandlingId = forbehandlingId.toString(),
+            )
+        val etteroppgjoerRad = etteroppgjoerRad(forbehandlingId, resultatTypeEtteroppgjoer)
+        every { etteroppgjoerService.hentNyesteRad(forbehandlingId) } returns etteroppgjoerRad
+
+        val resultat =
+            service.utledBehandlingResultatFraVedtak(
+                vedtak(),
+                VedtakKafkaHendelseHendelseType.IVERKSATT,
+                revurdering,
+            )
+        resultat shouldBe forventetBehandlingResultat
+    }
+
+    private fun etteroppgjoerRad(
+        forbehandlingId: UUID,
+        resultatType: EtteroppgjoerResultatType,
+    ): EtteroppgjoerRad {
+        val etteroppgjoerRad =
+            EtteroppgjoerRad(
+                resultatType = resultatType,
+                id = 8330,
+                forbehandlingId = forbehandlingId,
+                sakId = SakId(6734),
+                aar = YearMonth.now().year,
+                hendelse = EtteroppgjoerHendelseType.OPPRETTET,
+                forbehandlingStatus = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                opprettet = Tidspunkt.now(),
+                maanederYtelse = emptyList(),
+                tekniskTid = Tidspunkt.now(),
+                summerteInntekter = null,
+                pensjonsgivendeInntekt = null,
+                utbetaltStoenad = 7140,
+                nyBruttoStoenad = 6032,
+                differanse = 3305,
+                rettsgebyr = 8280,
+                rettsgebyrGyldigFra = null,
+                tilbakekrevingGrense = 0.1,
+                etterbetalingGrense = 2.3,
+            )
+        return etteroppgjoerRad
+    }
+
+    private fun forventetMapping(): List<Pair<EtteroppgjoerResultatType, BehandlingResultat>> =
+        listOf(
+            EtteroppgjoerResultatType.TILBAKEKREVING to BehandlingResultat.ETTEROPPGJOER_TILBAKEKREVING,
+            EtteroppgjoerResultatType.ETTERBETALING to BehandlingResultat.ETTEROPPGJOER_ETTERBETALING,
+            EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING to BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_MED_UTBETALING,
+            EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING to BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_UTEN_UTBETALING,
+        )
+
     @Test
     fun `lagreMaanedligStoenadstatistikk lagrer ting riktig`() {
         val stoenadRepository: StoenadRepository = mockk(relaxed = true)
@@ -521,6 +590,8 @@ fun behandling(
     type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     soeker: String = "12312312312",
     avdoed: List<String>? = null,
+    revurderingsaarsak: Revurderingaarsak? = null,
+    relatertBehandlingId: String? = null,
 ) = StatistikkBehandling(
     id = id,
     sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr, null, null),
@@ -542,11 +613,11 @@ fun behandling(
             saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
         ),
     enhet = Enheter.defaultEnhet.enhetNr,
-    revurderingsaarsak = null,
+    revurderingsaarsak = revurderingsaarsak,
     revurderingInfo = null,
     prosesstype = Prosesstype.MANUELL,
     utlandstilknytning = null,
     kilde = Vedtaksloesning.GJENNY,
     pesysId = 123L,
-    relatertBehandlingId = null,
+    relatertBehandlingId = relatertBehandlingId,
 )

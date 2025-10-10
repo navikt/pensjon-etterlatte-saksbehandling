@@ -1,6 +1,5 @@
 package no.nav.etterlatte.statistikk.service
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -396,7 +395,7 @@ class StatistikkService(
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
             type = vedtakInnhold.behandling.type.name,
             status = hendelse.name,
-            resultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling)?.name,
+            resultat = utledBehandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling)?.name,
             resultatBegrunnelse = null,
             behandlingMetode =
                 hentBehandlingMetode(
@@ -710,7 +709,7 @@ class StatistikkService(
         return fellesRad
     }
 
-    internal fun behandlingResultatFraVedtak(
+    internal fun utledBehandlingResultatFraVedtak(
         vedtak: VedtakDto,
         vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
         behandling: StatistikkBehandling,
@@ -751,7 +750,7 @@ class StatistikkService(
     }
 
     private fun hentResultatFraEtteroppgjoerStatistikk(behandling: StatistikkBehandling): BehandlingResultat? {
-        val etteroppgjoerRad = etteroppgjoerService.hentNyesteRad(behandling.relatertBehandlingId!!.toUUID())
+        val etteroppgjoerRad = etteroppgjoerService.hentNyesteRad(behandling.relatertBehandlingIdNonNull())
         val resultat =
             krevIkkeNull(etteroppgjoerRad?.resultatType) {
                 "Kan ikke sette resultat når det mangler i etteroppgjørsstatistikken"

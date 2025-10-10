@@ -575,7 +575,6 @@ class EtteroppgjoerForbehandlingService(
             )
 
         dao.lagreForbehandling(forbehandlingCopy)
-
         dao.kopierSummerteInntekter(forbehandling.id, forbehandlingCopy.id)
         dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
 

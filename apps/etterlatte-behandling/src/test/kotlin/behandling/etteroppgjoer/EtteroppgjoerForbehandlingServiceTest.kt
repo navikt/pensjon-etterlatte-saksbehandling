@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -94,6 +95,8 @@ class EtteroppgjoerForbehandlingServiceTest {
                 sisteFerdigstilteForbehandling = UUID.randomUUID(),
             )
 
+        val oppgaveId = UUID.randomUUID()
+
         init {
             coEvery {
                 behandlingService.hentSisteIverksatteBehandling(sakId1)
@@ -120,6 +123,12 @@ class EtteroppgjoerForbehandlingServiceTest {
             } returns forbehandling
         }
 
+        fun returnsForbehandlinger(forbehandlinger: List<EtteroppgjoerForbehandling>) {
+            coEvery {
+                dao.hentForbehandlinger(any())
+            } returns forbehandlinger
+        }
+
         fun returnsOppgave(oppgave: OppgaveIntern) {
             coEvery { oppgaveService.hentOppgave(any()) } returns oppgave
         }
@@ -133,6 +142,41 @@ class EtteroppgjoerForbehandlingServiceTest {
         }
     }
 
+    @ParameterizedTest(name = "skal ikke opprette forbehandling hvis det allerede eksisterer en med status={0}")
+    @EnumSource(
+        value = EtteroppgjoerForbehandlingStatus::class,
+        names = ["FERDIGSTILT", "AVBRUTT"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `skal ikke opprette forbehandling hvis det eksisterer en fra før og den er under behandling`(
+        status: EtteroppgjoerForbehandlingStatus,
+    ) {
+        val ctx = TestContext()
+
+        ctx.returnsForbehandlinger(
+            listOf(
+                EtteroppgjoerForbehandling
+                    .opprett(
+                        sak(),
+                        Periode(YearMonth.now().minusYears(1), null),
+                        ctx.behandling.id,
+                    ).copy(aar = 2024, status = status),
+            ),
+        )
+
+        val exception =
+            assertThrows(IkkeTillattException::class.java) {
+                ctx.service.opprettEtteroppgjoerForbehandling(
+                    sakId1,
+                    2024,
+                    ctx.oppgaveId,
+                    mockk(),
+                )
+            }
+
+        assertEquals(exception.code, "FORBEHANDLING_FINNES_ALLEREDE")
+    }
+
     @ParameterizedTest(name = "skal ikke opprette forbehandling for status={0}")
     @EnumSource(
         value = EtteroppgjoerStatus::class,
@@ -141,7 +185,6 @@ class EtteroppgjoerForbehandlingServiceTest {
     )
     fun `skal ikke opprette forbehandling hvis etteroppgjoer ikke har rett status status`(status: EtteroppgjoerStatus) {
         val ctx = TestContext()
-        val oppgaveId = UUID.randomUUID()
 
         ctx.returnsEtteroppgjoer(ctx.etteroppgjoer.copy(status = status))
 
@@ -150,7 +193,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 ctx.service.opprettEtteroppgjoerForbehandling(
                     sakId1,
                     2024,
-                    oppgaveId,
+                    ctx.oppgaveId,
                     mockk(),
                 )
             }
@@ -161,7 +204,6 @@ class EtteroppgjoerForbehandlingServiceTest {
     @Test
     fun `skal ikke opprette forbehandling hvis etteroppgjoer ikke finnes`() {
         val ctx = TestContext()
-        val oppgaveId = UUID.randomUUID()
 
         ctx.returnsEtteroppgjoer(null)
 
@@ -170,7 +212,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 ctx.service.opprettEtteroppgjoerForbehandling(
                     sakId1,
                     2024,
-                    oppgaveId,
+                    ctx.oppgaveId,
                     mockk(),
                 )
             }
@@ -181,7 +223,6 @@ class EtteroppgjoerForbehandlingServiceTest {
     @Test
     fun `skal ikke opprette forbehandling hvis ikke sakType er OMS`() {
         val ctx = TestContext()
-        val oppgaveId = UUID.randomUUID()
 
         ctx.returnsSak(sak(sakId = sakId1, sakType = SakType.BARNEPENSJON))
 
@@ -190,7 +231,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 ctx.service.opprettEtteroppgjoerForbehandling(
                     sakId1,
                     2024,
-                    oppgaveId,
+                    ctx.oppgaveId,
                     mockk(),
                 )
             }
@@ -201,7 +242,6 @@ class EtteroppgjoerForbehandlingServiceTest {
     @Test
     fun `skal ikke opprette forbehandling hvis oppgave for opprette forbehandling ikke er gyldig`() {
         val ctx = TestContext()
-        val oppgaveId = UUID.randomUUID()
 
         ctx.returnsOppgave(
             mockk {
@@ -215,7 +255,7 @@ class EtteroppgjoerForbehandlingServiceTest {
             ctx.service.opprettEtteroppgjoerForbehandling(
                 sakId1,
                 2024,
-                oppgaveId,
+                ctx.oppgaveId,
                 mockk(),
             )
         }

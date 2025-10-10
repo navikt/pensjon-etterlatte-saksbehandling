@@ -134,12 +134,12 @@ class BeregnOmstillingsstoenadService(
 
         val resultat =
             if (skalBrukeNyeBeregningsregler) {
+                logger.info("Beregner omstillingsstønad med nye beregningsregler")
                 kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
                     grunnlag = beregningsgrunnlag,
                     periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
                 )
             } else {
-                logger.info("Beregner omstillingsstønad med nye beregningsregler")
                 kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
                     grunnlag = beregningsgrunnlag,
                     periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),

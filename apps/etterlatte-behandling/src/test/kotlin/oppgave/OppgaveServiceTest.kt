@@ -386,7 +386,7 @@ internal class OppgaveServiceTest(
                 merknad = null,
             )
         oppgaveService.tildelSaksbehandler(oppgaveFerdigstilt.id, saksbehandler.ident)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             behandlingId,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             saksbehandler,
@@ -402,7 +402,7 @@ internal class OppgaveServiceTest(
             )
         val saksbehandlerforstegangs = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(annenbehandlingfoerstegangs.id, saksbehandlerforstegangs.ident)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             annenBehandlingId,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             saksbehandlerforstegangs,
@@ -1201,7 +1201,7 @@ internal class OppgaveServiceTest(
 
         val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1.ident)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             behandlingsref,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             saksbehandler1,
@@ -1226,7 +1226,7 @@ internal class OppgaveServiceTest(
         val saksbehandler1 = "saksbehandler01"
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1)
         assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
-            oppgaveService.ferdigStillOppgaveUnderBehandling(
+            oppgaveService.ferdigstillOppgaveUnderBehandling(
                 behandlingsref,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 simpleSaksbehandler(ident = "feilSaksbehandler"),
@@ -1412,7 +1412,7 @@ internal class OppgaveServiceTest(
         assertEquals(attestant.ident(), oppgaveTilAttestering.saksbehandler?.ident)
 
         val ferdigstiltOppgave =
-            oppgaveService.ferdigStillOppgaveUnderBehandling(
+            oppgaveService.ferdigstillOppgaveUnderBehandling(
                 behandlingId,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 attestant,

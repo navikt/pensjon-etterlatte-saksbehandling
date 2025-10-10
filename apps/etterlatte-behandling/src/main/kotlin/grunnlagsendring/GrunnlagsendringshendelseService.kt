@@ -88,7 +88,7 @@ class GrunnlagsendringshendelseService(
 
         grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelseId, kommentar)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             referanse = hendelseId.toString(),
             type = OppgaveType.VURDER_KONSEKVENS,
             saksbehandler = saksbehandler,

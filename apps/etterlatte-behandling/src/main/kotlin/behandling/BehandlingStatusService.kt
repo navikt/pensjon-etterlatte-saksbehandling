@@ -257,7 +257,7 @@ class BehandlingStatusServiceImpl(
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)
         haandterEtteroppgjoerAttestertVedtak(behandling)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
             saksbehandler = brukerTokenInfo,

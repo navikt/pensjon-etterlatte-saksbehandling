@@ -83,9 +83,9 @@ class EtteroppgjoerForbehandlingService(
                 dao.lagreForbehandling(it)
             }
 
-        etteroppgjoerService.oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling)
+        etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             forbehandling.id.toString(),
             OppgaveType.ETTEROPPGJOER,
             brukerTokenInfo,

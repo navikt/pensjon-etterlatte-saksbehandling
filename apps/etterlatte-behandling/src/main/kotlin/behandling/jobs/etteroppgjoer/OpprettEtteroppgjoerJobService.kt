@@ -12,7 +12,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 enum class EtteroppgjoerFilter(
     val harSanksjon: Boolean,

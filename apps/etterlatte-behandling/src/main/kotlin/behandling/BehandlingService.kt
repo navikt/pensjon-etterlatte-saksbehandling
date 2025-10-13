@@ -403,28 +403,28 @@ internal class BehandlingServiceImpl(
             throw BehandlingKanIkkeAvbrytesException(behandling.status)
         }
 
-        behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar).also {
-            val hendelserKnyttetTilBehandling =
-                grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
+        behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar)
 
-            oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingId.toString(), "Behandlingen avbrytes manuelt")
+        val hendelserKnyttetTilBehandling =
+            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
 
-            hendelserKnyttetTilBehandling.forEach { hendelse ->
-                oppgaveService.opprettOppgave(
-                    referanse = hendelse.id.toString(),
-                    sakId = behandling.sak.id,
-                    kilde = OppgaveKilde.HENDELSE,
-                    type = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = hendelse.beskrivelse(),
-                )
-            }
+        oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingId.toString(), "Behandlingen avbrytes manuelt")
 
-            haandterEtteroppgjoerRevurderingErTilUgunst(behandling, aarsak)
-            haandterOmgjoeringEtterKlage(behandling)
-
-            hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident(), kommentar, aarsak.toString())
-            grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
+        hendelserKnyttetTilBehandling.forEach { hendelse ->
+            oppgaveService.opprettOppgave(
+                referanse = hendelse.id.toString(),
+                sakId = behandling.sak.id,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.VURDER_KONSEKVENS,
+                merknad = hendelse.beskrivelse(),
+            )
         }
+
+        haandterEtteroppgjoerRevurdering(behandling, aarsak)
+        haandterOmgjoeringEtterKlage(behandling)
+
+        hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident(), kommentar, aarsak.toString())
+        grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
 
         val persongalleri = grunnlagService.hentPersongalleri(behandlingId)!!
 
@@ -434,14 +434,25 @@ internal class BehandlingServiceImpl(
         )
     }
 
-    private fun haandterEtteroppgjoerRevurderingErTilUgunst(
+    private fun haandterEtteroppgjoerRevurdering(
         behandling: Behandling,
         aarsak: AarsakTilAvbrytelse?,
     ) {
-        if (behandling.type == BehandlingType.REVURDERING && aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
-            val merknad = "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring"
-            etteroppgjoerTempService.tilbakestillEtteroppgjoerStatusPgaUgunst(behandling)
-            etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(behandling.sak.id, merknad)
+        if (behandling.type == BehandlingType.REVURDERING) {
+            logger.info("Tilbakestiller etteroppgjøret ved avbrutt revurdering")
+
+            etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
+                behandling,
+                aarsak,
+                hentUtlandstilknytningForSak(behandling.sak.id),
+            )
+
+            if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
+                etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+                    behandling.sak.id,
+                    "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
+                )
+            }
         }
     }
 

@@ -1,9 +1,10 @@
 package no.nav.etterlatte.statistikk.service
 
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType.BEREGNET
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRepository
@@ -30,8 +31,16 @@ class EtteroppgjoerStatistikkService(
         return etteroppgjoerRad
     }
 
-    fun hentNyesteRad(forbehandlingId: UUID): EtteroppgjoerRad? {
+    fun hentNyesteRad(
+        forbehandlingId: UUID,
+        filter: (EtteroppgjoerRad) -> Boolean = { true },
+    ): EtteroppgjoerRad? {
         val rader = etteroppgjoerRepository.hentEtteroppgjoerRaderForForbehandling(forbehandlingId)
-        return rader.maxByOrNull { it.tekniskTid }
+        return rader
+            .filter { filter(it) }
+            .maxByOrNull { it.tekniskTid }
     }
+
+    fun hentNyesteBeregnedeResultat(forbehandlingId: UUID): EtteroppgjoerResultatType? =
+        hentNyesteRad(forbehandlingId) { it.hendelse == BEREGNET }?.resultatType
 }

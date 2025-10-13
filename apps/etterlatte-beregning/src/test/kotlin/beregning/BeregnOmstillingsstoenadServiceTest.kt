@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -44,6 +45,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private val sanksjonService = mockk<SanksjonService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private lateinit var beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService
 
@@ -58,9 +60,11 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 trygdetidKlient = trygdetidKlient,
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 featureToggleService = featureToggleService,
+                sanksjonService = sanksjonService,
             )
 
         every { featureToggleService.isEnabled(any(), any()) } returns false
+        every { sanksjonService.hentSanksjon(any()) } returns emptyList()
     }
 
     @Test
@@ -327,6 +331,13 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
             }
         }
+    }
+
+    @Test
+    fun `placeholder test med sanksjon`() {
+        every { featureToggleService.isEnabled(any(), any()) } returns true
+
+        TODO("Not yet implemented")
     }
 
     private fun mockBehandling(

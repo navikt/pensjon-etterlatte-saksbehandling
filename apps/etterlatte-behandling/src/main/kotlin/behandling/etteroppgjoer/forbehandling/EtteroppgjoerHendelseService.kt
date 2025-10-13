@@ -1,11 +1,11 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_RESULTAT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
@@ -25,7 +25,6 @@ import java.time.LocalDateTime
 class EtteroppgjoerHendelseService(
     private val rapidPubliserer: KafkaProdusent<String, String>,
     private val hendelseDao: HendelseDao,
-    private val behandlingService: BehandlingService,
     private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerHendelseService::class.java)
@@ -35,6 +34,7 @@ class EtteroppgjoerHendelseService(
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto? = null,
         hendelseType: EtteroppgjoerHendelseType,
         saksbehandler: String?,
+        utlandstilknytning: Utlandstilknytning?,
     ) {
         hendelseDao.etteroppgjoerHendelse(
             forbehandlingId = etteroppgjoerForbehandling.id,
@@ -45,8 +45,6 @@ class EtteroppgjoerHendelseService(
             kommentar = null,
             begrunnelse = null,
         )
-
-        val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(etteroppgjoerForbehandling.sak.id)
 
         // TODO: nullable?
         val summerteInntekter =

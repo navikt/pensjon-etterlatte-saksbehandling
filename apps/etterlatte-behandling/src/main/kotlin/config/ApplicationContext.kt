@@ -435,7 +435,10 @@ internal class ApplicationContext(
             oppdaterTilgangService,
         )
 
-    val etteroppgjoerTempService = EtteroppgjoerTempService(oppgaveService, etteroppgjoerDao, etteroppgjoerForbehandlingDao)
+    private val etteroppgjoerHendelseService = EtteroppgjoerHendelseService(rapid, hendelseDao, etteroppgjoerForbehandlingDao)
+
+    val etteroppgjoerTempService =
+        EtteroppgjoerTempService(oppgaveService, etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerHendelseService)
 
     val behandlingService =
         BehandlingServiceImpl(
@@ -654,9 +657,6 @@ internal class ApplicationContext(
             klient = inntektskomponentKlient,
             featureToggleService = featureToggleService,
         )
-
-    private val etteroppgjoerHendelseService =
-        EtteroppgjoerHendelseService(rapid, hendelseDao, behandlingService, etteroppgjoerForbehandlingDao)
 
     val etteroppgjoerForbehandlingService =
         EtteroppgjoerForbehandlingService(

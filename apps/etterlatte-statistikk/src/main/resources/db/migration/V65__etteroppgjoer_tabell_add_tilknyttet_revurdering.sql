@@ -1,0 +1,1 @@
+ALTER TABLE etteroppgjoer_statistikk ADD COLUMN tilknyttet_revurdering bool;

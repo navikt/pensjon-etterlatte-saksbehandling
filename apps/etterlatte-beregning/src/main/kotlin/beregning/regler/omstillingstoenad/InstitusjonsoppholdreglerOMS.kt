@@ -28,6 +28,15 @@ val brukerHarTellendeInstitusjonsopphold: Regel<OmstillingstoenadGrunnlag, Boole
         it != null && it.reduksjon != Reduksjon.NEI_KORT_OPPHOLD
     }
 
+val brukerHarSanksjon: Regel<OmstillingstoenadGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        OMS_GYLDIG_FRA,
+        beskrivelse = "Finner om bruker har sanksjon",
+        finnFaktum = OmstillingstoenadGrunnlag::sanksjon,
+    ) {
+        it != null
+    }
+
 val institusjonsoppholdSatsRegelOMS =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,

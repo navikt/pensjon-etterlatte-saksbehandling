@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
 data class Avdoed(
@@ -99,6 +100,20 @@ val beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold =
             }
         }
 
+val beregnRiktigOmstillingsstoenadOppMotSanksjon =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Beregn 0 dersom sanksjon",
+        regelReferanse = RegelReferanse(id = "OMS-BEREGNING-SANKSJON"),
+    ) benytter beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold og brukerHarSanksjon med { beregnetOmstillingstoenad, harSanksjon ->
+        if (harSanksjon) {
+            Beregningstall(0)
+        } else {
+            beregnetOmstillingstoenad
+        }
+    }
+
+@Deprecated("Erstatt med kroneavrundetOmstillingstoenadRegelMedInstitusjonV2")
 val kroneavrundetOmstillingstoenadRegelMedInstitusjon =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
@@ -113,6 +128,6 @@ val kroneavrundetOmstillingstoenadRegelMedInstitusjonV2 =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør en kroneavrunding av omstillingstønad inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON"),
-    ) benytter beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold med { beregnetOmstillingstoenad ->
+    ) benytter beregnRiktigOmstillingsstoenadOppMotSanksjon med { beregnetOmstillingstoenad ->
         beregnetOmstillingstoenad.round(decimals = 0).toInteger()
     }

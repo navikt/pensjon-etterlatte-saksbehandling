@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
@@ -27,6 +28,8 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -47,6 +50,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
+import kotlin.collections.map
 
 enum class BeregningToggles(
     val value: String,
@@ -300,7 +304,29 @@ class BeregnOmstillingsstoenadService(
     }
 
     // Kopiert fra AvkortingRegelkjoring.kt -> periodiserteSanksjoner()
-    private fun utledPeriodisertSanksjon(sanksjon: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> {
+    private fun utledPeriodisertSanksjon(sanksjon: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> =
+        try {
+            periodisertSanksjon(sanksjon)
+        } catch (e: PeriodiseringAvGrunnlagFeil) {
+            when (e) {
+                is PeriodiseringAvGrunnlagFeil.PerioderOverlapper -> throw UgyldigForespoerselException(
+                    code = "OVERLAPPENDE_SANKSJONER",
+                    detail =
+                        "Behandlingen har sanksjoner som overlapper med hverandre i perioder. Dobbelt " +
+                            "sanksjon i en måned støttes ikke, og de overlappende sanksjonene må endres / " +
+                            "fjernes for å kunne beregne avkortet ytelse.",
+                    cause = e,
+                )
+
+                else -> throw InternfeilException(
+                    "Kunne ikke sette opp perioder for sanksjon riktig. " +
+                        "Feilen som oppstod var: ${e.code}",
+                    e,
+                )
+            }
+        }
+
+    private fun periodisertSanksjon(sanksjon: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> {
         if (sanksjon.isEmpty()) {
             return KonstantGrunnlag(
                 FaktumNode(

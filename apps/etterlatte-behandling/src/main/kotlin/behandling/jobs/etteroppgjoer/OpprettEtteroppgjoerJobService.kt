@@ -64,11 +64,11 @@ class OpprettEtteroppgjoerJobService(
                 try {
                     inTransaction {
                         runBlocking {
-                            etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
+                            etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, inntektsaar)
+                            true
                         }
                     }
                 } catch (e: Exception) {
-                    logger.warn("Feil ved oppretting av etteroppgjør", e)
                     false
                 }
             }

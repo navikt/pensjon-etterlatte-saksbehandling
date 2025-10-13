@@ -99,14 +99,14 @@ class EtteroppgjoerService(
         dao.oppdaterFerdigstiltForbehandlingId(sakId, inntektsaar, forbehandlingId)
     }
 
-    suspend fun opprettEtteroppgjoer(
+    suspend fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
     ): Etteroppgjoer? {
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw Exception("Etteroppgjør finnes allerede")
 
         val sisteIverksatteVedtak =
             vedtakKlient

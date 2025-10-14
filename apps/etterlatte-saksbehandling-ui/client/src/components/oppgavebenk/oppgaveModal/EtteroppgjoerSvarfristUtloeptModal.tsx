@@ -14,7 +14,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
-import { KommentarLabel } from '~components/oppgavebenk/oppgaveModal/KommentarLabel'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -92,7 +91,8 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
                       message: 'Du må legge til en kommentar',
                     },
                   })}
-                  label={<KommentarLabel />}
+                  label="Kommentar"
+                  description="Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter en revurdering eller forbehandling."
                   error={errors.kommentar?.message}
                 />
               ) : (

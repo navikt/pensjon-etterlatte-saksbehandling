@@ -4,6 +4,7 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.omstillingstoenadSatsRegel
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
 data class Avdoed(
@@ -20,21 +22,24 @@ data class Avdoed(
 data class PeriodisertOmstillingstoenadGrunnlag(
     val avdoed: PeriodisertGrunnlag<FaktumNode<Avdoed>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
+    val sanksjon: PeriodisertGrunnlag<FaktumNode<Sanksjon?>>,
 ) : PeriodisertGrunnlag<OmstillingstoenadGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> =
         avdoed.finnAlleKnekkpunkter() +
-            institusjonsopphold.finnAlleKnekkpunkter()
+            institusjonsopphold.finnAlleKnekkpunkter() + sanksjon.finnAlleKnekkpunkter()
 
     override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): OmstillingstoenadGrunnlag =
         OmstillingstoenadGrunnlag(
             avdoed.finnGrunnlagForPeriode(datoIPeriode),
             institusjonsopphold.finnGrunnlagForPeriode(datoIPeriode),
+            sanksjon.finnGrunnlagForPeriode(datoIPeriode),
         )
 }
 
 data class OmstillingstoenadGrunnlag(
     val avdoed: FaktumNode<Avdoed>,
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
+    val sanksjon: FaktumNode<Sanksjon?>,
 )
 
 @Deprecated("Ikke i bruk lenger")
@@ -95,11 +100,34 @@ val beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold =
             }
         }
 
+val beregnRiktigOmstillingsstoenadOppMotSanksjon =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Beregn 0 dersom sanksjon",
+        regelReferanse = RegelReferanse(id = "OMS-BEREGNING-SANKSJON"),
+    ) benytter beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold og brukerHarSanksjon med { beregnetOmstillingstoenad, harSanksjon ->
+        if (harSanksjon) {
+            Beregningstall(0)
+        } else {
+            beregnetOmstillingstoenad
+        }
+    }
+
+@Deprecated("Erstatt med kroneavrundetOmstillingstoenadRegelMedInstitusjonV2")
 val kroneavrundetOmstillingstoenadRegelMedInstitusjon =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør en kroneavrunding av omstillingstønad inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON"),
     ) benytter beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold med { beregnetOmstillingstoenad ->
+        beregnetOmstillingstoenad.round(decimals = 0).toInteger()
+    }
+
+val kroneavrundetOmstillingstoenadRegelMedInstitusjonV2 =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Gjør en kroneavrunding av omstillingstønad inkludert institusjonsopphold",
+        regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON", versjon = "2.0"),
+    ) benytter beregnRiktigOmstillingsstoenadOppMotSanksjon med { beregnetOmstillingstoenad ->
         beregnetOmstillingstoenad.round(decimals = 0).toInteger()
     }

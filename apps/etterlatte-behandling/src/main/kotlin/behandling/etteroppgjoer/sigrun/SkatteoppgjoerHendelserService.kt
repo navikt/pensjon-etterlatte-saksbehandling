@@ -98,17 +98,19 @@ class SkatteoppgjoerHendelserService(
         val etteroppgjoer: Etteroppgjoer? =
             sak?.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
 
+        sikkerLogg.info(
+            "Behandler hendelse med sekvensnummer=${hendelse.sekvensnummer} for ident=$ident, sakId=${sak?.id}. Hendelse=${hendelse.toJson()}",
+        )
+
         if (etteroppgjoer != null) {
             if (hendelse.hendelsetype == null || hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
-                logger.info("Oppdaterer etteroppgjør for sak ${sak.id}, år $inntektsaar")
-
                 oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
             } else {
                 logger.warn(
                     """
                     Mottok hendelse av type ${hendelse.hendelsetype} på sak ${sak.id}, 
-                    som skal ha etteroppgjør. Sekvensnummer: ${hendelse.sekvensnummer}, 
-                    inntektsår: $inntektsaar
+                    som skal ha etteroppgjør. Hendelsen blir ikke behandlet.
+                    Sekvensnummer: ${hendelse.sekvensnummer}, inntektsår: $inntektsaar
                     """.trimIndent(),
                 )
             }
@@ -140,7 +142,6 @@ class SkatteoppgjoerHendelserService(
                         "sekvensnummer: ${hendelse.sekvensnummer}, etter at vi allerede har oppdatert status til " +
                         "MOTTATT_SKATTEOPPJOER. Se sikkerlogg for full hendelse fra skatt",
                 )
-                sikkerLogg.info("Full hendelse for dobbel oppdatering fra skatt: ", kv("hendelse", hendelse.toJson()))
             }
 
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
@@ -152,10 +153,6 @@ class SkatteoppgjoerHendelserService(
             logger.error(
                 "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede " +
                     "opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
-            )
-            sikkerLogg.error(
-                "Person med fnr=${hendelse.identifikator} har mottatt ny hendelse fra skatt om nytt skatteoppgjør, " +
-                    "men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
             )
         }
     }

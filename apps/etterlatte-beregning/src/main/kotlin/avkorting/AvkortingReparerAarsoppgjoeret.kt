@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
 /*
@@ -22,18 +21,12 @@ import java.time.YearMonth
 class AvkortingReparerAarsoppgjoeret(
     val avkortingRepository: AvkortingRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun hentSisteAvkortingMedReparertAarsoppgjoer(
         forrigeAvkorting: Avkorting,
         virkningstidspunkt: YearMonth,
         sakId: SakId,
         alleVedtak: List<VedtakSammendragDto>,
     ): Avkorting {
-        if (YearMonth.now() > YearMonth.of(2025, 5)) {
-            logger.warn("AvkortingReparerAarsoppgjoeret.kt har nå med sikkerhet blitt kjørt på alle saker etter regulering og kan fjernes!")
-        }
-
         val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.toSet()
         val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
         val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng

@@ -102,7 +102,7 @@ class EtteroppgjoerService(
     suspend fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
@@ -131,7 +131,7 @@ class EtteroppgjoerService(
     suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
         sistIverksatteBehandling: Behandling,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         val sakId = sistIverksatteBehandling.sak.id
         logger.info(
             """

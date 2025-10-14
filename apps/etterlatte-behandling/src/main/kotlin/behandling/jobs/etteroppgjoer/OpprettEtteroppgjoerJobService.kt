@@ -69,6 +69,8 @@ class OpprettEtteroppgjoerJobService(
                         }
                     }
                 } catch (e: Exception) {
+                    // TODO: Fjerne logglinja hvis det spammer mye
+                    logger.warn("Feil ved oppretting av etteroppgjør", e)
                     false
                 }
             }

@@ -127,7 +127,7 @@ val kroneavrundetOmstillingstoenadRegelMedInstitusjonV2 =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør en kroneavrunding av omstillingstønad inkludert institusjonsopphold",
-        regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON"),
+        regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON", versjon = "2.0"),
     ) benytter beregnRiktigOmstillingsstoenadOppMotSanksjon med { beregnetOmstillingstoenad ->
         beregnetOmstillingstoenad.round(decimals = 0).toInteger()
     }

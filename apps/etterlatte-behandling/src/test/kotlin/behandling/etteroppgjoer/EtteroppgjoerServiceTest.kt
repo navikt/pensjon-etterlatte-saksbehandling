@@ -24,9 +24,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID
 
@@ -247,7 +246,7 @@ class EtteroppgjoerServiceTest {
                     sisteIverksatteBehandling = behandling.id,
                 ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
 
-        assertThrows(InternfeilException::class.java) {
+        assertThrows<InternfeilException> {
             ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
         }
     }
@@ -269,13 +268,13 @@ class EtteroppgjoerServiceTest {
                 sisteIverksatteBehandling = behandling.id,
             )
 
-        assertThrows(IkkeTillattException::class.java) {
+        assertThrows<IkkeTillattException> {
             ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
         }
     }
 
     @Test
-    fun `opprettEtteroppgjoer returnerer null dersom etteroppgjør allerede finnes for år`() {
+    fun `opprettEtteroppgjoer kaster exception dersom etteroppgjør allerede finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             Etteroppgjoer(
@@ -284,9 +283,9 @@ class EtteroppgjoerServiceTest {
                 status = EtteroppgjoerStatus.FERDIGSTILT,
             )
 
-        val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
-
-        assertNull(resultat)
+        assertThrows<IkkeTillattException> {
+            runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
+        }
         coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
     }

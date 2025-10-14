@@ -106,7 +106,7 @@ class EtteroppgjoerService(
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw Exception("Etteroppgjør finnes allerede")
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
 
         val sisteIverksatteVedtak =
             vedtakKlient
@@ -139,7 +139,7 @@ class EtteroppgjoerService(
             behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
 
         val status =
             try {

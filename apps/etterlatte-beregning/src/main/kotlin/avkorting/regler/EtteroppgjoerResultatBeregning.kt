@@ -123,12 +123,12 @@ val etteroppgjoerGrense =
         regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-GRENSE"),
     ) benytter etteroppgjoerRettsgebyr med { rettsgebyr ->
 
-        val etterbetaling = rettsgebyr.rettsgebyr
-        val tilbakekreving = rettsgebyr.rettsgebyr.divide(4)
+        val tilbakekreving = rettsgebyr.rettsgebyr
+        val etterbetaling = rettsgebyr.rettsgebyr.divide(4)
 
         EtteroppgjoerGrense(
-            etterbetaling,
             tilbakekreving,
+            etterbetaling,
             rettsgebyr,
         )
     }

@@ -93,3 +93,11 @@ fun PreparedStatement.setNullableDouble(
     null -> this.setNull(index, Types.FLOAT)
     else -> this.setDouble(index, value)
 }
+
+fun PreparedStatement.setNullableBoolean(
+    index: Int,
+    value: Boolean?,
+) = when (value) {
+    null -> this.setNull(index, Types.BOOLEAN)
+    else -> this.setBoolean(index, value)
+}

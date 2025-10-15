@@ -101,6 +101,7 @@ class EtteroppgjoerHendelseService(
                                 inntektsaar = pensjonsgivendeInntekt.inntektsaar,
                                 inntekter = pensjonsgivendeInntekt.inntekter,
                             ),
+                        tilknyttetRevurdering = etteroppgjoerForbehandling.kopiertFra != null
                     ),
             )
         val meldingMap =

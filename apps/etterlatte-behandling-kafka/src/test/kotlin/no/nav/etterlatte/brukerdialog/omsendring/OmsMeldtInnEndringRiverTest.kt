@@ -59,6 +59,7 @@ class OmsMeldtInnEndringRiverTest {
                 endring = OmsEndring.AKTIVITET_OG_INNTEKT,
                 beskrivelse = "Endringer fra bruker..",
                 tidspunkt = Instant.parse("2024-08-01T05:06:07Z"),
+                forventetInntektTilNesteAar = null,
             )
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak

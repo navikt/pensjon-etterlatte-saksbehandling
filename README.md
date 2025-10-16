@@ -121,7 +121,7 @@ Interne henvendelser kan sendes via Slack i kanalen #team-etterlatte.
 For å kunne bruke [unleash](https://etterlatte-unleash-web.nav.cloud.nais.io/) så må apiToken ressurs være deployet til
 GCP miljøene med kubectl apply:
 
-`kubectl apply -f unleash-api-token-(development|production).yaml`
+`kubectl apply -f unleash-apitoken-(development|production).yaml`
 
 Dette oppretter en envFile som lastes i app/*/.nais/(dev|prod).yaml filene og som gir to miljøvariabler:
 

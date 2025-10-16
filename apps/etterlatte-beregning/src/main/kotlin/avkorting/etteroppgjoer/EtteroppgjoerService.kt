@@ -234,7 +234,7 @@ class EtteroppgjoerService(
                         alleVedtak = vedtak,
                         avkortingSistIverksatt = avkorting,
                     )
-                if (avkorting.aarsoppgjoer.map { it.aar }.toSet() != avkorting.aarsoppgjoer.map { it.aar }.toSet()) {
+                if (avkorting.aarsoppgjoer.map { it.aar }.toSet() != nyAvkorting.aarsoppgjoer.map { it.aar }.toSet()) {
                     logger.warn("Vi reparerte manglende årsoppgjør i sak $sakId i forbindelse med etteroppgjøret")
                 }
                 nyAvkorting

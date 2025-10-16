@@ -144,6 +144,9 @@ class ApplicationContext {
             sanksjonService = sanksjonService,
             etteroppgjoerRepository = etteroppgjoerRepository,
             avkortingService = avkortingService,
+            reparerAarsoppgjoeret = avkortingReparerAarsoppgjoeret,
+            vedtakKlient = vedtaksvurderingKlient,
+            behandlingKlient = behandlingKlient,
         )
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(

@@ -84,10 +84,10 @@ class EtteroppgjoerForbehandlingService(
                 dao.lagreForbehandling(it)
             }
 
-        etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
+        etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(ferdigstiltForbehandling)
 
         oppgaveService.ferdigstillOppgaveUnderBehandling(
-            forbehandling.id.toString(),
+            ferdigstiltForbehandling.id.toString(),
             OppgaveType.ETTEROPPGJOER,
             brukerTokenInfo,
         )
@@ -95,9 +95,9 @@ class EtteroppgjoerForbehandlingService(
         val beregnetEtteroppgjoerResultat =
                 beregningKlient.hentBeregnetEtteroppgjoerResultat(
                     EtteroppgjoerHentBeregnetResultatRequest(
-                        forbehandling.aar,
-                        forbehandling.id,
-                        forbehandling.sisteIverksatteBehandlingId,
+                        ferdigstiltForbehandling.aar,
+                        ferdigstiltForbehandling.id,
+                        ferdigstiltForbehandling.sisteIverksatteBehandlingId,
                     ),
                     brukerTokenInfo,
                 )

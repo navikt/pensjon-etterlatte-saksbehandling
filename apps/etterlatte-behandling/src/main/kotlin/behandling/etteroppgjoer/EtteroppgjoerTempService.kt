@@ -89,19 +89,22 @@ class EtteroppgjoerTempService(
                 "Revurderingen ble avbrutt"
             }
 
-        etteroppgjoerForbehandlingDao.lagreForbehandling(
-            forbehandling.tilAvbrutt(AarsakTilAvbryteForbehandling.ANNET, kommentar),
-        )
-        etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
-            sakId,
-            etteroppgjoer.inntektsaar,
-            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-        )
-        hendelserService.registrerOgSendEtteroppgjoerHendelse(
-            etteroppgjoerForbehandling = forbehandling,
-            hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
-            saksbehandler = (Kontekst.get().brukerTokenInfo)?.ident(),
-            utlandstilknytning = utlandstilknytning,
-        )
+        forbehandling
+            .tilAvbrutt(AarsakTilAvbryteForbehandling.ANNET, kommentar)
+            .let { avbruttForbehandling ->
+                etteroppgjoerForbehandlingDao.lagreForbehandling(avbruttForbehandling)
+
+                etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
+                    sakId = sakId,
+                    inntektsaar = etteroppgjoer.inntektsaar,
+                    status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                )
+                hendelserService.registrerOgSendEtteroppgjoerHendelse(
+                    etteroppgjoerForbehandling = avbruttForbehandling,
+                    hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
+                    saksbehandler = (Kontekst.get().brukerTokenInfo)?.ident(),
+                    utlandstilknytning = utlandstilknytning,
+                )
+            }
     }
 }

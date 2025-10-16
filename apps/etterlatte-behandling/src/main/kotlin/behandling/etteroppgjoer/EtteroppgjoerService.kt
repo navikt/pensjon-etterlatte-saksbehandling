@@ -99,14 +99,14 @@ class EtteroppgjoerService(
         dao.oppdaterFerdigstiltForbehandlingId(sakId, inntektsaar, forbehandlingId)
     }
 
-    suspend fun opprettEtteroppgjoer(
+    suspend fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
 
         val sisteIverksatteVedtak =
             vedtakKlient
@@ -131,7 +131,7 @@ class EtteroppgjoerService(
     suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
         sistIverksatteBehandling: Behandling,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         val sakId = sistIverksatteBehandling.sak.id
         logger.info(
             """
@@ -139,7 +139,7 @@ class EtteroppgjoerService(
             behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
 
         val status =
             try {

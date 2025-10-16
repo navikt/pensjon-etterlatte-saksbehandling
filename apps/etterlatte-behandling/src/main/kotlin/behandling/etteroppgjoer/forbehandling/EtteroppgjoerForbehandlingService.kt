@@ -92,9 +92,19 @@ class EtteroppgjoerForbehandlingService(
             brukerTokenInfo,
         )
 
+        val beregnetEtteroppgjoerResultat =
+                beregningKlient.hentBeregnetEtteroppgjoerResultat(
+                    EtteroppgjoerHentBeregnetResultatRequest(
+                        forbehandling.aar,
+                        forbehandling.id,
+                        forbehandling.sisteIverksatteBehandlingId,
+                    ),
+                    brukerTokenInfo,
+                )
+
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = ferdigstiltForbehandling,
-            etteroppgjoerResultat = null,
+            etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
             hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
             utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),

@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
@@ -106,6 +107,7 @@ class EtteroppgjoerForbehandlingService(
             etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
             hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),
         )
         return ferdigstiltForbehandling
     }
@@ -149,6 +151,7 @@ class EtteroppgjoerForbehandlingService(
             etteroppgjoerForbehandling = forbehandling,
             hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
             saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+            utlandstilknytning = hentUtlandstilknytning(forbehandling),
         )
     }
 
@@ -290,6 +293,7 @@ class EtteroppgjoerForbehandlingService(
             etteroppgjoerForbehandling = nyForbehandling,
             hendelseType = EtteroppgjoerHendelseType.OPPRETTET,
             saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+            utlandstilknytning = hentUtlandstilknytning(nyForbehandling),
         )
 
         oppgaveService.endreTilKildeBehandlingOgOppdaterReferanseOgMerknad(
@@ -396,6 +400,7 @@ class EtteroppgjoerForbehandlingService(
             etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
             hendelseType = EtteroppgjoerHendelseType.BEREGNET,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytning = hentUtlandstilknytning(beregnetForbehandling),
         )
 
         return BeregnetResultatOgBrevSomSkalSlettes(
@@ -659,6 +664,9 @@ class EtteroppgjoerForbehandlingService(
         }
         return ferdigstillForbehandling(detaljertBehandling.behandling, brukerTokenInfo)
     }
+
+    private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =
+        behandlingService.hentUtlandstilknytningForSak(ferdigstiltForbehandling.sak.id)
 }
 
 data class BeregnFaktiskInntektRequest(

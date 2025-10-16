@@ -1,26 +1,32 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.oppgave.OppgaveService
+import java.util.UUID
 
 // TODO: burde plasseres en annen plass, but for now pga overlappende avhengigheter i applicationContext...
 class EtteroppgjoerTempService(
     private val oppgaveService: OppgaveService,
     private val etteroppgjoerDao: EtteroppgjoerDao,
     private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
+    private val hendelserService: EtteroppgjoerHendelseService,
 ) {
     fun opprettOppgaveForOpprettForbehandling(
         sakId: SakId,
         merknad: String? = null,
     ) {
-        val defaultMerknad = "Etteroppgjøret for ${ETTEROPPGJOER_AAR} er klart til behandling"
+        val defaultMerknad = "Etteroppgjøret for $ETTEROPPGJOER_AAR er klart til behandling"
 
         val eksisterendeOppgaver =
             oppgaveService
@@ -44,11 +50,18 @@ class EtteroppgjoerTempService(
     }
 
     // TODO: ikke optimalt plassering men gjøres pga overlappende avhengigheter i applicationContext
-    fun tilbakestillEtteroppgjoerStatusPgaUgunst(behandling: Behandling) {
-        val sakId = behandling.sak.id
 
+    /**
+     * Setter status tilbake til MOTTATT_SKATTEOPPGJOER i etteroppgjøret og avbryter forbehandlingen.
+     */
+    fun tilbakestillEtteroppgjoerVedAvbruttRevurdering(
+        behandling: Behandling,
+        aarsak: AarsakTilAvbrytelse?,
+        utlandstilknytning: Utlandstilknytning?,
+    ) {
+        val sakId = behandling.sak.id
         val forbehandling =
-            etteroppgjoerForbehandlingDao.hentForbehandling(behandling.relatertBehandlingId!!.toUUID())
+            etteroppgjoerForbehandlingDao.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
                 ?: throw InternfeilException("Fant ikke forbehandling med relatertBehandlingId=${behandling.relatertBehandlingId}")
 
         val etteroppgjoer =
@@ -57,7 +70,7 @@ class EtteroppgjoerTempService(
 
         if (etteroppgjoer.status != EtteroppgjoerStatus.UNDER_REVURDERING) {
             throw InternfeilException(
-                "Kan ikke tilbakestille etteroppgjoer pga ugunst for sakId=$sakId: " +
+                "Kan ikke tilbakestille etteroppgjoer for sakId=$sakId: " +
                     "forventet etteroppgjoerStatus ${EtteroppgjoerStatus.UNDER_REVURDERING}, fant ${etteroppgjoer.status}",
             )
         }
@@ -69,17 +82,26 @@ class EtteroppgjoerTempService(
             )
         }
 
-        etteroppgjoerForbehandlingDao.lagreForbehandling(
-            forbehandling.tilAvbrutt(
-                AarsakTilAvbryteForbehandling.ANNET,
-                "Endring er til ugunst for bruker",
-            ),
-        )
+        val kommentar =
+            if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
+                "Endringen er til ugunst for bruker"
+            } else {
+                "Revurderingen ble avbrutt"
+            }
 
+        etteroppgjoerForbehandlingDao.lagreForbehandling(
+            forbehandling.tilAvbrutt(AarsakTilAvbryteForbehandling.ANNET, kommentar),
+        )
         etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
             sakId,
             etteroppgjoer.inntektsaar,
             EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+        )
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = forbehandling,
+            hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
+            saksbehandler = (Kontekst.get().brukerTokenInfo)?.ident(),
+            utlandstilknytning = utlandstilknytning,
         )
     }
 }

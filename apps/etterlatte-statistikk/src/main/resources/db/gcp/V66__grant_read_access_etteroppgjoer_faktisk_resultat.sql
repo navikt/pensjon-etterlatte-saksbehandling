@@ -1,1 +1,1 @@
-GRANT SELECT ON etteroppgjoer_statistikk TO bigquery_import;
+GRANT SELECT ON etteroppgjoer_faktisk_resultat TO bigquery_import;

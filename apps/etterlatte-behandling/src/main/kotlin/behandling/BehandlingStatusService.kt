@@ -379,7 +379,7 @@ class BehandlingStatusServiceImpl(
 
         val forbehandling = forbehandlingService.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
         if (forbehandling.erUnderBehandling()) {
-            forbehandlingService.ferdigstillForbehandlingUtenOppgave(forbehandling, brukerTokenInfo)
+            forbehandlingService.ferdigstillRevurderingForbehandling(forbehandling, brukerTokenInfo)
         }
     }
 

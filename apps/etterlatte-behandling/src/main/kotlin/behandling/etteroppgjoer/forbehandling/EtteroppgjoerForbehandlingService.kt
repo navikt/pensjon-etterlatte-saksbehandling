@@ -67,60 +67,49 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    fun ferdigstillForbehandlingUtenOppgave(
+    /**
+     * Ferdigstiller en forbehandling som hører til en revurdering. Vi trenger ikke å avslutte noen oppgave
+     * da denne ikke skal ha oppgave knyttet til seg og vi oppdaterer heller ikke etteroppgjøret.
+     */
+    fun ferdigstillRevurderingForbehandling(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerForbehandling = ferdigstillForbehandling(forbehandling, brukerTokenInfo, avsluttOppgave = false)
-
-    fun ferdigstillForbehandling(
-        forbehandling: EtteroppgjoerForbehandling,
-        brukerTokenInfo: BrukerTokenInfo,
-        avsluttOppgave: Boolean = true,
     ): EtteroppgjoerForbehandling {
-        logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
-        val forbehandling =
-            dao.hentForbehandling(forbehandling.id)
-                ?: throw FantIkkeForbehandling(forbehandling.id)
+        logger.info("Ferdigstiller forbehandling (tilknyttet revurdering) med id=${forbehandling.id}")
+
+        val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
 
         sjekkAtForbehandlingKanFerdigstilles(forbehandling)
 
-        if (avsluttOppgave) {
-            sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
-
-            oppgaveService.ferdigstillOppgaveUnderBehandling(
-                forbehandling.id.toString(),
-                OppgaveType.ETTEROPPGJOER,
-                brukerTokenInfo,
-            )
+        return forbehandling.tilFerdigstilt().also {
+            dao.lagreForbehandling(it)
+            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
         }
+    }
 
-        val ferdigstiltForbehandling =
-            forbehandling.tilFerdigstilt().also {
-                dao.lagreForbehandling(it)
-            }
+    /**
+     * Ferdigstiller forbehandling, tilknyttet oppgave og endrer status på etteroppjøret.
+     * Kontekst er en forbehandling som ikke hører til en revurdering.
+     */
+    fun ferdigstillForbehandling(
+        forbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): EtteroppgjoerForbehandling {
+        logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
 
-        etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(ferdigstiltForbehandling)
+        val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
 
-        val beregnetEtteroppgjoerResultat =
-            runBlocking {
-                beregningKlient.hentBeregnetEtteroppgjoerResultat(
-                    EtteroppgjoerHentBeregnetResultatRequest(
-                        ferdigstiltForbehandling.aar,
-                        ferdigstiltForbehandling.id,
-                        ferdigstiltForbehandling.sisteIverksatteBehandlingId,
-                    ),
-                    brukerTokenInfo,
-                )
-            }
+        sjekkAtForbehandlingKanFerdigstilles(forbehandling)
 
-        hendelserService.registrerOgSendEtteroppgjoerHendelse(
-            etteroppgjoerForbehandling = ferdigstiltForbehandling,
-            etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
-            hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
-            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
-            utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),
-        )
-        return ferdigstiltForbehandling
+        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+
+        ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
+
+        return forbehandling.tilFerdigstilt().also {
+            dao.lagreForbehandling(it)
+            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
+            etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
+        }
     }
 
     fun avbrytForbehandling(
@@ -316,6 +305,48 @@ class EtteroppgjoerForbehandlingService(
         )
 
         return nyForbehandling
+    }
+
+    private fun registrerOgSendHendelseFerdigstilt(
+        ferdigstiltForbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = ferdigstiltForbehandling,
+            etteroppgjoerResultat = hentBeregnetEtteroppgjoerResultat(ferdigstiltForbehandling, brukerTokenInfo),
+            hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
+            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),
+        )
+    }
+
+    private fun hentBeregnetEtteroppgjoerResultat(
+        ferdigstiltForbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto? {
+        val beregnetEtteroppgjoerResultat =
+            runBlocking {
+                beregningKlient.hentBeregnetEtteroppgjoerResultat(
+                    EtteroppgjoerHentBeregnetResultatRequest(
+                        ferdigstiltForbehandling.aar,
+                        ferdigstiltForbehandling.id,
+                        ferdigstiltForbehandling.sisteIverksatteBehandlingId,
+                    ),
+                    brukerTokenInfo,
+                )
+            }
+        return beregnetEtteroppgjoerResultat
+    }
+
+    private fun ferdigstillEtteroppgjoerOppgave(
+        forbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
+            forbehandling.id.toString(),
+            OppgaveType.ETTEROPPGJOER,
+            brukerTokenInfo,
+        )
     }
 
     private fun sjekkAtOppgaveErGyldigForForbehandling(

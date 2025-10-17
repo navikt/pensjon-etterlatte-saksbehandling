@@ -67,49 +67,49 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    suspend fun ferdigstillForbehandling(
+    /**
+     * Ferdigstiller en forbehandling som hører til en revurdering. Vi trenger ikke å avslutte noen oppgave
+     * da denne ikke skal ha oppgave knyttet til seg og vi oppdaterer heller ikke etteroppgjøret.
+     */
+    fun ferdigstillRevurderingForbehandling(
+        forbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): EtteroppgjoerForbehandling {
+        logger.info("Ferdigstiller forbehandling (tilknyttet revurdering) med id=${forbehandling.id}")
+
+        val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
+
+        sjekkAtInntekterErOppdatert(forbehandling)
+
+        return forbehandling.tilFerdigstilt().also {
+            dao.lagreForbehandling(it)
+            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
+        }
+    }
+
+    /**
+     * Ferdigstiller forbehandling, tilknyttet oppgave og endrer status på etteroppjøret.
+     * Kontekst er en forbehandling som ikke hører til en revurdering.
+     */
+    fun ferdigstillForbehandling(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
-        val forbehandling =
-            dao.hentForbehandling(forbehandling.id)
-                ?: throw FantIkkeForbehandling(forbehandling.id)
 
+        val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
+
+        sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling)
+        sjekkAtInntekterErOppdatert(forbehandling)
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
-        sjekkAtForbehandlingKanFerdigstilles(forbehandling)
 
-        val ferdigstiltForbehandling =
-            forbehandling.tilFerdigstilt().also {
-                dao.lagreForbehandling(it)
-            }
+        ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
 
-        etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(ferdigstiltForbehandling)
-
-        oppgaveService.ferdigstillOppgaveUnderBehandling(
-            ferdigstiltForbehandling.id.toString(),
-            OppgaveType.ETTEROPPGJOER,
-            brukerTokenInfo,
-        )
-
-        val beregnetEtteroppgjoerResultat =
-            beregningKlient.hentBeregnetEtteroppgjoerResultat(
-                EtteroppgjoerHentBeregnetResultatRequest(
-                    ferdigstiltForbehandling.aar,
-                    ferdigstiltForbehandling.id,
-                    ferdigstiltForbehandling.sisteIverksatteBehandlingId,
-                ),
-                brukerTokenInfo,
-            )
-
-        hendelserService.registrerOgSendEtteroppgjoerHendelse(
-            etteroppgjoerForbehandling = ferdigstiltForbehandling,
-            etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
-            hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
-            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
-            utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),
-        )
-        return ferdigstiltForbehandling
+        return forbehandling.tilFerdigstilt().also {
+            dao.lagreForbehandling(it)
+            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
+            etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
+        }
     }
 
     fun avbrytForbehandling(
@@ -305,6 +305,48 @@ class EtteroppgjoerForbehandlingService(
         )
 
         return nyForbehandling
+    }
+
+    private fun registrerOgSendHendelseFerdigstilt(
+        ferdigstiltForbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = ferdigstiltForbehandling,
+            etteroppgjoerResultat = hentBeregnetEtteroppgjoerResultat(ferdigstiltForbehandling, brukerTokenInfo),
+            hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
+            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),
+        )
+    }
+
+    private fun hentBeregnetEtteroppgjoerResultat(
+        ferdigstiltForbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto? {
+        val beregnetEtteroppgjoerResultat =
+            runBlocking {
+                beregningKlient.hentBeregnetEtteroppgjoerResultat(
+                    EtteroppgjoerHentBeregnetResultatRequest(
+                        ferdigstiltForbehandling.aar,
+                        ferdigstiltForbehandling.id,
+                        ferdigstiltForbehandling.sisteIverksatteBehandlingId,
+                    ),
+                    brukerTokenInfo,
+                )
+            }
+        return beregnetEtteroppgjoerResultat
+    }
+
+    private fun ferdigstillEtteroppgjoerOppgave(
+        forbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
+            forbehandling.id.toString(),
+            OppgaveType.ETTEROPPGJOER,
+            brukerTokenInfo,
+        )
     }
 
     private fun sjekkAtOppgaveErGyldigForForbehandling(
@@ -604,22 +646,15 @@ class EtteroppgjoerForbehandlingService(
         return forbehandlingCopy
     }
 
-    private suspend fun sjekkAtForbehandlingKanFerdigstilles(forbehandling: EtteroppgjoerForbehandling) {
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
-                ?: throw InternfeilException("Kunne ikke finne siste iverksatte behandling for sakId=${forbehandling.sak.id}")
-
-        // verifisere at vi bruker siste iverksatte behandling
-        if (sisteIverksatteBehandling.id != forbehandling.sisteIverksatteBehandlingId) {
-            throw InternfeilException(
-                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.id}",
-            )
-        }
-
+    private fun sjekkAtInntekterErOppdatert(forbehandling: EtteroppgjoerForbehandling) {
         val sistePensjonsgivendeInntekt =
-            sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
+            runBlocking {
+                sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
+            }
         val sisteSummerteInntekter =
-            inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+            runBlocking {
+                inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+            }
 
         // verifisere at vi har siste pensjonsgivende inntekt i databasen
         dao.hentPensjonsgivendeInntekt(forbehandling.id).let { pgi ->
@@ -650,7 +685,20 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    suspend fun ferdigstillForbehandlingUtenBrev(
+    private fun sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling: EtteroppgjoerForbehandling) {
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
+                ?: throw InternfeilException("Kunne ikke finne siste iverksatte behandling for sakId=${forbehandling.sak.id}")
+
+        // verifisere at vi bruker siste iverksatte behandling
+        if (sisteIverksatteBehandling.id != forbehandling.sisteIverksatteBehandlingId) {
+            throw InternfeilException(
+                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.id}",
+            )
+        }
+    }
+
+    fun ferdigstillForbehandlingUtenBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {

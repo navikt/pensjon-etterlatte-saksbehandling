@@ -255,7 +255,7 @@ class BehandlingStatusServiceImpl(
         }
 
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)
-        haandterEtteroppgjoerAttestertVedtak(behandling)
+        haandterEtteroppgjoerAttestertVedtak(behandling, brukerTokenInfo)
 
         oppgaveService.ferdigstillOppgaveUnderBehandling(
             referanse = vedtak.sakIdOgReferanse.referanse,
@@ -369,14 +369,17 @@ class BehandlingStatusServiceImpl(
         }
     }
 
-    private fun haandterEtteroppgjoerAttestertVedtak(behandling: Behandling) {
+    private fun haandterEtteroppgjoerAttestertVedtak(
+        behandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         if (behandling.type != BehandlingType.REVURDERING || behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) {
             return
         }
 
         val forbehandling = forbehandlingService.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
         if (forbehandling.erUnderBehandling()) {
-            forbehandlingService.lagreForbehandling(forbehandling.tilFerdigstilt())
+            forbehandlingService.ferdigstillRevurderingForbehandling(forbehandling, brukerTokenInfo)
         }
     }
 

@@ -67,17 +67,32 @@ class EtteroppgjoerForbehandlingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
-    suspend fun ferdigstillForbehandling(
+    fun ferdigstillForbehandlingUtenOppgave(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
+    ): EtteroppgjoerForbehandling = ferdigstillForbehandling(forbehandling, brukerTokenInfo, avsluttOppgave = false)
+
+    fun ferdigstillForbehandling(
+        forbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+        avsluttOppgave: Boolean = true,
     ): EtteroppgjoerForbehandling {
         logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
         val forbehandling =
             dao.hentForbehandling(forbehandling.id)
                 ?: throw FantIkkeForbehandling(forbehandling.id)
 
-        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
         sjekkAtForbehandlingKanFerdigstilles(forbehandling)
+
+        if (avsluttOppgave) {
+            sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+
+            oppgaveService.ferdigstillOppgaveUnderBehandling(
+                forbehandling.id.toString(),
+                OppgaveType.ETTEROPPGJOER,
+                brukerTokenInfo,
+            )
+        }
 
         val ferdigstiltForbehandling =
             forbehandling.tilFerdigstilt().also {
@@ -86,21 +101,17 @@ class EtteroppgjoerForbehandlingService(
 
         etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(ferdigstiltForbehandling)
 
-        oppgaveService.ferdigstillOppgaveUnderBehandling(
-            ferdigstiltForbehandling.id.toString(),
-            OppgaveType.ETTEROPPGJOER,
-            brukerTokenInfo,
-        )
-
         val beregnetEtteroppgjoerResultat =
-            beregningKlient.hentBeregnetEtteroppgjoerResultat(
-                EtteroppgjoerHentBeregnetResultatRequest(
-                    ferdigstiltForbehandling.aar,
-                    ferdigstiltForbehandling.id,
-                    ferdigstiltForbehandling.sisteIverksatteBehandlingId,
-                ),
-                brukerTokenInfo,
-            )
+            runBlocking {
+                beregningKlient.hentBeregnetEtteroppgjoerResultat(
+                    EtteroppgjoerHentBeregnetResultatRequest(
+                        ferdigstiltForbehandling.aar,
+                        ferdigstiltForbehandling.id,
+                        ferdigstiltForbehandling.sisteIverksatteBehandlingId,
+                    ),
+                    brukerTokenInfo,
+                )
+            }
 
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = ferdigstiltForbehandling,
@@ -604,7 +615,7 @@ class EtteroppgjoerForbehandlingService(
         return forbehandlingCopy
     }
 
-    private suspend fun sjekkAtForbehandlingKanFerdigstilles(forbehandling: EtteroppgjoerForbehandling) {
+    private fun sjekkAtForbehandlingKanFerdigstilles(forbehandling: EtteroppgjoerForbehandling) {
         val sisteIverksatteBehandling =
             behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
                 ?: throw InternfeilException("Kunne ikke finne siste iverksatte behandling for sakId=${forbehandling.sak.id}")
@@ -617,9 +628,13 @@ class EtteroppgjoerForbehandlingService(
         }
 
         val sistePensjonsgivendeInntekt =
-            sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
+            runBlocking {
+                sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
+            }
         val sisteSummerteInntekter =
-            inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+            runBlocking {
+                inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+            }
 
         // verifisere at vi har siste pensjonsgivende inntekt i databasen
         dao.hentPensjonsgivendeInntekt(forbehandling.id).let { pgi ->
@@ -650,7 +665,7 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    suspend fun ferdigstillForbehandlingUtenBrev(
+    fun ferdigstillForbehandlingUtenBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {

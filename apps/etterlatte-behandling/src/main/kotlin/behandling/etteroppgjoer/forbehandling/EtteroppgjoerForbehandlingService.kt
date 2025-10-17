@@ -79,7 +79,7 @@ class EtteroppgjoerForbehandlingService(
 
         val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
 
-        sjekkAtForbehandlingKanFerdigstilles(forbehandling)
+        sjekkAtInntekterErOppdatert(forbehandling)
 
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
@@ -99,8 +99,8 @@ class EtteroppgjoerForbehandlingService(
 
         val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
 
-        sjekkAtForbehandlingKanFerdigstilles(forbehandling)
-
+        sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling)
+        sjekkAtInntekterErOppdatert(forbehandling)
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
         ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
@@ -646,18 +646,7 @@ class EtteroppgjoerForbehandlingService(
         return forbehandlingCopy
     }
 
-    private fun sjekkAtForbehandlingKanFerdigstilles(forbehandling: EtteroppgjoerForbehandling) {
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
-                ?: throw InternfeilException("Kunne ikke finne siste iverksatte behandling for sakId=${forbehandling.sak.id}")
-
-        // verifisere at vi bruker siste iverksatte behandling
-        if (sisteIverksatteBehandling.id != forbehandling.sisteIverksatteBehandlingId) {
-            throw InternfeilException(
-                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.id}",
-            )
-        }
-
+    private fun sjekkAtInntekterErOppdatert(forbehandling: EtteroppgjoerForbehandling) {
         val sistePensjonsgivendeInntekt =
             runBlocking {
                 sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
@@ -693,6 +682,19 @@ class EtteroppgjoerForbehandlingService(
                     "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste OMS inntekt",
                 )
             }
+        }
+    }
+
+    private fun sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling: EtteroppgjoerForbehandling) {
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
+                ?: throw InternfeilException("Kunne ikke finne siste iverksatte behandling for sakId=${forbehandling.sak.id}")
+
+        // verifisere at vi bruker siste iverksatte behandling
+        if (sisteIverksatteBehandling.id != forbehandling.sisteIverksatteBehandlingId) {
+            throw InternfeilException(
+                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.id}",
+            )
         }
     }
 

@@ -93,14 +93,14 @@ class EtteroppgjoerForbehandlingService(
         )
 
         val beregnetEtteroppgjoerResultat =
-                beregningKlient.hentBeregnetEtteroppgjoerResultat(
-                    EtteroppgjoerHentBeregnetResultatRequest(
-                        ferdigstiltForbehandling.aar,
-                        ferdigstiltForbehandling.id,
-                        ferdigstiltForbehandling.sisteIverksatteBehandlingId,
-                    ),
-                    brukerTokenInfo,
-                )
+            beregningKlient.hentBeregnetEtteroppgjoerResultat(
+                EtteroppgjoerHentBeregnetResultatRequest(
+                    ferdigstiltForbehandling.aar,
+                    ferdigstiltForbehandling.id,
+                    ferdigstiltForbehandling.sisteIverksatteBehandlingId,
+                ),
+                brukerTokenInfo,
+            )
 
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
             etteroppgjoerForbehandling = ferdigstiltForbehandling,
@@ -135,24 +135,26 @@ class EtteroppgjoerForbehandlingService(
                 "Kan ikke avbryte behandling uten å begrunne hvorfor. Kommentar er null eller blankt",
             )
         }
+        forbehandling.tilAvbrutt(aarsak, kommentar.orEmpty()).let { avbruttForbehandling ->
+            dao.lagreForbehandling(avbruttForbehandling)
 
-        dao.lagreForbehandling(forbehandling.tilAvbrutt(aarsak, kommentar.orEmpty())).let {
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                forbehandling.sak.id,
-                forbehandling.aar,
+                avbruttForbehandling.sak.id,
+                avbruttForbehandling.aar,
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
             )
+
+            oppgaveService.avbrytAapneOppgaverMedReferanse(
+                forbehandlingId.toString(),
+                "Avbrutt manuelt. Årsak: ${kommentar ?: aarsak.name}",
+            )
+            hendelserService.registrerOgSendEtteroppgjoerHendelse(
+                etteroppgjoerForbehandling = avbruttForbehandling,
+                hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
+                saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+                utlandstilknytning = hentUtlandstilknytning(forbehandling),
+            )
         }
-
-        val merknad = "Avbrutt manuelt. Årsak: ${kommentar ?: aarsak.name}"
-        oppgaveService.avbrytAapneOppgaverMedReferanse(forbehandlingId.toString(), merknad)
-
-        hendelserService.registrerOgSendEtteroppgjoerHendelse(
-            etteroppgjoerForbehandling = forbehandling,
-            hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
-            saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
-            utlandstilknytning = hentUtlandstilknytning(forbehandling),
-        )
     }
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)

@@ -6,7 +6,6 @@ import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
@@ -21,6 +20,8 @@ import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.rettsgebyr.RettsgebyrRepository
 import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 data class EtteroppgjoerDifferanseGrunnlag(
@@ -65,15 +66,47 @@ val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>
         finnFelt = { it.avkortetYtelse },
     )
 
+data class MaanederMedAvkortetYtelse(
+    val antallMaaneder: Long,
+    val ytelseEtterAvkorting: Int,
+)
+
+private fun normaliserPerioder(avkortingsperioder: List<AvkortetYtelse>): List<MaanederMedAvkortetYtelse> =
+    avkortingsperioder.map {
+        val tom = it.periode.tom ?: it.periode.tom ?: YearMonth.of(it.periode.fom.year, Month.DECEMBER)
+        val antallMaaneder = it.periode.fom.until(tom, ChronoUnit.MONTHS) + 1
+        MaanederMedAvkortetYtelse(
+            antallMaaneder = antallMaaneder,
+            ytelseEtterAvkorting = it.ytelseEtterAvkorting,
+        )
+    }
+
+val normalisertNyBruttoStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<MaanederMedAvkortetYtelse>> =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Gjør om en periode med avkortet ny brutto ytelse til en mellomverdi med antall måneder med avkortet ytelse",
+        regelReferanse = RegelReferanse("REGEL-ETTEROPPGJOER-NORMALISER-NY-BRUTTO-STOENAD"),
+    ) benytter nyBruttoStoenad med { avkorteYtelse ->
+        normaliserPerioder(avkorteYtelse)
+    }
+
+val normalisertBruttoUtbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<MaanederMedAvkortetYtelse>> =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Gjør om en periode med brutto avkortet ytelse til en mellomverdi med antall måneder med avkortet ytelse",
+        regelReferanse = RegelReferanse("REGEL-ETTEROPPGJOER-NORMALISER-BRUTTO-UTBETALT-STOENAD"),
+    ) benytter utbetaltStoenad med { avkorteYtelse ->
+        normaliserPerioder(avkorteYtelse)
+    }
+
 val sumNyBruttoStoenad =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-NY-BRUTTO-STOENAD"),
-    ) benytter nyBruttoStoenad med { avkortetYtelse ->
-        avkortetYtelse.sumOf {
-            // TODO egen regel?
-            (it.periode.fom.until(it.periode.tom, ChronoUnit.MONTHS) + 1) * it.ytelseEtterAvkorting
+    ) benytter normalisertNyBruttoStoenad med { maanederMedAvkortetYtelse ->
+        maanederMedAvkortetYtelse.sumOf {
+            it.antallMaaneder * it.ytelseEtterAvkorting
         }
     }
 
@@ -82,10 +115,9 @@ val sumUtbetaltStoenad =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-UTBETALT-STOENAD"),
-    ) benytter utbetaltStoenad med { avkortetYtelse ->
-        avkortetYtelse.sumOf {
-            // TODO egen regel?
-            (it.periode.fom.until(it.periode.tom, ChronoUnit.MONTHS) + 1) * it.ytelseEtterAvkorting
+    ) benytter normalisertBruttoUtbetaltStoenad med { maanederMedAvkortetYtelse ->
+        maanederMedAvkortetYtelse.sumOf {
+            it.antallMaaneder * it.ytelseEtterAvkorting
         }
     }
 
@@ -146,6 +178,7 @@ val beregneEtteroppgjoerRegel =
                 Beregningstall(differanse.differanse * -1) > grenser.etterbetaling -> EtteroppgjoerResultatType.ETTERBETALING
                 differanse.differanse == 0L && differanse.utbetaltStoenad == 0L &&
                     differanse.nyBruttoStoenad == 0L -> EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+
                 else -> EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING
             }
 

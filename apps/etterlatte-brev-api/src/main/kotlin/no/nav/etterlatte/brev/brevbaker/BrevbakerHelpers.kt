@@ -15,7 +15,7 @@ object BrevbakerHelpers {
         sakId: SakId,
         soeker: Soeker,
         avsender: Avsender,
-        vergeNavn: String? = null,
+        annenMottakerNavn: String? = null,
     ) = Felles(
         dokumentDato = LocalDate.now(),
         saksnummer = sakId.toString(),
@@ -39,6 +39,7 @@ object BrevbakerHelpers {
                     attesterendeSaksbehandler = avsender.attestant,
                 )
             },
-        vergeNavn = vergeNavn,
+        annenMottakerNavn = annenMottakerNavn,
+        vergeNavn = null,
     )
 }

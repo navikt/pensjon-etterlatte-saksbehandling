@@ -106,11 +106,7 @@ class EtteroppgjoerService(
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (sjekkOmEtteroppgjoerFinnes(
-                sakId,
-                inntektsaar,
-            )
-        ) {
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) {
             throw IkkeTillattException("ETTEROPPGJOER_FINNES", "Etteroppgjør finnes allerede")
         }
 
@@ -146,11 +142,7 @@ class EtteroppgjoerService(
             behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        if (sjekkOmEtteroppgjoerFinnes(
-                sakId,
-                inntektsaar,
-            )
-        ) {
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) {
             throw IkkeTillattException("ETTEROPPGJOER_FINNES", "Etteroppgjør finnes allerede")
         }
 

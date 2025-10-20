@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -42,6 +43,24 @@ class EtteroppgjoerBeregningResultatTest {
 
         resultat.verdi.differanse.differanse shouldBe -600
         resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.ETTERBETALING.name
+    }
+
+    @Test
+    fun `tolererer implisitt lukkede perioder i beregningen av etteroppgjoeret`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11365),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), null, ytelse = 12456),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 10990),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), null, ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        assertDoesNotThrow { beregneEtteroppgjoerRegel.anvend(differanseGrunnlag, regelPeriode) }
     }
 
     @Test

@@ -106,7 +106,13 @@ class EtteroppgjoerService(
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
+        if (sjekkOmEtteroppgjoerFinnes(
+                sakId,
+                inntektsaar,
+            )
+        ) {
+            throw IkkeTillattException("ETTEROPPGJOER_FINNES", "Etteroppgjør finnes allerede")
+        }
 
         val sisteIverksatteVedtak =
             vedtakKlient
@@ -114,6 +120,7 @@ class EtteroppgjoerService(
                 .sortedByDescending { it.datoAttestert }
                 .firstOrNull { it.vedtakType != VedtakType.OPPHOER }
                 ?: throw InternfeilException("Fant ikke siste iverksatte vedtak i sak=$sakId")
+
         val sisteIverksatteBehandling =
             krevIkkeNull(behandlingService.hentBehandling(sisteIverksatteVedtak.behandlingId)) {
                 "Siste iverksatte vedtak (id=${sisteIverksatteVedtak.id} peker på en behandling " +
@@ -139,7 +146,13 @@ class EtteroppgjoerService(
             behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
+        if (sjekkOmEtteroppgjoerFinnes(
+                sakId,
+                inntektsaar,
+            )
+        ) {
+            throw IkkeTillattException("ETTEROPPGJOER_FINNES", "Etteroppgjør finnes allerede")
+        }
 
         val status =
             try {

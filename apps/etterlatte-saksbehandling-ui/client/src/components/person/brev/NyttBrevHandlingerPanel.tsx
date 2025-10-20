@@ -1,7 +1,7 @@
 import { Alert, BodyLong, Box, Button, ConfirmationPanel, Heading, HStack, Modal } from '@navikt/ds-react'
 import { BrevStatus, Brevtype, IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 
@@ -19,6 +19,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
   const [statusModalOpen, setStatusModalOpen] = useState(false)
   const [bekreftetInfobrev, setBekreftetInfobrev] = useState(!erAktivitetspliktVarsel)
   const [feilmeldingBekreft, setFeilmeldingBekreft] = useState<string | undefined>()
+  const [bekreftetSettOverBrev, setBekreftetSettOverBrev] = useState<boolean>(false)
 
   const [ferdigstillStatus, apiFerdigstillBrev] = useApiCall(ferdigstillBrev)
   const [journalfoerStatus, apiJournalfoerBrev] = useApiCall(journalfoerBrev)
@@ -106,6 +107,14 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
             Er du sikker på at du vil ferdigstille brevet?
           </Heading>
 
+          <ConfirmationPanel
+            name="BekreftSettOverBrev"
+            checked={bekreftetSettOverBrev}
+            label="Jeg har sett over brevet inkludert vedlegg, og innholdet skal være riktig for søker"
+            onChange={(e) => {
+              setBekreftetSettOverBrev(e.currentTarget.checked)
+            }}
+          />
           <BodyLong spacing>
             Når du ferdigstiller brevet vil det bli journalført og distribuert. Denne handlingen kan ikke angres.
           </BodyLong>

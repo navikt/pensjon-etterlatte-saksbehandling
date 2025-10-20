@@ -1,7 +1,7 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, ConfirmationPanel, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
@@ -35,6 +35,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   const kanRedigeres = kanRedigereEtteroppgjoerBehandling(etteroppgjoer.behandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
+  const [bekreftetSettOverBrev, setBekreftetSettOverBrev] = useState<boolean>(false)
 
   const lukkAdvarselBehandlingEndret = () => {
     setVisAdvarselBehandlingEndret(false)
@@ -58,6 +59,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   }
 
   function lukkModal() {
+    setBekreftetSettOverBrev(false)
     resetFerdigstillForbehandlingStatus()
     setModalOpen(false)
   }
@@ -88,10 +90,20 @@ export function EtteroppgjoerForbehandlingBrev() {
         }}
       >
         <Modal.Body>
-          <BodyShort>
-            Når forbehandlingen for etteroppgjøret ferdigstilles vil brevet sendes ut og forbehandlingen låses for
-            endringer.
-          </BodyShort>
+          <VStack gap="4">
+            <ConfirmationPanel
+              name="BekreftSettOverBrev"
+              checked={bekreftetSettOverBrev}
+              label="Jeg har sett over brevet, inkludert vedlegg, og innholdet skal være riktig for søker"
+              onChange={(e) => {
+                setBekreftetSettOverBrev(e.currentTarget.checked)
+              }}
+            />
+            <BodyShort spacing>
+              Når forbehandlingen for etteroppgjøret ferdigstilles vil brevet sendes ut og forbehandlingen låses for
+              endringer.
+            </BodyShort>
+          </VStack>
           {isFailureHandler({
             apiResult: ferdigstillForbehandlingResult,
             errorMessage: 'Kunne ikke ferdigstille forbehandling',
@@ -102,6 +114,7 @@ export function EtteroppgjoerForbehandlingBrev() {
             variant="primary"
             onClick={ferdigstillForbehandling}
             loading={isPending(ferdigstillForbehandlingResult)}
+            disabled={!bekreftetSettOverBrev}
           >
             Ferdigstill
           </Button>
@@ -119,6 +132,12 @@ export function EtteroppgjoerForbehandlingBrev() {
           <Heading level="1" size="large">
             Forhåndsvarsel
           </Heading>
+
+          <Box marginBlock="0 2">
+            <Alert variant="info" size="small">
+              Husk å se over redigerbart innhold i brevet slik at det er tilpasset brukers situasjon og inntekt.
+            </Alert>
+          </Box>
 
           {visAdvarselBehandlingEndret && (
             <Alert variant="warning">

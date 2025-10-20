@@ -73,7 +73,7 @@ data class MaanederMedAvkortetYtelse(
 
 private fun normaliserPerioder(avkortingsperioder: List<AvkortetYtelse>): List<MaanederMedAvkortetYtelse> =
     avkortingsperioder.map {
-        val tom = it.periode.tom ?: it.periode.tom ?: YearMonth.of(it.periode.fom.year, Month.DECEMBER)
+        val tom = it.periode.tom ?: YearMonth.of(it.periode.fom.year, Month.DECEMBER)
         val antallMaaneder = it.periode.fom.until(tom, ChronoUnit.MONTHS) + 1
         MaanederMedAvkortetYtelse(
             antallMaaneder = antallMaaneder,

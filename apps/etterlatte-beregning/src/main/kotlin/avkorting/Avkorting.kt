@@ -7,6 +7,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
 import no.nav.etterlatte.beregning.Beregning
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
@@ -17,10 +18,19 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.Regel
+import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.libs.regler.RegelReferanse
+import no.nav.etterlatte.libs.regler.benytter
+import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
+import no.nav.etterlatte.libs.regler.med
+import no.nav.etterlatte.libs.regler.og
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 /**
@@ -152,9 +162,15 @@ data class Avkorting(
         aldersovergang: YearMonth? = null,
     ): Avkorting {
         var oppdatertAvkorting = this
-        nyttGrunnlag.forEach { oppdatertAvkorting = oppdatertAvkorting.oppdaterMedInntektsgrunnlag(it, bruker, opphoerFom, aldersovergang) }
+        nyttGrunnlag.forEach {
+            oppdatertAvkorting = oppdatertAvkorting.oppdaterMedInntektsgrunnlag(it, bruker, opphoerFom, aldersovergang)
+        }
 
-        return oppdatertAvkorting.beregnAvkorting(beregning.beregningsperioder.minOf { it.datoFOM }, beregning, sanksjoner)
+        return oppdatertAvkorting.beregnAvkorting(
+            beregning.beregningsperioder.minOf { it.datoFOM },
+            beregning,
+            sanksjoner,
+        )
     }
 
     /**
@@ -1057,4 +1073,82 @@ fun finnAntallInnvilgaMaanederForAar(
     val tomMaaned = tom ?: aldersovergang?.minusMonths(1)
     val tomEllerDesember = tomMaaned?.monthValue ?: 12
     return tomEllerDesember - (aarsoppgjoerFom.monthValue - 1)
+}
+
+data class InnvilgedeMaanederGrunnlag(
+    val beregningsperioder: FaktumNode<List<YtelseFoerAvkorting>>,
+    val aldersovergang: FaktumNode<YearMonth?>,
+)
+
+val perioderMedYtelse =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        finnFaktum = InnvilgedeMaanederGrunnlag::beregningsperioder,
+        finnFelt = { it },
+    )
+
+val aldersovergang =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        finnFaktum = InnvilgedeMaanederGrunnlag::aldersovergang,
+        finnFelt = { it },
+    )
+
+val perioderMedYtelserOgAldersovergang: Regel<InnvilgedeMaanederGrunnlag, List<YtelseFoerAvkorting>> =
+    RegelMeta(
+        OMS_GYLDIG_FRA,
+        "",
+        RegelReferanse("", ""),
+    ) benytter perioderMedYtelse og aldersovergang med { beregningsperioder, aldersovergang ->
+        if (aldersovergang == null) {
+            beregningsperioder
+        } else {
+            val perioder = beregningsperioder.filter { it.periode.fom < aldersovergang }
+            if (perioder.isNotEmpty()) {
+                val sistePeriode = perioder.last()
+
+                perioder.dropLast(1) +
+                    sistePeriode.copy(
+                        periode =
+                            sistePeriode.periode.copy(
+                                tom =
+                                    aldersovergang.minusMonths(
+                                        1L,
+                                    ),
+                            ),
+                    )
+            } else {
+                perioder
+            }
+        }
+    }
+
+val antallInnvilgedeMaanederForAar: Regel<InnvilgedeMaanederGrunnlag, Long> =
+    RegelMeta(
+        OMS_GYLDIG_FRA,
+        "",
+        RegelReferanse("", ""),
+    ) benytter perioderMedYtelserOgAldersovergang med { beregningsperioder ->
+        beregningsperioder.sumOf { beregningsperiode ->
+            if (beregningsperiode.beregning > 0) {
+                beregningsperiode.periode.antallMaanederIPeriode()
+            } else {
+                0L
+            }
+        }
+    }
+
+fun Periode.antallMaanederIPeriode(): Long {
+    val tomEllerDesember =
+        this.tom ?: YearMonth.of(
+            this.fom.year,
+            Month.DECEMBER,
+        )
+
+    return this.fom.until(
+        tomEllerDesember,
+        ChronoUnit.MONTHS,
+    ) + 1L
 }

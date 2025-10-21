@@ -187,3 +187,8 @@ class PdfMedData(
     val bytes: ByteArray,
     val opprettet: Tidspunkt,
 )
+
+data class KanFerdigstilleBrevResponse(
+    val kanFerdigstille: Boolean,
+    val aarsak: String? = null,
+)

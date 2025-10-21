@@ -96,12 +96,11 @@ class EtteroppgjoerForbehandlingBrevService(
             )
         }
 
-        brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { kanFerdigstilles ->
-            if (!kanFerdigstilles) {
+        brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { response ->
+            if (!response.kanFerdigstille) {
                 throw UgyldigForespoerselException(
                     code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                    detail =
-                        "Brevet kan ikke ferdigstilles før du har gjennomgått forhåndsvisningen.",
+                    detail = response.aarsak ?: "Ukjent feil",
                 )
             }
         }

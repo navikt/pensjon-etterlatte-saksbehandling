@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektBulkResponsData
-import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentenFilter
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
@@ -36,6 +35,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -719,7 +719,7 @@ class BrevKlientTest : BrevKlient {
         brevId: BrevID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
+    ): KanFerdigstilleBrevResponse {
         TODO("Not yet implemented")
     }
 

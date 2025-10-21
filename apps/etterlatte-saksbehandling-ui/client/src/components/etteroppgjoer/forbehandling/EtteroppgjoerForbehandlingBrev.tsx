@@ -94,7 +94,7 @@ export function EtteroppgjoerForbehandlingBrev() {
             <ConfirmationPanel
               name="BekreftSettOverBrev"
               checked={bekreftetSettOverBrev}
-              label="Jeg har sett over brevet, inkludert vedlegg, og innholdet skal være riktig for søker"
+              label="Jeg har sett over redigerbart innhold inkludert vedlegg, og tilpasset det til brukers situasjon og inntekt"
               onChange={(e) => {
                 setBekreftetSettOverBrev(e.currentTarget.checked)
               }}

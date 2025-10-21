@@ -127,7 +127,10 @@ export const Behandling = () => {
                   <Route
                     path="*"
                     element={
-                      <Navigate to={`/behandling/${behandling.id}/${routedata.behandlingRoutes[0].path}`} replace />
+                      <Navigate
+                        to={`/behandling/${behandlingIdFraURL}/${routedata.behandlingRoutes[0].path}`}
+                        replace
+                      />
                     }
                   />
                 </Routes>

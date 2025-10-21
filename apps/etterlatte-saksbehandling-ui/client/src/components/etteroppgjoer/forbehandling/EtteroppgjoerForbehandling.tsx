@@ -26,6 +26,7 @@ export function EtteroppgjoerForbehandling() {
 
   useEffect(() => {
     if (!etteroppgjoerId) return
+
     hentEtteroppgjoerRequest(etteroppgjoerId, (etteroppgjoer) => {
       dispatch(addEtteroppgjoer(etteroppgjoer))
     })
@@ -53,7 +54,7 @@ export function EtteroppgjoerForbehandling() {
                 path="*"
                 element={
                   <Navigate
-                    to={`/etteroppgjoer/${etteroppgjoerReducer.etteroppgjoer.behandling.id}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
+                    to={`/etteroppgjoer/${etteroppgjoerId}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
                     replace
                   />
                 }

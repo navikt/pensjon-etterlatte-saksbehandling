@@ -21,7 +21,7 @@ import java.time.Period
 import java.time.temporal.ChronoUnit
 import kotlin.math.floor
 
-// TODO dato settes riktig senere
+// Dato for når trygdetidsreglene begynte å gjelde er vilkårlig og bare satt langt tilbake
 val TRYGDETID_DATO: LocalDate = LocalDate.of(1900, 1, 1)
 
 data class TrygdetidPeriodeMedPoengaar(
@@ -229,7 +229,7 @@ val summerFaktiskNorge =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Summer alle perioder for faktisk norge",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FAKTISK-NASJONAL-TRYGDETID", versjon = "1.1"),
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FAKTISK-NASJONAL-TRYGDETID", versjon = "1.2"),
     ) benytter trygdetidGrunnlagListeFaktiskNorge og dagerPrMaanedTrygdetidGrunnlag med {
         trygdetidPerioder,
         dagerPrMaaned,
@@ -265,7 +265,7 @@ val summerFaktiskTeoretisk =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Summer alle perioder for faktisk teoretisk",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FAKTISK-TEORETISK-TRYGDETID", versjon = "2.1"),
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FAKTISK-TEORETISK-TRYGDETID", versjon = "2.2"),
     ) benytter trygdetidGrunnlagListeFaktiskNorgeOgProrata og antallPoengaarINorge og dagerPrMaanedTrygdetidGrunnlag med {
         trygdetidPerioder,
         norskPoengaar,
@@ -329,7 +329,7 @@ val fremtidigTrygdetidForNasjonal =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Regn ut fremtidig trygdetid nasjonal",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID", versjon = "1.1"),
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID", versjon = "2.0"),
     ) benytter nordiskEllerFireFemtedeler og fremtidigTrygdetid og opptjeningsTidIMnd med
         { nordiskEllerFireFemtedeler, fremtidig, opptjening ->
             if (fremtidig != Period.ZERO) {
@@ -354,7 +354,7 @@ val fremtidigTrygdetidForTeoretisk =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Regn ut fremtidig trygdetid teoretisk",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-TEORETISK-TRYGDETID", versjon = "1"),
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-TEORETISK-TRYGDETID", versjon = "2.0"),
     ) benytter summerFaktiskTeoretisk og fremtidigTrygdetid og opptjeningsTidIMnd med {
         teoretisk,
         fremtidig,
@@ -421,8 +421,8 @@ val beregnetFremtidigTrygdetid =
 val avrundetTrygdetid: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, TrygdetidPar<Int>> =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
-        beskrivelse = "Avrunder trygdetid til nærmeste hele år basert på måneder",
-        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING", versjon = "1.1"),
+        beskrivelse = "Avrunder trygdetid til nærmeste hele år basert på måneder og dager",
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING", versjon = "1.2"),
     ) benytter beregnetFaktiskTrygdetid og
         beregnetFremtidigTrygdetid og dagerPrMaanedTrygdetidGrunnlag med { faktisk, fremtidig, antallDager ->
 
@@ -460,7 +460,7 @@ val avrundetBroek =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Avrunder trygdetid broek basert på måneder - maks 40 år",
-        regelReferanse = RegelReferanse(id = "REGEL-AVRUNDET-PRORATA-BROEK", versjon = "2"),
+        regelReferanse = RegelReferanse(id = "REGEL-AVRUNDET-PRORATA-BROEK", versjon = "2.1"),
     ) benytter beregnetFaktiskTrygdetid med { faktisk ->
         val nasjonalAvrundet = faktisk.nasjonal.avrundet()
         val teoretiskAvrundet = faktisk.teoretisk.avrundet()
@@ -498,7 +498,7 @@ val beregnDetaljertBeregnetTrygdetid =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Beregn detaljert trygdetid",
-        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-DETALJERT-TRYGDETID"),
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-DETALJERT-TRYGDETID", versjon = "1.1"),
     ) benytter beregnetFaktiskTrygdetid og
         beregnetFremtidigTrygdetid og avrundetTrygdetidOgBroek med { faktisk, fremtidig, avrundet ->
 

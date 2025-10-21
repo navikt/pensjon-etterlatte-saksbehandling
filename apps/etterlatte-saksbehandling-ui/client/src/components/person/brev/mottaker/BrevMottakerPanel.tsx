@@ -103,15 +103,16 @@ export function BrevMottakerPanel({
           </Box>
         ),
         pending: <Spinner label="Henter eventuelle verger" margin="0" />,
-        error: () => (
-          <Box marginBlock="0 2">
-            <Alert variant="info" size="small">
-              Sjekk om brevet skal sendes til verge. Registrer eventuelt riktig adresse.
-            </Alert>
-          </Box>
-        ),
+        error: () =>
+          kanRedigeres && (
+            <Box marginBlock="0 2">
+              <Alert variant="info" size="small">
+                Sjekk om brevet skal sendes til verge. Registrer eventuelt riktig adresse.
+              </Alert>
+            </Box>
+          ),
         success: (soekeren) =>
-          (soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt || []).length > 0 && (
+          ((kanRedigeres && soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt) || []).length > 0 && (
             <Box marginBlock="0 2">
               <Alert variant="info" size="small">
                 Brevet skal sendes til verge. Registrer riktig adresse.

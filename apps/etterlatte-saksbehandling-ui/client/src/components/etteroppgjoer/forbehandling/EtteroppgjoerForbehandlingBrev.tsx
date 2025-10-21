@@ -133,12 +133,13 @@ export function EtteroppgjoerForbehandlingBrev() {
             Forhåndsvarsel
           </Heading>
 
-          <Box marginBlock="0 2">
-            <Alert variant="info" size="small">
-              Husk å se over redigerbart innhold i brevet slik at det er tilpasset brukers situasjon og inntekt.
-            </Alert>
-          </Box>
-
+          {kanRedigeres && (
+            <Box marginBlock="0 2">
+              <Alert variant="info" size="small">
+                Husk å se over redigerbart innhold i brevet slik at det er tilpasset brukers situasjon og inntekt.
+              </Alert>
+            </Box>
+          )}
           {visAdvarselBehandlingEndret && (
             <Alert variant="warning">
               Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles

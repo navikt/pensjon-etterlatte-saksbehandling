@@ -40,6 +40,5 @@ object BrevbakerHelpers {
                 )
             },
         annenMottakerNavn = annenMottakerNavn,
-        vergeNavn = null,
     )
 }

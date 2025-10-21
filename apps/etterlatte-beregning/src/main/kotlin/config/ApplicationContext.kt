@@ -92,6 +92,7 @@ class ApplicationContext {
             trygdetidKlient = trygdetidKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             featureToggleService = featureToggleService,
+            sanksjonService = sanksjonService,
         )
 
     val beregnOverstyrBeregningService =
@@ -143,6 +144,9 @@ class ApplicationContext {
             sanksjonService = sanksjonService,
             etteroppgjoerRepository = etteroppgjoerRepository,
             avkortingService = avkortingService,
+            reparerAarsoppgjoeret = avkortingReparerAarsoppgjoeret,
+            vedtakKlient = vedtaksvurderingKlient,
+            behandlingKlient = behandlingKlient,
         )
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(

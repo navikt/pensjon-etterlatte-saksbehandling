@@ -493,7 +493,7 @@ class TilbakekrevingService(
                 kommentar,
             )
 
-            oppgaveService.ferdigStillOppgaveUnderBehandling(
+            oppgaveService.ferdigstillOppgaveUnderBehandling(
                 referanse = tilbakekreving.id.toString(),
                 type = OppgaveType.TILBAKEKREVING,
                 saksbehandler = saksbehandler,

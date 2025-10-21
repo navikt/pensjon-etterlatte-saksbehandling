@@ -385,7 +385,7 @@ class KlageServiceImpl(
             )
         klageDao.lagreKlage(klageMedResultat)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             referanse = klageMedResultat.id.toString(),
             type = OppgaveType.KLAGE,
             saksbehandler = saksbehandler,
@@ -521,7 +521,7 @@ class KlageServiceImpl(
                 ),
             klageHendelseType = KlageHendelseType.ATTESTERT,
         )
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             referanse = klageId.toString(),
             type = OppgaveType.KLAGE,
             saksbehandler = saksbehandler,

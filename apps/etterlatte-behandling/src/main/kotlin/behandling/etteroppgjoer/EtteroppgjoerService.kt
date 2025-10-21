@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -49,16 +50,6 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
-    fun hentEtteroppgjoerForStatus(
-        status: EtteroppgjoerStatus,
-        inntektsaar: Int,
-    ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForStatus(status, inntektsaar)
-
-    fun hentEtteroppgjoerForFilter(
-        filter: EtteroppgjoerFilter,
-        inntektsaar: Int,
-    ): List<Etteroppgjoer> = dao.hentEtteroppgjoerForFilter(filter, inntektsaar)
-
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,
         antall: Int,
@@ -82,7 +73,11 @@ class EtteroppgjoerService(
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
     }
 
-    fun oppdaterEtteroppgjoerFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+    fun oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+        if (!forbehandling.erFerdigstilt()) {
+            throw IkkeTillattException("FORBEHADNLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
+        }
+
         val ferdigstiltStatus =
             when (forbehandling.etteroppgjoerResultatType) {
                 EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
@@ -104,14 +99,14 @@ class EtteroppgjoerService(
         dao.oppdaterFerdigstiltForbehandlingId(sakId, inntektsaar, forbehandlingId)
     }
 
-    suspend fun opprettEtteroppgjoer(
+    suspend fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
 
         val sisteIverksatteVedtak =
             vedtakKlient
@@ -136,7 +131,7 @@ class EtteroppgjoerService(
     suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
         sistIverksatteBehandling: Behandling,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         val sakId = sistIverksatteBehandling.sak.id
         logger.info(
             """
@@ -144,7 +139,7 @@ class EtteroppgjoerService(
             behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) return null
+        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) throw IkkeTillattException("ETTEROPPGJOER_FINNES","Etteroppgjør finnes allerede")
 
         val status =
             try {

@@ -36,7 +36,7 @@ data class BrevbakerRequest internal constructor(
                         sakId = sakId,
                         soeker = soekerOgEventuellVerge.soeker,
                         avsender = avsender,
-                        vergeNavn =
+                        annenMottakerNavn =
                             finnVergesNavn(
                                 soekerOgEventuellVerge,
                                 sakType,

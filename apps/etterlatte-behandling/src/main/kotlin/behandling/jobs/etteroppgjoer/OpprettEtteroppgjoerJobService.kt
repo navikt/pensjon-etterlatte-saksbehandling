@@ -12,7 +12,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 enum class EtteroppgjoerFilter(
     val harSanksjon: Boolean,
@@ -65,10 +64,12 @@ class OpprettEtteroppgjoerJobService(
                 try {
                     inTransaction {
                         runBlocking {
-                            etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
+                            etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, inntektsaar)
+                            true
                         }
                     }
                 } catch (e: Exception) {
+                    // TODO: Fjerne logglinja hvis det spammer mye
                     logger.warn("Feil ved oppretting av etteroppgjør", e)
                     false
                 }

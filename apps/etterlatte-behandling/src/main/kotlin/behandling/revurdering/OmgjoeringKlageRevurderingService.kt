@@ -86,7 +86,7 @@ class OmgjoeringKlageRevurderingService(
                 opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
             ).oppdater()
             .also {
-                oppgaveService.ferdigStillOppgaveUnderBehandling(
+                oppgaveService.ferdigstillOppgaveUnderBehandling(
                     referanse = klagenViOmgjoerPaaGrunnAv.id.toString(),
                     type = OppgaveType.OMGJOERING,
                     saksbehandler = saksbehandler,

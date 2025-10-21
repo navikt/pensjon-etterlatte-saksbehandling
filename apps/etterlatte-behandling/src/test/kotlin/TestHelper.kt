@@ -298,6 +298,22 @@ fun foerstegangsbehandling(
     opprinnelse = BehandlingOpprinnelse.UKJENT,
 )
 
+fun sak(
+    sakId: SakId = sakId1,
+    sakType: SakType = SakType.OMSTILLINGSSTOENAD,
+    enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
+    adressebeskyttelse: AdressebeskyttelseGradering? = null,
+    erSkjermet: Boolean = false,
+): Sak =
+    Sak(
+        ident = "Soeker",
+        sakType = sakType,
+        id = sakId,
+        enhet = enhet,
+        adressebeskyttelse = adressebeskyttelse,
+        erSkjermet = erSkjermet,
+    )
+
 fun revurdering(
     id: UUID = UUID.randomUUID(),
     sakId: SakId,

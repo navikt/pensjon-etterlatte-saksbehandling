@@ -194,7 +194,7 @@ class GenerellBehandlingService(
 
         verifiserRiktigSaksbehandler(saksbehandler, hentetBehandling)
         harRiktigTilstandIOppgave(generellbehandlingId)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             referanse = generellbehandlingId.toString(),
             type = OppgaveType.KRAVPAKKE_UTLAND,
             saksbehandler = saksbehandler,

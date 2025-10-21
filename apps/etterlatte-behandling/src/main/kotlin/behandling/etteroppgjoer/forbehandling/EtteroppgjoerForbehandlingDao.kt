@@ -7,9 +7,7 @@ import no.nav.etterlatte.behandling.hendelse.getLongOrNull
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
@@ -55,24 +53,6 @@ class EtteroppgjoerForbehandlingDao(
                 statement.executeQuery().singleOrNull { toForbehandling() }
             }
         }
-
-    fun lagreAvbruttAarsak(
-        behandlingId: UUID,
-        aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling,
-        kommentar: String,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement("UPDATE etteroppgjoer_behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
-
-            stmt.setString(1, aarsakTilAvbrytelse.name)
-            stmt.setString(2, kommentar)
-            stmt.setObject(3, behandlingId)
-            krev(stmt.executeUpdate() == 1) {
-                "Kunne ikke lagre avbrutt aarsak for forbehandling=$behandlingId"
-            }
-        }
-    }
 
     fun hentForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> =
         connectionAutoclosing.hentConnection {

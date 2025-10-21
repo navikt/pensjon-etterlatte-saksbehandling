@@ -28,7 +28,7 @@ class BrevbakerRequestTest {
                         Vergemaal("Palle Poulsen", Folkeregisteridentifikator.of("09498230323")),
                     ),
             )
-        request.felles.vergeNavn shouldBe "Sverre Solli Sand ved verge"
+        request.felles.annenMottakerNavn shouldBe "Sverre Solli Sand ved verge"
     }
 
     @Test
@@ -42,7 +42,7 @@ class BrevbakerRequestTest {
                         null,
                     ),
             )
-        request.felles.vergeNavn shouldBe null
+        request.felles.annenMottakerNavn shouldBe null
     }
 
     @Test
@@ -56,7 +56,7 @@ class BrevbakerRequestTest {
                         null,
                     ),
             )
-        request.felles.vergeNavn shouldBe "Søker Søkersen ved verge"
+        request.felles.annenMottakerNavn shouldBe "Søker Søkersen ved verge"
     }
 
     @Test
@@ -69,7 +69,7 @@ class BrevbakerRequestTest {
                         UkjentVergemaal(),
                     ),
             )
-        request.felles.vergeNavn shouldBe "Terje André Vigen ved verge"
+        request.felles.annenMottakerNavn shouldBe "Terje André Vigen ved verge"
     }
 
     private fun brevbakerRequest(

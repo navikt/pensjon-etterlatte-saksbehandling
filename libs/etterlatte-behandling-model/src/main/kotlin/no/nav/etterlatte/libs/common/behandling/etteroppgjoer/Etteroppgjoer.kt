@@ -47,7 +47,7 @@ enum class EtteroppgjoerHendelseType(
 }
 
 const val ETTEROPPGJOER_STATISTIKK_RIVER_KEY = "etteroppgjoer_statistikk"
-const val ETTEROPPGJOER_RESULTAT_RIVER_KEY = "etteroppgave_resultat"
+const val ETTEROPPGJOER_RESULTAT_RIVER_KEY = "etteroppgjoer_resultat"
 
 data class EtteroppgjoerForbehandlingStatistikkDto(
     val forbehandling: EtteroppgjoerForbehandlingDto,
@@ -55,6 +55,7 @@ data class EtteroppgjoerForbehandlingStatistikkDto(
     val summerteInntekter: SummerteInntekterAOrdningenStatistikkDto? = null,
     val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkattStatistikkDto? = null,
     val saksbehandler: String?,
+    val tilknyttetRevurdering: Boolean?
 )
 
 data class SummerteInntekterAOrdningenStatistikkDto(

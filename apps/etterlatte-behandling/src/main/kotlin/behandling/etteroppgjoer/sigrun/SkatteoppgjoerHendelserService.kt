@@ -136,8 +136,13 @@ class SkatteoppgjoerHendelserService(
                     "for ${hendelse.gjelderPeriode?.toInt()}, sakId=${sak.id}. " +
                     "Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
             )
+
+            /*
+                Vi mottar en hendelse for hver ident, så hvis person har flere identer vil vi få flere hendelser for samme Etteroppgjør.
+                Dette er ikke et problem hvis Etteroppgjøret fortsatt har status MOTTATT_SKATTEOPPGJOER
+             */
             if (etteroppgjoer.status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
-                logger.warn(
+                logger.info(
                     "Vi fikk ny hendelse (type=${hendelse.hendelsetype}) om skatteoppgjør i sak ${sak.id}, " +
                         "sekvensnummer: ${hendelse.sekvensnummer}, etter at vi allerede har oppdatert status til " +
                         "MOTTATT_SKATTEOPPJOER. Se sikkerlogg for full hendelse fra skatt",

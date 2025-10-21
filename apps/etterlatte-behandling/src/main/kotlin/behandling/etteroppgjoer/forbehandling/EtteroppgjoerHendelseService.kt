@@ -33,8 +33,8 @@ class EtteroppgjoerHendelseService(
         etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto? = null,
         hendelseType: EtteroppgjoerHendelseType,
-        saksbehandler: String?,
-        utlandstilknytning: Utlandstilknytning?,
+        saksbehandler: String? = null,
+        utlandstilknytning: Utlandstilknytning? = null,
     ) {
         hendelseDao.etteroppgjoerHendelse(
             forbehandlingId = etteroppgjoerForbehandling.id,
@@ -46,19 +46,16 @@ class EtteroppgjoerHendelseService(
             begrunnelse = null,
         )
 
-        // TODO: nullable?
-        val summerteInntekter =
-            etteroppgjoerForbehandlingDao
-                .hentSummerteInntekter(etteroppgjoerForbehandling.id)
-        val pensjonsgivendeInntektFraSkatt =
-            etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!
-
         sendKafkaMelding(
             etteroppgjoerForbehandling = etteroppgjoerForbehandling,
             hendelseType = hendelseType,
             etteroppgjoerResultat = etteroppgjoerResultat,
-            summerteInntekter = summerteInntekter,
-            pensjonsgivendeInntekt = pensjonsgivendeInntektFraSkatt,
+            summerteInntekter =
+                etteroppgjoerForbehandlingDao
+                    .hentSummerteInntekter(etteroppgjoerForbehandling.id),
+            pensjonsgivendeInntekt =
+                etteroppgjoerForbehandlingDao
+                    .hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!,
             utlandstilknytningType = utlandstilknytning?.type,
             saksbehandler = saksbehandler,
         )
@@ -84,22 +81,20 @@ class EtteroppgjoerHendelseService(
                         utlandstilknytningType = utlandstilknytningType,
                         saksbehandler = saksbehandler,
                         summerteInntekter =
-                            if (summerteInntekter != null) {
+                            summerteInntekter?.let {
                                 SummerteInntekterAOrdningenStatistikkDto(
                                     afp = summerteInntekter.afp,
                                     loenn = summerteInntekter.loenn,
                                     oms = summerteInntekter.oms,
                                     tidspunktBeregnet = summerteInntekter.tidspunktBeregnet,
                                 )
-                            } else {
-                                null
                             },
                         pensjonsgivendeInntekt =
                             PensjonsgivendeInntektFraSkattStatistikkDto(
                                 inntektsaar = pensjonsgivendeInntekt.inntektsaar,
                                 inntekter = pensjonsgivendeInntekt.inntekter,
                             ),
-                        tilknyttetRevurdering = etteroppgjoerForbehandling.kopiertFra != null
+                        tilknyttetRevurdering = etteroppgjoerForbehandling.kopiertFra != null,
                     ),
             )
         val meldingMap =

@@ -1,9 +1,10 @@
 import { JournalpostSak, Sakstype } from '~shared/types/Journalpost'
 import { ISak, SakType } from '~shared/types/sak'
-import { Button, Heading, Table } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import { TabsAddIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 export const temaFraSakstype = (sakstype: SakType): string => {
   switch (sakstype) {
@@ -51,7 +52,9 @@ export const EndreSak = ({
       <Heading size="small" spacing>
         Sak
       </Heading>
-
+      <BodyShort>
+        Viser saksliste for bruker: <PersonLink fnr={gjennySak.ident}>{gjennySak.ident}</PersonLink>
+      </BodyShort>
       <Table>
         <Table.Header>
           <Table.Row>
@@ -64,7 +67,7 @@ export const EndreSak = ({
         </Table.Header>
         <Table.Body>
           {!!fagsak && (
-            <Table.Row>
+            <Table.Row style={{ background: 'var(--ac-alert-success-bg, var(--a-surface-success-subtle))' }}>
               <Table.DataCell>{fagsak?.fagsakId || '-'}</Table.DataCell>
               <Table.DataCell>{fagsak?.sakstype ? formaterSakstype(fagsak.sakstype) : '-'}</Table.DataCell>
               <Table.DataCell>{fagsak?.fagsaksystem || '-'}</Table.DataCell>

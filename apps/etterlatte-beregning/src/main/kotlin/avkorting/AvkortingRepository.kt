@@ -637,6 +637,7 @@ class AvkortingRepository(
             },
         overstyrtInnvilgaMaanederBegrunnelse = stringOrNull("overstyrt_innvilga_maaneder_begrunnelse"),
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+        maanederInnvilget = TODO(),
     )
 
     private fun Row.toFaktiskInntekt(

@@ -13,6 +13,8 @@ import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
 import no.nav.etterlatte.avkorting.toDto
+import no.nav.etterlatte.beregning.BeregningToggles
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -47,6 +49,7 @@ class EtteroppgjoerService(
     private val reparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
@@ -121,6 +124,7 @@ class EtteroppgjoerService(
                     utland = utlandsinntekt,
                     sanksjoner = sanksjoner,
                     spesifikasjon = spesifikasjon,
+                    brukNyeReglerAvkorting = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false),
                 )
             }
 

@@ -170,6 +170,7 @@ fun avkortinggrunnlag(
                     versjon = "",
                 ),
         ),
+    maanederInnvilget = null,
 )
 
 fun avkortinggrunnlagLagreDto(

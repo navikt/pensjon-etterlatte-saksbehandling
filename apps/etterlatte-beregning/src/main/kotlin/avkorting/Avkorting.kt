@@ -6,6 +6,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
+import no.nav.etterlatte.avkorting.regler.MaanedInnvilget
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -159,6 +160,7 @@ data class Avkorting(
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
         opphoerFom: YearMonth?,
+        brukNyeReglerAvkorting: Boolean,
         aldersovergang: YearMonth? = null,
     ): Avkorting {
         var oppdatertAvkorting = this
@@ -170,6 +172,7 @@ data class Avkorting(
             beregning.beregningsperioder.minOf { it.datoFOM },
             beregning,
             sanksjoner,
+            brukNyeReglerAvkorting,
         )
     }
 
@@ -198,6 +201,16 @@ data class Avkorting(
         // Ved revurdering tilbake i tid - betyr det at fom i årsoppgjøret også må flyttes til fom i nytt inntektsgrunnlag
         val gjeldendeAaarsoppgjoerFom = if (nyttGrunnlag.fom < aarsoppgjoer.fom) nyttGrunnlag.fom else aarsoppgjoer.fom
 
+        val maanederInnvilget =
+            finnAntallInnvilgaMaanederForAar(
+                fom = nyttGrunnlag.fom,
+                tom = tom,
+                aldersovergang = aldersovergang,
+                ytelse =
+                    this.aarsoppgjoer.singleOrNull { it.aar == nyttGrunnlag.fom.year }?.ytelseFoerAvkorting
+                        ?: emptyList(),
+            )
+
         val forventetInntekt =
             ForventetInntekt(
                 id = nyttGrunnlag.id,
@@ -208,7 +221,7 @@ data class Avkorting(
                 fratrekkInnAarUtland = fratrekkInnAarUtland,
                 innvilgaMaaneder =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergang),
+                        ?: maanederInnvilget.count { it.innvilget },
                 overstyrtInnvilgaMaanederAarsak =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
@@ -227,6 +240,7 @@ data class Avkorting(
                         kilde,
                         periode,
                     ),
+                maanederInnvilget = maanederInnvilget,
             )
 
         val oppdatert =
@@ -271,6 +285,7 @@ data class Avkorting(
         utland: Int,
         sanksjoner: List<Sanksjon>,
         spesifikasjon: String,
+        brukNyeReglerAvkorting: Boolean,
     ): Avkorting {
         val tidligereAarsoppgjoer = aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
 
@@ -313,7 +328,7 @@ data class Avkorting(
                 inntekt = inntekt,
             )
         val nyAvkorting = erstattAarsoppgjoer(etteroppgjoer)
-        return nyAvkorting.beregnAvkorting(tidligereAarsoppgjoer.fom, null, sanksjoner)
+        return nyAvkorting.beregnAvkorting(tidligereAarsoppgjoer.fom, null, sanksjoner, brukNyeReglerAvkorting)
     }
 
     /**
@@ -330,6 +345,7 @@ data class Avkorting(
         virkningstidspunkt: YearMonth,
         beregning: Beregning?,
         sanksjoner: List<Sanksjon>,
+        brukNyeReglerAvkorting: Boolean,
     ): Avkorting {
         val virkningstidspunktAar = virkningstidspunkt.year
 
@@ -344,7 +360,14 @@ data class Avkorting(
                     }
 
                 when (aarsoppgjoer) {
-                    is AarsoppgjoerLoepende -> beregnAvkortingLoepende(aarsoppgjoer, ytelseFoerAvkorting, sanksjoner)
+                    is AarsoppgjoerLoepende ->
+                        beregnAvkortingLoepende(
+                            aarsoppgjoer,
+                            ytelseFoerAvkorting,
+                            sanksjoner,
+                            brukNyeReglerAvkorting,
+                        )
+
                     is Etteroppgjoer -> beregnAvkortingEtteroppgjoer(aarsoppgjoer, ytelseFoerAvkorting, sanksjoner)
                 }
             }
@@ -362,6 +385,7 @@ data class Avkorting(
         aarsoppgjoer: AarsoppgjoerLoepende,
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         sanksjoner: List<Sanksjon>,
+        brukNyeReglerAvkorting: Boolean,
     ): AarsoppgjoerLoepende {
         val reberegnetInntektsavkorting =
             aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
@@ -425,6 +449,7 @@ data class Avkorting(
                     ytelseFoerAvkorting,
                     reberegnetInntektsavkorting,
                     sanksjoner,
+                    brukNyeReglerAvkorting,
                 )
             } else {
                 reberegnetInntektsavkorting.first().let {
@@ -467,6 +492,7 @@ data class Avkorting(
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         reberegnetInntektsavkorting: List<Inntektsavkorting>,
         sanksjoner: List<Sanksjon>,
+        brukNyeReglerAvkorting: Boolean,
     ): List<AvkortetYtelse> {
         val sorterteSanksjonerInnenforAarsoppgjoer =
             aarsoppgjoer
@@ -495,6 +521,7 @@ data class Avkorting(
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
                             kjenteSanksjonerForInntektsavkorting,
+                            brukNyeReglerAvkorting,
                         )
                 }
 
@@ -535,6 +562,7 @@ data class Avkorting(
                     reberegnetInntektsavkorting.last(),
                     avkortetYtelseMedAllForventetInntekt,
                     sorterteSanksjonerInnenforAarsoppgjoer,
+                    brukNyeReglerAvkorting,
                 )
             // Ytelse etter avkorting må reberegnes fra første sanksjon som ikke er "sett" i tidlegere beregninger
             val tidligsteFomIkkeBeregnetSanksjon =
@@ -677,6 +705,9 @@ sealed class AvkortingGrunnlag {
  * @property inntektInnvilgetPeriode Inntekten som benyttes til videre beregning av avkorting.
  * inntektInnvilgetPeriode beregnes av [inntektTom], [fratrekkInnAar], [inntektUtlandTom] og [fratrekkInnAarUtland].
  * Se [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt].
+ *
+ * @property maanederInnvilget En liste over alle månedene i inntektsåret, og om det er innvilget ytelese i den
+ * perioden eller ikke
  */
 data class ForventetInntekt(
     override val id: UUID,
@@ -691,6 +722,7 @@ data class ForventetInntekt(
     val overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
     override val inntektInnvilgetPeriode: InntektInnvilgetPeriode,
+    val maanederInnvilget: List<MaanedInnvilget>?,
 ) : AvkortingGrunnlag()
 
 /**
@@ -1065,47 +1097,79 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
     return eksisterendeAvrundetPerioder + nyYtelseFoerAvkorting
 }
 
+// returner subsumsjonsnoden? evt returne resultat + json for regelanvendelse for dokumentasjon
 fun finnAntallInnvilgaMaanederForAar(
-    aarsoppgjoerFom: YearMonth,
+    fom: YearMonth,
     tom: YearMonth?,
     aldersovergang: YearMonth?,
-): Int {
+    ytelse: List<YtelseFoerAvkorting>,
+): List<MaanedInnvilget> {
     val tomMaaned = tom ?: aldersovergang?.minusMonths(1)
-    val tomEllerDesember = tomMaaned?.monthValue ?: 12
-    return tomEllerDesember - (aarsoppgjoerFom.monthValue - 1)
+    if (ytelse.isEmpty()) {
+        // TODO se over om denne løsningen er rimelig
+        return (fom.month.value..(tomMaaned?.month?.value ?: 12)).map {
+            MaanedInnvilget(
+                maaned = YearMonth.of(fom.year, it),
+                innvilget = true,
+            )
+        }
+    }
+    val grunnlag =
+        MaanederInnvilgetGrunnlag(
+            beregningsperioder = FaktumNode(ytelse, "", ""),
+            tilOgMed = FaktumNode(tomMaaned, "", ""),
+        )
+    val antallInvilgedeMaaneder =
+        antallInnvilgedeMaanederForAar.anvend(
+            grunnlag,
+            periode =
+                RegelPeriode(
+                    fraDato =
+                        ytelse
+                            .first()
+                            .periode.fom
+                            .atDay(1),
+                    tilDato =
+                        ytelse
+                            .last()
+                            .periode.tom
+                            ?.atEndOfMonth(),
+                ),
+        )
+    return antallInvilgedeMaaneder.verdi
 }
 
-data class InnvilgedeMaanederGrunnlag(
+data class MaanederInnvilgetGrunnlag(
     val beregningsperioder: FaktumNode<List<YtelseFoerAvkorting>>,
-    val aldersovergang: FaktumNode<YearMonth?>,
+    val tilOgMed: FaktumNode<YearMonth?>,
 )
 
 val perioderMedYtelse =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        finnFaktum = InnvilgedeMaanederGrunnlag::beregningsperioder,
+        finnFaktum = MaanederInnvilgetGrunnlag::beregningsperioder,
         finnFelt = { it },
     )
 
-val aldersovergang =
+val tilOgMed =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        finnFaktum = InnvilgedeMaanederGrunnlag::aldersovergang,
+        finnFaktum = MaanederInnvilgetGrunnlag::tilOgMed,
         finnFelt = { it },
     )
 
-val perioderMedYtelserOgAldersovergang: Regel<InnvilgedeMaanederGrunnlag, List<YtelseFoerAvkorting>> =
+val perioderMedYtelserOgAldersovergang: Regel<MaanederInnvilgetGrunnlag, List<YtelseFoerAvkorting>> =
     RegelMeta(
         OMS_GYLDIG_FRA,
         "",
         RegelReferanse("", ""),
-    ) benytter perioderMedYtelse og aldersovergang med { beregningsperioder, aldersovergang ->
-        if (aldersovergang == null) {
+    ) benytter perioderMedYtelse og tilOgMed med { beregningsperioder, tilOgMed ->
+        if (tilOgMed == null) {
             beregningsperioder
         } else {
-            val perioder = beregningsperioder.filter { it.periode.fom < aldersovergang }
+            val perioder = beregningsperioder.filter { it.periode.fom < tilOgMed }
             if (perioder.isNotEmpty()) {
                 val sistePeriode = perioder.last()
 
@@ -1113,10 +1177,7 @@ val perioderMedYtelserOgAldersovergang: Regel<InnvilgedeMaanederGrunnlag, List<Y
                     sistePeriode.copy(
                         periode =
                             sistePeriode.periode.copy(
-                                tom =
-                                    aldersovergang.minusMonths(
-                                        1L,
-                                    ),
+                                tom = tilOgMed,
                             ),
                     )
             } else {
@@ -1125,18 +1186,34 @@ val perioderMedYtelserOgAldersovergang: Regel<InnvilgedeMaanederGrunnlag, List<Y
         }
     }
 
-val antallInnvilgedeMaanederForAar: Regel<InnvilgedeMaanederGrunnlag, Long> =
+val alleMaanederIAaret =
     RegelMeta(
         OMS_GYLDIG_FRA,
         "",
         RegelReferanse("", ""),
-    ) benytter perioderMedYtelserOgAldersovergang med { beregningsperioder ->
-        beregningsperioder.sumOf { beregningsperiode ->
-            if (beregningsperiode.beregning > 0) {
-                beregningsperiode.periode.antallMaanederIPeriode()
-            } else {
-                0L
-            }
+    ) benytter perioderMedYtelse med { perioder ->
+        val year =
+            perioder
+                .first()
+                .periode.fom.year
+        (1..12).map { YearMonth.of(year, it) }
+    }
+
+val antallInnvilgedeMaanederForAar: Regel<MaanederInnvilgetGrunnlag, List<MaanedInnvilget>> =
+    RegelMeta(
+        OMS_GYLDIG_FRA,
+        "",
+        RegelReferanse("", ""),
+    ) benytter perioderMedYtelserOgAldersovergang og alleMaanederIAaret med { beregningsperioder, alleMaaneder ->
+        alleMaaneder.map { maaned ->
+            val innvilget =
+                beregningsperioder.any {
+                    it.periode.erMaanedIPerioden(maaned) && it.beregning > 0
+                }
+            MaanedInnvilget(
+                maaned = maaned,
+                innvilget = innvilget,
+            )
         }
     }
 

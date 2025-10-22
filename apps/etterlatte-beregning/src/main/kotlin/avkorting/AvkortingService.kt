@@ -3,6 +3,8 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.avkorting.AvkortingMapper.avkortingForFrontend
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekter
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.beregning.BeregningToggles
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -34,6 +36,7 @@ class AvkortingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,7 +48,12 @@ class AvkortingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val avkorting = avkortingSomSjekkes ?: hentAvkorting(behandlingId)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val aarMedAvkorting = avkorting?.aarsoppgjoer.orEmpty().map { it.aar }.toSet()
+        val aarMedAvkorting =
+            avkorting
+                ?.aarsoppgjoer
+                .orEmpty()
+                .map { it.aar }
+                .toSet()
         val paakrevdeAar =
             AvkortingValider
                 .paakrevdeInntekterForBeregningAvAvkorting(
@@ -174,6 +182,11 @@ class AvkortingService(
                 sanksjoner = sanksjoner ?: emptyList(),
                 opphoerFom = behandling.opphoerFraOgMed,
                 aldersovergang = aldersovergangMaaned,
+                brukNyeReglerAvkorting =
+                    featureToggleService.isEnabled(
+                        BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
+                        false,
+                    ),
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)
@@ -275,7 +288,16 @@ class AvkortingService(
             }
 
         val beregnetAvkorting =
-            avkorting.beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
+            avkorting.beregnAvkorting(
+                virkningstidspunkt = behandling.virkningstidspunkt().dato,
+                beregning = beregning,
+                sanksjoner = sanksjoner,
+                brukNyeReglerAvkorting =
+                    featureToggleService.isEnabled(
+                        BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
+                        false,
+                    ),
+            )
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)

@@ -2,6 +2,7 @@ package no.nav.etterlatte.testdata
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -17,6 +18,7 @@ import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 class Behandler(
@@ -46,18 +48,13 @@ class Behandler(
         val sak = behandlingService.hentSak(sakId, bruker)
         logger.info("Henta sak $sakId")
 
-        val doedsdato =
-            grunnlagService
-                .hentGrunnlagForBehandling(behandling, bruker)
-                .hentAvdoede()
-                .first()
-                .hentDoedsdato()
+        val virkningstidspunkt = utledVirkningstidspunkt(behandling, bruker)
 
         behandlingService.settKommerBarnetTilGode(behandling, bruker)
         behandlingService.lagreGyldighetsproeving(behandling, bruker)
         behandlingService.lagreUtlandstilknytning(behandling, bruker)
         behandlingService.lagreBoddEllerArbeidetUtlandet(behandling, bruker)
-        behandlingService.lagreVirkningstidspunkt(behandling, doedsdato?.verdi!!, bruker)
+        behandlingService.lagreVirkningstidspunkt(behandling, bruker, virkningstidspunkt)
         behandlingService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId, bruker)
 
         logger.info("Tildelt til saksbehandler, klar til vilkårsvurdering")
@@ -83,7 +80,7 @@ class Behandler(
 
         if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
             logger.info("Avkorter $behandling")
-            avkortingService.avkort(behandling, bruker)
+            avkortingService.avkort(behandling, virkningstidspunkt, bruker)
             logger.info("Avkorta behandling $behandling i sak $sakId")
         }
         if (behandlingssteg == Behandlingssteg.AVKORTA) {
@@ -108,5 +105,22 @@ class Behandler(
             )
         logger.info("Ferdig attestert behandling $behandling i sak $sakId")
         RapidUtsender.sendUt(attestertVedtak, packet, context)
+    }
+
+    private fun utledVirkningstidspunkt(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): YearMonth {
+        val doedsdato =
+            runBlocking {
+                grunnlagService
+                    .hentGrunnlagForBehandling(behandlingId, bruker)
+                    .hentAvdoede()
+                    .first()
+                    .hentDoedsdato()
+                    ?.verdi!!
+            }
+        val maanedEtterDoedsfall = doedsdato.plusMonths(1)
+        return YearMonth.of(maanedEtterDoedsfall.year, maanedEtterDoedsfall.month)
     }
 }

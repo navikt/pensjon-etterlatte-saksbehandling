@@ -75,16 +75,12 @@ class LesSkatteoppgjoerHendelserJob(
 
     private fun lesOgBehandleFlereGanger() {
         logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
-        for (i in 0 until antallKjoeringer) {
-            if (jobbenErAktivert()) {
-                skatteoppgjoerHendelserService.lesOgBehandleHendelser(
-                    HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),
-                )
-                logger.info("Ferdig med å lese og behandle hendelser fra skatt")
-            } else {
-                logger.info("Avslutter fordi feature toggle er av")
-                break
-            }
+        if (jobbenErAktivert()) {
+            skatteoppgjoerHendelserService.lesOgBehandleHendelser(
+                HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),
+            )
+        } else {
+            logger.info("Avslutter fordi feature toggle er av")
         }
     }
 

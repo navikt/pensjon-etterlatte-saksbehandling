@@ -124,7 +124,7 @@ class DownstreamResourceClient(
         .hentTokenFraAD(brukerTokenInfo, listOf("api://${resource.clientId}/.default"))
         .andThen { runCatching { action(it) }.fold(resource) }
         .andThen { response ->
-            when (response) {
+            when (response) { // TODO Hvorfor skal alt være Ok her?
                 null -> Ok(resource)
                 else -> Ok(resource.addResponse(response))
             }

@@ -1,10 +1,9 @@
 import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { ISak } from '~shared/types/sak'
 import { formaterDato } from '~utils/formatering/dato'
 import { formaterJournalpostStatus } from '~utils/formatering/formatering'
 import styled from 'styled-components'
@@ -17,16 +16,26 @@ import JournalfoerJournalpostModal from '~components/person/journalfoeringsoppga
 import LagreJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/LagreJournalpostModal'
 import { EndreTittelJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/EndreTittelJournalpost'
 import { useAppSelector } from '~store/Store'
+import { hentSakMedBehandlnger } from '~shared/api/sak'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { mapResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
 
 interface Props {
   initialJournalpost: Journalpost
-  sak: ISak
   oppgaveId: string
 }
 
-export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Props) => {
+export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId }: Props) => {
   const [journalpost, setJournalpost] = useState<Journalpost>({ ...initialJournalpost })
   const { sakMedBehandlinger } = useAppSelector((store) => store.journalfoeringOppgaveReducer)
+  const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
+
+  useEffect(() => {
+    if (journalpost.bruker?.id) {
+      apiHentSak(journalpost.bruker.id)
+    }
+  }, [journalpost.bruker.id])
 
   return (
     <>
@@ -62,7 +71,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
 
         <EndreBruker
           bruker={journalpost.bruker}
-          oppdaterBruker={(bruker) => setJournalpost({ ...journalpost, bruker: bruker })}
+          oppdaterBruker={(bruker) => setJournalpost({ ...journalpost, bruker })}
         />
 
         <EndreTittelJournalpost
@@ -73,9 +82,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
         <EndreAvsenderMottaker
           key={journalpost.avsenderMottaker.id}
           avsenderMottaker={journalpost.avsenderMottaker}
-          oppdaterAvsenderMottaker={(avsenderMottaker) =>
-            setJournalpost({ ...journalpost, avsenderMottaker: avsenderMottaker })
-          }
+          oppdaterAvsenderMottaker={(avsenderMottaker) => setJournalpost({ ...journalpost, avsenderMottaker })}
         />
 
         <EndreDokumenter
@@ -83,23 +90,34 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
           oppdater={(dokumenter) => setJournalpost({ ...journalpost, dokumenter })}
         />
 
-        <EndreSak
-          fagsak={journalpost.sak}
-          gjennySak={sak}
-          alternativSak={sakMedBehandlinger?.ekstraSak?.sak}
-          kobleTilSak={(sak) => setJournalpost({ ...journalpost, sak })}
-        />
+        {mapResult(sakStatus, {
+          pending: <Spinner label="Laster sak..." />,
+          error: (
+            <Alert variant="error" size="small">
+              Kunne ikke hente sak for {journalpost.bruker?.id}
+            </Alert>
+          ),
+          success: (sakMedBehandling) => (
+            <>
+              <EndreSak
+                fagsak={journalpost.sak}
+                gjennySak={sakMedBehandling.sak}
+                alternativSak={sakMedBehandlinger?.ekstraSak?.sak}
+                kobleTilSak={(nySak) => setJournalpost({ ...journalpost, sak: nySak })}
+              />
 
-        <VStack gap="2">
-          <HStack gap="2" justify="center">
-            <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
-
-            <JournalfoerJournalpostModal journalpost={journalpost} sak={sak} />
-          </HStack>
-          <HStack justify="center">
-            <AvbrytBehandleJournalfoeringOppgave />
-          </HStack>
-        </VStack>
+              <VStack gap="2">
+                <HStack gap="2" justify="center">
+                  <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
+                  <JournalfoerJournalpostModal journalpost={journalpost} sak={sakMedBehandling.sak} />
+                </HStack>
+                <HStack justify="center">
+                  <AvbrytBehandleJournalfoeringOppgave />
+                </HStack>
+              </VStack>
+            </>
+          ),
+        })}
       </FormWrapper>
     </>
   )

@@ -49,7 +49,7 @@ export default function BehandleJournalfoeringOppgave() {
   const { id: oppgaveId } = useParams()
 
   useEffect(() => {
-    if (!oppgave && oppgaveId) {
+    if (oppgaveId && oppgave?.id !== oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
         dispatch(settOppgave(oppgave))
         dispatch(settBruker(oppgave.fnr!!))
@@ -98,12 +98,8 @@ export default function BehandleJournalfoeringOppgave() {
           {mapResult(journalpostStatus, {
             pending: <Spinner label="Laster journalpost..." />,
             success: (journalpost) =>
-              !!sakMedBehandlinger && kanEndreJournalpost(journalpost) ? (
-                <OppdaterJournalpost
-                  initialJournalpost={journalpost}
-                  sak={sakMedBehandlinger.sak}
-                  oppgaveId={oppgaveId!!}
-                />
+              kanEndreJournalpost(journalpost) ? (
+                <OppdaterJournalpost initialJournalpost={journalpost} oppgaveId={oppgaveId!!} />
               ) : (
                 <Routes>
                   <Route index element={<StartOppgavebehandling />} />

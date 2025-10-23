@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -26,7 +28,7 @@ class AvkortingService(
                 bruker,
                 AvkortingGrunnlagFlereInntekterDto(
                     inntekter =
-                        listOf(
+                        listOfNotNull(
                             AvkortingGrunnlagLagreDto(
                                 inntektTom = 200_000,
                                 fratrekkInnAar = 50_000,
@@ -35,6 +37,20 @@ class AvkortingService(
                                 spesifikasjon = "kun test",
                                 fom = virkningstidspunkt,
                             ),
+                            if (LocalDate.now().month >= Month.OCTOBER &&
+                                virkningstidspunkt.year == YearMonth.now().year
+                            ) {
+                                AvkortingGrunnlagLagreDto(
+                                    inntektTom = 200_000,
+                                    fratrekkInnAar = 50_000,
+                                    inntektUtlandTom = 0,
+                                    fratrekkInnAarUtland = 0,
+                                    spesifikasjon = "kun test",
+                                    fom = YearMonth.of(virkningstidspunkt.year + 1, 1),
+                                )
+                            } else {
+                                null
+                            },
                         ),
                 ),
             ).mapBoth(

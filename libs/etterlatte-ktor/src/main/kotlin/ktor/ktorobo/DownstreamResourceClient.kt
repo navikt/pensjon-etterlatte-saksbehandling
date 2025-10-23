@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.HttpTimeoutConfig
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.accept
@@ -123,7 +124,7 @@ class DownstreamResourceClient(
         .hentTokenFraAD(brukerTokenInfo, listOf("api://${resource.clientId}/.default"))
         .andThen { runCatching { action(it) }.fold(resource) }
         .andThen { response ->
-            when (response) { // TODO Hvorfor skal alt være Ok her?
+            when (response) {
                 null -> Ok(resource)
                 else -> Ok(resource.addResponse(response))
             }

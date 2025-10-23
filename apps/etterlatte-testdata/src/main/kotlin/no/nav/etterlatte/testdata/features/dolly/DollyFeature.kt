@@ -2,7 +2,6 @@ package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveParameters
@@ -93,12 +92,12 @@ class DollyFeature(
                         val accessToken = getDollyAccessToken()
                         val req =
                             BestillingRequest(
-                                it["barnOver18"]!!.toBoolean(),
-                                it["helsoesken"]!!.toInt(),
-                                it["halvsoeskenAvdoed"]!!.toInt(),
-                                it["halvsoeskenGjenlevende"]!!.toInt(),
-                                it["gruppeId"]!!.toLong(),
-                                1,
+                                erOver18 = it["barnOver18"]!!.toBoolean(),
+                                helsoesken = it["helsoesken"]!!.toInt(),
+                                halvsoeskenAvdoed = it["halvsoeskenAvdoed"]!!.toInt(),
+                                halvsoeskenGjenlevende = it["halvsoeskenGjenlevende"]!!.toInt(),
+                                gruppeId = it["gruppeId"]!!.toLong(),
+                                antall = 1,
                             )
 
                         dollyService

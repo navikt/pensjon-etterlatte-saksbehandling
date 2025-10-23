@@ -45,7 +45,9 @@ data class PensjonsgivendeInntektFraSkattSummert(
     val loensinntekt: Int,
     val naeringsinntekt: Int,
     val fiskeFangstFamiliebarnehage: Int,
-)
+) {
+    val summertInntekt = loensinntekt + naeringsinntekt + fiskeFangstFamiliebarnehage
+}
 
 data class PensjonsgivendeInntektFraSkatt(
     val inntektsaar: Int,

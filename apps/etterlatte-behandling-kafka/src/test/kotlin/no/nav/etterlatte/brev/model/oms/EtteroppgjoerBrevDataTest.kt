@@ -35,6 +35,7 @@ class EtteroppgjoerBrevDataTest {
                         afp = Kroner(400),
                         utlandsinntekt = Kroner(4000),
                         inntekt = Kroner(4444),
+                        pensjonsgivendeInntektHeleAaret = Kroner(5000),
                     ),
             )
 

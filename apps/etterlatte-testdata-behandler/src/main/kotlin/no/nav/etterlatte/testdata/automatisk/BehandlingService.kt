@@ -146,17 +146,17 @@ class BehandlingService(
         sakId: SakId,
         bruker: BrukerTokenInfo,
     ) {
-        val oppgaver: List<OppgaveIntern> =
+        val aapneOppgaver =
             retryOgPakkUt {
                 klient
                     .get(Resource(clientId, "$url/oppgaver/sak/${sakId.sakId}/oppgaver"), bruker)
                     .mapBoth(
-                        success = { readValue(it) },
+                        success = { readValue<List<OppgaveIntern>>(it) },
                         failure = { throw it },
                     )
-            }
+            }.filter { it.status.erIkkeAvsluttet() }
 
-        oppgaver.forEach {
+        aapneOppgaver.forEach {
             retryOgPakkUt {
                 klient
                     .post(

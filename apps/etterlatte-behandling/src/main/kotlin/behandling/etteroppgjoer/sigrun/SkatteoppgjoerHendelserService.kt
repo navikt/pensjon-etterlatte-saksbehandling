@@ -37,9 +37,7 @@ class SkatteoppgjoerHendelserService(
                 }
                 hendelsesliste.hendelser.size
             }
-        if (request.venteMellomKjoeringer) {
-            Thread.sleep(2000)
-        }
+
         return antallLest
     }
 
@@ -79,7 +77,7 @@ class SkatteoppgjoerHendelserService(
                 }
         }.let { (antallRelevante, varighet) ->
             logger.info(
-                "Behandling av ${hendelsesListe.size} ($antallRelevante relevante) " +
+                "Ferdig å behandle ${hendelsesListe.size} hendelse fra skatt ($antallRelevante relevante) " +
                     "tok ${varighet.toString(DurationUnit.SECONDS, 2)}",
             )
         }

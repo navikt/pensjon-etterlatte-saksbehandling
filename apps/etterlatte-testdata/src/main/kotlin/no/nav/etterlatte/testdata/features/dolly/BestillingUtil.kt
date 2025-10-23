@@ -29,7 +29,7 @@ fun generererBestilling(bestilling: BestillingRequest): String {
     val barnListe = listOf(listOf(soeker), helsoesken, halvsoeskenAvdoed).flatten()
 
     return bestillingTemplateStart(
-        Random.nextInt(20, 60),
+        bestilling.avdoedAlder,
         bestilling.antall,
     ) + barnListe +
         bestillingTemplateEnd(
@@ -37,6 +37,8 @@ fun generererBestilling(bestilling: BestillingRequest): String {
             bestilling.gjenlevendeAlder,
         )
 }
+
+fun alderVoksenRandom(): Int = Random.nextInt(20, 60)
 
 private fun alder18Til20() = Random.nextInt(18, 20)
 

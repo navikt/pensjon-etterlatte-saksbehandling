@@ -3,26 +3,6 @@ import { HelpText } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { ClickEvent, trackClick } from '~utils/analytics'
 
-export const ForventetInntektHeaderHjelpeTekst = () => {
-  const [aapen, setAapen] = useState<boolean>(false)
-
-  const sendKlikkEvent = () => {
-    if (!aapen) {
-      setAapen(true)
-      trackClick(ClickEvent.AVKORTING_FORVENTET_INNTEKT_HJELPETEKST)
-    } else {
-      setAapen(false)
-    }
-  }
-
-  return (
-    <HelpText title="Hva innebærer forventet inntekt totalt" onClick={sendKlikkEvent}>
-      Forventet inntekt totalt er registrert inntekt Norge pluss inntekt utland minus eventuelt fratrekk for inn-år.
-      Beløpet vil automatisk avrundes ned til nærmeste tusen når avkorting beregnes.
-    </HelpText>
-  )
-}
-
 export const InnvilgaMaanederHeaderHjelpeTekst = () => {
   const [aapen, setAapen] = useState<boolean>(false)
 

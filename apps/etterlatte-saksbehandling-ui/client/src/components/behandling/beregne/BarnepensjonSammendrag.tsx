@@ -28,6 +28,20 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
       hentLevendeSoeskenFraAvdoedeForSoeker(personopplysninger.avdoede, soeker?.foedselsnummer as string)) ??
     []
 
+  const TableWrapper = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+
+    .table {
+      max-width: 1200px;
+
+      .tableCell {
+        max-width: 100px;
+      }
+    }
+  `
+
   return (
     <TableWrapper>
       <Heading spacing size="small" level="2">
@@ -93,17 +107,3 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
     </TableWrapper>
   )
 }
-
-export const TableWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 1200px;
-
-  .table {
-    max-width: 1200px;
-
-    .tableCell {
-      max-width: 100px;
-    }
-  }
-`

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.testdata.automatisk
 
+import com.github.michaelbull.result.mapBoth
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFlereInntekterDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -15,19 +17,29 @@ class AvkortingService(
 ) {
     suspend fun avkort(
         behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
         bruker: BrukerTokenInfo,
     ) = retryOgPakkUt {
-        klient.post(
-            Resource(clientId, "$url/api/beregning/avkorting/$behandlingId"),
-            bruker,
-            AvkortingGrunnlagLagreDto(
-                inntektTom = 200_000,
-                fratrekkInnAar = 50_000,
-                inntektUtlandTom = 0,
-                fratrekkInnAarUtland = 0,
-                spesifikasjon = "kun test",
-                fom = YearMonth.now(),
-            ),
-        )
+        klient
+            .post(
+                Resource(clientId, "$url/api/beregning/avkorting/$behandlingId/liste"),
+                bruker,
+                AvkortingGrunnlagFlereInntekterDto(
+                    inntekter =
+                        listOf(
+                            AvkortingGrunnlagLagreDto(
+                                inntektTom = 200_000,
+                                fratrekkInnAar = 50_000,
+                                inntektUtlandTom = 0,
+                                fratrekkInnAarUtland = 0,
+                                spesifikasjon = "kun test",
+                                fom = virkningstidspunkt,
+                            ),
+                        ),
+                ),
+            ).mapBoth(
+                success = {},
+                failure = { throw it },
+            )
     }
 }

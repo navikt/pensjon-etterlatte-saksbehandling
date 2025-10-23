@@ -74,7 +74,7 @@ class LesSkatteoppgjoerHendelserJob(
     }
 
     private fun lesOgBehandleFlereGanger() {
-        logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt - $antallKjoeringer ganger")
+        logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt ")
         if (jobbenErAktivert()) {
             skatteoppgjoerHendelserService.lesOgBehandleHendelser(
                 HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),

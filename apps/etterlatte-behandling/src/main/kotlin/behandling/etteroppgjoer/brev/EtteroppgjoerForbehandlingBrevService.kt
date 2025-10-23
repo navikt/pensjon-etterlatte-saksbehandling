@@ -240,7 +240,7 @@ class EtteroppgjoerForbehandlingBrevService(
                     stoenad = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
                     faktiskStoenad = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                     avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
-                    grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag),
+                    grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag, data.opplysninger.skatt.summertInntekt),
                 ),
             vedlegg =
                 listOf(

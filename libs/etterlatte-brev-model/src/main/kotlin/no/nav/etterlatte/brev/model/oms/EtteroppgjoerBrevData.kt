@@ -18,7 +18,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object EtteroppgjoerBrevData {
-    fun beregningsVedlegg(etteroppgjoersAar: Int, erVedtak: Boolean): BrevVedleggRedigerbarNy =
+    fun beregningsVedlegg(
+        etteroppgjoersAar: Int,
+        erVedtak: Boolean,
+    ): BrevVedleggRedigerbarNy =
         BrevVedleggRedigerbarNy(
             data = BeregningsVedleggInnhold(etteroppgjoersAar, erVedtak),
             vedlegg = Vedlegg.OMS_EO_BEREGNINGVEDLEGG_INNHOLD,
@@ -68,7 +71,7 @@ object EtteroppgjoerBrevData {
 
     data class BeregningsVedleggInnhold(
         val etteroppgjoersAar: Int,
-        val erVedtak: Boolean
+        val erVedtak: Boolean,
     ) : BrevVedleggInnholdData() {
         override val type: String = "OMS_EO_BEREGNINGVEDLEGG_INNHOLD"
         override val brevKode: Vedlegg = Vedlegg.OMS_EO_BEREGNINGVEDLEGG_INNHOLD
@@ -123,9 +126,13 @@ data class EtteroppgjoerBrevGrunnlag(
     val afp: Kroner,
     val utlandsinntekt: Kroner,
     val inntekt: Kroner,
+    val pensjonsgivendeInntektHeleAaret: Kroner,
 ) {
     companion object {
-        fun fra(grunnlag: FaktiskInntektDto): EtteroppgjoerBrevGrunnlag {
+        fun fra(
+            grunnlag: FaktiskInntektDto,
+            pensjonsgivendeInntektHeleAaret: Int,
+        ): EtteroppgjoerBrevGrunnlag {
             krevIkkeNull(grunnlag.inntektInnvilgetPeriode) {
                 "Kan ikke vise beregningstabell uten summert faktisk inntekt"
             }
@@ -139,6 +146,7 @@ data class EtteroppgjoerBrevGrunnlag(
                 afp = Kroner(grunnlag.afp),
                 utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
                 inntekt = Kroner(grunnlag.inntektInnvilgetPeriode!!),
+                pensjonsgivendeInntektHeleAaret = Kroner(pensjonsgivendeInntektHeleAaret),
             )
         }
     }

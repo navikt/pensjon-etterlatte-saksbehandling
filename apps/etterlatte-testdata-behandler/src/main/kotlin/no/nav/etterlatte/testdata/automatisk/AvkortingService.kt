@@ -30,8 +30,8 @@ class AvkortingService(
                     inntekter =
                         listOfNotNull(
                             AvkortingGrunnlagLagreDto(
-                                inntektTom = 200_000,
-                                fratrekkInnAar = 50_000,
+                                inntektTom = 250_000,
+                                fratrekkInnAar = 0,
                                 inntektUtlandTom = 0,
                                 fratrekkInnAarUtland = 0,
                                 spesifikasjon = "kun test",
@@ -41,8 +41,8 @@ class AvkortingService(
                                 virkningstidspunkt.year == YearMonth.now().year
                             ) {
                                 AvkortingGrunnlagLagreDto(
-                                    inntektTom = 200_000,
-                                    fratrekkInnAar = 50_000,
+                                    inntektTom = 250_000,
+                                    fratrekkInnAar = 0,
                                     inntektUtlandTom = 0,
                                     fratrekkInnAarUtland = 0,
                                     spesifikasjon = "kun test",

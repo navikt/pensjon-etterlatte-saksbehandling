@@ -21,6 +21,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
+import { fnrHarGyldigFormat } from '~utils/fnr'
 
 interface Props {
   initialJournalpost: Journalpost

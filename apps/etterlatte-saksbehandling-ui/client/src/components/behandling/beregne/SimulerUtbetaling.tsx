@@ -111,7 +111,7 @@ const SimuleringBeregning = ({ data }: { data: SimulertBeregning }) => {
         <SimuleringGruppertPaaAar data={data} />
       ) : (
         <>
-          {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Simulering" perioder={data.etterbetaling} />}
+          {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Etterbetaling" perioder={data.etterbetaling} />}
 
           {data.tilbakekreving.length > 0 && (
             <UtbetalingTable tittel="Potensiell tilbakekreving" perioder={data.tilbakekreving} />

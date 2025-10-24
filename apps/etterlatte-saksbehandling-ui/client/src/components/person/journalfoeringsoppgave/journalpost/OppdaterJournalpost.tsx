@@ -40,7 +40,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
     } else {
       apiHentSak(sak.ident!!)
     }
-  }, [journalpost.bruker.id])
+  }, [journalpost.bruker.id, sak.ident])
 
   return (
     <>

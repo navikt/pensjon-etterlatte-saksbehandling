@@ -17,6 +17,8 @@ class AvkortingService(
     private val url: String,
     private val clientId: String,
 ) {
+    private val aarsinntekt: Int = 200_000
+
     suspend fun avkort(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
@@ -30,8 +32,8 @@ class AvkortingService(
                     inntekter =
                         listOfNotNull(
                             AvkortingGrunnlagLagreDto(
-                                inntektTom = 200_000,
-                                fratrekkInnAar = 50_000,
+                                inntektTom = aarsinntekt,
+                                fratrekkInnAar = fratrekkInnAarFramTil(virkningstidspunkt),
                                 inntektUtlandTom = 0,
                                 fratrekkInnAarUtland = 0,
                                 spesifikasjon = "kun test",
@@ -41,8 +43,8 @@ class AvkortingService(
                                 virkningstidspunkt.year == YearMonth.now().year
                             ) {
                                 AvkortingGrunnlagLagreDto(
-                                    inntektTom = 200_000,
-                                    fratrekkInnAar = 50_000,
+                                    inntektTom = aarsinntekt,
+                                    fratrekkInnAar = 0,
                                     inntektUtlandTom = 0,
                                     fratrekkInnAarUtland = 0,
                                     spesifikasjon = "kun test",
@@ -58,4 +60,6 @@ class AvkortingService(
                 failure = { throw it },
             )
     }
+
+    private fun fratrekkInnAarFramTil(virkningstidspunkt: YearMonth): Int = aarsinntekt * (virkningstidspunkt.month.value - 1) / 12
 }

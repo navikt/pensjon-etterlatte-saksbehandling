@@ -98,8 +98,12 @@ export default function BehandleJournalfoeringOppgave() {
           {mapResult(journalpostStatus, {
             pending: <Spinner label="Laster journalpost..." />,
             success: (journalpost) =>
-              kanEndreJournalpost(journalpost) ? (
-                <OppdaterJournalpost initialJournalpost={journalpost} oppgaveId={oppgaveId!!} />
+              !!sakMedBehandlinger && kanEndreJournalpost(journalpost) ? (
+                <OppdaterJournalpost
+                  initialJournalpost={journalpost}
+                  sak={sakMedBehandlinger.sak}
+                  oppgaveId={oppgaveId!!}
+                />
               ) : (
                 <Routes>
                   <Route index element={<StartOppgavebehandling />} />

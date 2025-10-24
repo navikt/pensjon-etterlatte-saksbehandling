@@ -20,20 +20,24 @@ import { hentSakMedBehandlnger } from '~shared/api/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
+import { ISak } from '~shared/types/sak'
 
 interface Props {
   initialJournalpost: Journalpost
+  sak: ISak
   oppgaveId: string
 }
 
-export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId }: Props) => {
+export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Props) => {
   const [journalpost, setJournalpost] = useState<Journalpost>({ ...initialJournalpost })
   const { sakMedBehandlinger } = useAppSelector((store) => store.journalfoeringOppgaveReducer)
   const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
 
   useEffect(() => {
-    if (journalpost.bruker?.id) {
-      apiHentSak(journalpost.bruker.id)
+    if (sak.ident != journalpost.bruker.id && fnrHarGyldigFormat(journalpost.bruker.id)) {
+      apiHentSak(journalpost.bruker.id!!)
+    } else {
+      apiHentSak(sak.ident!!)
     }
   }, [journalpost.bruker.id])
 
@@ -94,7 +98,8 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId }: Props) =>
           pending: <Spinner label="Laster sak..." />,
           error: (
             <Alert variant="error" size="small">
-              Kunne ikke hente sak for {journalpost.bruker?.id}
+              Kunne ikke hente sak for {journalpost.bruker?.id}, sjekk at dette er et gyldig fødselsnummer. Du kan endre
+              mottaker og laste saker på nytt.
             </Alert>
           ),
           success: (sakMedBehandling) => (

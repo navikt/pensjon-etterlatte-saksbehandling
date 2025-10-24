@@ -40,11 +40,6 @@ internal class TilSamordningRiver(
         context: MessageContext,
     ) {
         val vedtak = objectMapper.readValue<VedtakDto>(packet["vedtak"].toJson())
-        if (vedtak.id == 61452L) {
-            logger.info("Hopper over allerede samordnet vedtak som ble stuck i produksjon")
-            return
-        }
-
         val marker = createLogMarker(vedtak)
         logger.info(marker, "Behandler ekstern samordning [behandling=${vedtak.behandlingId}]")
 

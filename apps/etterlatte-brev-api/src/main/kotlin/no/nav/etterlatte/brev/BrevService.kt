@@ -421,7 +421,7 @@ class BrevService(
         ).contains(brevkoder)
 
     fun kanFerdigstilleBrev(id: BrevID): KanFerdigstilleBrevResponse {
-        val brev = sjekkOmBrevKanEndres(id)
+        val brev = hentBrev(id)
         val pdf = pdfService.hentPdfMedData(brev.id)
         val pdfOppdatert = pdf?.bytes != null && pdf.opprettet > brev.statusEndret
 
@@ -434,6 +434,8 @@ class BrevService(
                 aarsak = "Brevet kan ikke ferdigstilles før du har gjennomgått forhåndsvisningen.",
             )
         }
+
+        // sjekker at placeholder tekst ikke er i brev-innhold
         if (brev.brevkoder == Brevkoder.OMS_EO_FORHAANDSVARSEL) {
             val payload = db.hentBrevPayload(brev.id)?.toJson() ?: ""
             val payloadVedlegg = db.hentBrevPayloadVedlegg(brev.id)?.toJson() ?: ""
@@ -448,6 +450,7 @@ class BrevService(
                 )
             }
         }
+
         return KanFerdigstilleBrevResponse(kanFerdigstille = true)
     }
 

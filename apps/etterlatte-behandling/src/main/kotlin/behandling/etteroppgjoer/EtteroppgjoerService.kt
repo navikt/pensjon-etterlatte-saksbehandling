@@ -110,10 +110,14 @@ class EtteroppgjoerService(
             throw IkkeTillattException("ETTEROPPGJOER_FINNES", "Etteroppgjør finnes allerede")
         }
 
-        val sisteIverksatteVedtak =
+        val attesterteVedtak =
             vedtakKlient
                 .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
                 .sortedByDescending { it.datoAttestert }
+        val harVedtakAvTypeOpphoer = attesterteVedtak.any { it.vedtakType == VedtakType.OPPHOER }
+
+        val sisteIverksatteVedtak =
+            attesterteVedtak
                 .firstOrNull { it.vedtakType != VedtakType.OPPHOER }
                 ?: throw InternfeilException("Fant ikke siste iverksatte vedtak i sak=$sakId")
 
@@ -128,6 +132,7 @@ class EtteroppgjoerService(
             inntektsaar,
             sisteIverksatteBehandling,
             EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+            harVedtakAvTypeOpphoer,
         ).also { dao.lagreEtteroppgjoer(it) }
     }
 
@@ -160,7 +165,7 @@ class EtteroppgjoerService(
                 EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
             }
 
-        return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling, status)
+        return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling, status, false)
             .also { dao.lagreEtteroppgjoer(it) }
     }
 
@@ -183,6 +188,7 @@ class EtteroppgjoerService(
         inntektsaar: Int,
         sisteIverksatteBehandling: Behandling,
         etteroppgjoerStatus: EtteroppgjoerStatus,
+        harVedtakAvTypeOpphoer: Boolean,
     ): Etteroppgjoer {
         val etteroppgjoer =
             Etteroppgjoer(
@@ -191,7 +197,7 @@ class EtteroppgjoerService(
                 status = etteroppgjoerStatus,
                 harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
                 harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id, inntektsaar),
-                harOpphoer = sisteIverksatteBehandling.opphoerFraOgMed !== null,
+                harOpphoer = harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed !== null,
                 harBosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type !== UtlandstilknytningType.NASJONAL,
                 harAdressebeskyttelseEllerSkjermet =
                     sisteIverksatteBehandling.sak.adressebeskyttelse?.harAdressebeskyttelse() == true ||

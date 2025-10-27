@@ -65,7 +65,7 @@ export const lagreInformasjonFraBruker = async (args: {
   })
 }
 
-export const ferdigstillEtteroppgjoerForbehandlingBrev = async (args: {
+export const ferdigstillEtteroppgjoerForbehandlingMedBrev = async (args: {
   forbehandlingId: string
 }): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/ferdigstill`, {})

@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID
@@ -68,27 +69,33 @@ class EtteroppgjoerServiceTest {
                 }
             coEvery { beregningKlient.hentOverstyrtBeregning(any(), any()) } returns mockk()
             every { behandlingService.hentFoersteDoedsdato(any(), any()) } returns null
-            coEvery { vedtakKlient.hentIverksatteVedtak(any(), any()) } returns listOf(
-                VedtakSammendragDto(
-                    id = UUID.randomUUID().toString(),
-                    behandlingId = sisteIverksatteBehandlingId,
-                    vedtakType = VedtakType.INNVILGELSE,
-                    behandlendeSaksbehandler = "",
-                    datoFattet = null,
-                    attesterendeSaksbehandler = "",
-                    datoAttestert = null,
-                    virkningstidspunkt = null,
-                    opphoerFraOgMed = null,
-                    iverksettelsesTidspunkt = null,
-                ),
-            )
+            coEvery { vedtakKlient.hentIverksatteVedtak(any(), any()) } returns
+                listOf(
+                    VedtakSammendragDto(
+                        id = UUID.randomUUID().toString(),
+                        behandlingId = sisteIverksatteBehandlingId,
+                        vedtakType = VedtakType.INNVILGELSE,
+                        behandlendeSaksbehandler = "",
+                        datoFattet = null,
+                        attesterendeSaksbehandler = "",
+                        datoAttestert = null,
+                        virkningstidspunkt = null,
+                        opphoerFraOgMed = null,
+                        iverksettelsesTidspunkt = null,
+                    ),
+                )
 
-            coEvery { behandlingService.hentBehandling(sisteIverksatteBehandlingId) } returns foerstegangsbehandling(
-                sakId = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                status = BehandlingStatus.ATTESTERT,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
-            )
+            coEvery { behandlingService.hentBehandling(sisteIverksatteBehandlingId) } returns
+                foerstegangsbehandling(
+                    sakId = sakId,
+                    sakType = SakType.OMSTILLINGSSTOENAD,
+                    status = BehandlingStatus.ATTESTERT,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+                )
+        }
+
+        fun ingenEtteroppgjoer() {
+            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns null
         }
 
         fun sigrunGirSvar() {
@@ -114,6 +121,7 @@ class EtteroppgjoerServiceTest {
     fun `skal opprette etteroppgjør med status MOTTATT_SKATTEOPPGJOER hvis vi får svar fra sigrun`() {
         val ctx = TestContext(sakId)
         ctx.sigrunGirSvar()
+        ctx.ingenEtteroppgjoer()
 
         val foerstegangsBehandling =
             foerstegangsbehandling(
@@ -138,6 +146,7 @@ class EtteroppgjoerServiceTest {
     fun `skal opprette etteroppgjør med status VENTER_PAA_SKATTEOPPGJOER hvis vi ikke får svar fra sigrun`() {
         val cx = TestContext(sakId)
         cx.sigrunKasterFeil()
+        cx.ingenEtteroppgjoer()
 
         val foerstegangsBehandling =
             foerstegangsbehandling(
@@ -274,7 +283,7 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `opprettEtteroppgjoer kaster exception dersom etteroppgjør allerede finnes for år`() {
+    fun `opprettEtteroppgjoer returnerer null dersom etteroppgjør allerede finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             Etteroppgjoer(
@@ -283,9 +292,8 @@ class EtteroppgjoerServiceTest {
                 status = EtteroppgjoerStatus.FERDIGSTILT,
             )
 
-        assertThrows<IkkeTillattException> {
-            runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
-        }
+        val opprettetEtteroppgjoer = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
+        assertNull(opprettetEtteroppgjoer)
         coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
@@ -294,13 +302,12 @@ class EtteroppgjoerServiceTest {
     fun `opprettEtteroppgjoer returnerer nytt etteroppgjør dersom etteroppgjør ikke finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
-                null
+            null
 
         val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
 
         with(resultat!!) {
             status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
-
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }

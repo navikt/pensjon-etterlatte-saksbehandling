@@ -11,7 +11,7 @@ import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbeha
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
-import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
+import { ferdigstillEtteroppgjoerForbehandlingMedBrev } from '~shared/api/etteroppgjoer'
 import { isPending } from '@reduxjs/toolkit'
 import {
   EtteroppgjoerDetaljertForbehandling,
@@ -30,7 +30,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   const [modalOpen, setModalOpen] = useState(false)
 
   const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest, resetFerdigstillForbehandlingStatus] =
-    useApiCall(ferdigstillEtteroppgjoerForbehandlingBrev)
+    useApiCall(ferdigstillEtteroppgjoerForbehandlingMedBrev)
 
   const kanRedigeres = kanRedigereEtteroppgjoerBehandling(etteroppgjoer.behandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)

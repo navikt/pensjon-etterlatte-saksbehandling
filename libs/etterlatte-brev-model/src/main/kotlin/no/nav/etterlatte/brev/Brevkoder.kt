@@ -226,6 +226,8 @@ enum class Brevkoder(
         tittel = "Klagen er oversendt til NAV Klageinstans Vest",
         Brevtype.OVERSENDELSE_KLAGE,
     ),
+
+    // TODO: deprecated
     KLAGE_OVERSENDELSE_BLANKETT(
         EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
         EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT,

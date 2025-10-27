@@ -10,6 +10,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -105,6 +106,7 @@ class BehandlingKlient(
                         etteroppgjoerFilter = etteroppgjoerKonfigurasjon.etteroppgjoerFilter,
                         spesifikkeSaker = etteroppgjoerKonfigurasjon.spesifikkeSaker,
                         ekskluderteSaker = etteroppgjoerKonfigurasjon.ekskluderteSaker,
+                        spesifikkeEnheter = etteroppgjoerKonfigurasjon.spesifikkeEnheter,
                     ),
                 )
             }
@@ -122,4 +124,5 @@ data class StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
     val etteroppgjoerFilter: EtteroppgjoerFilter,
     val spesifikkeSaker: List<SakId>,
     val ekskluderteSaker: List<SakId>,
+    val spesifikkeEnheter: List<String>,
 )

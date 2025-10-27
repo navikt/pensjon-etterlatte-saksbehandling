@@ -1,0 +1,1 @@
+ALTER TABLE etteroppgjoer_konfigurasjon ADD COLUMN enheter TEXT[];

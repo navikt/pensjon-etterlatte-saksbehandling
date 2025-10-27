@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -232,6 +233,7 @@ fun Route.etteroppgjoerRoutes(
                             etteroppgjoerFilter = request.etteroppgjoerFilter,
                             spesifikkeSaker = request.spesifikkeSaker,
                             ekskluderteSaker = request.ekskluderteSaker,
+                            spesifikkeEnheter = request.spesifikkeEnheter,
                         )
                     }
 
@@ -273,4 +275,5 @@ data class EtteroppgjoerForbehandlingBulkRequest(
     val etteroppgjoerFilter: EtteroppgjoerFilter,
     val spesifikkeSaker: List<SakId>,
     val ekskluderteSaker: List<SakId>,
+    val spesifikkeEnheter: List<String>,
 )

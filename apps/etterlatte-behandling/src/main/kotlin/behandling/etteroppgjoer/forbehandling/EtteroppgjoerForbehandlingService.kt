@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -379,6 +380,7 @@ class EtteroppgjoerForbehandlingService(
         etteroppgjoerFilter: EtteroppgjoerFilter,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
+        spesifikkeEnheter: List<String>,
     ) {
         val relevanteSaker: List<SakId> =
             etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
@@ -387,6 +389,7 @@ class EtteroppgjoerForbehandlingService(
                 etteroppgjoerFilter = etteroppgjoerFilter,
                 spesifikkeSaker = spesifikkeSaker,
                 ekskluderteSaker = ekskluderteSaker,
+                spesifikkeEnheter = spesifikkeEnheter,
             )
 
         relevanteSaker.map { sakId ->

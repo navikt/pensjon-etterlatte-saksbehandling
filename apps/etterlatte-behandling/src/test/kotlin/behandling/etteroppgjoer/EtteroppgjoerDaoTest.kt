@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbe
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
@@ -35,6 +36,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
@@ -68,16 +71,16 @@ class EtteroppgjoerDaoTest(
         }
         sak =
             sakSkrivDao.opprettSak(
-                fnr = "en bruker",
+                fnr = "bruker1",
                 type = SakType.OMSTILLINGSSTOENAD,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
         sak2 =
             sakSkrivDao.opprettSak(
-                fnr = "en bruker",
+                fnr = "bruker2",
                 type = SakType.OMSTILLINGSSTOENAD,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enheter.AALESUND.enhetNr,
             )
     }
 
@@ -89,6 +92,25 @@ class EtteroppgjoerDaoTest(
         assertThrows<InternfeilException> {
             etteroppgjoerDao.hentAktivtEtteroppgjoerForSak(sak.id)
         }
+    }
+
+    @Test
+    fun `skal hente saker med etteroppgjoer for spesifikke enheter`() {
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak2.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
+
+        val etteroppgjoerSak =
+            etteroppgjoerDao
+                .hentEtteroppgjoerSakerIBulk(
+                    inntektsaar = 2024,
+                    antall = 2,
+                    etteroppgjoerFilter = EtteroppgjoerFilter.ENKEL,
+                    spesifikkeSaker = emptyList(),
+                    ekskluderteSaker = emptyList(),
+                    spesifikkeEnheter = listOf(Enheter.PORSGRUNN.enhetNr.toString()),
+                ).firstOrNull()
+
+        SakId(etteroppgjoerSak!!.sakId) shouldBe sak.id
     }
 
     @ParameterizedTest

@@ -127,6 +127,11 @@ class EtteroppgjoerForbehandlingService(
                 "FEIL_STATUS_FORBEHANDLING",
                 "Forbehandling med id=$forbehandlingId kan ikke avbrytes. Status er ${forbehandling.status}",
             )
+        } else if (forbehandling.kopiertFra != null) {
+            throw IkkeTillattException(
+                "FORBEHANDLING_ER_TILKNYTT_REVURDERING",
+                "Forbehandling med id=$forbehandlingId er tilknytt revurdering og kan ikke avbrytes gjennom dette endepunktet.",
+            )
         }
 
         if (aarsak == AarsakTilAvbryteForbehandling.ANNET && kommentar.isNullOrBlank()) {
@@ -135,6 +140,7 @@ class EtteroppgjoerForbehandlingService(
                 "Kan ikke avbryte behandling uten å begrunne hvorfor. Kommentar er null eller blankt",
             )
         }
+
         forbehandling.tilAvbrutt(aarsak, kommentar.orEmpty()).let { avbruttForbehandling ->
             dao.lagreForbehandling(avbruttForbehandling)
 

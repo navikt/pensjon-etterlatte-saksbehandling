@@ -102,12 +102,22 @@ class EtteroppgjoerService(
     suspend fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer {
+    ): Etteroppgjoer? {
         logger.info(
             "Forsøker å opprette etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) {
-            throw IkkeTillattException("ETTEROPPGJOER_FINNES", "Etteroppgjør finnes allerede")
+        val eksisterendeEtteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+        if (eksisterendeEtteroppgjoer != null && eksisterendeEtteroppgjoer.status !in
+            listOf(
+                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+        ) {
+            logger.info(
+                "Vi har allerede et opprettet etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar, med status=" +
+                    "${eksisterendeEtteroppgjoer.status}. Vi oppdaterer derfor ikke noen felter på dette etteroppgjøret.",
+            )
+            return null
         }
 
         val attesterteVedtak =
@@ -131,7 +141,7 @@ class EtteroppgjoerService(
             sakId,
             inntektsaar,
             sisteIverksatteBehandling,
-            EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+            eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
             harVedtakAvTypeOpphoer,
         ).also { dao.lagreEtteroppgjoer(it) }
     }
@@ -147,8 +157,9 @@ class EtteroppgjoerService(
             behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        if (sjekkOmEtteroppgjoerFinnes(sakId, inntektsaar)) {
-            throw IkkeTillattException("ETTEROPPGJOER_FINNES", "Etteroppgjør finnes allerede")
+        val eksisterendeEtteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+        if (eksisterendeEtteroppgjoer != null) {
+            return eksisterendeEtteroppgjoer
         }
 
         val status =
@@ -167,20 +178,6 @@ class EtteroppgjoerService(
 
         return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling, status, false)
             .also { dao.lagreEtteroppgjoer(it) }
-    }
-
-    private fun sjekkOmEtteroppgjoerFinnes(
-        sakId: SakId,
-        inntektsaar: Int,
-    ): Boolean {
-        val etteroppgjoerForSak = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-        if (etteroppgjoerForSak != null && etteroppgjoerForSak.status != EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER) {
-            logger.info(
-                "Etteroppgjoer for sakId=$sakId og inntektsaar=$inntektsaar er allerede opprettet med status ${etteroppgjoerForSak.status}.",
-            )
-            return true
-        }
-        return false
     }
 
     private suspend fun etteroppgjoer(
@@ -214,7 +211,8 @@ class EtteroppgjoerService(
     }
 
     private suspend fun utledOverstyrtBeregning(behandlingId: UUID): Boolean {
-        val overstyrtBeregningsgrunnlag = beregningKlient.hentOverstyrtBeregning(behandlingId, HardkodaSystembruker.etteroppgjoer)
+        val overstyrtBeregningsgrunnlag =
+            beregningKlient.hentOverstyrtBeregning(behandlingId, HardkodaSystembruker.etteroppgjoer)
         return overstyrtBeregningsgrunnlag != null
     }
 

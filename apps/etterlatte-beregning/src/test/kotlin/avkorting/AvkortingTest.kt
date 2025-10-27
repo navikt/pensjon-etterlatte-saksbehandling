@@ -423,6 +423,45 @@ internal class AvkortingTest {
                     }
                 }
             }
+
+            @Test
+            fun `skal kun ta høyde for aldersovergang hvis den er i inntektsåret`() {
+                val fomAar = 2024
+                val forventetInntekt =
+                    avkortinggrunnlagLagreDto(
+                        aarsinntekt = 200000,
+                        fom = YearMonth.of(fomAar, Month.MARCH),
+                    )
+
+                val opprettaAvkorting =
+                    Avkorting().oppdaterMedInntektsgrunnlag(
+                        forventetInntekt,
+                        bruker,
+                        aldersovergang = YearMonth.of(2025, Month.MAY),
+                    )
+
+                opprettaAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
+                    aarsoppgjoer(
+                        aar = 2024,
+                        fom = YearMonth.of(2024, 3),
+                    ),
+                    AarsoppgjoerLoepende::id,
+                    AarsoppgjoerLoepende::inntektsavkorting,
+                )
+                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting()) {
+                    size shouldBe 1
+                    with(get(0).grunnlag) {
+                        inntektTom shouldBe forventetInntekt.inntektTom
+                        fratrekkInnAar shouldBe forventetInntekt.fratrekkInnAar
+                        inntektUtlandTom shouldBe forventetInntekt.inntektUtlandTom
+                        fratrekkInnAarUtland shouldBe forventetInntekt.fratrekkInnAarUtland
+                        spesifikasjon shouldBe forventetInntekt.spesifikasjon
+                        innvilgaMaaneder shouldBe 10
+                        overstyrtInnvilgaMaanederAarsak shouldBe null
+                        overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+                    }
+                }
+            }
         }
 
         @Test

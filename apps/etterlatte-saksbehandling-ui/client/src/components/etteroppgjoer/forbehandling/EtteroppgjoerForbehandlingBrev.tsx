@@ -2,7 +2,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Button, ConfirmationPanel, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
-import { mapResult, mapSuccess } from '~shared/api/apiUtils'
+import { isPending, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
 import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
@@ -12,7 +12,6 @@ import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
-import { isPending } from '@reduxjs/toolkit'
 import {
   EtteroppgjoerDetaljertForbehandling,
   kanRedigereEtteroppgjoerBehandling,

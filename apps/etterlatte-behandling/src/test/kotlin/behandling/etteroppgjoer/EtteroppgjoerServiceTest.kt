@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID
@@ -282,7 +283,7 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `opprettEtteroppgjoer kaster exception dersom etteroppgjør allerede finnes for år`() {
+    fun `opprettEtteroppgjoer returnerer null dersom etteroppgjør allerede finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             Etteroppgjoer(
@@ -291,9 +292,8 @@ class EtteroppgjoerServiceTest {
                 status = EtteroppgjoerStatus.FERDIGSTILT,
             )
 
-        assertThrows<IkkeTillattException> {
-            runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
-        }
+        val opprettetEtteroppgjoer = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
+        assertNull(opprettetEtteroppgjoer)
         coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
     }

@@ -183,6 +183,7 @@ data class Avkorting(
                 ?: throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
 
         val tom = opphoerFom?.let { finnTomForInntekt(opphoerFom, aarsoppgjoer.aar) }
+        val aldersovergangIDetteInntektsaaret = aldersovergang?.takeIf { nyttGrunnlag.fom.year == aldersovergang.year }
 
         val inntektTom = nyttGrunnlag.inntektTom
         val fratrekkInnAar = nyttGrunnlag.fratrekkInnAar
@@ -204,14 +205,14 @@ data class Avkorting(
                 fratrekkInnAarUtland = fratrekkInnAarUtland,
                 innvilgaMaaneder =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergang),
+                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergangIDetteInntektsaaret),
                 overstyrtInnvilgaMaanederAarsak =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
-                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
+                    } ?: aldersovergangIDetteInntektsaaret?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
                 overstyrtInnvilgaMaanederBegrunnelse =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
-                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
+                        ?: aldersovergangIDetteInntektsaaret?.let { "Bruker har aldersovergang" },
                 spesifikasjon = nyttGrunnlag.spesifikasjon,
                 kilde = kilde,
                 inntektInnvilgetPeriode =

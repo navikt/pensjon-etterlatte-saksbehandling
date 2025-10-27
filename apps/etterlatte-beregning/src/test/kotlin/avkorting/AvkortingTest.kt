@@ -25,6 +25,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.test.assertEquals
 
 internal class AvkortingTest {
     @Nested
@@ -271,6 +272,33 @@ internal class AvkortingTest {
                     ),
             )
 
+        private val aarsoppgjoer2025 =
+            AarsoppgjoerLoepende(
+                id = UUID.randomUUID(),
+                aar = 2025,
+                fom = YearMonth.of(2025, Month.JANUARY),
+                ytelseFoerAvkorting =
+                    listOf(
+                        YtelseFoerAvkorting(
+                            beregning = 20902,
+                            periode = Periode(virkningstidspunkt, null),
+                            beregningsreferanse = beregningId,
+                        ),
+                    ),
+                inntektsavkorting =
+                    listOf(
+                        Inntektsavkorting(
+                            avkortinggrunnlag(
+                                periode =
+                                    Periode(
+                                        fom = YearMonth.of(2025, 1),
+                                        tom = null,
+                                    ),
+                            ),
+                        ),
+                    ),
+            )
+
         private val nyAvkorting = eksisterendeAvkorting.kopierAvkorting()
 
         @Test
@@ -305,6 +333,18 @@ internal class AvkortingTest {
                     ),
                 )
             }
+        }
+
+        @Test
+        fun `skal filtrere bort ikke-relevante årsoppgjør hvis det er et opphør i saken`() {
+            val avkortingMed2024og2025 =
+                eksisterendeAvkorting.copy(
+                    aarsoppgjoer = listOf(eksisterendeAvkorting.aarsoppgjoer.single(), aarsoppgjoer2025),
+                )
+            val opphoerFra2025 = YearMonth.of(2025, Month.JANUARY)
+            val kopiert = avkortingMed2024og2025.kopierAvkorting(opphoerFra2025)
+            assertEquals(1, kopiert.aarsoppgjoer.size)
+            assertEquals(2024, kopiert.aarsoppgjoer.single().aar)
         }
 
         // TODO Etteroppgjør

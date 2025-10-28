@@ -281,7 +281,7 @@ class AvkortingService(
             }
 
         val beregnetAvkorting =
-            avkorting.beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner)
+            avkorting.beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner, behandling.opphoerFraOgMed)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.tidshendelser.etteroppgjoer
 
-import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
 

@@ -1,1 +1,1 @@
-ALTER TABLE etteroppgjoer_konfigurasjon ADD COLUMN enheter TEXT[];
+ALTER TABLE etteroppgjoer_konfigurasjon ADD COLUMN spesifikke_enheter TEXT[];

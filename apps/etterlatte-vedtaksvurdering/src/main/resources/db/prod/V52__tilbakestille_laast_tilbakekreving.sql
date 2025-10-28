@@ -5,4 +5,6 @@ SET vedtakstatus         = 'FATTET_VEDTAK',
     attestant            = null,
     datoattestert        = null
 WHERE id = 59970
+  and vedtakstatus = 'ATTESTERT'
+  and type = 'TILBAKEKREVING'
   and sakid = 21803;

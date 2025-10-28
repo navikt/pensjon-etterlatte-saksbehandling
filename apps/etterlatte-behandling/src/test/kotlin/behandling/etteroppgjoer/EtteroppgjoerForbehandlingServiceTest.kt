@@ -2,9 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
@@ -13,7 +11,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.sakId1
@@ -113,7 +110,7 @@ class EtteroppgjoerForbehandlingServiceTest {
 
             every { dao.lagreForbehandling(any()) } returns 1
             every { dao.kopierSummerteInntekter(any(), any()) } returns 1
-            every { dao.kopierPensjonsgivendeInntekt(any(), any()) } just runs
+            every { dao.kopierPensjonsgivendeInntekt(any(), any()) } returns 1
         }
 
         fun returnsForbehandling(forbehandling: EtteroppgjoerForbehandling) {

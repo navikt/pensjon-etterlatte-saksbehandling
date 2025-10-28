@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
@@ -131,51 +130,24 @@ class EtteroppgjoerForbehandlingDao(
         nyForbehandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
-            val selectStatement = // TODO legge til random uuid som default på id slik at kopi kan gjøres med ren sql
+            val statement =
                 prepareStatement(
                     """
-                    SELECT inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat 
+                        INSERT INTO etteroppgjoer_pensjonsgivendeinntekt (
+                        forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat
+                    )
+                    SELECT ?, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat 
                     FROM etteroppgjoer_pensjonsgivendeinntekt
                     WHERE forbehandling_id = ?
                     """.trimIndent(),
                 )
+            statement.setObject(1, nyForbehandlingId)
+            statement.setObject(2, forbehandlingId)
 
-            selectStatement.setObject(1, forbehandlingId)
-            val resultSet = selectStatement.executeQuery()
-
-            val insertStatement =
-                prepareStatement(
-                    """
-                    INSERT INTO etteroppgjoer_pensjonsgivendeinntekt (
-                        id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimIndent(),
-                )
-
-            var count = 0
-            while (resultSet.next()) {
-                insertStatement.setObject(1, UUID.randomUUID())
-                insertStatement.setObject(2, nyForbehandlingId)
-                insertStatement.setInt(3, resultSet.getInt("inntektsaar"))
-                insertStatement.setString(4, resultSet.getString("skatteordning"))
-                insertStatement.setInt(5, resultSet.getInt("loensinntekt"))
-                insertStatement.setInt(6, resultSet.getInt("naeringsinntekt"))
-                insertStatement.setInt(7, resultSet.getInt("fiske_fangst_familiebarnehage"))
-                insertStatement.setTidspunkt(8, resultSet.getTidspunktOrNull("tidspunkt_beregnet"))
-                insertStatement.setJsonb(9, resultSet.getObject("regel_resultat"))
-                resultSet
-                    .getString("regel_resultat")
-                    ?.let { it -> objectMapper.readValue(it, JsonNode::class.java) }
-
-                insertStatement.addBatch()
-                count++
-            }
-
-            val result = insertStatement.executeBatch()
-
-            krev(result.size == count) {
-                "Kunne ikke kopiere alle pensjonsgivende inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
+            statement.executeUpdate().also { count ->
+                krev(count == 1) {
+                    "Kunne ikke kopiere pensjonsgivende inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
+                }
             }
         }
     }
@@ -303,8 +275,8 @@ class EtteroppgjoerForbehandlingDao(
             statement.setObject(1, nyForbehandlingId)
             statement.setObject(2, forbehandlingId)
 
-            statement.executeUpdate().also {
-                krev(it == 1) {
+            statement.executeUpdate().also { count ->
+                krev(count == 1) {
                     "Kunne ikke kopiere summerter inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
                 }
             }

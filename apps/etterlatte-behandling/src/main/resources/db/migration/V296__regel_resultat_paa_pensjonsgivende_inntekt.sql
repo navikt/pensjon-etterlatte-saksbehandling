@@ -16,3 +16,6 @@ ALTER TABLE etteroppgjoer_pensjonsgivendeinntekt
 UPDATE etteroppgjoer_pensjonsgivendeinntekt
 SET naeringsinntekt = naeringsinntekt + fiske_fangst_familiebarnehage
 WHERE regel_resultat IS NULL;
+
+ALTER TABLE etteroppgjoer_pensjonsgivendeinntekt
+    ALTER COLUMN id SET DEFAULT (gen_random_uuid());

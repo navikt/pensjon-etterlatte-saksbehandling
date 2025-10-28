@@ -1,7 +1,9 @@
 package behandling.etteroppgjoer
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -188,10 +190,10 @@ class EtteroppgjoerForbehandlingDaoTest(
         // negative returnere null hvis tomt
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
 
-        val regelresultat = "{\"regel\":\"lorem\"}".toJsonNode()
+        val regelresultatJson = "{\"regel\":\"lorem\"}".toJsonNode()
         val tidspunktBeregnet = Tidspunkt.now()
 
-        val pensjonsgivendeInntekter = SummertePensjonsgivendeInntekter(12, 34, tidspunktBeregnet, regelresultat)
+        val pensjonsgivendeInntekter = SummertePensjonsgivendeInntekter(12, 34, tidspunktBeregnet, regelresultatJson)
         etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
             forbehandlingId,
             pensjonsgivendeInntekter,
@@ -200,6 +202,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
             this.shouldBeEqualToIgnoringFields(pensjonsgivendeInntekter, SummertePensjonsgivendeInntekter::regelresultat)
         }
+        lesRegelResultatPGI(forbehandlingId) shouldBe regelresultatJson
     }
 
     @Test
@@ -409,11 +412,13 @@ class EtteroppgjoerForbehandlingDaoTest(
         val forbehandlingId = UUID.randomUUID()
         val nyForbehandlingId = UUID.randomUUID()
 
+        val regelresultatJson = "{\"regel\":\"lorem\"}".toJsonNode()
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId) shouldBe null
+        val tidspunktBeregnet = Tidspunkt.now()
         etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
             forbehandlingId,
-            SummertePensjonsgivendeInntekter(0, 0, Tidspunkt.now(), null),
+            SummertePensjonsgivendeInntekter(126000, 214000, tidspunktBeregnet, regelresultatJson),
         )
 
         etteroppgjoerForbehandlingDao.kopierPensjonsgivendeInntekt(forbehandlingId, nyForbehandlingId)
@@ -424,10 +429,13 @@ class EtteroppgjoerForbehandlingDaoTest(
                 nyForbehandlingId,
             )!!
 
-        pensjonsgivendeInntektKopi.loensinntekt shouldBe pensjonsgivendeInntekt.loensinntekt
-        pensjonsgivendeInntektKopi.naeringsinntekt shouldBe pensjonsgivendeInntekt.naeringsinntekt
-        pensjonsgivendeInntektKopi.tidspunktBeregnet shouldBe pensjonsgivendeInntekt.tidspunktBeregnet
-        pensjonsgivendeInntektKopi.regelresultat shouldBe pensjonsgivendeInntekt.regelresultat
+        pensjonsgivendeInntektKopi.loensinntekt shouldBe 126000
+        pensjonsgivendeInntektKopi.naeringsinntekt shouldBe 214000
+        pensjonsgivendeInntektKopi.tidspunktBeregnet shouldBe tidspunktBeregnet
+        pensjonsgivendeInntektKopi.regelresultat shouldBe null // DAO henter den ikke ut
+        pensjonsgivendeInntektKopi shouldBeEqual pensjonsgivendeInntekt
+
+        lesRegelResultatPGI(nyForbehandlingId) shouldBe regelresultatJson
     }
 
     private fun tolvMndInntekter(
@@ -436,5 +444,23 @@ class EtteroppgjoerForbehandlingDaoTest(
     ): List<Inntektsmaaned> =
         (1..12).map { mnd ->
             Inntektsmaaned(YearMonth.of(aar, mnd), beloep)
+        }
+
+    private fun lesRegelResultatPGI(forbehandlingId: UUID?): JsonNode =
+        ConnectionAutoclosingTest(dataSource).hentConnection { connection ->
+            val statement =
+                connection.prepareStatement(
+                    "SELECT regel_resultat FROM etteroppgjoer_pensjonsgivendeInntekt WHERE forbehandling_id = ?",
+                )
+            statement.setObject(1, forbehandlingId)
+            val resultSet = statement.executeQuery()
+            resultSet.next()
+
+            val value =
+                no.nav.etterlatte.libs.common.objectMapper
+                    .readValue(resultSet.getString(1), JsonNode::class.java)
+
+            resultSet.next() shouldBe false
+            value
         }
 }

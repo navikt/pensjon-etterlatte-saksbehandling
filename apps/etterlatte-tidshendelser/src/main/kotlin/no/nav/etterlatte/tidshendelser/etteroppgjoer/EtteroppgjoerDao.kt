@@ -18,7 +18,7 @@ class EtteroppgjoerDao(
             with(Databasetabell) {
                 tx.hent(
                     "SELECT $INNNTEKTSAAR, $ANTALL, $DATO, $ETTEROPPGJOER_FILTER," +
-                        "$SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER, $KJOERING_ID " +
+                        "$SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER, $SPESIFIKKE_ENHETER, $KJOERING_ID " +
                         "FROM $TABELLNAVN " +
                         "WHERE $AKTIV=true ORDER BY $OPPRETTET DESC LIMIT 1",
                 ) { row ->

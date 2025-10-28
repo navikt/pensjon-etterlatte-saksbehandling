@@ -161,9 +161,9 @@ class EtteroppgjoerForbehandlingDao(
                 prepareStatement(
                     """
                     INSERT INTO etteroppgjoer_pensjonsgivendeinntekt(
-                        id, forbehandling_id, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat
+                        forbehandling_id, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat
                     ) 
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?)
                     ON CONFLICT (forbehandling_id) DO UPDATE SET
                         loensinntekt = excluded.loensinntekt,
                         naeringsinntekt = excluded.naeringsinntekt,
@@ -172,12 +172,11 @@ class EtteroppgjoerForbehandlingDao(
                     """.trimIndent(),
                 )
 
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, behandlingId)
-            statement.setInt(3, inntekterFraSkatt.loensinntekt)
-            statement.setInt(4, inntekterFraSkatt.naeringsinntekt)
-            statement.setTidspunkt(5, inntekterFraSkatt.tidspunktBeregnet)
-            statement.setJsonb(6, inntekterFraSkatt.regelresultat)
+            statement.setObject(1, behandlingId)
+            statement.setInt(2, inntekterFraSkatt.loensinntekt)
+            statement.setInt(3, inntekterFraSkatt.naeringsinntekt)
+            statement.setTidspunkt(4, inntekterFraSkatt.tidspunktBeregnet)
+            statement.setJsonb(5, inntekterFraSkatt.regelresultat)
 
             val result = statement.executeUpdate()
             krev(result == 1) {

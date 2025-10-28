@@ -301,7 +301,7 @@ data class Avkorting(
                     ),
             )
 
-        // TODO: opphør fom må utledes riktig for saker med opphør
+        // TODO: opphør fom må utledes riktig for saker med opphør i etteroppgjøret
         val opphoerFom = null
 
         val etteroppgjoer =

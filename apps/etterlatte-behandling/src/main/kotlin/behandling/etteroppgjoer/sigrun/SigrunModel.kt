@@ -74,13 +74,6 @@ data class PensjonsgivendeInntektFraSkatt(
                         fiskeFangstFamiliebarnehage = 0,
                         inntektsaar = aar,
                     ),
-                    PensjonsgivendeInntekt(
-                        skatteordning = "SVALBARD",
-                        loensinntekt = aarsinntekt,
-                        naeringsinntekt = 0,
-                        fiskeFangstFamiliebarnehage = 0,
-                        inntektsaar = aar,
-                    ),
                 ),
         )
     }

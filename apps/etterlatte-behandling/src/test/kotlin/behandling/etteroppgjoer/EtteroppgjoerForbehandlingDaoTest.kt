@@ -352,7 +352,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(
             forbehandlingId,
             SummerteInntekterAOrdningen(
-                afp = InntektSummert("A", tolvMndInntekter(ETTEROPPGJOER_AAR, 5000.toBigDecimal())),
+                afp = InntektSummert("A", tolvMndInntekter(2024, 5000.toBigDecimal())),
                 loenn = InntektSummert("B", tolvMndInntekter(2024, 6000.toBigDecimal())),
                 oms = InntektSummert("C", tolvMndInntekter(2024, 7000.toBigDecimal())),
                 tidspunktBeregnet = Tidspunkt.now(),

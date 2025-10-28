@@ -1,5 +1,5 @@
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import { Box, Heading, VStack } from '@navikt/ds-react'
+import { Alert, Box, Heading, VStack } from '@navikt/ds-react'
 import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraSkatteetaten'
 import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/components/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
 import { OpplysningerFraAInntektSummert } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraAInntektSummert'
@@ -24,9 +24,13 @@ export const Inntektsopplysninger = () => {
         {etteroppgjoer.opplysninger.summerteInntekter && (
           <OpplysningerFraAInntektSummert inntekter={etteroppgjoer.opplysninger.summerteInntekter} />
         )}
-        <BrukeroppgittInntektForInnvilgedePerioder
-          avkortingGrunnlag={etteroppgjoer.opplysninger.tidligereAvkorting.avkortingGrunnlag}
-        />
+        {etteroppgjoer.opplysninger.tidligereAvkorting ? (
+          <BrukeroppgittInntektForInnvilgedePerioder
+            avkortingGrunnlag={etteroppgjoer.opplysninger.tidligereAvkorting.avkortingGrunnlag}
+          />
+        ) : (
+          <Alert variant="error">Kunne ikke hente eksisterende avkorting i saken.</Alert>
+        )}
       </VStack>
     </Box>
   )

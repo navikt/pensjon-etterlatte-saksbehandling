@@ -11,6 +11,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektBulkResponsDto
@@ -348,7 +349,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(
             forbehandlingId,
             SummerteInntekterAOrdningen(
-                afp = InntektSummert("A", tolvMndInntekter(2024, 5000.toBigDecimal())),
+                afp = InntektSummert("A", tolvMndInntekter(ETTEROPPGJOER_AAR, 5000.toBigDecimal())),
                 loenn = InntektSummert("B", tolvMndInntekter(2024, 6000.toBigDecimal())),
                 oms = InntektSummert("C", tolvMndInntekter(2024, 7000.toBigDecimal())),
                 tidspunktBeregnet = Tidspunkt.now(),
@@ -423,10 +424,10 @@ class EtteroppgjoerForbehandlingDaoTest(
                 nyForbehandlingId,
             )!!
 
-        pensjonsgivendeInntekt.loensinntekt shouldBe pensjonsgivendeInntektKopi.loensinntekt
-        pensjonsgivendeInntekt.naeringsinntekt shouldBe pensjonsgivendeInntektKopi.naeringsinntekt
-        pensjonsgivendeInntekt.tidspunktBeregnet shouldBe pensjonsgivendeInntektKopi.tidspunktBeregnet
-        pensjonsgivendeInntekt.regelresultat shouldBe pensjonsgivendeInntektKopi.regelresultat
+        pensjonsgivendeInntektKopi.loensinntekt shouldBe pensjonsgivendeInntekt.loensinntekt
+        pensjonsgivendeInntektKopi.naeringsinntekt shouldBe pensjonsgivendeInntekt.naeringsinntekt
+        pensjonsgivendeInntektKopi.tidspunktBeregnet shouldBe pensjonsgivendeInntekt.tidspunktBeregnet
+        pensjonsgivendeInntektKopi.regelresultat shouldBe pensjonsgivendeInntekt.regelresultat
     }
 
     private fun tolvMndInntekter(

@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -276,9 +275,9 @@ class EtteroppgjoerForbehandlingService(
         val nyForbehandling = opprettOgLagreForbehandling(sak, inntektsaar, brukerTokenInfo)
 
         try {
-            val summerteInntekter =
+            val pensjonsgivendeInntekter =
                 runBlocking { pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, inntektsaar) }
-            dao.lagrePensjonsgivendeInntekt(nyForbehandling.id, summerteInntekter)
+            dao.lagrePensjonsgivendeInntekt(nyForbehandling.id, pensjonsgivendeInntekter)
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke hente og lagre ned summerte inntekter fra Skatteetaten for forbehandlingen i sakId=$sakId",

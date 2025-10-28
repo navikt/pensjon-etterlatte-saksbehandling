@@ -105,7 +105,7 @@ class EtteroppgjoerServiceTest {
                     any(),
                     any(),
                 )
-            } returns PensjonsgivendeInntektAarResponse(0, "", emptyList())
+            } returns PensjonsgivendeInntektAarResponse.stub("09498230323")
         }
 
         fun sigrunKasterFeil() {
@@ -140,7 +140,7 @@ class EtteroppgjoerServiceTest {
                 )
             }
 
-        assertEquals(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, etteroppgjoer!!.status)
+        assertEquals(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, etteroppgjoer.status)
     }
 
     @Test
@@ -165,7 +165,7 @@ class EtteroppgjoerServiceTest {
                 )
             }
 
-        assertEquals(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, etteroppgjoer!!.status)
+        assertEquals(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, etteroppgjoer.status)
     }
 
     @Test

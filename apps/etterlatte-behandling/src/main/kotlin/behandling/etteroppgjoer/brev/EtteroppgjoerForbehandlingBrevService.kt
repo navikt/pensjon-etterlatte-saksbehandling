@@ -162,11 +162,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 )
             }
 
-            // TODO: hente når vi henter ut detaljertForbehandling i stede
-            val pensjonsgivendeInntekt =
-                etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(
-                    forbehandlingId,
-                )
+            val pensjonsgivendeInntekt = detaljertForbehandling.opplysninger.skatt
 
             val sisteIverksatteBehandling =
                 behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)

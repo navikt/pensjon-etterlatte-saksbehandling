@@ -70,7 +70,7 @@ export interface SummerteInntekterAOrdningen {
 export interface EtteroppgjoerOpplysninger {
   skatt: PensjonsgivendeInntektFraSkatteetatenSummert
   summerteInntekter?: SummerteInntekterAOrdningen
-  tidligereAvkorting: Avkorting
+  tidligereAvkorting?: Avkorting
 }
 
 export interface IInformasjonFraBruker {

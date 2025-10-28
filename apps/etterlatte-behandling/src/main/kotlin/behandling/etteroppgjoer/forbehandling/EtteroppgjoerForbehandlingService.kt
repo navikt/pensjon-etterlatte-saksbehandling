@@ -193,7 +193,13 @@ class EtteroppgjoerForbehandlingService(
                     "Fant ikke relatert behandling=${forbehandling.sisteIverksatteBehandlingId} for forbehandling=$forbehandlingId",
                 )
 
-        val avkorting = hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
+        val avkorting =
+            try {
+                hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke hente tidligere avkorting for behandling med id=$sisteIverksatteBehandling", e)
+                null
+            }
 
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
 
@@ -241,10 +247,10 @@ class EtteroppgjoerForbehandlingService(
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntektSummert,
                     summerteInntekter = summerteInntekter,
-                    tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
+                    tidligereAvkorting = avkorting?.avkortingMedForventaInntekt,
                 ),
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
-            faktiskInntekt = avkorting.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
+            faktiskInntekt = avkorting?.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
         )
     }
 

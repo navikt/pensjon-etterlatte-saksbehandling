@@ -174,5 +174,5 @@ data class DetaljertForbehandlingDto(
 data class EtteroppgjoerOpplysninger(
     val skatt: PensjonsgivendeInntektFraSkattSummert,
     val summerteInntekter: SummerteInntekterAOrdningen?,
-    val tidligereAvkorting: AvkortingDto,
+    val tidligereAvkorting: AvkortingDto?,
 )

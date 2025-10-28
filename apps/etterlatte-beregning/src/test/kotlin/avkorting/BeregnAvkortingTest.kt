@@ -2028,6 +2028,8 @@ class BeregnAvkortingTest {
         assertEquals(1, avkorting.aarsoppgjoer.size)
         val aarsoppgjoer = avkorting.aarsoppgjoer.single()
         with(aarsoppgjoer.avkortetYtelse) {
+            size shouldBe 2
+
             get(0).asClue {
                 it.periode.fom shouldBe YearMonth.of(2024, Month.MARCH)
                 it.periode.tom shouldBe YearMonth.of(2024, Month.APRIL)

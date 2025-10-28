@@ -4,9 +4,9 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
@@ -163,7 +163,10 @@ class EtteroppgjoerForbehandlingBrevService(
             }
 
             // TODO: hente når vi henter ut detaljertForbehandling i stede
-            val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(forbehandlingId)
+            val pensjonsgivendeInntekt =
+                etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(
+                    forbehandlingId,
+                )
 
             val sisteIverksatteBehandling =
                 behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
@@ -199,7 +202,7 @@ class EtteroppgjoerForbehandlingBrevService(
     private fun brevRequestDataMapper(
         data: DetaljertForbehandlingDto,
         sisteIverksatteBehandling: Behandling,
-        pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt?,
+        pensjonsgivendeInntekt: SummertePensjonsgivendeInntekter?,
     ): EtteroppgjoerBrevRequestData {
         krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
@@ -217,7 +220,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
         // TODO: usikker om dette blir rett, følge opp ifm testing
-        val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
+        val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.summertInntekt > 0
 
         return EtteroppgjoerBrevRequestData(
             redigerbar =

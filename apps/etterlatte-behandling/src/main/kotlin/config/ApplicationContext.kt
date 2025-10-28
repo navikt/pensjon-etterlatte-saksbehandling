@@ -47,6 +47,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHen
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlientImpl
@@ -658,6 +659,11 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
         )
 
+    private val pensjonsgivendeInntektService: PensjonsgivendeInntektService =
+        PensjonsgivendeInntektService(
+            sigrunKlient = sigrunKlient,
+        )
+
     val etteroppgjoerForbehandlingService =
         EtteroppgjoerForbehandlingService(
             dao = etteroppgjoerForbehandlingDao,
@@ -665,8 +671,8 @@ internal class ApplicationContext(
             sakDao = sakLesDao,
             oppgaveService = oppgaveService,
             inntektskomponentService = inntektskomponentService,
+            pensjonsgivendeInntektService = pensjonsgivendeInntektService,
             hendelserService = etteroppgjoerHendelseService,
-            sigrunKlient = sigrunKlient,
             beregningKlient = beregningKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,

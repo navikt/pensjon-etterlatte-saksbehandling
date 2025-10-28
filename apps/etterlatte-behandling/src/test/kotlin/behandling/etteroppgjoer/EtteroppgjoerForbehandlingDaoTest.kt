@@ -11,7 +11,6 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektBulkResponsDto
@@ -20,14 +19,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.inntektDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.inntektsinformasjonDto
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
@@ -37,8 +34,8 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
@@ -185,20 +182,22 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og hente pensjonsgivendeInntekt`() {
-        val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
 
         // negative returnere null hvis tomt
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
 
+        val regelresultat = "{\"regel\":\"lorem\"}".toJsonNode()
+        val tidspunktBeregnet = Tidspunkt.now()
+
+        val pensjonsgivendeInntekter = SummertePensjonsgivendeInntekter(12, 34, tidspunktBeregnet, regelresultat)
         etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
-            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
             forbehandlingId,
+            pensjonsgivendeInntekter,
         )
 
         with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
-            this.inntektsaar shouldBe inntektsaar
-            inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
+            this.shouldBeEqualToIgnoringFields(pensjonsgivendeInntekter, SummertePensjonsgivendeInntekter::regelresultat)
         }
     }
 
@@ -341,7 +340,6 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `kopier summerte inntekter til ny forbehandling`() {
-        val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
         val nyForbehandlingId = UUID.randomUUID()
         opprettForbehandling(forbehandlingId)
@@ -407,24 +405,28 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `kopier pensjonsgivendeInntekt til ny forbehandling`() {
-        val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
         val nyForbehandlingId = UUID.randomUUID()
 
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId) shouldBe null
         etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
-            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
             forbehandlingId,
+            SummertePensjonsgivendeInntekter(0, 0, Tidspunkt.now(), null),
         )
 
         etteroppgjoerForbehandlingDao.kopierPensjonsgivendeInntekt(forbehandlingId, nyForbehandlingId)
 
         val pensjonsgivendeInntekt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!
-        val pensjonsgivendeInntektKopi = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId)!!
+        val pensjonsgivendeInntektKopi =
+            etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(
+                nyForbehandlingId,
+            )!!
 
-        pensjonsgivendeInntekt.inntekter shouldBe pensjonsgivendeInntektKopi.inntekter
-        pensjonsgivendeInntekt.inntektsaar shouldBe pensjonsgivendeInntektKopi.inntektsaar
+        pensjonsgivendeInntekt.loensinntekt shouldBe pensjonsgivendeInntektKopi.loensinntekt
+        pensjonsgivendeInntekt.naeringsinntekt shouldBe pensjonsgivendeInntektKopi.naeringsinntekt
+        pensjonsgivendeInntekt.tidspunktBeregnet shouldBe pensjonsgivendeInntektKopi.tidspunktBeregnet
+        pensjonsgivendeInntekt.regelresultat shouldBe pensjonsgivendeInntektKopi.regelresultat
     }
 
     private fun tolvMndInntekter(

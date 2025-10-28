@@ -8,6 +8,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -68,27 +69,29 @@ class EtteroppgjoerServiceTest {
                 }
             coEvery { beregningKlient.hentOverstyrtBeregning(any(), any()) } returns mockk()
             every { behandlingService.hentFoersteDoedsdato(any(), any()) } returns null
-            coEvery { vedtakKlient.hentIverksatteVedtak(any(), any()) } returns listOf(
-                VedtakSammendragDto(
-                    id = UUID.randomUUID().toString(),
-                    behandlingId = sisteIverksatteBehandlingId,
-                    vedtakType = VedtakType.INNVILGELSE,
-                    behandlendeSaksbehandler = "",
-                    datoFattet = null,
-                    attesterendeSaksbehandler = "",
-                    datoAttestert = null,
-                    virkningstidspunkt = null,
-                    opphoerFraOgMed = null,
-                    iverksettelsesTidspunkt = null,
-                ),
-            )
+            coEvery { vedtakKlient.hentIverksatteVedtak(any(), any()) } returns
+                listOf(
+                    VedtakSammendragDto(
+                        id = UUID.randomUUID().toString(),
+                        behandlingId = sisteIverksatteBehandlingId,
+                        vedtakType = VedtakType.INNVILGELSE,
+                        behandlendeSaksbehandler = "",
+                        datoFattet = null,
+                        attesterendeSaksbehandler = "",
+                        datoAttestert = null,
+                        virkningstidspunkt = null,
+                        opphoerFraOgMed = null,
+                        iverksettelsesTidspunkt = null,
+                    ),
+                )
 
-            coEvery { behandlingService.hentBehandling(sisteIverksatteBehandlingId) } returns foerstegangsbehandling(
-                sakId = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                status = BehandlingStatus.ATTESTERT,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
-            )
+            coEvery { behandlingService.hentBehandling(sisteIverksatteBehandlingId) } returns
+                foerstegangsbehandling(
+                    sakId = sakId,
+                    sakType = SakType.OMSTILLINGSSTOENAD,
+                    status = BehandlingStatus.ATTESTERT,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+                )
         }
 
         fun sigrunGirSvar() {
@@ -97,7 +100,7 @@ class EtteroppgjoerServiceTest {
                     any(),
                     any(),
                 )
-            } returns PensjonsgivendeInntektFraSkatt.stub()
+            } returns PensjonsgivendeInntektAarResponse(0, "", emptyList())
         }
 
         fun sigrunKasterFeil() {
@@ -294,13 +297,12 @@ class EtteroppgjoerServiceTest {
     fun `opprettEtteroppgjoer returnerer nytt etteroppgjør dersom etteroppgjør ikke finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
-                null
+            null
 
         val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
 
         with(resultat!!) {
             status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
-
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }

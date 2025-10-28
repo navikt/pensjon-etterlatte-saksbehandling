@@ -6,10 +6,10 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektBulkResponsData
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentenFilter
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -850,7 +850,7 @@ class SigrunKlienTest : SigrunKlient {
     override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektFraSkatt = PensjonsgivendeInntektFraSkatt.stub()
+    ): PensjonsgivendeInntektAarResponse = PensjonsgivendeInntektAarResponse.stub(ident)
 
     override suspend fun hentHendelsesliste(
         antall: Int,

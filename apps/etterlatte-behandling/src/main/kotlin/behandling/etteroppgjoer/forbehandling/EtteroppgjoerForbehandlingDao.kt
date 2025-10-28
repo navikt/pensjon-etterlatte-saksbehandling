@@ -1,8 +1,9 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
@@ -10,7 +11,6 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
@@ -130,10 +131,10 @@ class EtteroppgjoerForbehandlingDao(
         nyForbehandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
-            val selectStatement =
+            val selectStatement = // TODO legge til random uuid som default på id slik at kopi kan gjøres med ren sql
                 prepareStatement(
                     """
-                    SELECT inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage
+                    SELECT inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat 
                     FROM etteroppgjoer_pensjonsgivendeinntekt
                     WHERE forbehandling_id = ?
                     """.trimIndent(),
@@ -146,9 +147,9 @@ class EtteroppgjoerForbehandlingDao(
                 prepareStatement(
                     """
                     INSERT INTO etteroppgjoer_pensjonsgivendeinntekt (
-                        id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage
+                        id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )
 
@@ -161,6 +162,11 @@ class EtteroppgjoerForbehandlingDao(
                 insertStatement.setInt(5, resultSet.getInt("loensinntekt"))
                 insertStatement.setInt(6, resultSet.getInt("naeringsinntekt"))
                 insertStatement.setInt(7, resultSet.getInt("fiske_fangst_familiebarnehage"))
+                insertStatement.setTidspunkt(8, resultSet.getTidspunktOrNull("tidspunkt_beregnet"))
+                insertStatement.setJsonb(9, resultSet.getObject("regel_resultat"))
+                resultSet
+                    .getString("regel_resultat")
+                    ?.let { it -> objectMapper.readValue(it, JsonNode::class.java) }
 
                 insertStatement.addBatch()
                 count++
@@ -175,40 +181,40 @@ class EtteroppgjoerForbehandlingDao(
     }
 
     fun lagrePensjonsgivendeInntekt(
-        inntekterFraSkatt: PensjonsgivendeInntektFraSkatt,
         behandlingId: UUID,
+        inntekterFraSkatt: SummertePensjonsgivendeInntekter,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
                 prepareStatement(
                     """
                     INSERT INTO etteroppgjoer_pensjonsgivendeinntekt(
-                        id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt,fiske_fangst_familiebarnehage
+                        id, forbehandling_id, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat
                     ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (forbehandling_id) DO UPDATE SET
+                        loensinntekt = excluded.loensinntekt,
+                        naeringsinntekt = excluded.naeringsinntekt,
+                        tidspunkt_beregnet = excluded.tidspunkt_beregnet,
+                        regel_resultat = excluded.regel_resultat
                     """.trimIndent(),
                 )
 
-            for (inntekt in inntekterFraSkatt.inntekter) {
-                statement.setObject(1, UUID.randomUUID())
-                statement.setObject(2, behandlingId)
-                statement.setInt(3, inntekt.inntektsaar)
-                statement.setString(4, inntekt.skatteordning)
-                statement.setInt(5, inntekt.loensinntekt)
-                statement.setInt(6, inntekt.naeringsinntekt)
-                statement.setInt(7, inntekt.fiskeFangstFamiliebarnehage)
+            statement.setObject(1, UUID.randomUUID())
+            statement.setObject(2, behandlingId)
+            statement.setInt(3, inntekterFraSkatt.loensinntekt)
+            statement.setInt(4, inntekterFraSkatt.naeringsinntekt)
+            statement.setTidspunkt(5, inntekterFraSkatt.tidspunktBeregnet)
+            statement.setJsonb(6, inntekterFraSkatt.regelresultat)
 
-                statement.addBatch()
-            }
-
-            val result = statement.executeBatch()
-            krev(result.size == inntekterFraSkatt.inntekter.size) {
-                "Kunne ikke lagre alle pensjonsgivendeInntekter for behandlingId=$behandlingId"
+            val result = statement.executeUpdate()
+            krev(result == 1) {
+                "Kunne ikke lagre pensjonsgivende inntekt for behandlingId=$behandlingId"
             }
         }
     }
 
-    fun hentPensjonsgivendeInntekt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
+    fun hentPensjonsgivendeInntekt(forbehandlingId: UUID): SummertePensjonsgivendeInntekter? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -220,18 +226,9 @@ class EtteroppgjoerForbehandlingDao(
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandlingId)
-                val pensjonsgivendeInntekter =
-                    statement.executeQuery().toList {
-                        toPensjonsgivendeInntekt()
-                    }
 
-                if (pensjonsgivendeInntekter.isEmpty()) {
-                    null
-                } else {
-                    PensjonsgivendeInntektFraSkatt(
-                        inntektsaar = pensjonsgivendeInntekter.first().inntektsaar,
-                        inntekter = pensjonsgivendeInntekter,
-                    )
+                statement.executeQuery().singleOrNull {
+                    toSummertePensjonsgivendeInntekter()
                 }
             }
         }
@@ -348,13 +345,12 @@ class EtteroppgjoerForbehandlingDao(
             aarsakTilAvbrytelseBeskrivelse = getString("kommentar_til_avbrytelse"),
         )
 
-    private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =
-        PensjonsgivendeInntekt(
-            skatteordning = getString("skatteordning"),
+    private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =
+        SummertePensjonsgivendeInntekter(
             loensinntekt = getInt("loensinntekt"),
             naeringsinntekt = getInt("naeringsinntekt"),
-            fiskeFangstFamiliebarnehage = getInt("fiske_fangst_familiebarnehage"),
-            inntektsaar = getInt("inntektsaar"),
+            tidspunktBeregnet = getTidspunktOrNull("tidspunkt_beregnet"),
+            regelresultat = null,
         )
 }
 

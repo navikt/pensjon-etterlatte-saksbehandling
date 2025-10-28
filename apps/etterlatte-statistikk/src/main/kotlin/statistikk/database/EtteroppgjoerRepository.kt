@@ -1,14 +1,11 @@
 package no.nav.etterlatte.statistikk.database
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.serialization.json.Json
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummertePensjonsgivendeInntekterStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -143,7 +140,7 @@ data class EtteroppgjoerRad(
     val maanederYtelse: List<Int>,
     val tekniskTid: Tidspunkt,
     val summerteInntekter: SummerteInntekterAOrdningenStatistikkDto? = null,
-    val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkattStatistikkDto? = null,
+    val pensjonsgivendeInntekt: SummertePensjonsgivendeInntekterStatistikkDto? = null,
     // Følgende rader går på resultat, som ikke nødvendigvis er gitt
     val utbetaltStoenad: Long?,
     val nyBruttoStoenad: Long?,
@@ -182,7 +179,7 @@ data class EtteroppgjoerRad(
                 resultatType = resultat?.resultatType,
                 summerteInntekter = statistikkDto.summerteInntekter,
                 pensjonsgivendeInntekt = statistikkDto.pensjonsgivendeInntekt,
-                tilknyttetRevurdering = statistikkDto.tilknyttetRevurdering
+                tilknyttetRevurdering = statistikkDto.tilknyttetRevurdering,
             )
     }
 }

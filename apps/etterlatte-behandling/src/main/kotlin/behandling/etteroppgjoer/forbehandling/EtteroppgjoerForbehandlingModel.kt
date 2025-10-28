@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
@@ -172,7 +172,7 @@ data class DetaljertForbehandlingDto(
 )
 
 data class EtteroppgjoerOpplysninger(
-    val skatt: PensjonsgivendeInntektFraSkattSummert,
+    val skatt: SummertePensjonsgivendeInntekter,
     val summerteInntekter: SummerteInntekterAOrdningen?,
     val tidligereAvkorting: AvkortingDto,
 )

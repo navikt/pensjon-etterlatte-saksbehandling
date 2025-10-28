@@ -2,6 +2,7 @@ import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { NOK } from '~utils/formatering/formatering'
+import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 export const FaktiskInntektVisning = () => {
   const { faktiskInntekt } = useEtteroppgjoer()
@@ -29,7 +30,7 @@ export const FaktiskInntektVisning = () => {
 
       <VStack gap="2" maxWidth="30rem">
         <Label>Spesifikasjon av inntekt</Label>
-        <BodyShort>{faktiskInntekt.spesifikasjon}</BodyShort>
+        <TekstMedMellomrom>{faktiskInntekt.spesifikasjon}</TekstMedMellomrom>
       </VStack>
     </VStack>
   ) : (

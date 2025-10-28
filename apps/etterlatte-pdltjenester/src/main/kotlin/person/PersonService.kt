@@ -231,6 +231,7 @@ class PersonService(
                         PdlIdentifikator.Npid(NavPersonIdent(npid))
                     }
                 } catch (e: Exception) {
+                    sikkerLogg.error("Fant ingen pdlidentifikator for ${request.ident.value} fra PDL", e)
                     throw PdlForesporselFeilet(
                         "Fant ingen pdlidentifikator for ${request.ident} fra PDL",
                     )

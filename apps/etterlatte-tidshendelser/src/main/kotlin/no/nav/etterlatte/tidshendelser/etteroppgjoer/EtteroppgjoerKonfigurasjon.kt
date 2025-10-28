@@ -14,5 +14,6 @@ data class EtteroppgjoerKonfigurasjon(
     val etteroppgjoerFilter: EtteroppgjoerFilter,
     val spesifikkeSaker: List<SakId>,
     val ekskluderteSaker: List<SakId>,
+    val spesifikkeEnheter: List<String>,
     val kjoeringId: String? = null,
 )

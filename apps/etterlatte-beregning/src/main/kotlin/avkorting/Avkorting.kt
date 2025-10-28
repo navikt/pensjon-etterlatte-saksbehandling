@@ -92,10 +92,21 @@ data class Avkorting(
     /**
      * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
      */
-    fun kopierAvkorting(opphoerFom: YearMonth? = null): Avkorting =
-        Avkorting(
+    fun kopierAvkorting(opphoerFom: YearMonth? = null): Avkorting {
+        val relevanteAaroppgjoer =
+            if (opphoerFom == null) {
+                this.aarsoppgjoer
+            } else {
+                // Vi skal ikke ta med årsoppgjør som ikke har en beregning i dette vedtaket på grunn av opphør
+                // Ytelse----->|OPPHØR i måned M - dvs. ingen ytelse fra og med M - og siste måned med ytelse
+                // må da være måneden før M (opphoerFom.minusMonths(1))
+                val sisteTom = opphoerFom.minusMonths(1)
+                this.aarsoppgjoer.filter { it.aar <= sisteTom.year }
+            }
+
+        return Avkorting(
             aarsoppgjoer =
-                aarsoppgjoer.map {
+                relevanteAaroppgjoer.map {
                     when (it) {
                         is AarsoppgjoerLoepende ->
                             it.copy(
@@ -139,6 +150,7 @@ data class Avkorting(
                     }
                 },
         )
+    }
 
     /**
      * Brukes til å beregne avkoring med flere forventede inntekter [ForventetInntekt]
@@ -171,6 +183,7 @@ data class Avkorting(
                 ?: throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
 
         val tom = opphoerFom?.let { finnTomForInntekt(opphoerFom, aarsoppgjoer.aar) }
+        val aldersovergangIDetteInntektsaaret = aldersovergang?.takeIf { nyttGrunnlag.fom.year == aldersovergang.year }
 
         val inntektTom = nyttGrunnlag.inntektTom
         val fratrekkInnAar = nyttGrunnlag.fratrekkInnAar
@@ -192,14 +205,14 @@ data class Avkorting(
                 fratrekkInnAarUtland = fratrekkInnAarUtland,
                 innvilgaMaaneder =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergang),
+                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergangIDetteInntektsaaret),
                 overstyrtInnvilgaMaanederAarsak =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
-                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
+                    } ?: aldersovergangIDetteInntektsaaret?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
                 overstyrtInnvilgaMaanederBegrunnelse =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
-                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
+                        ?: aldersovergangIDetteInntektsaaret?.let { "Bruker har aldersovergang" },
                 spesifikasjon = nyttGrunnlag.spesifikasjon,
                 kilde = kilde,
                 inntektInnvilgetPeriode =

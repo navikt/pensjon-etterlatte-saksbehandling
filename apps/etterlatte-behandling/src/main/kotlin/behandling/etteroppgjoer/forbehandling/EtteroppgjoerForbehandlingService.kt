@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -126,6 +127,11 @@ class EtteroppgjoerForbehandlingService(
                 "FEIL_STATUS_FORBEHANDLING",
                 "Forbehandling med id=$forbehandlingId kan ikke avbrytes. Status er ${forbehandling.status}",
             )
+        } else if (forbehandling.kopiertFra != null) {
+            throw IkkeTillattException(
+                "FORBEHANDLING_ER_TILKNYTT_REVURDERING",
+                "Forbehandling med id=$forbehandlingId er tilknytt revurdering og kan ikke avbrytes gjennom dette endepunktet.",
+            )
         }
 
         if (aarsak == AarsakTilAvbryteForbehandling.ANNET && kommentar.isNullOrBlank()) {
@@ -134,6 +140,7 @@ class EtteroppgjoerForbehandlingService(
                 "Kan ikke avbryte behandling uten å begrunne hvorfor. Kommentar er null eller blankt",
             )
         }
+
         forbehandling.tilAvbrutt(aarsak, kommentar.orEmpty()).let { avbruttForbehandling ->
             dao.lagreForbehandling(avbruttForbehandling)
 
@@ -192,7 +199,13 @@ class EtteroppgjoerForbehandlingService(
                     "Fant ikke relatert behandling=${forbehandling.sisteIverksatteBehandlingId} for forbehandling=$forbehandlingId",
                 )
 
-        val avkorting = hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
+        val avkorting =
+            try {
+                hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke hente tidligere avkorting for behandling med id=$sisteIverksatteBehandling", e)
+                null
+            }
 
         val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
 
@@ -227,10 +240,10 @@ class EtteroppgjoerForbehandlingService(
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntekt,
                     summerteInntekter = summerteInntekter,
-                    tidligereAvkorting = avkorting.avkortingMedForventaInntekt,
+                    tidligereAvkorting = avkorting?.avkortingMedForventaInntekt,
                 ),
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
-            faktiskInntekt = avkorting.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
+            faktiskInntekt = avkorting?.avkortingMedFaktiskInntekt?.avkortingGrunnlag?.firstOrNull() as? FaktiskInntektDto,
         )
     }
 
@@ -373,6 +386,7 @@ class EtteroppgjoerForbehandlingService(
         etteroppgjoerFilter: EtteroppgjoerFilter,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
+        spesifikkeEnheter: List<String>,
     ) {
         val relevanteSaker: List<SakId> =
             etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
@@ -381,6 +395,7 @@ class EtteroppgjoerForbehandlingService(
                 etteroppgjoerFilter = etteroppgjoerFilter,
                 spesifikkeSaker = spesifikkeSaker,
                 ekskluderteSaker = ekskluderteSaker,
+                spesifikkeEnheter = spesifikkeEnheter,
             )
 
         relevanteSaker.map { sakId ->

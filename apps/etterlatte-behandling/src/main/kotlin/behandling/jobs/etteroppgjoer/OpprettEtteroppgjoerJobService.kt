@@ -64,8 +64,7 @@ class OpprettEtteroppgjoerJobService(
                 try {
                     inTransaction {
                         runBlocking {
-                            etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, inntektsaar)
-                            true
+                            etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, inntektsaar) != null
                         }
                     }
                 } catch (e: Exception) {

@@ -45,7 +45,12 @@ class AvkortingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val avkorting = avkortingSomSjekkes ?: hentAvkorting(behandlingId)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val aarMedAvkorting = avkorting?.aarsoppgjoer.orEmpty().map { it.aar }.toSet()
+        val aarMedAvkorting =
+            avkorting
+                ?.aarsoppgjoer
+                .orEmpty()
+                .map { it.aar }
+                .toSet()
         val paakrevdeAar =
             AvkortingValider
                 .paakrevdeInntekterForBeregningAvAvkorting(
@@ -164,7 +169,8 @@ class AvkortingService(
 
                 else -> null
             }
-
+        // liste av nye grunnlag, hvert element er for et konkret år
+        // + måned bruker har aldersovergang (hvis de har det)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
         val oppdatert =
             avkorting.beregnAvkortingMedNyeGrunnlag(

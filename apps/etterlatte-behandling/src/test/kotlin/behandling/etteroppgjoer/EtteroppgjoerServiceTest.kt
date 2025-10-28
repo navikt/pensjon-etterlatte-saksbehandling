@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID
@@ -94,6 +95,10 @@ class EtteroppgjoerServiceTest {
                 )
         }
 
+        fun ingenEtteroppgjoer() {
+            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns null
+        }
+
         fun sigrunGirSvar() {
             coEvery {
                 sigrunKlient.hentPensjonsgivendeInntekt(
@@ -117,6 +122,7 @@ class EtteroppgjoerServiceTest {
     fun `skal opprette etteroppgjør med status MOTTATT_SKATTEOPPGJOER hvis vi får svar fra sigrun`() {
         val ctx = TestContext(sakId)
         ctx.sigrunGirSvar()
+        ctx.ingenEtteroppgjoer()
 
         val foerstegangsBehandling =
             foerstegangsbehandling(
@@ -141,6 +147,7 @@ class EtteroppgjoerServiceTest {
     fun `skal opprette etteroppgjør med status VENTER_PAA_SKATTEOPPGJOER hvis vi ikke får svar fra sigrun`() {
         val cx = TestContext(sakId)
         cx.sigrunKasterFeil()
+        cx.ingenEtteroppgjoer()
 
         val foerstegangsBehandling =
             foerstegangsbehandling(
@@ -277,7 +284,7 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `opprettEtteroppgjoer kaster exception dersom etteroppgjør allerede finnes for år`() {
+    fun `opprettEtteroppgjoer returnerer null dersom etteroppgjør allerede finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             Etteroppgjoer(
@@ -286,9 +293,8 @@ class EtteroppgjoerServiceTest {
                 status = EtteroppgjoerStatus.FERDIGSTILT,
             )
 
-        assertThrows<IkkeTillattException> {
-            runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
-        }
+        val opprettetEtteroppgjoer = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
+        assertNull(opprettetEtteroppgjoer)
         coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
     }

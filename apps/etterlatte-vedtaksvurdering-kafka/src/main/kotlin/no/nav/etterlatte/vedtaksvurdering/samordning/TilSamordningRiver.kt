@@ -53,7 +53,7 @@ internal class TilSamordningRiver(
                 logger.info(marker, "Samordning ferdig [behandling=${vedtak.behandlingId}]")
             }
         } catch (e: Exception) {
-            logger.error(marker, "Feil ved behandling av samordning [behandling=${vedtak.behandlingId}")
+            logger.error(marker, "Feil ved behandling av samordning [behandling=${vedtak.behandlingId}]")
             throw e
         }
     }

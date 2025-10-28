@@ -13,7 +13,7 @@ export function LenkeTilInntektOversikt() {
 
   useEffect(() => {
     urlForInntektOversiktRequest(etteroppgjoer.behandling.sak.ident)
-  }, [])
+  }, [etteroppgjoer.behandling.sak.ident])
 
   return (
     <Box

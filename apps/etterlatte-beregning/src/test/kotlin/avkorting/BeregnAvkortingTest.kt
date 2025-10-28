@@ -2508,7 +2508,7 @@ class BeregnAvkortingTest {
 
     private fun `Revurdering der opphør flyttes tidligere`() =
         `Førstegangsbehandling fra mars 2024 med opphør i mai 2025`()
-            .kopierAvkorting()
+            .kopierAvkorting(opphoerFom = YearMonth.of(2024, Month.OCTOBER))
             .beregnAvkorting(
                 virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
                 beregning =

@@ -13,7 +13,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
@@ -25,12 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.AfterEach
@@ -38,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.Month
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
@@ -488,83 +481,6 @@ internal class AvkortingServiceTest {
         val beregnetAvkorting = mockk<Avkorting>()
         val lagretAvkorting = mockk<Avkorting>()
         val avkortingFrontend = mockk<AvkortingFrontendDto>()
-
-        // @Test
-        fun `skal håndtere en oppdatert til og med i beregningen av avkorting`() {
-            val behandlingId = UUID.randomUUID()
-            val forrigeBehandlingId = UUID.randomUUID()
-            val sakId = randomSakId()
-            val behandling =
-                behandling(
-                    id = behandlingId,
-                    sak = sakId,
-                    behandlingType = BehandlingType.REVURDERING,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.MARCH)),
-                )
-            val forrigeAvkorting2024 =
-                avkorting(
-                    ytelseFoerAvkorting =
-                        listOf(
-                            YtelseFoerAvkorting(
-                                beregning = 2000,
-                                periode = Periode(fom = YearMonth.of(2024, Month.MARCH), tom = YearMonth.of(2024, Month.APRIL)),
-                                beregningsreferanse = UUID.randomUUID(),
-                            ),
-                            YtelseFoerAvkorting(
-                                beregning = 2300,
-                                periode =
-                                    Periode(
-                                        fom = YearMonth.of(2024, Month.MAY),
-                                        tom = YearMonth.of(2024, Month.DECEMBER),
-                                    ),
-                                beregningsreferanse = UUID.randomUUID(),
-                            ),
-                        ),
-                    inntektsavkorting =
-                        listOf(
-                            Inntektsavkorting(
-                                grunnlag =
-                                    ForventetInntekt(
-                                        id = UUID.randomUUID(),
-                                        periode =
-                                            Periode(
-                                                fom = YearMonth.of(2024, Month.MARCH),
-                                                tom = YearMonth.of(2024, Month.DECEMBER),
-                                            ),
-                                        inntektTom = 0,
-                                        fratrekkInnAar = 0,
-                                        inntektUtlandTom = 0,
-                                        fratrekkInnAarUtland = 0,
-                                        innvilgaMaaneder = 10,
-                                        spesifikasjon = "",
-                                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-                                        overstyrtInnvilgaMaanederAarsak = null,
-                                        overstyrtInnvilgaMaanederBegrunnelse = null,
-                                        inntektInnvilgetPeriode =
-                                            BenyttetInntektInnvilgetPeriode(
-                                                verdi = 0,
-                                                tidspunkt = Tidspunkt.now(),
-                                                regelResultat = emptyMap<String, String>().toJsonNode(),
-                                                kilde =
-                                                    Grunnlagsopplysning.RegelKilde(
-                                                        "",
-                                                        Tidspunkt.now(),
-                                                        "",
-                                                    ),
-                                            ),
-                                    ),
-                                avkortingsperioder = emptyList(),
-                                avkortetYtelseForventetInntekt = emptyList(),
-                            ),
-                        ),
-                    avkortetYtelse = TODO(),
-                    aar = TODO(),
-                )
-
-            runBlocking {
-                service.kopierAvkorting(behandlingId, forrigeBehandlingId, HardkodaSystembruker.omregning)
-            }
-        }
 
         @Test
         fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -113,12 +114,14 @@ class EtteroppgjoerDao(
         etteroppgjoerFilter: EtteroppgjoerFilter,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
+        spesifikkeEnheter: List<String>,
     ): List<SakId> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
-                    SELECT sak_id FROM etteroppgjoer e 
+                    SELECT sak_id FROM etteroppgjoer e
+                    INNER JOIN sak s on s.id = e.sak_id
                     WHERE e.status = 'MOTTATT_SKATTEOPPGJOER'
                     AND e.inntektsaar = ?
                     AND e.har_sanksjon = ?
@@ -128,8 +131,9 @@ class EtteroppgjoerDao(
                     AND e.har_adressebeskyttelse_eller_skjermet = ?
                     AND e.har_aktivitetskrav = ?
                     AND e.har_overstyrt_beregning = ?
-                     ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
-                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(sak_id = ANY(?))"}
+                     ${if (spesifikkeSaker.isEmpty()) "" else " AND e.sak_id = ANY(?)"}
+                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(e.sak_id = ANY(?))"}
+                     ${if (spesifikkeEnheter.isEmpty()) "" else " AND s.enhet = ANY(?)"}
                     ORDER BY sak_id
                     LIMIT $antall
                     """.trimIndent(),
@@ -156,8 +160,14 @@ class EtteroppgjoerDao(
                         setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
                         paramIndex += 1
                     }
+
                     if (ekskluderteSaker.isNotEmpty()) {
                         setArray(paramIndex, createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
+                        paramIndex += 1
+                    }
+
+                    if (spesifikkeEnheter.isNotEmpty()) {
+                        setArray(paramIndex, createArrayOf("text", spesifikkeEnheter.toTypedArray()))
                     }
                 }.executeQuery()
                     .toList {

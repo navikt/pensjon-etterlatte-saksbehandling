@@ -8,6 +8,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -104,7 +105,7 @@ class EtteroppgjoerServiceTest {
                     any(),
                     any(),
                 )
-            } returns PensjonsgivendeInntektFraSkatt.stub()
+            } returns PensjonsgivendeInntektAarResponse.stub("09498230323")
         }
 
         fun sigrunKasterFeil() {
@@ -139,7 +140,7 @@ class EtteroppgjoerServiceTest {
                 )
             }
 
-        assertEquals(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, etteroppgjoer!!.status)
+        assertEquals(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER, etteroppgjoer.status)
     }
 
     @Test
@@ -164,7 +165,7 @@ class EtteroppgjoerServiceTest {
                 )
             }
 
-        assertEquals(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, etteroppgjoer!!.status)
+        assertEquals(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, etteroppgjoer.status)
     }
 
     @Test

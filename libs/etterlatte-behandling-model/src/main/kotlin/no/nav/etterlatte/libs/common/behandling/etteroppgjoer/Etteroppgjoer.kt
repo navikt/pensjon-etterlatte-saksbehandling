@@ -53,9 +53,9 @@ data class EtteroppgjoerForbehandlingStatistikkDto(
     val forbehandling: EtteroppgjoerForbehandlingDto,
     val utlandstilknytningType: UtlandstilknytningType?,
     val summerteInntekter: SummerteInntekterAOrdningenStatistikkDto? = null,
-    val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkattStatistikkDto? = null,
+    val pensjonsgivendeInntekt: SummertePensjonsgivendeInntekterStatistikkDto? = null,
     val saksbehandler: String?,
-    val tilknyttetRevurdering: Boolean?
+    val tilknyttetRevurdering: Boolean?,
 )
 
 data class SummerteInntekterAOrdningenStatistikkDto(
@@ -65,9 +65,9 @@ data class SummerteInntekterAOrdningenStatistikkDto(
     val tidspunktBeregnet: Tidspunkt,
 )
 
-data class PensjonsgivendeInntektFraSkattStatistikkDto(
-    val inntektsaar: Int,
-    val inntekter: List<PensjonsgivendeInntekt>,
+data class SummertePensjonsgivendeInntekterStatistikkDto(
+    val loensinntekt: Int,
+    val naeringsinntekt: Int,
 )
 
 data class AvbrytForbehandlingRequest(

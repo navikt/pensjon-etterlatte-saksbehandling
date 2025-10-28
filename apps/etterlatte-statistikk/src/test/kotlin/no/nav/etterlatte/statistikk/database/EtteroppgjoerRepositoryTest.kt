@@ -6,9 +6,8 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbe
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummertePensjonsgivendeInntekterStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -54,20 +53,11 @@ class EtteroppgjoerRepositoryTest(
                         tidspunktBeregnet = Tidspunkt.now(),
                     ),
                 pensjonsgivendeInntekt =
-                    PensjonsgivendeInntektFraSkattStatistikkDto(
-                        inntektsaar = 2024,
-                        inntekter =
-                            listOf(
-                                PensjonsgivendeInntekt(
-                                    inntektsaar = 2024,
-                                    skatteordning = "skatteordning",
-                                    loensinntekt = 1,
-                                    naeringsinntekt = 1,
-                                    fiskeFangstFamiliebarnehage = 1,
-                                ),
-                            ),
+                    SummertePensjonsgivendeInntekterStatistikkDto(
+                        loensinntekt = 1,
+                        naeringsinntekt = 1,
                     ),
-                tilknyttetRevurdering = true
+                tilknyttetRevurdering = true,
             )
         val repo = EtteroppgjoerRepository(dataSource)
         repo.lagreEtteroppgjoerRad(rad)
@@ -98,7 +88,7 @@ class EtteroppgjoerRepositoryTest(
                 tilbakekrevingGrense = null,
                 etterbetalingGrense = null,
                 resultatType = null,
-                tilknyttetRevurdering = null
+                tilknyttetRevurdering = null,
             )
         val repo = EtteroppgjoerRepository(dataSource)
         repo.lagreEtteroppgjoerRad(rad)

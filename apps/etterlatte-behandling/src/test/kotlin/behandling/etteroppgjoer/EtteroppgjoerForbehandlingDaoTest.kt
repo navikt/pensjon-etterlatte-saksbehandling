@@ -1,7 +1,9 @@
 package behandling.etteroppgjoer
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -11,7 +13,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektBulkResponsDto
@@ -20,14 +22,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.inntektDto
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.inntektsinformasjonDto
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
@@ -37,8 +37,8 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
@@ -185,21 +185,24 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og hente pensjonsgivendeInntekt`() {
-        val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
 
         // negative returnere null hvis tomt
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
 
+        val regelresultatJson = "{\"regel\":\"lorem\"}".toJsonNode()
+        val tidspunktBeregnet = Tidspunkt.now()
+
+        val pensjonsgivendeInntekter = SummertePensjonsgivendeInntekter(12, 34, tidspunktBeregnet, regelresultatJson)
         etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
-            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
             forbehandlingId,
+            pensjonsgivendeInntekter,
         )
 
         with(etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!) {
-            this.inntektsaar shouldBe inntektsaar
-            inntekter shouldBe PensjonsgivendeInntektFraSkatt.stub(inntektsaar).inntekter
+            this.shouldBeEqualToIgnoringFields(pensjonsgivendeInntekter, SummertePensjonsgivendeInntekter::regelresultat)
         }
+        lesRegelResultatPGI(forbehandlingId) shouldBe regelresultatJson
     }
 
     @Test
@@ -341,7 +344,6 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `kopier summerte inntekter til ny forbehandling`() {
-        val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
         val nyForbehandlingId = UUID.randomUUID()
         opprettForbehandling(forbehandlingId)
@@ -407,24 +409,33 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `kopier pensjonsgivendeInntekt til ny forbehandling`() {
-        val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
         val nyForbehandlingId = UUID.randomUUID()
 
+        val regelresultatJson = "{\"regel\":\"lorem\"}".toJsonNode()
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId) shouldBe null
+        val tidspunktBeregnet = Tidspunkt.now()
         etteroppgjoerForbehandlingDao.lagrePensjonsgivendeInntekt(
-            PensjonsgivendeInntektFraSkatt.stub(inntektsaar),
             forbehandlingId,
+            SummertePensjonsgivendeInntekter(126000, 214000, tidspunktBeregnet, regelresultatJson),
         )
 
         etteroppgjoerForbehandlingDao.kopierPensjonsgivendeInntekt(forbehandlingId, nyForbehandlingId)
 
         val pensjonsgivendeInntekt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)!!
-        val pensjonsgivendeInntektKopi = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(nyForbehandlingId)!!
+        val pensjonsgivendeInntektKopi =
+            etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(
+                nyForbehandlingId,
+            )!!
 
-        pensjonsgivendeInntekt.inntekter shouldBe pensjonsgivendeInntektKopi.inntekter
-        pensjonsgivendeInntekt.inntektsaar shouldBe pensjonsgivendeInntektKopi.inntektsaar
+        pensjonsgivendeInntektKopi.loensinntekt shouldBe 126000
+        pensjonsgivendeInntektKopi.naeringsinntekt shouldBe 214000
+        pensjonsgivendeInntektKopi.tidspunktBeregnet shouldBe tidspunktBeregnet
+        pensjonsgivendeInntektKopi.regelresultat shouldBe null // DAO henter den ikke ut
+        pensjonsgivendeInntektKopi shouldBeEqual pensjonsgivendeInntekt
+
+        lesRegelResultatPGI(nyForbehandlingId) shouldBe regelresultatJson
     }
 
     private fun tolvMndInntekter(
@@ -433,5 +444,23 @@ class EtteroppgjoerForbehandlingDaoTest(
     ): List<Inntektsmaaned> =
         (1..12).map { mnd ->
             Inntektsmaaned(YearMonth.of(aar, mnd), beloep)
+        }
+
+    private fun lesRegelResultatPGI(forbehandlingId: UUID?): JsonNode =
+        ConnectionAutoclosingTest(dataSource).hentConnection { connection ->
+            val statement =
+                connection.prepareStatement(
+                    "SELECT regel_resultat FROM etteroppgjoer_pensjonsgivendeInntekt WHERE forbehandling_id = ?",
+                )
+            statement.setObject(1, forbehandlingId)
+            val resultSet = statement.executeQuery()
+            resultSet.next()
+
+            val value =
+                no.nav.etterlatte.libs.common.objectMapper
+                    .readValue(resultSet.getString(1), JsonNode::class.java)
+
+            resultSet.next() shouldBe false
+            value
         }
 }

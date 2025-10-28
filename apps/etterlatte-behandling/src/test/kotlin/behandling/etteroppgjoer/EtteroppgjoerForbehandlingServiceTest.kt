@@ -2,9 +2,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
@@ -12,7 +10,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.sakId1
@@ -30,10 +28,8 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak
 import no.nav.etterlatte.sak.SakLesDao
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -50,8 +46,8 @@ class EtteroppgjoerForbehandlingServiceTest {
         val etteroppgjoerService: EtteroppgjoerService = mockk()
         val oppgaveService: OppgaveService = mockk()
         val inntektskomponentService: InntektskomponentService = mockk()
+        val pensjonsgivendeInntektService: PensjonsgivendeInntektService = mockk()
         val hendelserService: EtteroppgjoerHendelseService = mockk()
-        val sigrunKlient: SigrunKlient = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
@@ -64,8 +60,8 @@ class EtteroppgjoerForbehandlingServiceTest {
                 etteroppgjoerService = etteroppgjoerService,
                 oppgaveService = oppgaveService,
                 inntektskomponentService = inntektskomponentService,
+                pensjonsgivendeInntektService = pensjonsgivendeInntektService,
                 hendelserService = hendelserService,
-                sigrunKlient = sigrunKlient,
                 beregningKlient = beregningKlient,
                 behandlingService = behandlingService,
                 vedtakKlient = vedtakKlient,
@@ -114,7 +110,7 @@ class EtteroppgjoerForbehandlingServiceTest {
 
             every { dao.lagreForbehandling(any()) } returns 1
             every { dao.kopierSummerteInntekter(any(), any()) } returns 1
-            every { dao.kopierPensjonsgivendeInntekt(any(), any()) } just runs
+            every { dao.kopierPensjonsgivendeInntekt(any(), any()) } returns 1
         }
 
         fun returnsForbehandling(forbehandling: EtteroppgjoerForbehandling) {

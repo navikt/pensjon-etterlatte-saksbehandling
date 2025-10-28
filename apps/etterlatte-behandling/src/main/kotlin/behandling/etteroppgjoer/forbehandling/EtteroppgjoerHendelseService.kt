@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_RESU
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummertePensjonsgivendeInntekterStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -66,7 +66,7 @@ class EtteroppgjoerHendelseService(
         hendelseType: EtteroppgjoerHendelseType,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
         summerteInntekter: SummerteInntekterAOrdningen?,
-        pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt,
+        pensjonsgivendeInntekt: SummertePensjonsgivendeInntekter?,
         utlandstilknytningType: UtlandstilknytningType?,
         saksbehandler: String?,
     ) {
@@ -90,10 +90,12 @@ class EtteroppgjoerHendelseService(
                                 )
                             },
                         pensjonsgivendeInntekt =
-                            PensjonsgivendeInntektFraSkattStatistikkDto(
-                                inntektsaar = pensjonsgivendeInntekt.inntektsaar,
-                                inntekter = pensjonsgivendeInntekt.inntekter,
-                            ),
+                            pensjonsgivendeInntekt?.let {
+                                SummertePensjonsgivendeInntekterStatistikkDto(
+                                    loensinntekt = it.loensinntekt,
+                                    naeringsinntekt = it.naeringsinntekt,
+                                )
+                            },
                         tilknyttetRevurdering = etteroppgjoerForbehandling.kopiertFra != null,
                     ),
             )

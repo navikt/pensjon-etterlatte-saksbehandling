@@ -7,16 +7,14 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -59,8 +57,8 @@ class EtteroppgjoerForbehandlingService(
     private val etteroppgjoerService: EtteroppgjoerService,
     private val oppgaveService: OppgaveService,
     private val inntektskomponentService: InntektskomponentService,
+    private val pensjonsgivendeInntektService: PensjonsgivendeInntektService,
     private val hendelserService: EtteroppgjoerHendelseService,
-    private val sigrunKlient: SigrunKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
@@ -235,24 +233,11 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
-        val pensjonsgivendeInntektSummert =
-            pensjonsgivendeInntekt.inntekter.fold(
-                initial = PensjonsgivendeInntektFraSkattSummert(pensjonsgivendeInntekt.inntektsaar, 0, 0, 0),
-                operation = { acc, inntekt ->
-                    PensjonsgivendeInntektFraSkattSummert(
-                        pensjonsgivendeInntekt.inntektsaar,
-                        acc.loensinntekt + inntekt.loensinntekt,
-                        acc.naeringsinntekt + inntekt.naeringsinntekt,
-                        acc.fiskeFangstFamiliebarnehage + inntekt.fiskeFangstFamiliebarnehage,
-                    )
-                },
-            )
-
         return DetaljertForbehandlingDto(
             behandling = forbehandling,
             opplysninger =
                 EtteroppgjoerOpplysninger(
-                    skatt = pensjonsgivendeInntektSummert,
+                    skatt = pensjonsgivendeInntekt,
                     summerteInntekter = summerteInntekter,
                     tidligereAvkorting = avkorting?.avkortingMedForventaInntekt,
                 ),
@@ -269,7 +254,7 @@ class EtteroppgjoerForbehandlingService(
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
 
-    fun hentPensjonsgivendeInntekt(behandlingId: UUID): PensjonsgivendeInntektFraSkatt? = dao.hentPensjonsgivendeInntekt(behandlingId)
+    fun hentPensjonsgivendeInntekt(behandlingId: UUID): SummertePensjonsgivendeInntekter? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlinger(sakId)
 
@@ -287,9 +272,18 @@ class EtteroppgjoerForbehandlingService(
 
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId)
 
-        val pensjonsgivendeInntekt = runBlocking { sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) }
         val nyForbehandling = opprettOgLagreForbehandling(sak, inntektsaar, brukerTokenInfo)
 
+        try {
+            val pensjonsgivendeInntekter =
+                runBlocking { pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, inntektsaar) }
+            dao.lagrePensjonsgivendeInntekt(nyForbehandling.id, pensjonsgivendeInntekter)
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke hente og lagre ned summerte inntekter fra Skatteetaten for forbehandlingen i sakId=$sakId",
+                e,
+            )
+        }
         try {
             val summerteInntekter =
                 runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) }
@@ -301,7 +295,6 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        dao.lagrePensjonsgivendeInntekt(pensjonsgivendeInntekt, nyForbehandling.id)
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
         hendelserService.registrerOgSendEtteroppgjoerHendelse(
@@ -664,7 +657,7 @@ class EtteroppgjoerForbehandlingService(
     private fun sjekkAtInntekterErOppdatert(forbehandling: EtteroppgjoerForbehandling) {
         val sistePensjonsgivendeInntekt =
             runBlocking {
-                sigrunKlient.hentPensjonsgivendeInntekt(forbehandling.sak.ident, forbehandling.aar)
+                pensjonsgivendeInntektService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
             }
         val sisteSummerteInntekter =
             runBlocking {

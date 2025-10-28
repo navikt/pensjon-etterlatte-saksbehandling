@@ -11,17 +11,14 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelserSekvensnummerFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.ktor.navConsumerId
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -39,7 +36,7 @@ interface SigrunKlient {
     suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektFraSkatt
+    ): PensjonsgivendeInntektAarResponse
 
     suspend fun hentHendelsesliste(
         antall: Int,
@@ -60,9 +57,9 @@ class SigrunKlientImpl(
     override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektFraSkatt {
+    ): PensjonsgivendeInntektAarResponse {
         if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_PGI, false)) {
-            return PensjonsgivendeInntektFraSkatt.stub()
+            return PensjonsgivendeInntektAarResponse.stub(ident)
         }
 
         return retry {
@@ -78,7 +75,7 @@ class SigrunKlientImpl(
         }.let {
             when (it) {
                 is RetryResult.Success -> {
-                    it.content.body<PensjonsgivendeInntektAarResponse>().fromResponse()
+                    it.content.body<PensjonsgivendeInntektAarResponse>()
                 }
 
                 is RetryResult.Failure -> {
@@ -163,7 +160,19 @@ data class PensjonsgivendeInntektAarResponse(
     val inntektsaar: Int,
     val norskPersonidentifikator: String,
     val pensjonsgivendeInntekt: List<PensjonsgivendeInntektResponse>,
-)
+) {
+    companion object {
+        fun stub(ident: String) =
+            PensjonsgivendeInntektAarResponse(
+                2024,
+                ident,
+                listOf(
+                    PensjonsgivendeInntektResponse("FASTLAND", 4000, 5000, 500),
+                    PensjonsgivendeInntektResponse("SVALBARD", 3100, 3200, 200),
+                ),
+            )
+    }
+}
 
 data class PensjonsgivendeInntektResponse(
     val skatteordning: String,
@@ -171,20 +180,3 @@ data class PensjonsgivendeInntektResponse(
     val pensjonsgivendeInntektAvNaeringsinntekt: Int?,
     val pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage: Int?,
 )
-
-fun PensjonsgivendeInntektAarResponse.fromResponse() =
-    PensjonsgivendeInntektFraSkatt(
-        inntektsaar = inntektsaar,
-        inntekter =
-            pensjonsgivendeInntekt.map {
-                PensjonsgivendeInntekt(
-                    skatteordning = it.skatteordning,
-                    loensinntekt = it.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
-                    naeringsinntekt = it.pensjonsgivendeInntektAvNaeringsinntekt ?: 0,
-                    fiskeFangstFamiliebarnehage =
-                        it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage
-                            ?: 0,
-                    inntektsaar = inntektsaar,
-                )
-            },
-    )

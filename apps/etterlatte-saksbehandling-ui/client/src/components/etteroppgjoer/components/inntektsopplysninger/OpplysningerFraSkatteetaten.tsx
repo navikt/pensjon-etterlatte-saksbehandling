@@ -45,12 +45,7 @@ export const OpplysningerFraSkatteetaten = ({
                   </HelpText>
                 </HStack>
               </Table.DataCell>
-              <Table.DataCell align="right">
-                {NOK(
-                  inntektFraSkatteetatenSummert.naeringsinntekt +
-                    inntektFraSkatteetatenSummert.fiskeFangstFamiliebarnehage
-                )}
-              </Table.DataCell>
+              <Table.DataCell align="right">{NOK(inntektFraSkatteetatenSummert.naeringsinntekt)}</Table.DataCell>
             </Table.Row>
           </Table.Body>
         </Table>

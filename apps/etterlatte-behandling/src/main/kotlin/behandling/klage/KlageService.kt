@@ -337,12 +337,16 @@ class KlageServiceImpl(
     ) {
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
 
-        klage.utfall?.omgjoering()?.let {
-            lagOppgaveForOmgjoering(klage)
-        } ?: throw IkkeTillattException(
-            "KAN_IKKE_OPPRETE_OMGJOERINGSOPPGAVE",
-            "Kan ikke opprette oppgave om omgjøring av vedtak for klageId=$klageId",
-        )
+        val harOppgaveForOmgjoering =
+            oppgaveService.hentOppgaverForReferanse(klageId.toString()).none({
+                it.type == OppgaveType.OMGJOERING
+            })
+
+        if (harOppgaveForOmgjoering) {
+            throw IkkeTillattException("OMGJOERING_ER_ALLEREDE_OPPRETTET", "Klagen har allerede en oppgave for omgjoering.")
+        }
+
+        lagOppgaveForOmgjoering(klage)
     }
 
     override fun haandterKabalrespons(
@@ -354,18 +358,23 @@ class KlageServiceImpl(
 
         if (kabalrespons.kabalStatus == KabalStatus.FERDIGSTILT) {
             val vedtaketKlagenGjelder =
-                klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?: throw OmgjoeringMaaGjeldeEtVedtakException(klage)
+                klage.formkrav?.formkrav?.vedtaketKlagenGjelder
+
+            val merknad =
+                when (vedtaketKlagenGjelder) {
+                    null -> "Klage på ukjent vedtak er ferdig behandlet. Resultat: ${kabalrespons.resultat}"
+                    else -> "Klage på vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
+                        vedtaketKlagenGjelder.datoAttestert?.format(
+                            DateTimeFormatter.ISO_LOCAL_DATE,
+                        )} er ferdig behandlet. Resultat: ${kabalrespons.resultat}"
+                }
 
             oppgaveService.opprettOppgave(
                 referanse = klage.id.toString(),
                 sakId = klage.sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.KLAGE_SVAR_KABAL,
-                merknad = "Klage på vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
-                    vedtaketKlagenGjelder.datoAttestert?.format(
-                        DateTimeFormatter.ISO_LOCAL_DATE,
-                    )
-                }) er ferdig behandlet. Resultat: ${kabalrespons.resultat}",
+                merknad = merknad,
             )
         }
 

@@ -245,7 +245,7 @@ enum class Brevkoder(
     OMS_EO_FORHAANDSVARSEL(
         EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL_INNHOLD,
         EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL,
-        "Forshåndsvarsel om etteroppgjør av omstillingsstønad",
+        "Forhåndsvarsel om etteroppgjør av omstillingsstønad",
         Brevtype.INFORMASJON,
     ),
 

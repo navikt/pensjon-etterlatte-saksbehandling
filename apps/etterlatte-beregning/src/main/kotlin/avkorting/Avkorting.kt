@@ -602,7 +602,12 @@ data class Avkorting(
                     minOf(desemberIAaret, opphoerFom.minusMonths(1))
                 }
             }
-            false -> null
+            false ->
+                if (opphoerFom != null && opphoerFom.minusMonths(1).year == aarsoppgjoer.aar) {
+                    opphoerFom.minusMonths(1)
+                } else {
+                    null
+                }
         }
     }
 

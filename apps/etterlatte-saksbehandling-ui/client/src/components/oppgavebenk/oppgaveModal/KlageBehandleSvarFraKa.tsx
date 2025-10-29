@@ -49,7 +49,7 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
   }
 
   const avslutt = ({ kommentar }: { kommentar: string }) => {
-    const nyMerknad = `${oppgave.merknad} – \nKommentar: ${kommentar}`
+    const nyMerknad = `${oppgave.merknad} – Kommentar: ${kommentar}`
 
     avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, (oppgave) => {
       oppdaterStatus(oppgave.id, oppgave.status)

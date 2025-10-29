@@ -134,9 +134,9 @@ class EtteroppgjoerForbehandlingDao(
                 prepareStatement(
                     """
                         INSERT INTO etteroppgjoer_pensjonsgivendeinntekt (
-                        forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat
+                        forbehandling_id, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat
                     )
-                    SELECT ?, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage, tidspunkt_beregnet, regel_resultat 
+                    SELECT ?, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat 
                     FROM etteroppgjoer_pensjonsgivendeinntekt
                     WHERE forbehandling_id = ?
                     """.trimIndent(),

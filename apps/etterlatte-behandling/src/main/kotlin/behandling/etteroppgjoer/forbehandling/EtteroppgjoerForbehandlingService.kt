@@ -666,7 +666,9 @@ class EtteroppgjoerForbehandlingService(
 
         // verifisere at vi har siste pensjonsgivende inntekt i databasen
         dao.hentPensjonsgivendeInntekt(forbehandling.id).let { pgi ->
-            if (pgi != sistePensjonsgivendeInntekt) {
+            if (pgi?.loensinntekt != sistePensjonsgivendeInntekt.loensinntekt ||
+                pgi.naeringsinntekt != sistePensjonsgivendeInntekt.naeringsinntekt
+            ) {
                 throw InternfeilException(
                     "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste Pensjonsgivende inntekt",
                 )

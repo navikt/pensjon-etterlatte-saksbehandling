@@ -23,6 +23,7 @@ import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/In
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
 import { EtteroppgjoerSvarfristUtloeptModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerSvarfristUtloeptModal'
 import { OpprettEtteroppgjoerForbehandlingModal } from '~components/oppgavebenk/oppgaveModal/OpprettEtteroppgjoerForbehandlingModal'
+import { KlageBehandleSvarFraKa } from '~components/oppgavebenk/oppgaveModal/KlageBehandleSvarFraKa'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -154,6 +155,12 @@ export const HandlingerForOppgave = ({
           </Button>
         )
       )
+
+    case Oppgavetype.KLAGE_SVAR_KABAL:
+      return (
+        erInnloggetSaksbehandlerOppgave && <KlageBehandleSvarFraKa oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+      )
+
     case Oppgavetype.KRAVPAKKE_UTLAND:
       return (
         erInnloggetSaksbehandlerOppgave && (

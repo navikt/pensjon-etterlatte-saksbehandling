@@ -35,7 +35,7 @@ export const BrevOppgaveModal = ({
   } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
 
   const avslutt = ({ kommentar }: { kommentar: string }) => {
-    const nyMerknad = `${oppgave.merknad} – \nKommentar (${formaterDatoMedKlokkeslett(new Date())}): ${kommentar}`
+    const nyMerknad = `${oppgave.merknad} – Kommentar (${formaterDatoMedKlokkeslett(new Date())}): ${kommentar}`
 
     avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, (oppgave) => {
       oppdaterStatus(oppgave.id, oppgave.status)

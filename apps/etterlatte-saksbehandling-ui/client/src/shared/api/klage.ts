@@ -70,6 +70,10 @@ export function attesterVedtakOmAvvistKlage(args: { klageId: string; kommentar: 
   })
 }
 
+export function opprettOppgaveForOmgjoering(args: { klageId: string }): Promise<ApiResponse<Klage>> {
+  return apiClient.post(`/klage/${args.klageId}/vedtak/underkjenn`, {})
+}
+
 export function underkjennVedtakOmAvvistKlage(args: {
   klageId: string
   kommentar: string

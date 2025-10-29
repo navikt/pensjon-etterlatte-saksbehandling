@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
@@ -130,6 +129,11 @@ interface KlageService {
         begrunnelse: String,
         saksbehandler: Saksbehandler,
     ): Klage
+
+    fun opprettOppgaveForOmgjoering(
+        klageId: UUID,
+        saksbehandler: Saksbehandler,
+    )
 }
 
 class ManglerSaksbehandlerException(
@@ -327,30 +331,55 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
+    override fun opprettOppgaveForOmgjoering(
+        klageId: UUID,
+        saksbehandler: Saksbehandler,
+    ) {
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
+
+        val harOppgaveForOmgjoering =
+            oppgaveService.hentOppgaverForReferanse(klageId.toString()).none({
+                it.type == OppgaveType.OMGJOERING
+            })
+
+        if (harOppgaveForOmgjoering) {
+            throw IkkeTillattException("OMGJOERING_ER_ALLEREDE_OPPRETTET", "Klagen har allerede en oppgave for omgjoering.")
+        }
+
+        lagOppgaveForOmgjoering(klage)
+    }
+
     override fun haandterKabalrespons(
         klageId: UUID,
         kabalrespons: Kabalrespons,
     ) {
-        val opprinneligKlage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
+        logger.info("Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}, for sakId=${klage.sak.id}")
 
         if (kabalrespons.kabalStatus == KabalStatus.FERDIGSTILT) {
-            // Se på hva kabalresponsen er, og opprett oppgave om det er nødvendig.
-            when (kabalrespons.resultat) {
-                BehandlingResultat.HENLAGT,
-                BehandlingResultat.IKKE_SATT,
-                BehandlingResultat.HEVET,
-                -> {
-                } // Her trenger vi ikke gjøre noe
-                BehandlingResultat.IKKE_MEDHOLD,
-                BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
-                -> {
-                } // trenger vi å gjøre noe spesifikt her?
-                BehandlingResultat.MEDHOLD -> lagOppgaveForOmgjoering(opprinneligKlage)
-            }
+            val vedtaketKlagenGjelder =
+                klage.formkrav?.formkrav?.vedtaketKlagenGjelder
+
+            val merknad =
+                when (vedtaketKlagenGjelder) {
+                    null -> "Klage på ukjent vedtak er ferdig behandlet. Resultat: ${kabalrespons.resultat}"
+                    else -> "Klage på vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
+                        vedtaketKlagenGjelder.datoAttestert?.format(
+                            DateTimeFormatter.ISO_LOCAL_DATE,
+                        )} er ferdig behandlet. Resultat: ${kabalrespons.resultat}"
+                }
+
+            oppgaveService.opprettOppgave(
+                referanse = klage.id.toString(),
+                sakId = klage.sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.KLAGE_SVAR_KABAL,
+                merknad = merknad,
+            )
         }
 
         opprettKlageHendelse(
-            klage = opprinneligKlage,
+            klage = klage,
             hendelse = KlageHendelseType.KABAL_HENDELSE,
             saksbehandler = null,
             kommentar = "Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}",

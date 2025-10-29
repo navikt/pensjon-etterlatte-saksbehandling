@@ -11,24 +11,25 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterDato } from '~utils/formatering/dato'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
-import { opprettEtteroppgoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
 import { useNavigate } from 'react-router-dom'
+import { opprettOppgaveForOmgjoering } from '~shared/api/klage'
 
 type Props = {
   oppgave: OppgaveDTO
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
-export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus }: Props) => {
+export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
+
+  const navigate = useNavigate()
+
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const [ferdigstillStatus] = useApiCall(ferdigstillOppgaveMedMerknad)
+  const [ferdigstillStatus, ferdigstill] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
-
-  const navigate = useNavigate()
 
   const {
     formState: { errors },
@@ -36,11 +37,14 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
     register,
   } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
 
-  const [opprettForbehandlingResult, opprettForbehandlingRequest] = useApiCall(opprettForbehandlingApi)
+  const [opprettOmgjoeringOppgaveResult, opprettOmgjoeringOppgaveRequest] = useApiCall(opprettOppgaveForOmgjoering)
 
-  const opprettForbehandling = () => {
-    opprettForbehandlingRequest({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (forbehandling) => {
-      navigate(`/etteroppgjoer/${forbehandling.id}`)
+  const opprettOmgjoeringOppgave = () => {
+    opprettOmgjoeringOppgaveRequest({ klageId: oppgave.referanse!! }, () => {
+      ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+        navigate('/person', { state: { fnr: oppgave.fnr } })
+      })
     })
   }
 
@@ -64,7 +68,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: 'Etteroppgjør – opprett forbehandling' }}
+        header={{ heading: 'Klage - Behandle svar fra KA' }}
       >
         <Modal.Body>
           <VStack gap="4">
@@ -74,6 +78,8 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
             </HStack>
 
             {oppgave.merknad && <Alert variant="info">{oppgave.merknad}</Alert>}
+
+            <BodyShort>Klage svar fra KA</BodyShort>
 
             {kanRedigeres &&
               (erTildeltSaksbehandler ? (
@@ -85,17 +91,15 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
                     },
                   })}
                   label="Kommentar"
-                  description="Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter en revurdering eller forbehandling."
+                  description="Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter en omgjøring av vedtaket."
                   error={errors.kommentar?.message}
                 />
               ) : (
                 <BodyShort>Du må tildele deg oppgaven for å endre den.</BodyShort>
               ))}
 
-            {mapResult(opprettForbehandlingResult, {
-              error: (error) => (
-                <ApiErrorAlert>Kunne ikke opprette forbehandling for etteroppgjør. {error.detail}</ApiErrorAlert>
-              ),
+            {mapResult(opprettOmgjoeringOppgaveResult, {
+              error: (error) => <ApiErrorAlert>Det oppstod en feil: {error.detail}</ApiErrorAlert>,
             })}
 
             <HStack gap="4" justify="end">
@@ -110,8 +114,8 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
               )}
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button loading={isPending(opprettForbehandlingResult)} onClick={() => opprettForbehandling()}>
-                  Opprett forbehandling
+                <Button loading={isPending(opprettOmgjoeringOppgaveResult)} onClick={() => opprettOmgjoeringOppgave()}>
+                  Opprett omgjøring av vedtak
                 </Button>
               )}
             </HStack>

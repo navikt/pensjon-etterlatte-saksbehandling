@@ -57,7 +57,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   MANGLER_SOEKNAD: 'Mangler søknad',
   KRAVPAKKE_UTLAND: 'Kravpakke utland',
   KLAGE: 'Klage',
-  KLAGE_SVAR_KABAL: 'Klage svar KA',
+  KLAGE_SVAR_KABAL: 'Klage svar fra KA',
   TILBAKEKREVING: 'Tilbakekreving',
   OMGJOERING: 'Omgjøring',
   JOURNALFOERING: 'Journalføring',

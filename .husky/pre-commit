@@ -1,6 +1,6 @@
 cd ./apps/etterlatte-saksbehandling-ui
-yarn lint-staged --cwd ./client
-yarn lint-staged --cwd ./server
+yarn lint-staged --config .lintstagedrc.json --cwd ./client
+yarn lint-staged --config .lintstagedrc.json --cwd ./server
 
 changedKotlinFiles=$(git diff --name-only --cached | grep '\.kt[s"]\?$' || true)
 

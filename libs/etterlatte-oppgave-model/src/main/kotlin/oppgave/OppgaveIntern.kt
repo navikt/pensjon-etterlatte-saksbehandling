@@ -111,6 +111,7 @@ enum class OppgaveType {
     GOSYS,
     KRAVPAKKE_UTLAND,
     KLAGE,
+    KLAGE_SVAR_KABAL,
     TILBAKEKREVING,
     OMGJOERING,
     JOURNALFOERING,
@@ -129,6 +130,7 @@ enum class OppgaveType {
     MELDT_INN_ENDRING,
     ETTEROPPGJOER,
     ETTEROPPGJOER_SVARFRIST_UTLOEPT,
+
     ;
 
     companion object {

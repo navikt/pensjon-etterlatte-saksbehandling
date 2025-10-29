@@ -130,6 +130,11 @@ interface KlageService {
         begrunnelse: String,
         saksbehandler: Saksbehandler,
     ): Klage
+
+    fun opprettOppgaveOmOmgjoeringAvKlage(
+        klageId: UUID,
+        saksbehandler: Saksbehandler,
+    )
 }
 
 class ManglerSaksbehandlerException(
@@ -327,30 +332,46 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
+    override fun opprettOppgaveOmOmgjoeringAvKlage(
+        klageId: UUID,
+        saksbehandler: Saksbehandler,
+    ) {
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
+
+        klage.utfall?.omgjoering()?.let {
+            lagOppgaveForOmgjoering(klage)
+        } ?: throw IkkeTillattException(
+            "KAN_IKKE_OPPRETE_OMGJOERINGSOPPGAVE",
+            "Kan ikke opprette oppgave om omgjøring av vedtak for klageId=$klageId",
+        )
+    }
+
     override fun haandterKabalrespons(
         klageId: UUID,
         kabalrespons: Kabalrespons,
     ) {
-        val opprinneligKlage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
+        logger.info("Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}, for sakId=${klage.sak.id}")
 
         if (kabalrespons.kabalStatus == KabalStatus.FERDIGSTILT) {
-            // Se på hva kabalresponsen er, og opprett oppgave om det er nødvendig.
-            when (kabalrespons.resultat) {
-                BehandlingResultat.HENLAGT,
-                BehandlingResultat.IKKE_SATT,
-                BehandlingResultat.HEVET,
-                -> {
-                } // Her trenger vi ikke gjøre noe
-                BehandlingResultat.IKKE_MEDHOLD,
-                BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
-                -> {
-                } // trenger vi å gjøre noe spesifikt her?
-                BehandlingResultat.MEDHOLD -> lagOppgaveForOmgjoering(opprinneligKlage)
-            }
+            val vedtaketKlagenGjelder =
+                klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?: throw OmgjoeringMaaGjeldeEtVedtakException(klage)
+
+            oppgaveService.opprettOppgave(
+                referanse = klage.id.toString(),
+                sakId = klage.sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.KLAGE_SVAR_KABAL,
+                merknad = "Klage på vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
+                    vedtaketKlagenGjelder.datoAttestert?.format(
+                        DateTimeFormatter.ISO_LOCAL_DATE,
+                    )
+                }) er ferdig behandlet. Resultat: ${kabalrespons.resultat}",
+            )
         }
 
         opprettKlageHendelse(
-            klage = opprinneligKlage,
+            klage = klage,
             hendelse = KlageHendelseType.KABAL_HENDELSE,
             saksbehandler = null,
             kommentar = "Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}",

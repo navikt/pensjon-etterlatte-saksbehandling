@@ -180,6 +180,15 @@ internal fun Route.klageRoutes(
             }
 
             route("vedtak") {
+                post("omgjoering") {
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                        inTransaction {
+                            klageService.opprettOppgaveOmOmgjoeringAvKlage(klageId, saksbehandler)
+                        }
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+
                 post("fatt") {
                     kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         val klage =

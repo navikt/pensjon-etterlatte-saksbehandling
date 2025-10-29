@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 data class HendelseslisteFraSkatt(

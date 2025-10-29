@@ -13,7 +13,6 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektBulkResponsDto
@@ -185,7 +184,7 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og hente pensjonsgivendeInntekt`() {
-        val forbehandlingId = UUID.randomUUID()
+        val forbehandlingId = opprettForbehandling().id
 
         // negative returnere null hvis tomt
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
@@ -378,7 +377,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         summerteInntekterKopi.tidspunktBeregnet shouldBe summerteInntekter.tidspunktBeregnet
     }
 
-    private fun opprettForbehandling(forbehandlingId: UUID): EtteroppgjoerForbehandling {
+    private fun opprettForbehandling(forbehandlingId: UUID = UUID.randomUUID()): EtteroppgjoerForbehandling {
         val forbehandling =
             EtteroppgjoerForbehandling(
                 id = forbehandlingId,
@@ -409,8 +408,8 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `kopier pensjonsgivendeInntekt til ny forbehandling`() {
-        val forbehandlingId = UUID.randomUUID()
-        val nyForbehandlingId = UUID.randomUUID()
+        val forbehandlingId = opprettForbehandling().id
+        val nyForbehandlingId = opprettForbehandling().id
 
         val regelresultatJson = "{\"regel\":\"lorem\"}".toJsonNode()
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null

@@ -71,8 +71,8 @@ export const BrevutfallSkjema = ({
       datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
         ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
         : undefined,
-      datoTom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
-        ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
+      datoTom: brevutfallOgEtterbetaling.etterbetaling?.datoTom
+        ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoTom)
         : undefined,
       aldersgruppe: brevutfallOgEtterbetaling.brevutfall.aldersgruppe,
       feilutbetalingValg: brevutfallOgEtterbetaling.brevutfall.feilutbetaling?.valg,

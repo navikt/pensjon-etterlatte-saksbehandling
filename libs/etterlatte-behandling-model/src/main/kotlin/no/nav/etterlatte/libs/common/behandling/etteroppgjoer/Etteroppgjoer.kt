@@ -18,7 +18,6 @@ enum class EtteroppgjoerForbehandlingStatus {
 
 data class EtteroppgjoerForbehandlingDto(
     val id: UUID,
-    val hendelseId: UUID,
     val opprettet: Tidspunkt,
     val status: EtteroppgjoerForbehandlingStatus,
     val sak: Sak,

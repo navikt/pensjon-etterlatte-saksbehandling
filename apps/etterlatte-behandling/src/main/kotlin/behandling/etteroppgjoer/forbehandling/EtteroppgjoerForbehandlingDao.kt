@@ -285,7 +285,6 @@ class EtteroppgjoerForbehandlingDao(
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(
             id = getString("id").let { UUID.fromString(it) },
-            hendelseId = UUID.randomUUID(), // TODO
             sak =
                 Sak(
                     id = SakId(getLong("sak_id")),
@@ -295,7 +294,6 @@ class EtteroppgjoerForbehandlingDao(
                     adressebeskyttelse = getString("adressebeskyttelse")?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
                     erSkjermet = getBoolean("erSkjermet"),
                 ),
-            // sekvensnummerSkatt = "123", // TODO
             opprettet = getTidspunkt("opprettet"),
             status = EtteroppgjoerForbehandlingStatus.valueOf(getString("status")),
             aar = getInt("aar"),

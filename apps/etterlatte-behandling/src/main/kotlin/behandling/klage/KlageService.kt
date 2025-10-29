@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
@@ -131,7 +130,7 @@ interface KlageService {
         saksbehandler: Saksbehandler,
     ): Klage
 
-    fun opprettOppgaveOmOmgjoeringAvKlage(
+    fun opprettOppgaveForOmgjoering(
         klageId: UUID,
         saksbehandler: Saksbehandler,
     )
@@ -332,7 +331,7 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
-    override fun opprettOppgaveOmOmgjoeringAvKlage(
+    override fun opprettOppgaveForOmgjoering(
         klageId: UUID,
         saksbehandler: Saksbehandler,
     ) {

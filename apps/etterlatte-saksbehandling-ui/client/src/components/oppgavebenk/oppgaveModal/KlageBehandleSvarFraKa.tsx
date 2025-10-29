@@ -12,7 +12,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { opprettOppgaveForOmgjoeringAvKlage } from '~shared/api/klage'
+import { opprettOppgaveForOmgjoering } from '~shared/api/klage'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -37,9 +37,7 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
     register,
   } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
 
-  const [opprettOmgjoeringOppgaveResult, opprettOmgjoeringOppgaveRequest] = useApiCall(
-    opprettOppgaveForOmgjoeringAvKlage
-  )
+  const [opprettOmgjoeringOppgaveResult, opprettOmgjoeringOppgaveRequest] = useApiCall(opprettOppgaveForOmgjoering)
 
   const opprettOmgjoeringOppgave = () => {
     opprettOmgjoeringOppgaveRequest({ klageId: oppgave.referanse!! }, () => {

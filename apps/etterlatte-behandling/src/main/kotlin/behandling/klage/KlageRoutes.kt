@@ -183,7 +183,7 @@ internal fun Route.klageRoutes(
                 post("omgjoering") {
                     kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         inTransaction {
-                            klageService.opprettOppgaveOmOmgjoeringAvKlage(klageId, saksbehandler)
+                            klageService.opprettOppgaveForOmgjoering(klageId, saksbehandler)
                         }
                         call.respond(HttpStatusCode.OK)
                     }

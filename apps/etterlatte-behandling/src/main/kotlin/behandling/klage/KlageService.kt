@@ -362,11 +362,11 @@ class KlageServiceImpl(
 
             val merknad =
                 when (vedtaketKlagenGjelder) {
-                    null -> "Klage på ukjent vedtak er ferdig behandlet. Resultat: ${kabalrespons.resultat}"
+                    null -> "Klage på ukjent vedtak er ferdig behandlet hos KA. Resultat: ${kabalrespons.resultat}"
                     else -> "Klage på vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
                         vedtaketKlagenGjelder.datoAttestert?.format(
                             DateTimeFormatter.ISO_LOCAL_DATE,
-                        )} er ferdig behandlet. Resultat: ${kabalrespons.resultat}"
+                        )} er ferdig behandlet hos KA. Resultat: ${kabalrespons.resultat}"
                 }
 
             oppgaveService.opprettOppgave(

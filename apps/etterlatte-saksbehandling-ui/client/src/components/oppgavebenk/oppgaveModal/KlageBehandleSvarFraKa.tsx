@@ -79,8 +79,6 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
 
             {oppgave.merknad && <Alert variant="info">{oppgave.merknad}</Alert>}
 
-            <BodyShort>Klage svar fra KA</BodyShort>
-
             {kanRedigeres &&
               (erTildeltSaksbehandler ? (
                 <Textarea

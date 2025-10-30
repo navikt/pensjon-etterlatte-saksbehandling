@@ -36,8 +36,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
@@ -143,7 +141,6 @@ class EtteroppgjoerDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-                hendelseId = UUID.randomUUID(),
                 aar = inntektsaar,
                 opprettet = Tidspunkt.now(),
                 sak = sak,

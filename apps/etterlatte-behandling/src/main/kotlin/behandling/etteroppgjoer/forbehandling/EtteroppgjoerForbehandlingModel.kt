@@ -20,7 +20,6 @@ import java.util.UUID
 
 data class EtteroppgjoerForbehandling(
     val id: UUID,
-    val hendelseId: UUID,
     val opprettet: Tidspunkt,
     val status: EtteroppgjoerForbehandlingStatus,
     val sak: Sak,
@@ -45,7 +44,6 @@ data class EtteroppgjoerForbehandling(
             sisteIverksatteBehandling: UUID,
         ) = EtteroppgjoerForbehandling(
             id = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
             sak = sak,
             status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
             aar = innvilgetPeriode.fom.year,
@@ -115,7 +113,6 @@ data class EtteroppgjoerForbehandling(
     fun tilDto(): EtteroppgjoerForbehandlingDto =
         EtteroppgjoerForbehandlingDto(
             id = id,
-            hendelseId = hendelseId,
             opprettet = opprettet,
             status = status,
             sak = sak,

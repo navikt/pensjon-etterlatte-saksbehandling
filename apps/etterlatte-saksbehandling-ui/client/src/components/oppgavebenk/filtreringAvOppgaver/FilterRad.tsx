@@ -45,6 +45,10 @@ export const FilterRad = ({
     return () => clearTimeout(delay)
   }, [sakEllerFnr])
 
+  const oppgaveTypeOptions = Object.entries(OPPGAVETYPEFILTER)
+    .map(([, beskrivelse]) => beskrivelse)
+    .sort((a, b) => a.localeCompare(b))
+
   return (
     <VStack gap="4">
       <HStack gap="4" align="start" wrap={false}>
@@ -119,7 +123,7 @@ export const FilterRad = ({
 
             <MultiSelectFilter
               label="Oppgavetype"
-              options={Object.entries(OPPGAVETYPEFILTER).map(([, beskrivelse]) => beskrivelse)}
+              options={oppgaveTypeOptions}
               values={filter.oppgavetypeFilter}
               onChange={(typer) =>
                 setFilter({ ...filter, oppgavetypeFilter: typer.includes(OPPGAVETYPEFILTER.visAlle) ? [] : typer })

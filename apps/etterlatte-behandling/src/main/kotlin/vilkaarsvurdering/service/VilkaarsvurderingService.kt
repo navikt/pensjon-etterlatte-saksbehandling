@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -39,6 +40,17 @@ class VirkningstidspunktIkkeSattException(
     behandlingId: UUID,
 ) : RuntimeException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
+data class PeriodisertVilkaarsvurdering(
+    val vilkaarsvurdering: Vilkaarsvurdering,
+    val peroide: Periode
+) {
+
+    init {
+
+    }
+}
+
+
 class VilkaarsvurderingService(
     private val repository: VilkaarsvurderingDao,
     private val behandlingService: BehandlingService,
@@ -47,7 +59,13 @@ class VilkaarsvurderingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    @Deprecated("Bad")
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = repository.hent(behandlingId)
+
+    fun hentVilkaarsvurderingPerioder(behandlingId: UUID): List<PeriodisertVilkaarsvurdering> {
+
+    }
+
 
     fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean {
         val hentBehandling = behandlingService.hentBehandling(behandlingId)!!
@@ -91,6 +109,7 @@ class VilkaarsvurderingService(
 
     fun slettTotalVurdering(
         behandlingId: UUID,
+        vilkaarsvurderingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Vilkaarsvurdering {
         behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true)

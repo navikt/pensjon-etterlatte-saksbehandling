@@ -38,7 +38,7 @@ class FinnRegelverkKnekkpunkter : RegelVisitor {
     }
 }
 
-fun Regel<*, *>.finnAlleKnekkpunkter(): Set<LocalDate> {
+fun Regel<*, *>.finnAlleKnekkpunkterIRegel(): Set<LocalDate> {
     val finnKnekkpunkterVisitor = FinnRegelverkKnekkpunkter()
 
     accept(finnKnekkpunkterVisitor)

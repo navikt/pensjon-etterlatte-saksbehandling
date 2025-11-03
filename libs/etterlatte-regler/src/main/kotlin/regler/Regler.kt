@@ -13,6 +13,12 @@ class TildatoMaaVaereSenereEnnFradato(
         detail = "Tildato ($tilDato) må være større eller lik fradato ($fraDato)",
     )
 
+data class RegelPeriode2(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate? = null,
+    val skalBeregnes: Boolean
+)
+
 data class RegelPeriode(
     val fraDato: LocalDate,
     val tilDato: LocalDate? = null,

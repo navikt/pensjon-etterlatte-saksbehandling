@@ -33,7 +33,7 @@ internal class VisitorTest {
 
     @Test
     fun `Skal finne alle unike knekkpunkter i grafen`() {
-        val knekkpunkter = regelSomKombinererToRegler.finnAlleKnekkpunkter()
+        val knekkpunkter = regelSomKombinererToRegler.finnAlleKnekkpunkterIRegel()
 
         knekkpunkter.size shouldBe 3
         knekkpunkter shouldContainExactlyInAnyOrder listOf(GJELDER_FRA_1, GJELDER_FRA_2, GJELDER_FRA_3)

@@ -34,8 +34,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -142,6 +144,11 @@ class BeregnBarnepensjonService(
         }
     }
 
+    data class PeriodisertVilkaarsvurdering(
+        val periode: Periode,
+        val vilkaarsvurderingResultat: VilkaarsvurderingResultat
+    )
+
     private fun beregnBarnepensjon(
         behandlingId: UUID,
         grunnlag: Grunnlag,
@@ -150,6 +157,7 @@ class BeregnBarnepensjonService(
         virkningstidspunkt: YearMonth,
         kunGammeltRegelverk: Boolean = false,
         tilDato: LocalDate? = null,
+        vilkaarsperioder: List<PeriodisertVilkaarsvurdering>
     ): Beregning {
         val beregningTom =
             when (kunGammeltRegelverk) {
@@ -162,6 +170,13 @@ class BeregnBarnepensjonService(
                 grunnlag = beregningsgrunnlag,
                 periode = RegelPeriode(virkningstidspunkt.atDay(1), beregningTom?.atEndOfMonth()),
             )
+
+        val perioderViSkalBeregneOver: List<RegelPeriode> = emptyList()
+
+        perioderViSkalBeregneOver.map {
+
+        }
+
 
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {

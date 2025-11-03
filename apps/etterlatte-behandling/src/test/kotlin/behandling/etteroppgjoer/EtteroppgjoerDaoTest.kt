@@ -105,6 +105,7 @@ class EtteroppgjoerDaoTest(
                     inntektsaar = 2024,
                     antall = 2,
                     etteroppgjoerFilter = EtteroppgjoerFilter.ENKEL,
+                    status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
                     spesifikkeSaker = emptyList(),
                     ekskluderteSaker = emptyList(),
                     spesifikkeEnheter = listOf(Enheter.PORSGRUNN.enhetNr.toString()),

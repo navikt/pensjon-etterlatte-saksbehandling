@@ -176,7 +176,7 @@ class EtteroppgjoerForbehandlingService(
     fun hentSisteFerdigstillteForbehandling(sakId: SakId): EtteroppgjoerForbehandling {
         val sisteFerdigstilteForbehandling =
             dao
-                .hentForbehandlinger(sakId)
+                .hentForbehandlingerForSak(sakId)
                 .filter { it.erFerdigstilt() }
                 .maxByOrNull { it.opprettet }
 
@@ -256,7 +256,7 @@ class EtteroppgjoerForbehandlingService(
 
     fun hentPensjonsgivendeInntekt(behandlingId: UUID): SummertePensjonsgivendeInntekter? = dao.hentPensjonsgivendeInntekt(behandlingId)
 
-    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlinger(sakId)
+    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlingerForSak(sakId)
 
     fun opprettEtteroppgjoerForbehandling(
         sakId: SakId,
@@ -392,6 +392,7 @@ class EtteroppgjoerForbehandlingService(
                 inntektsaar = inntektsaar,
                 antall = antall,
                 etteroppgjoerFilter = etteroppgjoerFilter,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
                 spesifikkeSaker = spesifikkeSaker,
                 ekskluderteSaker = ekskluderteSaker,
                 spesifikkeEnheter = spesifikkeEnheter,

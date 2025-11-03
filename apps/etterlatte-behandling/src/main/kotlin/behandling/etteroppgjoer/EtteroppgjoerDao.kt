@@ -111,6 +111,7 @@ class EtteroppgjoerDao(
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,
         antall: Int,
+        status: EtteroppgjoerStatus,
         etteroppgjoerFilter: EtteroppgjoerFilter,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
@@ -122,7 +123,7 @@ class EtteroppgjoerDao(
                     """
                     SELECT sak_id FROM etteroppgjoer e
                     INNER JOIN sak s on s.id = e.sak_id
-                    WHERE e.status = 'MOTTATT_SKATTEOPPGJOER'
+                    WHERE e.status = ?
                     AND e.inntektsaar = ?
                     AND e.har_sanksjon = ?
                     AND e.har_institusjonsopphold = ?
@@ -139,6 +140,8 @@ class EtteroppgjoerDao(
                     """.trimIndent(),
                 ).apply {
                     var paramIndex = 1
+                    setString(paramIndex, status.name)
+                    paramIndex += 1
                     setInt(paramIndex, inntektsaar)
                     paramIndex += 1
                     setBoolean(paramIndex, etteroppgjoerFilter.harSanksjon)

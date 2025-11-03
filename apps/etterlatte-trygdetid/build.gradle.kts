@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:etterlatte-jobs"))
 
     implementation(libs.database.kotliquery)
     implementation(libs.navfelles.tokenclientcore)

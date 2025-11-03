@@ -24,6 +24,10 @@ class Server(
             initEmbeddedServer(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
+                cronJobs =
+                    listOf(
+                        context.sjekkAvvikJobb,
+                    ),
             ) {
                 trygdetid(trygdetidService, behandlingKlient, featureToggleService)
                 avtale(avtaleService, behandlingKlient)

@@ -54,7 +54,7 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun hentForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> =
+    fun hentForbehandlingerForSak(sakId: SakId): List<EtteroppgjoerForbehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

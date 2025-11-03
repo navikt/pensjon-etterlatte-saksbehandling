@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.logger
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.util.UUID
 
@@ -26,30 +27,38 @@ class EtteroppgjoerTempService(
         sakId: SakId,
         merknad: String? = null,
     ) {
-        val defaultMerknad = "Etteroppgjøret for $ETTEROPPGJOER_AAR er klart til behandling"
-
+        // Samme oppgave brukes for oppretting og behandling av forbehandling.
+        // En tom referanse betyr at oppgaven gjelder oppretting.
+        // Når forbehandling opprettes, settes referansen til forbehandlingId.
         val eksisterendeOppgaver =
             oppgaveService
                 .hentOppgaverForSakAvType(sakId, listOf(OppgaveType.ETTEROPPGJOER))
                 .filter { it.erIkkeAvsluttet() && it.referanse.isEmpty() }
 
-        if (eksisterendeOppgaver.isEmpty()) {
-            oppgaveService.opprettOppgave(
-                referanse = "",
-                sakId = sakId,
-                kilde = OppgaveKilde.HENDELSE,
-                type = OppgaveType.ETTEROPPGJOER,
-                merknad = merknad ?: defaultMerknad,
-            )
-        } else {
-            throw InternfeilException(
-                "Forsøker å opprette ny oppgave om opprette forbehandling, " +
-                    "men det eksisterer allerede ${eksisterendeOppgaver.size} oppgave(r) for sakId=$sakId",
-            )
+        when {
+            eksisterendeOppgaver.size > 2 -> {
+                throw InternfeilException(
+                    "For mange oppgaver for opprette forbehandling i sak=$sakId: " +
+                        "fant ${eksisterendeOppgaver.size}, forventet maks 1. Må undersøke hvorfor vi fortsetter å opprette.",
+                )
+            }
+
+            eksisterendeOppgaver.isNotEmpty() -> {
+                logger.info("Det eksisterer allerede en oppgave for opprette forbehandling i sak=$sakId, hopper over opprettelse")
+                return
+            }
+
+            else -> {
+                oppgaveService.opprettOppgave(
+                    referanse = "",
+                    sakId = sakId,
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.ETTEROPPGJOER,
+                    merknad = merknad ?: "Etteroppgjøret for $ETTEROPPGJOER_AAR er klart til behandling",
+                )
+            }
         }
     }
-
-    // TODO: ikke optimalt plassering men gjøres pga overlappende avhengigheter i applicationContext
 
     /**
      * Setter status tilbake til MOTTATT_SKATTEOPPGJOER i etteroppgjøret og avbryter forbehandlingen.

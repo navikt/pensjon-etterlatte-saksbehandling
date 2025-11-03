@@ -174,7 +174,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         opprettForbehandling(UUID.randomUUID())
         opprettForbehandling(UUID.randomUUID())
 
-        with(etteroppgjoerForbehandlingDao.hentForbehandlinger(sak.id)) {
+        with(etteroppgjoerForbehandlingDao.hentForbehandlingerForSak(sak.id)) {
             size shouldBe 2
             forEach {
                 it.aarsakTilAvbrytelse shouldBe AarsakTilAvbryteForbehandling.FEILREGISTRERT

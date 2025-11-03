@@ -98,7 +98,6 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
@@ -150,7 +149,6 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
@@ -243,7 +241,6 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
@@ -269,7 +266,6 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
@@ -382,7 +378,6 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = forbehandlingId,
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                hendelseId = UUID.randomUUID(),
                 aar = 2024,
                 opprettet = Tidspunkt.now(),
                 sak = sak,

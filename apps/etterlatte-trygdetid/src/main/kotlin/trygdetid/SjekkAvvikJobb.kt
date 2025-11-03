@@ -125,11 +125,21 @@ class SjekkAvvikJobb(
             ) {
                 if (jobbKjoererMutex.tryLock()) {
                     try {
+                        var antallSjekket = 0
                         while (true) {
+                            if (antallSjekket % 100 == 0 &&
+                                !featureToggleService.isEnabled(
+                                    SjekkAvvikToggle.AVVIK_JOBB_ENABLED,
+                                    false,
+                                )
+                            ) {
+                                break
+                            }
                             val harSjekketEtAvvik = sjekkAvvikService.sjekkTrygdetid()
                             if (!harSjekketEtAvvik) {
                                 break
                             }
+                            antallSjekket++
                         }
                     } catch (e: Exception) {
                         logger.warn("Jobb for sjekking av trygdetid feilet", e)

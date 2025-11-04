@@ -105,21 +105,7 @@ class EtteroppgjoerForbehandlingBrevService(
         }
 
         val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
-        if (!response.kanFerdigstille) {
-            // dette skal egentlig ikke oppstå, men må håndtere det for å få rett status på forbehandling, etteroppgjør og oppgave
-            if (brev.erDistribuert()) {
-                logger.error(
-                    "Klarte ikke å ferdigstille brev med id=$brevId for forbehandling $forbehandlingId " +
-                        "fordi brev allerede er distribuert. Ferdigstiller likevel, men bør undersøkes.",
-                )
-                etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
-                etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
-                    forbehandlingId = forbehandlingId,
-                    dato = brev.statusEndret.toLocalDate(),
-                )
-                return
-            }
-
+        if (!response.kanFerdigstille && brev.status.ikkeFerdigstilt()) {
             throw UgyldigForespoerselException(
                 code = "KAN_IKKE_FERDIGSTILLE_BREV",
                 detail = response.aarsak ?: "Ukjent feil",

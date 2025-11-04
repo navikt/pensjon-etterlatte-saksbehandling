@@ -98,8 +98,8 @@ class EtteroppgjoerForbehandlingBrevService(
             throw IkkeTillattException(
                 code = "KAN_IKKE_FERDIGSTILLE_BREV",
                 detail =
-                    "Behandling er redigert etter brevet ble opprettet. " +
-                        "Gå gjennom brevet og vurder om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
+                    "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder " +
+                        "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
             )
         }
 

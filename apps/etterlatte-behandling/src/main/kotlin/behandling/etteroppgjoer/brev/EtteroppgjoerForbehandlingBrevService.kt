@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingBrevService(
@@ -112,6 +113,10 @@ class EtteroppgjoerForbehandlingBrevService(
                         "fordi brev allerede er distribuert. Ferdigstiller likevel, men bør undersøkes.",
                 )
                 etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
+                etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
+                    forbehandlingId = forbehandlingId,
+                    dato = brev.statusEndret.toLocalDate(),
+                )
                 return
             }
 
@@ -127,7 +132,10 @@ class EtteroppgjoerForbehandlingBrevService(
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
         )
-        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(forbehandlingId)
+        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
+            forbehandlingId = forbehandlingId,
+            dato = LocalDate.now(),
+        )
     }
 
     suspend fun genererPdf(

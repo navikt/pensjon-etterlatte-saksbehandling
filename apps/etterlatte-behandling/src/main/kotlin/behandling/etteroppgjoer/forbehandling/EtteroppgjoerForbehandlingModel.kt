@@ -133,11 +133,11 @@ data class EtteroppgjoerForbehandling(
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 
-    fun medVarselbrevSendt(): EtteroppgjoerForbehandling {
+    fun medVarselbrevSendt(dato: LocalDate): EtteroppgjoerForbehandling {
         if (varselbrevSendt != null) {
             throw InternfeilException("Forbehandling har allerede varselbrev sendt tidspunkt=$varselbrevSendt")
         }
-        return this.copy(varselbrevSendt = LocalDate.now())
+        return this.copy(varselbrevSendt = dato)
     }
 
     fun erUnderBehandling() =

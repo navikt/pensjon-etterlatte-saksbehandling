@@ -83,10 +83,10 @@ class EtteroppgjoerForbehandlingBrevService(
             etteroppgjoerForbehandlingService
                 .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
 
-        val behandling = detaljertForbehandling.behandling
-        val sakId = behandling.sak.id
+        val forbehandling = detaljertForbehandling.behandling
+        val sakId = forbehandling.sak.id
         val brevId =
-            behandling.brevId ?: throw UgyldigForespoerselException(
+            forbehandling.brevId ?: throw UgyldigForespoerselException(
                 code = "MANGLER_BREVID",
                 detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
             )
@@ -103,25 +103,25 @@ class EtteroppgjoerForbehandlingBrevService(
             )
         }
 
-        val respons = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
-        if (!respons.kanFerdigstille) {
+        val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
+        if (!response.kanFerdigstille) {
             // dette skal egentlig ikke oppstå, men må håndtere det for å få rett status på forbehandling, etteroppgjør og oppgave
             if (brev.erDistribuert()) {
                 logger.error(
                     "Klarte ikke å ferdigstille brev med id=$brevId for forbehandling $forbehandlingId " +
                         "fordi brev allerede er distribuert. Ferdigstiller likevel, men bør undersøkes.",
                 )
-                etteroppgjoerForbehandlingService.ferdigstillForbehandling(behandling, brukerTokenInfo)
+                etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
                 return
             }
 
             throw UgyldigForespoerselException(
                 code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                detail = respons.aarsak ?: "Ukjent feil",
+                detail = response.aarsak ?: "Ukjent feil",
             )
         }
 
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(behandling, brukerTokenInfo)
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,

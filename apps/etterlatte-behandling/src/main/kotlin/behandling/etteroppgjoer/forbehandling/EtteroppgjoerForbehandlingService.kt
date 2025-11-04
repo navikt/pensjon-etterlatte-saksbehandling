@@ -47,6 +47,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -164,9 +165,12 @@ class EtteroppgjoerForbehandlingService(
 
     fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
 
-    fun lagreVarselbrevSendt(forbehandlingId: UUID) {
+    fun lagreVarselbrevSendt(
+        forbehandlingId: UUID,
+        dato: LocalDate,
+    ) {
         val forbehandling = hentForbehandling(forbehandlingId)
-        lagreForbehandling(forbehandling.medVarselbrevSendt())
+        lagreForbehandling(forbehandling.medVarselbrevSendt(dato))
     }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =

@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingBrevService(
@@ -79,39 +80,62 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val detaljertForbehandling = etteroppgjoerForbehandlingService.hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
-        val sakId = detaljertForbehandling.behandling.sak.id
+        val detaljertForbehandling =
+            etteroppgjoerForbehandlingService
+                .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
+
+        val forbehandling = detaljertForbehandling.behandling
+        val sakId = forbehandling.sak.id
         val brevId =
-            detaljertForbehandling.behandling.brevId
-                ?: throw UgyldigForespoerselException(
-                    code = "MANGLER_BREVID",
-                    detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
-                )
+            forbehandling.brevId ?: throw UgyldigForespoerselException(
+                code = "MANGLER_BREVID",
+                detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
+            )
 
         val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
-        if (detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt > brev.statusEndret) {
+
+        val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
+        if (sistBeregnetTidspunkt > brev.statusEndret) {
             throw IkkeTillattException(
-                "KAN_IKKE_FERDIGSTILLE_BREV",
-                "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
+                code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                detail =
+                    "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder " +
+                        "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
             )
         }
 
-        brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { response ->
-            if (!response.kanFerdigstille) {
-                throw UgyldigForespoerselException(
-                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                    detail = response.aarsak ?: "Ukjent feil",
+        val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
+        if (!response.kanFerdigstille) {
+            // dette skal egentlig ikke oppstå, men må håndtere det for å få rett status på forbehandling, etteroppgjør og oppgave
+            if (brev.erDistribuert()) {
+                logger.error(
+                    "Klarte ikke å ferdigstille brev med id=$brevId for forbehandling $forbehandlingId " +
+                        "fordi brev allerede er distribuert. Ferdigstiller likevel, men bør undersøkes.",
                 )
+                etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
+                etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
+                    forbehandlingId = forbehandlingId,
+                    dato = brev.statusEndret.toLocalDate(),
+                )
+                return
             }
+
+            throw UgyldigForespoerselException(
+                code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                detail = response.aarsak ?: "Ukjent feil",
+            )
         }
 
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(detaljertForbehandling.behandling, brukerTokenInfo)
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
         )
-        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(forbehandlingId)
+        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
+            forbehandlingId = forbehandlingId,
+            dato = LocalDate.now(),
+        )
     }
 
     suspend fun genererPdf(

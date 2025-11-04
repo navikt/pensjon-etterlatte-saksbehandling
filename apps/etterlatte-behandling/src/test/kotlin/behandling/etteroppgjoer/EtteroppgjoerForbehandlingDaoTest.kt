@@ -6,7 +6,6 @@ import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -161,10 +160,11 @@ class EtteroppgjoerForbehandlingDaoTest(
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
             )
+        val datoBrevSendt = LocalDate.now().minusDays(1)
         etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
         etteroppgjoerForbehandlingDao.hentForbehandling(forbehandling.id)!!.varselbrevSendt shouldBe null
-        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling.medVarselbrevSendt())
-        etteroppgjoerForbehandlingDao.hentForbehandling(forbehandling.id)!!.varselbrevSendt shouldNotBe null
+        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling.medVarselbrevSendt(dato = datoBrevSendt))
+        etteroppgjoerForbehandlingDao.hentForbehandling(forbehandling.id)!!.varselbrevSendt shouldBe datoBrevSendt
     }
 
     @Test

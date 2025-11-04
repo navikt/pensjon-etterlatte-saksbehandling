@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.trygdetid.SjekkAvvikJobb
 import no.nav.etterlatte.trygdetid.SjekkAvvikService
@@ -26,7 +27,8 @@ import java.time.temporal.ChronoUnit
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler.systemEnv())
+    private val env = Miljoevariabler.systemEnv()
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource =
         DataSourceBuilder.createDataSource(
             jdbcUrl = properties.jdbcUrl,
@@ -55,7 +57,7 @@ class ApplicationContext {
             featureToggleService = featureToggleService,
         )
 
-    private val leaderElection = LeaderElection(config.getString("ELECTOR_PATH"))
+    private val leaderElection = LeaderElection(env[AppConfig.ELECTOR_PATH])
     private val avvikRepository = TrygdetidAvvikRepository(dataSource)
     private val sjekkAvvikService =
         SjekkAvvikService(

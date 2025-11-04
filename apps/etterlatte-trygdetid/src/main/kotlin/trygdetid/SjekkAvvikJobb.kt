@@ -11,7 +11,6 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
@@ -193,7 +192,7 @@ class SjekkAvvikService(
                     yrkesskade = trygdetid.yrkesskade,
                     nordiskKonvensjon = nordiskKonvensjon,
                 )?.resultat
-                ?: throw InternfeilException("Har en beregnet trygdetid som ikke lar seg reberegne, trygdetidId = $trygdetidId")
+                ?: return null // Overstyrte trygdetider uten grunnlag lar seg ikke reberegne, og det er kun da vi gir ut null her
 
         return TrygdetidAvvik.fraBeregninger(trygdetid.beregnetTrygdetid.resultat, nyttResultat)
     }

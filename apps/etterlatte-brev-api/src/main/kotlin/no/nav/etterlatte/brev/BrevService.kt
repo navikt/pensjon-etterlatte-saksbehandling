@@ -422,6 +422,10 @@ class BrevService(
 
     fun kanFerdigstilleBrev(id: BrevID): KanFerdigstilleBrevResponse {
         val brev = hentBrev(id)
+        if (brev.erFerdigstilt()) {
+            return KanFerdigstilleBrevResponse(kanFerdigstille = true)
+        }
+
         val pdf = pdfService.hentPdfMedData(brev.id)
         val pdfOppdatert = pdf?.bytes != null && pdf.opprettet > brev.statusEndret
 

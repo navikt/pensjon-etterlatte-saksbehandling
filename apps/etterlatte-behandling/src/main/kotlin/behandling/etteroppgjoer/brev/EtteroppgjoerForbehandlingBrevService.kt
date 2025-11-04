@@ -96,13 +96,19 @@ class EtteroppgjoerForbehandlingBrevService(
             )
         }
 
-        brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { response ->
-            if (!response.kanFerdigstille) {
-                throw UgyldigForespoerselException(
-                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                    detail = response.aarsak ?: "Ukjent feil",
-                )
+        if (!brev.erDistribuert()) {
+            brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { response ->
+                if (!response.kanFerdigstille) {
+                    throw UgyldigForespoerselException(
+                        code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                        detail = response.aarsak ?: "Ukjent feil",
+                    )
+                }
             }
+        } else {
+            logger.error(
+                "Forsøker å ferdigstille brev som allerede er distribuert for forbehandling $forbehandlingId. Må undersøke hvorfor dette oppstår.",
+            )
         }
 
         etteroppgjoerForbehandlingService.ferdigstillForbehandling(detaljertForbehandling.behandling, brukerTokenInfo)

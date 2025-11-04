@@ -158,6 +158,8 @@ class StrukturertBrevService(
                 "Fant ingen brev for behandling (id=$behandlingId)"
             }
 
+        // TODO: hvis et brev allerede er distribuert???
+
         try {
             if (!brev.erFerdigstilt()) {
                 ferdigstillStrukturertBrev(behandlingId, brevType, brukerTokenInfo)

@@ -79,39 +79,49 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val detaljertForbehandling = etteroppgjoerForbehandlingService.hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
-        val sakId = detaljertForbehandling.behandling.sak.id
+        val forbehandling =
+            etteroppgjoerForbehandlingService
+                .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
+
+        val behandling = forbehandling.behandling
+        val sakId = behandling.sak.id
         val brevId =
-            detaljertForbehandling.behandling.brevId
-                ?: throw UgyldigForespoerselException(
-                    code = "MANGLER_BREVID",
-                    detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
-                )
+            behandling.brevId ?: throw UgyldigForespoerselException(
+                code = "MANGLER_BREVID",
+                detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
+            )
 
         val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
-        if (detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt > brev.statusEndret) {
+
+        val sistBeregnetTidspunkt = forbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
+        if (sistBeregnetTidspunkt > brev.statusEndret) {
             throw IkkeTillattException(
-                "KAN_IKKE_FERDIGSTILLE_BREV",
-                "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
+                code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                detail =
+                    "Behandling er redigert etter brevet ble opprettet. " +
+                        "Gå gjennom brevet og vurder om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
             )
         }
 
-        if (!brev.erDistribuert()) {
-            brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo).let { response ->
-                if (!response.kanFerdigstille) {
-                    throw UgyldigForespoerselException(
-                        code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                        detail = response.aarsak ?: "Ukjent feil",
-                    )
-                }
+        val respons = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
+        if (!respons.kanFerdigstille) {
+            // dette skal egentlig ikke oppstå, men må håndtere det for å få rett status på forbehandling, etteroppgjør og oppgave
+            if (brev.erDistribuert()) {
+                logger.error(
+                    "Klarte ikke å ferdigstille brev med id=$brevId for forbehandling $forbehandlingId " +
+                        "fordi brev allerede er distribuert. Ferdigstiller likevel, men bør undersøkes.",
+                )
+                etteroppgjoerForbehandlingService.ferdigstillForbehandling(behandling, brukerTokenInfo)
+                return
             }
-        } else {
-            logger.error(
-                "Forsøker å ferdigstille brev som allerede er distribuert for forbehandling $forbehandlingId. Må undersøke hvorfor dette oppstår.",
+
+            throw UgyldigForespoerselException(
+                code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                detail = respons.aarsak ?: "Ukjent feil",
             )
         }
 
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(detaljertForbehandling.behandling, brukerTokenInfo)
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(behandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,

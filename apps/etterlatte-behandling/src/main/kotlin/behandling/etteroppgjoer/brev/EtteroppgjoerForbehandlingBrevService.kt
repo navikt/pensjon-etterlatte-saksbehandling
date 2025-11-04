@@ -79,11 +79,11 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val forbehandling =
+        val detaljertForbehandling =
             etteroppgjoerForbehandlingService
                 .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
 
-        val behandling = forbehandling.behandling
+        val behandling = detaljertForbehandling.behandling
         val sakId = behandling.sak.id
         val brevId =
             behandling.brevId ?: throw UgyldigForespoerselException(
@@ -93,7 +93,7 @@ class EtteroppgjoerForbehandlingBrevService(
 
         val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
 
-        val sistBeregnetTidspunkt = forbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
+        val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
         if (sistBeregnetTidspunkt > brev.statusEndret) {
             throw IkkeTillattException(
                 code = "KAN_IKKE_FERDIGSTILLE_BREV",

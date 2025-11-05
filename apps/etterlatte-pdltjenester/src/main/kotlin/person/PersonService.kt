@@ -2,6 +2,7 @@ package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
@@ -210,26 +212,21 @@ class PersonService(
                 }
             } else {
                 try {
-                    val folkeregisterIdent: String? =
-                        identResponse.data.hentIdenter.identer
+                    val identer = identResponse.data.hentIdenter.identer
+
+                    val folkeregisterIdent: PdlIdentifikator.FolkeregisterIdent? =
+                        identer
                             .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
                             .firstOrNull { !it.historisk }
                             ?.ident
-                    if (folkeregisterIdent != null) {
-                        PdlIdentifikator.FolkeregisterIdent(
-                            folkeregisterident =
-                                Folkeregisteridentifikator.of(
-                                    folkeregisterIdent,
-                                ),
-                        )
-                    } else {
-                        val npid: String =
-                            identResponse.data.hentIdenter.identer
-                                .filter { it.gruppe == PDLIdentGruppeTyper.NPID.navn }
-                                .first { !it.historisk }
-                                .ident
-                        PdlIdentifikator.Npid(NavPersonIdent(npid))
-                    }
+                            ?.let { tilFolkeregisterIdent(it) }
+
+                    folkeregisterIdent
+                        ?: identer
+                            .filter { it.gruppe == PDLIdentGruppeTyper.NPID.navn }
+                            .first { !it.historisk }
+                            .ident
+                            .let { tilNpidIdent(it) }
                 } catch (e: Exception) {
                     sikkerLogg.error(
                         """
@@ -465,4 +462,32 @@ class PersonService(
         throw no.nav.etterlatte.personweb.PdlForesporselFeilet(
             "Denne personen har adressebeskyttelse. Behandlingen skal derfor sendes til enhet Vikafossen som vil behandle saken videre.",
         )
+
+    private fun tilFolkeregisterIdent(folkeregisterIdent: String): PdlIdentifikator.FolkeregisterIdent =
+        try {
+            PdlIdentifikator.FolkeregisterIdent(
+                folkeregisterident =
+                    Folkeregisteridentifikator.of(
+                        folkeregisterIdent,
+                    ),
+            )
+        } catch (e: InvalidFoedselsnummerException) {
+            if (isDev()) {
+                sikkerLogg.error("Folkeregisterident fra PDL $folkeregisterIdent har ugyldig format", e)
+                throw FantIkkePersonException("Folkeregisterident fra PDL ${folkeregisterIdent.maskerFnr()} har ugyldig format", e)
+            }
+            throw e
+        }
+
+    private fun tilNpidIdent(npid: String): PdlIdentifikator.Npid {
+        try {
+            return PdlIdentifikator.Npid(NavPersonIdent(npid))
+        } catch (e: InvalidFoedselsnummerException) {
+            if (isDev()) {
+                sikkerLogg.error("NPID-ident fra PDL $npid har ugyldig format", e)
+                throw FantIkkePersonException("NPID-ident fra PDL ${npid.maskerFnr()} har ugyldig format", e)
+            }
+            throw e
+        }
+    }
 }

@@ -46,7 +46,7 @@
     "@types/is-hotkey": "^0.1.10",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.6.2",
-    "@types/react": "^19.2.0",
+    "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.0",
     "@types/react-tabs": "^5.0.5",
     "@types/styled-components": "^5.1.35",

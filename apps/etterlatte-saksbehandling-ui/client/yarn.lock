@@ -465,10 +465,10 @@
     redux-thunk "^3.1.0"
     reselect "^5.1.0"
 
-"@rolldown/pluginutils@1.0.0-beta.35":
-  version "1.0.0-beta.35"
-  resolved "https://registry.yarnpkg.com/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.35.tgz#1a477e7742b154b67519d40e4fc17485de338e7a"
-  integrity sha512-slYrCpoxJUqzFDDNlvrOYRazQUNRvWPjXA17dAOISY3rDMxX6k8K4cj2H+hEYMHF81HO3uNd5rHVigAWRM5dSg==
+"@rolldown/pluginutils@1.0.0-beta.46":
+  version "1.0.0-beta.46"
+  resolved "https://registry.yarnpkg.com/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.46.tgz#fa457cfa15ed4438ef47f6d5ff18fdc24b6a6bb3"
+  integrity sha512-xMNwJo/pHkEP/mhNVnW+zUiJDle6/hxrwO0mfSJuEVRbBfgrJFuUSRoZx/nYUw5pCjrysl9OkNXCkAdih8GCnA==
 
 "@rollup/rollup-android-arm-eabi@4.46.3":
   version "4.46.3"
@@ -876,12 +876,12 @@
     "@typescript-eslint/types" "8.46.3"
     eslint-visitor-keys "^4.2.1"
 
-"@vitejs/plugin-react-swc@~4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@vitejs/plugin-react-swc/-/plugin-react-swc-4.1.0.tgz#257a55049ebaf9d0a873575b2dff3616e4e82b33"
-  integrity sha512-Ff690TUck0Anlh7wdIcnsVMhofeEVgm44Y4OYdeeEEPSKyZHzDI9gfVBvySEhDfXtBp8tLCbfsVKPWEMEjq8/g==
+"@vitejs/plugin-react-swc@^4.2.0":
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@vitejs/plugin-react-swc/-/plugin-react-swc-4.2.1.tgz#f547a339ac64a536449e4a4d192261dd99be47d6"
+  integrity sha512-SIZ/XxeS2naLw4L2vVvpTyujM2OY+Rf+y6nWETqfoBrZpI3SFdyNJof3nQ8HbLhXJ1Eh9e9c0JGYC8GYPhLkCw==
   dependencies:
-    "@rolldown/pluginutils" "1.0.0-beta.35"
+    "@rolldown/pluginutils" "1.0.0-beta.46"
     "@swc/core" "^1.13.5"
 
 "@vitest/expect@4.0.6":

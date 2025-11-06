@@ -28,7 +28,7 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.63.0",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.9.3",
+    "react-router-dom": "^7.9.5",
     "redux": "^5.0.1",
     "slate": "^0.118.1",
     "slate-dom": "^0.118.1",

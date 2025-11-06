@@ -69,6 +69,7 @@ class AvkortingValiderTest {
             ),
             avkorting,
             listOf(inntektMedFratrekk),
+            true,
             naa = YearMonth.of(2024, 12),
         )
     }
@@ -101,6 +102,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = fom)),
                 avkorting,
                 listOf(inntektMedFratrekk),
+                true,
                 naa = fom,
             )
         }
@@ -145,6 +147,7 @@ class AvkortingValiderTest {
             beregning(beregningsperiode(datoFOM = fom)),
             avkorting,
             listOf(inntektMedFratrekk),
+            true,
             naa = fom,
         )
     }
@@ -186,6 +189,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = fom)),
                 avkorting,
                 listOf(inntektMedFratrekk),
+                true,
                 naa = fom,
             )
         }
@@ -232,6 +236,7 @@ class AvkortingValiderTest {
             beregning(),
             avkorting,
             listOf(inntektMedFratrekk),
+            true,
             naa = YearMonth.of(2024, 6),
         )
     }
@@ -253,6 +258,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                 avkorting,
                 listOf(utenFratrekk),
+                true,
                 naa = YearMonth.of(2024, 3),
             )
 
@@ -268,6 +274,7 @@ class AvkortingValiderTest {
                     beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                     avkorting,
                     listOf(inntektMedFratrekk),
+                    true,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -285,6 +292,7 @@ class AvkortingValiderTest {
                     beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                     avkorting,
                     listOf(inntektMedFratrekkUtland),
+                    true,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -314,6 +322,7 @@ class AvkortingValiderTest {
                 beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2025, 1))),
                 eksisterendeAvkorting = avkorting,
                 nyeGrunnlag = listOf(utenFratrekk),
+                true,
             )
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
@@ -328,6 +337,7 @@ class AvkortingValiderTest {
                     beregning(),
                     avkorting,
                     listOf(inntektMedFratrekk),
+                    true,
                 )
             }
 
@@ -343,6 +353,7 @@ class AvkortingValiderTest {
                     beregning(),
                     avkorting,
                     listOf(inntektMedFratrekkUtland),
+                    true,
                 )
             }
         }
@@ -378,6 +389,7 @@ class AvkortingValiderTest {
                 ),
             behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2024, 2)),
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
+            krevInntektForNesteAar = true,
             naa = YearMonth.of(2024, 5),
         )
     }
@@ -413,6 +425,7 @@ class AvkortingValiderTest {
                 ),
             behandling = behandling(BehandlingType.REVURDERING, virk = YearMonth.of(2024, 2)),
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
+            krevInntektForNesteAar = true,
         )
     }
 
@@ -435,6 +448,7 @@ class AvkortingValiderTest {
                 avkorting,
                 beregning,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
+                true,
             )
         krav shouldContainExactly listOf(2024, 2025, 2026)
     }

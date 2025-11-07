@@ -2,6 +2,7 @@ package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -205,6 +206,12 @@ class PersonService(
             return identResult.gjeldendeFolkeregisterIdent()
                 ?: identResult.gjeldendeNpidIdent()
                 ?: throw FantIkkePersonException("Fant ikke gjeldende ident for personen ${request.ident}")
+        } catch (e: ForespoerselException) {
+            if (isDev() && e is InvalidFoedselsnummerException) {
+                sikkerLogg.error("Ident fra PDL for ${request.ident.value} har ugyldig format", e)
+                throw FantIkkePersonException("Ident fra PDL for ${request.ident} har ugyldig format", e)
+            }
+            throw e
         } catch (e: Exception) {
             sikkerLogg.error(
                 """
@@ -213,13 +220,10 @@ class PersonService(
                 """.trimIndent(),
                 e,
             )
-            if (isDev() && e is InvalidFoedselsnummerException) {
-                sikkerLogg.error("Ident fra PDL for ${request.ident.value} har ugyldig format", e)
-                throw FantIkkePersonException("Ident fra PDL for ${request.ident} har ugyldig format", e)
-            }
-            throw PdlForesporselFeilet(
-                "Fant ingen pdlidentifikator for ${request.ident} fra PDL",
-            )
+            throw e as? PdlForesporselFeilet
+                ?: PdlForesporselFeilet(
+                    "Fant ingen pdlidentifikator for ${request.ident} fra PDL",
+                )
         }
     }
 

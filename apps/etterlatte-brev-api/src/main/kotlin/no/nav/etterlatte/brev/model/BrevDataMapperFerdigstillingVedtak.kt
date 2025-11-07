@@ -555,7 +555,6 @@ class BrevDataMapperFerdigstillingVedtak(
             trygdetid = krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             vilkaarsVurdering = vilkaarsvurdering.await(),
             behandling = behandling,
-            navnAvdoed = avdoede.single().navn,
             land.await(),
         )
     }

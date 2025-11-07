@@ -64,7 +64,6 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             trygdetid: TrygdetidDto,
             vilkaarsVurdering: VilkaarsvurderingDto,
             behandling: DetaljertBehandling,
-            navnAvdoed: String,
             landKodeverk: List<LandDto>,
         ): OmstillingsstoenadInntektsjusteringVedtak {
             val beregningsperioder =
@@ -95,7 +94,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = navnAvdoed,
+                                navnAvdoed = null,
                                 landKodeverk = landKodeverk,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,

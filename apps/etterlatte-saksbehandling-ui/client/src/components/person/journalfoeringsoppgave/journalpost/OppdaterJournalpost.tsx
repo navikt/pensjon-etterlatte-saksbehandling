@@ -35,12 +35,12 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
   const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
 
   useEffect(() => {
-    if (sak.ident != journalpost.bruker.id && fnrHarGyldigFormat(journalpost.bruker.id)) {
-      apiHentSak(journalpost.bruker.id!!)
+    if (!!journalpost.bruker.id && sak.ident !== journalpost.bruker.id && fnrHarGyldigFormat(journalpost.bruker.id)) {
+      apiHentSak(journalpost.bruker.id)
     } else {
-      apiHentSak(sak.ident!!)
+      apiHentSak(sak.ident)
     }
-  }, [journalpost.bruker.id, sak.ident])
+  }, [journalpost.bruker?.id, sak.ident])
 
   return (
     <>

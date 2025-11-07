@@ -74,21 +74,6 @@ data class EtteroppgjoerForbehandling(
         )
     }
 
-    fun oppdaterBrukerHarSvart(
-        harMottattNyInformasjon: JaNei?,
-        endringErTilUgunstForBruker: JaNei?,
-        beskrivelseAvUgunst: String?,
-    ): EtteroppgjoerForbehandling =
-        copy(
-            harMottattNyInformasjon = harMottattNyInformasjon,
-            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon == JaNei.JA },
-            beskrivelseAvUgunst =
-                beskrivelseAvUgunst?.takeIf {
-                    harMottattNyInformasjon == JaNei.JA &&
-                        endringErTilUgunstForBruker == JaNei.JA
-                },
-        )
-
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
         if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
@@ -152,6 +137,21 @@ data class EtteroppgjoerForbehandling(
             listOf(
                 EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
             )
+
+    fun oppdaterBrukerHarSvart(
+        harMottattNyInformasjon: JaNei?,
+        endringErTilUgunstForBruker: JaNei?,
+        beskrivelseAvUgunst: String?,
+    ): EtteroppgjoerForbehandling =
+        copy(
+            harMottattNyInformasjon = harMottattNyInformasjon,
+            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon == JaNei.JA },
+            beskrivelseAvUgunst =
+                beskrivelseAvUgunst?.takeIf {
+                    harMottattNyInformasjon == JaNei.JA &&
+                        endringErTilUgunstForBruker == JaNei.JA
+                },
+        )
 }
 
 class EtteroppgjoerForbehandlingStatusException(

@@ -258,8 +258,6 @@ class EtteroppgjoerForbehandlingService(
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
 
-    fun hentPensjonsgivendeInntekt(behandlingId: UUID): SummertePensjonsgivendeInntekter? = dao.hentPensjonsgivendeInntekt(behandlingId)
-
     fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlingerForSak(sakId)
 
     fun opprettEtteroppgjoerForbehandling(

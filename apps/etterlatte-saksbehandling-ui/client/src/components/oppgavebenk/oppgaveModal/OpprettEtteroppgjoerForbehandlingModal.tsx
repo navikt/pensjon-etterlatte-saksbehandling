@@ -93,9 +93,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
               ))}
 
             {mapResult(opprettForbehandlingResult, {
-              error: (error) => (
-                <ApiErrorAlert>Kunne ikke opprette forbehandling for etteroppgjør. {error.detail}</ApiErrorAlert>
-              ),
+              error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
             })}
 
             <HStack gap="4" justify="end">

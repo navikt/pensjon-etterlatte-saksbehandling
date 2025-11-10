@@ -208,6 +208,7 @@ class PersonService(
                 ?: throw FantIkkePersonException("Fant ikke gjeldende ident for personen ${request.ident}")
         } catch (e: ForespoerselException) {
             if (isDev() && e is InvalidFoedselsnummerException) {
+                logger.error("Ident fra PDL for ${request.ident} har ugyldig format. Se sikkerlogg", e)
                 sikkerLogg.error("Ident fra PDL for ${request.ident.value} har ugyldig format", e)
                 throw FantIkkePersonException("Ident fra PDL for ${request.ident} har ugyldig format", e)
             }
@@ -230,15 +231,27 @@ class PersonService(
     suspend fun hentPdlFolkeregisterIdenter(request: HentPdlIdentRequest): PdlFolkeregisterIdentListe {
         logger.info("Henter alle folkeregisteridenter for ident=${request.ident} fra PDL, inkl. historiske")
 
-        return hentPdlIdentifikatorer(request, listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT))
-            .identer
-            .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
-            .map {
-                PdlIdentifikator.FolkeregisterIdent(
-                    Folkeregisteridentifikator.of(it.ident),
-                    it.historisk,
-                )
-            }.let(::PdlFolkeregisterIdentListe)
+        val identer =
+            hentPdlIdentifikatorer(request, listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT))
+                .identer
+
+        try {
+            return identer
+                .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                .map {
+                    PdlIdentifikator.FolkeregisterIdent(
+                        Folkeregisteridentifikator.of(it.ident),
+                        it.historisk,
+                    )
+                }.let(::PdlFolkeregisterIdentListe)
+        } catch (e: InvalidFoedselsnummerException) {
+            if (isDev()) {
+                logger.error("Ident fra PDL for ${request.ident} har ugyldig format", e)
+                sikkerLogg.error("Ident fra PDL for ${request.ident.value} har ugyldig format", e)
+                return PdlFolkeregisterIdentListe(emptyList())
+            }
+            throw e
+        }
     }
 
     private suspend fun hentPdlIdentifikatorer(

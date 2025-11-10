@@ -89,7 +89,7 @@ internal class OmregningHendelserBeregningRiver(
         val revurderingaarsak = omregningData.revurderingaarsak
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
 
-        if (revurderingaarsak == Revurderingaarsak.REGULERING) {
+        if (revurderingaarsak != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
             beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         }
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()

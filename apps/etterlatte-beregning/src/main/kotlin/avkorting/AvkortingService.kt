@@ -3,6 +3,8 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.avkorting.AvkortingMapper.avkortingForFrontend
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekter
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -26,6 +28,15 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
+enum class InntektToggles(
+    private val toggle: String,
+) : FeatureToggle {
+    INNTEKT_NESTE_AAR("legge-inn-flere-inntekter"),
+    ;
+
+    override fun key(): String = toggle
+}
+
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val avkortingRepository: AvkortingRepository,
@@ -34,6 +45,7 @@ class AvkortingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -51,12 +63,19 @@ class AvkortingService(
                 .orEmpty()
                 .map { it.aar }
                 .toSet()
+
+        val skalKreveInntektNesteAar =
+            featureToggleService.isEnabled(
+                toggleId = InntektToggles.INNTEKT_NESTE_AAR,
+                defaultValue = true,
+            )
         val paakrevdeAar =
             AvkortingValider
                 .paakrevdeInntekterForBeregningAvAvkorting(
                     avkorting = avkorting ?: Avkorting(),
                     beregning = beregning,
                     behandlingType = behandling.behandlingType,
+                    krevInntektForNesteAar = skalKreveInntektNesteAar,
                 ).toSet()
         val manglendeAar = paakrevdeAar - aarMedAvkorting
         return manglendeAar.sorted()
@@ -155,7 +174,19 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        validerInntekter(behandling, beregning, avkorting, nyeGrunnlag)
+        val skalKreveInntektNesteAar =
+            featureToggleService.isEnabled(
+                toggleId = InntektToggles.INNTEKT_NESTE_AAR,
+                defaultValue = true,
+            )
+
+        validerInntekter(
+            behandling,
+            beregning,
+            avkorting,
+            nyeGrunnlag,
+            skalKreveInntektNesteAar,
+        )
         val aldersovergangMaaned =
             when (behandling.opphoerFraOgMed) {
                 null -> {
@@ -281,7 +312,12 @@ class AvkortingService(
             }
 
         val beregnetAvkorting =
-            avkorting.beregnAvkorting(behandling.virkningstidspunkt().dato, beregning, sanksjoner, behandling.opphoerFraOgMed)
+            avkorting.beregnAvkorting(
+                behandling.virkningstidspunkt().dato,
+                beregning,
+                sanksjoner,
+                behandling.opphoerFraOgMed,
+            )
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)

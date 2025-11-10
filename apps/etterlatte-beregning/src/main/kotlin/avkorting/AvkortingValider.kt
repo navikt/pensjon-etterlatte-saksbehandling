@@ -16,6 +16,7 @@ object AvkortingValider {
         avkorting: Avkorting,
         beregning: Beregning,
         behandlingType: BehandlingType,
+        krevInntektForNesteAar: Boolean,
         naa: YearMonth = YearMonth.now(),
     ): List<Int> {
         val sortertePerioder = beregning.beregningsperioder.sortedBy { it.datoFOM }
@@ -25,7 +26,9 @@ object AvkortingValider {
         val sisteAar =
             when (val sisteAarIBeregning = sortertePerioder.last().datoTOM?.year) {
                 null ->
-                    if (naa.month >= MAANED_FOR_INNTEKT_NESTE_AAR && behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                    if (naa.month >= MAANED_FOR_INNTEKT_NESTE_AAR && krevInntektForNesteAar &&
+                        behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING
+                    ) {
                         naa.year + 1
                     } else {
                         naa.year
@@ -42,6 +45,7 @@ object AvkortingValider {
         beregning: Beregning,
         eksisterendeAvkorting: Avkorting,
         nyeGrunnlag: List<AvkortingGrunnlagLagreDto>,
+        krevInntektForNesteAar: Boolean,
         naa: YearMonth = YearMonth.now(),
     ) {
         val inntekterViHar =
@@ -51,6 +55,7 @@ object AvkortingValider {
                 eksisterendeAvkorting,
                 beregning,
                 behandling.behandlingType,
+                krevInntektForNesteAar,
                 naa,
             ).toSet()
         if (!inntekterViHar.containsAll(inntekterViTrenger)) {

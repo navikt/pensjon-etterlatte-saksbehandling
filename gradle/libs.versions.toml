@@ -60,7 +60,7 @@ ktor-servertests = { module = "io.ktor:ktor-server-test-host", version.ref = "kt
 ktor-serverswagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor-version" }
 ktor-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.10.10-14.51.7935662eebb4" }
+etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.11.10-14.35.6c85e2f202a7" }
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "1.1.6" }
 brevbaker-api-model-common = { module = "no.nav.pensjon.brevbaker:brevbaker-api-model-common", version = "2.7.0"}
 

@@ -1,0 +1,1 @@
+GRANT SELECT ON etteroppgjoer_big_query_statistikk TO bigquery_import;

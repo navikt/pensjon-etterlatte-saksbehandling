@@ -159,7 +159,7 @@ class StrukturertBrevService(
             }
 
         try {
-            if (!brev.erFerdigstilt()) {
+            if (brev.status.ikkeFerdigstilt()) {
                 ferdigstillStrukturertBrev(behandlingId, brevType, brukerTokenInfo)
             } else {
                 logger.info("Behandling=$behandlingId med strukturert brev=${brev.id} er allerede ferdigstilt")

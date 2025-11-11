@@ -24,9 +24,9 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { opprettEtteroppgjoerForbehandlingIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
-import { EtteroppgjoerForbehandlingListe } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingListe'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { SakType } from '~shared/types/sak'
+import { EtteroppgjoerForbehandlingTabell } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingTabell'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -192,7 +192,7 @@ export const SakOversikt = ({
               {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
-                  <EtteroppgjoerForbehandlingListe sakId={sak.id} />
+                  <EtteroppgjoerForbehandlingTabell sakId={sak.id} />
                   {etteroppgjoerForbehandlingKnappEnabled && (
                     <Box>
                       {mapResult(opprettForbehandlingStatus, {

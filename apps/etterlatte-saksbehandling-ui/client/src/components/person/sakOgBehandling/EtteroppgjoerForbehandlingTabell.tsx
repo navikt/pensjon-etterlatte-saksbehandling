@@ -2,22 +2,30 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Alert, Button, Link, Table } from '@navikt/ds-react'
+import { Alert, Link, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { hentEtteroppgjoerForbehandlinger } from '~shared/api/etteroppgjoer'
 import {
   EtteroppgjoerForbehandling,
+  EtteroppgjoerForbehandlingStatus,
   teksterEtteroppgjoerBehandlingStatus,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { mapResult } from '~shared/api/apiUtils'
-import { PersonChatIcon } from '@navikt/aksel-icons'
+import { HarSvartIModiaModal } from '~components/person/sakOgBehandling/HarSvartIModiaModal'
 
 export function EtteroppgjoerForbehandlingTabell({ sakId }: { sakId: number }) {
   const [hentEtteroppgjoerForbehandlingerResult, hentEtteroppgjoerForbehandlingerFetch] = useApiCall(
     hentEtteroppgjoerForbehandlinger
   )
 
-  // TODO toggle visning av kopier eller ikke?
+  const harFerdigstiltForbehandling = (forbehandlinger: Array<EtteroppgjoerForbehandling>) => {
+    const ferdigstilteForbehandlinger = forbehandlinger.filter(
+      (forbehandling) => forbehandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
+    )
+
+    return !!ferdigstilteForbehandlinger?.length
+  }
+
   const relevanteForbehandlinger = (forbehandlinger: Array<EtteroppgjoerForbehandling>) =>
     forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
 
@@ -35,11 +43,11 @@ export function EtteroppgjoerForbehandlingTabell({ sakId }: { sakId: number }) {
         </Alert>
       ) : (
         <>
-          <div>
-            <Button variant="secondary" icon={<PersonChatIcon />} iconPosition="right">
-              Har svart i Modia
-            </Button>
-          </div>
+          {harFerdigstiltForbehandling(forbehandlinger) && (
+            <div>
+              <HarSvartIModiaModal sakId={sakId} />
+            </div>
+          )}
 
           <Table zebraStripes>
             <Table.Header>

@@ -5,14 +5,14 @@ import React, { useState } from 'react'
 import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterDato } from '~utils/formatering/dato'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { opprettEtteroppgoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
 import { useNavigate } from 'react-router-dom'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -92,8 +92,9 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
                 <BodyShort>Du må tildele deg oppgaven for å endre den.</BodyShort>
               ))}
 
-            {mapResult(opprettForbehandlingResult, {
-              error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+            {isFailureHandler({
+              apiResult: opprettForbehandlingResult,
+              errorMessage: 'Kunne ikke opprette forbehandling',
             })}
 
             <HStack gap="4" justify="end">

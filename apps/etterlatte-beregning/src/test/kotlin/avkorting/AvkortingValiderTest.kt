@@ -30,6 +30,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.test.assertEquals
 
 class AvkortingValiderTest {
     @Test
@@ -233,7 +234,7 @@ class AvkortingValiderTest {
             )
         validerInntekter(
             behandling(BehandlingType.REVURDERING),
-            beregning(),
+            beregning(beregninger = listOf(beregningsperiode(datoFOM = YearMonth.of(2024, 1)))),
             avkorting,
             listOf(inntektMedFratrekk),
             true,
@@ -451,6 +452,27 @@ class AvkortingValiderTest {
                 true,
             )
         krav shouldContainExactly listOf(2024, 2025, 2026)
+    }
+
+    @Test
+    fun `påkrevde inntekter ved inntektsjustering for neste år gir neste år`() {
+        val avkorting = Avkorting(aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)))
+        val beregning =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(datoFOM = YearMonth.of(2026, Month.JANUARY)),
+                    ),
+            )
+
+        val krav =
+            AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                avkorting,
+                beregning,
+                BehandlingType.REVURDERING,
+                true,
+            )
+        assertEquals(krav, listOf(2025, 2026))
     }
 
     private fun behandling(

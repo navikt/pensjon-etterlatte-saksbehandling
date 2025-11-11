@@ -203,7 +203,11 @@ class AarligInntektsjusteringJobbService(
             return true
         }
 
-        if (runBlocking { beregningKlient.harOverstyrt(forrigeBehandling.id, HardkodaSystembruker.omregning) }) {
+        val harOverstyrtBeregning =
+            runBlocking {
+                beregningKlient.harOverstyrt(forrigeBehandling.id, HardkodaSystembruker.omregning)
+            }
+        if (harOverstyrtBeregning) {
             nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, HAR_OVERSTYRT_BEREGNING)
             return true
         }

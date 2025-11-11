@@ -11,6 +11,8 @@ import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -23,6 +25,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -67,6 +70,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val oppgaveService: OppgaveService = mockk()
     private val rapid: KafkaProdusent<String, String> = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService = mockk()
 
     val service =
         AarligInntektsjusteringJobbService(
@@ -82,6 +86,7 @@ class AarligInntektsjusteringJobbServiceTest {
             oppgaveService,
             rapid,
             featureToggleService,
+            etteroppgjoerForbehandlingService,
         )
 
     @BeforeAll
@@ -93,6 +98,8 @@ class AarligInntektsjusteringJobbServiceTest {
     fun beforeEach() {
         clearAllMocks()
         every { featureToggleService.isEnabled(any(), any()) } returns true
+
+        coEvery { etteroppgjoerForbehandlingService.hentEtteroppgjoerForbehandlinger(any()) } returns emptyList()
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {
@@ -329,6 +336,42 @@ class AarligInntektsjusteringJobbServiceTest {
                         status shouldBe KjoeringStatus.FERDIGSTILT
                         sakId shouldBe SakId(123L)
                         begrunnelse shouldBe "Sak har allerede oppgitt inntekt for 2025"
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `Sak med Etteroppgjoer forbehandling skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        every { etteroppgjoerForbehandlingService.hentEtteroppgjoerForbehandlinger(any()) } returns
+            listOf(
+                EtteroppgjoerForbehandling.opprett(gyldigSak, mockk(relaxed = true), mockk()),
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjusteringJobb(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING.name
                     }
                 },
             )

@@ -600,6 +600,32 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
         )
 
+    private val inntektskomponentService =
+        InntektskomponentService(
+            klient = inntektskomponentKlient,
+            featureToggleService = featureToggleService,
+        )
+
+    private val pensjonsgivendeInntektService: PensjonsgivendeInntektService =
+        PensjonsgivendeInntektService(
+            sigrunKlient = sigrunKlient,
+        )
+
+    val etteroppgjoerForbehandlingService =
+        EtteroppgjoerForbehandlingService(
+            dao = etteroppgjoerForbehandlingDao,
+            etteroppgjoerService = etteroppgjoerService,
+            sakDao = sakLesDao,
+            oppgaveService = oppgaveService,
+            inntektskomponentService = inntektskomponentService,
+            pensjonsgivendeInntektService = pensjonsgivendeInntektService,
+            hendelserService = etteroppgjoerHendelseService,
+            beregningKlient = beregningKlient,
+            behandlingService = behandlingService,
+            vedtakKlient = vedtakKlient,
+            etteroppgjoerTempService = etteroppgjoerTempService,
+        )
+
     val aarligInntektsjusteringJobbService =
         AarligInntektsjusteringJobbService(
             omregningService = omregningService,
@@ -614,6 +640,7 @@ internal class ApplicationContext(
             rapid = rapid,
             featureToggleService = featureToggleService,
             aldersovergangService = nyAldersovergangService,
+            etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
         )
 
     private val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
@@ -651,32 +678,6 @@ internal class ApplicationContext(
             grunnlagService = grunnlagService,
             pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
-        )
-
-    private val inntektskomponentService =
-        InntektskomponentService(
-            klient = inntektskomponentKlient,
-            featureToggleService = featureToggleService,
-        )
-
-    private val pensjonsgivendeInntektService: PensjonsgivendeInntektService =
-        PensjonsgivendeInntektService(
-            sigrunKlient = sigrunKlient,
-        )
-
-    val etteroppgjoerForbehandlingService =
-        EtteroppgjoerForbehandlingService(
-            dao = etteroppgjoerForbehandlingDao,
-            etteroppgjoerService = etteroppgjoerService,
-            sakDao = sakLesDao,
-            oppgaveService = oppgaveService,
-            inntektskomponentService = inntektskomponentService,
-            pensjonsgivendeInntektService = pensjonsgivendeInntektService,
-            hendelserService = etteroppgjoerHendelseService,
-            beregningKlient = beregningKlient,
-            behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
-            etteroppgjoerTempService = etteroppgjoerTempService,
         )
 
     val behandlingsStatusService =

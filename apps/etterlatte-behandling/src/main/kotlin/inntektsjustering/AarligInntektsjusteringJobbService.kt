@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -30,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -77,6 +79,7 @@ class AarligInntektsjusteringJobbService(
     private val oppgaveService: OppgaveService,
     private val rapid: KafkaProdusent<String, String>,
     private val featureToggleService: FeatureToggleService,
+    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -171,6 +174,15 @@ class AarligInntektsjusteringJobbService(
 
         val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak.id)
         if (aapneBehandlinger.isNotEmpty()) {
+            nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
+            return true
+        }
+
+        val aapneForbehandlinger =
+            etteroppgjoerForbehandlingService
+                .hentEtteroppgjoerForbehandlinger(sakId)
+                .filter { it.erUnderBehandling() }
+        if (aapneForbehandlinger.isNotEmpty()) {
             nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
             return true
         }

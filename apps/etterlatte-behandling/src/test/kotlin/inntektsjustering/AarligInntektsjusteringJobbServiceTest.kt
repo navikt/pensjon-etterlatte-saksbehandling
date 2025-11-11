@@ -109,6 +109,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 harInntektForAar = false,
                 harSanksjon = false,
             )
+        coEvery { beregningKlient.harOverstyrt(any(), any()) } returns false
         coEvery { aldersovergangService.aldersovergangMaaned(any(), any()) } returns YearMonth.of(2050, 1)
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
@@ -544,6 +545,37 @@ class AarligInntektsjusteringJobbServiceTest {
                         status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
                         begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.ALDERSOVERGANG_67.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `sak som har overstyrt beregning skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery { beregningKlient.harOverstyrt(any(), any()) } returns true
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjusteringJobb(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.HAR_OVERSTYRT_BEREGNING.name
                     }
                 },
             )

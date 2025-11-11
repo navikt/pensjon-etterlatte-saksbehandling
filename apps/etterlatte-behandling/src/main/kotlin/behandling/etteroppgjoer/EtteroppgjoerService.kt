@@ -39,7 +39,7 @@ class EtteroppgjoerService(
     val beregningKlient: BeregningKlient,
     val sigrunKlient: SigrunKlient,
 ) {
-    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? = dao.hentAktivtEtteroppgjoerForSak(sakId)
+    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
 
     fun hentEtteroppgjoerMedSvarfristUtloept(
         inntektsaar: Int,

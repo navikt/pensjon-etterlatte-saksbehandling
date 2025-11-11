@@ -59,7 +59,6 @@ export const SakOversikt = ({
 }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const etteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer)
   const etteroppgjoerForbehandlingKnappEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer_dev_opprett_forbehandling)
   const byttTilAnnenSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
@@ -190,7 +189,7 @@ export const SakOversikt = ({
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>
 
-              {etteroppgjoerEnabled && sak.sakType === SakType.OMSTILLINGSSTOENAD && (
+              {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingListe sakId={sak.id} />

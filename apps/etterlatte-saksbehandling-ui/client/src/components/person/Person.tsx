@@ -31,7 +31,6 @@ import { usePersonLocationState } from '~components/person/lenker/usePersonLocat
 import { AktivitetspliktSakoversikt } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 import EtteroppgjoerSaksoversikt from '~components/person/etteroppgjoer/EtteroppgjoerSaksoversikt'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -55,8 +54,6 @@ export const Person = () => {
 
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
-
-  const etteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
@@ -116,7 +113,7 @@ export const Person = () => {
             <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
           )}
 
-          {etteroppgjoerEnabled && isOmstillingsstoenad(foretrukketSakResult) && (
+          {isOmstillingsstoenad(foretrukketSakResult) && (
             <Tabs.Tab value={PersonOversiktFane.ETTEROPPGJOER} label="Etteroppgjør" icon={<CurrencyExchangeIcon />} />
           )}
         </Tabs.List>
@@ -146,7 +143,7 @@ export const Person = () => {
           <AktivitetspliktSakoversikt fnr={fnr} sakResult={foretrukketSakResult} />
         </Tabs.Panel>
 
-        {etteroppgjoerEnabled && isOmstillingsstoenad(foretrukketSakResult) && (
+        {isOmstillingsstoenad(foretrukketSakResult) && (
           <Tabs.Panel value={PersonOversiktFane.ETTEROPPGJOER}>
             <EtteroppgjoerSaksoversikt sakResult={foretrukketSakResult} />
           </Tabs.Panel>

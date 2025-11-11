@@ -29,9 +29,11 @@ object AvkortingValider {
                     if (naa.month >= MAANED_FOR_INNTEKT_NESTE_AAR && krevInntektForNesteAar &&
                         behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING
                     ) {
-                        naa.year + 1
+                        maxOf(naa.year + 1, foersteAar)
                     } else {
-                        naa.year
+                        // Hvis virkningstidspunkt er i framtiden (fra nå) er det viktig at siste år påkrevd er
+                        // minst like stort som første år i beregning
+                        maxOf(naa.year, foersteAar)
                     }
 
                 else -> sisteAarIBeregning

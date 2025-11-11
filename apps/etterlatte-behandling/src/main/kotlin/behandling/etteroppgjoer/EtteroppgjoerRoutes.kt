@@ -70,7 +70,7 @@ fun Route.etteroppgjoerRoutes(
                     val etteroppgjoer =
                         inTransaction {
                             etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
-                        } ?: throw IkkeFunnetException("INGEN_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
+                        }
 
                     call.respond(etteroppgjoer)
                 }
@@ -83,9 +83,7 @@ fun Route.etteroppgjoerRoutes(
                 }
                 kunSkrivetilgang {
                     inTransaction {
-                        val etteroppgjoer =
-                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
-                                ?: throw InternfeilException("Fant ikke etteroppgjør for sak $sakId")
+                        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
 
                         krev(etteroppgjoer.status in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING_I_DEV) {
                             "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"

@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.brev.OppdaterDoedshendelseBrevDistribuert
-import no.nav.etterlatte.brukerdialog.inntektsjustering.InntektsjusteringRiver
 import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringRiver
 import no.nav.etterlatte.brukerdialog.soeknad.NySoeknadRiver
 import no.nav.etterlatte.brukerdialog.soeknad.OpprettBehandlingRiver
@@ -70,12 +69,6 @@ private fun settOppRivers(
     OpprettBehandlingRiver(
         rapidsConnection,
         appBuilder.behandlingKlient,
-    )
-
-    InntektsjusteringRiver(
-        rapidsConnection,
-        behandlingKlient = appBuilder.behandlingKlient,
-        journalfoerInntektsjusteringService = appBuilder.journalfoerInntektsjusteringService,
     )
 
     OmsMeldtInnEndringRiver(

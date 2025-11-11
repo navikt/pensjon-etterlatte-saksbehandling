@@ -64,29 +64,6 @@ class EtteroppgjoerDao(
         }
     }
 
-    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT *
-                        FROM etteroppgjoer 
-                        WHERE sak_id = ?
-                        AND status != ?
-                        """.trimIndent(),
-                    )
-                statement.setLong(1, sakId.sakId)
-                statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
-
-                val etteroppgjoer = statement.executeQuery().toList { toEtteroppgjoer() }
-
-                // TODO: håndtere flere aktive etteroppgjoer for sak
-                krev(etteroppgjoer.size < 2) { "Fant ${etteroppgjoer.size} aktive etteroppgjoer for sak $sakId, forventet 1" }
-                etteroppgjoer.firstOrNull()
-            }
-        }
-
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,

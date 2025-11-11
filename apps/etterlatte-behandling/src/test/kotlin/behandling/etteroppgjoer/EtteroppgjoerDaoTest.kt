@@ -83,16 +83,6 @@ class EtteroppgjoerDaoTest(
     }
 
     @Test
-    fun `skal kaste feil hvis flere aktive etteroppgjoer for samme sak `() {
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
-
-        assertThrows<InternfeilException> {
-            etteroppgjoerDao.hentAktivtEtteroppgjoerForSak(sak.id)
-        }
-    }
-
-    @Test
     fun `skal hente saker med etteroppgjoer for spesifikke enheter`() {
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak2.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
@@ -110,28 +100,6 @@ class EtteroppgjoerDaoTest(
                 ).firstOrNull()
 
         SakId(etteroppgjoerSak!!.sakId) shouldBe sak.id
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        value = EtteroppgjoerStatus::class,
-        names = ["FERDIGSTILT"],
-        mode = EnumSource.Mode.EXCLUDE,
-    )
-    fun `skal hente aktive etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, status))
-        etteroppgjoerDao.hentAktivtEtteroppgjoerForSak(sak.id)!!.status shouldBe status
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        value = EtteroppgjoerStatus::class,
-        names = ["FERDIGSTILT"],
-        mode = EnumSource.Mode.INCLUDE,
-    )
-    fun `skal ikke hente ferdigstilte etteroppgjoer for sak`(status: EtteroppgjoerStatus) {
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, status))
-        etteroppgjoerDao.hentAktivtEtteroppgjoerForSak(sak.id) shouldBe null
     }
 
     @Test

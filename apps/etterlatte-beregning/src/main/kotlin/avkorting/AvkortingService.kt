@@ -119,6 +119,16 @@ class AvkortingService(
                 krevIkkeNull(eksisterendeAvkorting ?: forrigeAvkorting) {
                     "Både eksisterende og forrige avkorting er null, men da skulle vi returnert null fra metoden"
                 }
+
+            // Selv om vi ikke reberegner avkortingen må vi lagre ned en kopi slik at vi tar med oss det kopierte
+            // når vi legger inn grunnlag senere i behandlingen.
+            if (eksisterendeAvkorting == null) {
+                avkortingRepository.lagreAvkorting(
+                    behandlingId,
+                    behandling.sak,
+                    avkorting.kopierAvkorting(behandling.opphoerFraOgMed),
+                )
+            }
             return avkortingForFrontend(avkorting, behandling, forrigeAvkorting)
         }
 

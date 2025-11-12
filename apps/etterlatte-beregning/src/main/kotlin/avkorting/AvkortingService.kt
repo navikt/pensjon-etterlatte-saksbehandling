@@ -110,7 +110,7 @@ class AvkortingService(
                 brukerTokenInfo = brukerTokenInfo,
             )
         if (manglendeInntektsaar.isNotEmpty()) {
-            logger.warn(
+            logger.info(
                 "Vi har en omsstillingsstønad ${behandling.behandlingType} som mangler " +
                     "inntekt påkrevd(e) år: $manglendeInntektsaar i sak=${behandling.sak}, " +
                     "behandlingId=${behandling.id}.",
@@ -126,7 +126,7 @@ class AvkortingService(
                 avkortingRepository.lagreAvkorting(
                     behandlingId,
                     behandling.sak,
-                    avkorting.kopierAvkorting(behandling.opphoerFraOgMed),
+                    avkorting.kopierAvkorting(opphoerFom = behandling.opphoerFraOgMed, nullstillAvkortetYtelse = true),
                 )
             }
             return avkortingForFrontend(avkorting, behandling, forrigeAvkorting)
@@ -180,9 +180,21 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingFrontendDto {
         tilstandssjekk(behandlingId, brukerTokenInfo)
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
-        val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandlingId)
+
+        if (eksisterendeAvkorting == null && behandling.behandlingType == BehandlingType.REVURDERING) {
+            throw InternfeilException(
+                "Prøver å reberegne en avkorting i en revurdering, der det ikke " +
+                    "finnes en avkorting for revurderingen. Dette betyr at kopiering av forrige avkorting har " +
+                    "feilet. Stopper beregningen slik at vi ikke lager behandlinger med hull i " +
+                    "avkortingsgrunnlag. behandlingId=${behandling.id}, sakId=${behandling.sak}",
+            )
+        }
+        // Sjekken over garanterer at vi får en ny tom avkorting kun i førstegangsbehandling
+        val avkorting = eksisterendeAvkorting ?: Avkorting()
+
+        val beregning = beregningService.hentBeregningNonnull(behandlingId)
 
         val skalKreveInntektNesteAar =
             featureToggleService.isEnabled(

@@ -27,7 +27,11 @@ class AvkortingReparerAarsoppgjoeret(
         sakId: SakId,
         alleVedtak: List<VedtakSammendragDto>,
     ): Avkorting {
-        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.toSet()
+        val alleBehandlingerMedVedtak =
+            alleVedtak
+                .filter { it.vedtakType != VedtakType.OPPHOER }
+                .map { it.behandlingId }
+        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(alleBehandlingerMedVedtak).toSet()
         val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
         val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
 
@@ -90,7 +94,7 @@ class AvkortingReparerAarsoppgjoeret(
 fun List<VedtakSammendragDto>.sisteLoependeVedtakForAar(aar: Int) =
     filter {
         val vedtakAar = it.virkningstidspunkt?.year ?: throw InternfeilException("Vedtak mangler virk")
-        it.vedtakType != VedtakType.OPPHOER && vedtakAar == aar
+        it.vedtakType != VedtakType.OPPHOER && vedtakAar <= aar
     }.maxBy {
         it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
     }

@@ -138,6 +138,18 @@ data class Avkorting(
                                                             tom = tom,
                                                         ),
                                                 ),
+                                            avkortingsperioder =
+                                                if (nullstillAvkortetYtelse) {
+                                                    emptyList()
+                                                } else {
+                                                    inntektsavkorting.avkortingsperioder
+                                                },
+                                            avkortetYtelseForventetInntekt =
+                                                if (nullstillAvkortetYtelse) {
+                                                    emptyList()
+                                                } else {
+                                                    inntektsavkorting.avkortetYtelseForventetInntekt
+                                                },
                                         )
                                     },
                                 avkortetYtelse =
@@ -173,9 +185,16 @@ data class Avkorting(
         aldersovergang: YearMonth? = null,
     ): Avkorting {
         var oppdatertAvkorting = this
-        nyttGrunnlag.forEach { oppdatertAvkorting = oppdatertAvkorting.oppdaterMedInntektsgrunnlag(it, bruker, opphoerFom, aldersovergang) }
+        nyttGrunnlag.forEach {
+            oppdatertAvkorting = oppdatertAvkorting.oppdaterMedInntektsgrunnlag(it, bruker, opphoerFom, aldersovergang)
+        }
 
-        return oppdatertAvkorting.beregnAvkorting(beregning.beregningsperioder.minOf { it.datoFOM }, beregning, sanksjoner, opphoerFom)
+        return oppdatertAvkorting.beregnAvkorting(
+            beregning.beregningsperioder.minOf { it.datoFOM },
+            beregning,
+            sanksjoner,
+            opphoerFom,
+        )
     }
 
     /**
@@ -214,7 +233,11 @@ data class Avkorting(
                 fratrekkInnAarUtland = fratrekkInnAarUtland,
                 innvilgaMaaneder =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergangIDetteInntektsaaret),
+                        ?: finnAntallInnvilgaMaanederForAar(
+                            gjeldendeAaarsoppgjoerFom,
+                            tom,
+                            aldersovergangIDetteInntektsaaret,
+                        ),
                 overstyrtInnvilgaMaanederAarsak =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
@@ -356,7 +379,14 @@ data class Avkorting(
                         }
 
                     when (aarsoppgjoer) {
-                        is AarsoppgjoerLoepende -> beregnAvkortingLoepende(aarsoppgjoer, ytelseFoerAvkorting, sanksjoner, opphoerFom)
+                        is AarsoppgjoerLoepende ->
+                            beregnAvkortingLoepende(
+                                aarsoppgjoer,
+                                ytelseFoerAvkorting,
+                                sanksjoner,
+                                opphoerFom,
+                            )
+
                         is Etteroppgjoer -> beregnAvkortingEtteroppgjoer(aarsoppgjoer, ytelseFoerAvkorting, sanksjoner)
                     }
                 }
@@ -611,6 +641,7 @@ data class Avkorting(
                     minOf(desemberIAaret, opphoerFom.minusMonths(1))
                 }
             }
+
             false ->
                 if (opphoerFom != null && opphoerFom.minusMonths(1).year == aarsoppgjoer.aar) {
                     opphoerFom.minusMonths(1)

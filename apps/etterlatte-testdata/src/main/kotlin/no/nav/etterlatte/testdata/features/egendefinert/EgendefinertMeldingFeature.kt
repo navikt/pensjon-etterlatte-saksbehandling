@@ -1,7 +1,6 @@
 package no.nav.etterlatte.testdata.features.egendefinert
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
@@ -18,7 +17,7 @@ import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.testdata.JsonMessage
-import no.nav.etterlatte.testdata.kunEtterlatteUtvikling
+import no.nav.etterlatte.testdata.kunEtterlatte
 
 object EgendefinertMeldingFeature : TestDataFeature {
     override val beskrivelse: String
@@ -30,7 +29,7 @@ object EgendefinertMeldingFeature : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-                kunEtterlatteUtvikling {
+                kunEtterlatte {
                     call.respond(
                         MustacheContent(
                             "egendefinert/ny-melding.hbs",
@@ -44,7 +43,7 @@ object EgendefinertMeldingFeature : TestDataFeature {
             }
 
             post {
-                kunEtterlatteUtvikling {
+                kunEtterlatte {
                     try {
                         val navIdent =
                             krevIkkeNull(brukerTokenInfo.ident()) {
@@ -88,7 +87,7 @@ object EgendefinertMeldingFeature : TestDataFeature {
             }
 
             get("sendt") {
-                kunEtterlatteUtvikling {
+                kunEtterlatte {
                     val partisjon = call.request.queryParameters["partisjon"]!!
                     val offset = call.request.queryParameters["offset"]!!
 

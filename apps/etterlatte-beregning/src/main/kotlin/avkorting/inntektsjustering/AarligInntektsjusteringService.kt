@@ -65,9 +65,12 @@ class AarligInntektsjusteringService(
                 fom = YearMonth.of(aar, 1),
             )
 
-        // Avkorting opprettes her med tidligere årsoppgjør
+        // vi kaller først hentOpprettEllerReberegnAvkorting, siden det er det som gjøres fra frontend når
+        // en saksbehandler åpner beregningssiden i Gjenny. Etter dette kallet skal årsoppgjør i revurderingen
+        // være opprettet, og vi kan gå videre til å legge inn inntekt for neste år
         avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, brukerTokenInfo)
-
+        // TODO: man kan  utlede nyttGrunnlag basert på avkortingen man har fått opprettet og hentet ut for behandling
+        //  i linjen over.
         avkortingService.beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(nyttGrunnlag), brukerTokenInfo)
         return avkortingRepository.hentAvkorting(behandlingId)
             ?: throw AvkortingFinnesIkkeException(behandlingId)

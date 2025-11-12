@@ -92,7 +92,10 @@ data class Avkorting(
     /**
      * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
      */
-    fun kopierAvkorting(opphoerFom: YearMonth? = null): Avkorting {
+    fun kopierAvkorting(
+        opphoerFom: YearMonth? = null,
+        nullstillAvkortetYtelse: Boolean = false,
+    ): Avkorting {
         val relevanteAaroppgjoer =
             if (opphoerFom == null) {
                 this.aarsoppgjoer
@@ -136,6 +139,12 @@ data class Avkorting(
                                                         ),
                                                 ),
                                         )
+                                    },
+                                avkortetYtelse =
+                                    if (nullstillAvkortetYtelse) {
+                                        emptyList()
+                                    } else {
+                                        it.avkortetYtelse
                                     },
                             )
 

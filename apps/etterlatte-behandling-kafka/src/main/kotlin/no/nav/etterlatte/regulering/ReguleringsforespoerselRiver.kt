@@ -140,7 +140,7 @@ enum class ReguleringFeatureToggle(
     private val key: String,
 ) : FeatureToggle {
     START_REGULERING("start-regulering"),
-    SKAL_STOPPE_ETTER_FATTET_VEDTAK("regulering-skal-stoppe-etter-fattet-vedtak"),
+    SKAL_STOPPE_ETTER_FATTET_VEDTAK("omregning-skal-stoppe-etter-fattet-vedtak"),
     ;
 
     override fun key() = key

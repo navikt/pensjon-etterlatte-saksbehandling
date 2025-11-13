@@ -56,6 +56,13 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const manglerFastsattInntektPaaForbehandling =
     etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erForbehandling
 
+  const erAutomatiskBehandlingMedNyInformasjon =
+    behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB &&
+    etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA
+
+  const kanRedigereFaktiskInntekt =
+    erRedigerbar && (behandling.opprinnelse !== Opprinnelse.AUTOMATISK_JOBB || erAutomatiskBehandlingMedNyInformasjon)
+
   const navigerTilNesteSteg = () => {
     if (harIngenSkjemaErrors) {
       if (revurderingStammerFraSvarfristUtloept) {
@@ -104,7 +111,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       )}
 
       <FastsettFaktiskInntekt
-        erRedigerbar={erRedigerbar}
+        erRedigerbar={kanRedigereFaktiskInntekt}
         setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
       />
 

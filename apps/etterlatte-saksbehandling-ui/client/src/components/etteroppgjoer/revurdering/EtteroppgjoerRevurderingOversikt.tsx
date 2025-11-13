@@ -80,7 +80,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       </BodyShort>
       <Inntektsopplysninger />
 
-      {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB ? (
+      {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && (
         <>
           <InformasjonFraBruker
             behandling={behandling}
@@ -100,21 +100,13 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
                 </Alert>
               </Box>
             )}
-
-          {etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
-            etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
-              <FastsettFaktiskInntekt
-                erRedigerbar={etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erRedigerbar}
-                setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-              />
-            )}
         </>
-      ) : (
-        <FastsettFaktiskInntekt
-          erRedigerbar={erRedigerbar}
-          setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-        />
       )}
+
+      <FastsettFaktiskInntekt
+        erRedigerbar={erRedigerbar}
+        setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+      />
 
       {etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
         <>

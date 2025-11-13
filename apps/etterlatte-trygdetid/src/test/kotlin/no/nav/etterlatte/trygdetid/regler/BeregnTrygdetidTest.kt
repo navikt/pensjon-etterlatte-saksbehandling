@@ -409,8 +409,8 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(15, 11, 0),
-                                antallMaaneder = 191,
+                                periode = Period.of(15, 10, 0),
+                                antallMaaneder = 190,
                                 opptjeningstidIMaaneder = 362,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -485,8 +485,8 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(19, 3, 0),
-                                antallMaaneder = 231,
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
                                 opptjeningstidIMaaneder = 312,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -546,15 +546,15 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(19, 3, 0),
-                                antallMaaneder = 231,
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
                                 opptjeningstidIMaaneder = 312,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
                         fremtidigTrygdetidTeoretisk =
                             FremtidigTrygdetid(
-                                periode = Period.of(19, 3, 0),
-                                antallMaaneder = 231,
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
                                 opptjeningstidIMaaneder = 312,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -767,7 +767,7 @@ internal class BeregnTrygdetidTest {
                                 opptjeningstidIMaaneder = 259,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
-                        samletTrygdetidNorge = 28,
+                        samletTrygdetidNorge = 29,
                         samletTrygdetidTeoretisk = 34,
                         prorataBroek = IntBroek(teller = 69, nevner = 137),
                         overstyrt = false,
@@ -835,8 +835,8 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(8, 0, 0),
-                                antallMaaneder = 96,
+                                periode = Period.of(7, 11, 0),
+                                antallMaaneder = 95,
                                 opptjeningstidIMaaneder = 481,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -1158,7 +1158,7 @@ internal class BeregnTrygdetidTest {
                                 opptjeningstidIMaaneder = 343,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = false,
                             ),
-                        samletTrygdetidNorge = 20,
+                        samletTrygdetidNorge = 21,
                         samletTrygdetidTeoretisk = 40,
                         prorataBroek = IntBroek(40, 302),
                         overstyrt = false,

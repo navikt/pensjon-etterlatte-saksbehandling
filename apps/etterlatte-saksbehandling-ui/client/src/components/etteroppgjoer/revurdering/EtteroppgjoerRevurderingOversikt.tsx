@@ -58,7 +58,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const erAutomatiskBehandlingMedNyInformasjon =
     behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB &&
-    etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA
+    etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
+    etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA
 
   const kanRedigereFaktiskInntekt =
     erRedigerbar && (behandling.opprinnelse !== Opprinnelse.AUTOMATISK_JOBB || erAutomatiskBehandlingMedNyInformasjon)

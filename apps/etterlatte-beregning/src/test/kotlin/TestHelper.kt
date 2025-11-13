@@ -206,6 +206,8 @@ fun inntektAvkortingGrunnlag(
         ),
 )
 
+fun aarsoppgjoerFor(aarListe: IntRange) = aarListe.map { aar -> aarsoppgjoer(aar) }
+
 fun aarsoppgjoer(
     aar: Int = 2024,
     fom: YearMonth = YearMonth.of(aar, 1),

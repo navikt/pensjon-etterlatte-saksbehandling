@@ -36,7 +36,7 @@ class AvkortingReparerAarsoppgjoeretTest {
         val virk = YearMonth.of(2024, 12)
         val alleVedtak = emptyList<VedtakSammendragDto>()
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -64,9 +64,14 @@ class AvkortingReparerAarsoppgjoeretTest {
                     )
             }
         val virk = YearMonth.of(2025, 1)
-        val alleVedtak = emptyList<VedtakSammendragDto>()
-
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        val alleVedtak =
+            listOf(
+                vedtakSammendragDto(
+                    virk = YearMonth.of(2024, 6),
+                    datoAttestert = YearMonth.of(2024, 6),
+                ),
+            )
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -94,9 +99,15 @@ class AvkortingReparerAarsoppgjoeretTest {
                     )
             }
         val virk = YearMonth.of(2025, 2)
-        val alleVedtak = emptyList<VedtakSammendragDto>()
+        val alleVedtak =
+            listOf(
+                vedtakSammendragDto(
+                    virk = YearMonth.of(2024, 1),
+                    datoAttestert = YearMonth.of(2024, 1),
+                ),
+            )
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -145,7 +156,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 ),
             )
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -198,7 +209,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 ),
             )
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -211,6 +222,57 @@ class AvkortingReparerAarsoppgjoeretTest {
                 virk,
                 sakId,
                 alleVedtak,
+            )
+
+        reparertAvkorting.aarsoppgjoer.size shouldBe 2
+        reparertAvkorting.aarsoppgjoer[0].aar shouldBe 2024
+        reparertAvkorting.aarsoppgjoer[1].aar shouldBe 2025
+    }
+
+    @Test
+    fun `skal hente avkorting for sist iverksatte`() {
+        val sakId = SakId(123L)
+        val forrigeAvkorting =
+            Avkorting(
+                aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)),
+            )
+
+        val sistebehandlingIdManglendeAar = UUID.randomUUID()
+        val sisteAvkortingManglendeAar =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(aar = 2024),
+                    ),
+            )
+
+        val alleVedtak =
+            listOf(
+                vedtakSammendragDto(virk = YearMonth.of(2025, 1), datoAttestert = YearMonth.of(2024, 11)),
+                vedtakSammendragDto(
+                    behandlingId = sistebehandlingIdManglendeAar,
+                    virk = YearMonth.of(2024, 10),
+                    datoAttestert = YearMonth.of(2024, 9),
+                ),
+                vedtakSammendragDto(
+                    type = VedtakType.INNVILGELSE,
+                    virk = YearMonth.of(2024, 3),
+                    datoAttestert = YearMonth.of(2024, 2),
+                ),
+            )
+
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
+            listOf(
+                aarsoppgjoer(aar = 2024),
+                aarsoppgjoer(aar = 2025),
+            )
+        every { repo.hentAvkorting(sistebehandlingIdManglendeAar) } returns sisteAvkortingManglendeAar
+
+        val reparertAvkorting =
+            service.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
+                sakId,
+                alleVedtak,
+                forrigeAvkorting,
             )
 
         reparertAvkorting.aarsoppgjoer.size shouldBe 2

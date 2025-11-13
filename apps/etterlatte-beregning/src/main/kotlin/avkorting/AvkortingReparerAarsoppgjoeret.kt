@@ -25,13 +25,10 @@ class AvkortingReparerAarsoppgjoeret(
         forrigeAvkorting: Avkorting,
         virkningstidspunkt: YearMonth,
         sakId: SakId,
-        alleVedtak: List<VedtakSammendragDto>,
+        iverksatteVedtakPaaSak: List<VedtakSammendragDto>,
     ): Avkorting {
-        val alleBehandlingerMedVedtak =
-            alleVedtak
-                .filter { it.vedtakType != VedtakType.OPPHOER }
-                .map { it.behandlingId }
-        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(alleBehandlingerMedVedtak).toSet()
+        val behandlingerMedVedtak = iverksatteVedtakPaaSak.map { it.behandlingId }
+        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(behandlingerMedVedtak).map { it.aar }.toSet()
         val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
         val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
 
@@ -50,7 +47,7 @@ class AvkortingReparerAarsoppgjoeret(
                     false -> virkningstidspunkt.year
                 }
 
-            val sisteBehandlingManglendeAar = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
+            val sisteBehandlingManglendeAar = iverksatteVedtakPaaSak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
             val sisteAvkortingManglendeAar =
                 avkortingRepository.hentAvkorting(sisteBehandlingManglendeAar)
                     ?: throw TidligereAvkortingFinnesIkkeException(sisteBehandlingManglendeAar)
@@ -68,7 +65,11 @@ class AvkortingReparerAarsoppgjoeret(
         alleVedtak: List<VedtakSammendragDto>,
         avkortingSistIverksatt: Avkorting,
     ): Avkorting {
-        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.toSet()
+        val alleAarMedAarsoppgjoer =
+            avkortingRepository
+                .hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId })
+                .map { it.aar }
+                .toSet()
         val alleAarNyAvkortng = avkortingSistIverksatt.aarsoppgjoer.map { it.aar }.toSet()
         val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
 
@@ -94,7 +95,7 @@ class AvkortingReparerAarsoppgjoeret(
 fun List<VedtakSammendragDto>.sisteLoependeVedtakForAar(aar: Int) =
     filter {
         val vedtakAar = it.virkningstidspunkt?.year ?: throw InternfeilException("Vedtak mangler virk")
-        it.vedtakType != VedtakType.OPPHOER && vedtakAar <= aar
+        it.vedtakType != VedtakType.OPPHOER && vedtakAar == aar
     }.maxBy {
         it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
     }

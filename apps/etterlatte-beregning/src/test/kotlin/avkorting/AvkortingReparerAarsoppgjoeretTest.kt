@@ -8,7 +8,6 @@ import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.NyeAarMedInntektMaaStarteIJanuar
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Test
@@ -24,7 +23,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det ikke mangler tidligere aarsoppgjoer paa forrige avkorting skal den returneres`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             mockk<Avkorting> {
                 every { aarsoppgjoer } returns
@@ -46,7 +44,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
                 alleVedtak,
             )
 
@@ -55,7 +52,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det mangler aarsoppgjoer men det er fordi nytt aarsoppgjoer er et nytt aar skal forrige avkorting returneres`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             mockk<Avkorting> {
                 every { aarsoppgjoer } returns
@@ -81,7 +77,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
                 alleVedtak,
             )
 
@@ -90,7 +85,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det mangler aarsoppgjoer men det er fordi nytt aarsoppgjoer er et nytt aar skal det feile hvis virk ikke er januar`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             mockk<Avkorting> {
                 every { aarsoppgjoer } returns
@@ -117,7 +111,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
                 alleVedtak,
             )
         }
@@ -125,7 +118,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det mangler aarsoppgjoer for aar samme som virk skal det tidligere avkorting hentes for kopiering`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             Avkorting(
                 aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)),
@@ -167,7 +159,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
                 alleVedtak,
             )
 
@@ -178,7 +169,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det mangler aarsoppgjoer for tidligere aar enn virk skal disse hentes og legges til`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             Avkorting(
                 aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)),
@@ -220,7 +210,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
                 alleVedtak,
             )
 
@@ -231,7 +220,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `skal hente avkorting for sist iverksatte`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             Avkorting(
                 aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)),
@@ -270,7 +258,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
         val reparertAvkorting =
             service.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-                sakId,
                 alleVedtak,
                 forrigeAvkorting,
             )

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.YearMonth
@@ -24,7 +23,6 @@ class AvkortingReparerAarsoppgjoeret(
     fun hentSisteAvkortingMedReparertAarsoppgjoer(
         forrigeAvkorting: Avkorting,
         virkningstidspunkt: YearMonth,
-        sakId: SakId,
         iverksatteVedtakPaaSak: List<VedtakSammendragDto>,
     ): Avkorting {
         val behandlingerMedVedtak = iverksatteVedtakPaaSak.map { it.behandlingId }
@@ -61,7 +59,6 @@ class AvkortingReparerAarsoppgjoeret(
     }
 
     fun hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-        sakId: SakId,
         alleVedtak: List<VedtakSammendragDto>,
         avkortingSistIverksatt: Avkorting,
     ): Avkorting {

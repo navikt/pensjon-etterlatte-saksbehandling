@@ -167,6 +167,18 @@ data class Avkorting(
                                     it.inntekt.copy(
                                         id = UUID.randomUUID(),
                                     ),
+                                avkortingsperioder =
+                                    if (nullstillAvkortetYtelse) {
+                                        emptyList()
+                                    } else {
+                                        it.avkortingsperioder
+                                    },
+                                avkortetYtelse =
+                                    if (nullstillAvkortetYtelse) {
+                                        emptyList()
+                                    } else {
+                                        it.avkortetYtelse
+                                    },
                             )
                     }
                 },

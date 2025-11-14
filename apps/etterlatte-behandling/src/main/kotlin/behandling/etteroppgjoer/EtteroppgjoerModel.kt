@@ -26,6 +26,8 @@ data class Etteroppgjoer(
     fun mottattSkatteoppgjoer() = status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
 
     fun kanOppretteRevurdering() = status == EtteroppgjoerStatus.VENTER_PAA_SVAR
+
+    fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
 }
 
 enum class EtteroppgjoerStatus {

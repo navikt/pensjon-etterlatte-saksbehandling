@@ -85,7 +85,7 @@ fun Route.etteroppgjoerRoutes(
                     inTransaction {
                         val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
 
-                        krev(etteroppgjoer.kanRedigeres()) {
+                        krev(etteroppgjoer.venterPaaSkatteoppgjoer()) {
                             "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"
                         }
 

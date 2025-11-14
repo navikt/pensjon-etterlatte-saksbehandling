@@ -25,7 +25,7 @@ data class Etteroppgjoer(
 
     fun mottattSkatteoppgjoer() = status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
 
-    fun kanOppretteRevurdering() = status == EtteroppgjoerStatus.VENTER_PAA_SVAR
+    fun kanOppretteRevurdering() = status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT)
 
     fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
 }

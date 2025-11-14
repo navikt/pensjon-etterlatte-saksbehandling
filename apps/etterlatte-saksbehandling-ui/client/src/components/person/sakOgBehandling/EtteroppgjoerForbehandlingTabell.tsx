@@ -19,7 +19,7 @@ export function EtteroppgjoerForbehandlingTabell({ sakId }: { sakId: number }) {
   )
 
   const harFerdigstiltForbehandling = (forbehandlinger: Array<EtteroppgjoerForbehandling>) => {
-    const ferdigstilteForbehandlinger = forbehandlinger.filter(
+    const ferdigstilteForbehandlinger = [...forbehandlinger].filter(
       (forbehandling) => forbehandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
     )
 

@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -293,6 +294,7 @@ internal class TrygdetidServiceIntegrationTest(
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
                 every { revurderingsaarsak } returns null
+                every { prosesstype } returns Prosesstype.MANUELL
             }
 
         repository.opprettTrygdetid(
@@ -346,7 +348,7 @@ internal class TrygdetidServiceIntegrationTest(
     }
 
     @Test
-    fun `skal kopiere uten reberegning av trygdetid fra annen behandling hvis vi er regulering`() {
+    fun `skal kopiere uten reberegning av trygdetid fra annen behandling hvis vi har en automatisk prosesstype`() {
         val behandlingId = UUID.randomUUID()
         val kildeBehandlingId = UUID.randomUUID()
         val grunnlagTestData = GrunnlagTestData()
@@ -367,6 +369,7 @@ internal class TrygdetidServiceIntegrationTest(
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { tidligereFamiliepleier } returns null
                 every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
+                every { prosesstype } returns Prosesstype.AUTOMATISK
             }
         val detaljertResultat =
             DetaljertBeregnetTrygdetidResultat(

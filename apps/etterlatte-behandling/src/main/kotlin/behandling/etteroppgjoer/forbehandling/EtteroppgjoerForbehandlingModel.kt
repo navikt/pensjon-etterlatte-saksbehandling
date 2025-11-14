@@ -36,12 +36,14 @@ data class EtteroppgjoerForbehandling(
     // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val kopiertFra: UUID? = null,
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
+    val harVedtakAvTypeOpphoer: Boolean? = null,
 ) {
     companion object {
         fun opprett(
             sak: Sak,
             innvilgetPeriode: Periode,
             sisteIverksatteBehandling: UUID,
+            harVedtakAvTypeOpphoer: Boolean? = null,
         ) = EtteroppgjoerForbehandling(
             id = UUID.randomUUID(),
             sak = sak,
@@ -56,6 +58,7 @@ data class EtteroppgjoerForbehandling(
             endringErTilUgunstForBruker = null,
             beskrivelseAvUgunst = null,
             varselbrevSendt = null,
+            harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
         )
     }
 

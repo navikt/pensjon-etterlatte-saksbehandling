@@ -123,12 +123,12 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = hentForbehandling(forbehandlingId)
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
-        if (!forbehandling.kanAvbrytes()) {
+        if (!forbehandling.erRedigerbar()) {
             throw IkkeTillattException(
                 "FEIL_STATUS_FORBEHANDLING",
                 "Forbehandling med id=$forbehandlingId kan ikke avbrytes. Status er ${forbehandling.status}",
             )
-        } else if (forbehandling.kopiertFra != null) {
+        } else if (forbehandling.erRevurdering()) {
             throw IkkeTillattException(
                 "FORBEHANDLING_ER_TILKNYTT_REVURDERING",
                 "Forbehandling med id=$forbehandlingId er tilknytt revurdering og kan ikke avbrytes gjennom dette endepunktet.",
@@ -417,7 +417,7 @@ class EtteroppgjoerForbehandlingService(
     ): BeregnetResultatOgBrevSomSkalSlettes {
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        if (!forbehandling.kanEndres()) {
+        if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
 
@@ -472,7 +472,7 @@ class EtteroppgjoerForbehandlingService(
         beskrivelseAvUgunst: String?,
     ) {
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
-        if (!forbehandling.kanEndres()) {
+        if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
 
@@ -546,9 +546,8 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
-        if (etteroppgjoer.status !in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING) {
-            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
+        if (!etteroppgjoer.mottattSkatteoppgjoer()) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjoerStatus=${etteroppgjoer.status}")
             throw IkkeTillattException(
                 "FEIL_ETTEROPPGJOERS_STATUS",
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",

@@ -33,7 +33,6 @@ data class EtteroppgjoerForbehandling(
     val beskrivelseAvUgunst: String?,
     val aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling? = null,
     val aarsakTilAvbrytelseBeskrivelse: String? = null,
-    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val kopiertFra: UUID? = null,
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
     val harVedtakAvTypeOpphoer: Boolean? = null,
@@ -88,7 +87,7 @@ data class EtteroppgjoerForbehandling(
         aarsak: AarsakTilAvbryteForbehandling,
         kommentar: String?,
     ): EtteroppgjoerForbehandling {
-        if (!kanAvbrytes()) {
+        if (!erRedigerbar()) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.AVBRUTT)
         }
         return copy(
@@ -115,10 +114,6 @@ data class EtteroppgjoerForbehandling(
             varselbrevSendt = varselbrevSendt,
         )
 
-    fun kanAvbrytes() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
-
-    fun kanEndres() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
-
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 
     fun medVarselbrevSendt(dato: LocalDate): EtteroppgjoerForbehandling {
@@ -129,17 +124,19 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun erUnderBehandling() =
-        status in
-            listOf(
-                EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                EtteroppgjoerForbehandlingStatus.BEREGNET,
-            )
+        when (status) {
+            EtteroppgjoerForbehandlingStatus.OPPRETTET,
+            EtteroppgjoerForbehandlingStatus.BEREGNET,
+            -> true
+            else -> false
+        }
 
-    fun erFerdigstilt() =
-        status in
-            listOf(
-                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-            )
+    fun erFerdigstilt() = status == EtteroppgjoerForbehandlingStatus.FERDIGSTILT
+
+    fun erRedigerbar() = erUnderBehandling() && !erFerdigstilt()
+
+    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
+    fun erRevurdering() = kopiertFra != null
 
     fun oppdaterBrukerHarSvart(
         harMottattNyInformasjon: JaNei?,

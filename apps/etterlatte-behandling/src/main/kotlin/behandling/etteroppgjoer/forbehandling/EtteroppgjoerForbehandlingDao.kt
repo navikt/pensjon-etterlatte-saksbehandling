@@ -91,7 +91,7 @@ class EtteroppgjoerForbehandlingDao(
                             beskrivelse_av_ugunst = excluded.beskrivelse_av_ugunst,
                             etteroppgjoer_resultat_type = excluded.etteroppgjoer_resultat_type,
                             aarsak_til_avbrytelse = excluded.aarsak_til_avbrytelse,
-                            kommentar_til_avbrytelse = excluded.kommentar_til_avbrytelse
+                            kommentar_til_avbrytelse = excluded.kommentar_til_avbrytelse,
                             har_vedtak_av_type_opphoer = excluded.har_vedtak_av_type_opphoer
                         """.trimIndent(),
                     )

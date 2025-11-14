@@ -19,6 +19,7 @@ import no.nav.etterlatte.testdata.dolly.DollyInterface
 import no.nav.etterlatte.testdata.dolly.ForenkletFamilieModell
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
 import no.nav.etterlatte.testdata.features.dolly.alderVoksenRandom
+import no.nav.etterlatte.testdata.features.dolly.defaultDagerSidenDoedsfall
 import no.nav.etterlatte.testdata.features.dolly.generererBestilling
 
 class OpprettFamilie(
@@ -85,6 +86,7 @@ class OpprettFamilie(
                     val barnOver18 = params["barnOver18"]?.toBoolean() ?: false
                     val halvSoesken = params["halvsoeskenAvdoed"]?.toInt() ?: throw Exception("Må ha halvsoeskenAvdoed")
                     val helSoesken = params["helsoesken"]?.toInt() ?: throw Exception("Må ha helsoesken")
+                    val antallDagerSidenDoedsfall = params["antallDagerSidenDoedsfall"]?.toInt()
                     sjekk(gjenlevendeAlder >= 0) { "GjenlevendeAlder kan ikke være negativ" }
 
                     val (brukerId, accessToken) =
@@ -107,6 +109,7 @@ class OpprettFamilie(
                             halvsoeskenAvdoed = halvSoesken,
                             gruppeId = gruppeId,
                             antall = 1,
+                            antallDagerSidenDoedsfall = antallDagerSidenDoedsfall ?: defaultDagerSidenDoedsfall(),
                         )
 
                     val bestilling =

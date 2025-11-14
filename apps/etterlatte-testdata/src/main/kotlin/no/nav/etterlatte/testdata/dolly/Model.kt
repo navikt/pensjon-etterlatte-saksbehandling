@@ -2,6 +2,7 @@ package no.nav.etterlatte.testdata.dolly
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.testdata.features.dolly.alderVoksenRandom
+import no.nav.etterlatte.testdata.features.dolly.defaultDagerSidenDoedsfall
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Bruker(
@@ -105,7 +106,7 @@ data class BestillingRequest(
     val halvsoeskenGjenlevende: Int = 0,
     val gruppeId: Long,
     val antall: Int,
-    val antallDagerSidenDoedsfall: Int = 7,
+    val antallDagerSidenDoedsfall: Int = defaultDagerSidenDoedsfall(),
     val gjenlevendeAlder: Int = alderVoksenRandom(),
     val avdoedAlder: Int = alderVoksenRandom(),
 )

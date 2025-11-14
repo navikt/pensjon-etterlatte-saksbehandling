@@ -40,6 +40,8 @@ fun generererBestilling(bestilling: BestillingRequest): String {
 
 fun alderVoksenRandom(): Int = Random.nextInt(20, 60)
 
+fun defaultDagerSidenDoedsfall(): Int = 7
+
 private fun alder18Til20() = Random.nextInt(18, 20)
 
 private fun alderUnder18() = Random.nextInt(1, 18)

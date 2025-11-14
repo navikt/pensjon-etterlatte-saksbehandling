@@ -53,7 +53,9 @@ class EtteroppgjoerService(
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+    ): Etteroppgjoer =
+        dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+            ?: throw InternfeilException("Fant ikke etteroppgjoer for sak $sakId og inntektsaar $inntektsaar")
 
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,

@@ -69,7 +69,7 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
                         }
 
                     call.respond(etteroppgjoer)

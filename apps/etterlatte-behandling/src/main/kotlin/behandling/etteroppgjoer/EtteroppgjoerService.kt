@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
@@ -53,9 +52,7 @@ class EtteroppgjoerService(
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer =
-        dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-            ?: throw InternfeilException("Fant ikke etteroppgjoer for sak $sakId og inntektsaar $inntektsaar")
+    ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,

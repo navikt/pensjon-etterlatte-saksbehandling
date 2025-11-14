@@ -646,12 +646,7 @@ class TrygdetidServiceImpl(
         if (featureToggleService.isEnabled(TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING, false)) {
             alleTrygdetider.forEach { trygdetid ->
                 val erOverstyrt = trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true
-                if (!erOverstyrt && behandling.revurderingsaarsak !in
-                    listOf(
-                        Revurderingaarsak.REGULERING,
-                        Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
-                    )
-                ) {
+                if (!erOverstyrt && behandling.prosesstype != Prosesstype.AUTOMATISK) {
                     oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
                 } else {
                     behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)

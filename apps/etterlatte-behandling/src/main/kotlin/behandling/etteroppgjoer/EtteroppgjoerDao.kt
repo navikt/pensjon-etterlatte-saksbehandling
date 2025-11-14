@@ -77,6 +77,7 @@ class EtteroppgjoerDao(
                         FROM etteroppgjoer
                         WHERE sak_id = ?
                         AND inntektsaar = ?
+                        AND status != 'FERDIGSTILT'
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId.sakId)

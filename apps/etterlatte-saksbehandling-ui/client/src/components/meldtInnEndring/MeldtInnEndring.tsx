@@ -16,7 +16,6 @@ import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { MeldtInnEndringSkjema } from '~components/meldtInnEndring/MeldtInnEndringSkjema'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 
 export enum MeldtInnEndringHandlingValgt {
@@ -33,8 +32,6 @@ export const MeldtInnEndring = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const navigate = useNavigate()
-
-  const etteroppgjoerFeatureToggle = useFeaturetoggle(FeatureToggle.etteroppgjoer)
 
   if (!oppgaveId) {
     return <Alert variant="error">Oppgave ID ligger ikke med i URL</Alert>
@@ -95,23 +92,19 @@ export const MeldtInnEndring = () => {
                     <>
                       {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.INGEN ? (
                         <>
-                          {etteroppgjoerFeatureToggle && (
-                            <>
-                              <Label>Endringen er svar på etteroppgjøret</Label>
+                          <Label>Endringen er svar på etteroppgjøret</Label>
 
-                              <div>
-                                <Button
-                                  onClick={() =>
-                                    navigate(`/svar-paa-etteroppgjoer/${oppgaveId}`, {
-                                      state: { opprinnelse: Opprinnelse.MELD_INN_ENDRING_SKJEMA },
-                                    })
-                                  }
-                                >
-                                  Behandle mottatt svar etteroppgjør
-                                </Button>
-                              </div>
-                            </>
-                          )}
+                          <div>
+                            <Button
+                              onClick={() =>
+                                navigate(`/svar-paa-etteroppgjoer/${oppgaveId}`, {
+                                  state: { opprinnelse: Opprinnelse.MELD_INN_ENDRING_SKJEMA },
+                                })
+                              }
+                            >
+                              Behandle mottatt svar etteroppgjør
+                            </Button>
+                          </div>
 
                           <Label>Endringen krever en revurdering</Label>
                           <BodyShort>

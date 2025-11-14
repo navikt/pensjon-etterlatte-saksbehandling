@@ -69,8 +69,8 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
-                        }
+                            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
+                        } ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjoer for sak")
 
                     call.respond(etteroppgjoer)
                 }
@@ -85,7 +85,7 @@ fun Route.etteroppgjoerRoutes(
                     inTransaction {
                         val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
 
-                        krev(etteroppgjoer.status in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING_I_DEV) {
+                        krev(etteroppgjoer.venterPaaSkatteoppgjoer()) {
                             "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"
                         }
 

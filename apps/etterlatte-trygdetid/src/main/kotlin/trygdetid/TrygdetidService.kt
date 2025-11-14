@@ -276,7 +276,8 @@ class TrygdetidServiceImpl(
                         .sortedByDescending { it.datoFattet }
                         .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
 
-                val forrigeTrygdetider = hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
+                val forrigeTrygdetider =
+                    hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
                 if (forrigeTrygdetider.isEmpty()) {
                     opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 } else {
@@ -391,6 +392,7 @@ class TrygdetidServiceImpl(
                     throw InternfeilException("Støtter ikke pesys henting for ukjent avdød eller tidligere Familiepleier")
                 }
             }
+
             else -> throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
         }
 
@@ -407,7 +409,8 @@ class TrygdetidServiceImpl(
                 val hentTrygdetid =
                     trygdetidRepository.hentTrygdetid(behandlingId)
                         ?: throw InternfeilException("Trygdetid er ikke opprettet")
-                val doedsdato = avdoedMedFnr.second.hentDoedsdato()?.verdi ?: throw InternfeilException("Avdød mangler dødsdato")
+                val doedsdato =
+                    avdoedMedFnr.second.hentDoedsdato()?.verdi ?: throw InternfeilException("Avdød mangler dødsdato")
 
                 val trygdetidForUfoereOgAlderspensjon =
                     pesysKlient.hentTrygdetidsgrunnlag(
@@ -419,7 +422,11 @@ class TrygdetidServiceImpl(
                     populerTrygdetidsGrunnlagFraPesys(hentTrygdetid, trygdetidForUfoereOgAlderspensjon)
                 trygdetidRepository.oppdaterTrygdetid(hentetTrygdetidMedPesysTrygdetid)
                 val oppdatertTrygdetid =
-                    opprettFremtidigTrygdetidForAvdoed(hentetTrygdetidMedPesysTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
+                    opprettFremtidigTrygdetidForAvdoed(
+                        hentetTrygdetidMedPesysTrygdetid,
+                        avdoedMedFnr.second,
+                        brukerTokenInfo,
+                    )
 
                 oppdatertTrygdetid ?: hentetTrygdetidMedPesysTrygdetid
             }
@@ -639,7 +646,7 @@ class TrygdetidServiceImpl(
         if (featureToggleService.isEnabled(TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING, false)) {
             alleTrygdetider.forEach { trygdetid ->
                 val erOverstyrt = trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true
-                if (!erOverstyrt && behandling.revurderingsaarsak != Revurderingaarsak.REGULERING) {
+                if (!erOverstyrt && behandling.prosesstype != Prosesstype.AUTOMATISK) {
                     oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
                 } else {
                     behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)

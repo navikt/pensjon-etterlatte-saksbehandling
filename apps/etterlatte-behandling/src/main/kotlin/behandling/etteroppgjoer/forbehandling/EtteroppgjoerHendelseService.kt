@@ -96,7 +96,7 @@ class EtteroppgjoerHendelseService(
                                     naeringsinntekt = it.naeringsinntekt,
                                 )
                             },
-                        tilknyttetRevurdering = etteroppgjoerForbehandling.kopiertFra != null,
+                        tilknyttetRevurdering = etteroppgjoerForbehandling.erRevurdering(),
                     ),
             )
         val meldingMap =

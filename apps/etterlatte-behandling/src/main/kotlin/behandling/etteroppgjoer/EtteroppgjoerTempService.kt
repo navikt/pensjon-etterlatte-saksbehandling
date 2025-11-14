@@ -84,7 +84,7 @@ class EtteroppgjoerTempService(
             )
         }
 
-        if (!forbehandling.kanAvbrytes() || forbehandling.kopiertFra == null) {
+        if (!forbehandling.erRedigerbar() || !forbehandling.erRevurdering()) {
             throw InternfeilException(
                 "Kan ikke tilbakestille etteroppgjoer for sakId=$sakId: " +
                     "forventet at forbehandling kunne avbrytes, men kan ikke",

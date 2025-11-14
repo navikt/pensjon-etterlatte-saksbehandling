@@ -37,8 +37,6 @@ export const SvarPaaEtteroppgjoer = () => {
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingEtteroppgjoer)
 
-  const harEtteroppgjoer = true
-
   const opprettRevurdering = (oppgave: OppgaveDTO) => {
     opprettRevurderingRequest(
       { sakId: oppgave.sakId, opprinnelse: !!opprinnelse ? opprinnelse : Opprinnelse.UKJENT },
@@ -58,79 +56,73 @@ export const SvarPaaEtteroppgjoer = () => {
     hentOppgaveFetch(oppgaveId!)
   }, [oppgaveId])
 
-  return harEtteroppgjoer ? (
-    <>
-      {mapResult(hentOppgaveResult, {
-        pending: <Spinner label="Henter oppgaver..." />,
-        error: (error) => <ApiErrorAlert>Kunne ikke hente oppgave, på grunn av feil: {error.detail}</ApiErrorAlert>,
-        success: (oppgave) => (
-          <>
-            <StatusBar ident={oppgave.fnr} />
-            <HStack height="100%" minHeight="100vh" wrap={false}>
-              <Box paddingInline="16" paddingBlock="16 4" width="100%">
-                <VStack gap="4" maxWidth="50rem">
-                  <Heading size="medium" spacing>
-                    Behandling av svar på etteroppgjøret
-                  </Heading>
+  return mapResult(hentOppgaveResult, {
+    pending: <Spinner label="Henter oppgaver..." />,
+    error: (error) => <ApiErrorAlert>Kunne ikke hente oppgave, på grunn av feil: {error.detail}</ApiErrorAlert>,
+    success: (oppgave) => (
+      <>
+        <StatusBar ident={oppgave.fnr} />
+        <HStack height="100%" minHeight="100vh" wrap={false}>
+          <Box paddingInline="16" paddingBlock="16 4" width="100%">
+            <VStack gap="4" maxWidth="50rem">
+              <Heading size="medium" spacing>
+                Behandling av svar på etteroppgjøret
+              </Heading>
 
-                  <Heading size="small" level="3">
-                    Revurdering blir knyttet til en forbehandling
-                  </Heading>
+              <Heading size="small" level="3">
+                Revurdering blir knyttet til en forbehandling
+              </Heading>
 
-                  <BodyShort>
-                    Hvis bruker har gitt nok informasjon kan revurderingen for etteroppgjøret opprettes, ellers kan
-                    oppgaven avsluttes. Ved opprettelse av revurdering vil den automatisk knyttes til den siste
-                    ferdigstilte forbehandlingen.
-                  </BodyShort>
+              <BodyShort>
+                Hvis bruker har gitt nok informasjon kan revurderingen for etteroppgjøret opprettes, ellers kan oppgaven
+                avsluttes. Ved opprettelse av revurdering vil den automatisk knyttes til den siste ferdigstilte
+                forbehandlingen.
+              </BodyShort>
 
-                  <Textarea
-                    label="Begrunnelse (valgfri)"
-                    value={begrunnelse || ''}
-                    onChange={(e) => setBegrunnelse(e.target.value)}
-                  />
+              <Textarea
+                label="Begrunnelse (valgfri)"
+                value={begrunnelse || ''}
+                onChange={(e) => setBegrunnelse(e.target.value)}
+              />
 
-                  {isFailureHandler({
-                    apiResult: ferdigstillOppgaveResult,
-                    errorMessage: 'Feil under ferdigstilling av oppgave',
-                  })}
+              {isFailureHandler({
+                apiResult: ferdigstillOppgaveResult,
+                errorMessage: 'Feil under ferdigstilling av oppgave',
+              })}
 
-                  {isFailureHandler({
-                    apiResult: opprettRevurderingResult,
-                    errorMessage: 'Feil under opprettelse av revurdering',
-                  })}
-                  <HStack justify="space-between">
-                    <Button
-                      variant="secondary"
-                      onClick={() => navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)}
-                    >
-                      Avbryt
-                    </Button>
-                    <HStack gap="4">
-                      <Button
-                        loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
-                        onClick={() => opprettRevurdering(oppgave)}
-                      >
-                        Opprett revurdering
-                      </Button>
-                      <Button
-                        loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
-                        onClick={() => avsluttOppgave(oppgave)}
-                      >
-                        Avslutt oppgave
-                      </Button>
-                    </HStack>
-                  </HStack>
-                </VStack>
-              </Box>
-              <Sidebar>
-                <DokumentlisteLiten fnr={oppgave.fnr!} />
-              </Sidebar>
-            </HStack>
-          </>
-        ),
-      })}
-    </>
-  ) : (
-    <Alert variant="error">Innbygger har ikke etteroppgjør</Alert>
-  )
+              {isFailureHandler({
+                apiResult: opprettRevurderingResult,
+                errorMessage: 'Feil under opprettelse av revurdering',
+              })}
+              <HStack justify="space-between">
+                <Button
+                  variant="secondary"
+                  onClick={() => navigerTilPersonOversikt(oppgave.fnr!, PersonOversiktFane.SAKER)}
+                >
+                  Avbryt
+                </Button>
+                <HStack gap="4">
+                  <Button
+                    loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
+                    onClick={() => opprettRevurdering(oppgave)}
+                  >
+                    Opprett revurdering
+                  </Button>
+                  <Button
+                    loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
+                    onClick={() => avsluttOppgave(oppgave)}
+                  >
+                    Avslutt oppgave
+                  </Button>
+                </HStack>
+              </HStack>
+            </VStack>
+          </Box>
+          <Sidebar>
+            <DokumentlisteLiten fnr={oppgave.fnr!} />
+          </Sidebar>
+        </HStack>
+      </>
+    ),
+  })
 }

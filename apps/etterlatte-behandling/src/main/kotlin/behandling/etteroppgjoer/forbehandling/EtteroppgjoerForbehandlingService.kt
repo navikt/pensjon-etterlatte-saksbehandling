@@ -535,14 +535,12 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // Etteroppgjør
-        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-        if (etteroppgjoer == null) {
-            logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
-            throw IkkeTillattException(
-                "MANGLER_ETTEROPPGJOER",
-                "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
-            )
-        }
+        val etteroppgjoer =
+            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
+                ?: throw IkkeTillattException(
+                    "MANGLER_ETTEROPPGJOER",
+                    "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
+                )
 
         if (!etteroppgjoer.mottattSkatteoppgjoer()) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjoerStatus=${etteroppgjoer.status}")

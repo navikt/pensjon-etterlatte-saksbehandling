@@ -69,8 +69,8 @@ fun Route.etteroppgjoerRoutes(
                 kunSkrivetilgang {
                     val etteroppgjoer =
                         inTransaction {
-                            etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
-                        }
+                            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
+                        } ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjoer for sak")
 
                     call.respond(etteroppgjoer)
                 }

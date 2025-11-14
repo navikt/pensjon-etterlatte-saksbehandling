@@ -544,8 +544,7 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
-        if (etteroppgjoer.status !in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING) {
+        if (!etteroppgjoer.mottattSkatteoppgjoer()) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjoerStatus=${etteroppgjoer.status}")
             throw IkkeTillattException(
                 "FEIL_ETTEROPPGJOERS_STATUS",

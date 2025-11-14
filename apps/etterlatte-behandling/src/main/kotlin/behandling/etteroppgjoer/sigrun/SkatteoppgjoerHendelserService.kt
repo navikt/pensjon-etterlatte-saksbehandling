@@ -122,12 +122,7 @@ class SkatteoppgjoerHendelserService(
         hendelse: SkatteoppgjoerHendelse,
         sak: Sak,
     ) {
-        if (etteroppgjoer.status in
-            listOf(
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-            )
-        ) {
+        if (etteroppgjoer.venterPaaSkatteoppgjoer()) {
             logger.info(
                 "Vi har mottatt hendelse ${hendelse.hendelsetype} fra skatt med sekvensnummer=" +
                     "${hendelse.sekvensnummer} om tilgjengelig skatteoppgjør " +
@@ -139,7 +134,7 @@ class SkatteoppgjoerHendelserService(
                 Vi mottar en hendelse for hver ident, så hvis person har flere identer vil vi få flere hendelser for samme Etteroppgjør.
                 Dette er ikke et problem hvis Etteroppgjøret fortsatt har status MOTTATT_SKATTEOPPGJOER
              */
-            if (etteroppgjoer.status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) {
+            if (etteroppgjoer.mottattSkatteoppgjoer()) {
                 logger.info(
                     "Vi fikk ny hendelse (type=${hendelse.hendelsetype}) om skatteoppgjør i sak ${sak.id}, " +
                         "sekvensnummer: ${hendelse.sekvensnummer}, etter at vi allerede har oppdatert status til " +

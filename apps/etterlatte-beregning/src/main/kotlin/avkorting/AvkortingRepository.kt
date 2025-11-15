@@ -750,7 +750,7 @@ class AvkortingRepository(
         dataSource.transaction { tx ->
             queryOf(
                 "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ANY (?) ORDER BY aar ASC",
-                behandlinger,
+                behandlinger.toTypedArray(),
             ).let { query ->
                 tx.run(
                     query

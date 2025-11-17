@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoed
-import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoedGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeMedPoengaar
 import no.nav.etterlatte.trygdetid.regler.beregnDetaljertBeregnetTrygdetidMedYrkesskade
@@ -37,20 +36,16 @@ object TrygdetidBeregningService {
         }
 
         val grunnlag =
-            TrygdetidGrunnlagMedAvdoedGrunnlag(
-                FaktumNode(
-                    verdi =
-                        TrygdetidGrunnlagMedAvdoed(
-                            trygdetidGrunnlagListe = trygdetidGrunnlag,
-                            foedselsDato = foedselsDato,
-                            doedsDato = doedsDato,
-                            norskPoengaar = norskPoengaar,
-                            yrkesskade = yrkesskade,
-                            nordiskKonvensjon = nordiskKonvensjon,
-                        ),
-                    kilde = "System",
-                    beskrivelse = "Beregn detaljert trygdetidsgrunnlag",
-                ),
+            TrygdetidGrunnlagMedAvdoed(
+                trygdetidGrunnlagListe = trygdetidGrunnlag,
+                foedselsDato = foedselsDato,
+                doedsDato = doedsDato,
+                norskPoengaar = norskPoengaar,
+                yrkesskade = yrkesskade,
+                nordiskKonvensjon = nordiskKonvensjon,
+            ).tilTrygdetidGrunnlagMedAvdoedGrunnlag(
+                kilde = "System",
+                beskrivelse = "Grunnlag for beregning av trygdetid",
             )
 
         val resultat =

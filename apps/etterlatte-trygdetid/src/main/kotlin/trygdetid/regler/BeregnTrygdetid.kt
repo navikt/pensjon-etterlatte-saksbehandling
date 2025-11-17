@@ -56,18 +56,66 @@ data class TrygdetidGrunnlagMedAvdoed(
     val norskPoengaar: Int?,
     val yrkesskade: Boolean,
     val nordiskKonvensjon: Boolean,
-)
+) {
+    fun tilTrygdetidGrunnlagMedAvdoedGrunnlag(
+        kilde: String,
+        beskrivelse: String,
+    ): TrygdetidGrunnlagMedAvdoedGrunnlag =
+        TrygdetidGrunnlagMedAvdoedGrunnlag(
+            trygdetidGrunnlagListe =
+                FaktumNode(
+                    verdi = trygdetidGrunnlagListe,
+                    kilde = kilde,
+                    beskrivelse = beskrivelse,
+                ),
+            foedselsDato =
+                FaktumNode(
+                    verdi = foedselsDato,
+                    kilde = kilde,
+                    beskrivelse = beskrivelse,
+                ),
+            doedsDato =
+                FaktumNode(
+                    verdi = doedsDato,
+                    kilde = kilde,
+                    beskrivelse = beskrivelse,
+                ),
+            norskPoengaar =
+                FaktumNode(
+                    verdi = norskPoengaar,
+                    kilde = kilde,
+                    beskrivelse = beskrivelse,
+                ),
+            yrkesskade =
+                FaktumNode(
+                    verdi = yrkesskade,
+                    kilde = kilde,
+                    beskrivelse = beskrivelse,
+                ),
+            nordiskKonvensjon =
+                FaktumNode(
+                    verdi = nordiskKonvensjon,
+                    kilde = kilde,
+                    beskrivelse = beskrivelse,
+                ),
+        )
+}
 
 data class TrygdetidGrunnlagMedAvdoedGrunnlag(
-    val trygdetidGrunnlagMedAvdoed: FaktumNode<TrygdetidGrunnlagMedAvdoed>,
+    val trygdetidGrunnlagListe: FaktumNode<List<TrygdetidGrunnlag>>,
+    val foedselsDato: FaktumNode<LocalDate>,
+    val doedsDato: FaktumNode<LocalDate>,
+    val norskPoengaar: FaktumNode<Int?>,
+    val yrkesskade: FaktumNode<Boolean>,
+    val nordiskKonvensjon: FaktumNode<Boolean>,
 )
 
 val nordiskKonvensjon: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Hent nordisk konvensjon",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.nordiskKonvensjon },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::nordiskKonvensjon,
+        finnFelt = { it },
     )
 
 val dagerPrMaanedTrygdetidGrunnlag =
@@ -83,36 +131,53 @@ data class Opptjeningsdatoer(
     val doedsDato: LocalDate,
 )
 
-val opptjeningsDatoer: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Opptjeningsdatoer> =
+val foedselsdato: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, LocalDate> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Hent foedselsdato og doedsdato",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { Opptjeningsdatoer(foedselsDato = it.foedselsDato, doedsDato = it.doedsDato) },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::foedselsDato,
+        finnFelt = { it },
     )
+
+val doedsdato: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, LocalDate> =
+    finnFaktumIGrunnlag(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Hent foedselsdato og doedsdato",
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::foedselsDato,
+        finnFelt = { it },
+    )
+
+val opptjeningsDatoer: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Opptjeningsdatoer> =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "",
+        regelReferanse = RegelReferanse("", ""),
+    ) benytter foedselsdato og doedsdato med { foedsel, doed ->
+        Opptjeningsdatoer(foedselsDato = foedsel, doedsDato = doed)
+    }
 
 val antallPoengaarINorge: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Int?> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Finner antall poengår i Norge for overstyring av norske TT perioder",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.norskPoengaar },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::norskPoengaar,
+        finnFelt = { it },
     )
 
 val erYrkesskade: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Er dette yrkesskade",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.yrkesskade },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::yrkesskade,
+        finnFelt = { it },
     )
 
 val trygdetidGrunnlagListe: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, List<TrygdetidGrunnlag>> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Grunnlag liste med poengår",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.trygdetidGrunnlagListe },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagListe,
+        finnFelt = { it },
     )
 
 /**

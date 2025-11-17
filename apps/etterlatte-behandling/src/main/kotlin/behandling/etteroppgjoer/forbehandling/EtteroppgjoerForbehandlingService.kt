@@ -481,6 +481,18 @@ class EtteroppgjoerForbehandlingService(
             .also { dao.lagreForbehandling(it) }
     }
 
+    fun lagreOmOpphoerSkyldesDoedsfall(
+        forbehandlingId: UUID,
+        opphoerSkyldesDoedsfall: JaNei,
+    ) {
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        if (!forbehandling.erRedigerbar()) {
+            throw ForbehandlingKanIkkeEndres()
+        }
+
+        forbehandling.oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall).also { dao.lagreForbehandling(it) }
+    }
+
     fun sjekkAtOppgavenErTildeltSaksbehandler(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -757,6 +769,10 @@ data class InformasjonFraBrukerRequest(
     val harMottattNyInformasjon: JaNei,
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
+)
+
+data class OpphoerSkyldesDoedsfallRequest(
+    val opphoerSkyldesDoedsfall: JaNei,
 )
 
 data class BeregnetResultatOgBrevSomSkalSlettes(

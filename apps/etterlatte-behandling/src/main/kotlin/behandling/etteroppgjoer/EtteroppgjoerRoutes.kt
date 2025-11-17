@@ -12,13 +12,13 @@ import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlin
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpphoerSkyldesDoedsfallRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -210,6 +210,19 @@ fun Route.etteroppgjoerRoutes(
                             harMottattNyInformasjon = request.harMottattNyInformasjon,
                             endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
                             beskrivelseAvUgunst = request.beskrivelseAvUgunst,
+                        )
+                    }
+
+                    call.respond(HttpStatusCode.OK)
+                }
+
+                post("doedsfall-skyldes-doedsfall") {
+                    val request = call.receive<OpphoerSkyldesDoedsfallRequest>()
+
+                    inTransaction {
+                        forbehandlingService.lagreOmOpphoerSkyldesDoedsfall(
+                            forbehandlingId,
+                            opphoerSkyldesDoedsfall = request.opphoerSkyldesDoedsfall,
                         )
                     }
 

@@ -1,0 +1,1 @@
+alter table etteroppgjoer_behandling add COLUMN opphoer_skyldes_doedsfall text null;

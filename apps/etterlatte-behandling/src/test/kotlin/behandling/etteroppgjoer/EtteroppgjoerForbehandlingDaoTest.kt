@@ -109,6 +109,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = dato,
                 etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
+                opphoerSkyldesDoedsfall = null,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny.copy())
@@ -159,6 +160,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
+                opphoerSkyldesDoedsfall = null,
             )
         val datoBrevSendt = LocalDate.now().minusDays(1)
         etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
@@ -252,6 +254,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
+                opphoerSkyldesDoedsfall = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningen)
@@ -277,6 +280,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
+                opphoerSkyldesDoedsfall = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         val afp =
@@ -392,6 +396,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 aarsakTilAvbrytelseBeskrivelse = "test",
                 beskrivelseAvUgunst = "test",
                 etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
+                opphoerSkyldesDoedsfall = null,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(

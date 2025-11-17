@@ -137,7 +137,7 @@ class OppdaterTilgangService(
                 false -> persongalleri.hentAlleIdentifikatorer()
             }
         val relevanteIdenterForSkjerming =
-            (relevanteIPersongalleri + vergersFodeselsenummer(grunnlag)).distinct()
+            (relevanteIPersongalleri + vergersFoedselsnummer(grunnlag)).distinct()
 
         return relevanteIdenterForSkjerming.any { fnr -> sjekkOmIdentErSkjermet(fnr) }
     }
@@ -183,7 +183,7 @@ class OppdaterTilgangService(
         return LocalDate.now() >= foedselsdatoSoeker.plusYears(18)
     }
 
-    fun vergersFodeselsenummer(grunnlag: Grunnlag?): List<String> =
+    fun vergersFoedselsnummer(grunnlag: Grunnlag?): List<String> =
         grunnlag
             ?.vergemaalellerfremtidsfullmakt(Saksrolle.SOEKER)
             ?.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident?.value }

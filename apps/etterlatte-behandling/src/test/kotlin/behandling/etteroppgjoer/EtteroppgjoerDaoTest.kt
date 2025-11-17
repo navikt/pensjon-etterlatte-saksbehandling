@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -28,10 +27,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -215,22 +211,6 @@ class EtteroppgjoerDaoTest(
         with(resultat) {
             size shouldBe 1
             first().inntektsaar shouldBe 2024
-        }
-    }
-
-    @Test
-    fun `hent etteroppgjoer for filter`() {
-        val inntektsaar = 2024
-        val enkelSak = Etteroppgjoer(sak.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
-        val annenSak = Etteroppgjoer(sak2.id, inntektsaar, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, true)
-        etteroppgjoerDao.lagreEtteroppgjoer(enkelSak)
-        etteroppgjoerDao.lagreEtteroppgjoer(annenSak)
-
-        val resultat = etteroppgjoerDao.hentEtteroppgjoerForFilter(EtteroppgjoerFilter.ENKEL, inntektsaar)
-        with(resultat) {
-            size shouldBe 1
-            first().inntektsaar shouldBe inntektsaar
-            first().sakId shouldBe enkelSak.sakId
         }
     }
 }

@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
 import no.nav.etterlatte.libs.common.trygdetid.FremtidigTrygdetid
+import no.nav.etterlatte.libs.common.trygdetid.justertForDager
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -19,7 +20,7 @@ import no.nav.etterlatte.trygdetid.normaliser
 import java.time.LocalDate
 import java.time.Period
 import java.time.temporal.ChronoUnit
-import kotlin.math.floor
+import kotlin.math.roundToInt
 
 // Dato for når trygdetidsreglene begynte å gjelde er vilkårlig og bare satt langt tilbake
 val TRYGDETID_DATO: LocalDate = LocalDate.of(1900, 1, 1)
@@ -170,18 +171,21 @@ val trygdetidGrunnlagListeFaktiskNorgeOgProrata =
 
 /**
  * Finn første fremtidig trygdetid (skal være enten ingen eller bare en) og juster det mtp antall dager i en måned.
+ *
+ * Framtidig trydetid regnes alltid i hele måneder, og skal gjelde fra og med hele måneden fra dødsdato. Det er ikke
+ * nødvendigvis slik i grunnlaget, så vi justerer opp perioden for framtidig trygdetid.
  */
 val fremtidigTrygdetid =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Henter ut periode for fremtidig trygdetid",
-        regelReferanse = RegelReferanse(id = "REGEL-FINN-FREMTIDIG-TRYGDETIDSPERIODE", versjon = "1.1"),
+        regelReferanse = RegelReferanse(id = "REGEL-FINN-FREMTIDIG-TRYGDETIDSPERIODE", versjon = "1.2"),
     ) benytter normalisertTrygdetidGrunnlagListe og dagerPrMaanedTrygdetidGrunnlag med {
         trygdetidPerioder,
         dagerPrMaaned,
         ->
         trygdetidPerioder.firstOrNull { it.type == TrygdetidType.FREMTIDIG }.let {
-            listOfNotNull(it).summer(dagerPrMaaned)
+            listOfNotNull(it).summer(dagerPrMaaned).justertForDager()
         }
     }
 
@@ -329,7 +333,7 @@ val fremtidigTrygdetidForNasjonal =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Regn ut fremtidig trygdetid nasjonal",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID", versjon = "2.0"),
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID", versjon = "2.1"),
     ) benytter nordiskEllerFireFemtedeler og fremtidigTrygdetid og opptjeningsTidIMnd med
         { nordiskEllerFireFemtedeler, fremtidig, opptjening ->
             if (fremtidig != Period.ZERO) {
@@ -354,7 +358,7 @@ val fremtidigTrygdetidForTeoretisk =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Regn ut fremtidig trygdetid teoretisk",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-TEORETISK-TRYGDETID", versjon = "2.0"),
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-TEORETISK-TRYGDETID", versjon = "2.1"),
     ) benytter summerFaktiskTeoretisk og fremtidigTrygdetid og opptjeningsTidIMnd med {
         teoretisk,
         fremtidig,
@@ -422,14 +426,26 @@ val avrundetTrygdetid: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, TrygdetidPar<In
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Avrunder trygdetid til nærmeste hele år basert på måneder og dager",
-        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING", versjon = "1.2"),
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING", versjon = "2.0"),
     ) benytter beregnetFaktiskTrygdetid og
         beregnetFremtidigTrygdetid og dagerPrMaanedTrygdetidGrunnlag med { faktisk, fremtidig, antallDager ->
 
+            val faktiskNasjonal =
+                if (fremtidig.nasjonal != null && fremtidig.nasjonal.periode != Period.ZERO) {
+                    faktisk.nasjonal.avrundet()
+                } else {
+                    faktisk.nasjonal
+                }
+            val faktiskTeoretisk =
+                if (fremtidig.teoretisk != null && fremtidig.teoretisk.periode != Period.ZERO) {
+                    faktisk.teoretisk.avrundet()
+                } else {
+                    faktisk.teoretisk
+                }
             TrygdetidPar(
                 nasjonal =
                     minOf(
-                        faktisk.nasjonal.periode.plus(fremtidig.nasjonal.periodeEllerZero()).normalisertMedDager(antallDager).let {
+                        faktiskNasjonal.periode.plus(fremtidig.nasjonal.periodeEllerZero()).normalisertMedDager(antallDager).let {
                             if (it.months >= 6) {
                                 it.years + 1
                             } else {
@@ -440,7 +456,7 @@ val avrundetTrygdetid: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, TrygdetidPar<In
                     ),
                 teoretisk =
                     minOf(
-                        faktisk.teoretisk.periode.plus(fremtidig.teoretisk.periodeEllerZero()).normalisertMedDager(antallDager).let {
+                        faktiskTeoretisk.periode.plus(fremtidig.teoretisk.periodeEllerZero()).normalisertMedDager(antallDager).let {
                             if (it.months >= 6) {
                                 it.years + 1
                             } else {
@@ -562,10 +578,8 @@ private fun Period.justertForOpptjeningstiden(
     if (mindreEnnFireFemtedelerAvOpptjeningstiden) {
         val fullTrygdetidIMaaneder = Period.ofYears(40).toTotalMonths().toInt()
         val fireFemtedelerAvOpptjeningIMaaneder = opptjening * 0.8
-        val justertOpptjeningstidMaaneder = fullTrygdetidIMaaneder - fireFemtedelerAvOpptjeningIMaaneder
-        val antallHeleMaaneder = floor(justertOpptjeningstidMaaneder).toInt()
-        val antallDagerIRest = floor((justertOpptjeningstidMaaneder - antallHeleMaaneder) * 30).toInt()
-        val justertOpptjeningsperiode = Period.of(0, antallHeleMaaneder, antallDagerIRest).normalized()
+        val justertOpptjeningstidMaaneder = (fullTrygdetidIMaaneder - fireFemtedelerAvOpptjeningIMaaneder).roundToInt()
+        val justertOpptjeningsperiode = Period.ofMonths(justertOpptjeningstidMaaneder).normalized()
         justertOpptjeningsperiode
     } else {
         this

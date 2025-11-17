@@ -120,8 +120,8 @@ class TrygdetidAvvikRepositoryTest(
                 session.run(
                     query
                         .map { row ->
-                            row.string("status") shouldBe "SJEKKET_HAR_AVVIK"
-                            row.stringOrNull("avvik")?.let { objectMapper.readValue<TrygdetidAvvik>(it) }
+                            row.string("status_v2") shouldBe "SJEKKET_HAR_AVVIK"
+                            row.stringOrNull("avvik_v2")?.let { objectMapper.readValue<TrygdetidAvvik>(it) }
                         }.asSingle,
                 )
             }
@@ -139,8 +139,8 @@ class TrygdetidAvvikRepositoryTest(
                 session.run(
                     query
                         .map {
-                            it.string("status") shouldBe "SJEKKET_INGEN_AVVIK"
-                            it.stringOrNull("avvik") shouldBe null
+                            it.string("status_v2") shouldBe "SJEKKET_INGEN_AVVIK"
+                            it.stringOrNull("avvik_v2") shouldBe null
                         }.asSingle,
                 )
             }

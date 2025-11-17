@@ -98,12 +98,32 @@ class EtteroppgjoerDao(
     ): List<SakId> =
         connectionAutoclosing.hentConnection {
             with(it) {
-                prepareStatement(
+                val statement =
                     """
                     SELECT sak_id FROM etteroppgjoer e
                     INNER JOIN sak s on s.id = e.sak_id
                     WHERE e.status = ?
                     AND (e.inntektsaar = ? OR e.inntektsaar = ?)
+                    AND (e.har_sanksjon = ? OR e.har_sanksjon = ?)
+                    AND (e.har_institusjonsopphold = ? OR e.har_institusjonsopphold = ?)
+                    AND (e.har_opphoer = ? OR e.har_opphoer = ?)
+                    AND (e.har_bosatt_utland = ? OR e.har_bosatt_utland = ?)
+                    AND (e.har_adressebeskyttelse_eller_skjermet = ? OR e.har_adressebeskyttelse_eller_skjermet = ?)
+                    AND (e.har_aktivitetskrav = ? OR e.har_aktivitetskrav = ?)
+                    AND (e.har_overstyrt_beregning = ? OR e.har_overstyrt_beregning = ?)
+                     ${if (spesifikkeSaker.isEmpty()) "" else " AND e.sak_id = ANY(?)"}
+                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(e.sak_id = ANY(?))"}
+                     ${if (spesifikkeEnheter.isEmpty()) "" else " AND s.enhet = ANY(?)"}
+                    AND NOT EXISTS (select 1 from oppgave where type = ? and referanse = '' and status != ?)
+                    ORDER BY sak_id
+                    LIMIT $antall
+                    """.trimIndent()
+                prepareStatement(
+                    """
+                    SELECT sak_id FROM etteroppgjoer e
+                    INNER JOIN sak s on s.id = e.sak_id
+                    WHERE e.status = ?
+                    AND e.inntektsaar = ?
                     AND (e.har_sanksjon = ? OR e.har_sanksjon = ?)
                     AND (e.har_institusjonsopphold = ? OR e.har_institusjonsopphold = ?)
                     AND (e.har_opphoer = ? OR e.har_opphoer = ?)
@@ -124,7 +144,7 @@ class EtteroppgjoerDao(
                     fun settFilterVerdier(filterVerdi: FilterVerdi) {
                         setBoolean(paramIndex, filterVerdi.filterEn)
                         paramIndex += 1
-                        setBoolean(paramIndex, filterVerdi.filterEn)
+                        setBoolean(paramIndex, filterVerdi.filterTo)
                         paramIndex += 1
                     }
 

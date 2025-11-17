@@ -7,6 +7,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -18,10 +19,15 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.FilterVerdi
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -133,6 +139,71 @@ class EtteroppgjoerDaoTest(
             )
         saker.size shouldBe 2
         saker shouldContainExactlyInAnyOrder listOf(sak.id, sak2.id)
+    }
+
+    @Test
+    fun `skal ignorere saker med oppgaver for etteroppgjør som har tom referanse og ikke er ferdigstilt`() {
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak2.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
+
+        val sakerUtenOppgaver =
+            etteroppgjoerDao.hentEtteroppgjoerSakerIBulk(
+                inntektsaar = 2024,
+                antall = 50,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                etteroppgjoerFilter = EtteroppgjoerFilter.ENKEL,
+                spesifikkeSaker = listOf(),
+                ekskluderteSaker = listOf(),
+                spesifikkeEnheter = listOf(),
+            )
+        sakerUtenOppgaver.size shouldBe 2
+        sakerUtenOppgaver shouldContainExactlyInAnyOrder listOf(sak.id, sak2.id)
+
+        // oppretter en oppgave for sak1
+        val oppgaveForForbehandlingEtteroppgjoer =
+            opprettNyOppgaveMedReferanseOgSak(
+                referanse = "",
+                sak = sak,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = "Etteroppgjøret for $ETTEROPPGJOER_AAR er klart til behandling",
+            )
+        with(dataSource.connection) {
+            val statement =
+                prepareStatement(
+                    """
+                    INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
+                    VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """.trimIndent(),
+                )
+            statement.setObject(1, oppgaveForForbehandlingEtteroppgjoer.id)
+            statement.setString(2, oppgaveForForbehandlingEtteroppgjoer.status.name)
+            statement.setString(3, oppgaveForForbehandlingEtteroppgjoer.enhet.enhetNr)
+            statement.setSakId(4, oppgaveForForbehandlingEtteroppgjoer.sakId)
+            statement.setString(5, oppgaveForForbehandlingEtteroppgjoer.type.name)
+            statement.setString(6, oppgaveForForbehandlingEtteroppgjoer.saksbehandler?.ident)
+            statement.setString(7, oppgaveForForbehandlingEtteroppgjoer.referanse)
+            statement.setString(8, oppgaveForForbehandlingEtteroppgjoer.gruppeId)
+            statement.setString(9, oppgaveForForbehandlingEtteroppgjoer.merknad)
+            statement.setTidspunkt(10, oppgaveForForbehandlingEtteroppgjoer.opprettet)
+            statement.setString(11, oppgaveForForbehandlingEtteroppgjoer.sakType.name)
+            statement.setString(12, oppgaveForForbehandlingEtteroppgjoer.fnr)
+            statement.setTidspunkt(13, oppgaveForForbehandlingEtteroppgjoer.frist)
+            statement.setString(14, oppgaveForForbehandlingEtteroppgjoer.kilde?.name)
+            statement.executeUpdate()
+        }
+        val sakerUtenOppgaver2 =
+            etteroppgjoerDao.hentEtteroppgjoerSakerIBulk(
+                inntektsaar = 2024,
+                antall = 50,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                etteroppgjoerFilter = EtteroppgjoerFilter.ENKEL,
+                spesifikkeSaker = listOf(),
+                ekskluderteSaker = listOf(),
+                spesifikkeEnheter = listOf(),
+            )
+        sakerUtenOppgaver2.size shouldBe 1
+        sakerUtenOppgaver2 shouldContainExactlyInAnyOrder listOf(sak2.id)
     }
 
     @Test

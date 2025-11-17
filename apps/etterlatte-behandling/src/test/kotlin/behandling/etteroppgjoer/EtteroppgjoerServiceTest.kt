@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -28,6 +30,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.YearMonth
 import java.util.UUID
 
@@ -99,6 +103,10 @@ class EtteroppgjoerServiceTest {
             every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns null
         }
 
+        fun returnerEtteroppgjoer(etteroppgjoer: Etteroppgjoer) {
+            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns etteroppgjoer
+        }
+
         fun sigrunGirSvar() {
             coEvery {
                 sigrunKlient.hentPensjonsgivendeInntekt(
@@ -115,6 +123,49 @@ class EtteroppgjoerServiceTest {
                     any(),
                 )
             } throws Exception("Ingen skatteoppgjør funnet :/")
+        }
+    }
+
+    @ParameterizedTest(name = "skal hente aktivt etteroppgjør med status={0}")
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["FERDIGSTILT"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `skal hente aktivt etteroppgjør for sak`(status: EtteroppgjoerStatus) {
+        val ctx = TestContext(sakId)
+
+        val resultat =
+            ctx.returnerEtteroppgjoer(
+                Etteroppgjoer(
+                    sakId = sakId,
+                    inntektsaar = ETTEROPPGJOER_AAR,
+                    status = status,
+                ),
+            )
+
+        resultat.shouldNotBeNull()
+    }
+
+    @Test
+    fun `skal kaste feil hvis ikke aktivt etteroppgjør for sak`() {
+        val ctx = TestContext(sakId)
+        ctx.ingenEtteroppgjoer()
+
+        assertThrows<InternfeilException> {
+            ctx.service.hentAktivtEtteroppgjoerForSak(sakId)
+        }
+
+        ctx.returnerEtteroppgjoer(
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = ETTEROPPGJOER_AAR,
+                status = EtteroppgjoerStatus.FERDIGSTILT,
+            ),
+        )
+
+        assertThrows<InternfeilException> {
+            ctx.service.hentAktivtEtteroppgjoerForSak(sakId)
         }
     }
 

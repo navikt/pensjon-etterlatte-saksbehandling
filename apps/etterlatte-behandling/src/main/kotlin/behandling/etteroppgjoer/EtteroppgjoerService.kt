@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
@@ -40,7 +39,9 @@ class EtteroppgjoerService(
     val sigrunKlient: SigrunKlient,
 ) {
     fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer =
-        dao.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
+        dao
+            .hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
+            ?.takeIf { !it.erFerdigstilt() }
             ?: throw InternfeilException("Fant ikke aktivt etteroppgjoer ($ETTEROPPGJOER_AAR) for sak $sakId")
 
     fun hentEtteroppgjoerMedSvarfristUtloept(
@@ -149,7 +150,7 @@ class EtteroppgjoerService(
             inntektsaar,
             sisteIverksatteBehandling,
             eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-            harVedtakAvTypeOpphoer,
+            harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
         ).also { dao.lagreEtteroppgjoer(it) }
     }
 

@@ -9,7 +9,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
-import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -41,7 +40,9 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
@@ -122,12 +123,12 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = hentForbehandling(forbehandlingId)
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
-        if (!forbehandling.kanAvbrytes()) {
+        if (!forbehandling.erRedigerbar()) {
             throw IkkeTillattException(
                 "FEIL_STATUS_FORBEHANDLING",
                 "Forbehandling med id=$forbehandlingId kan ikke avbrytes. Status er ${forbehandling.status}",
             )
-        } else if (forbehandling.kopiertFra != null) {
+        } else if (forbehandling.erRevurdering()) {
             throw IkkeTillattException(
                 "FORBEHANDLING_ER_TILKNYTT_REVURDERING",
                 "Forbehandling med id=$forbehandlingId er tilknytt revurdering og kan ikke avbrytes gjennom dette endepunktet.",
@@ -416,7 +417,7 @@ class EtteroppgjoerForbehandlingService(
     ): BeregnetResultatOgBrevSomSkalSlettes {
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
 
-        if (!forbehandling.kanEndres()) {
+        if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
 
@@ -471,7 +472,7 @@ class EtteroppgjoerForbehandlingService(
         beskrivelseAvUgunst: String?,
     ) {
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
-        if (!forbehandling.kanEndres()) {
+        if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
 
@@ -536,18 +537,15 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // Etteroppgjør
-        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-        if (etteroppgjoer == null) {
-            logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
-            throw IkkeTillattException(
-                "MANGLER_ETTEROPPGJOER",
-                "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
-            )
-        }
+        val etteroppgjoer =
+            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
+                ?: throw IkkeTillattException(
+                    "MANGLER_ETTEROPPGJOER",
+                    "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
+                )
 
-        // TODO: Denne sjekken må være strengere når vi får koblet opp mot skatt.
-        if (etteroppgjoer.status !in EtteroppgjoerStatus.KLAR_TIL_FORBEHANDLING) {
-            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjørstatus=${etteroppgjoer.status}")
+        if (!etteroppgjoer.mottattSkatteoppgjoer()) {
+            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjoerStatus=${etteroppgjoer.status}")
             throw IkkeTillattException(
                 "FEIL_ETTEROPPGJOERS_STATUS",
                 "Kan ikke opprette forbehandling på grunn av feil etteroppgjør status=${etteroppgjoer.status}",
@@ -574,12 +572,27 @@ class EtteroppgjoerForbehandlingService(
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
 
+        val attesterteVedtak =
+            runBlocking {
+                vedtakKlient
+                    .hentIverksatteVedtak(sak.id, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
+                    .sortedByDescending { it.datoAttestert }
+            }
+        val harVedtakAvTypeOpphoer = attesterteVedtak.any { it.vedtakType == VedtakType.OPPHOER }
+
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
-        return EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode, sisteIverksatteBehandling.id).also {
-            dao.lagreForbehandling(it)
-        }
+        return EtteroppgjoerForbehandling
+            .opprett(
+                sak,
+                innvilgetPeriode,
+                sisteIverksatteBehandling.id,
+                harVedtakAvTypeOpphoer =
+                    harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
+            ).also {
+                dao.lagreForbehandling(it)
+            }
     }
 
     private fun utledInnvilgetPeriode(

@@ -1,5 +1,6 @@
 package behandling.etteroppgjoer
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -13,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.FilterVerdi
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
@@ -23,6 +25,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -96,6 +99,40 @@ class EtteroppgjoerDaoTest(
                 ).firstOrNull()
 
         SakId(etteroppgjoerSak!!.sakId) shouldBe sak.id
+    }
+
+    @Test
+    fun `skal hente saker både med og uten aktivitetskrav hvis filter er satt til don't care`() {
+        etteroppgjoerDao.lagreEtteroppgjoer(
+            Etteroppgjoer(
+                sakId = sak.id,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                harAktivitetskrav = true,
+            ),
+        )
+        etteroppgjoerDao.lagreEtteroppgjoer(
+            Etteroppgjoer(
+                sakId = sak2.id,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                harAktivitetskrav = false,
+            ),
+        )
+        assertEquals(FilterVerdi.DONT_CARE, EtteroppgjoerFilter.MED_AKTIVITET_OG_SKJERMET.harAktivitetskrav)
+
+        val saker =
+            etteroppgjoerDao.hentEtteroppgjoerSakerIBulk(
+                inntektsaar = 2024,
+                antall = 10,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                etteroppgjoerFilter = EtteroppgjoerFilter.MED_AKTIVITET_OG_SKJERMET,
+                spesifikkeSaker = listOf(),
+                ekskluderteSaker = listOf(),
+                spesifikkeEnheter = listOf(),
+            )
+        saker.size shouldBe 2
+        saker shouldContainExactlyInAnyOrder listOf(sak.id, sak2.id)
     }
 
     @Test

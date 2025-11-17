@@ -114,9 +114,10 @@ class EtteroppgjoerDao(
                      ${if (spesifikkeSaker.isEmpty()) "" else " AND e.sak_id = ANY(?)"}
                      ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(e.sak_id = ANY(?))"}
                      ${if (spesifikkeEnheter.isEmpty()) "" else " AND s.enhet = ANY(?)"}
-                    AND NOT EXISTS (select 1 from oppgave where type = ? and referanse = '' and status != ?)
+                    AND NOT EXISTS (SELECT 1 FROM oppgave o 
+                            WHERE o.type = ? AND o.referanse = '' AND status != ? AND e.sak_id = o.sak_id)
                     ORDER BY sak_id
-                    LIMIT $antall
+                    LIMIT ?
                     """.trimIndent(),
                 ).apply {
                     var paramIndex = 1
@@ -158,6 +159,8 @@ class EtteroppgjoerDao(
                     setString(paramIndex, OppgaveType.ETTEROPPGJOER.name)
                     paramIndex += 1
                     setString(paramIndex, Status.FERDIGSTILT.name)
+                    paramIndex += 1
+                    setInt(paramIndex, antall)
                 }.executeQuery()
                     .toList {
                         SakId(getLong("sak_id"))

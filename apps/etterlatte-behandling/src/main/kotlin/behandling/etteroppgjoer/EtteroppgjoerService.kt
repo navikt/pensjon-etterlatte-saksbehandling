@@ -150,7 +150,7 @@ class EtteroppgjoerService(
             inntektsaar,
             sisteIverksatteBehandling,
             eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-            harVedtakAvTypeOpphoer,
+            harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
         ).also { dao.lagreEtteroppgjoer(it) }
     }
 

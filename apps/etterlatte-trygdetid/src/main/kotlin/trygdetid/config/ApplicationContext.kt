@@ -7,7 +7,12 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.trygdetid.SjekkAvvikJobb
+import no.nav.etterlatte.trygdetid.SjekkAvvikService
+import no.nav.etterlatte.trygdetid.TrygdetidAvvikRepository
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
@@ -17,10 +22,13 @@ import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl
 import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientImpl
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler.systemEnv())
+    private val env = Miljoevariabler.systemEnv()
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource =
         DataSourceBuilder.createDataSource(
             jdbcUrl = properties.jdbcUrl,
@@ -35,10 +43,11 @@ class ApplicationContext {
     val avtaleService = AvtaleService(avtaleRepository)
 
     val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
+    private val trygdetidRepository = TrygdetidRepository(dataSource)
 
     val trygdetidService =
         TrygdetidServiceImpl(
-            TrygdetidRepository(dataSource),
+            trygdetidRepository = trygdetidRepository,
             behandlingKlient = behandlingKlient,
             grunnlagKlient = grunnlagKlient,
             beregnTrygdetidService = TrygdetidBeregningService,
@@ -46,6 +55,23 @@ class ApplicationContext {
             avtaleService = avtaleService,
             vedtaksvurderingKlient = vedtaksvurderingKlient,
             featureToggleService = featureToggleService,
+        )
+
+    private val leaderElection = LeaderElection(env[AppConfig.ELECTOR_PATH])
+    private val avvikRepository = TrygdetidAvvikRepository(dataSource)
+    private val sjekkAvvikService =
+        SjekkAvvikService(
+            avvikRepository = avvikRepository,
+            trygdetidRepository = trygdetidRepository,
+            avtaleRepository = avtaleRepository,
+        )
+    val sjekkAvvikJobb =
+        SjekkAvvikJobb(
+            sjekkAvvikService = sjekkAvvikService,
+            leaderElection = leaderElection,
+            featureToggleService = featureToggleService,
+            periode = Duration.of(10, ChronoUnit.MINUTES),
+            initialDelaySeconds = 120,
         )
 }
 

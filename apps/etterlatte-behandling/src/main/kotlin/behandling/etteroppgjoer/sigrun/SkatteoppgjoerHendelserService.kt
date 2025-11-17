@@ -1,8 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -13,11 +12,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -29,33 +27,18 @@ class SkatteoppgjoerHendelserService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun setupKontekstAndRun(
-        request: HendelseKjoeringRequest,
-        context: Context,
-    ) {
-        Kontekst.set(context)
+    fun lesOgBehandleHendelser(request: HendelseKjoeringRequest): Int {
+        val antallLest =
+            inTransaction {
+                val hendelsesliste = lesHendelsesliste(request)
 
-        lesOgBehandleHendelser(request)
-    }
-
-    fun lesOgBehandleHendelser(request: HendelseKjoeringRequest) {
-        logger.info("Starter med å be om ${request.antall} hendelser fra skatt")
-
-        inTransaction {
-            val hendelsesliste = lesHendelsesliste(request)
-
-            if (!hendelsesliste.hendelser.isEmpty()) {
-                behandleHendelser(hendelsesliste.hendelser, request)
+                if (!hendelsesliste.hendelser.isEmpty()) {
+                    behandleHendelser(hendelsesliste.hendelser, request)
+                }
+                hendelsesliste.hendelser.size
             }
-        }
-    }
 
-    fun settSekvensnummerForLesingFraDato(dato: LocalDate) {
-        val sekvensnummer = runBlocking { sigrunKlient.hentSekvensnummerForLesingFraDato(dato) }
-
-        inTransaction {
-            dao.lagreKjoering(HendelserKjoering(sekvensnummer, 0, 0, null))
-        }
+        return antallLest
     }
 
     private fun behandleHendelser(
@@ -70,14 +53,17 @@ class SkatteoppgjoerHendelserService(
                         logger.error("Hendelse med sekvensnummer ${hendelse.sekvensnummer} mangler periode")
                         return@count false
                     }
-                    if (hendelse.gjelderPeriode.toInt() !in request.inntektsaarListe) {
-                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har relevant perioe")
+                    if (hendelse.gjelderPeriode.toInt() != request.etteroppgjoerAar) {
+                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har ikke relevant periode")
                         return@count false
                     }
                     try {
                         return@count behandleHendelse(hendelse)
                     } catch (e: Exception) {
-                        throw InternfeilException("Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}", e)
+                        throw InternfeilException(
+                            "Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}",
+                            e,
+                        )
                     }
                 }.also { antallRelevante ->
                     dao.lagreKjoering(
@@ -91,7 +77,7 @@ class SkatteoppgjoerHendelserService(
                 }
         }.let { (antallRelevante, varighet) ->
             logger.info(
-                "Behandling av ${hendelsesListe.size} ($antallRelevante relevante) " +
+                "Ferdig å behandle ${hendelsesListe.size} hendelse fra skatt ($antallRelevante relevante) " +
                     "tok ${varighet.toString(DurationUnit.SECONDS, 2)}",
             )
         }
@@ -110,16 +96,19 @@ class SkatteoppgjoerHendelserService(
         val etteroppgjoer: Etteroppgjoer? =
             sak?.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
 
+        sikkerLogg.info(
+            "Behandler hendelse med sekvensnummer=${hendelse.sekvensnummer} for ident=$ident, sakId=${sak?.id}. Hendelse=${hendelse.toJson()}",
+        )
+
         if (etteroppgjoer != null) {
             if (hendelse.hendelsetype == null || hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
-                logger.info("Oppdaterer etteroppgjør for sak ${sak.id}, år $inntektsaar")
                 oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
             } else {
                 logger.warn(
                     """
                     Mottok hendelse av type ${hendelse.hendelsetype} på sak ${sak.id}, 
-                    som skal ha etteroppgjør. Sekvensnummer: ${hendelse.sekvensnummer}, 
-                    inntektsår: $inntektsaar
+                    som skal ha etteroppgjør. Hendelsen blir ikke behandlet.
+                    Sekvensnummer: ${hendelse.sekvensnummer}, inntektsår: $inntektsaar
                     """.trimIndent(),
                 )
             }
@@ -133,17 +122,26 @@ class SkatteoppgjoerHendelserService(
         hendelse: SkatteoppgjoerHendelse,
         sak: Sak,
     ) {
-        if (etteroppgjoer.status in
-            listOf(
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-            )
-        ) {
+        if (etteroppgjoer.venterPaaSkatteoppgjoer()) {
             logger.info(
-                "Vi har mottatt hendelse fra skatt om tilgjengelig skatteoppgjør " +
+                "Vi har mottatt hendelse ${hendelse.hendelsetype} fra skatt med sekvensnummer=" +
+                    "${hendelse.sekvensnummer} om tilgjengelig skatteoppgjør " +
                     "for ${hendelse.gjelderPeriode?.toInt()}, sakId=${sak.id}. " +
                     "Oppdaterer etteroppgjoer med status ${etteroppgjoer.status}.",
             )
+
+            /*
+                Vi mottar en hendelse for hver ident, så hvis person har flere identer vil vi få flere hendelser for samme Etteroppgjør.
+                Dette er ikke et problem hvis Etteroppgjøret fortsatt har status MOTTATT_SKATTEOPPGJOER
+             */
+            if (etteroppgjoer.mottattSkatteoppgjoer()) {
+                logger.info(
+                    "Vi fikk ny hendelse (type=${hendelse.hendelsetype}) om skatteoppgjør i sak ${sak.id}, " +
+                        "sekvensnummer: ${hendelse.sekvensnummer}, etter at vi allerede har oppdatert status til " +
+                        "MOTTATT_SKATTEOPPJOER. Se sikkerlogg for full hendelse fra skatt",
+                )
+            }
+
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                 sak.id,
                 etteroppgjoer.inntektsaar,
@@ -154,25 +152,18 @@ class SkatteoppgjoerHendelserService(
                 "Vi har mottatt hendelse fra skatt om nytt skatteoppgjør for sakId=${sak.id}, men det er allerede " +
                     "opprettet et etteroppgjør med status ${etteroppgjoer.status}. Se sikkerlogg for mer informasjon.",
             )
-            sikkerLogg.error(
-                "Person med fnr=${hendelse.identifikator} har mottatt ny hendelse fra skatt om nytt skatteoppgjør, " +
-                    "men det er allerede opprettet et etteroppgjør med status ${etteroppgjoer.status}.",
-            )
         }
     }
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
         val sisteKjoering = dao.hentSisteKjoering()
 
-        return runBlocking { sigrunKlient.hentHendelsesliste(request.antall, sisteKjoering.nesteSekvensnummer()) }
+        return runBlocking { sigrunKlient.hentHendelsesliste(request.antallHendelser, sisteKjoering.nesteSekvensnummer()) }
     }
 }
 
 data class HendelseKjoeringRequest(
-    val antall: Int,
-    val inntektsaarListe: List<Int>,
-)
-
-data class HendelserSettSekvensnummerRequest(
-    val startdato: LocalDate,
+    val antallHendelser: Int,
+    val etteroppgjoerAar: Int,
+    val venteMellomKjoeringer: Boolean,
 )

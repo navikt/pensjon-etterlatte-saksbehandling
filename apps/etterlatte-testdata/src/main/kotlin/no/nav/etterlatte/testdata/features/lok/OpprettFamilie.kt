@@ -1,7 +1,6 @@
 package no.nav.etterlatte.testdata.features.opprettFamilie
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
@@ -11,6 +10,7 @@ import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
@@ -18,6 +18,7 @@ import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyInterface
 import no.nav.etterlatte.testdata.dolly.ForenkletFamilieModell
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
+import no.nav.etterlatte.testdata.features.dolly.alderVoksenRandom
 import no.nav.etterlatte.testdata.features.dolly.generererBestilling
 
 class OpprettFamilie(
@@ -84,6 +85,7 @@ class OpprettFamilie(
                     val barnOver18 = params["barnOver18"]?.toBoolean() ?: false
                     val halvSoesken = params["halvsoeskenAvdoed"]?.toInt() ?: throw Exception("Må ha halvsoeskenAvdoed")
                     val helSoesken = params["helsoesken"]?.toInt() ?: throw Exception("Må ha helsoesken")
+                    sjekk(gjenlevendeAlder >= 0) { "GjenlevendeAlder kan ikke være negativ" }
 
                     val (brukerId, accessToken) =
                         when (dev) {
@@ -95,7 +97,11 @@ class OpprettFamilie(
 
                     val dollyReq =
                         BestillingRequest(
-                            gjenlevendeAlder = gjenlevendeAlder,
+                            gjenlevendeAlder =
+                                when (gjenlevendeAlder) {
+                                    0 -> alderVoksenRandom()
+                                    else -> gjenlevendeAlder
+                                },
                             erOver18 = barnOver18,
                             helsoesken = helSoesken,
                             halvsoeskenAvdoed = halvSoesken,

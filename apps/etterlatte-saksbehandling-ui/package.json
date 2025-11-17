@@ -6,12 +6,12 @@
     "lisenssjekk": "yarn license-checker-rseidelsohn --onlyAllow \"MIT;Apache-2.0;BSD-3-Clause;ISC;BSD-2-Clause;Python-2.0;BlueOak-1.0.0;CC-BY-3.0;CC0-1.0\" --summary"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "~8.41.0",
-    "@typescript-eslint/parser": "~8.41.0",
-    "eslint": "^9.34.0",
+    "@typescript-eslint/eslint-plugin": "~8.46.2",
+    "@typescript-eslint/parser": "~8.46.2",
+    "eslint": "^9.39.0",
     "husky": "~9.1.7",
     "license-checker-rseidelsohn": "^4.4.2",
-    "lint-staged": "~16.1.6",
+    "lint-staged": "~16.2.6",
     "prettier": "^3.6.2"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

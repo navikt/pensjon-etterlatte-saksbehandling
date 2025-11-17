@@ -1,7 +1,7 @@
 import { Table } from '@navikt/ds-react'
 import React from 'react'
 import { tekstKlasseKode, TilbakekrevingBeloep, TilbakekrevingPeriode } from '~shared/types/Tilbakekreving'
-import { formaterMaanedDato } from '~utils/formatering/dato'
+import { formaterMaanednavnAar } from '~utils/formatering/dato'
 
 export function TilbakekrevingVurderingPerioderRadAndreKlassetyper({
   periode,
@@ -13,7 +13,7 @@ export function TilbakekrevingVurderingPerioderRadAndreKlassetyper({
   return (
     <>
       <Table.Row>
-        <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
+        <Table.DataCell key="maaned">{formaterMaanednavnAar(periode.maaned)}</Table.DataCell>
         <Table.DataCell key="klasse">{tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}</Table.DataCell>
         <Table.DataCell key="bruttoUtbetaling">{beloep.bruttoUtbetaling} kr</Table.DataCell>
         <Table.DataCell key="nyBruttoUtbetaling">{beloep.nyBruttoUtbetaling} kr</Table.DataCell>

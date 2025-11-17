@@ -226,6 +226,8 @@ enum class Brevkoder(
         tittel = "Klagen er oversendt til NAV Klageinstans Vest",
         Brevtype.OVERSENDELSE_KLAGE,
     ),
+
+    // TODO: deprecated
     KLAGE_OVERSENDELSE_BLANKETT(
         EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
         EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT,
@@ -243,7 +245,7 @@ enum class Brevkoder(
     OMS_EO_FORHAANDSVARSEL(
         EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL_INNHOLD,
         EtterlatteBrevKode.OMS_EO_FORHAANDSVARSEL,
-        "Forshåndsvarsel om etteroppgjør av omstillingsstønad",
+        "Forhåndsvarsel om etteroppgjør av omstillingsstønad",
         Brevtype.INFORMASJON,
     ),
 

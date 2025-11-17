@@ -67,8 +67,6 @@ class SkatteoppgjoerHendelserServiceTest {
 
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2024) } returns
             Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
-        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2025) } returns
-            Etteroppgjoer(SakId(2L), 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(3L), any()) } returns
             Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
 
@@ -76,14 +74,14 @@ class SkatteoppgjoerHendelserServiceTest {
         coEvery { etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any()) } just runs
 
         runBlocking {
-            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall, listOf(2024, 2025)))
+            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall, 2024, false))
         }
 
         coVerify {
             dao.lagreKjoering(
                 withArg { kjoering ->
                     kjoering.antallHendelser shouldBe 5
-                    kjoering.antallRelevante shouldBe 3
+                    kjoering.antallRelevante shouldBe 2
                     kjoering.nesteSekvensnummer().toInt() shouldBe 16
                     kjoering.sisteRegistreringstidspunkt shouldBe registreringstidspunktSisteHendelse
                 },

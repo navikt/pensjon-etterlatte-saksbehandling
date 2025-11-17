@@ -30,6 +30,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.test.assertEquals
 
 class AvkortingValiderTest {
     @Test
@@ -69,6 +70,7 @@ class AvkortingValiderTest {
             ),
             avkorting,
             listOf(inntektMedFratrekk),
+            true,
             naa = YearMonth.of(2024, 12),
         )
     }
@@ -101,6 +103,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = fom)),
                 avkorting,
                 listOf(inntektMedFratrekk),
+                true,
                 naa = fom,
             )
         }
@@ -145,6 +148,7 @@ class AvkortingValiderTest {
             beregning(beregningsperiode(datoFOM = fom)),
             avkorting,
             listOf(inntektMedFratrekk),
+            true,
             naa = fom,
         )
     }
@@ -186,6 +190,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = fom)),
                 avkorting,
                 listOf(inntektMedFratrekk),
+                true,
                 naa = fom,
             )
         }
@@ -229,9 +234,10 @@ class AvkortingValiderTest {
             )
         validerInntekter(
             behandling(BehandlingType.REVURDERING),
-            beregning(),
+            beregning(beregninger = listOf(beregningsperiode(datoFOM = YearMonth.of(2024, 1)))),
             avkorting,
             listOf(inntektMedFratrekk),
+            true,
             naa = YearMonth.of(2024, 6),
         )
     }
@@ -253,6 +259,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                 avkorting,
                 listOf(utenFratrekk),
+                true,
                 naa = YearMonth.of(2024, 3),
             )
 
@@ -268,6 +275,7 @@ class AvkortingValiderTest {
                     beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                     avkorting,
                     listOf(inntektMedFratrekk),
+                    true,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -285,6 +293,7 @@ class AvkortingValiderTest {
                     beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                     avkorting,
                     listOf(inntektMedFratrekkUtland),
+                    true,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -314,6 +323,7 @@ class AvkortingValiderTest {
                 beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2025, 1))),
                 eksisterendeAvkorting = avkorting,
                 nyeGrunnlag = listOf(utenFratrekk),
+                true,
             )
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
@@ -328,6 +338,7 @@ class AvkortingValiderTest {
                     beregning(),
                     avkorting,
                     listOf(inntektMedFratrekk),
+                    true,
                 )
             }
 
@@ -343,6 +354,7 @@ class AvkortingValiderTest {
                     beregning(),
                     avkorting,
                     listOf(inntektMedFratrekkUtland),
+                    true,
                 )
             }
         }
@@ -378,6 +390,7 @@ class AvkortingValiderTest {
                 ),
             behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2024, 2)),
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
+            krevInntektForNesteAar = true,
             naa = YearMonth.of(2024, 5),
         )
     }
@@ -413,6 +426,7 @@ class AvkortingValiderTest {
                 ),
             behandling = behandling(BehandlingType.REVURDERING, virk = YearMonth.of(2024, 2)),
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
+            krevInntektForNesteAar = true,
         )
     }
 
@@ -435,8 +449,30 @@ class AvkortingValiderTest {
                 avkorting,
                 beregning,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
+                true,
             )
-        krav shouldContainExactly listOf(2024, 2025)
+        krav shouldContainExactly listOf(2024, 2025, 2026)
+    }
+
+    @Test
+    fun `påkrevde inntekter ved inntektsjustering for neste år gir neste år`() {
+        val avkorting = Avkorting(aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)))
+        val beregning =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(datoFOM = YearMonth.of(2026, Month.JANUARY)),
+                    ),
+            )
+
+        val krav =
+            AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                avkorting,
+                beregning,
+                BehandlingType.REVURDERING,
+                true,
+            )
+        assertEquals(krav, listOf(2025, 2026))
     }
 
     private fun behandling(

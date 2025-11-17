@@ -9,15 +9,8 @@ export interface Etteroppgjoer {
 }
 
 export interface EtteroppgjoerForbehandling {
-  behandling: EtteroppgjoerBehandling
-  opplysninger: EtteroppgjoerOpplysninger
-  faktiskInntekt?: FaktiskInntekt
-  beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
-}
-
-export interface EtteroppgjoerBehandling {
   id: string
-  status: EtteroppgjoerBehandlingStatus
+  status: EtteroppgjoerForbehandlingStatus
   sak: ISak
   aar: number
   innvilgetPeriode: {
@@ -30,20 +23,28 @@ export interface EtteroppgjoerBehandling {
   harMottattNyInformasjon?: JaNei
   endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string
+  harVedtakAvTypeOpphoer?: boolean
 }
 
-export enum EtteroppgjoerBehandlingStatus {
+export interface EtteroppgjoerDetaljertForbehandling {
+  behandling: EtteroppgjoerForbehandling
+  opplysninger: EtteroppgjoerOpplysninger
+  faktiskInntekt?: FaktiskInntekt
+  beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
+}
+
+export enum EtteroppgjoerForbehandlingStatus {
   OPPRETTET = 'OPPRETTET',
   BEREGNET = 'BEREGNET',
   FERDIGSTILT = 'FERDIGSTILT',
   AVBRUTT = 'AVBRUTT',
 }
 
-export function kanRedigereEtteroppgjoerBehandling(status: EtteroppgjoerBehandlingStatus): boolean {
-  return [EtteroppgjoerBehandlingStatus.OPPRETTET, EtteroppgjoerBehandlingStatus.BEREGNET].includes(status)
+export function kanRedigereEtteroppgjoerBehandling(status: EtteroppgjoerForbehandlingStatus): boolean {
+  return [EtteroppgjoerForbehandlingStatus.OPPRETTET, EtteroppgjoerForbehandlingStatus.BEREGNET].includes(status)
 }
 
-export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerBehandlingStatus, string> = {
+export const teksterEtteroppgjoerBehandlingStatus: Record<EtteroppgjoerForbehandlingStatus, string> = {
   OPPRETTET: 'Opprettet',
   BEREGNET: 'Beregnet',
   FERDIGSTILT: 'Ferdigstilt',
@@ -70,7 +71,7 @@ export interface SummerteInntekterAOrdningen {
 export interface EtteroppgjoerOpplysninger {
   skatt: PensjonsgivendeInntektFraSkatteetatenSummert
   summerteInntekter?: SummerteInntekterAOrdningen
-  tidligereAvkorting: Avkorting
+  tidligereAvkorting?: Avkorting
 }
 
 export interface IInformasjonFraBruker {

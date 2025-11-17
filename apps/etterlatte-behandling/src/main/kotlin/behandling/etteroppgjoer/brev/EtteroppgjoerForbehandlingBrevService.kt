@@ -4,9 +4,9 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -31,6 +32,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingBrevService(
@@ -63,7 +65,9 @@ class EtteroppgjoerForbehandlingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
         etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
+
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
+
         return brevKlient.tilbakestillStrukturertBrev(
             brevID = brevId,
             behandlingId = forbehandlingId,
@@ -72,26 +76,40 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    suspend fun ferdigstillForbehandlingOgDistribuerBrev(
+    suspend fun ferdigstillForbehandlingMedBrev(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
-        val brevId =
-            forbehandling.brevId
-                ?: throw UgyldigForespoerselException(
-                    code = "MANGLER_BREVID",
-                    detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
-                )
+        val detaljertForbehandling =
+            etteroppgjoerForbehandlingService
+                .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
 
-        brevKlient.kanFerdigstilleBrev(brevId, forbehandling.sak.id, brukerTokenInfo).let { kanFerdigstilles ->
-            if (!kanFerdigstilles) {
-                throw UgyldigForespoerselException(
-                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                    detail =
-                        "Brev kan ikke ferdigstilles før du har sett over forhåndsvisning",
-                )
-            }
+        val forbehandling = detaljertForbehandling.behandling
+        val sakId = forbehandling.sak.id
+        val brevId =
+            forbehandling.brevId ?: throw UgyldigForespoerselException(
+                code = "MANGLER_BREVID",
+                detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
+            )
+
+        val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
+
+        val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
+        if (sistBeregnetTidspunkt > brev.statusEndret) {
+            throw IkkeTillattException(
+                code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                detail =
+                    "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder " +
+                        "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
+            )
+        }
+
+        val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
+        if (!response.kanFerdigstille && brev.status.ikkeFerdigstilt()) {
+            throw UgyldigForespoerselException(
+                code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                detail = response.aarsak ?: "Ukjent feil",
+            )
         }
 
         etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
@@ -100,7 +118,10 @@ class EtteroppgjoerForbehandlingBrevService(
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
         )
-        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(forbehandlingId)
+        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
+            forbehandlingId = forbehandlingId,
+            dato = LocalDate.now(),
+        )
     }
 
     suspend fun genererPdf(
@@ -109,7 +130,6 @@ class EtteroppgjoerForbehandlingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
-
         return brevKlient.genererPdf(brevID, forbehandlingId, brevRequest, brukerTokenInfo)
     }
 
@@ -137,6 +157,7 @@ class EtteroppgjoerForbehandlingBrevService(
                     forbehandlingId,
                     brukerTokenInfo,
                 )
+
             krevIkkeNull(detaljertForbehandling.beregnetEtteroppgjoerResultat) {
                 "Forbehandlingen må ha et utregnet resultat for å sende et varselbrev"
             }
@@ -151,7 +172,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 )
             }
 
-            val pensjonsgivendeInntekt = etteroppgjoerForbehandlingService.hentPensjonsgivendeInntekt(forbehandlingId)
+            val pensjonsgivendeInntekt = detaljertForbehandling.opplysninger.skatt
 
             val sisteIverksatteBehandling =
                 behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
@@ -187,7 +208,7 @@ class EtteroppgjoerForbehandlingBrevService(
     private fun brevRequestDataMapper(
         data: DetaljertForbehandlingDto,
         sisteIverksatteBehandling: Behandling,
-        pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt?,
+        pensjonsgivendeInntekt: SummertePensjonsgivendeInntekter?,
     ): EtteroppgjoerBrevRequestData {
         krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
@@ -205,7 +226,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
         // TODO: usikker om dette blir rett, følge opp ifm testing
-        val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.inntekter.isNotEmpty()
+        val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.summertInntekt > 0
 
         return EtteroppgjoerBrevRequestData(
             redigerbar =
@@ -228,11 +249,11 @@ class EtteroppgjoerForbehandlingBrevService(
                     stoenad = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
                     faktiskStoenad = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                     avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
-                    grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag),
+                    grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag, data.opplysninger.skatt.summertInntekt),
                 ),
             vedlegg =
                 listOf(
-                    EtteroppgjoerBrevData.beregningsVedlegg(data.behandling.aar),
+                    EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = data.behandling.aar, erVedtak = false),
                 ),
             sak = sisteIverksatteBehandling.sak,
         )

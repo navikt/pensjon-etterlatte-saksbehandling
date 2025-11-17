@@ -16,7 +16,7 @@ export const OpplysningerFraSkatteetaten = ({
       <Heading size="small">Opplysninger fra Skatteetaten</Heading>
       <BodyShort>Pensjonsgivende inntekt for {etteroppgjoer.behandling.aar}.</BodyShort>
 
-      <Box maxWidth="25rem">
+      <Box width="25rem">
         <Table>
           <Table.Header>
             <Table.Row>
@@ -45,12 +45,7 @@ export const OpplysningerFraSkatteetaten = ({
                   </HelpText>
                 </HStack>
               </Table.DataCell>
-              <Table.DataCell align="right">
-                {NOK(
-                  inntektFraSkatteetatenSummert.naeringsinntekt +
-                    inntektFraSkatteetatenSummert.fiskeFangstFamiliebarnehage
-                )}
-              </Table.DataCell>
+              <Table.DataCell align="right">{NOK(inntektFraSkatteetatenSummert.naeringsinntekt)}</Table.DataCell>
             </Table.Row>
           </Table.Body>
         </Table>

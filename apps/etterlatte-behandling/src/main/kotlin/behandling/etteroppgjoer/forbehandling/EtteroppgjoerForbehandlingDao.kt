@@ -1,18 +1,16 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -22,8 +20,10 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setNullableBoolean
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -55,25 +55,7 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun lagreAvbruttAarsak(
-        behandlingId: UUID,
-        aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling,
-        kommentar: String,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement("UPDATE etteroppgjoer_behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
-
-            stmt.setString(1, aarsakTilAvbrytelse.name)
-            stmt.setString(2, kommentar)
-            stmt.setObject(3, behandlingId)
-            krev(stmt.executeUpdate() == 1) {
-                "Kunne ikke lagre avbrutt aarsak for forbehandling=$behandlingId"
-            }
-        }
-    }
-
-    fun hentForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> =
+    fun hentForbehandlingerForSak(sakId: SakId): List<EtteroppgjoerForbehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -96,13 +78,21 @@ class EtteroppgjoerForbehandlingDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer_behandling(
-                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt
+                            id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt, etteroppgjoer_resultat_type,
+                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id,
-                            varselbrev_sendt = excluded.varselbrev_sendt
+                            varselbrev_sendt = excluded.varselbrev_sendt,
+                            har_mottatt_ny_informasjon = excluded.har_mottatt_ny_informasjon,
+                            endring_er_til_ugunst_for_bruker = excluded.endring_er_til_ugunst_for_bruker,
+                            beskrivelse_av_ugunst = excluded.beskrivelse_av_ugunst,
+                            etteroppgjoer_resultat_type = excluded.etteroppgjoer_resultat_type,
+                            aarsak_til_avbrytelse = excluded.aarsak_til_avbrytelse,
+                            kommentar_til_avbrytelse = excluded.kommentar_til_avbrytelse,
+                            har_vedtak_av_type_opphoer = excluded.har_vedtak_av_type_opphoer
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
@@ -125,6 +115,10 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(12, forbehandling.endringErTilUgunstForBruker?.name)
                 statement.setString(13, forbehandling.beskrivelseAvUgunst)
                 statement.setDate(14, forbehandling.varselbrevSendt?.let { Date.valueOf(it) })
+                statement.setString(15, forbehandling.etteroppgjoerResultatType?.name)
+                statement.setString(16, forbehandling.aarsakTilAvbrytelse?.name)
+                statement.setString(17, forbehandling.aarsakTilAvbrytelseBeskrivelse.orEmpty())
+                statement.setNullableBoolean(18, forbehandling.harVedtakAvTypeOpphoer)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -139,134 +133,62 @@ class EtteroppgjoerForbehandlingDao(
         nyForbehandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
-            val selectStatement =
+            val statement =
                 prepareStatement(
                     """
-                    SELECT inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage
+                        INSERT INTO etteroppgjoer_pensjonsgivendeinntekt (
+                        forbehandling_id, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat
+                    )
+                    SELECT ?, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat 
                     FROM etteroppgjoer_pensjonsgivendeinntekt
                     WHERE forbehandling_id = ?
                     """.trimIndent(),
                 )
+            statement.setObject(1, nyForbehandlingId)
+            statement.setObject(2, forbehandlingId)
 
-            selectStatement.setObject(1, forbehandlingId)
-            val resultSet = selectStatement.executeQuery()
-
-            val insertStatement =
-                prepareStatement(
-                    """
-                    INSERT INTO etteroppgjoer_pensjonsgivendeinntekt (
-                        id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt, fiske_fangst_familiebarnehage
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """.trimIndent(),
-                )
-
-            var count = 0
-            while (resultSet.next()) {
-                insertStatement.setObject(1, UUID.randomUUID())
-                insertStatement.setObject(2, nyForbehandlingId)
-                insertStatement.setInt(3, resultSet.getInt("inntektsaar"))
-                insertStatement.setString(4, resultSet.getString("skatteordning"))
-                insertStatement.setInt(5, resultSet.getInt("loensinntekt"))
-                insertStatement.setInt(6, resultSet.getInt("naeringsinntekt"))
-                insertStatement.setInt(7, resultSet.getInt("fiske_fangst_familiebarnehage"))
-
-                insertStatement.addBatch()
-                count++
-            }
-
-            val result = insertStatement.executeBatch()
-
-            krev(result.size == count) {
-                "Kunne ikke kopiere alle pensjonsgivende inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
+            statement.executeUpdate().also { count ->
+                krev(count == 1) {
+                    "Kunne ikke kopiere pensjonsgivende inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
+                }
             }
         }
     }
 
     fun lagrePensjonsgivendeInntekt(
-        inntekterFraSkatt: PensjonsgivendeInntektFraSkatt,
         behandlingId: UUID,
+        inntekterFraSkatt: SummertePensjonsgivendeInntekter,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
                 prepareStatement(
                     """
                     INSERT INTO etteroppgjoer_pensjonsgivendeinntekt(
-                        id, forbehandling_id, inntektsaar, skatteordning, loensinntekt, naeringsinntekt,fiske_fangst_familiebarnehage
+                        forbehandling_id, loensinntekt, naeringsinntekt, tidspunkt_beregnet, regel_resultat
                     ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?) 
+                    VALUES (?, ?, ?, ?, ?)
+                    ON CONFLICT (forbehandling_id) DO UPDATE SET
+                        loensinntekt = excluded.loensinntekt,
+                        naeringsinntekt = excluded.naeringsinntekt,
+                        tidspunkt_beregnet = excluded.tidspunkt_beregnet,
+                        regel_resultat = excluded.regel_resultat
                     """.trimIndent(),
                 )
 
-            for (inntekt in inntekterFraSkatt.inntekter) {
-                statement.setObject(1, UUID.randomUUID())
-                statement.setObject(2, behandlingId)
-                statement.setInt(3, inntekt.inntektsaar)
-                statement.setString(4, inntekt.skatteordning)
-                statement.setInt(5, inntekt.loensinntekt)
-                statement.setInt(6, inntekt.naeringsinntekt)
-                statement.setInt(7, inntekt.fiskeFangstFamiliebarnehage)
+            statement.setObject(1, behandlingId)
+            statement.setInt(2, inntekterFraSkatt.loensinntekt)
+            statement.setInt(3, inntekterFraSkatt.naeringsinntekt)
+            statement.setTidspunkt(4, inntekterFraSkatt.tidspunktBeregnet)
+            statement.setJsonb(5, inntekterFraSkatt.regelresultat)
 
-                statement.addBatch()
+            val result = statement.executeUpdate()
+            krev(result == 1) {
+                "Kunne ikke lagre pensjonsgivende inntekt for behandlingId=$behandlingId"
             }
-
-            val result = statement.executeBatch()
-            krev(result.size == inntekterFraSkatt.inntekter.size) {
-                "Kunne ikke lagre alle pensjonsgivendeInntekter for behandlingId=$behandlingId"
-            }
         }
     }
 
-    fun oppdaterRelatertBehandling(
-        forbehandlingId: UUID,
-        nyForbehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE behandling b
-                    SET relatert_behandling = ?
-                    WHERE b.relatert_behandling = ?
-                    AND b.revurdering_aarsak = ?
-                    AND b.status != ?
-                    """.trimIndent(),
-                )
-            statement.setString(1, nyForbehandlingId.toString())
-            statement.setString(2, forbehandlingId.toString())
-            statement.setString(3, Revurderingaarsak.ETTEROPPGJOER.name)
-            statement.setString(4, BehandlingStatus.IVERKSATT.name) // TODO: Bør være strengere -tillate færre statuser?
-
-            statement.executeUpdate()
-        }
-    }
-
-    fun oppdaterInformasjonFraBruker(
-        forbehandlingId: UUID,
-        harMottattNyInformasjon: JaNei,
-        endringErTilUgunstForBruker: JaNei?,
-        beskrivelseAvUgunst: String?,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE etteroppgjoer_behandling
-                    SET har_mottatt_ny_informasjon = ?, endring_er_til_ugunst_for_bruker = ?, beskrivelse_av_ugunst = ?
-                    WHERE id = ?
-                    """.trimIndent(),
-                )
-
-            statement.setString(1, harMottattNyInformasjon.name)
-            statement.setString(2, endringErTilUgunstForBruker?.name)
-            statement.setString(3, beskrivelseAvUgunst)
-            statement.setObject(4, forbehandlingId)
-
-            statement.executeUpdate()
-        }
-    }
-
-    fun hentPensjonsgivendeInntekt(forbehandlingId: UUID): PensjonsgivendeInntektFraSkatt? =
+    fun hentPensjonsgivendeInntekt(forbehandlingId: UUID): SummertePensjonsgivendeInntekter? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -278,18 +200,9 @@ class EtteroppgjoerForbehandlingDao(
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandlingId)
-                val pensjonsgivendeInntekter =
-                    statement.executeQuery().toList {
-                        toPensjonsgivendeInntekt()
-                    }
 
-                if (pensjonsgivendeInntekter.isEmpty()) {
-                    null
-                } else {
-                    PensjonsgivendeInntektFraSkatt(
-                        inntektsaar = pensjonsgivendeInntekter.first().inntektsaar,
-                        inntekter = pensjonsgivendeInntekter,
-                    )
+                statement.executeQuery().singleOrNull {
+                    toSummertePensjonsgivendeInntekter()
                 }
             }
         }
@@ -364,8 +277,8 @@ class EtteroppgjoerForbehandlingDao(
             statement.setObject(1, nyForbehandlingId)
             statement.setObject(2, forbehandlingId)
 
-            statement.executeUpdate().also {
-                krev(it == 1) {
+            statement.executeUpdate().also { count ->
+                krev(count == 1) {
                     "Kunne ikke kopiere summerter inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
                 }
             }
@@ -375,7 +288,6 @@ class EtteroppgjoerForbehandlingDao(
     private fun ResultSet.toForbehandling(): EtteroppgjoerForbehandling =
         EtteroppgjoerForbehandling(
             id = getString("id").let { UUID.fromString(it) },
-            hendelseId = UUID.randomUUID(), // TODO
             sak =
                 Sak(
                     id = SakId(getLong("sak_id")),
@@ -385,7 +297,6 @@ class EtteroppgjoerForbehandlingDao(
                     adressebeskyttelse = getString("adressebeskyttelse")?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
                     erSkjermet = getBoolean("erSkjermet"),
                 ),
-            // sekvensnummerSkatt = "123", // TODO
             opprettet = getTidspunkt("opprettet"),
             status = EtteroppgjoerForbehandlingStatus.valueOf(getString("status")),
             aar = getInt("aar"),
@@ -400,16 +311,19 @@ class EtteroppgjoerForbehandlingDao(
             harMottattNyInformasjon = getString("har_mottatt_ny_informasjon")?.let { enumValueOf<JaNei>(it) },
             endringErTilUgunstForBruker = getString("endring_er_til_ugunst_for_bruker")?.let { enumValueOf<JaNei>(it) },
             beskrivelseAvUgunst = getString("beskrivelse_av_ugunst"),
-            varselbrevSendt = getDate("varselbrev_sendt")?.let { it.toLocalDate() },
+            varselbrevSendt = getDate("varselbrev_sendt")?.toLocalDate(),
+            etteroppgjoerResultatType = getString("etteroppgjoer_resultat_type")?.let { enumValueOf<EtteroppgjoerResultatType>(it) },
+            aarsakTilAvbrytelse = getString("aarsak_til_avbrytelse")?.let { enumValueOf<AarsakTilAvbryteForbehandling>(it) },
+            aarsakTilAvbrytelseBeskrivelse = getString("kommentar_til_avbrytelse"),
+            harVedtakAvTypeOpphoer = getBoolean("har_vedtak_av_type_opphoer"),
         )
 
-    private fun ResultSet.toPensjonsgivendeInntekt(): PensjonsgivendeInntekt =
-        PensjonsgivendeInntekt(
-            skatteordning = getString("skatteordning"),
+    private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =
+        SummertePensjonsgivendeInntekter(
             loensinntekt = getInt("loensinntekt"),
             naeringsinntekt = getInt("naeringsinntekt"),
-            fiskeFangstFamiliebarnehage = getInt("fiske_fangst_familiebarnehage"),
-            inntektsaar = getInt("inntektsaar"),
+            tidspunktBeregnet = getTidspunktOrNull("tidspunkt_beregnet"),
+            regelresultat = null,
         )
 }
 

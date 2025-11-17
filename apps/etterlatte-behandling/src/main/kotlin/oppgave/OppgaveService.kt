@@ -166,10 +166,11 @@ class OppgaveService(
         oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
     }
 
-    fun endreTilKildeBehandlingOgOppdaterReferanse(
+    fun endreTilKildeBehandlingOgOppdaterReferanseOgMerknad(
         oppgaveId: UUID,
         referanse: String,
-    ) {
+        merknad: String? = null,
+    ): OppgaveIntern {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
 
@@ -182,13 +183,19 @@ class OppgaveService(
             )
         }
         oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+
+        if (!merknad.isNullOrEmpty()) {
+            oppgaveDao.oppdaterMerknad(oppgaveId, merknad)
+        }
+
+        return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
     fun oppdaterReferanseOgMerknad(
         oppgaveId: UUID,
         referanse: String,
         merknad: String,
-    ) {
+    ): OppgaveIntern {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
 
@@ -196,6 +203,7 @@ class OppgaveService(
 
         // Krever ikke at saksbehandler er tildelt for dette
         oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
+        return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
     fun endrePaaVent(
@@ -345,7 +353,7 @@ class OppgaveService(
             ?.ident
 
     // TODO: Slå sammen med de 3 andre "ferdigstill"-funksjonene
-    fun ferdigStillOppgaveUnderBehandling(
+    fun ferdigstillOppgaveUnderBehandling(
         referanse: String,
         type: OppgaveType,
         saksbehandler: BrukerTokenInfo,

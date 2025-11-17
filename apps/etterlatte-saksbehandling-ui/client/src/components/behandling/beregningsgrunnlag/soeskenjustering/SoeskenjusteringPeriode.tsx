@@ -15,7 +15,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import styled from 'styled-components'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { formaterMaanedDato } from '~utils/formatering/dato'
+import { formaterMaanednavnAar } from '~utils/formatering/dato'
 
 type SoeskenjusteringPeriodeProps = {
   control: Control<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
@@ -73,7 +73,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                 ) : (
                   <OppdrasSammenLes>
                     <Label>Fra og med</Label>
-                    <BodyShort>{formaterMaanedDato(fom.field.value)}</BodyShort>
+                    <BodyShort>{formaterMaanednavnAar(fom.field.value)}</BodyShort>
                   </OppdrasSammenLes>
                 )
               }
@@ -100,7 +100,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                 ) : (
                   <OppdrasSammenLes>
                     <Label>Til og med</Label>
-                    <BodyShort>{tom.field.value ? formaterMaanedDato(tom.field.value) : 'Ingen slutt'}</BodyShort>
+                    <BodyShort>{tom.field.value ? formaterMaanednavnAar(tom.field.value) : 'Ingen slutt'}</BodyShort>
                   </OppdrasSammenLes>
                 )
               }

@@ -3,6 +3,9 @@ package no.nav.etterlatte.beregning.regler.avkorting
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -15,18 +18,46 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.beregning.regler.restanse
 import no.nav.etterlatte.beregning.regler.sanksjon
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.periode.Periode
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.test.assertEquals
 
-// TODO: Testene her må justeres for å håndtere nytt grunnbeløp på en bærekraftig måte
-@Disabled
 class BeregnAvkortingTest {
+    @BeforeEach
+    fun `mock grunnbeloep`() {
+        mockkObject(GrunnbeloepRepository)
+        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
+            listOf(
+                Grunnbeloep(
+                    dato = YearMonth.of(2023, 5),
+                    grunnbeloep = 118620,
+                    grunnbeloepPerMaaned = 9885,
+                    omregningsfaktor = BigDecimal("1.045591"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2024, 5),
+                    grunnbeloep = 124028,
+                    grunnbeloepPerMaaned = 10336,
+                    omregningsfaktor = BigDecimal("1.064076"),
+                ),
+            )
+    }
+
+    @AfterEach
+    fun `unmock grunnbeloep`() {
+        unmockkObject(GrunnbeloepRepository)
+    }
+
     @Test
     fun `Beregner avkortet ytelse for foerstegangsbehandling`() {
         val avkorting = `Avkorting foerstegangsbehandling`()
@@ -1991,6 +2022,33 @@ class BeregnAvkortingTest {
         }
     }
 
+    @Test
+    fun `Tester å legge inn et opphør fom midt inne i første avkortingsår`() {
+        val avkorting = `Revurdering der opphør flyttes tidligere`()
+        assertEquals(1, avkorting.aarsoppgjoer.size)
+        val aarsoppgjoer = avkorting.aarsoppgjoer.single()
+        with(aarsoppgjoer.avkortetYtelse) {
+            size shouldBe 2
+
+            get(0).asClue {
+                it.periode.fom shouldBe YearMonth.of(2024, Month.MARCH)
+                it.periode.tom shouldBe YearMonth.of(2024, Month.APRIL)
+                it.ytelseEtterAvkorting shouldBe 17474
+                it.avkortingsbeloep shouldBe 4526
+                it.ytelseFoerAvkorting shouldBe 22000
+                it.restanse shouldBe null
+            }
+            get(1).asClue {
+                it.periode.fom shouldBe YearMonth.of(2024, Month.MAY)
+                it.periode.tom shouldBe YearMonth.of(2024, Month.SEPTEMBER)
+                it.ytelseEtterAvkorting shouldBe 18576
+                it.avkortingsbeloep shouldBe 4424
+                it.ytelseFoerAvkorting shouldBe 23000
+                it.restanse shouldBe null
+            }
+        }
+    }
+
     // TODO Revurdering opphør midt i et år
 
     private fun `Avkorting foerstegangsbehandling`() =
@@ -2116,6 +2174,7 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = null)),
+                opphoerFom = null,
             )
 
     private fun `Avkorting revurdering av sanksjon åpen periode lukker sanksjonsperioden`() =
@@ -2131,6 +2190,7 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.MAY))),
+                opphoerFom = null,
             )
 
     private fun `Avkorting ny inntekt en`() =
@@ -2184,6 +2244,7 @@ class BeregnAvkortingTest {
                             type = SanksjonType.BORTFALL,
                         ),
                     ),
+                opphoerFom = null,
             )
 
     private fun `Sanksjon etter inntektsendring legges inn`() =
@@ -2205,6 +2266,7 @@ class BeregnAvkortingTest {
                     listOf(
                         sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = null),
                     ),
+                opphoerFom = null,
             )
 
     private fun `Sanksjon etter inntektsendring lukkes`() =
@@ -2223,6 +2285,7 @@ class BeregnAvkortingTest {
                     listOf(
                         sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = YearMonth.of(2024, Month.AUGUST)),
                     ),
+                opphoerFom = null,
             )
 
     private fun `Avkorting ny lavere inntekt to etter sanksjon`() =
@@ -2308,6 +2371,7 @@ class BeregnAvkortingTest {
                         ),
                 ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 
     private fun `Avkorting korrigere siste inntekt`() =
@@ -2364,6 +2428,7 @@ class BeregnAvkortingTest {
                         ),
                 ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 
     private fun `Revurdering ny inntekt for nytt år`() =
@@ -2409,6 +2474,7 @@ class BeregnAvkortingTest {
                         ),
                 ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 
     private fun `Revurdering ny inntekt nytt år med opphør`() =
@@ -2439,4 +2505,68 @@ class BeregnAvkortingTest {
                 sanksjoner = emptyList(),
                 opphoerFom = YearMonth.of(2026, Month.JULY),
             )
+
+    private fun `Revurdering der opphør flyttes tidligere`() =
+        `Førstegangsbehandling fra mars 2024 med opphør i mai 2025`()
+            .kopierAvkorting(opphoerFom = YearMonth.of(2024, Month.OCTOBER))
+            .beregnAvkorting(
+                virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MARCH),
+                                    datoTOM = YearMonth.of(2024, Month.APRIL),
+                                    utbetaltBeloep = 22_000,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MAY),
+                                    datoTOM = YearMonth.of(2024, Month.SEPTEMBER),
+                                    utbetaltBeloep = 23_000,
+                                ),
+                            ),
+                    ),
+                sanksjoner = listOf(),
+                opphoerFom = YearMonth.of(2024, Month.OCTOBER),
+            )
+
+    private fun `Førstegangsbehandling fra mars 2024 med opphør i mai 2025`() =
+        Avkorting().beregnAvkortingMedNyeGrunnlag(
+            nyttGrunnlag =
+                listOf(
+                    avkortinggrunnlagLagreDto(
+                        id = UUID.randomUUID(),
+                        aarsinntekt = 200_000,
+                        fratrekkInnAar = 50_000,
+                        fom = YearMonth.of(2024, Month.MARCH),
+                    ),
+                    avkortinggrunnlagLagreDto(
+                        id = UUID.randomUUID(),
+                        aarsinntekt = 250_000,
+                        fratrekkInnAar = 0,
+                        fom = YearMonth.of(2025, Month.JANUARY),
+                    ),
+                ),
+            bruker = bruker,
+            beregning =
+                beregning(
+                    beregninger =
+                        listOf(
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.MARCH),
+                                datoTOM = YearMonth.of(2024, Month.APRIL),
+                                utbetaltBeloep = 22_000,
+                            ),
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.MAY),
+                                datoTOM = YearMonth.of(2025, Month.APRIL),
+                                utbetaltBeloep = 23_000,
+                            ),
+                        ),
+                ),
+            sanksjoner = listOf(),
+            opphoerFom = YearMonth.of(2025, Month.MAY),
+            aldersovergang = null,
+        )
 }

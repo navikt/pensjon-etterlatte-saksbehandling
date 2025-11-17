@@ -42,25 +42,26 @@ class AarligInntektsjusteringService(
         logger.info("Oppretter avkorting for nytt inntektsår med siste inntekt fra behandling=$forrigeBehandlingId")
         val forrigeAvkorting = avkortingService.hentForrigeAvkorting(forrigeBehandlingId)
 
-        val siseInntekt =
+        val sisteInntekt =
             (forrigeAvkorting.aarsoppgjoer.last() as AarsoppgjoerLoepende)
                 .inntektsavkorting
                 .last()
                 .grunnlag
 
-        with(siseInntekt.periode) {
-            if (fom.year != aar - 1 || (tom != null && tom?.year != aar - 1)) {
+        val riktigInntektsAar = aar - 1
+        with(sisteInntekt.periode) {
+            if (fom.year != riktigInntektsAar || (tom != null && tom?.year != riktigInntektsAar)) {
                 throw InternfeilException("Årlig inntektsjustering feilet - inntekt som overføres er i feil år")
             }
         }
 
         val nyttGrunnlag =
             AvkortingGrunnlagLagreDto(
-                inntektTom = siseInntekt.inntektTom,
+                inntektTom = sisteInntekt.inntektTom,
                 fratrekkInnAar = 0,
-                inntektUtlandTom = siseInntekt.inntektUtlandTom,
+                inntektUtlandTom = sisteInntekt.inntektUtlandTom,
                 fratrekkInnAarUtland = 0,
-                spesifikasjon = "Automatisk jobb viderefører inntekt fra $aar med id=${siseInntekt.id}",
+                spesifikasjon = "Automatisk jobb viderefører inntekt fra ${sisteInntekt.periode.fom.year} med id=${sisteInntekt.id}",
                 fom = YearMonth.of(aar, 1),
             )
 

@@ -1,8 +1,8 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
-import { mapResult, mapSuccess } from '~shared/api/apiUtils'
+import { Alert, BodyShort, Box, Button, ConfirmationPanel, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
+import { isPending, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
 import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
@@ -11,10 +11,9 @@ import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbeha
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
-import { ferdigstillEtteroppgjoerForbehandlingBrev } from '~shared/api/etteroppgjoer'
-import { isPending } from '@reduxjs/toolkit'
+import { ferdigstillEtteroppgjoerForbehandlingMedBrev } from '~shared/api/etteroppgjoer'
 import {
-  EtteroppgjoerForbehandling,
+  EtteroppgjoerDetaljertForbehandling,
   kanRedigereEtteroppgjoerBehandling,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
@@ -30,17 +29,18 @@ export function EtteroppgjoerForbehandlingBrev() {
   const [modalOpen, setModalOpen] = useState(false)
 
   const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest, resetFerdigstillForbehandlingStatus] =
-    useApiCall(ferdigstillEtteroppgjoerForbehandlingBrev)
+    useApiCall(ferdigstillEtteroppgjoerForbehandlingMedBrev)
 
   const kanRedigeres = kanRedigereEtteroppgjoerBehandling(etteroppgjoer.behandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
+  const [bekreftetSettOverBrev, setBekreftetSettOverBrev] = useState<boolean>(false)
 
   const lukkAdvarselBehandlingEndret = () => {
     setVisAdvarselBehandlingEndret(false)
   }
 
-  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: EtteroppgjoerForbehandling) => {
+  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: EtteroppgjoerDetaljertForbehandling) => {
     if (etteroppgjoer.beregnetEtteroppgjoerResultat != undefined) {
       return (
         new Date(etteroppgjoer.beregnetEtteroppgjoerResultat?.tidspunkt).getTime() >
@@ -58,6 +58,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   }
 
   function lukkModal() {
+    setBekreftetSettOverBrev(false)
     resetFerdigstillForbehandlingStatus()
     setModalOpen(false)
   }
@@ -88,10 +89,20 @@ export function EtteroppgjoerForbehandlingBrev() {
         }}
       >
         <Modal.Body>
-          <BodyShort>
-            Når forbehandlingen for etteroppgjøret ferdigstilles vil brevet sendes ut og forbehandlingen låses for
-            endringer.
-          </BodyShort>
+          <VStack gap="4">
+            <ConfirmationPanel
+              name="BekreftSettOverBrev"
+              checked={bekreftetSettOverBrev}
+              label="Jeg har sett over redigerbart innhold inkludert vedlegg, og tilpasset det til brukers situasjon og inntekt"
+              onChange={(e) => {
+                setBekreftetSettOverBrev(e.currentTarget.checked)
+              }}
+            />
+            <BodyShort spacing>
+              Når forbehandlingen for etteroppgjøret ferdigstilles vil brevet sendes ut og forbehandlingen låses for
+              endringer.
+            </BodyShort>
+          </VStack>
           {isFailureHandler({
             apiResult: ferdigstillForbehandlingResult,
             errorMessage: 'Kunne ikke ferdigstille forbehandling',
@@ -102,6 +113,7 @@ export function EtteroppgjoerForbehandlingBrev() {
             variant="primary"
             onClick={ferdigstillForbehandling}
             loading={isPending(ferdigstillForbehandlingResult)}
+            disabled={!bekreftetSettOverBrev}
           >
             Ferdigstill
           </Button>
@@ -120,6 +132,13 @@ export function EtteroppgjoerForbehandlingBrev() {
             Forhåndsvarsel
           </Heading>
 
+          {kanRedigeres && (
+            <Box marginBlock="0 2">
+              <Alert variant="info" size="small">
+                Husk å se over redigerbart innhold i brevet slik at det er tilpasset brukers situasjon og inntekt.
+              </Alert>
+            </Box>
+          )}
           {visAdvarselBehandlingEndret && (
             <Alert variant="warning">
               Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles

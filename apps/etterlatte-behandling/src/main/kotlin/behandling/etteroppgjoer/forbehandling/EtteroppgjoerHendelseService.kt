@@ -1,18 +1,18 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_RESULTAT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummertePensjonsgivendeInntekterStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -25,7 +25,6 @@ import java.time.LocalDateTime
 class EtteroppgjoerHendelseService(
     private val rapidPubliserer: KafkaProdusent<String, String>,
     private val hendelseDao: HendelseDao,
-    private val behandlingService: BehandlingService,
     private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerHendelseService::class.java)
@@ -34,7 +33,8 @@ class EtteroppgjoerHendelseService(
         etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto? = null,
         hendelseType: EtteroppgjoerHendelseType,
-        saksbehandler: String?,
+        saksbehandler: String? = null,
+        utlandstilknytning: Utlandstilknytning? = null,
     ) {
         hendelseDao.etteroppgjoerHendelse(
             forbehandlingId = etteroppgjoerForbehandling.id,
@@ -46,25 +46,19 @@ class EtteroppgjoerHendelseService(
             begrunnelse = null,
         )
 
-        if (hendelseType.skalSendeStatistikk) {
-            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(etteroppgjoerForbehandling.sak.id)
-
-            // TODO: nullable?
-            val summerteInntekter =
+        sendKafkaMelding(
+            etteroppgjoerForbehandling = etteroppgjoerForbehandling,
+            hendelseType = hendelseType,
+            etteroppgjoerResultat = etteroppgjoerResultat,
+            summerteInntekter =
                 etteroppgjoerForbehandlingDao
-                    .hentSummerteInntekter(etteroppgjoerForbehandling.id)
-            val pensjonsgivendeInntektFraSkatt = etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!
-
-            sendKafkaMelding(
-                etteroppgjoerForbehandling = etteroppgjoerForbehandling,
-                hendelseType = hendelseType,
-                etteroppgjoerResultat = etteroppgjoerResultat,
-                summerteInntekter = summerteInntekter,
-                pensjonsgivendeInntekt = pensjonsgivendeInntektFraSkatt,
-                utlandstilknytningType = utlandstilknytning?.type,
-                saksbehandler = saksbehandler,
-            )
-        }
+                    .hentSummerteInntekter(etteroppgjoerForbehandling.id),
+            pensjonsgivendeInntekt =
+                etteroppgjoerForbehandlingDao
+                    .hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!,
+            utlandstilknytningType = utlandstilknytning?.type,
+            saksbehandler = saksbehandler,
+        )
     }
 
     private fun sendKafkaMelding(
@@ -72,7 +66,7 @@ class EtteroppgjoerHendelseService(
         hendelseType: EtteroppgjoerHendelseType,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
         summerteInntekter: SummerteInntekterAOrdningen?,
-        pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkatt,
+        pensjonsgivendeInntekt: SummertePensjonsgivendeInntekter?,
         utlandstilknytningType: UtlandstilknytningType?,
         saksbehandler: String?,
     ) {
@@ -87,21 +81,22 @@ class EtteroppgjoerHendelseService(
                         utlandstilknytningType = utlandstilknytningType,
                         saksbehandler = saksbehandler,
                         summerteInntekter =
-                            if (summerteInntekter != null) {
+                            summerteInntekter?.let {
                                 SummerteInntekterAOrdningenStatistikkDto(
                                     afp = summerteInntekter.afp,
                                     loenn = summerteInntekter.loenn,
                                     oms = summerteInntekter.oms,
                                     tidspunktBeregnet = summerteInntekter.tidspunktBeregnet,
                                 )
-                            } else {
-                                null
                             },
                         pensjonsgivendeInntekt =
-                            PensjonsgivendeInntektFraSkattStatistikkDto(
-                                inntektsaar = pensjonsgivendeInntekt.inntektsaar,
-                                inntekter = pensjonsgivendeInntekt.inntekter,
-                            ),
+                            pensjonsgivendeInntekt?.let {
+                                SummertePensjonsgivendeInntekterStatistikkDto(
+                                    loensinntekt = it.loensinntekt,
+                                    naeringsinntekt = it.naeringsinntekt,
+                                )
+                            },
+                        tilknyttetRevurdering = etteroppgjoerForbehandling.erRevurdering(),
                     ),
             )
         val meldingMap =

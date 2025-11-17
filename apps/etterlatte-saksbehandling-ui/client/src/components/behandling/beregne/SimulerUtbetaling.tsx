@@ -5,17 +5,17 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
-import { BodyLong, BodyShort, Box, Heading, Label, Table } from '@navikt/ds-react'
-import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
-import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
-import { NOK } from '~utils/formatering/formatering'
-import styled from 'styled-components'
+import { BodyLong, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
+import { SimulertBeregning } from '~shared/types/Utbetaling'
+import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useAppSelector } from '~store/Store'
-import { compareDesc } from 'date-fns'
 import { SakType } from '~shared/types/sak'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { SimuleringGruppertPaaAar } from './SimuleringGruppertPaaAar'
+import { UtbetalingTable } from './UtbetalingTable'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -57,7 +57,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
   return (
     <>
       <Box paddingBlock="12">
-        <Heading spacing size="small" level="1">
+        <Heading spacing size="small" level="2">
           Simulere utbetaling
         </Heading>
 
@@ -102,72 +102,27 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 }
 
 const SimuleringBeregning = ({ data }: { data: SimulertBeregning }) => {
+  const visGrupperteSimuleringer = useFeaturetoggle(FeatureToggle.ny_simuleringsvisning)
   return (
-    <>
+    <VStack gap="8">
       <UtbetalingTable tittel="Kommende utbetaling(er)" perioder={data.kommendeUtbetalinger} />
 
-      {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Etterbetaling" perioder={data.etterbetaling} />}
+      {visGrupperteSimuleringer ? (
+        <SimuleringGruppertPaaAar data={data} />
+      ) : (
+        <>
+          {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Etterbetaling" perioder={data.etterbetaling} />}
 
-      {data.tilbakekreving.length > 0 && (
-        <UtbetalingTable tittel="Potensiell tilbakekreving" perioder={data.tilbakekreving} />
+          {data.tilbakekreving.length > 0 && (
+            <UtbetalingTable tittel="Potensiell tilbakekreving" perioder={data.tilbakekreving} />
+          )}
+        </>
       )}
 
       <>
         Beregnet dato: {formaterDato(data.datoBeregnet)}
         {data.infomelding && <BodyShort textColor="subtle">{data.infomelding}</BodyShort>}
       </>
-    </>
-  )
-}
-
-const TableWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 1000px;
-  margin-top: 1em;
-  margin-bottom: 1em;
-`
-
-const UtbetalingTable = ({ tittel, perioder }: { tittel: string; perioder: SimulertBeregningsperiode[] }) => {
-  const sortertePerioder = [...perioder].sort((a, b) => compareDesc(new Date(a.fom), new Date(b.fom)))
-
-  return (
-    <TableWrapper>
-      <Heading size="xsmall">{tittel}</Heading>
-      <Table zebraStripes>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>Periode</Table.HeaderCell>
-            <Table.HeaderCell>Klasse</Table.HeaderCell>
-            <Table.HeaderCell>Konto</Table.HeaderCell>
-            <Table.HeaderCell>Forfall</Table.HeaderCell>
-            <Table.HeaderCell align="right">Beløp</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {sortertePerioder.map((periode, idx) => (
-            <Table.Row key={idx}>
-              <Table.DataCell>
-                {formaterDato(periode.fom)} - {formaterKanskjeStringDato(periode.tom)}
-              </Table.DataCell>
-              <Table.DataCell>
-                {periode.klassekodeBeskrivelse} {periode.tilbakefoering && '(tidligere utbetalt)'}
-              </Table.DataCell>
-              <Table.DataCell>{periode.konto}</Table.DataCell>
-              <Table.DataCell>{formaterDato(periode.forfall)}</Table.DataCell>
-              <Table.DataCell align="right">{NOK(periode.beloep)}</Table.DataCell>
-            </Table.Row>
-          ))}
-          <Table.Row>
-            <Table.DataCell colSpan={4}>
-              <Label>Sum</Label>
-            </Table.DataCell>
-            <Table.DataCell align="right">
-              {NOK(perioder.map((row) => row.beloep).reduce((sum, current) => sum + current, 0))}
-            </Table.DataCell>
-          </Table.Row>
-        </Table.Body>
-      </Table>
-    </TableWrapper>
+    </VStack>
   )
 }

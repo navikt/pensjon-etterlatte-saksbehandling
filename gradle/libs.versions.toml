@@ -5,8 +5,8 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
 jackson-version = "2.20.0"
-jupiter-version = "5.13.4"
-ktor-version = "3.2.3"
+jupiter-version = "6.0.0"
+ktor-version = "3.3.0"
 navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.3"
@@ -18,16 +18,16 @@ tbdlibs-version = "2025.08.16-09.21-71db7cad" # OBS! rapidsandrivers bruker denn
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "7.0.2" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.12.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.12.0" }
-database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.13.2" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.13.2" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.8" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
 jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
 jackson-modulekotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-version" }
 
-kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "4.0.0" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "4.1.0" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.12.0" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.6.0" }
 
@@ -60,21 +60,21 @@ ktor-servertests = { module = "io.ktor:ktor-server-test-host", version.ref = "kt
 ktor-serverswagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor-version" }
 ktor-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.08.26-11.41.6f3f2d59f9e8" }
+etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "2025.11.10-14.35.6c85e2f202a7" }
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "1.1.6" }
-brevbaker-api-model-common = { module = "no.nav.pensjon.brevbaker:brevbaker-api-model-common", version = "1.20.0"}
+brevbaker-api-model-common = { module = "no.nav.pensjon.brevbaker:brevbaker-api-model-common", version = "2.7.0"}
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.18" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.19" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.15.3" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.15.4" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
 messaginghub-pooled-jms = { module = "org.messaginghub:pooled-jms", version = "3.1.7" }
 
-mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.3.0" }
+mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.3.1" }
 
 navfelles-rapidsandriversktor = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapidsandrivers-version" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
@@ -83,7 +83,7 @@ navfelles-tjenestespesifikasjoner-oppdragsimulering = { module = "com.github.nav
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor = { module = "no.nav.security:token-validation-ktor-v3", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.3.0" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "3.0.0" }
 
 test-navfelles-rapidsandriversktor = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdlibs-version" }
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
@@ -91,7 +91,7 @@ test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", versi
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "6.0.3" }
-test-mockk = { module = "io.mockk:mockk", version = "1.14.5" }
+test-mockk = { module = "io.mockk:mockk", version = "1.14.6" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }

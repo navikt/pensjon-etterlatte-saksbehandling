@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -18,6 +19,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.ALDERSOVERGANG_67
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.HAR_OPPHOER_FOM
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.HAR_OVERSTYRT_BEREGNING
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.HAR_SANKSJON
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONO_INFO
@@ -30,6 +32,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -77,6 +80,7 @@ class AarligInntektsjusteringJobbService(
     private val oppgaveService: OppgaveService,
     private val rapid: KafkaProdusent<String, String>,
     private val featureToggleService: FeatureToggleService,
+    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -175,6 +179,15 @@ class AarligInntektsjusteringJobbService(
             return true
         }
 
+        val aapneForbehandlinger =
+            etteroppgjoerForbehandlingService
+                .hentEtteroppgjoerForbehandlinger(sakId)
+                .filter { it.erUnderBehandling() }
+        if (aapneForbehandlinger.isNotEmpty()) {
+            nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
+            return true
+        }
+
         if (vedtak.underSamordning) {
             nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, TIL_SAMORDNING)
             return true
@@ -199,6 +212,15 @@ class AarligInntektsjusteringJobbService(
 
         if (avkortingSjekk.harSanksjon) {
             nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, HAR_SANKSJON)
+            return true
+        }
+
+        val harOverstyrtBeregning =
+            runBlocking {
+                beregningKlient.harOverstyrt(forrigeBehandling.id, HardkodaSystembruker.omregning)
+            }
+        if (harOverstyrtBeregning) {
+            nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, HAR_OVERSTYRT_BEREGNING)
             return true
         }
 
@@ -450,6 +472,7 @@ enum class AarligInntektsjusteringAarsakManuell {
     HAR_SANKSJON,
     HAR_OPPHOER_FOM,
     ALDERSOVERGANG_67,
+    HAR_OVERSTYRT_BEREGNING,
 }
 
 enum class ManuellBehandlingToggle(

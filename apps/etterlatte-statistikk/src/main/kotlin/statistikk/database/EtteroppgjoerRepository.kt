@@ -1,14 +1,11 @@
 package no.nav.etterlatte.statistikk.database
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.serialization.json.Json
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummertePensjonsgivendeInntekterStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -19,6 +16,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setNullableBoolean
 import no.nav.etterlatte.libs.database.setNullableDate
 import no.nav.etterlatte.libs.database.setNullableDouble
 import no.nav.etterlatte.libs.database.setNullableInt
@@ -42,8 +40,8 @@ class EtteroppgjoerRepository(
                     """
                     INSERT INTO etteroppgjoer_statistikk (forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                     opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,summerte_inntekter, pensjonsgivende_inntekter)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )
             statement.setObject(1, rad.forbehandlingId)
@@ -64,6 +62,7 @@ class EtteroppgjoerRepository(
             statement.setString(16, rad.resultatType?.name)
             statement.setJsonb(17, rad.summerteInntekter)
             statement.setJsonb(18, rad.pensjonsgivendeInntekt)
+            statement.setNullableBoolean(19, rad.tilknyttetRevurdering)
             statement.executeUpdate()
         }
     }
@@ -75,7 +74,7 @@ class EtteroppgjoerRepository(
                     """
                     SELECT id, forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                       opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter
+                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering
                     FROM etteroppgjoer_statistikk
                     WHERE id = ?
                     """.trimIndent(),
@@ -93,7 +92,7 @@ class EtteroppgjoerRepository(
                     """
                     SELECT id, forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                       opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter
+                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering
                     FROM etteroppgjoer_statistikk
                     WHERE forbehandling_id = ?
                     """.trimIndent(),
@@ -127,6 +126,7 @@ private fun ResultSet.tilEtteroppgjoerRad(): EtteroppgjoerRad =
                 ?.let { enumValueOf<EtteroppgjoerResultatType>(it) },
         summerteInntekter = getString("summerte_inntekter")?.let { objectMapper.readValue(it) },
         pensjonsgivendeInntekt = getString("pensjonsgivende_inntekter")?.let { objectMapper.readValue(it) },
+        tilknyttetRevurdering = getBoolean("tilknyttet_revurdering").takeUnless { wasNull() },
     )
 
 data class EtteroppgjoerRad(
@@ -140,7 +140,7 @@ data class EtteroppgjoerRad(
     val maanederYtelse: List<Int>,
     val tekniskTid: Tidspunkt,
     val summerteInntekter: SummerteInntekterAOrdningenStatistikkDto? = null,
-    val pensjonsgivendeInntekt: PensjonsgivendeInntektFraSkattStatistikkDto? = null,
+    val pensjonsgivendeInntekt: SummertePensjonsgivendeInntekterStatistikkDto? = null,
     // Følgende rader går på resultat, som ikke nødvendigvis er gitt
     val utbetaltStoenad: Long?,
     val nyBruttoStoenad: Long?,
@@ -150,6 +150,7 @@ data class EtteroppgjoerRad(
     val tilbakekrevingGrense: Double?,
     val etterbetalingGrense: Double?,
     val resultatType: EtteroppgjoerResultatType?,
+    val tilknyttetRevurdering: Boolean?,
 ) {
     companion object {
         fun fraHendelseOgDto(
@@ -178,6 +179,7 @@ data class EtteroppgjoerRad(
                 resultatType = resultat?.resultatType,
                 summerteInntekter = statistikkDto.summerteInntekter,
                 pensjonsgivendeInntekt = statistikkDto.pensjonsgivendeInntekt,
+                tilknyttetRevurdering = statistikkDto.tilknyttetRevurdering,
             )
     }
 }

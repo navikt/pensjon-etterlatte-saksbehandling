@@ -5,6 +5,7 @@ import java.time.LocalDate
 
 enum class EtteroppgjoerFilter {
     ENKEL,
+    MED_AKTIVITET_OG_SKJERMET,
 }
 
 data class EtteroppgjoerKonfigurasjon(
@@ -14,5 +15,6 @@ data class EtteroppgjoerKonfigurasjon(
     val etteroppgjoerFilter: EtteroppgjoerFilter,
     val spesifikkeSaker: List<SakId>,
     val ekskluderteSaker: List<SakId>,
+    val spesifikkeEnheter: List<String>,
     val kjoeringId: String? = null,
 )

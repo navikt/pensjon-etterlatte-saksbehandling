@@ -8,6 +8,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { ILand } from '~utils/kodeverk'
+import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 interface PeriodeRedigeringModus {
   redigerPeriode: boolean
@@ -81,7 +82,7 @@ export const TrygdetidPerioderTable = ({
                     ) : (
                       <Box maxWidth="42.5rem">
                         <Label>Begrunnelse</Label>
-                        <BodyShort>{trygdetidPeriode.begrunnelse}</BodyShort>
+                        <TekstMedMellomrom>{trygdetidPeriode.begrunnelse}</TekstMedMellomrom>
                       </Box>
                     )
                   ) : (

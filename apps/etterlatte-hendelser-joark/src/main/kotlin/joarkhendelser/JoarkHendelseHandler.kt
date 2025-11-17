@@ -1,5 +1,6 @@
 package no.nav.etterlatte.joarkhendelser
 
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.config.sikkerLogg
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
@@ -22,6 +23,17 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+enum class KjenteSkjemaKoder(
+    val skjemaKode: String,
+) {
+    ANKE("NAV 90-00.08 A"),
+    ETTERSENDELSE_ANKE("NAVe 90-00.08 A"),
+    ETTERSENDELSE_KLAGE("NAVe 90-00.08 K"),
+    ;
+
+    val navn = name.lowercase().replace("_", " ")
+}
 
 /**
  * Håndterer hendelser fra Joark og behandler de hendelsene som tilhører Team Etterlatte.
@@ -96,6 +108,45 @@ class JoarkHendelseHandler(
         if (journalpostErFerdigstilt(journalpost)) {
             return
         }
+        if (journalpost.journalfoerendeEnhet != null) {
+            // Journalposten har allerede satt en journalførende enhet, og vi vil ikke plukke den opp hvis den skal
+            // sendes rett til kabal (når det gjelder en anke på våre tema)
+            logger.info(
+                "Håndterer en journalpost som har satt journalførende enhet (id=${journalpost.journalpostId}, " +
+                    "enhet=${journalpost.journalfoerendeEnhet}, hendelse=${hendelse.hendelsesType})",
+            )
+            val kjentSkjemakode =
+                KjenteSkjemaKoder.entries.find { kjentSkjema -> kjentSkjema.skjemaKode in journalpost.dokumenter.map { it.brevkode } }
+            if (kjentSkjemakode != null && journalpost.journalfoerendeEnhet == Enheter.KLAGE_VEST.enhetNr.enhetNr) {
+                if (hendelse.hendelsesType == HendelseType.JOURNALPOST_MOTTATT) {
+                    logger.info(
+                        "Oppretter oppgave til Kabal for journalpost med id=$journalpostId, " +
+                            "tema=$temaNytt siden den har satt journalførende enhet=${journalpost.journalfoerendeEnhet} og " +
+                            "brevkoden brukt er $kjentSkjemakode",
+                    )
+                    oppgaveKlient.opprettOppgaveForKabal(journalpost, temaNytt, kjentSkjemakode)
+                } else {
+                    logger.info(
+                        "Journalposthendelsen (${hendelse.hendelsesType}) er ikke mottatt, så vi oppretter " +
+                            "ikke en oppgave til Kabal for journalpost $journalpostId, tema=$temaNytt, " +
+                            "enhet=${journalpost.journalfoerendeEnhet}",
+                    )
+                }
+                return
+            } else {
+                // team klage ruter journalposter som de ikke vil vi skal plukke opp ved å sette journalførende enhet
+                // det er mulig at vi har ander tilfeller der noen prøver å rute en journalpost utenfor Gjenny
+                // så legger på en error slik at vi kan fange det opp og se om vi må håndtere disse journalpostene
+                // annerledes.
+                logger.warn(
+                    "Behandler en journalpost med id=$journalpostId og tema $temaNytt, " +
+                        "som har journalførende enhet ${journalpost.journalfoerendeEnhet} satt. " +
+                        "Brevkoden brukt er ikke en av de kjente kodene for anke / klager som skal til kabal, " +
+                        "og det bør dobbletsjekkes om denne journalposten sendes rett.",
+                )
+            }
+        }
+
         logger.info(
             "Starter behandling av hendelse (id=$hendelseId, journalpostId=$journalpostId, temaNytt=$temaNytt, temaGammelt=$temaGammelt)",
         )

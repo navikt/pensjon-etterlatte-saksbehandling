@@ -10,7 +10,7 @@ import {
 import React, { useState } from 'react'
 import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
-import { formaterMaanedDato } from '~utils/formatering/dato'
+import { formaterMaanednavnAar } from '~utils/formatering/dato'
 import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
@@ -43,7 +43,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
               if (klasseTypeYtelse(beloep)) {
                 return (
                   <Table.Row key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}>
-                    <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
+                    <Table.DataCell key="maaned">{formaterMaanednavnAar(periode.maaned)}</Table.DataCell>
                     <Table.DataCell key="klasse">
                       {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
                     </Table.DataCell>

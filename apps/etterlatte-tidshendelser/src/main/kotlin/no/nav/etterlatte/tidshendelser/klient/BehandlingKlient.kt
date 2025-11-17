@@ -2,6 +2,7 @@ package no.nav.etterlatte.tidshendelser.klient
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -15,6 +16,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerKonfigurasjon
+import java.time.Duration
 import java.time.YearMonth
 
 class BehandlingKlient(
@@ -74,6 +76,11 @@ class BehandlingKlient(
                 .get("$behandlingUrl/saker/bp-fyller-18-i-maaned/$maaned") {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
+                    timeout {
+                        requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                        socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                        connectTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                    }
                 }.body()
         }
 
@@ -98,6 +105,7 @@ class BehandlingKlient(
                         etteroppgjoerFilter = etteroppgjoerKonfigurasjon.etteroppgjoerFilter,
                         spesifikkeSaker = etteroppgjoerKonfigurasjon.spesifikkeSaker,
                         ekskluderteSaker = etteroppgjoerKonfigurasjon.ekskluderteSaker,
+                        spesifikkeEnheter = etteroppgjoerKonfigurasjon.spesifikkeEnheter,
                     ),
                 )
             }
@@ -115,4 +123,5 @@ data class StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
     val etteroppgjoerFilter: EtteroppgjoerFilter,
     val spesifikkeSaker: List<SakId>,
     val ekskluderteSaker: List<SakId>,
+    val spesifikkeEnheter: List<String>,
 )

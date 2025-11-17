@@ -255,9 +255,9 @@ class BehandlingStatusServiceImpl(
         }
 
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)
-        haandterEtteroppgjoerAttestertVedtak(behandling)
+        haandterEtteroppgjoerAttestertVedtak(behandling, brukerTokenInfo)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
             saksbehandler = brukerTokenInfo,
@@ -330,6 +330,7 @@ class BehandlingStatusServiceImpl(
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
         haandterAktivitetspliktOppgave(behandling)
+
         if (behandling.type == BehandlingType.REVURDERING) {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
@@ -351,7 +352,7 @@ class BehandlingStatusServiceImpl(
             // TODO: litt for enkelt, må kanskje sjekke mer
             if (aar > virkAar) {
                 try {
-                    etteroppgjoerService.opprettEtteroppgjoer(behandling, virkAar)
+                    etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, virkAar)
                 } catch (e: Exception) {
                     logger.error("Kunne ikke opprette etteroppgjør ved iverksettelse av sak", e)
                 }
@@ -368,14 +369,17 @@ class BehandlingStatusServiceImpl(
         }
     }
 
-    private fun haandterEtteroppgjoerAttestertVedtak(behandling: Behandling) {
+    private fun haandterEtteroppgjoerAttestertVedtak(
+        behandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         if (behandling.type != BehandlingType.REVURDERING || behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) {
             return
         }
 
         val forbehandling = forbehandlingService.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
         if (forbehandling.erUnderBehandling()) {
-            forbehandlingService.lagreForbehandling(forbehandling.tilFerdigstilt())
+            forbehandlingService.ferdigstillRevurderingForbehandling(forbehandling, brukerTokenInfo)
         }
     }
 

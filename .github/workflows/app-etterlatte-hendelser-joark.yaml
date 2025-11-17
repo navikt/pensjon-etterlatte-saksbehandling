@@ -11,6 +11,7 @@ on:
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-behandling-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -23,6 +24,7 @@ on:
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-behandling-model/**
       - gradle/libs.versions.toml
 
 permissions:

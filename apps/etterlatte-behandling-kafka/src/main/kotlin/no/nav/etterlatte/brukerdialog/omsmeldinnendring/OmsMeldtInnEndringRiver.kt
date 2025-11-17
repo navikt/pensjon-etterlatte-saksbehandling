@@ -111,6 +111,7 @@ internal class OmsMeldtInnEndringRiver(
             OmsEndring.INNTEKT -> "Inntekt"
             OmsEndring.AKTIVITET_OG_INNTEKT -> "Aktivitet og inntekt"
             OmsEndring.SVAR_PAA_ETTEROPPGJOER -> "Svar på etteroppgjør"
+            OmsEndring.FORVENTET_INNTEKT_TIL_NESTE_AAR -> "Forventet inntekt til neste år"
             OmsEndring.ANNET -> "Annet"
         }
 }

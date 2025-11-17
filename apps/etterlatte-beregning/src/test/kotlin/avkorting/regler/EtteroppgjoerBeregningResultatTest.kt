@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -28,9 +29,9 @@ class EtteroppgjoerBeregningResultatTest {
     fun `skal etterbetale hvis differanse er mer en grense for etterbetaling`() {
         val nyBruttoStoenad =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 2000),
-                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 9), ytelse = 2000),
-                avkortetYtelse(fom = YearMonth.of(2024, 10), YearMonth.of(2024, 12), ytelse = 2000),
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 1050),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 9), ytelse = 1050),
+                avkortetYtelse(fom = YearMonth.of(2024, 10), YearMonth.of(2024, 12), ytelse = 1050),
             )
 
         val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), nyBruttoStoenad)
@@ -40,15 +41,33 @@ class EtteroppgjoerBeregningResultatTest {
                 regelPeriode,
             )
 
-        resultat.verdi.differanse.differanse shouldBe -12000
+        resultat.verdi.differanse.differanse shouldBe -600
         resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.ETTERBETALING.name
+    }
+
+    @Test
+    fun `tolererer implisitt lukkede perioder i beregningen av etteroppgjoeret`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11365),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), null, ytelse = 12456),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 10990),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), null, ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        assertDoesNotThrow { beregneEtteroppgjoerRegel.anvend(differanseGrunnlag, regelPeriode) }
     }
 
     @Test
     fun `akkurat utenfor grense for tilbakekreving gir tilbakekreving`() {
         val forventet =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11340),
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11365),
                 avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
             )
 
@@ -66,8 +85,8 @@ class EtteroppgjoerBeregningResultatTest {
                 regelPeriode,
             )
 
-        resultat.verdi.differanse.differanse shouldBe 1400
         resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKEKREVING.name
+        resultat.verdi.differanse.differanse shouldBe 1500
     }
 
     @Test
@@ -127,6 +146,84 @@ class EtteroppgjoerBeregningResultatTest {
 
         resultat.verdi.differanse.differanse shouldBe 0
         resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING.name
+    }
+
+    @Test
+    fun `ikke etteroppgjør hvis innenfor grense for etterbetaling`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11390),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11440),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.differanse.differanse shouldBe -200
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING.name
+    }
+
+    @Test
+    fun `ikke etteroppgjør hvis innenfor grense for tilbakekreving`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11700),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11400),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.differanse.differanse shouldBe 1200
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING.name
+    }
+
+    @Test
+    fun `ikke etteroppgjør hvis ingen utbetaling og ingen endring`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 0),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 0),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 0),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 0),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.differanse.differanse shouldBe 0
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING.name
     }
 
     private fun grunnlag(

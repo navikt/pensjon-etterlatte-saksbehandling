@@ -49,7 +49,7 @@ export default function BehandleJournalfoeringOppgave() {
   const { id: oppgaveId } = useParams()
 
   useEffect(() => {
-    if (!oppgave && oppgaveId) {
+    if (oppgaveId && oppgave?.id !== oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
         dispatch(settOppgave(oppgave))
         dispatch(settBruker(oppgave.fnr!!))

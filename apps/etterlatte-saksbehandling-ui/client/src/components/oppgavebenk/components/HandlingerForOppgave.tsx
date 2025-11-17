@@ -22,6 +22,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
 import { EtteroppgjoerSvarfristUtloeptModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerSvarfristUtloeptModal'
+import { OpprettEtteroppgjoerForbehandlingModal } from '~components/oppgavebenk/oppgaveModal/OpprettEtteroppgjoerForbehandlingModal'
+import { KlageBehandleSvarFraKa } from '~components/oppgavebenk/oppgaveModal/KlageBehandleSvarFraKa'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -125,9 +127,17 @@ export const HandlingerForOppgave = ({
       )
     case Oppgavetype.ETTEROPPGJOER:
       return (
-        <Button size="small" as="a" href={`/etteroppgjoer/${referanse}`}>
-          Gå til etteroppgjør
-        </Button>
+        <>
+          {erInnloggetSaksbehandlerOppgave && referanse && (
+            <Button size="small" as="a" href={`/etteroppgjoer/${referanse}`}>
+              Gå til etteroppgjør
+            </Button>
+          )}
+
+          {erInnloggetSaksbehandlerOppgave && !referanse && (
+            <OpprettEtteroppgjoerForbehandlingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+          )}
+        </>
       )
 
     case Oppgavetype.ETTEROPPGJOER_SVARFRIST_UTLOEPT:
@@ -145,6 +155,12 @@ export const HandlingerForOppgave = ({
           </Button>
         )
       )
+
+    case Oppgavetype.KLAGE_SVAR_KABAL:
+      return (
+        erInnloggetSaksbehandlerOppgave && <KlageBehandleSvarFraKa oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+      )
+
     case Oppgavetype.KRAVPAKKE_UTLAND:
       return (
         erInnloggetSaksbehandlerOppgave && (

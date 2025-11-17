@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import okhttp3.internal.toImmutableList
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import kotlin.time.DurationUnit
@@ -348,7 +347,7 @@ fun Route.brevRoute(
                         partDataList.add(part)
                     }
                     val brev =
-                        pdfService.lagreOpplastaPDF(sakId, partDataList.toImmutableList(), brukerTokenInfo)
+                        pdfService.lagreOpplastaPDF(sakId, partDataList.toList(), brukerTokenInfo)
                     brev.onSuccess {
                         call.respond(brev)
                     }

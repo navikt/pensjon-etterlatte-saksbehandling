@@ -92,10 +92,24 @@ data class Avkorting(
     /**
      * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
      */
-    fun kopierAvkorting(opphoerFom: YearMonth? = null): Avkorting =
-        Avkorting(
+    fun kopierAvkorting(
+        opphoerFom: YearMonth? = null,
+        nullstillAvkortetYtelse: Boolean = false,
+    ): Avkorting {
+        val relevanteAaroppgjoer =
+            if (opphoerFom == null) {
+                this.aarsoppgjoer
+            } else {
+                // Vi skal ikke ta med årsoppgjør som ikke har en beregning i dette vedtaket på grunn av opphør
+                // Ytelse----->|OPPHØR i måned M - dvs. ingen ytelse fra og med M - og siste måned med ytelse
+                // må da være måneden før M (opphoerFom.minusMonths(1))
+                val sisteTom = opphoerFom.minusMonths(1)
+                this.aarsoppgjoer.filter { it.aar <= sisteTom.year }
+            }
+
+        return Avkorting(
             aarsoppgjoer =
-                aarsoppgjoer.map {
+                relevanteAaroppgjoer.map {
                     when (it) {
                         is AarsoppgjoerLoepende ->
                             it.copy(
@@ -124,7 +138,25 @@ data class Avkorting(
                                                             tom = tom,
                                                         ),
                                                 ),
+                                            avkortingsperioder =
+                                                if (nullstillAvkortetYtelse) {
+                                                    emptyList()
+                                                } else {
+                                                    inntektsavkorting.avkortingsperioder
+                                                },
+                                            avkortetYtelseForventetInntekt =
+                                                if (nullstillAvkortetYtelse) {
+                                                    emptyList()
+                                                } else {
+                                                    inntektsavkorting.avkortetYtelseForventetInntekt
+                                                },
                                         )
+                                    },
+                                avkortetYtelse =
+                                    if (nullstillAvkortetYtelse) {
+                                        emptyList()
+                                    } else {
+                                        it.avkortetYtelse
                                     },
                             )
 
@@ -135,10 +167,23 @@ data class Avkorting(
                                     it.inntekt.copy(
                                         id = UUID.randomUUID(),
                                     ),
+                                avkortingsperioder =
+                                    if (nullstillAvkortetYtelse) {
+                                        emptyList()
+                                    } else {
+                                        it.avkortingsperioder
+                                    },
+                                avkortetYtelse =
+                                    if (nullstillAvkortetYtelse) {
+                                        emptyList()
+                                    } else {
+                                        it.avkortetYtelse
+                                    },
                             )
                     }
                 },
         )
+    }
 
     /**
      * Brukes til å beregne avkoring med flere forventede inntekter [ForventetInntekt]
@@ -152,9 +197,16 @@ data class Avkorting(
         aldersovergang: YearMonth? = null,
     ): Avkorting {
         var oppdatertAvkorting = this
-        nyttGrunnlag.forEach { oppdatertAvkorting = oppdatertAvkorting.oppdaterMedInntektsgrunnlag(it, bruker, opphoerFom, aldersovergang) }
+        nyttGrunnlag.forEach {
+            oppdatertAvkorting = oppdatertAvkorting.oppdaterMedInntektsgrunnlag(it, bruker, opphoerFom, aldersovergang)
+        }
 
-        return oppdatertAvkorting.beregnAvkorting(beregning.beregningsperioder.minOf { it.datoFOM }, beregning, sanksjoner)
+        return oppdatertAvkorting.beregnAvkorting(
+            beregning.beregningsperioder.minOf { it.datoFOM },
+            beregning,
+            sanksjoner,
+            opphoerFom,
+        )
     }
 
     /**
@@ -171,6 +223,7 @@ data class Avkorting(
                 ?: throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
 
         val tom = opphoerFom?.let { finnTomForInntekt(opphoerFom, aarsoppgjoer.aar) }
+        val aldersovergangIDetteInntektsaaret = aldersovergang?.takeIf { nyttGrunnlag.fom.year == aldersovergang.year }
 
         val inntektTom = nyttGrunnlag.inntektTom
         val fratrekkInnAar = nyttGrunnlag.fratrekkInnAar
@@ -192,14 +245,18 @@ data class Avkorting(
                 fratrekkInnAarUtland = fratrekkInnAarUtland,
                 innvilgaMaaneder =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                        ?: finnAntallInnvilgaMaanederForAar(gjeldendeAaarsoppgjoerFom, tom, aldersovergang),
+                        ?: finnAntallInnvilgaMaanederForAar(
+                            gjeldendeAaarsoppgjoerFom,
+                            tom,
+                            aldersovergangIDetteInntektsaaret,
+                        ),
                 overstyrtInnvilgaMaanederAarsak =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
-                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
+                    } ?: aldersovergangIDetteInntektsaaret?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
                 overstyrtInnvilgaMaanederBegrunnelse =
                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
-                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
+                        ?: aldersovergangIDetteInntektsaaret?.let { "Bruker har aldersovergang" },
                 spesifikasjon = nyttGrunnlag.spesifikasjon,
                 kilde = kilde,
                 inntektInnvilgetPeriode =
@@ -288,6 +345,9 @@ data class Avkorting(
                     ),
             )
 
+        // TODO: opphør fom må utledes riktig for saker med opphør i etteroppgjøret
+        val opphoerFom = null
+
         val etteroppgjoer =
             Etteroppgjoer(
                 id = UUID.randomUUID(),
@@ -297,7 +357,7 @@ data class Avkorting(
                 inntekt = inntekt,
             )
         val nyAvkorting = erstattAarsoppgjoer(etteroppgjoer)
-        return nyAvkorting.beregnAvkorting(tidligereAarsoppgjoer.fom, null, sanksjoner)
+        return nyAvkorting.beregnAvkorting(tidligereAarsoppgjoer.fom, null, sanksjoner, opphoerFom)
     }
 
     /**
@@ -314,24 +374,34 @@ data class Avkorting(
         virkningstidspunkt: YearMonth,
         beregning: Beregning?,
         sanksjoner: List<Sanksjon>,
+        opphoerFom: YearMonth?,
     ): Avkorting {
         val virkningstidspunktAar = virkningstidspunkt.year
 
         val oppdaterteOppgjoer =
-            (aarsoppgjoer).map { aarsoppgjoer ->
+            (aarsoppgjoer)
+                .filter { it.aar <= (opphoerFom?.year ?: it.aar) }
+                .map { aarsoppgjoer ->
 
-                val ytelseFoerAvkorting =
-                    if (beregning != null && aarsoppgjoer.aar >= virkningstidspunktAar) {
-                        aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
-                    } else {
-                        aarsoppgjoer.ytelseFoerAvkorting
+                    val ytelseFoerAvkorting =
+                        if (beregning != null && aarsoppgjoer.aar >= virkningstidspunktAar) {
+                            aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
+                        } else {
+                            aarsoppgjoer.ytelseFoerAvkorting
+                        }
+
+                    when (aarsoppgjoer) {
+                        is AarsoppgjoerLoepende ->
+                            beregnAvkortingLoepende(
+                                aarsoppgjoer,
+                                ytelseFoerAvkorting,
+                                sanksjoner,
+                                opphoerFom,
+                            )
+
+                        is Etteroppgjoer -> beregnAvkortingEtteroppgjoer(aarsoppgjoer, ytelseFoerAvkorting, sanksjoner)
                     }
-
-                when (aarsoppgjoer) {
-                    is AarsoppgjoerLoepende -> beregnAvkortingLoepende(aarsoppgjoer, ytelseFoerAvkorting, sanksjoner)
-                    is Etteroppgjoer -> beregnAvkortingEtteroppgjoer(aarsoppgjoer, ytelseFoerAvkorting, sanksjoner)
                 }
-            }
 
         return copy(aarsoppgjoer = oppdaterteOppgjoer)
     }
@@ -346,6 +416,7 @@ data class Avkorting(
         aarsoppgjoer: AarsoppgjoerLoepende,
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         sanksjoner: List<Sanksjon>,
+        opphoerFom: YearMonth?,
     ): AarsoppgjoerLoepende {
         val reberegnetInntektsavkorting =
             aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
@@ -409,14 +480,20 @@ data class Avkorting(
                     ytelseFoerAvkorting,
                     reberegnetInntektsavkorting,
                     sanksjoner,
+                    opphoerFom,
                 )
             } else {
                 reberegnetInntektsavkorting.first().let {
-                    val tomDesember = tomDesemberForAvkortetYtelse(aarsoppgjoer)
+                    val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, opphoerFom)
                     val sistePeriode =
-                        when (it.grunnlag.periode.tom) {
-                            null -> Periode(fom = it.grunnlag.periode.fom, tom = tomDesember)
-                            else -> it.grunnlag.periode
+                        when (val tomForPeriode = it.grunnlag.periode.tom) {
+                            null -> Periode(fom = it.grunnlag.periode.fom, tom = tomSluttenAvAaret)
+                            else ->
+                                if (tomSluttenAvAaret != null) {
+                                    it.grunnlag.periode.copy(tom = minOf(tomForPeriode, tomSluttenAvAaret))
+                                } else {
+                                    it.grunnlag.periode
+                                }
                         }
                     AvkortingRegelkjoring.beregnAvkortetYtelse(
                         periode = sistePeriode,
@@ -451,6 +528,7 @@ data class Avkorting(
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         reberegnetInntektsavkorting: List<Inntektsavkorting>,
         sanksjoner: List<Sanksjon>,
+        opphoerFom: YearMonth?,
     ): List<AvkortetYtelse> {
         val sorterteSanksjonerInnenforAarsoppgjoer =
             aarsoppgjoer
@@ -458,7 +536,7 @@ data class Avkorting(
                 .sortedBy { it.fom }
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
 
-        val tomDesember = tomDesemberForAvkortetYtelse(aarsoppgjoer)
+        val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, opphoerFom)
 
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
             // Kun de sanksjonene som er lagt inn fom < denne inntektsavkortingen er tidligere beregnet med
@@ -495,7 +573,7 @@ data class Avkorting(
                 AvkortingRegelkjoring.beregnAvkortetYtelse(
                     periode =
                         when (erSistePeriodeUtenOpphoer) {
-                            true -> Periode(inntektsavkorting.grunnlag.periode.fom, tomDesember)
+                            true -> Periode(inntektsavkorting.grunnlag.periode.fom, tomSluttenAvAaret)
                             false -> inntektsavkorting.grunnlag.periode
                         },
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
@@ -527,7 +605,7 @@ data class Avkorting(
                 }
             val ytelseMedAlleSanksjoner =
                 AvkortingRegelkjoring.beregnAvkortetYtelse(
-                    periode = Periode(fom = tidligsteFomIkkeBeregnetSanksjon, tom = tomDesember),
+                    periode = Periode(fom = tidligsteFomIkkeBeregnetSanksjon, tom = tomSluttenAvAaret),
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     avkortingsperioder = reberegnetInntektsavkorting.last().avkortingsperioder,
                     type = AARSOPPGJOER,
@@ -554,15 +632,34 @@ data class Avkorting(
 
     /**
      * Hvis det finnes [Aarsoppgjoer] for et gitt år finnes det også [AvkortetYtelse]/utbetaligner for neste år.
-     * Da må siste periode i et år avsluttes.
+     * Da må siste periode i et år avsluttes. Perioden avsluttes enten i desember i året, eller tidligere hvis
+     * det er lagt inn et opphør.
+     *
+     *
      * Hvis det ikke finnes [Aarsoppgjoer] neste år må siste periode være åpen for å tilfredstille Oppdrag.
      */
-    private fun tomDesemberForAvkortetYtelse(aarsoppgjoer: AarsoppgjoerLoepende): YearMonth? {
+    private fun tomSluttenAvAaretForAvkortetYtelse(
+        aarsoppgjoer: AarsoppgjoerLoepende,
+        opphoerFom: YearMonth?,
+    ): YearMonth? {
         val harAaroppgjoerNesteAaar =
             this.aarsoppgjoer.any { it.aar == aarsoppgjoer.aar + 1 }
         return when (harAaroppgjoerNesteAaar) {
-            true -> YearMonth.of(aarsoppgjoer.aar, 12)
-            false -> null
+            true -> {
+                val desemberIAaret = YearMonth.of(aarsoppgjoer.aar, 12)
+                if (opphoerFom == null) {
+                    desemberIAaret
+                } else {
+                    minOf(desemberIAaret, opphoerFom.minusMonths(1))
+                }
+            }
+
+            false ->
+                if (opphoerFom != null && opphoerFom.minusMonths(1).year == aarsoppgjoer.aar) {
+                    opphoerFom.minusMonths(1)
+                } else {
+                    null
+                }
         }
     }
 

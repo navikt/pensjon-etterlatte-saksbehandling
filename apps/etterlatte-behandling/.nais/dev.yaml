@@ -165,6 +165,8 @@ spec:
       value: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-ske
     - name: SIGRUN_OUTBOUND_SCOPE
       value: api://dev-fss.team-inntekt.sigrun-q4/.default
+    - name: ARBEID_OG_INNTEKT_URL
+      value: https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io
 
   envFrom:
     - secret: my-application-unleash-api-token
@@ -196,6 +198,7 @@ spec:
         - host: axsys.dev-fss-pub.nais.io
         - host: team-inntekt-proxy.dev-fss-pub.nais.io
         - host: sigrun-q2.dev.adeo.no
+        - host: arbeid-og-inntekt-q2.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

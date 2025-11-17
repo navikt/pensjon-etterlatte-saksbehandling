@@ -13,6 +13,7 @@ import no.nav.etterlatte.joarkhendelser.behandling.BehandlingKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
+import no.nav.etterlatte.joarkhendelser.joark.DokumentInfo
 import no.nav.etterlatte.joarkhendelser.joark.Fagsak
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
@@ -513,6 +514,8 @@ internal class JoarkHendelseHandlerTest {
         status: Journalstatus = Journalstatus.MOTTATT,
         sakType: SakType = SakType.OMSTILLINGSSTOENAD,
         bruker: Bruker? = Bruker("ident", BrukerIdType.FNR),
+        journalfoerendeEnhet: String? = null,
+        dokumenter: List<DokumentInfo> = emptyList(),
     ) = Journalpost(
         journalpostId = journalpostId.toString(),
         bruker = bruker,
@@ -520,5 +523,7 @@ internal class JoarkHendelseHandlerTest {
         journalstatus = status,
         sak = Fagsak("1", "EY", "FAGSAK", sakType.tema),
         kanal = Kanal.SKAN_IM,
+        journalfoerendeEnhet = journalfoerendeEnhet,
+        dokumenter = dokumenter,
     )
 }

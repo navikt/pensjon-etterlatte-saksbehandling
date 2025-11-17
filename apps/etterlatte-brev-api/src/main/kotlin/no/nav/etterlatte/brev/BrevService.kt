@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
@@ -419,15 +420,42 @@ class BrevService(
             Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         ).contains(brevkoder)
 
-    fun kanFerdigstilleBrev(id: BrevID): Boolean {
-        val brev = sjekkOmBrevKanEndres(id)
+    fun kanFerdigstilleBrev(id: BrevID): KanFerdigstilleBrevResponse {
+        val brev = hentBrev(id)
+        if (brev.erFerdigstilt()) {
+            return KanFerdigstilleBrevResponse(kanFerdigstille = true)
+        }
+
         val pdf = pdfService.hentPdfMedData(brev.id)
-        val kanFerdigstille = pdf?.bytes != null && pdf.opprettet > brev.statusEndret
+        val pdfOppdatert = pdf?.bytes != null && pdf.opprettet > brev.statusEndret
 
         logger.info(
-            "Sjekker om brev kan ferdigstilles. kanFerdigstilles: $kanFerdigstille, pdfOppdatert: ${pdf?.opprettet}, brevStatusEndret: ${brev.statusEndret}",
+            "Sjekker om brev kan ferdigstilles. pdfOppdatert: $pdfOppdatert, pdfOppdatert: ${pdf?.opprettet}, brevStatusEndret: ${brev.statusEndret}",
         )
-        return kanFerdigstille
+        if (!pdfOppdatert) {
+            return KanFerdigstilleBrevResponse(
+                kanFerdigstille = false,
+                aarsak = "Brevet kan ikke ferdigstilles før du har gjennomgått forhåndsvisningen.",
+            )
+        }
+
+        // sjekker at placeholder tekst ikke er i brev-innhold
+        if (brev.brevkoder == Brevkoder.OMS_EO_FORHAANDSVARSEL) {
+            val payload = db.hentBrevPayload(brev.id)?.toJson() ?: ""
+            val payloadVedlegg = db.hentBrevPayloadVedlegg(brev.id)?.toJson() ?: ""
+            val placeholder = "FORSLAG"
+
+            val inneholderMalTekst = payload.contains(placeholder) || payloadVedlegg.contains(placeholder)
+            logger.info("Sjekker om brev kan ferdigstilles. inneholderMalTekst: $inneholderMalTekst")
+            if (inneholderMalTekst) {
+                return KanFerdigstilleBrevResponse(
+                    kanFerdigstille = false,
+                    aarsak = "Brevet har mal-innhold som må fjernes ('FORSLAG').",
+                )
+            }
+        }
+
+        return KanFerdigstilleBrevResponse(kanFerdigstille = true)
     }
 
     suspend fun ferdigstill(

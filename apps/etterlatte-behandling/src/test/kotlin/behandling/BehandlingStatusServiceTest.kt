@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling
 
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
@@ -12,6 +14,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
@@ -49,6 +52,7 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
@@ -61,6 +65,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -242,6 +247,58 @@ internal class BehandlingStatusServiceTest {
     }
 
     @Test
+    fun `iverksett vedtak skal opprette etteroppgjør`() {
+        val sakId = sakId1
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+        val behandlingId = behandling.id
+        val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
+
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId)
+        coEvery {
+            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+                sistIverksatteBehandling = behandling,
+                inntektsaar = any(),
+            )
+        } returns mockk<Etteroppgjoer>()
+        every { grunnlagService.hentPersonopplysninger(any(), any()) } returns
+            mockk {
+                every { avdoede } returns
+                    listOf(
+                        mockk {
+                            every { opplysning } returns
+                                mockk {
+                                    every { doedsdato } returns LocalDate.now()
+                                }
+                        },
+                    )
+            }
+
+        inTransaction {
+            runBlocking {
+                sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+            }
+        }
+
+        coVerify {
+            behandlingDao.lagreStatus(any())
+            behandlingService.hentBehandling(behandlingId)
+            behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
+            behandlingInfoDao.hentBrevutfall(behandlingId)
+            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+                sistIverksatteBehandling = behandling,
+                inntektsaar = any(),
+            )
+        }
+    }
+
+    @Test
     fun `underkjent behandling`() {
         val sakId = sakId1
         val behandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.FATTET_VEDTAK)
@@ -340,7 +397,7 @@ internal class BehandlingStatusServiceTest {
                 behandlingId,
             )
         every { generellBehandlingService.opprettBehandling(any(), any()) } returns generellBehandlingUtland
-        every { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any(), any()) } returns mockk()
+        every { oppgaveService.ferdigstillOppgaveUnderBehandling(any(), any(), any(), any()) } returns mockk()
 
         inTransaction {
             sut.settAttestertVedtak(behandling, vedtakEndringDto, brukerTokenInfo)
@@ -350,7 +407,7 @@ internal class BehandlingStatusServiceTest {
             behandlingDao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
             generellBehandlingService.opprettBehandling(any(), any())
-            oppgaveService.ferdigStillOppgaveUnderBehandling(
+            oppgaveService.ferdigstillOppgaveUnderBehandling(
                 behandlingId.toString(),
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 any(),
@@ -382,7 +439,7 @@ internal class BehandlingStatusServiceTest {
         val vedtakEndringDto =
             VedtakEndringDTO(SakIdOgReferanse(sakId, behandlingId.toString()), vedtakHendelse, VedtakType.INNVILGELSE)
 
-        every { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any(), any()) } returns mockk()
+        every { oppgaveService.ferdigstillOppgaveUnderBehandling(any(), any(), any(), any()) } returns mockk()
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
         inTransaction {
@@ -392,7 +449,7 @@ internal class BehandlingStatusServiceTest {
         verify {
             behandlingDao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
-            oppgaveService.ferdigStillOppgaveUnderBehandling(
+            oppgaveService.ferdigstillOppgaveUnderBehandling(
                 behandlingId.toString(),
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 brukerTokenInfo,

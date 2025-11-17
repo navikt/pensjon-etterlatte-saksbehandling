@@ -20,7 +20,7 @@ import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import {
   AarsakTilAvsluttingEtteroppgjoerForbehandling,
   AvbrytEtteroppgjoerForbehandlingRequest,
-  EtteroppgjoerBehandlingStatus,
+  EtteroppgjoerForbehandlingStatus,
   tekstAarsakTilAvsluttingEtteroppgjoerForbehandling,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { avbrytEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
@@ -36,7 +36,7 @@ export default function AnnullerForbehandling() {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const kanRedigeres =
-    ![EtteroppgjoerBehandlingStatus.FERDIGSTILT, EtteroppgjoerBehandlingStatus.AVBRUTT].includes(
+    ![EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT].includes(
       etteroppgjoer.behandling.status
     ) && enhetErSkrivbar(etteroppgjoer.behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 

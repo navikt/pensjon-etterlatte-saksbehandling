@@ -14,6 +14,7 @@ import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.OpprettJournalpostR
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
+import no.nav.etterlatte.libs.common.omsmeldinnendring.ForventetInntektTilNesteAar
 import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsMeldtInnEndring
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -95,6 +96,7 @@ class JournalfoerOmsMeldtInnEndringService(
                             type = omsMeldtInnEndring.endring.name,
                             endringer = omsMeldtInnEndring.beskrivelse,
                             tidspunkt = formatertTidspunkt(omsMeldtInnEndring.tidspunkt),
+                            forventetInntektTilNesteAar = omsMeldtInnEndring.forventetInntektTilNesteAar,
                         ),
                     mal = "oms_meldt_inn_endring_v1",
                 )
@@ -117,4 +119,5 @@ data class ArkiverOmsMeldtInnEndring(
     val type: String,
     val endringer: String,
     val tidspunkt: String,
+    val forventetInntektTilNesteAar: ForventetInntektTilNesteAar?,
 ) : PDFMal

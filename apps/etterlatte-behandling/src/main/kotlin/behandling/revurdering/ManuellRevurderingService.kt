@@ -156,7 +156,7 @@ class ManuellRevurderingService(
                             revurdering.id,
                         )
                         try {
-                            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                            oppgaveService.ferdigstillOppgaveUnderBehandling(
                                 paaGrunnAvHendelse.toString(),
                                 OppgaveType.VURDER_KONSEKVENS,
                                 saksbehandler,

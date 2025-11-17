@@ -1,4 +1,4 @@
-import { BodyLong, BodyShort, Box, HStack, Label, Table, Tag, Tooltip, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, HStack, Label, Table, Tag, Tooltip, VStack } from '@navikt/ds-react'
 import {
   ForventetInntektHjelpeTekst,
   ForventetInntektUtlandHjelpeTekst,
@@ -6,10 +6,10 @@ import {
 } from '~components/behandling/avkorting/AvkortingHjelpeTekster'
 import { NOK } from '~utils/formatering/formatering'
 import {
+  erForventetInntekt,
   FaktiskInntektGrunnlag,
   ForventetInntektGrunnlag,
   IAvkortingGrunnlag,
-  erForventetInntekt,
   SystemOverstyrtInnvilgaMaanederAarsak,
 } from '~shared/types/IAvkorting'
 import { ArrowCirclepathIcon, HeadCloudIcon } from '@navikt/aksel-icons'
@@ -18,6 +18,7 @@ import { lastDayOfMonth } from 'date-fns'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 interface Props {
   avkortingGrunnlagListe: IAvkortingGrunnlag[]
@@ -189,7 +190,7 @@ const ForventetInntektDetaljer = ({
       <Box marginBlock="0 4">
         <VStack>
           <Label>Spesifikasjon av inntekt</Label>
-          <BodyLong>{forventetInntektGrunnlag.spesifikasjon}</BodyLong>
+          <TekstMedMellomrom>{forventetInntektGrunnlag.spesifikasjon}</TekstMedMellomrom>
         </VStack>
       </Box>
     </div>
@@ -233,7 +234,7 @@ const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrun
       <Box marginBlock="0 4">
         <VStack>
           <Label>Spesifikasjon av inntekt</Label>
-          <BodyLong>{faktiskInntektGrunnlag.spesifikasjon}</BodyLong>
+          <TekstMedMellomrom>{faktiskInntektGrunnlag.spesifikasjon}</TekstMedMellomrom>
         </VStack>
       </Box>
     </div>

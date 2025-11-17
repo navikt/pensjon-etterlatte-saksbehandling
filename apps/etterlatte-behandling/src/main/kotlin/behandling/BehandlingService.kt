@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -11,7 +12,7 @@ import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -292,7 +293,10 @@ interface BehandlingService {
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
-    fun oppdaterRelatertBehandlingIdStatusTilBeregnet(forbehandling: EtteroppgjoerForbehandling)
+    fun settBeregnet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 data class SakMedBehandlingerOgOppgaver(
@@ -312,6 +316,7 @@ internal class BehandlingServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val beregningKlient: BeregningKlient,
+    private val etteroppgjoerTempService: EtteroppgjoerTempService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -398,56 +403,28 @@ internal class BehandlingServiceImpl(
             throw BehandlingKanIkkeAvbrytesException(behandling.status)
         }
 
-        behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar).also {
-            val hendelserKnyttetTilBehandling =
-                grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
+        behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar)
 
-            oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingId.toString(), "Behandlingen avbrytes manuelt")
+        val hendelserKnyttetTilBehandling =
+            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
 
-            hendelserKnyttetTilBehandling.forEach { hendelse ->
-                oppgaveService.opprettOppgave(
-                    referanse = hendelse.id.toString(),
-                    sakId = behandling.sak.id,
-                    kilde = OppgaveKilde.HENDELSE,
-                    type = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = hendelse.beskrivelse(),
-                )
-            }
+        oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingId.toString(), "Behandlingen avbrytes manuelt")
 
-            val erBehandlingOmgjoeringEtterKlage =
-                when (behandling) {
-                    is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
-
-                    is Foerstegangsbehandling ->
-                        behandling.relatertBehandlingId?.let { klageId ->
-                            oppgaveService
-                                .hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE)
-                                .any { it.id.toString() == klageId }
-                        } ?: false
-                }
-
-            if (erBehandlingOmgjoeringEtterKlage) {
-                val omgjoeringsoppgaveForKlage =
-                    oppgaveService
-                        .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
-                        .find { it.referanse == behandling.relatertBehandlingId }
-                        ?: throw InternfeilException(
-                            "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
-                                "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
-                        )
-                oppgaveService.opprettOppgave(
-                    referanse = omgjoeringsoppgaveForKlage.referanse,
-                    sakId = omgjoeringsoppgaveForKlage.sakId,
-                    kilde = omgjoeringsoppgaveForKlage.kilde,
-                    type = omgjoeringsoppgaveForKlage.type,
-                    merknad = omgjoeringsoppgaveForKlage.merknad,
-                    frist = omgjoeringsoppgaveForKlage.frist,
-                )
-            }
-
-            hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident(), kommentar, aarsak.toString())
-            grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
+        hendelserKnyttetTilBehandling.forEach { hendelse ->
+            oppgaveService.opprettOppgave(
+                referanse = hendelse.id.toString(),
+                sakId = behandling.sak.id,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.VURDER_KONSEKVENS,
+                merknad = hendelse.beskrivelse(),
+            )
         }
+
+        haandterEtteroppgjoerRevurdering(behandling, aarsak)
+        haandterOmgjoeringEtterKlage(behandling)
+
+        hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident(), kommentar, aarsak.toString())
+        grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
 
         val persongalleri = grunnlagService.hentPersongalleri(behandlingId)!!
 
@@ -455,6 +432,61 @@ internal class BehandlingServiceImpl(
             behandling.toStatistikkBehandling(persongalleri = persongalleri),
             BehandlingHendelseType.AVBRUTT,
         )
+    }
+
+    private fun haandterEtteroppgjoerRevurdering(
+        behandling: Behandling,
+        aarsak: AarsakTilAvbrytelse?,
+    ) {
+        if (behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
+            logger.info("Tilbakestiller etteroppgjøret ved avbrutt revurdering")
+
+            etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
+                behandling,
+                aarsak,
+                hentUtlandstilknytningForSak(behandling.sak.id),
+            )
+
+            if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
+                etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+                    behandling.sak.id,
+                    "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
+                )
+            }
+        }
+    }
+
+    private fun haandterOmgjoeringEtterKlage(behandling: Behandling) {
+        val erBehandlingOmgjoeringEtterKlage =
+            when (behandling) {
+                is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+
+                is Foerstegangsbehandling ->
+                    behandling.relatertBehandlingId?.let { klageId ->
+                        oppgaveService
+                            .hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE)
+                            .any { it.id.toString() == klageId }
+                    } ?: false
+            }
+
+        if (erBehandlingOmgjoeringEtterKlage) {
+            val omgjoeringsoppgaveForKlage =
+                oppgaveService
+                    .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
+                    .find { it.referanse == behandling.relatertBehandlingId }
+                    ?: throw InternfeilException(
+                        "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
+                            "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
+                    )
+            oppgaveService.opprettOppgave(
+                referanse = omgjoeringsoppgaveForKlage.referanse,
+                sakId = omgjoeringsoppgaveForKlage.sakId,
+                kilde = omgjoeringsoppgaveForKlage.kilde,
+                type = omgjoeringsoppgaveForKlage.type,
+                merknad = omgjoeringsoppgaveForKlage.merknad,
+                frist = omgjoeringsoppgaveForKlage.frist,
+            )
+        }
     }
 
     override suspend fun hentStatistikkBehandling(
@@ -987,13 +1019,18 @@ internal class BehandlingServiceImpl(
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
 
-    override fun oppdaterRelatertBehandlingIdStatusTilBeregnet(forbehandling: EtteroppgjoerForbehandling) {
-        val revurderingForbehandling =
-            hentBehandlingerForSak(sakId = forbehandling.sak.id)
-                .firstOrNull { it.relatertBehandlingId == forbehandling.id.toString() && it.status.kanEndres() }
-        if (revurderingForbehandling != null) {
-            behandlingDao.lagreStatus(revurderingForbehandling.tilBeregnet())
-        }
+    override fun settBeregnet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val behandling = hentBehandling(behandlingId) ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
+
+        behandling
+            .tilBeregnet()
+            .let {
+                behandlingDao.lagreStatus(it)
+                registrerBehandlingHendelse(it, brukerTokenInfo.ident())
+            }
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

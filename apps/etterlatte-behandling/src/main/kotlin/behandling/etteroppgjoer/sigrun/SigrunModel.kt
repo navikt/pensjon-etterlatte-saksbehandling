@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 data class HendelseslisteFraSkatt(
@@ -11,7 +10,7 @@ data class HendelseslisteFraSkatt(
         fun stub(
             startSekvensnummer: Long = 0,
             antall: Int = 10,
-            aar: Int = 2024,
+            aar: Int = ETTEROPPGJOER_AAR,
         ): HendelseslisteFraSkatt {
             val hendelser =
                 List(antall) { index ->
@@ -40,46 +39,9 @@ data class SkatteoppgjoerHendelse(
     val registreringstidspunkt: Tidspunkt?,
 )
 
-data class PensjonsgivendeInntektFraSkattSummert(
-    val inntektsaar: Int,
+data class PensjonsgivendeInntektSummert(
     val loensinntekt: Int,
     val naeringsinntekt: Int,
-    val fiskeFangstFamiliebarnehage: Int,
-)
-
-data class PensjonsgivendeInntektFraSkatt(
-    val inntektsaar: Int,
-    val inntekter: List<PensjonsgivendeInntekt>,
 ) {
-    init {
-        require(inntekter.all { it.inntektsaar == inntektsaar }) {
-            "Alle inntekter må ha inntektsår = $inntektsaar, men fant: ${inntekter.map { it.inntektsaar }}"
-        }
-    }
-
-    companion object {
-        fun stub(
-            aar: Int = 2024,
-            aarsinntekt: Int = 300000,
-        ) = PensjonsgivendeInntektFraSkatt(
-            inntektsaar = aar,
-            inntekter =
-                listOf(
-                    PensjonsgivendeInntekt(
-                        skatteordning = "FASTLAND",
-                        loensinntekt = aarsinntekt,
-                        naeringsinntekt = 0,
-                        fiskeFangstFamiliebarnehage = 0,
-                        inntektsaar = aar,
-                    ),
-                    PensjonsgivendeInntekt(
-                        skatteordning = "SVALBARD",
-                        loensinntekt = aarsinntekt,
-                        naeringsinntekt = 0,
-                        fiskeFangstFamiliebarnehage = 0,
-                        inntektsaar = aar,
-                    ),
-                ),
-        )
-    }
+    val summertInntekt = loensinntekt + naeringsinntekt
 }

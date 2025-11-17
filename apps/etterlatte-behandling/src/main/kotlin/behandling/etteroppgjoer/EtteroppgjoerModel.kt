@@ -15,24 +15,28 @@ data class Etteroppgjoer(
     val harBosattUtland: Boolean = false,
     val harOverstyrtBeregning: Boolean = false,
     val sisteFerdigstilteForbehandling: UUID? = null,
-)
+) {
+    fun venterPaaSkatteoppgjoer() =
+        status in
+            listOf(
+                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+
+    fun mottattSkatteoppgjoer() = status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+
+    fun kanOppretteRevurdering() = status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT)
+
+    fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
+}
 
 enum class EtteroppgjoerStatus {
-    AVBRUTT_FORBEHANDLING,
     VENTER_PAA_SKATTEOPPGJOER,
     MOTTATT_SKATTEOPPGJOER,
+    VENTER_PAA_SVAR,
 
     UNDER_FORBEHANDLING,
-    FERDIGSTILT_FORBEHANDLING, // TODO: endre til VENTER_PAA_SVAR_FRA_BRUKER ?
     UNDER_REVURDERING,
 
-    FERDIGSTILT_UTEN_VARSEL,
     FERDIGSTILT,
-    ;
-
-    companion object {
-        // TODO: må være strengere her når vi går i prod
-        val KLAR_TIL_FORBEHANDLING = setOf(VENTER_PAA_SKATTEOPPGJOER, AVBRUTT_FORBEHANDLING, MOTTATT_SKATTEOPPGJOER)
-        val ETTEROPPGJOER_ER_FERDIGSTILT = setOf(FERDIGSTILT, FERDIGSTILT_UTEN_VARSEL)
-    }
 }

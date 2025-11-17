@@ -11,17 +11,14 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelserSekvensnummerFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.PensjonsgivendeInntekt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.ktor.navConsumerId
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -39,7 +36,7 @@ interface SigrunKlient {
     suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektFraSkatt
+    ): PensjonsgivendeInntektAarResponse
 
     suspend fun hentHendelsesliste(
         antall: Int,
@@ -55,15 +52,14 @@ class SigrunKlientImpl(
     val url: String,
     val featureToggleService: FeatureToggleService,
 ) : SigrunKlient {
-    private val logger = LoggerFactory.getLogger(SigrunKlientImpl::class.java)
     private val sikkerlogg = sikkerlogger()
 
     override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektFraSkatt {
+    ): PensjonsgivendeInntektAarResponse {
         if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_PGI, false)) {
-            return PensjonsgivendeInntektFraSkatt.stub()
+            return PensjonsgivendeInntektAarResponse.stub(ident)
         }
 
         return retry {
@@ -79,13 +75,12 @@ class SigrunKlientImpl(
         }.let {
             when (it) {
                 is RetryResult.Success -> {
-                    it.content.body<PensjonsgivendeInntektAarResponse>().fromResponse()
+                    it.content.body<PensjonsgivendeInntektAarResponse>()
                 }
 
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet. Se sikkerlogg")
-                    sikkerlogg.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet for ident=$ident")
-                    throw it.samlaExceptions()
+                    sikkerlogg.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet for ident=$ident", it.samlaExceptions())
+                    throw InternfeilException("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet. Se sikkerlogg")
                 }
             }
         }
@@ -121,12 +116,12 @@ class SigrunKlientImpl(
                         return@let objectMapper.readValue(body)
                     } catch (e: Exception) {
                         sikkerlogg.error("Feilet i JSON-parsing. body: $body", e)
-                        throw InternfeilException("Feilet i JSON-parsing.", e)
+                        throw InternfeilException("Feilet i JSON-parsing. Se sikkerlogg")
                     }
                 }
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun for henting av Hendelsesliste feilet")
-                    throw it.samlaExceptions()
+                    sikkerlogg.error("Kall mot Sigrun for henting av Hendelsesliste feilet.", it.samlaExceptions())
+                    throw InternfeilException("Kall mot Sigrun for henting av Hendelsesliste feilet. Se sikkerlogg")
                 }
             }
         }
@@ -153,8 +148,8 @@ class SigrunKlientImpl(
             when (it) {
                 is RetryResult.Success -> it.content.body<HendelserSekvensnummerFraSkatt>().sekvensnummer
                 is RetryResult.Failure -> {
-                    logger.error("Kall mot Sigrun for henting av sekvensnummer feilet")
-                    throw it.samlaExceptions()
+                    sikkerlogg.error("Kall mot Sigrun for henting av sekvensnummer feilet", it.samlaExceptions())
+                    throw InternfeilException("Kall mot Sigrun for henting av sekvensnummer feilet")
                 }
             }
         }
@@ -165,7 +160,19 @@ data class PensjonsgivendeInntektAarResponse(
     val inntektsaar: Int,
     val norskPersonidentifikator: String,
     val pensjonsgivendeInntekt: List<PensjonsgivendeInntektResponse>,
-)
+) {
+    companion object {
+        fun stub(ident: String) =
+            PensjonsgivendeInntektAarResponse(
+                2024,
+                ident,
+                listOf(
+                    PensjonsgivendeInntektResponse("FASTLAND", 4000, 5000, 500),
+                    PensjonsgivendeInntektResponse("SVALBARD", 3100, 3200, 200),
+                ),
+            )
+    }
+}
 
 data class PensjonsgivendeInntektResponse(
     val skatteordning: String,
@@ -173,20 +180,3 @@ data class PensjonsgivendeInntektResponse(
     val pensjonsgivendeInntektAvNaeringsinntekt: Int?,
     val pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage: Int?,
 )
-
-fun PensjonsgivendeInntektAarResponse.fromResponse() =
-    PensjonsgivendeInntektFraSkatt(
-        inntektsaar = inntektsaar,
-        inntekter =
-            pensjonsgivendeInntekt.map {
-                PensjonsgivendeInntekt(
-                    skatteordning = it.skatteordning,
-                    loensinntekt = it.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
-                    naeringsinntekt = it.pensjonsgivendeInntektAvNaeringsinntekt ?: 0,
-                    fiskeFangstFamiliebarnehage =
-                        it.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage
-                            ?: 0,
-                    inntektsaar = inntektsaar,
-                )
-            },
-    )

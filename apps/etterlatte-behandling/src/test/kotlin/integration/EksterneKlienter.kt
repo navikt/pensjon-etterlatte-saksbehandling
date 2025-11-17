@@ -6,11 +6,10 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektBulkResponsData
-import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.AInntektReponsData
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentenFilter
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -36,6 +35,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.KanFerdigstilleBrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -50,6 +50,8 @@ import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkNavn
 import no.nav.etterlatte.kodeverk.KodeverkResponse
+import no.nav.etterlatte.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -104,8 +106,6 @@ import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
-import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
 import java.time.YearMonth
@@ -719,7 +719,7 @@ class BrevKlientTest : BrevKlient {
         brevId: BrevID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
+    ): KanFerdigstilleBrevResponse {
         TODO("Not yet implemented")
     }
 
@@ -850,7 +850,7 @@ class SigrunKlienTest : SigrunKlient {
     override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektFraSkatt = PensjonsgivendeInntektFraSkatt.stub()
+    ): PensjonsgivendeInntektAarResponse = PensjonsgivendeInntektAarResponse.stub(ident)
 
     override suspend fun hentHendelsesliste(
         antall: Int,

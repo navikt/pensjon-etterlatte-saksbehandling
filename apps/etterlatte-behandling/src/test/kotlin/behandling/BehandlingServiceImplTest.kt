@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
@@ -84,6 +85,7 @@ internal class BehandlingServiceImplTest {
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val grunnlagService = mockk<GrunnlagService>()
     private val oppgaveServiceMock = mockk<OppgaveService>()
+    private val etteroppgjoerTempService = mockk<EtteroppgjoerTempService>()
 
     private val behandlingService =
         BehandlingServiceImpl(
@@ -95,6 +97,7 @@ internal class BehandlingServiceImplTest {
             oppgaveService = oppgaveServiceMock,
             grunnlagService = grunnlagService,
             beregningKlient = mockk(),
+            etteroppgjoerTempService = etteroppgjoerTempService,
         )
 
     @AfterEach
@@ -219,7 +222,7 @@ internal class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `avbrytBehangling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for revurdering `() {
+    fun `avbrytBehandling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for revurdering`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
         val relatertBehandlingsId = UUID.randomUUID()
@@ -232,6 +235,7 @@ internal class BehandlingServiceImplTest {
 
         val oppgaveKlage = mockOppgaveIntern(relatertBehandlingsId)
 
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns listOf(revurderingbehandling)
         every { behandlingDaoMock.hentBehandling(revurderingbehandling.id) } returns revurderingbehandling
         every { behandlingDaoMock.avbrytBehandling(revurderingbehandling.id, any(), any()) } just runs
         every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
@@ -247,6 +251,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
         every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
         every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
+        every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
 
         every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
@@ -265,7 +270,7 @@ internal class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `avbrytBehangling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for førstegangsbehandling `() {
+    fun `avbrytBehandling oppretter oppgave hvis omgjoeringsoppgaveForKlage eksisterer for førstegangsbehandling `() {
         nyKontekstMedBruker(mockSaksbehandler())
 
         val relatertBehandlingsId = UUID.randomUUID()
@@ -469,6 +474,52 @@ internal class BehandlingServiceImplTest {
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
         verify(exactly = 1) {
             grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(nyFoerstegangsbehandling.id)
+        }
+    }
+
+    @Test
+    fun `avbryt revurdering for etteroppgjoer tilbakestiller ogsaa etteroppgjoeret`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
+        val revurdering =
+            revurdering(
+                sakId = randomSakId(),
+                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+            )
+
+        every { behandlingDaoMock.hentBehandlingerForSak(revurdering.sak.id) } returns listOf(revurdering)
+        every { behandlingDaoMock.hentBehandling(revurdering.id) } returns revurdering
+        every { behandlingDaoMock.avbrytBehandling(revurdering.id, any(), any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
+
+        every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
+        every { etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(any(), any()) } just runs
+
+        behandlingService.avbrytBehandling(
+            revurdering.id,
+            simpleSaksbehandler(),
+            AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
+            "kom men tar",
+        )
+
+        verify(exactly = 1) {
+            behandlingDaoMock.avbrytBehandling(revurdering.id, AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST, "kom men tar")
+
+            etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
+                revurdering,
+                AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
+                null,
+            )
+
+            etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+                revurdering.sak.id,
+                "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
+            )
         }
     }
 

@@ -1,6 +1,10 @@
 package no.nav.etterlatte.pdl
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.NavPersonIdent
+import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -102,7 +106,32 @@ data class PdlFolkegisterIdentData(
 
 data class PdlFolkeregisterIdentResult(
     val identer: List<PdlIdenter>,
-)
+) {
+    private val logger = LoggerFactory.getLogger(PdlFolkeregisterIdentResult::class.java)
+
+    fun gjeldendeFolkeregisterIdent(): PdlIdentifikator.FolkeregisterIdent? =
+        gjeldendeIdent(PDLIdentGruppeTyper.FOLKEREGISTERIDENT)
+            ?.let {
+                PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(it.ident))
+            }
+
+    fun gjeldendeNpidIdent(): PdlIdentifikator.Npid? =
+        gjeldendeIdent(PDLIdentGruppeTyper.NPID)
+            ?.let {
+                PdlIdentifikator.Npid(NavPersonIdent.of(it.ident))
+            }
+
+    private fun gjeldendeIdent(gruppe: PDLIdentGruppeTyper): PdlIdenter? {
+        val gjeldende =
+            identer
+                .filter { it.gruppe == gruppe.navn }
+                .filter { !it.historisk }
+        if (gjeldende.size > 1) {
+            logger.error("Skal ikke være flere gjeldende identer av gitt type")
+        }
+        return gjeldende.singleOrNull()
+    }
+}
 
 data class PdlAdressebeskyttelseData(
     val hentPerson: PdlHentPersonAdressebeskyttelse? = null,

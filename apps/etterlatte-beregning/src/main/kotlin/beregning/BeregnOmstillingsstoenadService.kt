@@ -2,6 +2,8 @@ package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
@@ -9,9 +11,12 @@ import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.PeriodisertOmstillingstoenadGrunnlag
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegelMedInstitusjon
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegelMedInstitusjonV2
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.toSamlet
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -22,6 +27,9 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -31,15 +39,27 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
+import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
+import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
+import kotlin.collections.map
+
+enum class BeregningToggles(
+    val value: String,
+) : FeatureToggle {
+    BEREGNING_BRUK_NYE_BEREGNINGSREGLER("beregning_bruk_nye_beregningsregler"),
+    ;
+
+    override fun key(): String = this.value
+}
 
 class BeregnOmstillingsstoenadService(
     private val grunnlagKlient: GrunnlagKlient,
@@ -47,6 +67,8 @@ class BeregnOmstillingsstoenadService(
     private val trygdetidKlient: TrygdetidKlient,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
+    private val sanksjonService: SanksjonService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
 
@@ -70,6 +92,7 @@ class BeregnOmstillingsstoenadService(
                 throw TrygdetidMangler(behandling.id)
             }
 
+        val sanksjon = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val beregningsgrunnlag =
@@ -85,6 +108,7 @@ class BeregnOmstillingsstoenadService(
             opprettBeregningsgrunnlag(
                 trygdetid,
                 beregningsgrunnlag,
+                sanksjon,
             )
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -118,11 +142,22 @@ class BeregnOmstillingsstoenadService(
         virkningstidspunkt: YearMonth,
         tilDato: LocalDate? = null,
     ): Beregning {
+        val skalBrukeNyeBeregningsregler = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false)
+
         val resultat =
-            kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
-                grunnlag = beregningsgrunnlag,
-                periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
-            )
+            if (skalBrukeNyeBeregningsregler) {
+                logger.info("Beregner omstillingsstønad med nye beregningsregler")
+
+                kroneavrundetOmstillingstoenadRegelMedInstitusjonV2.eksekver(
+                    grunnlag = beregningsgrunnlag,
+                    periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
+                )
+            } else {
+                kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
+                    grunnlag = beregningsgrunnlag,
+                    periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
+                )
+            }
 
         val beregnetDato = Tidspunkt.now()
         return when (resultat) {
@@ -233,6 +268,7 @@ class BeregnOmstillingsstoenadService(
     private fun opprettBeregningsgrunnlag(
         trygdetid: TrygdetidDto,
         beregningsgrunnlag: BeregningsGrunnlag,
+        sanksjon: List<Sanksjon>,
     ): PeriodisertOmstillingstoenadGrunnlag {
         val samletTrygdetid =
             trygdetid.toSamlet(beregningsgrunnlag.beregningsMetode.beregningsMetode)
@@ -263,6 +299,57 @@ class BeregnOmstillingsstoenadService(
                         )
                     },
                 ) { _, _, _ -> FaktumNode(null, beregningsgrunnlag.kilde, "Institusjonsopphold") },
+            sanksjon = utledPeriodisertSanksjon(sanksjon),
         )
+    }
+
+    // Kopiert fra AvkortingRegelkjoring.kt -> periodiserteSanksjoner()
+    private fun utledPeriodisertSanksjon(sanksjon: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> =
+        try {
+            periodisertSanksjon(sanksjon)
+        } catch (e: PeriodiseringAvGrunnlagFeil) {
+            when (e) {
+                is PeriodiseringAvGrunnlagFeil.PerioderOverlapper -> throw UgyldigForespoerselException(
+                    code = "OVERLAPPENDE_SANKSJONER",
+                    detail =
+                        "Behandlingen har sanksjoner som overlapper med hverandre i perioder. Dobbelt " +
+                            "sanksjon i en måned støttes ikke, og de overlappende sanksjonene må endres / " +
+                            "fjernes for å kunne beregne avkortet ytelse.",
+                    cause = e,
+                )
+
+                else -> throw InternfeilException(
+                    "Kunne ikke sette opp perioder for sanksjon riktig. " +
+                        "Feilen som oppstod var: ${e.code}",
+                    e,
+                )
+            }
+        }
+
+    private fun periodisertSanksjon(sanksjon: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> {
+        if (sanksjon.isEmpty()) {
+            return KonstantGrunnlag(
+                FaktumNode(
+                    null,
+                    "Ingen sanksjoner innenfor årsoppgjør",
+                    "Ingen sanksjoner innenfor årsoppgjør",
+                ),
+            )
+        }
+
+        return PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+            sanksjon.map {
+                GrunnlagMedPeriode(
+                    data =
+                        FaktumNode(
+                            verdi = it,
+                            beskrivelse = "Sanksjon: ${it.type}",
+                            kilde = it.id!!,
+                        ),
+                    fom = it.fom.atDay(1),
+                    tom = it.tom?.atEndOfMonth(),
+                )
+            },
+        ) { _, _, _ -> FaktumNode(null, beskrivelse = "Ingen sanksjon i perioden", kilde = "Grunnlag") }
     }
 }

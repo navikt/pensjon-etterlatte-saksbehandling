@@ -4,6 +4,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -11,22 +12,47 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
+
+enum class FilterVerdi(
+    val filterEn: Boolean,
+    val filterTo: Boolean,
+) {
+    FALSE(false, false),
+    TRUE(true, true),
+    DONT_CARE(false, true),
+}
 
 enum class EtteroppgjoerFilter(
-    val harSanksjon: Boolean,
-    val harInsitusjonsopphold: Boolean,
-    val harOpphoer: Boolean,
-    val harAdressebeskyttelseEllerSkjermet: Boolean,
-    val harAktivitetskrav: Boolean,
-    val harBosattUtland: Boolean,
-    val harOverstyrtBeregning: Boolean,
+    val harSanksjon: FilterVerdi,
+    val harInsitusjonsopphold: FilterVerdi,
+    val harOpphoer: FilterVerdi,
+    val harAdressebeskyttelseEllerSkjermet: FilterVerdi,
+    val harAktivitetskrav: FilterVerdi,
+    val harBosattUtland: FilterVerdi,
+    val harOverstyrtBeregning: FilterVerdi,
 ) {
-    ENKEL(false, false, false, false, false, false, false),
+    ENKEL(
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+    ),
+    MED_AKTIVITET_OG_SKJERMET(
+        harSanksjon = FilterVerdi.FALSE,
+        harInsitusjonsopphold = FilterVerdi.FALSE,
+        harOpphoer = FilterVerdi.FALSE,
+        harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
+        harAktivitetskrav = FilterVerdi.DONT_CARE,
+        harBosattUtland = FilterVerdi.FALSE,
+        harOverstyrtBeregning = FilterVerdi.FALSE,
+    ),
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-class EtteroppgjoerJobService(
+class OpprettEtteroppgjoerJobService(
     private val etteroppgjoerService: EtteroppgjoerService,
     private val vedtakKlient: VedtakKlient,
     private val featureToggleService: FeatureToggleService,
@@ -46,7 +72,7 @@ class EtteroppgjoerJobService(
     }
 
     suspend fun startEtteroppgjoerKjoering() {
-        val etteroppgjoersAar = YearMonth.now().year - 1
+        val etteroppgjoersAar = ETTEROPPGJOER_AAR
         finnOgOpprettEtteroppgjoer(etteroppgjoersAar)
     }
 
@@ -64,10 +90,11 @@ class EtteroppgjoerJobService(
                 try {
                     inTransaction {
                         runBlocking {
-                            etteroppgjoerService.opprettEtteroppgjoer(sakId, inntektsaar) != null
+                            etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, inntektsaar) != null
                         }
                     }
                 } catch (e: Exception) {
+                    // TODO: Fjerne logglinja hvis det spammer mye
                     logger.warn("Feil ved oppretting av etteroppgjør", e)
                     false
                 }

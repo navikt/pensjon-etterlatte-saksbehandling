@@ -1,9 +1,10 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektFraSkattSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -19,7 +20,6 @@ import java.util.UUID
 
 data class EtteroppgjoerForbehandling(
     val id: UUID,
-    val hendelseId: UUID,
     val opprettet: Tidspunkt,
     val status: EtteroppgjoerForbehandlingStatus,
     val sak: Sak,
@@ -31,17 +31,20 @@ data class EtteroppgjoerForbehandling(
     val harMottattNyInformasjon: JaNei?,
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
-    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
+    val aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling? = null,
+    val aarsakTilAvbrytelseBeskrivelse: String? = null,
     val kopiertFra: UUID? = null,
+    val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
+    val harVedtakAvTypeOpphoer: Boolean? = null,
 ) {
     companion object {
         fun opprett(
             sak: Sak,
             innvilgetPeriode: Periode,
             sisteIverksatteBehandling: UUID,
+            harVedtakAvTypeOpphoer: Boolean? = null,
         ) = EtteroppgjoerForbehandling(
             id = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
             sak = sak,
             status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
             aar = innvilgetPeriode.fom.year,
@@ -54,6 +57,7 @@ data class EtteroppgjoerForbehandling(
             endringErTilUgunstForBruker = null,
             beskrivelseAvUgunst = null,
             varselbrevSendt = null,
+            harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
         )
     }
 
@@ -63,6 +67,7 @@ data class EtteroppgjoerForbehandling(
         }
         return copy(
             status = EtteroppgjoerForbehandlingStatus.BEREGNET,
+            etteroppgjoerResultatType = beregnetEtteroppgjoerResultatDto.resultatType,
             brevId =
                 this.brevId?.takeIf {
                     beregnetEtteroppgjoerResultatDto.resultatType !=
@@ -78,17 +83,23 @@ data class EtteroppgjoerForbehandling(
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }
 
-    fun tilAvbrutt(): EtteroppgjoerForbehandling {
-        if (!kanAvbrytes()) {
+    fun tilAvbrutt(
+        aarsak: AarsakTilAvbryteForbehandling,
+        kommentar: String?,
+    ): EtteroppgjoerForbehandling {
+        if (!erRedigerbar()) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.AVBRUTT)
         }
-        return copy(status = EtteroppgjoerForbehandlingStatus.AVBRUTT)
+        return copy(
+            status = EtteroppgjoerForbehandlingStatus.AVBRUTT,
+            aarsakTilAvbrytelse = aarsak,
+            aarsakTilAvbrytelseBeskrivelse = kommentar,
+        )
     }
 
     fun tilDto(): EtteroppgjoerForbehandlingDto =
         EtteroppgjoerForbehandlingDto(
             id = id,
-            hendelseId = hendelseId,
             opprettet = opprettet,
             status = status,
             sak = sak,
@@ -103,29 +114,44 @@ data class EtteroppgjoerForbehandling(
             varselbrevSendt = varselbrevSendt,
         )
 
-    fun kanAvbrytes() = status !in listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
-
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
 
-    fun medVarselbrevSendt(): EtteroppgjoerForbehandling {
+    fun medVarselbrevSendt(dato: LocalDate): EtteroppgjoerForbehandling {
         if (varselbrevSendt != null) {
             throw InternfeilException("Forbehandling har allerede varselbrev sendt tidspunkt=$varselbrevSendt")
         }
-        return this.copy(varselbrevSendt = LocalDate.now())
+        return this.copy(varselbrevSendt = dato)
     }
 
     fun erUnderBehandling() =
-        status in
-            listOf(
-                EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                EtteroppgjoerForbehandlingStatus.BEREGNET,
-            )
+        when (status) {
+            EtteroppgjoerForbehandlingStatus.OPPRETTET,
+            EtteroppgjoerForbehandlingStatus.BEREGNET,
+            -> true
+            else -> false
+        }
 
-    fun erFerdigstilt() =
-        status in
-            listOf(
-                EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-            )
+    fun erFerdigstilt() = status == EtteroppgjoerForbehandlingStatus.FERDIGSTILT
+
+    fun erRedigerbar() = erUnderBehandling() && !erFerdigstilt()
+
+    // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
+    fun erRevurdering() = kopiertFra != null
+
+    fun oppdaterBrukerHarSvart(
+        harMottattNyInformasjon: JaNei?,
+        endringErTilUgunstForBruker: JaNei?,
+        beskrivelseAvUgunst: String?,
+    ): EtteroppgjoerForbehandling =
+        copy(
+            harMottattNyInformasjon = harMottattNyInformasjon,
+            endringErTilUgunstForBruker = endringErTilUgunstForBruker?.takeIf { harMottattNyInformasjon == JaNei.JA },
+            beskrivelseAvUgunst =
+                beskrivelseAvUgunst?.takeIf {
+                    harMottattNyInformasjon == JaNei.JA &&
+                        endringErTilUgunstForBruker == JaNei.JA
+                },
+        )
 }
 
 class EtteroppgjoerForbehandlingStatusException(
@@ -143,7 +169,7 @@ data class DetaljertForbehandlingDto(
 )
 
 data class EtteroppgjoerOpplysninger(
-    val skatt: PensjonsgivendeInntektFraSkattSummert,
+    val skatt: SummertePensjonsgivendeInntekter,
     val summerteInntekter: SummerteInntekterAOrdningen?,
-    val tidligereAvkorting: AvkortingDto,
+    val tidligereAvkorting: AvkortingDto?,
 )

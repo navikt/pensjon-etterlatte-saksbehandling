@@ -22,9 +22,10 @@ export const enum FeatureToggle {
   opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
   aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
   aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
-  etteroppgjoer = 'etteroppgjoer-frontend',
   bytt_til_annen_sak = 'bytt-til-annen-sak',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
+  etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
+  ny_simuleringsvisning = 'ny-simuleringsvisning',
 }
 
 export interface Toggle {
@@ -92,13 +93,18 @@ const aktivitetsplikt_oppgave_unntak_med_frist: Toggle = {
   enabled: false,
 }
 
-const etteroppgjoer: Toggle = {
-  togglename: FeatureToggle.etteroppgjoer,
+const etteroppgjoer_dev_opprett_forbehandling: Toggle = {
+  togglename: FeatureToggle.etteroppgjoer_dev_opprett_forbehandling,
   enabled: false,
 }
 
 const bytt_til_annen_sak: Toggle = {
   togglename: FeatureToggle.bytt_til_annen_sak,
+  enabled: false,
+}
+
+const ny_simuleringsvisning: Toggle = {
+  togglename: FeatureToggle.ny_simuleringsvisning,
   enabled: false,
 }
 
@@ -118,9 +124,10 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.opprette_oppfoelgingsoppgave]: opprette_oppfoelgingsoppgave,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist]: aktivitetsplikt_oppgave_unntak_med_frist,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist]: aktivitetsplikt_oppgave_unntak_uten_frist,
-  [FeatureToggle.etteroppgjoer]: etteroppgjoer,
   [FeatureToggle.bytt_til_annen_sak]: bytt_til_annen_sak,
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
+  [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
+  [FeatureToggle.ny_simuleringsvisning]: ny_simuleringsvisning,
 }
 
 export const Unleashcontext = createContext<{

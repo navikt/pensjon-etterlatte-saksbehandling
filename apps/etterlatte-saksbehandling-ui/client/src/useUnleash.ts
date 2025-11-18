@@ -26,6 +26,7 @@ export const enum FeatureToggle {
   oppgave_til_journalpost = 'oppgave-til-journalpost',
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
   ny_simuleringsvisning = 'ny-simuleringsvisning',
+  etteroppgjoer_opphoer_skyldes_doedsfall = 'etteroppgjoer-opphoer-skyldes-doedsfall',
 }
 
 export interface Toggle {
@@ -108,6 +109,11 @@ const ny_simuleringsvisning: Toggle = {
   enabled: false,
 }
 
+const etteroppgjoer_opphoer_skyldes_doedsfall: Toggle = {
+  togglename: FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall,
+  enabled: false,
+}
+
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
@@ -128,6 +134,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
   [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
   [FeatureToggle.ny_simuleringsvisning]: ny_simuleringsvisning,
+  [FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall]: etteroppgjoer_opphoer_skyldes_doedsfall,
 }
 
 export const Unleashcontext = createContext<{

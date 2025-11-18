@@ -19,11 +19,14 @@ import {
   OpphoerSkyldesDoedsfall,
   OpphoerSkyldesDoedsfallSkjema,
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
+
+  const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
 
   const erRedigerbar =
     kanRedigereEtteroppgjoerBehandling(behandling.status) &&
@@ -46,7 +49,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
 
-      {!!behandling.harVedtakAvTypeOpphoer && (
+      {opphoerSkyldesDoedsfallErSkrudPaa && !!behandling.harVedtakAvTypeOpphoer && (
         <OpphoerSkyldesDoedsfall
           erRedigerbar={erRedigerbar}
           setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}

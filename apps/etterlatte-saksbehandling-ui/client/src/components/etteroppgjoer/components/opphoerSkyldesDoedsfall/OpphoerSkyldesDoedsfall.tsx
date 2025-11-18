@@ -62,7 +62,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
       <VStack gap="4">
         <Heading size="large">Opphoer skyldes doedsfall</Heading>
         <BodyShort>
-          Det er registrert et opphoer på saken, du må derfor svare på om opphøret skyldes et dødsfall.
+          Det er registrert et opphør på saken, du må derfor svare på om opphøret skyldes et dødsfall.
         </BodyShort>
 
         {opphoerSkyldesDoedsfallSkjemaErAapen && erRedigerbar ? (

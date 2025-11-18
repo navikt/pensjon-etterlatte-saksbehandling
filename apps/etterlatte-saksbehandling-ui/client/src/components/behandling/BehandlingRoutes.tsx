@@ -24,7 +24,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { EtteroppgjoerRevurderingOversikt } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingOversikt'
-import { DetaljertEtteroppgjoer } from '~shared/types/EtteroppgjoerForbehandling'
+import { DetaljertEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { useAppSelector } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
 
@@ -46,7 +46,7 @@ export interface BehandlingRouteType {
   description: string
   kreverBehandlingsstatus?: (
     behandling: IBehandlingReducer,
-    etteroppgjoer?: DetaljertEtteroppgjoer | null
+    etteroppgjoer?: DetaljertEtteroppgjoerForbehandling | null
   ) => IBehandlingStatus
   sakstype?: SakType
 }

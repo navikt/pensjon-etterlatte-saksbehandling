@@ -36,7 +36,7 @@ export interface EtteroppgjoerForbehandling {
   opphoerSkyldesDoedsfall?: JaNei
 }
 
-export interface DetaljertEtteroppgjoer {
+export interface DetaljertEtteroppgjoerForbehandling {
   forbehandling: EtteroppgjoerForbehandling
   opplysninger: EtteroppgjoerOpplysninger
   faktiskInntekt?: FaktiskInntekt

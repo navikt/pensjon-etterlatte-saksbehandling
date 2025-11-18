@@ -574,7 +574,9 @@ class EtteroppgjoerForbehandlingService(
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
 
-        logger.info("Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id ${sisteIverksatteBehandling}")
+        logger.info(
+            "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id $sisteIverksatteBehandling",
+        )
 
         val attesterteVedtak =
             runBlocking {
@@ -599,15 +601,18 @@ class EtteroppgjoerForbehandlingService(
             }
     }
 
-    private suspend fun hentSisteIverksatteBehandlingMedAvkorting(sakId: SakId, brukerTokenInfo: BrukerTokenInfo): Behandling {
+    suspend fun hentSisteIverksatteBehandlingMedAvkorting(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling {
         val behandlingerMedAarsoppgjoer = beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId, brukerTokenInfo)
 
-        return behandlingService.hentBehandlingerForSak(sakId)
+        return behandlingService
+            .hentBehandlingerForSak(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
             .filter { it.id in behandlingerMedAarsoppgjoer }
             .maxBy { it.behandlingOpprettet }
     }
-
 
     private fun utledInnvilgetPeriode(
         innvilgedePerioder: List<InnvilgetPeriodeDto>,

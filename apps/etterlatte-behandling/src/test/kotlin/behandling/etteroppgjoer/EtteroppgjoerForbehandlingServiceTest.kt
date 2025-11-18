@@ -1,9 +1,11 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
@@ -16,6 +18,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -26,6 +29,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak
 import no.nav.etterlatte.sak.SakLesDao
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -136,6 +140,47 @@ class EtteroppgjoerForbehandlingServiceTest {
         fun returnsEtteroppgjoer(etteroppgjoer: Etteroppgjoer?) {
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
         }
+    }
+
+    @Test
+    fun `skal hente siste iverksatte behandling med avkorting`() {
+        val ctx = TestContext()
+
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.IVERKSATT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+
+        val revurdering =
+            revurdering(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+
+        val underBehandling =
+            revurdering(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.BEREGNET,
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+
+        coEvery { ctx.beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId1, any()) } returns
+            listOf(behandling.id)
+
+        coEvery { ctx.behandlingService.hentBehandlingerForSak(sakId1) } returns
+            listOf(behandling, revurdering, underBehandling)
+
+        val sisteIverksatteBehandling = runBlocking { ctx.service.hentSisteIverksatteBehandlingMedAvkorting(sakId1, mockk()) }
+
+        sisteIverksatteBehandling shouldBe behandling
     }
 
     @ParameterizedTest(name = "skal ikke opprette forbehandling hvis det allerede eksisterer en med status={0}")

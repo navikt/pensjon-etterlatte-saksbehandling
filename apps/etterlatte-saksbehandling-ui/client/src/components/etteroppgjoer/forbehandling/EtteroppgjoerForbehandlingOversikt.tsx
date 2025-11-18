@@ -15,6 +15,10 @@ import React, { useState } from 'react'
 import { FieldErrors } from 'react-hook-form'
 import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FerdigstillEtteroppgjoerUtenBrev } from '~components/etteroppgjoer/components/FerdigstillEtteroppgjoerUtenBrev'
+import {
+  OpphoerSkyldesDoedsfall,
+  OpphoerSkyldesDoedsfallSkjema,
+} from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -28,6 +32,9 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
   const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
     FieldErrors<FastsettFaktiskInntektSkjema> | undefined
   >()
+  const [opphoerSkyldesDoedsfallSkjemaErrors, setOpphoerSkyldesDoedsfallSkjemaErrors] = useState<
+    FieldErrors<OpphoerSkyldesDoedsfallSkjema> | undefined
+  >()
 
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
@@ -39,6 +46,13 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
 
+      {!!behandling.harVedtakAvTypeOpphoer && (
+        <OpphoerSkyldesDoedsfall
+          erRedigerbar={erRedigerbar}
+          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+        />
+      )}
+
       <FastsettFaktiskInntekt
         erRedigerbar={erRedigerbar}
         setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
@@ -49,6 +63,12 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </VStack>
+      )}
+
+      {!!opphoerSkyldesDoedsfallSkjemaErrors && (
+        <Box maxWidth="42.5rem">
+          <SammendragAvSkjemaFeil errors={opphoerSkyldesDoedsfallSkjemaErrors} />
+        </Box>
       )}
 
       {!!fastsettFaktiskInntektSkjemaErrors && (

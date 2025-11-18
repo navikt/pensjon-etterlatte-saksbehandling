@@ -216,7 +216,7 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(HttpStatusCode.OK)
                 }
 
-                post("doedsfall-skyldes-doedsfall") {
+                post("opphoer-skyldes-doedsfall") {
                     val request = call.receive<OpphoerSkyldesDoedsfallRequest>()
 
                     inTransaction {

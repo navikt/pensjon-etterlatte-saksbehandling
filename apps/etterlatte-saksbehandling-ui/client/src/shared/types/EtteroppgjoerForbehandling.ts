@@ -23,6 +23,7 @@ export interface EtteroppgjoerForbehandling {
   harMottattNyInformasjon?: JaNei
   endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string
+  harVedtakAvTypeOpphoer?: boolean
 }
 
 export interface EtteroppgjoerDetaljertForbehandling {

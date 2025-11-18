@@ -1,9 +1,11 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.FilterVerdi
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -102,39 +104,43 @@ class EtteroppgjoerDao(
                     INNER JOIN sak s on s.id = e.sak_id
                     WHERE e.status = ?
                     AND e.inntektsaar = ?
-                    AND e.har_sanksjon = ?
-                    AND e.har_institusjonsopphold = ?
-                    AND e.har_opphoer = ?
-                    AND e.har_bosatt_utland = ?
-                    AND e.har_adressebeskyttelse_eller_skjermet = ?
-                    AND e.har_aktivitetskrav = ?
-                    AND e.har_overstyrt_beregning = ?
+                    AND (e.har_sanksjon = ? OR e.har_sanksjon = ?)
+                    AND (e.har_institusjonsopphold = ? OR e.har_institusjonsopphold = ?)
+                    AND (e.har_opphoer = ? OR e.har_opphoer = ?)
+                    AND (e.har_bosatt_utland = ? OR e.har_bosatt_utland = ?)
+                    AND (e.har_adressebeskyttelse_eller_skjermet = ? OR e.har_adressebeskyttelse_eller_skjermet = ?)
+                    AND (e.har_aktivitetskrav = ? OR e.har_aktivitetskrav = ?)
+                    AND (e.har_overstyrt_beregning = ? OR e.har_overstyrt_beregning = ?)
                      ${if (spesifikkeSaker.isEmpty()) "" else " AND e.sak_id = ANY(?)"}
                      ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(e.sak_id = ANY(?))"}
                      ${if (spesifikkeEnheter.isEmpty()) "" else " AND s.enhet = ANY(?)"}
+                    AND NOT EXISTS (SELECT 1 FROM oppgave o 
+                            WHERE o.type = ? AND o.referanse = '' AND status != ? AND e.sak_id = o.sak_id)
                     ORDER BY sak_id
-                    LIMIT $antall
+                    LIMIT ?
                     """.trimIndent(),
                 ).apply {
                     var paramIndex = 1
+
+                    fun settFilterVerdier(filterVerdi: FilterVerdi) {
+                        setBoolean(paramIndex, filterVerdi.filterEn)
+                        paramIndex += 1
+                        setBoolean(paramIndex, filterVerdi.filterTo)
+                        paramIndex += 1
+                    }
+
                     setString(paramIndex, status.name)
                     paramIndex += 1
                     setInt(paramIndex, inntektsaar)
                     paramIndex += 1
-                    setBoolean(paramIndex, etteroppgjoerFilter.harSanksjon)
-                    paramIndex += 1
-                    setBoolean(paramIndex, etteroppgjoerFilter.harInsitusjonsopphold)
-                    paramIndex += 1
-                    setBoolean(paramIndex, etteroppgjoerFilter.harOpphoer)
-                    paramIndex += 1
-                    setBoolean(paramIndex, etteroppgjoerFilter.harBosattUtland)
-                    paramIndex += 1
-                    setBoolean(paramIndex, etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
-                    paramIndex += 1
-                    setBoolean(paramIndex, etteroppgjoerFilter.harAktivitetskrav)
-                    paramIndex += 1
-                    setBoolean(paramIndex, etteroppgjoerFilter.harOverstyrtBeregning)
-                    paramIndex += 1
+
+                    settFilterVerdier(etteroppgjoerFilter.harSanksjon)
+                    settFilterVerdier(etteroppgjoerFilter.harInsitusjonsopphold)
+                    settFilterVerdier(etteroppgjoerFilter.harOpphoer)
+                    settFilterVerdier(etteroppgjoerFilter.harBosattUtland)
+                    settFilterVerdier(etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
+                    settFilterVerdier(etteroppgjoerFilter.harAktivitetskrav)
+                    settFilterVerdier(etteroppgjoerFilter.harOverstyrtBeregning)
 
                     if (spesifikkeSaker.isNotEmpty()) {
                         setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
@@ -148,46 +154,17 @@ class EtteroppgjoerDao(
 
                     if (spesifikkeEnheter.isNotEmpty()) {
                         setArray(paramIndex, createArrayOf("text", spesifikkeEnheter.toTypedArray()))
+                        paramIndex += 1
                     }
+                    setString(paramIndex, OppgaveType.ETTEROPPGJOER.name)
+                    paramIndex += 1
+                    setString(paramIndex, Status.FERDIGSTILT.name)
+                    paramIndex += 1
+                    setInt(paramIndex, antall)
                 }.executeQuery()
                     .toList {
                         SakId(getLong("sak_id"))
                     }
-            }
-        }
-
-    fun hentEtteroppgjoerForFilter(
-        filter: EtteroppgjoerFilter,
-        inntektsaar: Int,
-    ): List<Etteroppgjoer> =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val sql =
-                    """
-                    SELECT *
-                    FROM etteroppgjoer
-                    WHERE inntektsaar = ?
-                      AND har_sanksjon = ?
-                      AND har_institusjonsopphold = ?
-                      AND har_opphoer = ?
-                      AND har_bosatt_utland = ?
-                      AND har_adressebeskyttelse_eller_skjermet = ?
-                      AND har_aktivitetskrav = ?
-                      AND har_overstyrt_beregning = ?
-                    """.trimIndent()
-
-                prepareStatement(sql)
-                    .apply {
-                        setInt(1, inntektsaar)
-                        setBoolean(2, filter.harSanksjon)
-                        setBoolean(3, filter.harInsitusjonsopphold)
-                        setBoolean(4, filter.harOpphoer)
-                        setBoolean(5, filter.harBosattUtland)
-                        setBoolean(6, filter.harAdressebeskyttelseEllerSkjermet)
-                        setBoolean(7, filter.harAktivitetskrav)
-                        setBoolean(8, filter.harOverstyrtBeregning)
-                    }.executeQuery()
-                    .toList { toEtteroppgjoer() }
             }
         }
 

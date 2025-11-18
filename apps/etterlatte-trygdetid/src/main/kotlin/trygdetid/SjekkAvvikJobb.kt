@@ -37,7 +37,7 @@ class TrygdetidAvvikRepository(
             queryOf(
                 statement =
                     """
-                    SELECT trygdetid_id, behandling_id, sak_id from trygdetid_avvik where status = 'IKKE_SJEKKET' limit 1
+                    SELECT trygdetid_id, behandling_id, sak_id from trygdetid_avvik where status_v2 = 'IKKE_SJEKKET' limit 1
                     """.trimIndent(),
             ).let { query ->
                 session.run(
@@ -68,7 +68,7 @@ class TrygdetidAvvikRepository(
             queryOf(
                 statement =
                     """
-                    UPDATE trygdetid_avvik SET status = :status, avvik = (:avvik)::jsonb 
+                    UPDATE trygdetid_avvik SET status_v2 = :status, avvik_v2 = (:avvik)::jsonb 
                     WHERE trygdetid_id = :trygdetidId AND behandling_id = :behandlingId 
                     """.trimIndent(),
                 paramMap =

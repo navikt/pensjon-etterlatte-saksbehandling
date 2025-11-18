@@ -1,0 +1,1 @@
+alter table etteroppgjoer_behandling add COLUMN har_vedtak_av_type_opphoer bool null;

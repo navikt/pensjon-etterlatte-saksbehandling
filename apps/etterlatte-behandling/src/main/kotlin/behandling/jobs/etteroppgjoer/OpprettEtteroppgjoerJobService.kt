@@ -13,16 +13,42 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 
-enum class EtteroppgjoerFilter(
-    val harSanksjon: Boolean,
-    val harInsitusjonsopphold: Boolean,
-    val harOpphoer: Boolean,
-    val harAdressebeskyttelseEllerSkjermet: Boolean,
-    val harAktivitetskrav: Boolean,
-    val harBosattUtland: Boolean,
-    val harOverstyrtBeregning: Boolean,
+enum class FilterVerdi(
+    val filterEn: Boolean,
+    val filterTo: Boolean,
 ) {
-    ENKEL(false, false, false, false, false, false, false),
+    FALSE(false, false),
+    TRUE(true, true),
+    DONT_CARE(false, true),
+}
+
+enum class EtteroppgjoerFilter(
+    val harSanksjon: FilterVerdi,
+    val harInsitusjonsopphold: FilterVerdi,
+    val harOpphoer: FilterVerdi,
+    val harAdressebeskyttelseEllerSkjermet: FilterVerdi,
+    val harAktivitetskrav: FilterVerdi,
+    val harBosattUtland: FilterVerdi,
+    val harOverstyrtBeregning: FilterVerdi,
+) {
+    ENKEL(
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
+    ),
+    MED_AKTIVITET_OG_SKJERMET(
+        harSanksjon = FilterVerdi.FALSE,
+        harInsitusjonsopphold = FilterVerdi.FALSE,
+        harOpphoer = FilterVerdi.FALSE,
+        harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
+        harAktivitetskrav = FilterVerdi.DONT_CARE,
+        harBosattUtland = FilterVerdi.FALSE,
+        harOverstyrtBeregning = FilterVerdi.FALSE,
+    ),
 }
 
 @OptIn(DelicateCoroutinesApi::class)

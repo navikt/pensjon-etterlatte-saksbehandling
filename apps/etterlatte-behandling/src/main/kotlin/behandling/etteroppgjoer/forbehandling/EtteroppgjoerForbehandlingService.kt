@@ -41,7 +41,9 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
@@ -536,14 +538,12 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // Etteroppgjør
-        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-        if (etteroppgjoer == null) {
-            logger.error("Fant ikke etteroppgjør for sak=${sak.id} og inntektsår=$inntektsaar")
-            throw IkkeTillattException(
-                "MANGLER_ETTEROPPGJOER",
-                "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
-            )
-        }
+        val etteroppgjoer =
+            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
+                ?: throw IkkeTillattException(
+                    "MANGLER_ETTEROPPGJOER",
+                    "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
+                )
 
         if (!etteroppgjoer.mottattSkatteoppgjoer()) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil etteroppgjoerStatus=${etteroppgjoer.status}")
@@ -576,21 +576,36 @@ class EtteroppgjoerForbehandlingService(
 
         logger.info("Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id ${sisteIverksatteBehandling}")
 
+        val attesterteVedtak =
+            runBlocking {
+                vedtakKlient
+                    .hentIverksatteVedtak(sak.id, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
+                    .sortedByDescending { it.datoAttestert }
+            }
+        val harVedtakAvTypeOpphoer = attesterteVedtak.any { it.vedtakType == VedtakType.OPPHOER }
+
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
-        return EtteroppgjoerForbehandling.opprett(sak, innvilgetPeriode, sisteIverksatteBehandling.id).also {
-            dao.lagreForbehandling(it)
-        }
+        return EtteroppgjoerForbehandling
+            .opprett(
+                sak,
+                innvilgetPeriode,
+                sisteIverksatteBehandling.id,
+                harVedtakAvTypeOpphoer =
+                    harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
+            ).also {
+                dao.lagreForbehandling(it)
+            }
     }
 
-    private suspend fun hentSisteIverksatteBehandlingMedAvkorting(sakId: SakId, brukerTokenInfo: BrukerTokenInfo): UUID {
+    private suspend fun hentSisteIverksatteBehandlingMedAvkorting(sakId: SakId, brukerTokenInfo: BrukerTokenInfo): Behandling {
         val behandlingerMedAarsoppgjoer = beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId, brukerTokenInfo)
 
         return behandlingService.hentBehandlingerForSak(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
             .filter { it.id in behandlingerMedAarsoppgjoer }
-            .maxBy { it.behandlingOpprettet }.id
+            .maxBy { it.behandlingOpprettet }
     }
 
 

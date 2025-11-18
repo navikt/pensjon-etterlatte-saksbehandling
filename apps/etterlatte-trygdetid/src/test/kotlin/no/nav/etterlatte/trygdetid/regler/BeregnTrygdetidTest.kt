@@ -409,8 +409,8 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(15, 11, 0),
-                                antallMaaneder = 191,
+                                periode = Period.of(15, 10, 0),
+                                antallMaaneder = 190,
                                 opptjeningstidIMaaneder = 362,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -485,8 +485,8 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(19, 3, 0),
-                                antallMaaneder = 231,
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
                                 opptjeningstidIMaaneder = 312,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -546,15 +546,15 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(19, 3, 0),
-                                antallMaaneder = 231,
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
                                 opptjeningstidIMaaneder = 312,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
                         fremtidigTrygdetidTeoretisk =
                             FremtidigTrygdetid(
-                                periode = Period.of(19, 3, 0),
-                                antallMaaneder = 231,
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
                                 opptjeningstidIMaaneder = 312,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -767,7 +767,7 @@ internal class BeregnTrygdetidTest {
                                 opptjeningstidIMaaneder = 259,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
-                        samletTrygdetidNorge = 28,
+                        samletTrygdetidNorge = 29,
                         samletTrygdetidTeoretisk = 34,
                         prorataBroek = IntBroek(teller = 69, nevner = 137),
                         overstyrt = false,
@@ -835,8 +835,8 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(8, 0, 0),
-                                antallMaaneder = 96,
+                                periode = Period.of(7, 11, 0),
+                                antallMaaneder = 95,
                                 opptjeningstidIMaaneder = 481,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
@@ -1158,7 +1158,7 @@ internal class BeregnTrygdetidTest {
                                 opptjeningstidIMaaneder = 343,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = false,
                             ),
-                        samletTrygdetidNorge = 20,
+                        samletTrygdetidNorge = 21,
                         samletTrygdetidTeoretisk = 40,
                         prorataBroek = IntBroek(40, 302),
                         overstyrt = false,
@@ -1166,6 +1166,176 @@ internal class BeregnTrygdetidTest {
                         beregnetSamletTrygdetidNorge = null,
                     ),
                     LocalDate.of(1979, 6, 4) to LocalDate.of(2024, 2, 28),
+                    null,
+                    false,
+                ),
+                Arguments.of(
+                    // ...arguments =
+                    "Sjekker opprunding av faktisk trygdetid foer addering med framtidig trygdetid",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            type = TrygdetidType.FREMTIDIG,
+                            bosted = LandNormalisert.NORGE.isoCode,
+                            periode =
+                                TrygdetidPeriode(
+                                    fra = LocalDate.of(2022, 10, 19),
+                                    til = LocalDate.of(2051, 12, 31),
+                                ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = false,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            type = TrygdetidType.FAKTISK,
+                            bosted = LandNormalisert.NORGE.isoCode,
+                            periode =
+                                TrygdetidPeriode(
+                                    fra = LocalDate.of(2012, 7, 25),
+                                    til = LocalDate.of(2022, 9, 30),
+                                ),
+                            poengInnAar = true,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.of(10, 9, 0),
+                                antallMaaneder = 129,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(10, 9, 0),
+                                antallMaaneder = 129,
+                            ),
+                        fremtidigTrygdetidNorge =
+                            FremtidigTrygdetid(
+                                periode = Period.of(22, 9, 0),
+                                antallMaaneder = 273,
+                                opptjeningstidIMaaneder = 259,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true,
+                            ),
+                        fremtidigTrygdetidTeoretisk =
+                            FremtidigTrygdetid(
+                                periode = Period.of(22, 9, 0),
+                                antallMaaneder = 273,
+                                opptjeningstidIMaaneder = 259,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true,
+                            ),
+                        samletTrygdetidNorge = 34,
+                        samletTrygdetidTeoretisk = 34,
+                        prorataBroek = null,
+                        overstyrt = false,
+                        yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
+                    ),
+                    LocalDate.of(1985, 2, 16) to LocalDate.of(2022, 10, 19),
+                    null,
+                    false,
+                ),
+                Arguments.of(
+                    // ...arguments =
+                    "Sjekker opprunding av faktisk trygdetid foer addering med framtidig trygdetid",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            type = TrygdetidType.FAKTISK,
+                            bosted = LandNormalisert.NORGE.isoCode,
+                            periode =
+                                TrygdetidPeriode(
+                                    fra = LocalDate.of(2012, 7, 25),
+                                    til = LocalDate.of(2022, 9, 30),
+                                ),
+                            poengInnAar = true,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            type = TrygdetidType.FREMTIDIG,
+                            bosted = LandNormalisert.NORGE.isoCode,
+                            periode =
+                                TrygdetidPeriode(
+                                    fra = LocalDate.of(2022, 10, 19),
+                                    til = LocalDate.of(2051, 12, 31),
+                                ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = false,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.of(10, 9, 0),
+                                antallMaaneder = 129,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(10, 9, 0),
+                                antallMaaneder = 129,
+                            ),
+                        fremtidigTrygdetidNorge =
+                            FremtidigTrygdetid(
+                                periode = Period.of(22, 9, 0),
+                                antallMaaneder = 273,
+                                opptjeningstidIMaaneder = 259,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true,
+                            ),
+                        fremtidigTrygdetidTeoretisk =
+                            FremtidigTrygdetid(
+                                periode = Period.of(22, 9, 0),
+                                antallMaaneder = 273,
+                                opptjeningstidIMaaneder = 259,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true,
+                            ),
+                        samletTrygdetidNorge = 34,
+                        samletTrygdetidTeoretisk = 34,
+                        prorataBroek = null,
+                        overstyrt = false,
+                        yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
+                    ),
+                    LocalDate.of(1985, 2, 16) to LocalDate.of(2022, 10, 19),
+                    null,
+                    false,
+                ),
+                Arguments.of(
+                    "Runder ikke opp faktisk trygdetid hvis ingen framtidig trygdetid",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            type = TrygdetidType.FAKTISK,
+                            bosted = LandNormalisert.NORGE.isoCode,
+                            periode =
+                                TrygdetidPeriode(
+                                    fra = LocalDate.of(2012, 7, 25),
+                                    til = LocalDate.of(2022, 6, 17),
+                                ),
+                            poengInnAar = true,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.of(10, 6, 0),
+                                antallMaaneder = 126,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(10, 6, 0),
+                                antallMaaneder = 126,
+                            ),
+                        fremtidigTrygdetidNorge = null,
+                        fremtidigTrygdetidTeoretisk = null,
+                        samletTrygdetidNorge = 10,
+                        samletTrygdetidTeoretisk = 10,
+                        prorataBroek = null,
+                        overstyrt = false,
+                        yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
+                    ),
+                    null,
                     null,
                     false,
                 ),

@@ -25,8 +25,11 @@ import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -195,6 +198,15 @@ fun Route.avkorting(
                     null -> call.respond(HttpStatusCode.NoContent)
                     else -> call.respond(resultat.toDto())
                 }
+            }
+        }
+
+        route("avkorting-aarsoppgjoer/{$SAKID_CALL_PARAMETER}") {
+            get {
+                val aarsoppgjoer = avkortingService.hentAarsoppgjoerForSak(sakId)
+
+                if(aarsoppgjoer.isEmpty()) throw InternfeilException("Fant ingen årsoppgjør for sak $sakId")
+                call.respond(aarsoppgjoer)
             }
         }
     }

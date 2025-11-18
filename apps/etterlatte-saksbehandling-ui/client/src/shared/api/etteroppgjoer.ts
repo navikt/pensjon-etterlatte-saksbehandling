@@ -4,7 +4,7 @@ import {
   BeregnetEtteroppgjoerResultatDto,
   Etteroppgjoer,
   EtteroppgjoerForbehandling,
-  EtteroppgjoerDetaljertForbehandling,
+  DetaljertEtteroppgjoer,
   FaktiskInntekt,
   IInformasjonFraBruker,
 } from '~shared/types/EtteroppgjoerForbehandling'
@@ -29,7 +29,7 @@ export const opprettEtteroppgoerForbehandling = async (args: {
 
 export const hentEtteroppgjoerForbehandling = async (
   behandlingId: string
-): Promise<ApiResponse<EtteroppgjoerDetaljertForbehandling>> => {
+): Promise<ApiResponse<DetaljertEtteroppgjoer>> => {
   return apiClient.get(`/etteroppgjoer/forbehandling/${behandlingId}`)
 }
 

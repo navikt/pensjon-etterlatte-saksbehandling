@@ -24,7 +24,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { EtteroppgjoerRevurderingOversikt } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingOversikt'
-import { EtteroppgjoerDetaljertForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { DetaljertEtteroppgjoer } from '~shared/types/EtteroppgjoerForbehandling'
 import { useAppSelector } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
 
@@ -46,7 +46,7 @@ export interface BehandlingRouteType {
   description: string
   kreverBehandlingsstatus?: (
     behandling: IBehandlingReducer,
-    etteroppgjoer?: EtteroppgjoerDetaljertForbehandling | null
+    etteroppgjoer?: DetaljertEtteroppgjoer | null
   ) => IBehandlingStatus
   sakstype?: SakType
 }
@@ -101,7 +101,7 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
       if (behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER) {
         return IBehandlingStatus.BEREGNET
       }
-      if (!etteroppgjoer || etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+      if (!etteroppgjoer || etteroppgjoer.forbehandling.endringErTilUgunstForBruker === JaNei.JA) {
         return IBehandlingStatus.FATTET_VEDTAK
       } else {
         return IBehandlingStatus.BEREGNET
@@ -122,7 +122,7 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
       if (behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER) {
         return behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET
       }
-      if (!etteroppgjoer || etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA) {
+      if (!etteroppgjoer || etteroppgjoer.forbehandling.endringErTilUgunstForBruker === JaNei.JA) {
         return IBehandlingStatus.FATTET_VEDTAK
       } else {
         return behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET

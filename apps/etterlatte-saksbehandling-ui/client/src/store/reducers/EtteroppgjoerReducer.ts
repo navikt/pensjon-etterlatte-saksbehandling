@@ -2,20 +2,20 @@ import { createAction, createReducer } from '@reduxjs/toolkit'
 import {
   BeregnetEtteroppgjoerResultatDto,
   EtteroppgjoerForbehandling,
-  EtteroppgjoerDetaljertForbehandling,
+  DetaljertEtteroppgjoer,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { useAppSelector } from '~store/Store'
 import { IBrev } from '~shared/types/Brev'
 
-export const addEtteroppgjoer = createAction<EtteroppgjoerDetaljertForbehandling>('etteroppgjoer/add')
+export const addEtteroppgjoer = createAction<DetaljertEtteroppgjoer>('etteroppgjoer/add')
 export const addEtteroppgjoerOppgave = createAction<OppgaveDTO>('etteroppgjoer/oppgave/add')
 export const addEtteroppgjoerBrev = createAction<IBrev>('etteroppgjoer/brev/add')
 export const resetEtteroppgjoer = createAction('etteroppgjoer/reset')
 export const addResultatEtteroppgjoer = createAction<BeregnetEtteroppgjoerResultatDto>('etteroppgjoer/resultat/add')
 export const updateEtteroppgjoerBehandling = createAction<EtteroppgjoerForbehandling>('etteroppgjoer/behandling/update')
 const initialState: {
-  etteroppgjoer: EtteroppgjoerDetaljertForbehandling | null
+  etteroppgjoer: DetaljertEtteroppgjoer | null
   oppgave: OppgaveDTO | null
 } = {
   etteroppgjoer: null,
@@ -27,13 +27,13 @@ export const etteroppgjoerReducer = createReducer(initialState, (builder) => {
     state.etteroppgjoer = action.payload
   })
   builder.addCase(addEtteroppgjoerBrev, (state, action) => {
-    if (state.etteroppgjoer?.behandling) {
-      state.etteroppgjoer.behandling.brevId = action.payload.id
+    if (state.etteroppgjoer?.forbehandling) {
+      state.etteroppgjoer.forbehandling.brevId = action.payload.id
     }
   })
   builder.addCase(updateEtteroppgjoerBehandling, (state, action) => {
-    if (state.etteroppgjoer?.behandling) {
-      state.etteroppgjoer.behandling = action.payload
+    if (state.etteroppgjoer?.forbehandling) {
+      state.etteroppgjoer.forbehandling = action.payload
     }
   })
   builder.addCase(addEtteroppgjoerOppgave, (state, action) => {

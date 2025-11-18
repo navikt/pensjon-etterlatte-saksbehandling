@@ -12,10 +12,7 @@ import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingMedBrev } from '~shared/api/etteroppgjoer'
-import {
-  EtteroppgjoerDetaljertForbehandling,
-  kanRedigereEtteroppgjoerBehandling,
-} from '~shared/types/EtteroppgjoerForbehandling'
+import { DetaljertEtteroppgjoer, kanRedigereEtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBrev } from '~shared/types/Brev'
@@ -40,7 +37,7 @@ export function EtteroppgjoerForbehandlingBrev() {
     setVisAdvarselBehandlingEndret(false)
   }
 
-  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: EtteroppgjoerDetaljertForbehandling) => {
+  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: DetaljertEtteroppgjoer) => {
     if (etteroppgjoer.beregnetEtteroppgjoerResultat != undefined) {
       return (
         new Date(etteroppgjoer.beregnetEtteroppgjoerResultat?.tidspunkt).getTime() >

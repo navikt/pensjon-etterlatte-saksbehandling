@@ -3,17 +3,14 @@ import { HStack } from '@navikt/ds-react'
 import { EtteroppgjoerForbehandlingStegLenke } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppgjoerForbehandlingStegLenke'
 import React from 'react'
 import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import {
-  EtteroppgjoerDetaljertForbehandling,
-  EtteroppgjoerResultatType,
-} from '~shared/types/EtteroppgjoerForbehandling'
+import { DetaljertEtteroppgjoer, EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
 
 export enum EtteroppjoerForbehandlingSteg {
   OVERSIKT = 'oversikt',
   BREV = 'oppsummering',
 }
 
-function kanGaaTilEtteroppgjoerBrev(forbehandling?: EtteroppgjoerDetaljertForbehandling): boolean {
+function kanGaaTilEtteroppgjoerBrev(forbehandling?: DetaljertEtteroppgjoer): boolean {
   return (
     !!forbehandling?.beregnetEtteroppgjoerResultat &&
     forbehandling.beregnetEtteroppgjoerResultat.resultatType !== EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING

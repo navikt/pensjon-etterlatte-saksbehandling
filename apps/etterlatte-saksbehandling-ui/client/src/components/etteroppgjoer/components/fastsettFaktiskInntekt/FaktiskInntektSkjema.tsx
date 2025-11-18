@@ -1,4 +1,4 @@
-import { FaktiskInntekt, IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
+import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
@@ -37,7 +37,7 @@ export interface FastsettFaktiskInntektSkjema {
 
 interface Props {
   setFaktiskInntektSkjemaErAapen: (erAapen: boolean) => void
-  setFastsettFaktiskInntektSkjemaErrors: (errors: FieldErrors<IInformasjonFraBruker> | undefined) => void
+  setFastsettFaktiskInntektSkjemaErrors: (errors: FieldErrors<FastsettFaktiskInntektSkjema> | undefined) => void
 }
 
 export const FaktiskInntektSkjema = ({
@@ -45,7 +45,8 @@ export const FaktiskInntektSkjema = ({
   setFastsettFaktiskInntektSkjemaErrors,
 }: Props) => {
   const [lagreFaktiskInntektResult, lagreFaktiskInntektRequest] = useApiCall(lagreFaktiskInntekt)
-  const [hentEtteroppgjoerResult, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerForbehandling)
+  const [hentEtteroppgjoerForbehandlingResult, hentEtteroppgjoerForbehandlingFetch] =
+    useApiCall(hentEtteroppgjoerForbehandling)
 
   const { behandling, faktiskInntekt } = useEtteroppgjoer()
   const dispatch = useAppDispatch()
@@ -80,10 +81,10 @@ export const FaktiskInntektSkjema = ({
   }
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
-    setFastsettFaktiskInntektSkjemaErrors(errors)
+    setFastsettFaktiskInntektSkjemaErrors(undefined)
     lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
       dispatch(addResultatEtteroppgjoer(resultat))
-      hentEtteroppgjoerFetch(resultat.forbehandlingId, (etteroppgjoer) => {
+      hentEtteroppgjoerForbehandlingFetch(resultat.forbehandlingId, (etteroppgjoer) => {
         dispatch(addEtteroppgjoer(etteroppgjoer))
         dispatch(resetAvkorting())
         setFaktiskInntektSkjemaErAapen(false)
@@ -123,7 +124,7 @@ export const FaktiskInntektSkjema = ({
           errorMessage: 'Kunne ikke fastsette faktisk inntekt',
         })}
         {isFailureHandler({
-          apiResult: hentEtteroppgjoerResult,
+          apiResult: hentEtteroppgjoerForbehandlingResult,
           errorMessage: 'Kunne ikke hente oppdatert etteroppgjør',
         })}
 
@@ -136,7 +137,7 @@ export const FaktiskInntektSkjema = ({
               () => setFastsettFaktiskInntektSkjemaErrors(errors)
             )}
             size="small"
-            loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
+            loading={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerForbehandlingResult)}
           >
             Fastsett inntekt
           </Button>
@@ -145,7 +146,7 @@ export const FaktiskInntektSkjema = ({
               type="button"
               variant="secondary"
               size="small"
-              disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerResult)}
+              disabled={isPending(lagreFaktiskInntektResult) || isPending(hentEtteroppgjoerForbehandlingResult)}
               onClick={avbryt}
             >
               Avbryt

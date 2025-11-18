@@ -24,6 +24,7 @@ export interface EtteroppgjoerForbehandling {
   endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string
   harVedtakAvTypeOpphoer?: boolean
+  opphoerSkyldesDoedsfall?: JaNei
 }
 
 export interface EtteroppgjoerDetaljertForbehandling {

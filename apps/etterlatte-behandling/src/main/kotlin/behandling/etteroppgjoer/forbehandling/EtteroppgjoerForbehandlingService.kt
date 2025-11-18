@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -481,6 +482,18 @@ class EtteroppgjoerForbehandlingService(
             .also { dao.lagreForbehandling(it) }
     }
 
+    fun lagreOmOpphoerSkyldesDoedsfall(
+        forbehandlingId: UUID,
+        opphoerSkyldesDoedsfall: JaNei,
+    ) {
+        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        if (!forbehandling.erRedigerbar()) {
+            throw ForbehandlingKanIkkeEndres()
+        }
+
+        forbehandling.oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall).also { dao.lagreForbehandling(it) }
+    }
+
     fun sjekkAtOppgavenErTildeltSaksbehandler(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -567,10 +580,15 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sak.id)
+        val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
+
         krevIkkeNull(sisteIverksatteBehandling) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
+
+        logger.info(
+            "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id $sisteIverksatteBehandling",
+        )
 
         val attesterteVedtak =
             runBlocking {
@@ -593,6 +611,19 @@ class EtteroppgjoerForbehandlingService(
             ).also {
                 dao.lagreForbehandling(it)
             }
+    }
+
+    suspend fun hentSisteIverksatteBehandlingMedAvkorting(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling {
+        val behandlingerMedAarsoppgjoer = beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId, brukerTokenInfo)
+
+        return behandlingService
+            .hentBehandlingerForSak(sakId)
+            .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
+            .filter { it.id in behandlingerMedAarsoppgjoer }
+            .maxBy { it.behandlingOpprettet }
     }
 
     private fun utledInnvilgetPeriode(
@@ -757,6 +788,10 @@ data class InformasjonFraBrukerRequest(
     val harMottattNyInformasjon: JaNei,
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
+)
+
+data class OpphoerSkyldesDoedsfallRequest(
+    val opphoerSkyldesDoedsfall: JaNei,
 )
 
 data class BeregnetResultatOgBrevSomSkalSlettes(

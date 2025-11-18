@@ -15,16 +15,26 @@ import React, { useState } from 'react'
 import { FieldErrors } from 'react-hook-form'
 import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FerdigstillEtteroppgjoerUtenBrev } from '~components/etteroppgjoer/components/FerdigstillEtteroppgjoerUtenBrev'
+import {
+  OpphoerSkyldesDoedsfall,
+  OpphoerSkyldesDoedsfallSkjema,
+} from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
 
+  const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
+
   const erRedigerbar =
     kanRedigereEtteroppgjoerBehandling(behandling.status) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
+  const [opphoerSkyldesDoedsfallSkjemaErrors, setOpphoerSkyldesDoedsfallSkjemaErrors] = useState<
+    FieldErrors<OpphoerSkyldesDoedsfallSkjema> | undefined
+  >()
   const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
     FieldErrors<FastsettFaktiskInntektSkjema> | undefined
   >()
@@ -39,6 +49,13 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
 
+      {opphoerSkyldesDoedsfallErSkrudPaa && !!behandling.harVedtakAvTypeOpphoer && (
+        <OpphoerSkyldesDoedsfall
+          erRedigerbar={erRedigerbar}
+          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+        />
+      )}
+
       <FastsettFaktiskInntekt
         erRedigerbar={erRedigerbar}
         setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
@@ -49,6 +66,12 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </VStack>
+      )}
+
+      {!!opphoerSkyldesDoedsfallSkjemaErrors && (
+        <Box maxWidth="42.5rem">
+          <SammendragAvSkjemaFeil errors={opphoerSkyldesDoedsfallSkjemaErrors} />
+        </Box>
       )}
 
       {!!fastsettFaktiskInntektSkjemaErrors && (

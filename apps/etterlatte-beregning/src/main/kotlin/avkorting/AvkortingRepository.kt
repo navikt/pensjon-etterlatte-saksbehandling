@@ -745,4 +745,19 @@ class AvkortingRepository(
                 )
             }
         }
+
+    fun hentAlleBehandlingerMedAarsoppgjoer(sakId: SakId): List<UUID> =
+        dataSource.transaction { tx ->
+            queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar DESC",
+                sakId.sakId,
+            ).let { query ->
+                tx.run(
+                    query
+                        .map { row ->
+                            row.uuid("behandling_id")
+                        }.asList,
+                )
+            }
+        }
 }

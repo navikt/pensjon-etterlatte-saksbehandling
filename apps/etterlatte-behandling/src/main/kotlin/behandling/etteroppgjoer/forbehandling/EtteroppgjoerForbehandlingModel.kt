@@ -36,6 +36,7 @@ data class EtteroppgjoerForbehandling(
     val kopiertFra: UUID? = null,
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
     val harVedtakAvTypeOpphoer: Boolean? = null,
+    val opphoerSkyldesDoedsfall: JaNei?,
 ) {
     companion object {
         fun opprett(
@@ -58,6 +59,7 @@ data class EtteroppgjoerForbehandling(
             beskrivelseAvUgunst = null,
             varselbrevSendt = null,
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
+            opphoerSkyldesDoedsfall = null,
         )
     }
 
@@ -152,6 +154,9 @@ data class EtteroppgjoerForbehandling(
                         endringErTilUgunstForBruker == JaNei.JA
                 },
         )
+
+    fun oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall: JaNei): EtteroppgjoerForbehandling =
+        copy(opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall)
 }
 
 class EtteroppgjoerForbehandlingStatusException(

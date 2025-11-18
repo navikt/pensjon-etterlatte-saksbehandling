@@ -20,11 +20,18 @@ import { isEmpty } from 'lodash'
 import { ResultatAvForbehandling } from '~components/etteroppgjoer/components/resultatAvForbehandling/ResultatAvForbehandling'
 import { AvsluttEtteroppgjoerRevurderingModal } from '~components/etteroppgjoer/revurdering/AvsluttEtteroppgjoerRevurderingModal'
 import Spinner from '~shared/Spinner'
+import {
+  OpphoerSkyldesDoedsfall,
+  OpphoerSkyldesDoedsfallSkjema,
+} from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const etteroppgjoer = useEtteroppgjoer()
+
+  const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
 
   const erRedigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -32,6 +39,9 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     innloggetSaksbehandler.skriveEnheter
   )
 
+  const [opphoerSkyldesDoedsfallSkjemaErrors, setOpphoerSkyldesDoedsfallSkjemaErrors] = useState<
+    FieldErrors<OpphoerSkyldesDoedsfallSkjema> | undefined
+  >()
   const [informasjonFraBrukerSkjemaErrors, setInformasjonFraBrukerSkjemaErrors] = useState<
     FieldErrors<IInformasjonFraBruker> | undefined
   >()
@@ -45,6 +55,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   }
 
   const harIngenSkjemaErrors =
+    (!opphoerSkyldesDoedsfallSkjemaErrors || isEmpty(opphoerSkyldesDoedsfallSkjemaErrors)) &&
     (!informasjonFraBrukerSkjemaErrors || isEmpty(informasjonFraBrukerSkjemaErrors)) &&
     (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
 
@@ -66,7 +77,14 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const navigerTilNesteSteg = () => {
     if (harIngenSkjemaErrors) {
-      if (revurderingStammerFraSvarfristUtloept) {
+      if (
+        opphoerSkyldesDoedsfallErSkrudPaa &&
+        !!etteroppgjoer.behandling.harVedtakAvTypeOpphoer &&
+        !etteroppgjoer.behandling.opphoerSkyldesDoedsfall
+      ) {
+        setValideringFeilmelding('Du må ta stilling til om opphør skyldes dødsfall')
+        return
+      } else if (revurderingStammerFraSvarfristUtloept) {
         setValideringFeilmelding('Du må ta stilling til informasjon fra bruker')
         return
       } else if (manglerFastsattInntektPaaForbehandling) {
@@ -87,6 +105,13 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
       </BodyShort>
       <Inntektsopplysninger />
+
+      {opphoerSkyldesDoedsfallErSkrudPaa && !!etteroppgjoer.behandling.harVedtakAvTypeOpphoer && (
+        <OpphoerSkyldesDoedsfall
+          erRedigerbar={erRedigerbar}
+          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+        />
+      )}
 
       {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && (
         <>
@@ -125,7 +150,11 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
       <Box maxWidth="42.5rem">
         <VStack gap="8">
-          {/* TODO: prøve å se og merge disse 2 sammen */}
+          {/* TODO: prøve å se og merge disse 3 sammen */}
+          {!!opphoerSkyldesDoedsfallSkjemaErrors && (
+            <SammendragAvSkjemaFeil errors={opphoerSkyldesDoedsfallSkjemaErrors} />
+          )}
+
           {!!informasjonFraBrukerSkjemaErrors && <SammendragAvSkjemaFeil errors={informasjonFraBrukerSkjemaErrors} />}
 
           {!!fastsettFaktiskInntektSkjemaErrors && (

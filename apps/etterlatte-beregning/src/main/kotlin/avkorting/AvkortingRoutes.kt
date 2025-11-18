@@ -1,7 +1,6 @@
 package no.nav.etterlatte.avkorting
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -201,12 +200,12 @@ fun Route.avkorting(
             }
         }
 
-        route("avkorting-aarsoppgjoer/{$SAKID_CALL_PARAMETER}") {
+        route("behandlinger-med-aarsoppgjoer/{$SAKID_CALL_PARAMETER}") {
             get {
-                val aarsoppgjoer = avkortingService.hentAarsoppgjoerForSak(sakId)
+                val behandlinger = avkortingService.hentBehandlingerMedAarsoppgjoerForSak(sakId)
 
-                if(aarsoppgjoer.isEmpty()) throw InternfeilException("Fant ingen årsoppgjør for sak $sakId")
-                call.respond(aarsoppgjoer)
+                if(behandlinger.isEmpty()) throw InternfeilException("Fant ingen behandlinger med årsoppgjør for sak $sakId")
+                call.respond(behandlinger)
             }
         }
     }

@@ -163,7 +163,7 @@ class AvkortingService(
 
     fun hentAvkorting(behandlingId: UUID) = avkortingRepository.hentAvkorting(behandlingId)
 
-    fun hentAarsoppgjoerForSak(sakId: SakId) = avkortingRepository.hentAlleAarsoppgjoer(sakId)
+    fun hentBehandlingerMedAarsoppgjoerForSak(sakId: SakId) = avkortingRepository.hentAlleBehandlingerMedAarsoppgjoer(sakId)
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,

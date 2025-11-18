@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -142,6 +143,7 @@ internal class BehandlingFactoryTest {
 
     private val sakLesDaoMock = mockk<SakLesDao>()
     private val sakServiceMock = mockk<SakService>()
+    private val featureToggleService = DummyFeatureToggleService()
     private val behandlingFactory =
         BehandlingFactory(
             oppgaveService,
@@ -164,6 +166,7 @@ internal class BehandlingFactoryTest {
                     mockk(relaxed = true),
                     sakTilgang,
                     sakLesDaoMock,
+                    featureToggleService,
                 ),
         )
 

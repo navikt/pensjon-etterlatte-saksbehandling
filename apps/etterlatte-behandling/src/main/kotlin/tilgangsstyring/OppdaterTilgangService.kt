@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.grunnlagsendring.vergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -54,6 +56,15 @@ fun Sak.erSpesialSak(): Boolean {
     return harAdressebeskyttelse || erEgenansatt || harSpesialEnhet
 }
 
+enum class TilgangToggles(
+    private val key: String,
+) : FeatureToggle {
+    VURDER_SKJERMING_OGSAA_MED_HENSYN_TIL_VERGER("vurder-skjerming-ogsaa-med-hensyn-til-verger"),
+    ;
+
+    override fun key(): String = key
+}
+
 class OppdaterTilgangService(
     private val skjermingKlient: SkjermingKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
@@ -62,6 +73,7 @@ class OppdaterTilgangService(
     private val sakSkrivDao: SakSkrivDao,
     private val sakTilgang: SakTilgang,
     private val sakLesDao: SakLesDao,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -137,8 +149,11 @@ class OppdaterTilgangService(
                 false -> persongalleri.hentAlleIdentifikatorer()
             }
         val relevanteIdenterForSkjerming =
-            (relevanteIPersongalleri + vergersFoedselsnummer(grunnlag)).distinct()
-
+            if (featureToggleService.isEnabled(TilgangToggles.VURDER_SKJERMING_OGSAA_MED_HENSYN_TIL_VERGER, false)) {
+                (relevanteIPersongalleri + vergersFoedselsnummer(grunnlag)).distinct()
+            } else {
+                relevanteIPersongalleri
+            }
         return relevanteIdenterForSkjerming.any { fnr -> sjekkOmIdentErSkjermet(fnr) }
     }
 

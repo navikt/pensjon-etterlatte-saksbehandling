@@ -775,6 +775,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     applicationContext.sakSkrivDao,
                     applicationContext.sakTilgang,
                     applicationContext.sakLesDao,
+                    applicationContext.featureToggleService,
                 ),
         )
 }

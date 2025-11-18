@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -57,6 +58,10 @@ class OppdatererTilgangServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val brukerService = mockk<BrukerService>()
     private val sakTilgang = mockk<SakTilgang>()
+    private val featureToggleService =
+        DummyFeatureToggleService().apply {
+            settBryter(TilgangToggles.VURDER_SKJERMING_OGSAA_MED_HENSYN_TIL_VERGER, true)
+        }
     private val oppdaterTilgangService =
         OppdaterTilgangService(
             skjermingKlient,
@@ -66,6 +71,7 @@ class OppdatererTilgangServiceTest {
             sakSkrivDao,
             sakTilgang,
             sakLesDao,
+            featureToggleService,
         )
     private val soeker = "11057523044"
     private val persongalleri = persongalleri()

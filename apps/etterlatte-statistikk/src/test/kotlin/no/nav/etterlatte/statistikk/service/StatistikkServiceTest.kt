@@ -477,7 +477,7 @@ class StatistikkServiceTest {
                 rettsgebyrGyldigFra = null,
                 tilbakekrevingGrense = 0.1,
                 etterbetalingGrense = 2.3,
-                tilknyttetRevurdering = false,
+                tilknyttetRevurdering = false
             )
         return etteroppgjoerRad
     }

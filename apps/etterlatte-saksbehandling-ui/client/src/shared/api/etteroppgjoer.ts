@@ -8,6 +8,7 @@ import {
   FaktiskInntekt,
   IInformasjonFraBruker,
 } from '~shared/types/EtteroppgjoerForbehandling'
+import { JaNei } from '~shared/types/ISvar'
 
 export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer>> => {
   return apiClient.get(`/etteroppgjoer/${sakId}`)
@@ -62,6 +63,15 @@ export const lagreInformasjonFraBruker = async (args: {
 }) => {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/informasjon-fra-bruker`, {
     ...args.endringFraBruker,
+  })
+}
+
+export const lagreOmOpphoerSkyldesDoedsfall = async (args: {
+  forbehandlingId: string
+  opphoerSkyldesDoedsfall: JaNei
+}) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/opphoer-skyldes-doedsfall`, {
+    opphoerSkyldesDoedsfall: args.opphoerSkyldesDoedsfall,
   })
 }
 

@@ -3,11 +3,11 @@ import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentUrlForInntektOversikt } from '~shared/api/arbeidOgInntekt'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { mapResult } from '~shared/api/apiUtils'
 
 export function LenkeTilInntektOversikt() {
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
 
   const [urlForInntektOversiktResult, urlForInntektOversiktRequest] = useApiCall(hentUrlForInntektOversikt)
 

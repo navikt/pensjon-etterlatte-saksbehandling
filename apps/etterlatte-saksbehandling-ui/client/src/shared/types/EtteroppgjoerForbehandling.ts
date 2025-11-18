@@ -50,7 +50,7 @@ export enum EtteroppgjoerForbehandlingStatus {
   AVBRUTT = 'AVBRUTT',
 }
 
-export function kanRedigereEtteroppgjoerBehandling(status: EtteroppgjoerForbehandlingStatus): boolean {
+export function kanRedigereEtteroppgjoerForbehandling(status: EtteroppgjoerForbehandlingStatus): boolean {
   return [EtteroppgjoerForbehandlingStatus.OPPRETTET, EtteroppgjoerForbehandlingStatus.BEREGNET].includes(status)
 }
 

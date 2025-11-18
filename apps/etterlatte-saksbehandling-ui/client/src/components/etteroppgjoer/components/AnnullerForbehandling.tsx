@@ -16,7 +16,7 @@ import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Controller, useForm } from 'react-hook-form'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import {
   AarsakTilAvsluttingEtteroppgjoerForbehandling,
   AvbrytEtteroppgjoerForbehandlingRequest,
@@ -32,7 +32,7 @@ export default function AnnullerForbehandling() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [status, avbrytBehandling] = useApiCall(avbrytEtteroppgjoerForbehandling)
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const kanRedigeres =

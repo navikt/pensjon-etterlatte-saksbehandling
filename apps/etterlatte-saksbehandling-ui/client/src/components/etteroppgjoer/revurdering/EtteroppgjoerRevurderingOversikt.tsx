@@ -1,4 +1,4 @@
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import React, { useState } from 'react'
 import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
@@ -29,7 +29,7 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
 
   const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
 

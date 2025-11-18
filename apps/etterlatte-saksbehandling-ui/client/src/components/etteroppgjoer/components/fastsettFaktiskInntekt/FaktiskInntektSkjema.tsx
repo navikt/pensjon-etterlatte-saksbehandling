@@ -1,6 +1,10 @@
 import { FaktiskInntekt } from '~shared/types/EtteroppgjoerForbehandling'
 import { FieldErrors, useForm } from 'react-hook-form'
-import { addEtteroppgjoer, addResultatEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import {
+  addDetaljertEtteroppgjoerForbehandling,
+  addBeregnetEtteroppgjoerResultat,
+  useEtteroppgjoerForbehandling,
+} from '~store/reducers/EtteroppgjoerReducer'
 import { Box, Button, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledInntektTextField } from '~shared/components/textField/ControlledInntektTextField'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
@@ -48,7 +52,7 @@ export const FaktiskInntektSkjema = ({
   const [hentEtteroppgjoerForbehandlingResult, hentEtteroppgjoerForbehandlingFetch] =
     useApiCall(hentEtteroppgjoerForbehandling)
 
-  const { behandling, faktiskInntekt } = useEtteroppgjoer()
+  const { forbehandling, faktiskInntekt } = useEtteroppgjoerForbehandling()
   const dispatch = useAppDispatch()
 
   const {
@@ -82,10 +86,10 @@ export const FaktiskInntektSkjema = ({
 
   const submitFaktiskInntekt = (faktiskInntekt: FaktiskInntekt) => {
     setFastsettFaktiskInntektSkjemaErrors(undefined)
-    lagreFaktiskInntektRequest({ forbehandlingId: behandling.id, faktiskInntekt }, (resultat) => {
-      dispatch(addResultatEtteroppgjoer(resultat))
+    lagreFaktiskInntektRequest({ forbehandlingId: forbehandling.id, faktiskInntekt }, (resultat) => {
+      dispatch(addBeregnetEtteroppgjoerResultat(resultat))
       hentEtteroppgjoerForbehandlingFetch(resultat.forbehandlingId, (etteroppgjoer) => {
-        dispatch(addEtteroppgjoer(etteroppgjoer))
+        dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoer))
         dispatch(resetAvkorting())
         setFaktiskInntektSkjemaErAapen(false)
       })

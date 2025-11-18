@@ -5,7 +5,7 @@ import { Alert, BodyShort, Box, Button, ConfirmationPanel, Heading, HStack, Moda
 import { isPending, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
-import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addEtteroppgjoerBrev, useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { useAppDispatch } from '~store/Store'
@@ -14,7 +14,7 @@ import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottak
 import { ferdigstillEtteroppgjoerForbehandlingMedBrev } from '~shared/api/etteroppgjoer'
 import {
   DetaljertEtteroppgjoerForbehandling,
-  kanRedigereEtteroppgjoerBehandling,
+  kanRedigereEtteroppgjoerForbehandling,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -22,7 +22,7 @@ import { IBrev } from '~shared/types/Brev'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export function EtteroppgjoerForbehandlingBrev() {
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
   const dispatch = useAppDispatch()
   const [brevResult, fetchBrev] = useApiCall(hentBrevTilBehandling)
   const [opprettBrevResult, opprettBrevApi] = useApiCall(opprettBrevTilBehandling)
@@ -31,7 +31,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest, resetFerdigstillForbehandlingStatus] =
     useApiCall(ferdigstillEtteroppgjoerForbehandlingMedBrev)
 
-  const kanRedigeres = kanRedigereEtteroppgjoerBehandling(etteroppgjoer.behandling.status)
+  const kanRedigeres = kanRedigereEtteroppgjoerForbehandling(etteroppgjoer.behandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
   const [bekreftetSettOverBrev, setBekreftetSettOverBrev] = useState<boolean>(false)

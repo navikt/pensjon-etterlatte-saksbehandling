@@ -2,7 +2,7 @@ import { StegMenyBox } from '~components/behandling/stegmeny/StegMeny'
 import { HStack } from '@navikt/ds-react'
 import { EtteroppgjoerForbehandlingStegLenke } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppgjoerForbehandlingStegLenke'
 import React from 'react'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import {
   DetaljertEtteroppgjoerForbehandling,
   EtteroppgjoerResultatType,
@@ -21,7 +21,7 @@ function kanGaaTilEtteroppgjoerBrev(forbehandling?: DetaljertEtteroppgjoerForbeh
 }
 
 export function EtteroppjoerForbehandlingStegmeny() {
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
   return (
     <StegMenyBox>
       <HStack gap="6" align="center">

@@ -1,30 +1,30 @@
-import { updateEtteroppgjoerBehandling, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { updateEtteroppgjoerForbehandling, useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillEtteroppgjoerForbehandlingUtenBrev } from '~shared/api/etteroppgjoer'
 import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Button, Modal, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
-import { kanRedigereEtteroppgjoerBehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { kanRedigereEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 
-export function FerdigstillEtteroppgjoerUtenBrev() {
-  const { behandling } = useEtteroppgjoer()
+export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
+  const { forbehandling } = useEtteroppgjoerForbehandling()
   const [modalOpen, setModalOpen] = useState(false)
   const [resultFerdigstillEtteroppgjoer, fetchFerdigstillEtteroppgjoer, resetFerdigstillEtteroppgjoer] = useApiCall(
     ferdigstillEtteroppgjoerForbehandlingUtenBrev
   )
   const dispatch = useAppDispatch()
-  const redigerbar = behandling && kanRedigereEtteroppgjoerBehandling(behandling.status)
+  const redigerbar = forbehandling && kanRedigereEtteroppgjoerForbehandling(forbehandling.status)
 
   function avbryt() {
     setModalOpen(false)
     resetFerdigstillEtteroppgjoer()
   }
 
-  function ferdigstillEtteroppgjoer() {
-    fetchFerdigstillEtteroppgjoer({ forbehandlingId: behandling.id }, (etteroppgjoer) => {
-      dispatch(updateEtteroppgjoerBehandling(etteroppgjoer))
+  function ferdigstillForbehandling() {
+    fetchFerdigstillEtteroppgjoer({ forbehandlingId: forbehandling.id }, (etteroppgjoer) => {
+      dispatch(updateEtteroppgjoerForbehandling(etteroppgjoer))
     })
   }
 
@@ -34,7 +34,7 @@ export function FerdigstillEtteroppgjoerUtenBrev() {
         {redigerbar ? (
           <Button onClick={() => setModalOpen(true)}>Ferdigstill etteroppgjør</Button>
         ) : (
-          <PersonButtonLink fnr={behandling?.sak?.ident}>Tilbake til saksoversikten</PersonButtonLink>
+          <PersonButtonLink fnr={forbehandling?.sak?.ident}>Tilbake til saksoversikten</PersonButtonLink>
         )}
       </div>
       <Modal open={modalOpen} onClose={avbryt} header={{ heading: 'Ferdigstill etteroppgjør uten brev' }}>
@@ -56,9 +56,9 @@ export function FerdigstillEtteroppgjoerUtenBrev() {
         </Modal.Body>
         <Modal.Footer>
           {isSuccess(resultFerdigstillEtteroppgjoer) ? (
-            <PersonButtonLink fnr={behandling?.sak?.ident}>Tilbake til saksoversikten</PersonButtonLink>
+            <PersonButtonLink fnr={forbehandling?.sak?.ident}>Tilbake til saksoversikten</PersonButtonLink>
           ) : (
-            <Button onClick={ferdigstillEtteroppgjoer} loading={isPending(resultFerdigstillEtteroppgjoer)}>
+            <Button onClick={ferdigstillForbehandling} loading={isPending(resultFerdigstillEtteroppgjoer)}>
               Ferdigstill
             </Button>
           )}

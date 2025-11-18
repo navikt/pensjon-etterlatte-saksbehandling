@@ -1,4 +1,4 @@
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { Sidebar } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import React from 'react'
@@ -7,7 +7,7 @@ import { EtteroppgjoerForbehandlingSidemenyOppsummering } from '~components/ette
 import AnnullerForbehandling from '~components/etteroppgjoer/components/AnnullerForbehandling'
 
 export function EtteroppjoerSidemeny() {
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
   return (
     <Sidebar>
       <EtteroppgjoerForbehandlingSidemenyOppsummering />

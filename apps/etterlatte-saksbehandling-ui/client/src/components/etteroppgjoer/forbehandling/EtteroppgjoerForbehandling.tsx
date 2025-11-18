@@ -9,7 +9,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { EtteroppgjoerForbehandlingBrev } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandlingBrev'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { addEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addDetaljertEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import {
   EtteroppjoerForbehandlingSteg,
   EtteroppjoerForbehandlingStegmeny,
@@ -28,7 +28,7 @@ export function EtteroppgjoerForbehandling() {
     if (!etteroppgjoerId) return
 
     hentEtteroppgjoerRequest(etteroppgjoerId, (etteroppgjoer) => {
-      dispatch(addEtteroppgjoer(etteroppgjoer))
+      dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoer))
     })
   }, [etteroppgjoerId])
 

@@ -2,14 +2,14 @@ import { BodyShort, Box, Heading, HelpText, HStack, Table, VStack } from '@navik
 import { PensjonsgivendeInntektFraSkatteetatenSummert } from '~shared/types/EtteroppgjoerForbehandling'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 
 export const OpplysningerFraSkatteetaten = ({
   inntektFraSkatteetatenSummert,
 }: {
   inntektFraSkatteetatenSummert: PensjonsgivendeInntektFraSkatteetatenSummert
 }) => {
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
 
   return (
     <VStack gap="4">

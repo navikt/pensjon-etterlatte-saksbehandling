@@ -1,4 +1,4 @@
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { EtteroppgjoerForbehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import { Heading, HStack, Label, VStack } from '@navikt/ds-react'
@@ -6,7 +6,7 @@ import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React from 'react'
 
 export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
 
   const forbehandlingErFerdigstilt = etteroppgjoer.behandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
   const forbehandlingErAvbrutt = etteroppgjoer.behandling.status === EtteroppgjoerForbehandlingStatus.AVBRUTT

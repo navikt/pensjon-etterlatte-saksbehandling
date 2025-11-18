@@ -1,9 +1,9 @@
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { JaNei } from '~shared/types/ISvar'
 
 export const InformasjonFraBrukerVisning = () => {
-  const { behandling } = useEtteroppgjoer()
+  const { behandling } = useEtteroppgjoerForbehandling()
 
   return !!behandling.harMottattNyInformasjon ? (
     <VStack gap="4">

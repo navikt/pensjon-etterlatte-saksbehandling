@@ -6,7 +6,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { InformasjonFraBrukerVisning } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerVisning'
 import { InformasjonFraBrukerSkjema } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerSkjema'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { FieldErrors } from 'react-hook-form'
 import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 
@@ -23,7 +23,7 @@ export const InformasjonFraBruker = ({
 }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoer = useEtteroppgjoerForbehandling()
 
   const erRedigerbar = behandlingErRedigerbar(
     behandling.status,

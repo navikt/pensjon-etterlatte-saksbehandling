@@ -215,6 +215,13 @@ class BeregningKlientTest :
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregningDTO? = null
+
+    override suspend fun hentBehandlingerMedAarsoppgjoerForSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo
+    ): List<UUID> {
+        return emptyList()
+    }
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {

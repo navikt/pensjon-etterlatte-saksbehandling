@@ -29,11 +29,11 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
     kanRedigereEtteroppgjoerBehandling(behandling.status) &&
     enhetErSkrivbar(behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
-  const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
-    FieldErrors<FastsettFaktiskInntektSkjema> | undefined
-  >()
   const [opphoerSkyldesDoedsfallSkjemaErrors, setOpphoerSkyldesDoedsfallSkjemaErrors] = useState<
     FieldErrors<OpphoerSkyldesDoedsfallSkjema> | undefined
+  >()
+  const [fastsettFaktiskInntektSkjemaErrors, setFastsettFaktiskInntektSkjemaErrors] = useState<
+    FieldErrors<FastsettFaktiskInntektSkjema> | undefined
   >()
 
   return (

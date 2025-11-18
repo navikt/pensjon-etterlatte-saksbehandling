@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -567,10 +568,13 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sak.id)
+        val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
+
         krevIkkeNull(sisteIverksatteBehandling) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
+
+        logger.info("Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id ${sisteIverksatteBehandling}")
 
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
@@ -579,6 +583,16 @@ class EtteroppgjoerForbehandlingService(
             dao.lagreForbehandling(it)
         }
     }
+
+    private suspend fun hentSisteIverksatteBehandlingMedAvkorting(sakId: SakId, brukerTokenInfo: BrukerTokenInfo): UUID {
+        val behandlingerMedAarsoppgjoer = beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId, brukerTokenInfo)
+
+        return behandlingService.hentBehandlingerForSak(sakId)
+            .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
+            .filter { it.id in behandlingerMedAarsoppgjoer }
+            .maxBy { it.behandlingOpprettet }.id
+    }
+
 
     private fun utledInnvilgetPeriode(
         innvilgedePerioder: List<InnvilgetPeriodeDto>,

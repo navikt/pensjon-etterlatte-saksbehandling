@@ -1,6 +1,6 @@
 import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { useState } from 'react'
-import { BodyShort, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { JaNei } from '~shared/types/ISvar'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
@@ -116,6 +116,10 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
           </VStack>
         ) : (
           <VStack gap="4">
+            <VStack gap="2">
+              <Label>Om opphør skyldes dødsfall</Label>
+              <BodyShort>{behandling.opphoerSkyldesDoedsfall === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
+            </VStack>
             {erRedigerbar && (
               <div>
                 <Button

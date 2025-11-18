@@ -160,7 +160,7 @@ class BeregningKlientImpl(
 
     override suspend fun hentBehandlingerMedAarsoppgjoerForSak(
         sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo
     ): List<UUID> {
         try {
             return downstreamResourceClient
@@ -173,7 +173,7 @@ class BeregningKlientImpl(
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
                     success = { resource ->
-                        deserialize(resource.response.toString())
+                      deserialize(resource.response.toString())
                     },
                     failure = { errorResponse -> throw errorResponse },
                 )

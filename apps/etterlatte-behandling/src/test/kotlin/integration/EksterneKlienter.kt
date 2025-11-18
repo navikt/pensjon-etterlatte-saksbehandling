@@ -218,8 +218,10 @@ class BeregningKlientTest :
 
     override suspend fun hentBehandlingerMedAarsoppgjoerForSak(
         sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): List<UUID> = emptyList()
+        brukerTokenInfo: BrukerTokenInfo
+    ): List<UUID> {
+        return emptyList()
+    }
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {

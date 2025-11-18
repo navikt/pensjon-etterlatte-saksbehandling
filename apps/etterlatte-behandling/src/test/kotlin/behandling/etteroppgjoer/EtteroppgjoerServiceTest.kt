@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -18,11 +18,16 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -32,6 +37,7 @@ import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.Instant
 import java.time.YearMonth
 import java.util.UUID
 
@@ -39,7 +45,7 @@ class EtteroppgjoerServiceTest {
     private val sakId = sakId1
 
     private class TestContext(
-        val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        val sakId: SakId,
     ) {
         val dao: EtteroppgjoerDao = mockk()
         val sigrunKlient: SigrunKlient = mockk()
@@ -344,7 +350,7 @@ class EtteroppgjoerServiceTest {
                 status = EtteroppgjoerStatus.FERDIGSTILT,
             )
 
-        val opprettetEtteroppgjoer = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
+        val opprettetEtteroppgjoer = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
         assertNull(opprettetEtteroppgjoer)
         coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
@@ -356,11 +362,49 @@ class EtteroppgjoerServiceTest {
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             null
 
-        val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
+        val resultat = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
 
         with(resultat!!) {
-            status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+            this.sakId shouldBe ctx.sakId
+            this.inntektsaar shouldBe 2024
+            this.status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
+
+    @Test
+    fun `opprettEtteroppgjoer oppdaterer etteroppgjør dersom behandling ikke er påbegynt`() {
+        val ctx = TestContext(sakId)
+        every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                harUtlandstilsnitt = false,
+            )
+
+        coEvery { ctx.behandlingService.hentBehandling(ctx.sisteIverksatteBehandlingId) } returns
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+                utlandstilknytning = utlandstilsnitt(),
+            )
+
+        val resultat = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
+
+        with(resultat!!) {
+            this.sakId shouldBe ctx.sakId
+            this.inntektsaar shouldBe 2024
+            this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+            this.harUtlandstilsnitt shouldBe true
+        }
+        coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
+    }
+
+    private fun utlandstilsnitt(): Utlandstilknytning =
+        Utlandstilknytning(UtlandstilknytningType.UTLANDSTILSNITT, kildeSaksbehandler(), "begrunnelse")
+
+    fun kildeSaksbehandler() = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
 }

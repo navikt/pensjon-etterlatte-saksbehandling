@@ -29,9 +29,11 @@ enum class EtteroppgjoerFilter(
     val harAdressebeskyttelseEllerSkjermet: FilterVerdi,
     val harAktivitetskrav: FilterVerdi,
     val harBosattUtland: FilterVerdi,
+    val harUtlandstilsnitt: FilterVerdi,
     val harOverstyrtBeregning: FilterVerdi,
 ) {
     ENKEL(
+        FilterVerdi.FALSE,
         FilterVerdi.FALSE,
         FilterVerdi.FALSE,
         FilterVerdi.FALSE,
@@ -47,6 +49,7 @@ enum class EtteroppgjoerFilter(
         harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
         harAktivitetskrav = FilterVerdi.DONT_CARE,
         harBosattUtland = FilterVerdi.FALSE,
+        harUtlandstilsnitt = FilterVerdi.FALSE,
         harOverstyrtBeregning = FilterVerdi.FALSE,
     ),
 }
@@ -90,7 +93,7 @@ class OpprettEtteroppgjoerJobService(
                 try {
                     inTransaction {
                         runBlocking {
-                            etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, inntektsaar) != null
+                            etteroppgjoerService.upsertNyttEtteroppgjoer(sakId, inntektsaar) != null
                         }
                     }
                 } catch (e: Exception) {

@@ -32,6 +32,7 @@ class EgenAnsattService(
                 oppdaterTilgangService.haandtergraderingOgEgenAnsatt(
                     sakId = it.sakId,
                     persongalleri = it.persongalleri,
+                    grunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(it.sakId),
                 )
             }
 
@@ -45,6 +46,7 @@ class EgenAnsattService(
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(
             sakId = sakId,
             persongalleri = persongalleri,
+            grunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId),
         )
         logger.info("Ferdig oppdatert gradering og egen ansatt")
     }

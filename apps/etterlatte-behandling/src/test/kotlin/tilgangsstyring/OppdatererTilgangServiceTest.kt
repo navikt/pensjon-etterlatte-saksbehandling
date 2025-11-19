@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilgangsstyring
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.confirmVerified
@@ -12,18 +13,29 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonIdent
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakLesDao
@@ -36,6 +48,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.security.SecureRandom
 import java.time.LocalDate
+import java.util.UUID
 
 class OppdatererTilgangServiceTest {
     private val skjermingKlient = mockk<SkjermingKlientImpl>()
@@ -45,6 +58,10 @@ class OppdatererTilgangServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val brukerService = mockk<BrukerService>()
     private val sakTilgang = mockk<SakTilgang>()
+    private val featureToggleService =
+        DummyFeatureToggleService().apply {
+            settBryter(TilgangToggles.VURDER_SKJERMING_OGSAA_MED_HENSYN_TIL_VERGER, true)
+        }
     private val oppdaterTilgangService =
         OppdaterTilgangService(
             skjermingKlient,
@@ -54,6 +71,7 @@ class OppdatererTilgangServiceTest {
             sakSkrivDao,
             sakTilgang,
             sakLesDao,
+            featureToggleService,
         )
     private val soeker = "11057523044"
     private val persongalleri = persongalleri()
@@ -101,7 +119,7 @@ class OppdatererTilgangServiceTest {
 
         coEvery { skjermingKlient.personErSkjermet(any()) } returns true
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 1) {
             sakTilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -120,7 +138,7 @@ class OppdatererTilgangServiceTest {
         val sak = bpSak(enhet = Enheter.PORSGRUNN.enhetNr, gradering = null, erSkjermet = false)
         every { sakLesDao.hentSak(sak.id) } returns sak
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 1) {
             sakTilgang.oppdaterSkjerming(sak.id, true)
@@ -139,7 +157,7 @@ class OppdatererTilgangServiceTest {
         val sak = bpSak(enhet = Enheter.PORSGRUNN.enhetNr, gradering = null, erSkjermet = false)
         every { sakLesDao.hentSak(sak.id) } returns sak
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 0) {
             sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
@@ -161,7 +179,7 @@ class OppdatererTilgangServiceTest {
         val sak = bpSak(enhet = Enheter.EGNE_ANSATTE.enhetNr, gradering = null, erSkjermet = false)
         every { sakLesDao.hentSak(sak.id) } returns sak
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 0) {
             sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
@@ -208,7 +226,7 @@ class OppdatererTilgangServiceTest {
         val sak = bpSak(enhet = graderingOgEnhet.second, gradering = graderingOgEnhet.first, erSkjermet = false)
         every { sakLesDao.hentSak(sak.id) } returns sak
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 0) {
             sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
@@ -239,7 +257,7 @@ class OppdatererTilgangServiceTest {
             )
         every { sakLesDao.hentSak(sak.id) } returns sak
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 0) {
             sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
@@ -270,7 +288,7 @@ class OppdatererTilgangServiceTest {
             )
         every { sakLesDao.hentSak(sak.id) } returns sak
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 0) {
             sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
@@ -302,7 +320,7 @@ class OppdatererTilgangServiceTest {
         val sak = bpSak(enhet = Enheter.STEINKJER.enhetNr, gradering = AdressebeskyttelseGradering.FORTROLIG, erSkjermet = true)
         every { sakLesDao.hentSak(sak.id) } returns sak
 
-        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlag())
 
         verify(exactly = 1) {
             sakTilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.FORTROLIG)
@@ -312,6 +330,40 @@ class OppdatererTilgangServiceTest {
         verify(exactly = 0) {
             sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
             sakTilgang.oppdaterSkjerming(sak.id, false)
+        }
+    }
+
+    @Test
+    fun `Skal skjerme saken hvis soeker BP er under 18 aar og har skjermet verge`() {
+        val soeker18Aar = soekerPerson(soeker, foedselsdato = LocalDate.now().minusYears(12))
+        val vergesFnr = "16508201382"
+        val grunnlagMedVerge = grunnlag(oppnevntVerge = Folkeregisteridentifikator.of(vergesFnr))
+
+        coEvery {
+            pdltjenesterKlient.hentPerson(soeker, any(), any())
+        } returns soeker18Aar
+        coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
+        coEvery { skjermingKlient.personErSkjermet(vergesFnr) } returns true
+
+        val sak =
+            bpSak(
+                enhet = Enheter.PORSGRUNN.enhetNr,
+                gradering = AdressebeskyttelseGradering.UGRADERT,
+                erSkjermet = false,
+            )
+        every { sakLesDao.hentSak(sak.id) } returns sak
+
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri, grunnlagMedVerge)
+
+        verify(exactly = 0) {
+            sakTilgang.settEnhetOmAdressebeskyttet(any(), any())
+        }
+        verify(exactly = 1) {
+            sakTilgang.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
+            sakTilgang.oppdaterSkjerming(sak.id, true)
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(sak.id, Enheter.EGNE_ANSATTE.enhetNr))
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(SakMedEnhet(sak.id, Enheter.EGNE_ANSATTE.enhetNr)))
         }
     }
 
@@ -356,5 +408,37 @@ class OppdatererTilgangServiceTest {
             avdoedesBarn = null,
             avdoedesBarnUtenIdent = null,
             vergemaalEllerFremtidsfullmakt = null,
+        )
+
+    fun grunnlag(oppnevntVerge: Folkeregisteridentifikator? = null): Grunnlag {
+        val verger: List<VergemaalEllerFremtidsfullmakt> =
+            if (oppnevntVerge != null) {
+                listOf(
+                    VergemaalEllerFremtidsfullmakt(
+                        embete = "",
+                        type = "",
+                        vergeEllerFullmektig = VergeEllerFullmektig(oppnevntVerge, null, null, null, null),
+                        opphoerstidspunkt = null,
+                    ),
+                )
+            } else {
+                emptyList()
+            }
+
+        val soekerPerson =
+            personTestData(mapOf(FOEDSELSNUMMER to opprettOpplysning(this.soeker.toJsonNode())))
+                .copy(vergemaalEllerFremtidsfullmakt = verger)
+
+        return mockk {
+            every { soeker } returns
+                mapOf(SOEKER_PDL_V1 to opprettOpplysning(soekerPerson.toJsonNode()))
+        }
+    }
+
+    private fun opprettOpplysning(jsonNode: JsonNode) =
+        Opplysning.Konstant(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+            jsonNode,
         )
 }

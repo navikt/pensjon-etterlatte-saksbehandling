@@ -268,7 +268,11 @@ class SakServiceImpl(
          */
         val persongalleri = grunnlagService.hentPersongalleri(sak.id)
         if (persongalleri != null) {
-            tilgangsService.haandtergraderingOgEgenAnsatt(sak.id, persongalleri)
+            tilgangsService.haandtergraderingOgEgenAnsatt(
+                sak.id,
+                persongalleri,
+                grunnlagService.hentOpplysningsgrunnlagForSak(sak.id),
+            )
         }
         return sak
     }

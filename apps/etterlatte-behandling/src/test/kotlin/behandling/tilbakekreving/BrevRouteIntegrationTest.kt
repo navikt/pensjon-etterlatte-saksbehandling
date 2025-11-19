@@ -458,7 +458,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                     SakType.OMSTILLINGSSTOENAD,
                     Enheter.defaultEnhet.enhetNr,
                 )
-            coEvery { grunnlagServiceMock.hentOpplysningsgrunnlagForSak(sak.id) } returns
+            every { grunnlagServiceMock.hentOpplysningsgrunnlagForSak(sak.id) } returns
                 GrunnlagTestData().hentOpplysningsgrunnlag()
             sak
         }

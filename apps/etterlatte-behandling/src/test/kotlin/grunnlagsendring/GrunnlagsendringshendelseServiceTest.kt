@@ -92,10 +92,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         )
 
     private lateinit var grunnlagsendringshendelseService: GrunnlagsendringshendelseService
+    private val tomtGrunnlag = Grunnlag.empty()
 
     @BeforeEach
     fun before() {
         nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
+
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns tomtGrunnlag
 
         grunnlagsendringshendelseService =
             spyk(
@@ -684,13 +687,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns setOf(sakId)
         val persongalleri = persongalleri()
         every { grunnlagService.hentPersongalleri(sakId) } returns persongalleri
-        coEvery { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri) } just Runs
+        coEvery { oppdaterTilgangService.haandtergraderingOgEgenAnsatt(any(), any(), any()) } just Runs
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }
 
         coVerify(exactly = 1) {
-            oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+            oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri, tomtGrunnlag)
         }
         verify { grunnlagService.hentAlleSakerForFnr(Folkeregisteridentifikator.of(adressebeskyttelse.fnr)) }
     }

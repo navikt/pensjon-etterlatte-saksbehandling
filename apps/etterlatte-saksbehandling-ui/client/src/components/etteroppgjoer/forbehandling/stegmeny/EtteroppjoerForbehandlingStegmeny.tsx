@@ -11,12 +11,13 @@ export enum EtteroppjoerForbehandlingSteg {
 }
 
 export function EtteroppjoerForbehandlingStegmeny() {
-  const { beregnetEtteroppgjoerResultat } = useEtteroppgjoerForbehandling()
+  const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
 
   function kanGaaTilEtteroppgjoerForbehandlingBrev(): boolean {
     return (
-      !!beregnetEtteroppgjoerResultat &&
-      beregnetEtteroppgjoerResultat.resultatType !== EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+      !!etteroppgjoerForbehandling?.beregnetEtteroppgjoerResultat &&
+      etteroppgjoerForbehandling.beregnetEtteroppgjoerResultat.resultatType !==
+        EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
     )
   }
 

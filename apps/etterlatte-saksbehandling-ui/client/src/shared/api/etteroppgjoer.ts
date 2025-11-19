@@ -28,9 +28,9 @@ export const opprettEtteroppgoerForbehandling = async (args: {
 }
 
 export const hentEtteroppgjoerForbehandling = async (
-  behandlingId: string
+  forbehandlingId: string
 ): Promise<ApiResponse<DetaljertEtteroppgjoerForbehandling>> => {
-  return apiClient.get(`/etteroppgjoer/forbehandling/${behandlingId}`)
+  return apiClient.get(`/etteroppgjoer/forbehandling/${forbehandlingId}`)
 }
 
 export const avbrytEtteroppgjoerForbehandling = async (args: {

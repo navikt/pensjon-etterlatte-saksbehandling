@@ -8,8 +8,11 @@ import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { EtteroppgjoerForbehandlingBrev } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandlingBrev'
-import { useAppDispatch, useAppSelector } from '~store/Store'
-import { addDetaljertEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
+import { useAppDispatch } from '~store/Store'
+import {
+  addDetaljertEtteroppgjoerForbehandling,
+  useEtteroppgjoerForbehandling,
+} from '~store/reducers/EtteroppgjoerReducer'
 import {
   EtteroppjoerForbehandlingSteg,
   EtteroppjoerForbehandlingStegmeny,
@@ -18,33 +21,38 @@ import { EtteroppgjoerForbehandlingOversikt } from '~components/etteroppgjoer/fo
 import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/forbehandling/sidemeny/EtteroppgjoerForbehandlingSidemeny'
 
 export function EtteroppgjoerForbehandling() {
-  const { etteroppgjoerId } = useParams()
+  const { forbehandlingId } = useParams()
 
   const dispatch = useAppDispatch()
-  const [etteroppgjoerResult, hentEtteroppgjoerRequest] = useApiCall(hentEtteroppgjoerForbehandling)
-  const etteroppgjoerReducer = useAppSelector((state) => state.etteroppgjoerReducer)
+  const [henteEtteroppgjoerForbehandlingResult, hentEtteroppgjoerForbehandlingRequest] =
+    useApiCall(hentEtteroppgjoerForbehandling)
+  // const { etteroppgjoerForbehandling } = useAppSelector((state) => state.etteroppgjoerReducer)
+
+  const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
 
   useEffect(() => {
-    if (!etteroppgjoerId) return
+    if (!forbehandlingId) return
 
-    hentEtteroppgjoerRequest(etteroppgjoerId, (etteroppgjoer) => {
-      dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoer))
+    hentEtteroppgjoerForbehandlingRequest(forbehandlingId, (etteroppgjoerForbehandling) => {
+      dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoerForbehandling))
     })
-  }, [etteroppgjoerId])
+  }, [forbehandlingId])
+
+  console.log(etteroppgjoerForbehandling)
 
   return (
     <>
-      <StatusBar ident={etteroppgjoerReducer.etteroppgjoer?.behandling.sak.ident} />
+      <StatusBar ident={etteroppgjoerForbehandling?.forbehandling?.sak.ident} />
       <EtteroppjoerForbehandlingStegmeny />
 
-      {mapResult(etteroppgjoerResult, {
+      {mapResult(henteEtteroppgjoerForbehandlingResult, {
         pending: <Spinner label="Henter etteroppgjørbehandling" />,
         error: (error) => (
           <ApiErrorAlert>Kunne ikke hente forbehandlingen for etteroppgjør: {error.detail}</ApiErrorAlert>
         ),
       })}
       {/* Laster kun sidene hvis etteroppgjør finnes i reducer, slik at de kan bruke garantert etteroppgjør */}
-      {etteroppgjoerReducer.etteroppgjoer && (
+      {!!etteroppgjoerForbehandling && (
         <HStack height="100%" minHeight="100vh" wrap={false}>
           <Box width="100%">
             <Routes>
@@ -54,7 +62,7 @@ export function EtteroppgjoerForbehandling() {
                 path="*"
                 element={
                   <Navigate
-                    to={`/etteroppgjoer/${etteroppgjoerId}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
+                    to={`/etteroppgjoer/${forbehandlingId}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
                     replace
                   />
                 }

@@ -32,13 +32,13 @@ export default function AnnullerForbehandling() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [status, avbrytBehandling] = useApiCall(avbrytEtteroppgjoerForbehandling)
-  const etteroppgjoer = useEtteroppgjoerForbehandling()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const kanRedigeres =
     ![EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT].includes(
-      etteroppgjoer.behandling.status
-    ) && enhetErSkrivbar(etteroppgjoer.behandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
+      forbehandling.status
+    ) && enhetErSkrivbar(forbehandling.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   const {
     control,
@@ -54,9 +54,9 @@ export default function AnnullerForbehandling() {
   }
 
   const annuller = (data: AvbrytEtteroppgjoerForbehandlingRequest) => {
-    avbrytBehandling({ id: etteroppgjoer.behandling!!.id, avbrytEtteroppgjoerForbehandlingRequest: data }, () => {
-      if (etteroppgjoer.behandling.sak.ident) {
-        navigate('/person', { state: { fnr: etteroppgjoer.behandling.sak.ident } })
+    avbrytBehandling({ id: forbehandling!!.id, avbrytEtteroppgjoerForbehandlingRequest: data }, () => {
+      if (forbehandling.sak.ident) {
+        navigate('/person', { state: { fnr: forbehandling.sak.ident } })
       } else {
         window.location.reload() // Bare refresh behandling
       }

@@ -24,7 +24,7 @@ enum class FilterVerdi(
 
 enum class EtteroppgjoerFilter(
     val harSanksjon: FilterVerdi,
-    val harInsitusjonsopphold: FilterVerdi,
+    val harInstitusjonsopphold: FilterVerdi,
     val harOpphoer: FilterVerdi,
     val harAdressebeskyttelseEllerSkjermet: FilterVerdi,
     val harAktivitetskrav: FilterVerdi,
@@ -44,7 +44,7 @@ enum class EtteroppgjoerFilter(
     ),
     MED_AKTIVITET_OG_SKJERMET(
         harSanksjon = FilterVerdi.FALSE,
-        harInsitusjonsopphold = FilterVerdi.FALSE,
+        harInstitusjonsopphold = FilterVerdi.FALSE,
         harOpphoer = FilterVerdi.FALSE,
         harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
         harAktivitetskrav = FilterVerdi.DONT_CARE,

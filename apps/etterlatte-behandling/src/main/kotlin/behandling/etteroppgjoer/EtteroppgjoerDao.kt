@@ -136,7 +136,7 @@ class EtteroppgjoerDao(
                     paramIndex += 1
 
                     settFilterVerdier(etteroppgjoerFilter.harSanksjon)
-                    settFilterVerdier(etteroppgjoerFilter.harInsitusjonsopphold)
+                    settFilterVerdier(etteroppgjoerFilter.harInstitusjonsopphold)
                     settFilterVerdier(etteroppgjoerFilter.harOpphoer)
                     settFilterVerdier(etteroppgjoerFilter.harBosattUtland)
                     settFilterVerdier(etteroppgjoerFilter.harUtlandstilsnitt)

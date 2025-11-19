@@ -29,7 +29,9 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const etteroppgjoer = useEtteroppgjoerForbehandling()
+  const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
+
+  const { forbehandling } = etteroppgjoerForbehandling
 
   const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
 
@@ -50,8 +52,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   >()
   const [valideringFeilmelding, setValideringFeilmelding] = useState<string>('')
 
-  if (!etteroppgjoer) {
-    return <Spinner label="Laster etteroppgjør" />
+  if (!etteroppgjoerForbehandling) {
+    return <Spinner label="Laster etteroppgjør forbehandling" />
   }
 
   const harIngenSkjemaErrors =
@@ -60,17 +62,16 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     (!fastsettFaktiskInntektSkjemaErrors || isEmpty(fastsettFaktiskInntektSkjemaErrors))
 
   const revurderingStammerFraSvarfristUtloept =
-    behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !etteroppgjoer.behandling.harMottattNyInformasjon
+    behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !forbehandling.harMottattNyInformasjon
 
-  const erForbehandling = etteroppgjoer.behandling.kopiertFra === undefined
+  const erForbehandling = forbehandling.kopiertFra === undefined
 
-  const manglerFastsattInntektPaaForbehandling =
-    etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA && erForbehandling
+  const manglerFastsattInntektPaaForbehandling = forbehandling.harMottattNyInformasjon === JaNei.JA && erForbehandling
 
   const erAutomatiskBehandlingMedNyInformasjon =
     behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB &&
-    etteroppgjoer.behandling.harMottattNyInformasjon === JaNei.JA &&
-    etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA
+    forbehandling.harMottattNyInformasjon === JaNei.JA &&
+    forbehandling.endringErTilUgunstForBruker !== JaNei.JA
 
   const kanRedigereFaktiskInntekt =
     erRedigerbar && (behandling.opprinnelse !== Opprinnelse.AUTOMATISK_JOBB || erAutomatiskBehandlingMedNyInformasjon)
@@ -79,8 +80,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
     if (harIngenSkjemaErrors) {
       if (
         opphoerSkyldesDoedsfallErSkrudPaa &&
-        !!etteroppgjoer.behandling.harVedtakAvTypeOpphoer &&
-        !etteroppgjoer.behandling.opphoerSkyldesDoedsfall
+        !!forbehandling.harVedtakAvTypeOpphoer &&
+        !forbehandling.opphoerSkyldesDoedsfall
       ) {
         setValideringFeilmelding('Du må ta stilling til om opphør skyldes dødsfall')
         return
@@ -99,14 +100,14 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
       <Heading size="xlarge" level="1">
-        Etteroppgjør for {etteroppgjoer.behandling.aar}
+        Etteroppgjør for {forbehandling.aar}
       </Heading>
       <BodyShort>
-        <b>Skatteoppgjør mottatt:</b> {formaterDato(etteroppgjoer.behandling.opprettet)}
+        <b>Skatteoppgjør mottatt:</b> {formaterDato(forbehandling.opprettet)}
       </BodyShort>
       <Inntektsopplysninger />
 
-      {opphoerSkyldesDoedsfallErSkrudPaa && !!etteroppgjoer.behandling.harVedtakAvTypeOpphoer && (
+      {opphoerSkyldesDoedsfallErSkrudPaa && !!forbehandling.harVedtakAvTypeOpphoer && (
         <OpphoerSkyldesDoedsfall
           erRedigerbar={erRedigerbar}
           setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
@@ -121,18 +122,17 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
             setValideringFeilmedling={setValideringFeilmelding}
           />
 
-          {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA &&
-            !erFerdigBehandlet(behandling.status) && (
-              <Box maxWidth="42.5rem">
-                <Alert variant="info">
-                  <Heading spacing size="small" level="3">
-                    Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
-                  </Heading>
-                  Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en
-                  ny forbehandling for etteroppgjøret skal opprettes.
-                </Alert>
-              </Box>
-            )}
+          {forbehandling.endringErTilUgunstForBruker === JaNei.JA && !erFerdigBehandlet(behandling.status) && (
+            <Box maxWidth="42.5rem">
+              <Alert variant="info">
+                <Heading spacing size="small" level="3">
+                  Revurderingen skal avsluttes og det skal opprettes en ny forbehandling
+                </Heading>
+                Du har vurdert at endringen kommer til ugunst for bruker. Revurderingen skal derfor avsluttes, og en ny
+                forbehandling for etteroppgjøret skal opprettes.
+              </Alert>
+            </Box>
+          )}
         </>
       )}
 
@@ -141,7 +141,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
       />
 
-      {etteroppgjoer.behandling.endringErTilUgunstForBruker !== JaNei.JA && (
+      {forbehandling.endringErTilUgunstForBruker !== JaNei.JA && (
         <>
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
@@ -168,10 +168,10 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">
           <VStack gap="4" align="center">
-            {etteroppgjoer.behandling.endringErTilUgunstForBruker === JaNei.JA ? (
+            {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
               <AvsluttEtteroppgjoerRevurderingModal
                 behandling={behandling}
-                beskrivelseAvUgunst={etteroppgjoer.behandling.beskrivelseAvUgunst}
+                beskrivelseAvUgunst={forbehandling.beskrivelseAvUgunst}
               />
             ) : (
               <div>

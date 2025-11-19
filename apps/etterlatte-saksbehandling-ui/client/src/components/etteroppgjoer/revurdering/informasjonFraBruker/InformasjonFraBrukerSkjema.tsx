@@ -30,7 +30,7 @@ export const InformasjonFraBrukerSkjema = ({
   setInformasjonFraBrukerSkjemaErrors,
   setValideringFeilmedling,
 }: Props) => {
-  const etteroppgjoer = useEtteroppgjoerForbehandling()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
 
   const dispatch = useAppDispatch()
 
@@ -45,9 +45,9 @@ export const InformasjonFraBrukerSkjema = ({
     formState: { errors },
   } = useForm<IInformasjonFraBruker>({
     defaultValues: {
-      harMottattNyInformasjon: etteroppgjoer.behandling.harMottattNyInformasjon,
-      endringErTilUgunstForBruker: etteroppgjoer.behandling.endringErTilUgunstForBruker,
-      beskrivelseAvUgunst: etteroppgjoer.behandling.beskrivelseAvUgunst,
+      harMottattNyInformasjon: forbehandling.harMottattNyInformasjon,
+      endringErTilUgunstForBruker: forbehandling.endringErTilUgunstForBruker,
+      beskrivelseAvUgunst: forbehandling.beskrivelseAvUgunst,
     },
   })
 
@@ -136,7 +136,7 @@ export const InformasjonFraBrukerSkjema = ({
             Lagre
           </Button>
 
-          {!!etteroppgjoer.behandling.harMottattNyInformasjon && (
+          {!!forbehandling.harMottattNyInformasjon && (
             <Button
               type="button"
               variant="secondary"

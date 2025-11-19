@@ -3,24 +3,24 @@ import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { JaNei } from '~shared/types/ISvar'
 
 export const InformasjonFraBrukerVisning = () => {
-  const { behandling } = useEtteroppgjoerForbehandling()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
 
-  return !!behandling.harMottattNyInformasjon ? (
+  return !!forbehandling.harMottattNyInformasjon ? (
     <VStack gap="4">
       <VStack gap="2">
         <Label>Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?</Label>
-        <BodyShort>{behandling.harMottattNyInformasjon === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
+        <BodyShort>{forbehandling.harMottattNyInformasjon === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
       </VStack>
-      {!!behandling.endringErTilUgunstForBruker && (
+      {!!forbehandling.endringErTilUgunstForBruker && (
         <VStack gap="2">
           <Label>Er endringen til ugunst for bruker?</Label>
-          <BodyShort>{behandling.endringErTilUgunstForBruker === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
+          <BodyShort>{forbehandling.endringErTilUgunstForBruker === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
         </VStack>
       )}
-      {!!behandling.beskrivelseAvUgunst && (
+      {!!forbehandling.beskrivelseAvUgunst && (
         <VStack gap="2" maxWidth="30rem">
           <Label>Beskriv hvorfor endringen er til ugunst for bruker</Label>
-          <BodyShort>{behandling.beskrivelseAvUgunst}</BodyShort>
+          <BodyShort>{forbehandling.beskrivelseAvUgunst}</BodyShort>
         </VStack>
       )}
     </VStack>

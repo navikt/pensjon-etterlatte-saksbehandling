@@ -23,7 +23,7 @@ export const InformasjonFraBruker = ({
 }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const etteroppgjoer = useEtteroppgjoerForbehandling()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
 
   const erRedigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -32,7 +32,7 @@ export const InformasjonFraBruker = ({
   )
 
   const [informasjonFraBrukerSkjemaErAapen, setInformasjonFraBrukerSkjemaErAapen] = useState<boolean>(
-    erRedigerbar && !etteroppgjoer.behandling.harMottattNyInformasjon
+    erRedigerbar && !forbehandling.harMottattNyInformasjon
   )
 
   return (

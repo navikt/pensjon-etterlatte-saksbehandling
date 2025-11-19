@@ -434,7 +434,7 @@ class EtteroppgjoerForbehandlingService(
                 utlandsinntekt = request.utlandsinntekt,
                 spesifikasjon = request.spesifikasjon,
                 harDoedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA,
-                // og forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersAar == JaNei.NEI
+                // TODO: og forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersAar == JaNei.NEI
             )
 
         val beregnetEtteroppgjoerResultat =

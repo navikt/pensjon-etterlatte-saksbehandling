@@ -240,7 +240,7 @@ class EtteroppgjoerForbehandlingService(
             }
 
         return DetaljertForbehandlingDto(
-            behandling = forbehandling,
+            forbehandling = forbehandling,
             opplysninger =
                 EtteroppgjoerOpplysninger(
                     skatt = pensjonsgivendeInntekt,
@@ -765,11 +765,11 @@ class EtteroppgjoerForbehandlingService(
                 "ETTEROPPGJOER_RESULTAT_TRENGER_BREV",
                 "Etteroppgjøret kan kun ferdigstilles uten utsendt brev hvis resultatet er ingen utbetaling " +
                     "og ingen endring, mens resultatet for etteroppgjøret i sak " +
-                    "${detaljertBehandling.behandling.sak.id} for år ${detaljertBehandling.behandling.aar} er " +
+                    "${detaljertBehandling.forbehandling.sak.id} for år ${detaljertBehandling.forbehandling.aar} er " +
                     "${detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType}",
             )
         }
-        return ferdigstillForbehandling(detaljertBehandling.behandling, brukerTokenInfo)
+        return ferdigstillForbehandling(detaljertBehandling.forbehandling, brukerTokenInfo)
     }
 
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =

@@ -1,4 +1,7 @@
-import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import {
+  addDetaljertEtteroppgjoerForbehandling,
+  useEtteroppgjoerForbehandling,
+} from '~store/reducers/EtteroppgjoerReducer'
 import { useState } from 'react'
 import { BodyShort, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import { FieldErrors, useForm } from 'react-hook-form'
@@ -21,7 +24,7 @@ interface Props {
 }
 
 export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfallSkjemaErrors }: Props) => {
-  const { behandling } = useEtteroppgjoer()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
   const dispatch = useAppDispatch()
 
   const [lagreOmOpphoerSkyldesDoedsfallResult, lagreOmOpphoerSkyldesDoedsfallRequest] =
@@ -30,12 +33,12 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
     useApiCall(hentEtteroppgjoerForbehandling)
 
   const [opphoerSkyldesDoedsfallSkjemaErAapen, setOpphoerSkyldesDoedsfallSkjemaErAapen] = useState<boolean>(
-    erRedigerbar && !behandling.opphoerSkyldesDoedsfall
+    erRedigerbar && !forbehandling.opphoerSkyldesDoedsfall
   )
 
   const { control, handleSubmit } = useForm<OpphoerSkyldesDoedsfallSkjema>({
     defaultValues: {
-      opphoerSkyldesDoedsfall: behandling.opphoerSkyldesDoedsfall,
+      opphoerSkyldesDoedsfall: forbehandling.opphoerSkyldesDoedsfall,
     },
   })
 
@@ -47,10 +50,10 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
   const submitOmOpphoerSkyldesDoedsfall = (data: OpphoerSkyldesDoedsfallSkjema) => {
     setOpphoerSkyldesDoedsfallSkjemaErrors(undefined)
     lagreOmOpphoerSkyldesDoedsfallRequest(
-      { forbehandlingId: behandling.id, opphoerSkyldesDoedsfall: data.opphoerSkyldesDoedsfall },
+      { forbehandlingId: forbehandling.id, opphoerSkyldesDoedsfall: data.opphoerSkyldesDoedsfall },
       () => {
-        hentEtteroppgjoerForbehandlingFetch(behandling.id, (etteroppgjoerForbehandling) => {
-          dispatch(addEtteroppgjoer(etteroppgjoerForbehandling))
+        hentEtteroppgjoerForbehandlingFetch(forbehandling.id, (etteroppgjoerForbehandling) => {
+          dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoerForbehandling))
           setOpphoerSkyldesDoedsfallSkjemaErAapen(false)
         })
       }
@@ -99,7 +102,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
               >
                 Lagre
               </Button>
-              {!!behandling.opphoerSkyldesDoedsfall && (
+              {!!forbehandling.opphoerSkyldesDoedsfall && (
                 <Button
                   type="button"
                   size="small"
@@ -118,7 +121,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
           <VStack gap="4">
             <VStack gap="2">
               <Label>Om opphør skyldes dødsfall</Label>
-              <BodyShort>{behandling.opphoerSkyldesDoedsfall === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
+              <BodyShort>{forbehandling.opphoerSkyldesDoedsfall === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
             </VStack>
             {erRedigerbar && (
               <div>

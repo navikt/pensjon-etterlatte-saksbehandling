@@ -84,7 +84,7 @@ class EtteroppgjoerForbehandlingBrevService(
             etteroppgjoerForbehandlingService
                 .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
 
-        val forbehandling = detaljertForbehandling.behandling
+        val forbehandling = detaljertForbehandling.forbehandling
         val sakId = forbehandling.sak.id
         val brevId =
             forbehandling.brevId ?: throw UgyldigForespoerselException(
@@ -175,7 +175,7 @@ class EtteroppgjoerForbehandlingBrevService(
             val pensjonsgivendeInntekt = detaljertForbehandling.opplysninger.skatt
 
             val sisteIverksatteBehandling =
-                behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
+                behandlingService.hentBehandling(detaljertForbehandling.forbehandling.sisteIverksatteBehandlingId)
                     ?: throw InternfeilException("Fant ikke siste iverksatte behandling, kan ikke utlede brevinnhold")
 
             val (redigerbar, innhold, vedlegg, sak) =
@@ -233,7 +233,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 EtteroppgjoerBrevData.ForhaandsvarselInnhold(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
-                    etteroppgjoersAar = data.behandling.aar,
+                    etteroppgjoersAar = data.forbehandling.aar,
                     rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
                     avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
@@ -243,7 +243,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 EtteroppgjoerBrevData.Forhaandsvarsel(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
-                    etteroppgjoersAar = data.behandling.aar,
+                    etteroppgjoersAar = data.forbehandling.aar,
                     rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
                     stoenad = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
@@ -253,7 +253,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 ),
             vedlegg =
                 listOf(
-                    EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = data.behandling.aar, erVedtak = false),
+                    EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = data.forbehandling.aar, erVedtak = false),
                 ),
             sak = sisteIverksatteBehandling.sak,
         )

@@ -1,11 +1,11 @@
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { Alert, Box, Heading, VStack } from '@navikt/ds-react'
 import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraSkatteetaten'
 import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/components/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
 import { OpplysningerFraAInntektSummert } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraAInntektSummert'
 
 export const Inntektsopplysninger = () => {
-  const etteroppgjoer = useEtteroppgjoer()
+  const { opplysninger } = useEtteroppgjoerForbehandling()
 
   return (
     <Box
@@ -19,14 +19,14 @@ export const Inntektsopplysninger = () => {
         <Heading size="large" level="2">
           Inntektsopplysninger
         </Heading>
-        <OpplysningerFraSkatteetaten inntektFraSkatteetatenSummert={etteroppgjoer.opplysninger.skatt} />
+        <OpplysningerFraSkatteetaten inntektFraSkatteetatenSummert={opplysninger.skatt} />
 
-        {etteroppgjoer.opplysninger.summerteInntekter && (
-          <OpplysningerFraAInntektSummert inntekter={etteroppgjoer.opplysninger.summerteInntekter} />
+        {opplysninger.summerteInntekter && (
+          <OpplysningerFraAInntektSummert inntekter={opplysninger.summerteInntekter} />
         )}
-        {etteroppgjoer.opplysninger.tidligereAvkorting ? (
+        {opplysninger.tidligereAvkorting ? (
           <BrukeroppgittInntektForInnvilgedePerioder
-            avkortingGrunnlag={etteroppgjoer.opplysninger.tidligereAvkorting.avkortingGrunnlag}
+            avkortingGrunnlag={opplysninger.tidligereAvkorting.avkortingGrunnlag}
           />
         ) : (
           <Alert variant="error">Kunne ikke hente eksisterende avkorting i saken.</Alert>

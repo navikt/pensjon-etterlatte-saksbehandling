@@ -72,7 +72,7 @@ function App() {
                     <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                     <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                     <Route path="/aktivitet-vurdering/:oppgaveId/*" element={<VurderAktivitetspliktOppgave />} />
-                    <Route path="/etteroppgjoer/:etteroppgjoerId/*" element={<EtteroppgjoerForbehandling />} />
+                    <Route path="/etteroppgjoer/:forbehandlingId/*" element={<EtteroppgjoerForbehandling />} />
                     <Route path="/svar-paa-etteroppgjoer/:oppgaveId/*" element={<SvarPaaEtteroppgjoer />} />
                     <Route path="/meldt-inn-endring/:oppgaveId/*" element={<MeldtInnEndring />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

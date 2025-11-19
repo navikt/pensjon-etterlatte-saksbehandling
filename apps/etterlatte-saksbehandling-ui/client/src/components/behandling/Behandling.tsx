@@ -23,7 +23,7 @@ import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { addEtteroppgjoer, resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addDetaljertEtteroppgjoerForbehandling, resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
@@ -71,7 +71,7 @@ export const Behandling = () => {
     ) {
       fetchForbehandling(
         behandlingFraRedux?.relatertBehandlingId,
-        (result) => dispatch(addEtteroppgjoer(result)),
+        (result) => dispatch(addDetaljertEtteroppgjoerForbehandling(result)),
         () => dispatch(resetEtteroppgjoer())
       )
     } else {

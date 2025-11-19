@@ -226,6 +226,7 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val naeringsinntekt: Int,
     val utlandsinntekt: Int,
     val spesifikasjon: String,
+    val harDoedsfall: Boolean,
 )
 
 data class EtteroppgjoerHentBeregnetResultatRequest(

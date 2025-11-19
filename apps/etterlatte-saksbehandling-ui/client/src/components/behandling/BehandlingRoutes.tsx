@@ -134,7 +134,7 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
 export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
-  const etteroppgjoer = useAppSelector((state) => state.etteroppgjoerReducer.etteroppgjoer)
+  const etteroppgjoer = useAppSelector((state) => state.etteroppgjoerReducer.etteroppgjoerForbehandling)
   const personopplysninger = usePersonopplysninger()
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)

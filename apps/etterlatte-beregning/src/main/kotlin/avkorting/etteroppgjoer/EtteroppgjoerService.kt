@@ -230,7 +230,6 @@ class EtteroppgjoerService(
                 val vedtak = runBlocking { vedtakKlient.hentIverksatteVedtak(sakId, HardkodaSystembruker.etteroppgjoer) }
                 val nyAvkorting =
                     reparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-                        sakId = sakId,
                         alleVedtak = vedtak,
                         avkortingSistIverksatt = avkorting,
                     )

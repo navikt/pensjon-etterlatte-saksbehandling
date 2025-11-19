@@ -1,7 +1,6 @@
 package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.YearMonth
@@ -24,47 +23,41 @@ class AvkortingReparerAarsoppgjoeret(
     fun hentSisteAvkortingMedReparertAarsoppgjoer(
         forrigeAvkorting: Avkorting,
         virkningstidspunkt: YearMonth,
-        sakId: SakId,
-        alleVedtak: List<VedtakSammendragDto>,
+        iverksatteVedtakPaaSak: List<VedtakSammendragDto>,
     ): Avkorting {
-        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.toSet()
+        val sisteAarsoppgjoer = forrigeAvkorting.aarsoppgjoer.maxBy { it.aar }
+        if (sisteAarsoppgjoer.aar < virkningstidspunkt.year) {
+            if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
+                throw NyeAarMedInntektMaaStarteIJanuar()
+            }
+        }
+        val behandlingerMedVedtak = iverksatteVedtakPaaSak.map { it.behandlingId }
+        val alleAarMedAarsoppgjoer =
+            avkortingRepository.hentAlleAarsoppgjoer(behandlingerMedVedtak).map { it.aar }.toSet()
         val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
-        val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
 
-        if (manglerAar) {
-            val sisteAarsoppgjoer = forrigeAvkorting.aarsoppgjoer.maxBy { it.aar }
-            if (sisteAarsoppgjoer.aar < virkningstidspunkt.year) {
-                if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
-                    throw NyeAarMedInntektMaaStarteIJanuar()
-                }
-                return forrigeAvkorting
+        val alleManglendeAar = alleAarMedAarsoppgjoer - alleAarNyAvkortng
+        val aarsoppgjoerManglende =
+            alleManglendeAar.map { manglendeAar ->
+                val behandlingId = iverksatteVedtakPaaSak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
+                val avkorting =
+                    avkortingRepository.hentAvkorting(behandlingId)
+                        ?: throw TidligereAvkortingFinnesIkkeException(behandlingId)
+                avkorting.aarsoppgjoer.single { manglendeAar == it.aar }
             }
 
-            val manglendeAar =
-                when (alleAarNyAvkortng.contains(virkningstidspunkt.year)) {
-                    true -> virkningstidspunkt.year.minus(1)
-                    false -> virkningstidspunkt.year
-                }
-
-            val sisteBehandlingManglendeAar = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
-            val sisteAvkortingManglendeAar =
-                avkortingRepository.hentAvkorting(sisteBehandlingManglendeAar)
-                    ?: throw TidligereAvkortingFinnesIkkeException(sisteBehandlingManglendeAar)
-
-            return sisteAvkortingManglendeAar.copy(
-                aarsoppgjoer = sisteAvkortingManglendeAar.aarsoppgjoer + forrigeAvkorting.aarsoppgjoer,
-            )
-        } else {
-            return forrigeAvkorting
-        }
+        return Avkorting((aarsoppgjoerManglende + forrigeAvkorting.aarsoppgjoer).sortedBy { it.aar })
     }
 
     fun hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-        sakId: SakId,
         alleVedtak: List<VedtakSammendragDto>,
         avkortingSistIverksatt: Avkorting,
     ): Avkorting {
-        val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.toSet()
+        val alleAarMedAarsoppgjoer =
+            avkortingRepository
+                .hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId })
+                .map { it.aar }
+                .toSet()
         val alleAarNyAvkortng = avkortingSistIverksatt.aarsoppgjoer.map { it.aar }.toSet()
         val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
 
@@ -78,9 +71,7 @@ class AvkortingReparerAarsoppgjoeret(
                             ?: throw InternfeilException("Kunne ikke hente avkorting som skal finnes for $behandlingId")
                     avkorting.aarsoppgjoer.single { manglendeAar == it.aar }
                 }
-            return avkortingSistIverksatt.copy(
-                aarsoppgjoer = (avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar },
-            )
+            return Avkorting((avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar })
         } else {
             return avkortingSistIverksatt
         }

@@ -204,7 +204,7 @@ fun Route.avkorting(
             get {
                 val behandlinger = avkortingService.hentBehandlingerMedAarsoppgjoerForSak(sakId)
 
-                if(behandlinger.isEmpty()) throw InternfeilException("Fant ingen behandlinger med årsoppgjør for sak $sakId")
+                if (behandlinger.isEmpty()) throw InternfeilException("Fant ingen behandlinger med årsoppgjør for sak $sakId")
                 call.respond(behandlinger)
             }
         }

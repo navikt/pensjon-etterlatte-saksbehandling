@@ -760,4 +760,23 @@ class AvkortingRepository(
                 )
             }
         }
+
+    fun hentAlleAarsoppgjoer(behandlinger: List<UUID>): List<AarsoppgjoerLoepende> =
+        dataSource.transaction { tx ->
+            queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ANY (?) ORDER BY aar ASC",
+                behandlinger.toTypedArray(),
+            ).let { query ->
+                tx.run(
+                    query
+                        .map { row ->
+                            AarsoppgjoerLoepende(
+                                id = row.uuid("id"),
+                                aar = row.int("aar"),
+                                fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                            )
+                        }.asList,
+                )
+            }
+        }
 }

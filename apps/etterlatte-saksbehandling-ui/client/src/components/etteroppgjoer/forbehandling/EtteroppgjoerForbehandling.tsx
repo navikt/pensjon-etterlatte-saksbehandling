@@ -26,7 +26,6 @@ export function EtteroppgjoerForbehandling() {
   const dispatch = useAppDispatch()
   const [henteEtteroppgjoerForbehandlingResult, hentEtteroppgjoerForbehandlingRequest] =
     useApiCall(hentEtteroppgjoerForbehandling)
-  // const { etteroppgjoerForbehandling } = useAppSelector((state) => state.etteroppgjoerReducer)
 
   const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
 
@@ -37,8 +36,6 @@ export function EtteroppgjoerForbehandling() {
       dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoerForbehandling))
     })
   }, [forbehandlingId])
-
-  console.log(etteroppgjoerForbehandling)
 
   return (
     <>

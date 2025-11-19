@@ -52,6 +52,16 @@ enum class EtteroppgjoerFilter(
         harUtlandstilsnitt = FilterVerdi.FALSE,
         harOverstyrtBeregning = FilterVerdi.FALSE,
     ),
+    MED_AKTIVITET_SKJERMET_OG_UTLANDSTILSNITT(
+        harSanksjon = FilterVerdi.FALSE,
+        harInstitusjonsopphold = FilterVerdi.FALSE,
+        harOpphoer = FilterVerdi.FALSE,
+        harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
+        harAktivitetskrav = FilterVerdi.DONT_CARE,
+        harBosattUtland = FilterVerdi.FALSE,
+        harUtlandstilsnitt = FilterVerdi.DONT_CARE,
+        harOverstyrtBeregning = FilterVerdi.FALSE,
+    ),
 }
 
 @OptIn(DelicateCoroutinesApi::class)

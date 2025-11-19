@@ -108,6 +108,7 @@ class EtteroppgjoerDao(
                     AND (e.har_institusjonsopphold = ? OR e.har_institusjonsopphold = ?)
                     AND (e.har_opphoer = ? OR e.har_opphoer = ?)
                     AND (e.har_bosatt_utland = ? OR e.har_bosatt_utland = ?)
+                    AND (e.har_utlandstilsnitt = ? OR e.har_utlandstilsnitt = ?)
                     AND (e.har_adressebeskyttelse_eller_skjermet = ? OR e.har_adressebeskyttelse_eller_skjermet = ?)
                     AND (e.har_aktivitetskrav = ? OR e.har_aktivitetskrav = ?)
                     AND (e.har_overstyrt_beregning = ? OR e.har_overstyrt_beregning = ?)
@@ -135,9 +136,10 @@ class EtteroppgjoerDao(
                     paramIndex += 1
 
                     settFilterVerdier(etteroppgjoerFilter.harSanksjon)
-                    settFilterVerdier(etteroppgjoerFilter.harInsitusjonsopphold)
+                    settFilterVerdier(etteroppgjoerFilter.harInstitusjonsopphold)
                     settFilterVerdier(etteroppgjoerFilter.harOpphoer)
                     settFilterVerdier(etteroppgjoerFilter.harBosattUtland)
+                    settFilterVerdier(etteroppgjoerFilter.harUtlandstilsnitt)
                     settFilterVerdier(etteroppgjoerFilter.harAdressebeskyttelseEllerSkjermet)
                     settFilterVerdier(etteroppgjoerFilter.harAktivitetskrav)
                     settFilterVerdier(etteroppgjoerFilter.harOverstyrtBeregning)
@@ -220,12 +222,13 @@ class EtteroppgjoerDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer(
-                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_utlandstilsnitt, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
                             har_institusjonsopphold = excluded.har_institusjonsopphold,
                             har_bosatt_utland = excluded.har_bosatt_utland,
+                            har_utlandstilsnitt = excluded.har_utlandstilsnitt,
                             har_sanksjon = excluded.har_sanksjon,
                             har_opphoer = excluded.har_opphoer,
                             har_adressebeskyttelse_eller_skjermet = excluded.har_adressebeskyttelse_eller_skjermet,
@@ -246,11 +249,12 @@ class EtteroppgjoerDao(
                     statement.setBoolean(6, harInstitusjonsopphold)
                     statement.setBoolean(7, harSanksjon)
                     statement.setBoolean(8, harBosattUtland)
-                    statement.setBoolean(9, harAdressebeskyttelseEllerSkjermet)
-                    statement.setBoolean(10, harAktivitetskrav)
-                    statement.setBoolean(11, harOverstyrtBeregning)
-                    statement.setTidspunkt(12, Tidspunkt.now())
-                    statement.setObject(13, sisteFerdigstilteForbehandling)
+                    statement.setBoolean(9, harUtlandstilsnitt)
+                    statement.setBoolean(10, harAdressebeskyttelseEllerSkjermet)
+                    statement.setBoolean(11, harAktivitetskrav)
+                    statement.setBoolean(12, harOverstyrtBeregning)
+                    statement.setTidspunkt(13, Tidspunkt.now())
+                    statement.setObject(14, sisteFerdigstilteForbehandling)
 
                     statement.executeUpdate().also {
                         krev(it == 1) {
@@ -270,6 +274,7 @@ class EtteroppgjoerDao(
             harInstitusjonsopphold = getBoolean("har_institusjonsopphold"),
             harSanksjon = getBoolean("har_sanksjon"),
             harBosattUtland = getBoolean("har_bosatt_utland"),
+            harUtlandstilsnitt = getBoolean("har_utlandstilsnitt"),
             harAdressebeskyttelseEllerSkjermet = getBoolean("har_adressebeskyttelse_eller_skjermet"),
             harAktivitetskrav = getBoolean("har_aktivitetskrav"),
             harOverstyrtBeregning = getBoolean("har_overstyrt_beregning"),

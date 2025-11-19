@@ -289,6 +289,7 @@ class EtteroppgjoerDaoTest(
                 true,
                 true,
                 true,
+                true,
                 uuid,
             ),
         )
@@ -301,6 +302,7 @@ class EtteroppgjoerDaoTest(
             harSanksjon shouldBe true
             harOpphoer shouldBe true
             harBosattUtland shouldBe true
+            harUtlandstilsnitt shouldBe true
             harInstitusjonsopphold shouldBe true
             harAdressebeskyttelseEllerSkjermet shouldBe true
             harAktivitetskrav shouldBe true

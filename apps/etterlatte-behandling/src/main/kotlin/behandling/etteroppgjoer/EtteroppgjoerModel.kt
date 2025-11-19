@@ -13,6 +13,7 @@ data class Etteroppgjoer(
     val harAdressebeskyttelseEllerSkjermet: Boolean = false,
     val harAktivitetskrav: Boolean = false,
     val harBosattUtland: Boolean = false,
+    val harUtlandstilsnitt: Boolean = false,
     val harOverstyrtBeregning: Boolean = false,
     val sisteFerdigstilteForbehandling: UUID? = null,
 ) {

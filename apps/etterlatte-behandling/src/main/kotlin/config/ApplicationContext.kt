@@ -426,6 +426,7 @@ internal class ApplicationContext(
             sakSkrivDao = sakSkrivDao,
             sakTilgang = sakTilgang,
             sakLesDao = sakLesDao,
+            featureToggleService = featureToggleService,
         )
 
     val grunnlagService: GrunnlagService =

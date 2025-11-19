@@ -167,7 +167,7 @@ class EtteroppgjoerForbehandlingStatusException(
     )
 
 data class DetaljertForbehandlingDto(
-    val behandling: EtteroppgjoerForbehandling,
+    val forbehandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
     val faktiskInntekt: FaktiskInntektDto?,
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,

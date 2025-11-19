@@ -1,15 +1,13 @@
 import { BodyLong, Box, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 
 export const TabellForBeregnetEtteroppgjoerResultat = () => {
-  const etteroppgjoer = useEtteroppgjoer()
+  const { beregnetEtteroppgjoerResultat } = useEtteroppgjoerForbehandling()
 
-  if (!etteroppgjoer || !etteroppgjoer.beregnetEtteroppgjoerResultat) {
+  if (!beregnetEtteroppgjoerResultat) {
     return null
   }
-
-  const resultat = etteroppgjoer?.beregnetEtteroppgjoerResultat
 
   return (
     <VStack gap="4">
@@ -36,28 +34,28 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
             <Table.Row>
               <Table.HeaderCell scope="row">Ny brutto stønad</Table.HeaderCell>
               <Table.DataCell>
-                <HStack justify="end">{NOK(resultat.nyBruttoStoenad)}</HStack>
+                <HStack justify="end">{NOK(beregnetEtteroppgjoerResultat.nyBruttoStoenad)}</HStack>
               </Table.DataCell>
             </Table.Row>
             <Table.Row>
               <Table.HeaderCell scope="row">Brutto utbetalt stønad</Table.HeaderCell>
               <Table.DataCell>
-                <HStack justify="end">{NOK(resultat.utbetaltStoenad)}</HStack>
+                <HStack justify="end">{NOK(beregnetEtteroppgjoerResultat.utbetaltStoenad)}</HStack>
               </Table.DataCell>
             </Table.Row>
             <Table.Row>
               <Table.HeaderCell scope="row">
                 <HStack gap="2">
-                  {resultat.differanse > 0
+                  {beregnetEtteroppgjoerResultat.differanse > 0
                     ? 'For mye utbetalt'
-                    : resultat.differanse < 0
+                    : beregnetEtteroppgjoerResultat.differanse < 0
                       ? 'For lite utbetalt'
                       : 'Riktig beløp utbetalt'}
                 </HStack>
               </Table.HeaderCell>
               <Table.DataCell>
                 {/* Vi vil kun vise tallet uten fortegn for saksbehandler, men det kan komme som negativt tall fra backend */}
-                <HStack justify="end">{NOK(Math.abs(resultat.differanse))}</HStack>
+                <HStack justify="end">{NOK(Math.abs(beregnetEtteroppgjoerResultat.differanse))}</HStack>
               </Table.DataCell>
             </Table.Row>
             <Table.Row>
@@ -72,7 +70,9 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
               </Table.HeaderCell>
               <Table.DataCell>
                 <HStack justify="end">
-                  {resultat.differanse > 0 ? NOK(resultat.grense.tilbakekreving) : NOK(resultat.grense.etterbetaling)}
+                  {beregnetEtteroppgjoerResultat.differanse > 0
+                    ? NOK(beregnetEtteroppgjoerResultat.grense.tilbakekreving)
+                    : NOK(beregnetEtteroppgjoerResultat.grense.etterbetaling)}
                 </HStack>
               </Table.DataCell>
             </Table.Row>

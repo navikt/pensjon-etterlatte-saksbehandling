@@ -24,6 +24,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -63,8 +64,8 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun start() =
         startServer(
             featureToggleService =
-                mockk {
-                    every { isEnabled(KlageFeatureToggle.KanOppretteVedtakAvvisningToggle, any()) } returns true
+                DummyFeatureToggleService().apply {
+                    settBryter(KlageFeatureToggle.KanOppretteVedtakAvvisningToggle, true)
                 },
         ).also {
             resetDatabase()

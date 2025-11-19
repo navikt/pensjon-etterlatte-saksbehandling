@@ -159,6 +159,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             grunnlagService.opprettGrunnlag(any(), any())
         }
         verify {
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
             grunnlagService.hentPersongalleri(behandling!!.id)
             grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
@@ -285,6 +286,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 grunnlagService.hentPersongalleri(sak.id)
                 grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
                 grunnlagService.lagreNyeSaksopplysninger(sak.id, revurdering.id, any())
+                grunnlagService.hentOpplysningsgrunnlagForSak(any())
             }
             coVerify {
                 grunnlagService.opprettGrunnlag(any(), any())
@@ -346,6 +348,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             grunnlagService.opprettGrunnlag(any(), any())
         }
         verify {
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
             grunnlagService.hentPersongalleri(behandling!!.id)
             grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.lagreNyePersonopplysninger(sak.id, revurdering.id, any(), any())
@@ -772,6 +775,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     applicationContext.sakSkrivDao,
                     applicationContext.sakTilgang,
                     applicationContext.sakLesDao,
+                    applicationContext.featureToggleService,
                 ),
         )
 }

@@ -17,7 +17,6 @@ import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -41,6 +40,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.slf4j.LoggerFactory
@@ -359,7 +359,9 @@ class SakServiceImpl(
             .map { SakId(it.toLong()) }
     }
 
-    override fun hentSakerMedSkjerming(sakType: SakType): List<SakId> = lesDao.finnSakerMedSkjerming(sakType).map { it.id }
+    override fun hentSakerMedSkjerming(sakType: SakType): List<SakId> {
+        return lesDao.finnSakerMedSkjerming(sakType).map { it.id }
+    }
 
     private suspend fun hentSpraak(fnr: String): Spraak {
         val kontaktInfo = krrKlient.hentDigitalKontaktinformasjon(fnr)

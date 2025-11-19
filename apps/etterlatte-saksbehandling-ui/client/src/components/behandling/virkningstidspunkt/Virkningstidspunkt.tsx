@@ -22,7 +22,7 @@ import { addMonths, addYears, subYears } from 'date-fns'
 import { SoeknadVurdering } from '../soeknadsoversikt/SoeknadVurdering'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
-import { Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
+import { hentMinimumsVirkningstidspunkt, Hjemmel } from '~components/behandling/virkningstidspunkt/utils'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapFailure } from '~shared/api/apiUtils'
@@ -54,16 +54,16 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
 
   const [errorTekst, setErrorTekst] = useState<string>('')
 
-  // function getSoeknadMottattDato() {
-  //   return erBosattUtland
-  //     ? subYears(new Date(), 20)
-  //     : behandling.soeknadMottattDato
-  //       ? new Date(behandling.soeknadMottattDato)
-  //       : new Date(2024, 0, 1)
-  // For saker migrert fra Pesys har vi ikke tatt med søknad mottatt-dato
-  // Disse kan ha tidligste virkningstidspunkt i Gjenny 1.1.24, altså da etterlattereformen tredde i kraft
-  // Denne siste fallbacken er altså tenkt for disse sakene
-  // }
+  function getSoeknadMottattDato() {
+    return erBosattUtland
+      ? subYears(new Date(), 20)
+      : behandling.soeknadMottattDato
+        ? new Date(behandling.soeknadMottattDato)
+        : new Date(2024, 0, 1)
+    // For saker migrert fra Pesys har vi ikke tatt med søknad mottatt-dato
+    // Disse kan ha tidligste virkningstidspunkt i Gjenny 1.1.24, altså da etterlattereformen tredde i kraft
+    // Denne siste fallbacken er altså tenkt for disse sakene
+  }
 
   function foersteDoedsdato(): Date | undefined {
     const mappetAvdoede = avdoede?.map((it) => it.opplysning.doedsdato!!)
@@ -78,9 +78,8 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
   }
 
   const minimumVirkningstidspunkt = tidligVirkningstidspunktTillatt
-    ? subYears(new Date(), 40)
-    : subYears(new Date(), 40)
-  // : hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType)
+    ? subYears(new Date(), 3)
+    : hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType)
 
   const { monthpickerProps, inputProps } = useMonthpicker({
     fromDate: minimumVirkningstidspunkt,

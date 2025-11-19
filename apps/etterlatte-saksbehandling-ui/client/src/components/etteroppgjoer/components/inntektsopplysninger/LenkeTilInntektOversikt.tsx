@@ -7,13 +7,13 @@ import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerRedu
 import { mapResult } from '~shared/api/apiUtils'
 
 export function LenkeTilInntektOversikt() {
-  const etteroppgjoer = useEtteroppgjoerForbehandling()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
 
   const [urlForInntektOversiktResult, urlForInntektOversiktRequest] = useApiCall(hentUrlForInntektOversikt)
 
   useEffect(() => {
-    urlForInntektOversiktRequest(etteroppgjoer.behandling.sak.ident)
-  }, [etteroppgjoer.behandling.sak.ident])
+    urlForInntektOversiktRequest(forbehandling.sak.ident)
+  }, [forbehandling.sak.ident])
 
   return (
     <Box

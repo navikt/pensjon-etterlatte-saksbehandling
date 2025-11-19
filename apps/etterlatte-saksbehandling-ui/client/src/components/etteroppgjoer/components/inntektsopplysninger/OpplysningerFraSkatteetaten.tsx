@@ -9,12 +9,12 @@ export const OpplysningerFraSkatteetaten = ({
 }: {
   inntektFraSkatteetatenSummert: PensjonsgivendeInntektFraSkatteetatenSummert
 }) => {
-  const etteroppgjoer = useEtteroppgjoerForbehandling()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
 
   return (
     <VStack gap="4">
       <Heading size="small">Opplysninger fra Skatteetaten</Heading>
-      <BodyShort>Pensjonsgivende inntekt for {etteroppgjoer.behandling.aar}.</BodyShort>
+      <BodyShort>Pensjonsgivende inntekt for {forbehandling.aar}.</BodyShort>
 
       <Box width="25rem">
         <Table>

@@ -65,7 +65,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
       {
         forbehandlingId: forbehandling.id,
         opphoerSkyldesDoedsfall: data.opphoerSkyldesDoedsfall,
-        varDoedsfalletIEtterOppGjoeraaret:
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar:
           data.opphoerSkyldesDoedsfall === JaNei.JA ? data.opphoerSkyldesDoedsfallIEtteroppgjoersaar : undefined,
       },
       () => {

@@ -67,10 +67,7 @@ class JobbPoller(
                         JobbKategori.REGULERING -> reguleringService.execute(it)
                         JobbKategori.AARLIG_INNTEKTSJUSTERING -> inntektsjusteringService.execute(it)
                         JobbKategori.OPPFOELGING_BP_FYLT_18 -> oppfoelgingBpFylt18Service.execute(it)
-                        // Midlertidig skrudd av. Utbedres: JobbKategori.OPPDATERING_SKJERMING_BP -> oppdaterSkjermingBpService.execute(it)
-                        JobbKategori.OPPDATERING_SKJERMING_BP -> {
-                            emptyList<Long>()
-                        }
+                        JobbKategori.OPPDATERING_SKJERMING_BP -> oppdaterSkjermingBpService.execute(it)
                         JobbKategori.OPPRETT_ETTEROPPGJOER_FORBEHANDLING -> etteroppgjoerService.execute(it)
                     }
 

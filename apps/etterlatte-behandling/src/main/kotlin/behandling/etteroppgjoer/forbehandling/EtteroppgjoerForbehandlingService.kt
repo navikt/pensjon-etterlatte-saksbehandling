@@ -109,8 +109,8 @@ class EtteroppgjoerForbehandlingService(
 
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
-            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
             etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
+            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
         }
     }
 
@@ -163,16 +163,6 @@ class EtteroppgjoerForbehandlingService(
                 utlandstilknytning = hentUtlandstilknytning(forbehandling),
             )
         }
-    }
-
-    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
-
-    fun lagreVarselbrevSendt(
-        forbehandlingId: UUID,
-        dato: LocalDate,
-    ) {
-        val forbehandling = hentForbehandling(forbehandlingId)
-        lagreForbehandling(forbehandling.medVarselbrevSendt(dato))
     }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
@@ -487,13 +477,14 @@ class EtteroppgjoerForbehandlingService(
     fun lagreOmOpphoerSkyldesDoedsfall(
         forbehandlingId: UUID,
         opphoerSkyldesDoedsfall: JaNei,
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?
     ) {
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
         if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
 
-        forbehandling.oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall).also { dao.lagreForbehandling(it) }
+        forbehandling.oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall, opphoerSkyldesDoedsfallIEtteroppgjoersaar).also { dao.lagreForbehandling(it) }
     }
 
     fun sjekkAtOppgavenErTildeltSaksbehandler(
@@ -794,6 +785,7 @@ data class InformasjonFraBrukerRequest(
 
 data class OpphoerSkyldesDoedsfallRequest(
     val opphoerSkyldesDoedsfall: JaNei,
+    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?
 )
 
 data class BeregnetResultatOgBrevSomSkalSlettes(

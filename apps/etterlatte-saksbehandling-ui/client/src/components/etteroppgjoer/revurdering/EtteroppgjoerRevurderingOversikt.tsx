@@ -31,8 +31,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
 
-  const { forbehandling } = etteroppgjoerForbehandling
-
   const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
 
   const erRedigerbar = behandlingErRedigerbar(
@@ -55,6 +53,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   if (!etteroppgjoerForbehandling) {
     return <Spinner label="Laster etteroppgjør forbehandling" />
   }
+
+  const { forbehandling } = etteroppgjoerForbehandling
 
   const harIngenSkjemaErrors =
     (!opphoerSkyldesDoedsfallSkjemaErrors || isEmpty(opphoerSkyldesDoedsfallSkjemaErrors)) &&

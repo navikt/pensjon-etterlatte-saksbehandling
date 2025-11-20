@@ -373,7 +373,6 @@ class AvkortingService(
         return avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
             forrigeAvkorting,
             virkningstidspunkt,
-            behandling.sak,
             alleVedtak,
         )
     }
@@ -387,7 +386,6 @@ class AvkortingService(
         val forrigeAvkorting = hentForrigeAvkorting(behandlingId)
 
         return avkortingReparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-            sakId = sakId,
             alleVedtak = alleVedtak,
             avkortingSistIverksatt = forrigeAvkorting,
         )

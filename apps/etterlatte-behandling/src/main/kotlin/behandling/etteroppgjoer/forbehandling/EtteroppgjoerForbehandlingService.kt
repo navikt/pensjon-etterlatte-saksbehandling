@@ -109,8 +109,8 @@ class EtteroppgjoerForbehandlingService(
 
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
-            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
             etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
+            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
         }
     }
 
@@ -163,16 +163,6 @@ class EtteroppgjoerForbehandlingService(
                 utlandstilknytning = hentUtlandstilknytning(forbehandling),
             )
         }
-    }
-
-    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
-
-    fun lagreVarselbrevSendt(
-        forbehandlingId: UUID,
-        dato: LocalDate,
-    ) {
-        val forbehandling = hentForbehandling(forbehandlingId)
-        lagreForbehandling(forbehandling.medVarselbrevSendt(dato))
     }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =

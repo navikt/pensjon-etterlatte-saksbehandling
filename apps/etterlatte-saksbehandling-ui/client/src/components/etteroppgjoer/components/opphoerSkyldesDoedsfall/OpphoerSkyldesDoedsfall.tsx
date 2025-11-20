@@ -2,7 +2,7 @@ import {
   addDetaljertEtteroppgjoerForbehandling,
   useEtteroppgjoerForbehandling,
 } from '~store/reducers/EtteroppgjoerReducer'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BodyShort, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { JaNei } from '~shared/types/ISvar'
@@ -16,6 +16,7 @@ import { isPending } from '~shared/api/apiUtils'
 
 export interface OpphoerSkyldesDoedsfallSkjema {
   opphoerSkyldesDoedsfall: JaNei
+  opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
 }
 
 interface Props {
@@ -36,11 +37,22 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
     erRedigerbar && !forbehandling.opphoerSkyldesDoedsfall
   )
 
-  const { control, handleSubmit } = useForm<OpphoerSkyldesDoedsfallSkjema>({
+  const { control, handleSubmit, watch, register, unregister } = useForm<OpphoerSkyldesDoedsfallSkjema>({
     defaultValues: {
       opphoerSkyldesDoedsfall: forbehandling.opphoerSkyldesDoedsfall,
+      opphoerSkyldesDoedsfallIEtteroppgjoersaar: forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
     },
   })
+
+  const opphoerSkyldesDoedsfallVerdi = watch('opphoerSkyldesDoedsfall')
+
+  useEffect(() => {
+    if (opphoerSkyldesDoedsfallVerdi) {
+      register('opphoerSkyldesDoedsfallIEtteroppgjoersaar')
+    } else {
+      unregister('opphoerSkyldesDoedsfallIEtteroppgjoersaar')
+    }
+  }, [register, unregister, opphoerSkyldesDoedsfallVerdi])
 
   const avbryt = () => {
     setOpphoerSkyldesDoedsfallSkjemaErrors(undefined)
@@ -50,7 +62,12 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
   const submitOmOpphoerSkyldesDoedsfall = (data: OpphoerSkyldesDoedsfallSkjema) => {
     setOpphoerSkyldesDoedsfallSkjemaErrors(undefined)
     lagreOmOpphoerSkyldesDoedsfallRequest(
-      { forbehandlingId: forbehandling.id, opphoerSkyldesDoedsfall: data.opphoerSkyldesDoedsfall },
+      {
+        forbehandlingId: forbehandling.id,
+        opphoerSkyldesDoedsfall: data.opphoerSkyldesDoedsfall,
+        varDoedsfalletIEtterOppGjoeraaret:
+          data.opphoerSkyldesDoedsfall === JaNei.JA ? data.opphoerSkyldesDoedsfallIEtteroppgjoersaar : undefined,
+      },
       () => {
         hentEtteroppgjoerForbehandlingFetch(forbehandling.id, (etteroppgjoerForbehandling) => {
           dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoerForbehandling))
@@ -63,7 +80,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
   return (
     <form>
       <VStack gap="4">
-        <Heading size="large">Opphoer skyldes doedsfall</Heading>
+        <Heading size="large">Opphør skyldes dødsfall</Heading>
         <BodyShort>
           Det er registrert et opphør på saken, du må derfor svare på om opphøret skyldes et dødsfall.
         </BodyShort>
@@ -83,9 +100,24 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
               }
             />
 
+            {opphoerSkyldesDoedsfallVerdi === JaNei.JA && (
+              <ControlledRadioGruppe
+                name="opphoerSkyldesDoedsfallIEtteroppgjoersaar"
+                control={control}
+                legend="Skjedde dødsfallet i etteroppgjørsåret?"
+                errorVedTomInput="Du må svare på om dødsfallet skjedde i etteroppgjørsåret"
+                radios={
+                  <>
+                    <Radio value={JaNei.JA}>Ja</Radio>
+                    <Radio value={JaNei.NEI}>Nei</Radio>
+                  </>
+                }
+              />
+            )}
+
             {isFailureHandler({
               apiResult: lagreOmOpphoerSkyldesDoedsfallResult,
-              errorMessage: 'Kunne ikke lagre om opphoer skyldes dødsfall',
+              errorMessage: 'Kunne ikke lagre om opphør skyldes dødsfall',
             })}
             {isFailureHandler({
               apiResult: hentEtteroppgjoerForbehandlingResult,
@@ -123,6 +155,18 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
               <Label>Om opphør skyldes dødsfall</Label>
               <BodyShort>{forbehandling.opphoerSkyldesDoedsfall === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
             </VStack>
+            {forbehandling.opphoerSkyldesDoedsfall === JaNei.JA && (
+              <VStack gap="2">
+                <Label>Om dødsfallet skjedde i etteroppgjørsåret</Label>
+                <BodyShort>
+                  {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar && (
+                    <BodyShort>
+                      {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA ? 'Ja' : 'Nei'}
+                    </BodyShort>
+                  )}
+                </BodyShort>
+              </VStack>
+            )}
             {erRedigerbar && (
               <div>
                 <Button

@@ -180,6 +180,7 @@ fun Route.avkorting(
                         forbehandlingId = request.forbehandlingId,
                         sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
                         aar = request.aar,
+                        harDoedsfall = request.harDoedsfall,
                     )
                 call.respond(resultat.toDto())
             }

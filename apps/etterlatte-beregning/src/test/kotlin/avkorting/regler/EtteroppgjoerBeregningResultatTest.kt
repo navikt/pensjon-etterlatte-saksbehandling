@@ -7,6 +7,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
@@ -87,6 +88,39 @@ class EtteroppgjoerBeregningResultatTest {
 
         resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKEKREVING.name
         resultat.verdi.differanse.differanse shouldBe 1500
+    }
+
+    @Test
+    fun `skal ikke tilbakekreve hvis etteroppgjoer med doedsfall`() {
+        val forventet =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11365),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 10990),
+                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad).copy(harDoedsfall = FaktumNode(true, "", ""))
+
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        val medDoedsfall =
+            beregneEtteroppgjoerRegelMedDoedsfall.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKEKREVING.name
+        medDoedsfall.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING.name
+        medDoedsfall.verdi.opprinneligResultatType!!.name shouldBe resultat.verdi.resultatType.name
     }
 
     @Test
@@ -253,6 +287,7 @@ class EtteroppgjoerBeregningResultatTest {
                     "",
                     "",
                 ),
+            harDoedsfall = FaktumNode(false, "", ""),
         )
     }
 

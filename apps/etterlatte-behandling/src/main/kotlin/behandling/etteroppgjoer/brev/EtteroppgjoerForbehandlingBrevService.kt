@@ -91,9 +91,14 @@ class EtteroppgjoerForbehandlingBrevService(
             )
 
         val sakId = detaljertForbehandling.forbehandling.sak.id
-        krevBrevKanFerdigstilles(detaljertForbehandling, sakId, brevId, brukerTokenInfo)
+        val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
 
-        val forbehandlingMedVarselbrevSendt = detaljertForbehandling.forbehandling.medVarselbrevSendt(LocalDate.now())
+        krevBrevKanFerdigstilles(detaljertForbehandling, sakId, brev, brukerTokenInfo)
+
+        // TODO: fjerne om litt, vi har et par forbehandlinger som ikke er ferdigstilt men varselbrev er sendt
+        val varselBrevSendt = if (brev.status.erDistribuert()) brev.statusEndret.toLocalDate() else LocalDate.now()
+
+        val forbehandlingMedVarselbrevSendt = detaljertForbehandling.forbehandling.medVarselbrevSendt(varselBrevSendt)
         etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandlingMedVarselbrevSendt, brukerTokenInfo)
 
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
@@ -241,11 +246,9 @@ class EtteroppgjoerForbehandlingBrevService(
     private suspend fun krevBrevKanFerdigstilles(
         detaljertForbehandling: DetaljertForbehandlingDto,
         sakId: SakId,
-        brevId: Long,
+        brev: Brev,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
-
         if (brev.status.ikkeFerdigstilt()) {
             val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
             if (sistBeregnetTidspunkt > brev.statusEndret) {
@@ -258,7 +261,7 @@ class EtteroppgjoerForbehandlingBrevService(
             }
         }
 
-        val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
+        val response = brevKlient.kanFerdigstilleBrev(brev.id, sakId, brukerTokenInfo)
         if (!response.kanFerdigstille) {
             throw UgyldigForespoerselException(
                 code = "KAN_IKKE_FERDIGSTILLE_BREV",

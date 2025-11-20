@@ -91,7 +91,7 @@ class EtteroppgjoerForbehandlingBrevService(
             )
 
         val sakId = detaljertForbehandling.forbehandling.sak.id
-        kanFerdigstilleForbehandlingMedBrev(detaljertForbehandling, sakId, brevId, brukerTokenInfo)
+        krevBrevKanFerdigstilles(detaljertForbehandling, sakId, brevId, brukerTokenInfo)
 
         val forbehandlingMedVarselbrevSendt = detaljertForbehandling.forbehandling.medVarselbrevSendt(LocalDate.now())
         etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandlingMedVarselbrevSendt, brukerTokenInfo)
@@ -238,7 +238,7 @@ class EtteroppgjoerForbehandlingBrevService(
         )
     }
 
-    private suspend fun kanFerdigstilleForbehandlingMedBrev(
+    private suspend fun krevBrevKanFerdigstilles(
         detaljertForbehandling: DetaljertForbehandlingDto,
         sakId: SakId,
         brevId: Long,

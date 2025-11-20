@@ -84,43 +84,22 @@ class EtteroppgjoerForbehandlingBrevService(
             etteroppgjoerForbehandlingService
                 .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
 
-        val forbehandling = detaljertForbehandling.forbehandling
-        val sakId = forbehandling.sak.id
         val brevId =
-            forbehandling.brevId ?: throw UgyldigForespoerselException(
+            detaljertForbehandling.forbehandling.brevId ?: throw UgyldigForespoerselException(
                 code = "MANGLER_BREVID",
                 detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
             )
 
-        val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
+        val sakId = detaljertForbehandling.forbehandling.sak.id
+        kanFerdigstilleForbehandlingMedBrev(detaljertForbehandling, sakId, brevId, brukerTokenInfo)
 
-        val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
-        if (sistBeregnetTidspunkt > brev.statusEndret) {
-            throw IkkeTillattException(
-                code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                detail =
-                    "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder " +
-                        "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
-            )
-        }
+        val forbehandlingMedVarselbrevSendt = detaljertForbehandling.forbehandling.medVarselbrevSendt(LocalDate.now())
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandlingMedVarselbrevSendt, brukerTokenInfo)
 
-        val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
-        if (!response.kanFerdigstille && brev.status.ikkeFerdigstilt()) {
-            throw UgyldigForespoerselException(
-                code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                detail = response.aarsak ?: "Ukjent feil",
-            )
-        }
-
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
-        )
-        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
-            forbehandlingId = forbehandlingId,
-            dato = LocalDate.now(),
         )
     }
 
@@ -257,6 +236,35 @@ class EtteroppgjoerForbehandlingBrevService(
                 ),
             sak = sisteIverksatteBehandling.sak,
         )
+    }
+
+    private suspend fun kanFerdigstilleForbehandlingMedBrev(
+        detaljertForbehandling: DetaljertForbehandlingDto,
+        sakId: SakId,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
+
+        if (brev.status.ikkeFerdigstilt()) {
+            val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
+            if (sistBeregnetTidspunkt > brev.statusEndret) {
+                throw IkkeTillattException(
+                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                    detail =
+                        "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder " +
+                            "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
+                )
+            }
+        }
+
+        val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
+        if (!response.kanFerdigstille) {
+            throw UgyldigForespoerselException(
+                code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                detail = response.aarsak ?: "Ukjent feil",
+            )
+        }
     }
 
     suspend fun slettVarselbrev(

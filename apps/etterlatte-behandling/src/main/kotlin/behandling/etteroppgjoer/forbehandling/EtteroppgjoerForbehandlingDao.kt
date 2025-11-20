@@ -122,7 +122,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(17, forbehandling.aarsakTilAvbrytelseBeskrivelse.orEmpty())
                 statement.setNullableBoolean(18, forbehandling.harVedtakAvTypeOpphoer)
                 statement.setString(19, forbehandling.opphoerSkyldesDoedsfall?.name)
-                statement.setString(19, forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar?.name)
+                statement.setString(20, forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar?.name)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {

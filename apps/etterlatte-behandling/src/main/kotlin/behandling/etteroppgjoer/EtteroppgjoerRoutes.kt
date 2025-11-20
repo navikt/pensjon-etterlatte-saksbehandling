@@ -223,6 +223,8 @@ fun Route.etteroppgjoerRoutes(
                         forbehandlingService.lagreOmOpphoerSkyldesDoedsfall(
                             forbehandlingId,
                             opphoerSkyldesDoedsfall = request.opphoerSkyldesDoedsfall,
+                            opphoerSkyldesDoedsfallIEtteroppgjoersaar = request.opphoerSkyldesDoedsfallIEtteroppgjoersaar
+
                         )
                     }
 

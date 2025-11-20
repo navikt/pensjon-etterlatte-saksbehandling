@@ -226,6 +226,7 @@ class EtteroppgjoerDaoTest(
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = LocalDate.now().minusMonths(1),
                 opphoerSkyldesDoedsfall = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
 

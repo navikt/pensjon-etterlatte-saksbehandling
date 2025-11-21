@@ -99,8 +99,6 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
 
-        val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
-
         sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling)
         sjekkAtInntekterErOppdatert(forbehandling)
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)

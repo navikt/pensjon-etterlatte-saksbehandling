@@ -756,16 +756,21 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val detaljertBehandling = hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
-        if (detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType != EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
+        val erIngenEndringUtenUtbetaling = detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+        val harDoedsfallIEtteroppgjoersaaret = detaljertBehandling.forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+
+        if(erIngenEndringUtenUtbetaling || harDoedsfallIEtteroppgjoersaaret) {
+            return ferdigstillForbehandling(detaljertBehandling.forbehandling, brukerTokenInfo)
+        }
+        else {
             throw UgyldigForespoerselException(
                 "ETTEROPPGJOER_RESULTAT_TRENGER_BREV",
                 "Etteroppgjøret kan kun ferdigstilles uten utsendt brev hvis resultatet er ingen utbetaling " +
-                    "og ingen endring, mens resultatet for etteroppgjøret i sak " +
-                    "${detaljertBehandling.forbehandling.sak.id} for år ${detaljertBehandling.forbehandling.aar} er " +
-                    "${detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType}",
+                        "og ingen endring eller dødsfall i etteroppgjørsåret, mens resultatet for etteroppgjøret i sak " +
+                        "${detaljertBehandling.forbehandling.sak.id} for år ${detaljertBehandling.forbehandling.aar} er " +
+                        "${detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType}",
             )
         }
-        return ferdigstillForbehandling(detaljertBehandling.forbehandling, brukerTokenInfo)
     }
 
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =

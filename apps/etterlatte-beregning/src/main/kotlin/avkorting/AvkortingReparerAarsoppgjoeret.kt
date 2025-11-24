@@ -3,6 +3,7 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
 /*
@@ -20,6 +21,8 @@ import java.time.YearMonth
 class AvkortingReparerAarsoppgjoeret(
     val avkortingRepository: AvkortingRepository,
 ) {
+    private val logger = LoggerFactory.getLogger(AvkortingReparerAarsoppgjoeret::class.java)
+
     fun hentSisteAvkortingMedReparertAarsoppgjoer(
         forrigeAvkorting: Avkorting,
         virkningstidspunkt: YearMonth,
@@ -37,6 +40,14 @@ class AvkortingReparerAarsoppgjoeret(
         val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
 
         val alleManglendeAar = alleAarMedAarsoppgjoer - alleAarNyAvkortng
+        if (alleManglendeAar.isNotEmpty()) {
+            logger.info(
+                "Fant manglende årsoppgjør. Forrige årsoppgjør-ID: ${forrigeAvkorting.aarsoppgjoer.firstOrNull()?.id}. " +
+                    "Manglende år: " + alleManglendeAar,
+            )
+        } else {
+            logger.info("Fant ingen manglende år")
+        }
         val aarsoppgjoerManglende =
             alleManglendeAar.map { manglendeAar ->
                 val behandlingId = iverksatteVedtakPaaSak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
@@ -63,6 +74,12 @@ class AvkortingReparerAarsoppgjoeret(
 
         if (manglerAar) {
             val alleManglendeAar = alleAarMedAarsoppgjoer - alleAarNyAvkortng
+            if (alleManglendeAar.isNotEmpty()) {
+                logger.info(
+                    "Fant manglende årsoppgjør. Forrige årsoppgjør-ID: ${avkortingSistIverksatt.aarsoppgjoer.firstOrNull()?.id}. " +
+                        "Manglende år: " + alleManglendeAar,
+                )
+            }
             val aarsoppgjoerManglende =
                 alleManglendeAar.map { manglendeAar ->
                     val behandlingId = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
@@ -73,6 +90,7 @@ class AvkortingReparerAarsoppgjoeret(
                 }
             return Avkorting((avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar })
         } else {
+            logger.info("Fant ingen manglende år")
             return avkortingSistIverksatt
         }
     }

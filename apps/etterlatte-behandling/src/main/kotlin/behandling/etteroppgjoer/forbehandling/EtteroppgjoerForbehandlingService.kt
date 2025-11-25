@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -104,12 +103,14 @@ class EtteroppgjoerForbehandlingService(
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
         ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
-
         // TODO: bør nok validere at brev er generert i tilfeller vi skal ferdigstille med brev
+
+        haandterDoedsfallEtterEtteroppgjoersAar(forbehandling)
 
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
             etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
+
             registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
         }
     }
@@ -786,6 +787,16 @@ class EtteroppgjoerForbehandlingService(
 
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =
         behandlingService.hentUtlandstilknytningForSak(ferdigstiltForbehandling.sak.id)
+
+    private fun haandterDoedsfallEtterEtteroppgjoersAar(forbehandling: EtteroppgjoerForbehandling) {
+        val opphoerSkyldesDoedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA
+        val opphoerSkyldesDoedsfallIEtteroppgjoersaar = forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+        val resultatErEtterbetaling = forbehandling.etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
+
+        if (opphoerSkyldesDoedsfall && opphoerSkyldesDoedsfallIEtteroppgjoersaar && resultatErEtterbetaling) {
+            //  TODO: opprettEtteroppgjoerRevurdering
+        }
+    }
 }
 
 data class BeregnFaktiskInntektRequest(

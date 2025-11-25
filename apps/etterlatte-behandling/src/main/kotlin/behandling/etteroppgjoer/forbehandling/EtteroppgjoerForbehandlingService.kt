@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -50,7 +49,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -769,18 +767,18 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun kanFerdigstilleForbehandlingUtenBrev(detaljertForbehandling: DetaljertForbehandlingDto): Boolean {
-        val erIngenEndringUtenUtbetaling =
-            detaljertForbehandling.beregnetEtteroppgjoerResultat?.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
-        val erDoedsfallIEtteroppgjoersaaret =
-            detaljertForbehandling.forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
-                detaljertForbehandling.forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+    private fun kanFerdigstilleForbehandlingUtenBrev(dto: DetaljertForbehandlingDto): Boolean {
+        val etteroppgjoerResultat = dto.beregnetEtteroppgjoerResultat?.resultatType
 
-        if (erIngenEndringUtenUtbetaling || erDoedsfallIEtteroppgjoersaaret) {
-            return true
-        }
+        val ingenEndringUtenUtbetaling =
+            etteroppgjoerResultat == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
 
-        return false
+        val doedsfallMedIngenEndring =
+            etteroppgjoerResultat == EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING &&
+                dto.forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
+                dto.forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+
+        return ingenEndringUtenUtbetaling || doedsfallMedIngenEndring
     }
 
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =

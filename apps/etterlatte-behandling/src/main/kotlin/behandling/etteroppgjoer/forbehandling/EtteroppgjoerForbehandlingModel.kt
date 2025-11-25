@@ -84,6 +84,9 @@ data class EtteroppgjoerForbehandling(
         if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
+
+        // TODO: validere her at vi kan ferdigstille uten brev?
+
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }
 

@@ -38,7 +38,9 @@ export default function PersongalleriOmstillingsstoenad() {
       {avdoedFormArray.fields.map((field, index) => (
         <Box width="20rem" key={index}>
           <TextField
-            {...register(`persongalleri.avdoed.${index}.value`, { validate: validerFnrValgfri })}
+            {...register(`persongalleri.avdoed.${index}.value`, {
+              validate: (fnr) => validerFnrValgfri(fnr ?? null),
+            })}
             key={field.id}
             label="Avdød"
             description="Oppgi fødselsnummer (dersom det er tilgjengelig)"

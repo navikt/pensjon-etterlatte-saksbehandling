@@ -259,14 +259,14 @@ class EtteroppgjoerForbehandlingBrevService(
                             "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
                 )
             }
-        }
 
-        val response = brevKlient.kanFerdigstilleBrev(brev.id, sakId, brukerTokenInfo)
-        if (!response.kanFerdigstille) {
-            throw UgyldigForespoerselException(
-                code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                detail = response.aarsak ?: "Ukjent feil",
-            )
+            val response = brevKlient.kanFerdigstilleBrev(brev.id, sakId, brukerTokenInfo)
+            if (!response.kanFerdigstille) {
+                throw UgyldigForespoerselException(
+                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                    detail = response.aarsak ?: "Ukjent feil",
+                )
+            }
         }
     }
 

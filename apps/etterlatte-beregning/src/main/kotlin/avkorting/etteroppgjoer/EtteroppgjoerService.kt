@@ -11,7 +11,7 @@ import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
-import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -156,7 +156,7 @@ class EtteroppgjoerService(
 
         return when (
             val beregningResultat =
-                beregneEtteroppgjoerRegel.eksekver(KonstantGrunnlag(differanseGrunnlag), regelPeriode)
+                beregneEtteroppgjoerRegelMedDoedsfall.eksekver(KonstantGrunnlag(differanseGrunnlag), regelPeriode)
         ) {
             is RegelkjoeringResultat.Suksess -> {
                 val data =
@@ -177,7 +177,7 @@ class EtteroppgjoerService(
                     regelResultat = beregningResultat.toJsonNode(),
                     kilde =
                         Grunnlagsopplysning.RegelKilde(
-                            navn = beregneEtteroppgjoerRegel.regelReferanse.id,
+                            navn = beregneEtteroppgjoerRegelMedDoedsfall.regelReferanse.id,
                             ts = data.tidspunkt,
                             versjon = beregningResultat.reglerVersjon,
                         ),

@@ -2,6 +2,7 @@ import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerRedu
 import { BodyShort, Box, HStack, Label, VStack } from '@navikt/ds-react'
 import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
 import { NOK } from '~utils/formatering/formatering'
+import { JaNei } from '~shared/types/ISvar'
 
 export const ResultatAvForbehandling = () => {
   const { beregnetEtteroppgjoerResultat, forbehandling } = useEtteroppgjoerForbehandling()
@@ -27,7 +28,12 @@ export const ResultatAvForbehandling = () => {
     }
 
     if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING) {
-      if (differanse > 0) {
+      if (
+        forbehandling.opphoerSkyldesDoedsfall === JaNei.JA &&
+        forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.NEI
+      ) {
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${forbehandling.aar}. Siden opphøret er oppgitt å skyldes dødsfall etter etteroppgjørsåret, kreves beløpet ikke tilbake.`
+      } else if (differanse > 0) {
         return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${forbehandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
       }
 

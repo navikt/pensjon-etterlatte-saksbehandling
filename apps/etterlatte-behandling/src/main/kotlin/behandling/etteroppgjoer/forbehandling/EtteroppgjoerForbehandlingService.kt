@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -105,6 +106,7 @@ class EtteroppgjoerForbehandlingService(
         ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
 
         // TODO: bør nok validere at brev er generert i tilfeller vi skal ferdigstille med brev
+
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
             etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
@@ -116,19 +118,19 @@ class EtteroppgjoerForbehandlingService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val detaljertBehandling = hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
+        val forbehandling = hentForbehandling(forbehandlingId)
 
-        if (!kanFerdigstilleForbehandlingUtenBrev(detaljertBehandling)) {
+        if (!kanFerdigstilleForbehandlingUtenBrev(forbehandling)) {
             throw UgyldigForespoerselException(
                 "ETTEROPPGJOER_RESULTAT_TRENGER_BREV",
                 "Etteroppgjøret kan kun ferdigstilles uten utsendt brev dersom resultatet er 'ingen utbetaling' " +
                     "og 'ingen endring' eller 'dødsfall i etteroppgjørsåret'. Resultat for etteroppgjøret i denne saken " +
-                    "${detaljertBehandling.forbehandling.sak.id} for år ${detaljertBehandling.forbehandling.aar} er " +
-                    "${detaljertBehandling.beregnetEtteroppgjoerResultat?.resultatType}",
+                    "${forbehandling.sak.id} for år ${forbehandling.aar} er " +
+                    "${forbehandling.etteroppgjoerResultatType!!}",
             )
         }
 
-        return ferdigstillForbehandling(detaljertBehandling.forbehandling, brukerTokenInfo)
+        return ferdigstillForbehandling(forbehandling, brukerTokenInfo)
     }
 
     fun avbrytForbehandling(
@@ -768,16 +770,16 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun kanFerdigstilleForbehandlingUtenBrev(dto: DetaljertForbehandlingDto): Boolean {
-        val etteroppgjoerResultat = dto.beregnetEtteroppgjoerResultat?.resultatType
+    private fun kanFerdigstilleForbehandlingUtenBrev(forbehandling: EtteroppgjoerForbehandling): Boolean {
+        val etteroppgjoerResultat = forbehandling.etteroppgjoerResultatType
 
         val ingenEndringUtenUtbetaling =
             etteroppgjoerResultat == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
 
         val doedsfallMedIngenEndring =
             etteroppgjoerResultat == EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING &&
-                dto.forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
-                dto.forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+                forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
+                forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
 
         return ingenEndringUtenUtbetaling || doedsfallMedIngenEndring
     }

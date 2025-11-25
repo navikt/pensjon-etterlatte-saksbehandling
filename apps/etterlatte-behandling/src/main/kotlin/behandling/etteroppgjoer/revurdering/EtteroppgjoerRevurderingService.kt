@@ -4,10 +4,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -47,46 +47,22 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val sisteFerdigstilteForbehandlingId =
+        val sisteFerdigstilteForbehandling =
             inTransaction {
                 etteroppgjoerForbehandlingService
-                    .hentSisteFerdigstillteForbehandling(
-                        sakId = sakId,
-                    ).id
+                    .hentSisteFerdigstillteForbehandling(sakId)
             }
+
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
-
-                val sisteFerdigstilteForbehandling =
-                    etteroppgjoerForbehandlingService.hentSisteFerdigstillteForbehandling(
-                        sakId = sakId,
-                    )
-
                 val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
-                if (!etteroppgjoer.kanOppretteRevurdering()) {
-                    throw InternfeilException(
-                        "Kan ikke opprette etteroppgjoer revurdering for sak $sakId på grunn av feil status ${etteroppgjoer.status}",
-                    )
-                }
 
-                if (etteroppgjoer.sisteFerdigstilteForbehandling != sisteFerdigstilteForbehandling.id) {
-                    throw InternfeilException(
-                        "Fant ingen aktive etteroppgjoer for sak $sakId og forbehandling $sisteFerdigstilteForbehandlingId",
-                    )
-                }
+                kanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandling.id)
 
-                val sisteIverksatteIkkeOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
-
-                val sisteIverksatteBehandling =
-                    behandlingService.hentBehandling(sisteIverksatteIkkeOpphoer.behandlingId)
-                        ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteIkkeOpphoer.behandlingId}")
-
-                val nyForbehandling =
-                    etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(sisteFerdigstilteForbehandlingId, sakId)
-
+                val sisteIverksatteBehandling = hentSisteIverksatteBehandling(sakId, brukerTokenInfo)
                 val revurdering =
-                    opprettRevurdering(sakId, sisteIverksatteBehandling, opprinnelse, nyForbehandling, brukerTokenInfo)
+                    opprettRevurdering(sakId, sisteIverksatteBehandling, sisteFerdigstilteForbehandling.id, opprinnelse, brukerTokenInfo)
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = revurdering.id,
@@ -96,7 +72,7 @@ class EtteroppgjoerRevurderingService(
 
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                     sakId,
-                    nyForbehandling.aar,
+                    sisteFerdigstilteForbehandling.aar,
                     EtteroppgjoerStatus.UNDER_REVURDERING,
                 )
 
@@ -123,7 +99,7 @@ class EtteroppgjoerRevurderingService(
 
         return inTransaction {
             kopierFaktiskInntekt(
-                fraForbehandlingId = sisteFerdigstilteForbehandlingId,
+                fraForbehandlingId = sisteFerdigstilteForbehandling.id,
                 tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
                 brukerTokenInfo = brukerTokenInfo,
             )
@@ -134,10 +110,12 @@ class EtteroppgjoerRevurderingService(
     private fun opprettRevurdering(
         sakId: SakId,
         sisteIverksatteBehandling: Behandling,
+        sisteFerdigstilteForbehandlingId: UUID,
         opprinnelse: BehandlingOpprinnelse,
-        forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
+        val forbehandling = etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(sisteFerdigstilteForbehandlingId, sakId)
+
         val persongalleri =
             grunnlagService.hentPersongalleri(sakId)
                 ?: throw InternfeilException("Fant ikke persongalleri for sak $sakId")
@@ -215,5 +193,33 @@ class EtteroppgjoerRevurderingService(
                 brukerTokenInfo = brukerTokenInfo,
             )
         }
+    }
+
+    private fun kanOppretteEtteroppgjoerRevurdering(
+        etteroppgjoer: Etteroppgjoer,
+        forventetForbehandlingId: UUID,
+    ) {
+        if (!etteroppgjoer.kanOppretteRevurdering()) {
+            throw InternfeilException(
+                "Kan ikke opprette etteroppgjoer revurdering for sak ${etteroppgjoer.sakId} " +
+                    "på grunn av feil status ${etteroppgjoer.status}",
+            )
+        }
+
+        if (etteroppgjoer.sisteFerdigstilteForbehandling != forventetForbehandlingId) {
+            throw InternfeilException(
+                "Fant ingen aktive etteroppgjoer for sak ${etteroppgjoer.sakId} og forbehandling $forventetForbehandlingId",
+            )
+        }
+    }
+
+    private fun hentSisteIverksatteBehandling(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling {
+        val sisteIverksatteVedtak = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
+
+        return behandlingService.hentBehandling(sisteIverksatteVedtak.behandlingId)
+            ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteVedtak.behandlingId}")
     }
 }

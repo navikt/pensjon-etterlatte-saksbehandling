@@ -37,7 +37,7 @@ data class EtteroppgjoerForbehandling(
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
     val harVedtakAvTypeOpphoer: Boolean? = null,
     val opphoerSkyldesDoedsfall: JaNei?,
-    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?
+    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
 ) {
     companion object {
         fun opprett(
@@ -61,7 +61,7 @@ data class EtteroppgjoerForbehandling(
             varselbrevSendt = null,
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             opphoerSkyldesDoedsfall = null,
-            opphoerSkyldesDoedsfallIEtteroppgjoersaar = null
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
         )
     }
 
@@ -84,6 +84,9 @@ data class EtteroppgjoerForbehandling(
         if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
+
+        // TODO: validere her at vi kan ferdigstille uten brev?
+
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }
 
@@ -157,8 +160,17 @@ data class EtteroppgjoerForbehandling(
                 },
         )
 
-    fun oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall: JaNei, opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?): EtteroppgjoerForbehandling =
-        copy(opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall, opphoerSkyldesDoedsfallIEtteroppgjoersaar = opphoerSkyldesDoedsfallIEtteroppgjoersaar)
+    fun oppdaterOmOpphoerSkyldesDoedsfall(
+        opphoerSkyldesDoedsfall: JaNei,
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
+    ): EtteroppgjoerForbehandling =
+        copy(
+            opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall,
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar =
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar?.takeIf {
+                    opphoerSkyldesDoedsfall == JaNei.JA
+                },
+        )
 }
 
 class EtteroppgjoerForbehandlingStatusException(

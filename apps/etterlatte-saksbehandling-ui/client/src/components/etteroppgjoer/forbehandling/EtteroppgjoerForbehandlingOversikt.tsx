@@ -23,6 +23,7 @@ import {
   OpphoerSkyldesDoedsfallSkjema,
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { JaNei } from '~shared/types/ISvar'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -42,6 +43,12 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
     FieldErrors<FastsettFaktiskInntektSkjema> | undefined
   >()
 
+  const doedsfallIEtteroppgjoersaaret = forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA
+
+  const ferdigstillUtenBrev =
+    beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
+    doedsfallIEtteroppgjoersaaret
+
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
       <Heading size="xlarge" level="1">
@@ -52,17 +59,28 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
 
-      {opphoerSkyldesDoedsfallErSkrudPaa && !!forbehandling.harVedtakAvTypeOpphoer && (
-        <OpphoerSkyldesDoedsfall
+      {opphoerSkyldesDoedsfallErSkrudPaa ? (
+        <>
+          {!!forbehandling.harVedtakAvTypeOpphoer && (
+            <OpphoerSkyldesDoedsfall
+              erRedigerbar={erRedigerbar}
+              setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+            />
+          )}
+
+          {!doedsfallIEtteroppgjoersaaret && (
+            <FastsettFaktiskInntekt
+              erRedigerbar={erRedigerbar}
+              setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+            />
+          )}
+        </>
+      ) : (
+        <FastsettFaktiskInntekt
           erRedigerbar={erRedigerbar}
-          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+          setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
         />
       )}
-
-      <FastsettFaktiskInntekt
-        erRedigerbar={erRedigerbar}
-        setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-      />
 
       {!!beregnetEtteroppgjoerResultat && (
         <VStack gap="4">
@@ -85,14 +103,12 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">
-          {beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ? (
+          {ferdigstillUtenBrev ? (
             <FerdigstillEtteroppgjoerForbehandlingUtenBrev />
           ) : (
-            <div>
-              <Button as={Link} to={`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`}>
-                Gå til brev
-              </Button>
-            </div>
+            <Button as={Link} to={`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`}>
+              Gå til brev
+            </Button>
           )}
         </HStack>
       </Box>

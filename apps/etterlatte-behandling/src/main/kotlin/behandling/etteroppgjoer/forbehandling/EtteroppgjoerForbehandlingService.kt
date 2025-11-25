@@ -104,6 +104,7 @@ class EtteroppgjoerForbehandlingService(
 
         ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
 
+        // TODO: bør nok validere at brev er generert i tilfeller vi skal ferdigstille med brev
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
             etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)

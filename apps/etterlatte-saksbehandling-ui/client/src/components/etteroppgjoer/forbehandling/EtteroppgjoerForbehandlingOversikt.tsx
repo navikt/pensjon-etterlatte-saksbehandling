@@ -45,6 +45,10 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
   const doedsfallIEtteroppgjoersaaret = forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA
 
+  const ferdigstillUtenBrev =
+    beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
+    doedsfallIEtteroppgjoersaaret
+
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
       <Heading size="xlarge" level="1">
@@ -99,15 +103,12 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
         <HStack width="100%" justify="center">
-          {beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
-          doedsfallIEtteroppgjoersaaret ? (
+          {ferdigstillUtenBrev ? (
             <FerdigstillEtteroppgjoerForbehandlingUtenBrev />
           ) : (
-            <div>
-              <Button as={Link} to={`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`}>
-                Gå til brev
-              </Button>
-            </div>
+            <Button as={Link} to={`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`}>
+              Gå til brev
+            </Button>
           )}
         </HStack>
       </Box>

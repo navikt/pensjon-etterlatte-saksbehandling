@@ -12,21 +12,19 @@ import { JaNei } from '~shared/types/ISvar'
 export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
   const { forbehandling } = useEtteroppgjoerForbehandling()
   const [modalOpen, setModalOpen] = useState(false)
-  const [
-    ferdigstillEtteroppgjoerForbehandlingResult,
-    ferdigstillEtteroppgjoerForbehandlingRequest,
-    resetFerdigstillEtteroppgjoerForbehandling,
-  ] = useApiCall(ferdigstillEtteroppgjoerForbehandlingUtenBrev)
+  const [ferdigstillForbehandlingUtenBrevResult, ferdigstillForbehandlingUtenBrevRequest, resetForbehandlingUtenBrev] =
+    useApiCall(ferdigstillEtteroppgjoerForbehandlingUtenBrev)
+
   const dispatch = useAppDispatch()
-  const redigerbar = forbehandling && kanRedigereEtteroppgjoerForbehandling(forbehandling.status)
+  const erRedigerbar = forbehandling && kanRedigereEtteroppgjoerForbehandling(forbehandling.status)
 
   function avbryt() {
     setModalOpen(false)
-    resetFerdigstillEtteroppgjoerForbehandling()
+    resetForbehandlingUtenBrev()
   }
 
   function ferdigstillForbehandling() {
-    ferdigstillEtteroppgjoerForbehandlingRequest({ forbehandlingId: forbehandling.id }, (etteroppgjoer) => {
+    ferdigstillForbehandlingUtenBrevRequest({ forbehandlingId: forbehandling.id }, (etteroppgjoer) => {
       dispatch(updateEtteroppgjoerForbehandling(etteroppgjoer))
     })
   }
@@ -36,7 +34,7 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
   return (
     <>
       <div>
-        {redigerbar ? (
+        {erRedigerbar ? (
           <Button onClick={() => setModalOpen(true)}>Ferdigstill etteroppgjør</Button>
         ) : (
           <PersonButtonLink fnr={forbehandling?.sak?.ident}>Tilbake til saksoversikten</PersonButtonLink>
@@ -55,7 +53,7 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
                 etteroppgjøret ferdigstilles uten brev.
               </BodyLong>
             )}
-            {mapResult(ferdigstillEtteroppgjoerForbehandlingResult, {
+            {mapResult(ferdigstillForbehandlingUtenBrevResult, {
               success: () => <Alert variant="success">Etteroppgjøret er ferdigstilt uten varselbrev.</Alert>,
               error: (error) => (
                 <Alert variant="error">
@@ -66,18 +64,14 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
           </VStack>
         </Modal.Body>
         <Modal.Footer>
-          {isSuccess(ferdigstillEtteroppgjoerForbehandlingResult) ? (
+          {isSuccess(ferdigstillForbehandlingUtenBrevResult) ? (
             <PersonButtonLink fnr={forbehandling?.sak?.ident}>Tilbake til saksoversikten</PersonButtonLink>
           ) : (
-            <Button onClick={ferdigstillForbehandling} loading={isPending(ferdigstillEtteroppgjoerForbehandlingResult)}>
+            <Button onClick={ferdigstillForbehandling} loading={isPending(ferdigstillForbehandlingUtenBrevResult)}>
               Ferdigstill
             </Button>
           )}
-          <Button
-            onClick={avbryt}
-            variant="secondary"
-            disabled={isPending(ferdigstillEtteroppgjoerForbehandlingResult)}
-          >
+          <Button onClick={avbryt} variant="secondary" disabled={isPending(ferdigstillForbehandlingUtenBrevResult)}>
             Avbryt
           </Button>
         </Modal.Footer>

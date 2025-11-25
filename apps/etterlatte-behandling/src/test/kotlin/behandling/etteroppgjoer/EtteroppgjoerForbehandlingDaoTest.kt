@@ -127,7 +127,7 @@ class EtteroppgjoerForbehandlingDaoTest(
     }
 
     @Test
-    fun `skal oppdatere svar fra bruker`() {
+    fun `skal oppdatere forbehandling med mottatt svar fra bruker`() {
         val forbehandlingId = UUID.randomUUID()
         val forbehandling = opprettForbehandling(forbehandlingId)
         forbehandling
@@ -141,6 +141,41 @@ class EtteroppgjoerForbehandlingDaoTest(
             this?.harMottattNyInformasjon shouldBe JaNei.JA
             this?.endringErTilUgunstForBruker shouldBe JaNei.JA
             this?.beskrivelseAvUgunst shouldBe "beskrivelse"
+        }
+
+        // skal tilbakestille svar hvis mottat ny informasjon endres til nei
+        forbehandling
+            .oppdaterBrukerHarSvart(JaNei.NEI, null, null)
+            .also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.harMottattNyInformasjon shouldBe JaNei.NEI
+            this?.endringErTilUgunstForBruker shouldBe null
+            this?.beskrivelseAvUgunst shouldBe null
+        }
+    }
+
+    @Test
+    fun `skal oppdatere forbehandling med opphoer skyldes doedsfall og i etteroppgjoersAar`() {
+        val forbehandlingId = UUID.randomUUID()
+        val forbehandling = opprettForbehandling(forbehandlingId)
+        forbehandling
+            .oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall = JaNei.JA, opphoerSkyldesDoedsfallIEtteroppgjoersaar = JaNei.JA)
+            .also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.opphoerSkyldesDoedsfall shouldBe JaNei.JA
+            this?.opphoerSkyldesDoedsfallIEtteroppgjoersaar shouldBe JaNei.JA
+        }
+
+        // skal tilbakestille svar hvis opphoer skyldes doedsfall endres til nei
+        forbehandling
+            .oppdaterOmOpphoerSkyldesDoedsfall(JaNei.NEI, null)
+            .also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.opphoerSkyldesDoedsfall shouldBe JaNei.NEI
+            this?.opphoerSkyldesDoedsfallIEtteroppgjoersaar shouldBe null
         }
     }
 

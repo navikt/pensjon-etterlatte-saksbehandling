@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgang
@@ -88,7 +87,14 @@ class OppdaterTilgangService(
         grunnlag: Grunnlag?,
     ) {
         logger.info("Håndterer tilganger for sakid $sakId")
-        val sak = sakLesDao.hentSak(sakId) ?: throw PersonManglerSak()
+        val sak = sakLesDao.hentSak(sakId)
+        if (sak == null) {
+            logger.warn(
+                "Fant ikke sak $sakId som  skulle oppdatert tilgang. Det ligger muligens noe junky data i" +
+                    " grunnlagstabellen knyttet til en sak som aldri ble opprettet ferdig.",
+            )
+            return
+        }
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
         val identerMedGradering =

@@ -35,7 +35,7 @@ klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.9.24" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.1.0" }
 
-pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.5" }
+pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.6" }
 
 ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-version" }
 ktor-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }

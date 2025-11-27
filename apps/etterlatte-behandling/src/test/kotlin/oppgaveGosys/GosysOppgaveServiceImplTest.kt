@@ -21,11 +21,13 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.Saksbehandler
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -51,7 +53,7 @@ class GosysOppgaveServiceImplTest {
     private val saksbehandlerService =
         mockk<SaksbehandlerService> {
             every { hentKomplettSaksbehandler(sbident) } returns
-                no.nav.etterlatte.saksbehandler.Saksbehandler(
+                Saksbehandler(
                     sbident,
                     "Ola Nordmann",
                     listOf(Enheter.PORSGRUNN.enhetNr),
@@ -319,6 +321,11 @@ class GosysOppgaveServiceImplTest {
         val sakId = randomSakId()
         val gosysOppgave = mockGosysOppgave("EYO", "JFR", Random.nextLong().toString())
         val brukerTokenInfo = simpleSaksbehandler("Z123456")
+        val request =
+            FlyttOppgavetilGjennyRequest(
+                sakid = sakId.toString().toLong(),
+                enhetsnr = "9999",
+            )
 
         coEvery { gosysOppgaveKlient.hentOppgave(any(), any()) } returns gosysOppgave
         coEvery { gosysOppgaveKlient.feilregistrer(any(), any(), any()) } returns gosysOppgave
@@ -327,7 +334,7 @@ class GosysOppgaveServiceImplTest {
         } returns mockk()
 
         runBlocking {
-            service.flyttTilGjenny(gosysOppgave.id, sakId, brukerTokenInfo)
+            service.flyttTilGjenny(gosysOppgave.id, request, brukerTokenInfo)
         }
 
         verify(exactly = 1) {
@@ -350,6 +357,7 @@ class GosysOppgaveServiceImplTest {
                         versjon = gosysOppgave.versjon.toString(),
                         status = "FEILREGISTRERT",
                         beskrivelse = "Oppgave overført til Gjenny",
+                        endretAvEnhetsnr = request.enhetsnr,
                     ),
                 brukerTokenInfo = brukerTokenInfo,
             )

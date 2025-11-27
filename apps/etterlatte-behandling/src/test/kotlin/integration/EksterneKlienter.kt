@@ -218,10 +218,8 @@ class BeregningKlientTest :
 
     override suspend fun hentBehandlingerMedAarsoppgjoerForSak(
         sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo
-    ): List<UUID> {
-        return emptyList()
-    }
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<UUID> = emptyList()
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {
@@ -575,6 +573,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         id: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
+        enhetsnr: String,
     ): GosysApiOppgave = gosysApiOppgave()
 
     override suspend fun feilregistrer(

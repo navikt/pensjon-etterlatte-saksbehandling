@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import org.slf4j.LoggerFactory
@@ -53,7 +54,7 @@ interface GosysOppgaveService {
 
     suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: SakId,
+        request: FlyttOppgavetilGjennyRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern
 
@@ -73,8 +74,8 @@ interface GosysOppgaveService {
 
     suspend fun ferdigstill(
         oppgaveId: String,
-        oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
+        request: FerdigstillGosysOppgaveRequest,
     ): GosysOppgave
 
     suspend fun feilregistrer(
@@ -234,7 +235,7 @@ class GosysOppgaveServiceImpl(
 
     override suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: SakId,
+        request: FlyttOppgavetilGjennyRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern {
         logger.info("Starter flytting av gosys-oppgave (id=$oppgaveId) til Gjenny")
@@ -257,7 +258,7 @@ class GosysOppgaveServiceImpl(
             inTransaction {
                 oppgaveService.opprettOppgave(
                     referanse = gosysOppgave.journalpostId!!,
-                    sakId = sakId,
+                    sakId = SakId(request.sakid),
                     kilde = OppgaveKilde.SAKSBEHANDLER,
                     type = OppgaveType.JOURNALFOERING,
                     merknad = gosysOppgave.beskrivelse,
@@ -272,6 +273,7 @@ class GosysOppgaveServiceImpl(
                 FeilregistrerOppgaveRequest(
                     beskrivelse = "Oppgave overført til Gjenny",
                     versjon = gosysOppgave.versjon,
+                    enhetsnr = request.enhetsnr
                 ),
                 brukerTokenInfo,
             )
@@ -304,11 +306,11 @@ class GosysOppgaveServiceImpl(
 
     override suspend fun ferdigstill(
         oppgaveId: String,
-        oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
+        request: FerdigstillGosysOppgaveRequest,
     ): GosysOppgave =
         gosysOppgaveKlient
-            .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
+            .ferdigstill(oppgaveId, request.versjon, brukerTokenInfo, request.enhetsnr)
             .run { inTransaction { tilGosysOppgave() } }
 
     override suspend fun feilregistrer(
@@ -321,6 +323,7 @@ class GosysOppgaveServiceImpl(
                 versjon = request.versjon.toString(),
                 status = "FEILREGISTRERT",
                 beskrivelse = request.beskrivelse,
+                endretAvEnhetsnr = request.enhetsnr,
             )
 
         return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).id

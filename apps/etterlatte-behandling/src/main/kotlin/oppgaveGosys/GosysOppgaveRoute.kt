@@ -1,7 +1,6 @@
 package no.nav.etterlatte.oppgaveGosys
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -57,11 +56,10 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
             post("/flytt-til-gjenny") {
                 kunSaksbehandler {
+                    val flyttTilGjennyRequest = call.receive<FlyttOppgavetilGjennyRequest>()
                     val sakId =
-                        call.request.queryParameters["sakid"]!!
-                            .toLong()
-                            .let { SakId(it) }
-                    val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
+                        flyttTilGjennyRequest.sakid
+                    val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), flyttTilGjennyRequest, brukerTokenInfo)
                     call.respond(nyOppgave)
                 }
             }
@@ -96,8 +94,13 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
             post("ferdigstill") {
                 kunSaksbehandler {
-                    val versjon = call.request.queryParameters["versjon"]!!.toLong()
-                    call.respond(gosysService.ferdigstill(gosysOppgaveId, versjon, brukerTokenInfo))
+                    val ferdigstillGosysOppgaveRequest = call.receive<FerdigstillGosysOppgaveRequest>()
+                    //val versjon = call.request.queryParameters["versjon"]!!.toLong()
+                    call.respond(gosysService.ferdigstill(
+                        oppgaveId = gosysOppgaveId,
+                        brukerTokenInfo = brukerTokenInfo,
+                        request = ferdigstillGosysOppgaveRequest
+                    ))
                 }
             }
 
@@ -115,8 +118,19 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 data class FeilregistrerOppgaveRequest(
     val beskrivelse: String,
     val versjon: Long,
+    val enhetsnr: String
 )
 
 internal data class GosysOppgaveversjon(
     val versjon: Long,
+)
+
+data class FerdigstillGosysOppgaveRequest(
+    val versjon: Long,
+    val enhetsnr: String,
+)
+
+data class FlyttOppgavetilGjennyRequest(
+    val sakid: Long,
+    val enhetsnr: String,
 )

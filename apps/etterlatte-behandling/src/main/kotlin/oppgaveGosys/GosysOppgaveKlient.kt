@@ -78,6 +78,7 @@ interface GosysOppgaveKlient {
         oppgaveVersjon: Long,
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
+        // TODO
     ): GosysApiOppgave
 
     suspend fun endreFrist(
@@ -85,6 +86,7 @@ interface GosysOppgaveKlient {
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
+        // TODO
     ): GosysApiOppgave
 
     suspend fun hentOppgave(
@@ -96,12 +98,14 @@ interface GosysOppgaveKlient {
         id: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
+        enhetsnr: String,
     ): GosysApiOppgave
 
     suspend fun feilregistrer(
         id: String,
         request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
+        // TODO
     ): GosysApiOppgave
 }
 
@@ -213,13 +217,14 @@ class GosysOppgaveKlientImpl(
         id: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
+        enhetsnr: String,
     ): GosysApiOppgave {
         logger.info("Ferdigstiller Gosys-oppgave med id=$id")
 
         return patchOppgave(
             id,
             brukerTokenInfo,
-            body = EndreStatusRequest(oppgaveVersjon.toString(), "FERDIGSTILT"),
+            body = EndreStatusRequest(oppgaveVersjon.toString(), "FERDIGSTILT", null, enhetsnr),
         )
     }
 
@@ -307,6 +312,7 @@ data class EndreStatusRequest(
     val versjon: String,
     val status: String,
     val beskrivelse: String? = null,
+    val endretAvEnhetsnr: String,
 )
 
 class GosysInternalFeil(

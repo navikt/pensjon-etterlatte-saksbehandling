@@ -1,7 +1,6 @@
 package no.nav.etterlatte.oppgaveGosys
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -9,9 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.Enhetsnummer
-import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
-import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
-import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
@@ -57,37 +54,19 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
             post("/flytt-til-gjenny") {
                 kunSaksbehandler {
-                    val sakId =
-                        call.request.queryParameters["sakid"]!!
-                            .toLong()
-                            .let { SakId(it) }
-                    val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
+                    val flyttTilGjennyRequest = call.receive<FlyttOppgavetilGjennyRequest>()
+                    val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), flyttTilGjennyRequest, brukerTokenInfo)
                     call.respond(nyOppgave)
                 }
             }
 
             post("tildel-saksbehandler") {
                 kunSaksbehandler {
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
+                    val request = call.receive<SaksbehandlerEndringGosysRequest>()
                     val oppdatertVersjon =
                         gosysService.tildelOppgaveTilSaksbehandler(
                             gosysOppgaveId,
-                            saksbehandlerEndringDto.versjon,
-                            saksbehandlerEndringDto.saksbehandler,
-                            brukerTokenInfo,
-                        )
-                    call.respond(GosysOppgaveversjon(oppdatertVersjon))
-                }
-            }
-
-            post("endre-frist") {
-                kunSaksbehandler {
-                    val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
-                    val oppdatertVersjon =
-                        gosysService.endreFrist(
-                            gosysOppgaveId,
-                            redigerFristRequest.versjon,
-                            redigerFristRequest.frist,
+                            request,
                             brukerTokenInfo,
                         )
                     call.respond(GosysOppgaveversjon(oppdatertVersjon))
@@ -96,16 +75,14 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
             post("ferdigstill") {
                 kunSaksbehandler {
-                    val versjon = call.request.queryParameters["versjon"]!!.toLong()
-                    call.respond(gosysService.ferdigstill(gosysOppgaveId, versjon, brukerTokenInfo))
-                }
-            }
-
-            post("feilregistrer") {
-                kunSaksbehandler {
-                    val request = call.receive<FeilregistrerOppgaveRequest>()
-
-                    call.respond(gosysService.feilregistrer(gosysOppgaveId, request, brukerTokenInfo))
+                    val ferdigstillGosysOppgaveRequest = call.receive<FerdigstillGosysOppgaveRequest>()
+                    call.respond(
+                        gosysService.ferdigstill(
+                            oppgaveId = gosysOppgaveId,
+                            brukerTokenInfo = brukerTokenInfo,
+                            request = ferdigstillGosysOppgaveRequest,
+                        ),
+                    )
                 }
             }
         }
@@ -115,8 +92,31 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 data class FeilregistrerOppgaveRequest(
     val beskrivelse: String,
     val versjon: Long,
+    val enhetsnr: String,
 )
 
 internal data class GosysOppgaveversjon(
     val versjon: Long,
+)
+
+data class FerdigstillGosysOppgaveRequest(
+    val versjon: Long,
+    val enhetsnr: String,
+)
+
+data class FlyttOppgavetilGjennyRequest(
+    val sakid: Long,
+    val enhetsnr: String,
+)
+
+data class RedigerFristGosysRequest(
+    val frist: Tidspunkt,
+    val versjon: Long,
+    val enhetsnr: String,
+)
+
+data class SaksbehandlerEndringGosysRequest(
+    val saksbehandler: String,
+    val versjon: Long,
+    val enhetsnr: String,
 )

@@ -38,7 +38,7 @@ export const OverfoerOppgaveTilGjenny = ({
     hentSak({ fnr: oppgave.bruker.ident, type: sakType!!, opprettHvisIkkeFinnes: skalOppretteSak }, (sak) => {
       if (!sak) return
 
-      flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sak.id })
+      flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sak.id, enhetsnr: sak.enhet })
     })
   }
 

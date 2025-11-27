@@ -363,6 +363,13 @@ class StoenadRepositoryTest(
                 oppfyllerAktivitet = true,
                 aktivitet = "100_PROSENT_ARBEIDSSOEKER",
                 sanksjon = null,
+                etteroppgjoerAar = null,
+                etteroppgjoerUtbetalt = null,
+                etteroppgjoerNyStoenad = null,
+                etteroppgjoerDifferanse = null,
+                etteroppgjoerResultat = null,
+                etterbetaltBeloep = null,
+                tilbakekrevdBeloep = null,
             )
 
         assertDoesNotThrow {

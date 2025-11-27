@@ -2,9 +2,11 @@ package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad
 import no.nav.etterlatte.statistikk.service.AktivitetForMaaned
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,6 +44,13 @@ data class MaanedStoenadRad(
     val oppfyllerAktivitet: Boolean?,
     val aktivitet: String?,
     val sanksjon: String?,
+    val etteroppgjoerAar: Int?,
+    val etteroppgjoerUtbetalt: Long?,
+    val etteroppgjoerNyStoenad: Long?,
+    val etteroppgjoerDifferanse: Long?,
+    val etteroppgjoerResultat: String?,
+    val etterbetaltBeloep: Long?,
+    val tilbakekrevdBeloep: Long?,
 )
 
 private const val EN_G_PER_MND = 10336
@@ -50,6 +59,7 @@ class MaanedStatistikk(
     val maaned: YearMonth,
     stoenadRader: List<StoenadRad>,
     aktiviteter: Map<SakId, AktivitetForMaaned>,
+    etteroppgjoer: Map<SakId, EtteroppgjoerRad>,
 ) {
     val rader: List<MaanedStoenadRad>
 
@@ -127,45 +137,74 @@ class MaanedStatistikk(
                         }
                     }
 
-                MaanedStoenadRad(
-                    id = -1,
-                    fnrSoeker = sisteVedtak.fnrSoeker,
-                    fnrForeldre = sisteVedtak.fnrForeldre,
-                    fnrSoesken = aktuellBeregning?.soeskenFlokk ?: sisteVedtak.fnrSoesken,
-                    anvendtTrygdetid = aktuellBeregning?.trygdetid?.toString() ?: sisteVedtak.anvendtTrygdetid,
-                    nettoYtelse = nettoYtelse.toString(),
-                    avkortingsbeloep = avkortingsbeloep.toString(),
-                    aarsinntekt = aarsinntekt.toString(),
-                    beregningType = sisteVedtak.beregningType,
-                    anvendtSats =
-                        aktuellBeregning?.anvendtSats(
-                            beregningstype = sisteVedtak.beregning.type,
-                            // TODO: bytt ut med felt fra beregning når flere avdøde kommer inn
-                            erForeldreloes = sisteVedtak.fnrForeldre.size > 1,
-                            erOverstyrt = sisteVedtak.beregning.overstyrtBeregning == true,
-                        ) ?: sisteVedtak.anvendtSats,
-                    behandlingId = sisteVedtak.behandlingId,
-                    sakId = sisteVedtak.sakId,
-                    sakNummer = sisteVedtak.sakNummer,
-                    tekniskTid = sisteVedtak.tekniskTid,
-                    sakYtelse = sisteVedtak.sakYtelse,
-                    versjon = sisteVedtak.versjon,
-                    saksbehandler = sisteVedtak.saksbehandler,
-                    attestant = sisteVedtak.attestant,
-                    vedtakLoependeFom = sisteVedtak.vedtakLoependeFom,
-                    vedtakLoependeTom = sisteVedtak.opphoerFom?.minusMonths(1)?.atEndOfMonth(),
-                    statistikkMaaned = maaned,
-                    sakUtland = sisteVedtak.sakUtland,
-                    virkningstidspunkt = sisteVedtak.virkningstidspunkt,
-                    utbetalingsdato = sisteVedtak.utbetalingsdato,
-                    kilde = sisteVedtak.vedtaksloesning,
-                    pesysId = sisteVedtak.pesysId,
-                    sakYtelsesgruppe = sakYtelsesgruppe,
-                    harAktivitetsplikt = aktivitetForMaaned?.harAktivitetsplikt?.name,
-                    oppfyllerAktivitet = aktivitetForMaaned?.oppfyllerAktivitet,
-                    aktivitet = aktivitetForMaaned?.aktivitet,
-                    sanksjon = sanksjon?.name,
-                )
+                val rad =
+                    MaanedStoenadRad(
+                        id = -1,
+                        fnrSoeker = sisteVedtak.fnrSoeker,
+                        fnrForeldre = sisteVedtak.fnrForeldre,
+                        fnrSoesken = aktuellBeregning?.soeskenFlokk ?: sisteVedtak.fnrSoesken,
+                        anvendtTrygdetid = aktuellBeregning?.trygdetid?.toString() ?: sisteVedtak.anvendtTrygdetid,
+                        nettoYtelse = nettoYtelse.toString(),
+                        avkortingsbeloep = avkortingsbeloep.toString(),
+                        aarsinntekt = aarsinntekt.toString(),
+                        beregningType = sisteVedtak.beregningType,
+                        anvendtSats =
+                            aktuellBeregning?.anvendtSats(
+                                beregningstype = sisteVedtak.beregning.type,
+                                erForeldreloes = sisteVedtak.fnrForeldre.size > 1,
+                                erOverstyrt = sisteVedtak.beregning.overstyrtBeregning == true,
+                            ) ?: sisteVedtak.anvendtSats,
+                        behandlingId = sisteVedtak.behandlingId,
+                        sakId = sisteVedtak.sakId,
+                        sakNummer = sisteVedtak.sakNummer,
+                        tekniskTid = sisteVedtak.tekniskTid,
+                        sakYtelse = sisteVedtak.sakYtelse,
+                        versjon = sisteVedtak.versjon,
+                        saksbehandler = sisteVedtak.saksbehandler,
+                        attestant = sisteVedtak.attestant,
+                        vedtakLoependeFom = sisteVedtak.vedtakLoependeFom,
+                        vedtakLoependeTom = sisteVedtak.opphoerFom?.minusMonths(1)?.atEndOfMonth(),
+                        statistikkMaaned = maaned,
+                        sakUtland = sisteVedtak.sakUtland,
+                        virkningstidspunkt = sisteVedtak.virkningstidspunkt,
+                        utbetalingsdato = sisteVedtak.utbetalingsdato,
+                        kilde = sisteVedtak.vedtaksloesning,
+                        pesysId = sisteVedtak.pesysId,
+                        sakYtelsesgruppe = sakYtelsesgruppe,
+                        harAktivitetsplikt = aktivitetForMaaned?.harAktivitetsplikt?.name,
+                        oppfyllerAktivitet = aktivitetForMaaned?.oppfyllerAktivitet,
+                        aktivitet = aktivitetForMaaned?.aktivitet,
+                        sanksjon = sanksjon?.name,
+                        etteroppgjoerAar = null,
+                        etteroppgjoerUtbetalt = null,
+                        etteroppgjoerNyStoenad = null,
+                        etteroppgjoerDifferanse = null,
+                        etteroppgjoerResultat = null,
+                        etterbetaltBeloep = null,
+                        tilbakekrevdBeloep = null,
+                    )
+                when (val etteroppgjoerRad = etteroppgjoer[sakId]) {
+                    null -> rad
+                    else ->
+                        rad.copy(
+                            // Sette inn de aktuelle mappingene for etteroppgjøret her
+                            etteroppgjoerAar = etteroppgjoerRad.aar,
+                            etteroppgjoerUtbetalt = etteroppgjoerRad.utbetaltStoenad,
+                            etteroppgjoerNyStoenad = etteroppgjoerRad.nyBruttoStoenad,
+                            etteroppgjoerDifferanse = etteroppgjoerRad.differanse,
+                            etteroppgjoerResultat = etteroppgjoerRad.resultatType?.name,
+                            etterbetaltBeloep =
+                                etteroppgjoerRad.differanse?.takeIf {
+                                    etteroppgjoerRad.resultatType ==
+                                        EtteroppgjoerResultatType.ETTERBETALING
+                                },
+                            tilbakekrevdBeloep =
+                                etteroppgjoerRad.differanse?.takeIf {
+                                    etteroppgjoerRad.resultatType ==
+                                        EtteroppgjoerResultatType.TILBAKEKREVING
+                                },
+                        )
+                }
             }
     }
 }

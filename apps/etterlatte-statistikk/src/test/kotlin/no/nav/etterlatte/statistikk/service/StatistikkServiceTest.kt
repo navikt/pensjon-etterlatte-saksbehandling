@@ -477,7 +477,7 @@ class StatistikkServiceTest {
                 rettsgebyrGyldigFra = null,
                 tilbakekrevingGrense = 0.1,
                 etterbetalingGrense = 2.3,
-                tilknyttetRevurdering = false
+                tilknyttetRevurdering = false,
             )
         return etteroppgjoerRad
     }
@@ -502,7 +502,7 @@ class StatistikkServiceTest {
                 aktivitetspliktService = aktivitetspliktService,
                 etteroppgjoerService = etteroppgjoerService,
             )
-        service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList(), emptyMap()))
+        service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList(), emptyMap(), emptyMap()))
         verify {
             stoenadRepository.lagreMaanedJobUtfoert(YearMonth.of(2022, 8), 0, 0)
         }
@@ -543,6 +543,7 @@ class StatistikkServiceTest {
                 statistikkMaaned,
             )
         } returns emptyMap()
+        every { etteroppgjoerService.hentRaderForMaaned(statistikkMaaned) } returns emptyMap()
 
         service.produserStoenadStatistikkForMaaned(statistikkMaaned)
 

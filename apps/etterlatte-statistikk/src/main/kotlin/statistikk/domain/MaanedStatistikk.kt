@@ -11,6 +11,7 @@ import no.nav.etterlatte.statistikk.service.AktivitetForMaaned
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.math.absoluteValue
 
 data class MaanedStoenadRad(
     val id: Long,
@@ -194,12 +195,12 @@ class MaanedStatistikk(
                             etteroppgjoerDifferanse = etteroppgjoerRad.differanse,
                             etteroppgjoerResultat = etteroppgjoerRad.resultatType?.name,
                             etterbetaltBeloep =
-                                etteroppgjoerRad.differanse?.takeIf {
+                                etteroppgjoerRad.differanse?.absoluteValue?.takeIf {
                                     etteroppgjoerRad.resultatType ==
                                         EtteroppgjoerResultatType.ETTERBETALING
                                 },
                             tilbakekrevdBeloep =
-                                etteroppgjoerRad.differanse?.takeIf {
+                                etteroppgjoerRad.differanse?.absoluteValue?.takeIf {
                                     etteroppgjoerRad.resultatType ==
                                         EtteroppgjoerResultatType.TILBAKEKREVING
                                 },

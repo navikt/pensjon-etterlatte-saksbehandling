@@ -82,7 +82,7 @@ class SafModelTest {
 
     @Test
     fun `SERDE - Saf avsendermottaker til dokarkiv avsendermottaker`() {
-        val safJson = """{"id":"id","type":"FNR","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
+        val safJson = """{"id":"id","idType":"FNR","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
 
         val safAvsenderMottaker = deserialize<SafAvsenderMottaker>(safJson)
         safAvsenderMottaker.type shouldBe AvsenderMottakerIdType.FNR
@@ -101,7 +101,7 @@ class SafModelTest {
     @ParameterizedTest
     @EnumSource(AvsenderMottakerIdType::class)
     fun `Deserialisering av avsendermottaker idtype`(type: AvsenderMottakerIdType) {
-        val safJson = """{"id":"id","type":"$type","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
+        val safJson = """{"id":"id","idType":"$type","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
         val safAvsenderMottaker = deserialize<SafAvsenderMottaker>(safJson)
 
         safAvsenderMottaker.type shouldBe type
@@ -116,7 +116,7 @@ class SafModelTest {
         ],
     )
     fun `Deserialisering av avsendermottaker idtype som er NULL eller UKJENT`(type: String) {
-        val safJson = """{"id":"id","type":"$type","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
+        val safJson = """{"id":"id","idType":"$type","navn":"Navn Navnesen","land":"Norge","erLikBruker":false}"""
         val safAvsenderMottaker = deserialize<SafAvsenderMottaker>(safJson)
 
         safAvsenderMottaker.type shouldBe null

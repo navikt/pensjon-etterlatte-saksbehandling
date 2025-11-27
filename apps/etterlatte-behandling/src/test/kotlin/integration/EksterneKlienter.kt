@@ -102,9 +102,12 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.soeker
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
+import no.nav.etterlatte.oppgaveGosys.FeilregistrerOppgaveRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
+import no.nav.etterlatte.oppgaveGosys.RedigerFristGosysRequest
+import no.nav.etterlatte.oppgaveGosys.SaksbehandlerEndringGosysRequest
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
@@ -601,15 +604,13 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
 
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        tildeles: String,
+        request: SaksbehandlerEndringGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
     override suspend fun endreFrist(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        nyFrist: LocalDate,
+        request: RedigerFristGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 }

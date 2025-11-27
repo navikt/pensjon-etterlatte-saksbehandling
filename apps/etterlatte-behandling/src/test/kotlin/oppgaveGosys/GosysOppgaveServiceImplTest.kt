@@ -1,6 +1,7 @@
 package no.nav.etterlatte.oppgaveGosys
 
 import io.kotest.matchers.collections.shouldHaveSize
+import io.ktor.client.request.request
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -300,20 +301,27 @@ class GosysOppgaveServiceImplTest {
     fun `kalle gosys-klient med riktige params`() {
         val oppgaveId = "123"
         val tildeles = "A012345"
+        val enhetsnr = "9999"
         val oppgaveVersjon = 2L
+        val request =
+            SaksbehandlerEndringGosysRequest(
+                saksbehandler = tildeles,
+                versjon = oppgaveVersjon,
+                enhetsnr = enhetsnr,
+            )
+
         coEvery {
             gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
                 oppgaveId = oppgaveId,
-                oppgaveVersjon = oppgaveVersjon,
-                tildeles = tildeles,
+                request = request,
                 brukerTokenInfo,
             )
         } returns mockGosysOppgave("EYO", "GEN")
 
         runBlocking {
-            service.tildelOppgaveTilSaksbehandler(oppgaveId = oppgaveId, oppgaveVersjon = oppgaveVersjon, tildeles, brukerTokenInfo)
+            service.tildelOppgaveTilSaksbehandler(oppgaveId, request, brukerTokenInfo)
         }
-        coVerify { gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tildeles, brukerTokenInfo) }
+        coVerify { gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, request, brukerTokenInfo) }
     }
 
     @Test

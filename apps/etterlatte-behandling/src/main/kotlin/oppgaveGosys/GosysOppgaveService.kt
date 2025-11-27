@@ -60,15 +60,7 @@ interface GosysOppgaveService {
 
     suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        tilordnes: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Long
-
-    suspend fun endreFrist(
-        oppgaveId: String,
-        oppgaveVersjon: Long,
-        nyFrist: Tidspunkt,
+        request: SaksbehandlerEndringGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long
 
@@ -273,7 +265,7 @@ class GosysOppgaveServiceImpl(
                 FeilregistrerOppgaveRequest(
                     beskrivelse = "Oppgave overført til Gjenny",
                     versjon = gosysOppgave.versjon,
-                    enhetsnr = request.enhetsnr
+                    enhetsnr = request.enhetsnr,
                 ),
                 brukerTokenInfo,
             )
@@ -285,24 +277,15 @@ class GosysOppgaveServiceImpl(
 
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        tilordnes: String,
+        request: SaksbehandlerEndringGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long =
         gosysOppgaveKlient
             .tildelOppgaveTilSaksbehandler(
                 oppgaveId,
-                oppgaveVersjon,
-                tilordnes,
+                request,
                 brukerTokenInfo,
             ).versjon
-
-    override suspend fun endreFrist(
-        oppgaveId: String,
-        oppgaveVersjon: Long,
-        nyFrist: Tidspunkt,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Long = gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo).versjon
 
     override suspend fun ferdigstill(
         oppgaveId: String,

@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.apache.kafka.common.protocol.types.Field
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -51,11 +52,13 @@ data class GosysApiOppgave(
 data class GosysEndreSaksbehandlerRequest(
     val versjon: Long,
     val tilordnetRessurs: String,
+    val endretAvEnhetsnr: String,
 )
 
 data class GosysEndreFristRequest(
     val versjon: Long,
     val fristFerdigstillelse: LocalDate,
+    val endretAvEnhetsnr: String,
 )
 
 interface GosysOppgaveKlient {
@@ -75,18 +78,14 @@ interface GosysOppgaveKlient {
 
     suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        tildeles: String,
+        request: SaksbehandlerEndringGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
-        // TODO
     ): GosysApiOppgave
 
     suspend fun endreFrist(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        nyFrist: LocalDate,
+        request: RedigerFristGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
-        // TODO
     ): GosysApiOppgave
 
     suspend fun hentOppgave(
@@ -244,31 +243,34 @@ class GosysOppgaveKlientImpl(
 
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        tildeles: String,
+        request: SaksbehandlerEndringGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
-        logger.info("Tilordner oppgave $oppgaveId til saksbehandler $tildeles")
+        logger.info("Tilordner oppgave $oppgaveId til saksbehandler ${request.saksbehandler}")
 
         return patchOppgave(
             oppgaveId,
             brukerTokenInfo,
-            body = GosysEndreSaksbehandlerRequest(oppgaveVersjon, tildeles),
+            body = GosysEndreSaksbehandlerRequest(request.versjon, request.saksbehandler, request.enhetsnr),
         )
     }
 
     override suspend fun endreFrist(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        nyFrist: LocalDate,
+        request: RedigerFristGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
-        logger.info("Endrer frist på oppgave $oppgaveId til $nyFrist")
+        logger.info("Endrer frist på oppgave $oppgaveId til ${request.frist}")
 
         return patchOppgave(
             oppgaveId,
             brukerTokenInfo,
-            body = GosysEndreFristRequest(oppgaveVersjon, nyFrist),
+            body =
+                GosysEndreFristRequest(
+                    versjon = request.versjon,
+                    fristFerdigstillelse = request.frist.toLocalDate(),
+                    endretAvEnhetsnr = request.enhetsnr,
+                ),
         )
     }
 

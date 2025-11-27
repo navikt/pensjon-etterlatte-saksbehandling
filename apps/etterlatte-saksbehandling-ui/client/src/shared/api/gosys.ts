@@ -25,18 +25,27 @@ export const hentJournalfoeringsoppgaverFraGosys = async (
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: number
   nysaksbehandler: SaksbehandlerEndringDto
+  enhetsnr: string
 }): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
+    ...args.nysaksbehandler,
+    enhetsnr: args.enhetsnr,
+  })
 }
 
-export const flyttTilGjenny = async (args: { oppgaveId: number; sakId: number }): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/flytt-til-gjenny?sakId=${args.sakId}`, {})
+export const flyttTilGjenny = async (args: {
+  oppgaveId: number
+  sakId: number
+  enhetsnr: string
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/flytt-til-gjenny`, { sakid: args.sakId, enhetsnr: args.enhetsnr })
 
 export const ferdigstilleGosysOppgave = async (args: {
   oppgaveId: number
   versjon: number
+  enhetsnr: string
 }): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill?versjon=${args.versjon}`, {})
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill`, { versjon: args.versjon, enhetsnr: args.enhetsnr })
 
 export interface OppdatertOppgaveversjonResponseDto {
   versjon: number

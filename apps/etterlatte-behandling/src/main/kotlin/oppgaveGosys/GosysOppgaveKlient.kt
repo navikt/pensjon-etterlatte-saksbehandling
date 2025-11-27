@@ -104,7 +104,6 @@ interface GosysOppgaveKlient {
         id: String,
         request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
-        // TODO
     ): GosysApiOppgave
 }
 

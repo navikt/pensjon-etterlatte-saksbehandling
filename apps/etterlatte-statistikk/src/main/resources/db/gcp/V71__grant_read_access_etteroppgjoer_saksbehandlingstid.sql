@@ -1,0 +1,1 @@
+GRANT SELECT ON etteroppgjoer_saksbehandlingstid TO bigquery_import;

@@ -69,9 +69,11 @@ export const lagreInformasjonFraBruker = async (args: {
 export const lagreOmOpphoerSkyldesDoedsfall = async (args: {
   forbehandlingId: string
   opphoerSkyldesDoedsfall: JaNei
+  opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
 }) => {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/opphoer-skyldes-doedsfall`, {
     opphoerSkyldesDoedsfall: args.opphoerSkyldesDoedsfall,
+    opphoerSkyldesDoedsfallIEtteroppgjoersaar: args.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
   })
 }
 

@@ -28,6 +28,7 @@ data class EtteroppgjoerDifferanseGrunnlag(
     val utbetaltStoenad: FaktumNode<Aarsoppgjoer>,
     val nyBruttoStoenad: FaktumNode<Aarsoppgjoer>,
     val grunnlagForEtteroppgjoer: FaktumNode<FaktiskInntekt>,
+    val harDoedsfall: FaktumNode<Boolean>,
 )
 
 val inntektIEtteroppgjoerAar: Regel<EtteroppgjoerDifferanseGrunnlag, FaktiskInntekt> =
@@ -35,6 +36,14 @@ val inntektIEtteroppgjoerAar: Regel<EtteroppgjoerDifferanseGrunnlag, FaktiskInnt
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         finnFaktum = EtteroppgjoerDifferanseGrunnlag::grunnlagForEtteroppgjoer,
+        finnFelt = { it },
+    )
+
+val harDoedsfall: Regel<EtteroppgjoerDifferanseGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        finnFaktum = EtteroppgjoerDifferanseGrunnlag::harDoedsfall,
         finnFelt = { it },
     )
 
@@ -187,7 +196,28 @@ val beregneEtteroppgjoerRegel =
             grense = grenser,
             harIngenInntekt = ingenInntekt,
             differanse = differanse,
+            opprinneligResultatType = null,
         )
+    }
+
+val beregneEtteroppgjoerRegelMedDoedsfall =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-RESULTAT-MED-DOEDSFALL"),
+    ) benytter beregneEtteroppgjoerRegel og harDoedsfall med { resultat, doedsfall ->
+
+        if (doedsfall) {
+            val overstyrtResultat =
+                when (resultat.resultatType) {
+                    EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING
+                    else -> resultat.resultatType
+                }
+
+            resultat.copy(resultatType = overstyrtResultat, opprinneligResultatType = resultat.resultatType)
+        } else {
+            resultat
+        }
     }
 
 data class EtteroppgjoerDifferanse(
@@ -198,6 +228,7 @@ data class EtteroppgjoerDifferanse(
 
 data class EtteroppgjoerRegelResultat(
     val resultatType: EtteroppgjoerResultatType,
+    val opprinneligResultatType: EtteroppgjoerResultatType?,
     val grense: EtteroppgjoerGrense,
     val harIngenInntekt: Boolean,
     val differanse: EtteroppgjoerDifferanse,

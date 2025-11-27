@@ -99,8 +99,6 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
 
-        val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
-
         sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling)
         sjekkAtInntekterErOppdatert(forbehandling)
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
@@ -109,8 +107,8 @@ class EtteroppgjoerForbehandlingService(
 
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
-            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
             etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
+            registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
         }
     }
 
@@ -163,16 +161,6 @@ class EtteroppgjoerForbehandlingService(
                 utlandstilknytning = hentUtlandstilknytning(forbehandling),
             )
         }
-    }
-
-    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) = dao.lagreForbehandling(forbehandling)
-
-    fun lagreVarselbrevSendt(
-        forbehandlingId: UUID,
-        dato: LocalDate,
-    ) {
-        val forbehandling = hentForbehandling(forbehandlingId)
-        lagreForbehandling(forbehandling.medVarselbrevSendt(dato))
     }
 
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
@@ -433,6 +421,9 @@ class EtteroppgjoerForbehandlingService(
                 afp = request.afp,
                 utlandsinntekt = request.utlandsinntekt,
                 spesifikasjon = request.spesifikasjon,
+                harDoedsfall =
+                    forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
+                        forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI,
             )
 
         val beregnetEtteroppgjoerResultat =
@@ -485,13 +476,16 @@ class EtteroppgjoerForbehandlingService(
     fun lagreOmOpphoerSkyldesDoedsfall(
         forbehandlingId: UUID,
         opphoerSkyldesDoedsfall: JaNei,
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
     ) {
         val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
         if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
 
-        forbehandling.oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall).also { dao.lagreForbehandling(it) }
+        forbehandling.oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall, opphoerSkyldesDoedsfallIEtteroppgjoersaar).also {
+            dao.lagreForbehandling(it)
+        }
     }
 
     fun sjekkAtOppgavenErTildeltSaksbehandler(
@@ -792,6 +786,7 @@ data class InformasjonFraBrukerRequest(
 
 data class OpphoerSkyldesDoedsfallRequest(
     val opphoerSkyldesDoedsfall: JaNei,
+    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
 )
 
 data class BeregnetResultatOgBrevSomSkalSlettes(

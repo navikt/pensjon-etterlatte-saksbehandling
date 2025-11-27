@@ -34,8 +34,7 @@ class JobbSchedulerTask(
         ) {
             jobbScheduler.scheduleMaanedligeJobber()
 
-            // Den eneste ukentlige jobben er midlertidig skrudd av
-            // jobbScheduler.scheduleUkentligeJobber()
+            jobbScheduler.scheduleUkentligeJobber()
         }
     }
 }

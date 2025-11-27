@@ -37,6 +37,7 @@ data class EtteroppgjoerForbehandling(
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
     val harVedtakAvTypeOpphoer: Boolean? = null,
     val opphoerSkyldesDoedsfall: JaNei?,
+    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?
 ) {
     companion object {
         fun opprett(
@@ -60,6 +61,7 @@ data class EtteroppgjoerForbehandling(
             varselbrevSendt = null,
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             opphoerSkyldesDoedsfall = null,
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar = null
         )
     }
 
@@ -155,8 +157,8 @@ data class EtteroppgjoerForbehandling(
                 },
         )
 
-    fun oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall: JaNei): EtteroppgjoerForbehandling =
-        copy(opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall)
+    fun oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall: JaNei, opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?): EtteroppgjoerForbehandling =
+        copy(opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall, opphoerSkyldesDoedsfallIEtteroppgjoersaar = opphoerSkyldesDoedsfallIEtteroppgjoersaar)
 }
 
 class EtteroppgjoerForbehandlingStatusException(

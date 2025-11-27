@@ -187,7 +187,7 @@ class EtteroppgjoerService(
             } catch (e: Exception) {
                 logger.error(
                     "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${sistIverksatteBehandling.sak.id}, " +
-                        "om vi ikke klarte å hente skatteoppgjør for, vi antar at dette er fordi skatteoppgjøret ikke er " +
+                        "men vi klarte ikke hente skatteoppgjøret, vi antar at dette er fordi skatteoppgjøret ikke er " +
                         "tilgjengelig, hvis annen feil må saken ryddes opp manuelt",
                     e,
                 )

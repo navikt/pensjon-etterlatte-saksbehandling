@@ -86,11 +86,12 @@ fun Route.personRoute(service: PersonService) {
         kunSaksbehandler {
             val request = call.receive<HentPdlIdentRequest>()
 
-            val foedselsdato =
-                service.hentFoedselsdato(request.ident.value).foedselsdato
-                    ?: throw IkkeFunnetException("IKKE_FUNNET", "Fant ingen fødselsdato for bruker (se sikkerlogg)")
+            val foedselsdato = service.hentFoedselsdato(request.ident.value).foedselsdato
 
-            sikkerLogg.error("Fant ingen fødselsdato i PDL for ident=${request.ident.value}")
+            if (foedselsdato == null) {
+                sikkerLogg.error("Fant ingen fødselsdato i PDL for ident=${request.ident.value}")
+                throw IkkeFunnetException("IKKE_FUNNET", "Fant ingen fødselsdato for bruker (se sikkerlogg)")
+            }
 
             call.respond(foedselsdato)
         }

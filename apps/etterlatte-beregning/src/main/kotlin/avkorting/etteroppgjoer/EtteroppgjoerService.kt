@@ -11,7 +11,7 @@ import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
-import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -54,8 +54,9 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         aar: Int,
+        harDoedsfall: Boolean,
     ): BeregnetEtteroppgjoerResultat {
-        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, harDoedsfall)
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
         return etteroppgjoerResultat
     }
@@ -131,6 +132,7 @@ class EtteroppgjoerService(
         aar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
+        harDoedsfall: Boolean,
     ): BeregnetEtteroppgjoerResultat {
         // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer, setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
         // vi skal og bruke siste gjeldene rettsgebyr for etteroppgjoersAaret dvs det som er gjeldende 31. Desember
@@ -149,11 +151,12 @@ class EtteroppgjoerService(
                 FaktumNode(sisteIverksatteAvkorting, sisteIverksatteBehandlingId, ""),
                 FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
                 FaktumNode(inntektsgrunnlag, nyForbehandlingAvkorting.id, ""),
+                FaktumNode(harDoedsfall, forbehandlingId, ""),
             )
 
         return when (
             val beregningResultat =
-                beregneEtteroppgjoerRegel.eksekver(KonstantGrunnlag(differanseGrunnlag), regelPeriode)
+                beregneEtteroppgjoerRegelMedDoedsfall.eksekver(KonstantGrunnlag(differanseGrunnlag), regelPeriode)
         ) {
             is RegelkjoeringResultat.Suksess -> {
                 val data =
@@ -174,7 +177,7 @@ class EtteroppgjoerService(
                     regelResultat = beregningResultat.toJsonNode(),
                     kilde =
                         Grunnlagsopplysning.RegelKilde(
-                            navn = beregneEtteroppgjoerRegel.regelReferanse.id,
+                            navn = beregneEtteroppgjoerRegelMedDoedsfall.regelReferanse.id,
                             ts = data.tidspunkt,
                             versjon = beregningResultat.reglerVersjon,
                         ),

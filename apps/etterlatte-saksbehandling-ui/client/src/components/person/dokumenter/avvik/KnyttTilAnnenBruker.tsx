@@ -1,7 +1,13 @@
 import React, { useState } from 'react'
 import { Alert, Button, HStack, TextField, VStack } from '@navikt/ds-react'
-import { isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
-import { BrukerIdType, Journalpost, Sakstype } from '~shared/types/Journalpost'
+import { isPending, isSuccess, mapFailure, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import {
+  AvsenderMottaker,
+  AvsenderMottakerIdType,
+  BrukerIdType,
+  Journalpost,
+  Sakstype,
+} from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
 import { hentSak } from '~shared/api/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -17,6 +23,30 @@ import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { ApiError } from '~shared/api/apiClient'
+import { ApiErrorAlert } from '~ErrorBoundary'
+
+function reparerIdTypeAvsenderMottaker(avsenderMottaker?: AvsenderMottaker): AvsenderMottaker | undefined {
+  if (!avsenderMottaker) {
+    return undefined
+  }
+  if (!avsenderMottaker.id || !!avsenderMottaker.idType) {
+    return avsenderMottaker
+  }
+  const id = avsenderMottaker.id
+  if (id.length === 9) {
+    return {
+      ...avsenderMottaker,
+      idType: AvsenderMottakerIdType.ORGNR,
+    }
+  } else if (id.length === 11) {
+    return {
+      ...avsenderMottaker,
+      idType: AvsenderMottakerIdType.FNR,
+    }
+  } else {
+    return avsenderMottaker
+  }
+}
 
 export const KnyttTilAnnenBruker = ({
   journalpost,
@@ -43,6 +73,7 @@ export const KnyttTilAnnenBruker = ({
       {
         journalpost: {
           ...journalpost,
+          avsenderMottaker: reparerIdTypeAvsenderMottaker(journalpost.avsenderMottaker),
           bruker: {
             id: sak.ident,
             type: BrukerIdType.FNR,
@@ -128,6 +159,11 @@ export const KnyttTilAnnenBruker = ({
       <VStack gap="4">
         {mapSuccess(sakStatus, (data) => (
           <SakOverfoeringDetailjer fra={data.sak} til={annenSak} />
+        ))}
+        {mapFailure(oppdaterResult, (error) => (
+          <ApiErrorAlert>
+            Kunne ikke flytte journalpost til sak {annenSak.id}, på grunn av feil: {error.detail}
+          </ApiErrorAlert>
         ))}
 
         <HStack gap="4" justify="end">

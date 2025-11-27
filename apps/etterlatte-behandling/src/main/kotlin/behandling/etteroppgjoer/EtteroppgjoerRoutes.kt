@@ -27,9 +27,11 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.forbehandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
@@ -223,8 +225,7 @@ fun Route.etteroppgjoerRoutes(
                         forbehandlingService.lagreOmOpphoerSkyldesDoedsfall(
                             forbehandlingId,
                             opphoerSkyldesDoedsfall = request.opphoerSkyldesDoedsfall,
-                            opphoerSkyldesDoedsfallIEtteroppgjoersaar = request.opphoerSkyldesDoedsfallIEtteroppgjoersaar
-
+                            opphoerSkyldesDoedsfallIEtteroppgjoersaar = request.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
                         )
                     }
 
@@ -261,6 +262,12 @@ fun Route.etteroppgjoerRoutes(
             sjekkEtteroppgjoerEnabled(featureToggleService)
             val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
             call.respond(forbehandlinger)
+        }
+
+        route("/revurdering/{${BEHANDLINGID_CALL_PARAMETER}}/resultat") {
+            get {
+                call.respond(forbehandlingService.hentBeregnetResultatForRevurdering(behandlingId, brukerTokenInfo))
+            }
         }
 
         post("/les-skatteoppgjoer-hendelser") {

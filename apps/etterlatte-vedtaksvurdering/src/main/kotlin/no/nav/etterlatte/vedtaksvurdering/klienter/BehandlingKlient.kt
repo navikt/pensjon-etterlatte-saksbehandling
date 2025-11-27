@@ -7,6 +7,8 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -106,6 +108,11 @@ interface BehandlingKlient :
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): TilbakekrevingBehandling
+
+    suspend fun hentBeregnetEtteroppgjoerResultat(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto
 }
 
 class BehandlingKlientException(
@@ -442,4 +449,17 @@ class BehandlingKlientImpl(
             )
         }
     }
+
+    override suspend fun hentBeregnetEtteroppgjoerResultat(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto =
+        downstreamResourceClient
+            .get(
+                Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/etteroppgjoer/revurdering/$behandlingId/resultat",
+                ),
+                brukerTokenInfo,
+            ).mapBoth(success = { deserialize(it.response.toString()) }, failure = { throw it })
 }

@@ -49,7 +49,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -319,16 +318,16 @@ class EtteroppgjoerForbehandlingService(
     }
 
     private fun hentBeregnetEtteroppgjoerResultat(
-        ferdigstiltForbehandling: EtteroppgjoerForbehandling,
+        forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto? {
         val beregnetEtteroppgjoerResultat =
             runBlocking {
                 beregningKlient.hentBeregnetEtteroppgjoerResultat(
                     EtteroppgjoerHentBeregnetResultatRequest(
-                        ferdigstiltForbehandling.aar,
-                        ferdigstiltForbehandling.id,
-                        ferdigstiltForbehandling.sisteIverksatteBehandlingId,
+                        forbehandling.aar,
+                        forbehandling.id,
+                        forbehandling.sisteIverksatteBehandlingId,
                     ),
                     brukerTokenInfo,
                 )
@@ -352,11 +351,17 @@ class EtteroppgjoerForbehandlingService(
         sakId: SakId,
     ) {
         if (oppgave.sakId != sakId) {
-            throw UgyldigForespoerselException("OPPGAVE_IKKE_I_SAK", "OppgaveId=${oppgave.id} matcher ikke sakId=$sakId")
+            throw UgyldigForespoerselException(
+                "OPPGAVE_IKKE_I_SAK",
+                "OppgaveId=${oppgave.id} matcher ikke sakId=$sakId",
+            )
         }
 
         if (oppgave.erAvsluttet()) {
-            throw UgyldigForespoerselException("OPPGAVE_AVSLUTTET", "Oppgaven tilknyttet forbehandling er avsluttet og kan ikke behandles")
+            throw UgyldigForespoerselException(
+                "OPPGAVE_AVSLUTTET",
+                "Oppgaven tilknyttet forbehandling er avsluttet og kan ikke behandles",
+            )
         }
 
         if (oppgave.type != OppgaveType.ETTEROPPGJOER) {
@@ -483,9 +488,13 @@ class EtteroppgjoerForbehandlingService(
             throw ForbehandlingKanIkkeEndres()
         }
 
-        forbehandling.oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall, opphoerSkyldesDoedsfallIEtteroppgjoersaar).also {
-            dao.lagreForbehandling(it)
-        }
+        forbehandling
+            .oppdaterOmOpphoerSkyldesDoedsfall(
+                opphoerSkyldesDoedsfall,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+            ).also {
+                dao.lagreForbehandling(it)
+            }
     }
 
     fun sjekkAtOppgavenErTildeltSaksbehandler(
@@ -574,7 +583,8 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
+        val sisteIverksatteBehandling =
+            runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
 
         krevIkkeNull(sisteIverksatteBehandling) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
@@ -675,7 +685,8 @@ class EtteroppgjoerForbehandlingService(
                 )
 
         val forbehandling =
-            dao.hentForbehandling(forbehandlingId) ?: throw NotFoundException("Fant ikke forbehandling med id $forbehandlingId")
+            dao.hentForbehandling(forbehandlingId)
+                ?: throw NotFoundException("Fant ikke forbehandling med id $forbehandlingId")
 
         val forbehandlingCopy =
             forbehandling.copy(
@@ -768,7 +779,32 @@ class EtteroppgjoerForbehandlingService(
 
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =
         behandlingService.hentUtlandstilknytningForSak(ferdigstiltForbehandling.sak.id)
+
+    fun hentBeregnetResultatForRevurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val forbehandlingId =
+            behandling?.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
+                "MANGLER_FORBEHANDLING_ID",
+                "Behandling med id=$behandlingId peker ikke på en gyldig forbehandling",
+            )
+        val forbehandling = hentForbehandling(forbehandlingId)
+        return hentBeregnetEtteroppgjoerResultat(forbehandling, brukerTokenInfo) ?: throw IkkeFunnetException(
+            "MANGLER_BEREGNET_RESULTAT",
+            "Forbehandling med id=$forbehandlingId til revurdering med id=$behandlingId har " +
+                "ikke et beregnet resultat for etteroppgjøret.",
+        )
+    }
 }
+
+private fun String.parseUuid(): UUID? =
+    try {
+        UUID.fromString(this)
+    } catch (_: IllegalArgumentException) {
+        null
+    }
 
 data class BeregnFaktiskInntektRequest(
     val loennsinntekt: Int,

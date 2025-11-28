@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.database.setNullableLong
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
@@ -80,8 +81,11 @@ class StoenadRepository(
                         behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
                         virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, 
-                        sakYtelsesgruppe, harAktivitetsplikt, oppfyllerAktivitet, aktivitet, sanksjon
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sakYtelsesgruppe, harAktivitetsplikt, oppfyllerAktivitet, aktivitet, sanksjon,
+                        etteroppgjoer_aar, etteroppgjoer_utbetalt, etteroppgjoer_ny_stoenad, etteroppgjoer_differanse,
+                        etteroppgjoer_resultat, etterbetalt_beloep, tilbakekrevd_beloep
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 ).apply {
                     setString(1, maanedStatistikkRad.fnrSoeker)
@@ -113,6 +117,14 @@ class StoenadRepository(
                     setString(27, maanedStatistikkRad.oppfyllerAktivitet?.toString())
                     setString(28, maanedStatistikkRad.aktivitet)
                     setString(29, maanedStatistikkRad.sanksjon)
+
+                    setString(30, maanedStatistikkRad.etteroppgjoerAar?.toString())
+                    setNullableLong(31, maanedStatistikkRad.etteroppgjoerUtbetalt)
+                    setNullableLong(32, maanedStatistikkRad.etteroppgjoerNyStoenad)
+                    setNullableLong(33, maanedStatistikkRad.etteroppgjoerDifferanse)
+                    setString(34, maanedStatistikkRad.etteroppgjoerResultat)
+                    setNullableLong(35, maanedStatistikkRad.etterbetaltBeloep)
+                    setNullableLong(36, maanedStatistikkRad.tilbakekrevdBeloep)
                 }.executeUpdate()
         }
 

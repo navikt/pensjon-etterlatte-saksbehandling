@@ -266,7 +266,8 @@ fun Route.etteroppgjoerRoutes(
 
         route("/revurdering/{${BEHANDLINGID_CALL_PARAMETER}}/resultat") {
             get {
-                call.respond(forbehandlingService.hentBeregnetResultatForRevurdering(behandlingId, brukerTokenInfo))
+                val resultat = inTransaction { forbehandlingService.hentBeregnetResultatForRevurdering(behandlingId, brukerTokenInfo) }
+                call.respond(resultat)
             }
         }
 

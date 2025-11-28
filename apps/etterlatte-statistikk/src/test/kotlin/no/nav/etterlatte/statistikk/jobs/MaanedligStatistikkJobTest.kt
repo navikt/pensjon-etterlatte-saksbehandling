@@ -105,7 +105,7 @@ class MaanedligStatistikkJobTest {
         val statistikkService: StatistikkService = mockk()
         every { statistikkService.statistikkProdusertForMaaned(maanedIkkeKjoert) } returns KjoertStatus.IKKE_KJOERT
         every { statistikkService.produserStoenadStatistikkForMaaned(maanedIkkeKjoert) } returns mockMaanedStatistikk
-        every { statistikkService.lagreMaanedsstatistikk(mockMaanedStatistikk) } returns Unit
+        every { statistikkService.lagreMaanedsstatistikk(mockMaanedStatistikk) } returns (0L to 0L)
 
         val clockMaanedEtterProdusert: Clock =
             maanedIkkeKjoert

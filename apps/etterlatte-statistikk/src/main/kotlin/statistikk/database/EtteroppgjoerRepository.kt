@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.database.setNullableInt
 import no.nav.etterlatte.libs.database.setNullableLong
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.Month
@@ -40,7 +41,8 @@ class EtteroppgjoerRepository(
                     """
                     INSERT INTO etteroppgjoer_statistikk (forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                     opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering)
+                    rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,
+                    summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering)
                     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )
@@ -98,6 +100,26 @@ class EtteroppgjoerRepository(
                     """.trimIndent(),
                 )
             statement.setObject(1, forbehandlingId)
+            statement.executeQuery().toList { tilEtteroppgjoerRad() }
+        }
+
+    fun hentRaderForMaaned(maaned: YearMonth): List<EtteroppgjoerRad> =
+        dataSource.connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT DISTINCT ON (sak_id) id, forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
+                      opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
+                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering
+                    FROM etteroppgjoer_statistikk
+                    WHERE teknisk_tid >= ? AND teknisk_tid < ?
+                    AND tilknyttet_revurdering = TRUE
+                    AND forbehandling_status = 'FERDIGSTILT'
+                    ORDER BY sak_id, teknisk_tid DESC
+                    """.trimIndent(),
+                )
+            statement.setDate(1, Date.valueOf(maaned.atDay(1)))
+            statement.setDate(2, Date.valueOf(maaned.plusMonths(1).atDay(1)))
             statement.executeQuery().toList { tilEtteroppgjoerRad() }
         }
 }

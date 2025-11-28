@@ -187,7 +187,7 @@ class VedtakBehandlingService(
         if (etteroppgjoerResultat.resultatType in
             listOf(EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING, EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING)
         ) {
-            throw InternfeilException("Vedtak for etteroppgjør uten beregnet resultat støttes ikke")
+            throw InternfeilException("Vedtak for etteroppgjør med ingen endring støttes ikke enda. Sak = ${behandling.sak}")
         }
     }
 

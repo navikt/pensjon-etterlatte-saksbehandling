@@ -2,7 +2,7 @@ import { Alert, BodyShort, Button, HStack, Modal, Textarea, VStack } from '@navi
 import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 
-import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -58,11 +58,6 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
     })
   }
 
-  const tittel =
-    oppgave.type === Oppgavetype.ETTEROPPGJOER_OPPRETT_REVURDERING
-      ? 'Etteroppgjør – svarfrist utløpt'
-      : 'Etteroppgjør - opprett revurdering'
-
   return (
     <>
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
@@ -74,7 +69,7 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: tittel }}
+        header={{ heading: 'Etteroppgjør - opprett revurdering' }}
       >
         <Modal.Body>
           <VStack gap="4">

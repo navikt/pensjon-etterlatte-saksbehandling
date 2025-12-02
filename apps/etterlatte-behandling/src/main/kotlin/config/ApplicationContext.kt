@@ -839,6 +839,7 @@ internal class ApplicationContext(
             trygdetidKlient,
             beregningKlient,
             vedtakKlient,
+            featureToggleService,
         )
 
     val migreringService =

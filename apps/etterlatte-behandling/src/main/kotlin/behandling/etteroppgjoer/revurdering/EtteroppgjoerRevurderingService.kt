@@ -7,12 +7,14 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -25,7 +27,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
@@ -41,6 +42,7 @@ class EtteroppgjoerRevurderingService(
     private val trygdetidKlient: TrygdetidKlient,
     private val beregningKlient: BeregningKlient,
     private val vedtakKlient: VedtakKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun opprettEtteroppgjoerRevurdering(
         sakId: SakId,
@@ -149,25 +151,30 @@ class EtteroppgjoerRevurderingService(
     private fun hentSisteIverksatteVedtakIkkeOpphoer(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakSammendragDto =
+    ): UUID =
         runBlocking {
-            val iverksatteVedtak =
-                vedtakKlient
-                    .hentIverksatteVedtak(sakId, brukerTokenInfo)
-                    .sortedByDescending { it.datoFattet }
+            if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_OPPHOER_SKYLDES_DOEDSFALL, false)) {
+                val iverksatteVedtak =
+                    vedtakKlient
+                        .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                        .sortedByDescending { it.datoFattet }
 
-            val sisteIverksatteVedtak =
-                iverksatteVedtak.firstOrNull()
-                    ?: throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
+                val sisteIverksatteVedtak =
+                    iverksatteVedtak.firstOrNull()
+                        ?: throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
 
-            if (sisteIverksatteVedtak.vedtakType == VedtakType.OPPHOER) {
-                throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
+                if (sisteIverksatteVedtak.vedtakType == VedtakType.OPPHOER) {
+                    throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
+                }
+
+                if (sisteIverksatteVedtak.opphoerFraOgMed != null) {
+                    throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
+                }
+
+                sisteIverksatteVedtak.behandlingId
+            } else {
+                etteroppgjoerForbehandlingService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo).id
             }
-            if (sisteIverksatteVedtak.opphoerFraOgMed != null) {
-                throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
-            }
-
-            sisteIverksatteVedtak
         }
 
     private fun kopierFaktiskInntekt(
@@ -217,9 +224,9 @@ class EtteroppgjoerRevurderingService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        val sisteIverksatteVedtak = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
+        val sisteIverksatteBehandlingId = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
 
-        return behandlingService.hentBehandling(sisteIverksatteVedtak.behandlingId)
-            ?: throw InternfeilException("Fant ikke iverksatt behandling ${sisteIverksatteVedtak.behandlingId}")
+        return behandlingService.hentBehandling(sisteIverksatteBehandlingId)
+            ?: throw InternfeilException("Fant ikke iverksatt behandling $sisteIverksatteBehandlingId")
     }
 }

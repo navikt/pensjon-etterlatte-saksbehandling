@@ -802,8 +802,6 @@ class EtteroppgjoerForbehandlingService(
 
     private fun haandterDoedsfallEtterEtteroppgjoersAar(forbehandling: EtteroppgjoerForbehandling) {
         val opphoerSkyldesDoedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA
-        val opphoerSkyldesDoedsfallIEtteroppgjoersaar =
-            forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
         val resultatErEtterbetaling = forbehandling.etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
 
         if(opphoerSkyldesDoedsfall) {
@@ -811,7 +809,7 @@ class EtteroppgjoerForbehandlingService(
                 "Mangler svar på opphør skyldes dødsfall i etteroppgjørsåret"
             }
 
-            if (!opphoerSkyldesDoedsfallIEtteroppgjoersaar && resultatErEtterbetaling) {
+            if (!forbehandling.skyldesOpphoerDoedsfallIEtteroppgjoersaar() && resultatErEtterbetaling) {
                 oppgaveService.opprettOppgave(
                     referanse = forbehandling.id.toString(),
                     sakId = forbehandling.sak.id,

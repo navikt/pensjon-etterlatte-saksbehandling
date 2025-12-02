@@ -65,6 +65,8 @@ data class EtteroppgjoerForbehandling(
         )
     }
 
+    fun skyldesOpphoerDoedsfallIEtteroppgjoersaar() = opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+
     fun tilBeregnet(beregnetEtteroppgjoerResultatDto: BeregnetEtteroppgjoerResultatDto): EtteroppgjoerForbehandling {
         if (!erUnderBehandling()) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.BEREGNET)
@@ -81,7 +83,15 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
-        if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
+        val doedsfallIEtteroppgjoersaar = opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+
+        val kanFerdigstille = if (doedsfallIEtteroppgjoersaar) {
+            erUnderBehandling()
+        } else {
+            status == EtteroppgjoerForbehandlingStatus.BEREGNET
+        }
+
+        if(!kanFerdigstille) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
 

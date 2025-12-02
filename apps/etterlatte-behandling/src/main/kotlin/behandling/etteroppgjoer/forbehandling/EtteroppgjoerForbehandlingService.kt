@@ -98,7 +98,7 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
 
-        sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling)
+        sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling, brukerTokenInfo)
         sjekkAtInntekterErOppdatert(forbehandling)
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
@@ -110,7 +110,6 @@ class EtteroppgjoerForbehandlingService(
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
             etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
-
             registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
         }
     }
@@ -644,6 +643,9 @@ class EtteroppgjoerForbehandlingService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
+        // TODO: finn heller siste iverksatte behandling fra siste løpende vedtak i vedtaksvurdering
+        // TODO: se inntektsjusteringJobb for eksempel
+
         val behandlingerMedAarsoppgjoer = beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId, brukerTokenInfo)
 
         return behandlingService
@@ -770,10 +772,11 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling: EtteroppgjoerForbehandling) {
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatteBehandling(forbehandling.sak.id)
-                ?: throw InternfeilException("Kunne ikke finne siste iverksatte behandling for sakId=${forbehandling.sak.id}")
+    private fun sjekkAtSisteIverksatteBehandlingErRiktig(
+        forbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(forbehandling.sak.id, brukerTokenInfo) }
 
         // verifisere at vi bruker siste iverksatte behandling
         if (sisteIverksatteBehandling.id != forbehandling.sisteIverksatteBehandlingId) {

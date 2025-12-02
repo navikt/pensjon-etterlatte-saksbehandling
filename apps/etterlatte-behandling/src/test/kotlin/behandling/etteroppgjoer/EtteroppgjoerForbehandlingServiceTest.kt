@@ -76,7 +76,7 @@ class EtteroppgjoerForbehandlingServiceTest {
             foerstegangsbehandling(
                 sakId = sakId1,
                 sakType = SakType.OMSTILLINGSSTOENAD,
-                status = BehandlingStatus.ATTESTERT,
+                status = BehandlingStatus.IVERKSATT,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
             )
 
@@ -317,7 +317,10 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         ctx.returnsForbehandling(forbehandling)
 
-        val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1)
+        every { runBlocking { ctx.beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(any(), any()) } } returns listOf(ctx.behandling.id)
+        every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(ctx.behandling)
+
+        val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1, mockk())
 
         with(kopiertForbehandling) {
             assertNotEquals(id, forbehandling.id)

@@ -2,7 +2,7 @@ import {
   addDetaljertEtteroppgjoerForbehandling,
   useEtteroppgjoerForbehandling,
 } from '~store/reducers/EtteroppgjoerReducer'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BodyShort, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { JaNei } from '~shared/types/ISvar'
@@ -37,7 +37,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
     erRedigerbar && !forbehandling.opphoerSkyldesDoedsfall
   )
 
-  const { control, handleSubmit, watch, register, unregister } = useForm<OpphoerSkyldesDoedsfallSkjema>({
+  const { control, handleSubmit, watch } = useForm<OpphoerSkyldesDoedsfallSkjema>({
     defaultValues: {
       opphoerSkyldesDoedsfall: forbehandling.opphoerSkyldesDoedsfall,
       opphoerSkyldesDoedsfallIEtteroppgjoersaar: forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
@@ -45,14 +45,6 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
   })
 
   const opphoerSkyldesDoedsfallVerdi = watch('opphoerSkyldesDoedsfall')
-
-  useEffect(() => {
-    if (opphoerSkyldesDoedsfallVerdi) {
-      register('opphoerSkyldesDoedsfallIEtteroppgjoersaar')
-    } else {
-      unregister('opphoerSkyldesDoedsfallIEtteroppgjoersaar')
-    }
-  }, [register, unregister, opphoerSkyldesDoedsfallVerdi])
 
   const avbryt = () => {
     setOpphoerSkyldesDoedsfallSkjemaErrors(undefined)
@@ -65,8 +57,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
       {
         forbehandlingId: forbehandling.id,
         opphoerSkyldesDoedsfall: data.opphoerSkyldesDoedsfall,
-        opphoerSkyldesDoedsfallIEtteroppgjoersaar:
-          data.opphoerSkyldesDoedsfall === JaNei.JA ? data.opphoerSkyldesDoedsfallIEtteroppgjoersaar : undefined,
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar: data.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
       },
       () => {
         hentEtteroppgjoerForbehandlingFetch(forbehandling.id, (etteroppgjoerForbehandling) => {

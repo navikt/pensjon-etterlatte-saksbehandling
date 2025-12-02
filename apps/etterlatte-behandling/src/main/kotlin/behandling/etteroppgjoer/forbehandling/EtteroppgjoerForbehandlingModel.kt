@@ -37,7 +37,7 @@ data class EtteroppgjoerForbehandling(
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
     val harVedtakAvTypeOpphoer: Boolean? = null,
     val opphoerSkyldesDoedsfall: JaNei?,
-    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?
+    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
 ) {
     companion object {
         fun opprett(
@@ -61,9 +61,11 @@ data class EtteroppgjoerForbehandling(
             varselbrevSendt = null,
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             opphoerSkyldesDoedsfall = null,
-            opphoerSkyldesDoedsfallIEtteroppgjoersaar = null
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
         )
     }
+
+    fun skyldesOpphoerDoedsfallIEtteroppgjoersaar() = opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
 
     fun tilBeregnet(beregnetEtteroppgjoerResultatDto: BeregnetEtteroppgjoerResultatDto): EtteroppgjoerForbehandling {
         if (!erUnderBehandling()) {
@@ -81,9 +83,19 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
-        if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
+        val kanFerdigstille =
+            if (skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
+                erUnderBehandling()
+            } else {
+                status == EtteroppgjoerForbehandlingStatus.BEREGNET
+            }
+
+        if (!kanFerdigstille) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
+
+        // TODO: validere her at vi kan ferdigstille uten brev?
+
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }
 
@@ -157,8 +169,17 @@ data class EtteroppgjoerForbehandling(
                 },
         )
 
-    fun oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall: JaNei, opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?): EtteroppgjoerForbehandling =
-        copy(opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall, opphoerSkyldesDoedsfallIEtteroppgjoersaar = opphoerSkyldesDoedsfallIEtteroppgjoersaar)
+    fun oppdaterOmOpphoerSkyldesDoedsfall(
+        opphoerSkyldesDoedsfall: JaNei,
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
+    ): EtteroppgjoerForbehandling =
+        copy(
+            opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall,
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar =
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar?.takeIf {
+                    opphoerSkyldesDoedsfall == JaNei.JA
+                },
+        )
 }
 
 class EtteroppgjoerForbehandlingStatusException(

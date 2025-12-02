@@ -68,6 +68,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const manglerFastsattInntektPaaForbehandling = forbehandling.harMottattNyInformasjon === JaNei.JA && erForbehandling
 
+  const doedsfallIEtteroppgjoersaaret = forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA
+
   const erAutomatiskBehandlingMedNyInformasjon =
     behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB &&
     forbehandling.harMottattNyInformasjon === JaNei.JA &&
@@ -107,13 +109,6 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       </BodyShort>
       <Inntektsopplysninger />
 
-      {opphoerSkyldesDoedsfallErSkrudPaa && !!forbehandling.harVedtakAvTypeOpphoer && (
-        <OpphoerSkyldesDoedsfall
-          erRedigerbar={erRedigerbar}
-          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
-        />
-      )}
-
       {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && (
         <>
           <InformasjonFraBruker
@@ -136,10 +131,28 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </>
       )}
 
-      <FastsettFaktiskInntekt
-        erRedigerbar={kanRedigereFaktiskInntekt}
-        setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-      />
+      {opphoerSkyldesDoedsfallErSkrudPaa ? (
+        <>
+          {!!forbehandling.harVedtakAvTypeOpphoer && (
+            <OpphoerSkyldesDoedsfall
+              erRedigerbar={kanRedigereFaktiskInntekt}
+              setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+            />
+          )}
+
+          {!doedsfallIEtteroppgjoersaaret && (
+            <FastsettFaktiskInntekt
+              erRedigerbar={kanRedigereFaktiskInntekt}
+              setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+            />
+          )}
+        </>
+      ) : (
+        <FastsettFaktiskInntekt
+          erRedigerbar={kanRedigereFaktiskInntekt}
+          setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
+        />
+      )}
 
       {forbehandling.endringErTilUgunstForBruker !== JaNei.JA && (
         <>

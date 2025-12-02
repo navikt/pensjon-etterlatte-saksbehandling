@@ -154,6 +154,8 @@ class EtteroppgjoerRevurderingService(
     ): UUID =
         runBlocking {
             if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_OPPHOER_SKYLDES_DOEDSFALL, false)) {
+                etteroppgjoerForbehandlingService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo).id
+            } else {
                 val iverksatteVedtak =
                     vedtakKlient
                         .hentIverksatteVedtak(sakId, brukerTokenInfo)
@@ -172,8 +174,6 @@ class EtteroppgjoerRevurderingService(
                 }
 
                 sisteIverksatteVedtak.behandlingId
-            } else {
-                etteroppgjoerForbehandlingService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo).id
             }
         }
 

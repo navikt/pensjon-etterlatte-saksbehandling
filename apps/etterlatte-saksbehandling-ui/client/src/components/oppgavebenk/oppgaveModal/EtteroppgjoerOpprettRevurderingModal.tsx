@@ -2,7 +2,7 @@ import { Alert, BodyShort, Button, HStack, Modal, Textarea, VStack } from '@navi
 import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 
-import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -20,7 +20,7 @@ type Props = {
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
-export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: Props) => {
+export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
 
   const navigate = useNavigate()
@@ -58,6 +58,11 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
     })
   }
 
+  const tittel =
+    oppgave.type === Oppgavetype.ETTEROPPGJOER_OPPRETT_REVURDERING
+      ? 'Etteroppgjør – svarfrist utløpt'
+      : 'Etteroppgjør - opprett revurdering'
+
   return (
     <>
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
@@ -69,7 +74,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: 'Etteroppgjør – svarfrist utløpt' }}
+        header={{ heading: tittel }}
       >
         <Modal.Body>
           <VStack gap="4">

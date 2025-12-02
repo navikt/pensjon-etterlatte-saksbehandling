@@ -74,7 +74,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   OPPFOELGING: 'Oppfølging av sak',
   MELDT_INN_ENDRING: 'Meldt inn endring',
   ETTEROPPGJOER: 'Etteroppgjør',
-  ETTEROPPGJOER_SVARFRIST_UTLOEPT: 'Etteroppgjør svarfrist utløpt',
+  ETTEROPPGJOER_OPPRETT_REVURDERING: 'Etteroppgjør opprett revurdering',
 } as const
 
 export const FRISTFILTER = {

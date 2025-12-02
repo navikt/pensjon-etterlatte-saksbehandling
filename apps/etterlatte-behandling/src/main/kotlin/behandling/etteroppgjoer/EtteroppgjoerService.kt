@@ -89,7 +89,6 @@ class EtteroppgjoerService(
 
         val ferdigstiltStatus =
             when (forbehandling.etteroppgjoerResultatType) {
-                // TODO: Legge til en ny resultattype for dødsfall i etteroppgjørsåret?
                 EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
                 EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
                 EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT

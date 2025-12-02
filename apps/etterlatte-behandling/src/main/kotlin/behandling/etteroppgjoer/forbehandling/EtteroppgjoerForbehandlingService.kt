@@ -806,8 +806,20 @@ class EtteroppgjoerForbehandlingService(
             forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
         val resultatErEtterbetaling = forbehandling.etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
 
-        if (opphoerSkyldesDoedsfall && opphoerSkyldesDoedsfallIEtteroppgjoersaar && resultatErEtterbetaling) {
-            //  TODO: opprettEtteroppgjoerRevurdering
+        if(opphoerSkyldesDoedsfall) {
+            krevIkkeNull(forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar){
+                "Mangler svar på opphør skyldes dødsfall i etteroppgjørsåret"
+            }
+
+            if (!opphoerSkyldesDoedsfallIEtteroppgjoersaar && resultatErEtterbetaling) {
+                oppgaveService.opprettOppgave(
+                    referanse = forbehandling.id.toString(),
+                    sakId = forbehandling.sak.id,
+                    type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
+                    merknad = "Revurdering for etterbetaling til dødsbo kan opprettes",
+                    kilde = OppgaveKilde.SAKSBEHANDLER,
+                )
+            }
         }
     }
 

@@ -46,7 +46,7 @@ class AvkortingReparerAarsoppgjoeret(
                     "Manglende år: " + alleManglendeAar,
             )
         } else {
-            logger.info("Fant ingen manglende år")
+            logger.info("Fant ingen manglende årsoppgjør. Forrige årsoppgjør-ID: ${forrigeAvkorting.aarsoppgjoer.firstOrNull()?.id}.")
         }
         val aarsoppgjoerManglende =
             alleManglendeAar.map { manglendeAar ->
@@ -90,7 +90,7 @@ class AvkortingReparerAarsoppgjoeret(
                 }
             return Avkorting((avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar })
         } else {
-            logger.info("Fant ingen manglende år")
+            logger.info("Fant ingen manglende årsoppgjør. Forrige årsoppgjør-ID: ${avkortingSistIverksatt.aarsoppgjoer.firstOrNull()?.id}.")
             return avkortingSistIverksatt
         }
     }

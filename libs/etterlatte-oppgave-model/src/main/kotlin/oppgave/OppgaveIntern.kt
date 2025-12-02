@@ -157,11 +157,6 @@ data class SaksbehandlerEndringDto(
     val saksbehandler: String,
 )
 
-data class SaksbehandlerEndringGosysDto(
-    val saksbehandler: String,
-    val versjon: Long,
-)
-
 data class RedigerFristRequest(
     val frist: Tidspunkt,
 )
@@ -172,11 +167,6 @@ data class AvbrytAktivitetspliktoppgaveRequest(
 
 data class FerdigstillRequest(
     val merknad: String?,
-)
-
-data class RedigerFristGosysRequest(
-    val frist: Tidspunkt,
-    val versjon: Long,
 )
 
 data class SakIdOgReferanse(

@@ -38,11 +38,12 @@ internal fun barnepensjonBeregning(
     erForeldreloes: Boolean = false,
     landKodeverk: List<LandDto>,
 ): BarnepensjonBeregning {
-    val beregningsperioder =
-        barnepensjonBeregningsperioder(utbetalingsinfo, erForeldreloes)
-    val sisteBeregningsperiode = beregningsperioder.maxBy { periode -> periode.datoFOM }
+    val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo, erForeldreloes)
+    val sisteBeregningsperiodeFraUtbetalingsInfo = beregningsperioder.maxBy { periode -> periode.datoFOM }
+
     val mappedeTrygdetider =
         mapRiktigMetodeForAnvendteTrygdetider(trygdetid, avdoede, utbetalingsinfo.beregningsperioder, landKodeverk)
+
     val forskjelligTrygdetid =
         finnForskjelligTrygdetid(
             mappedeTrygdetider,
@@ -63,7 +64,7 @@ internal fun barnepensjonBeregning(
         trygdetid = mappedeTrygdetider,
         erForeldreloes = erForeldreloes,
         bruktTrygdetid =
-            mappedeTrygdetider.find { it.ident == sisteBeregningsperiode.trygdetidForIdent }
+            mappedeTrygdetider.find { it.ident == sisteBeregningsperiodeFraUtbetalingsInfo.trygdetidForIdent }
                 ?: throw ManglerAvdoedBruktTilTrygdetid(),
         forskjelligTrygdetid = forskjelligTrygdetid,
         erYrkesskade = erYrkesskade,
@@ -76,7 +77,7 @@ data class IdentMedMetodeIGrunnlagOgAnvendtMetode(
     val beregningsMetodeAnvendt: BeregningsMetode,
 )
 
-fun mapRiktigMetodeForAnvendteTrygdetider(
+private fun mapRiktigMetodeForAnvendteTrygdetider(
     trygdetid: List<TrygdetidDto>,
     avdoede: List<Avdoed>,
     beregningsperioder: List<Beregningsperiode>,
@@ -93,9 +94,11 @@ fun mapRiktigMetodeForAnvendteTrygdetider(
                     )
                 }
             }.associateBy { it.ident }
+
     if (anvendteTrygdetiderIdenter.isEmpty()) {
         throw ManglerAvdoedBruktTilTrygdetid()
     }
+
     // Ikke alle trygdetider er nødvendigvis brukt i beregningen, og har da ikke en anvendt trygdetid beregnet med
     // For disse trygdetidene fyller vi bare inn det som er brukt i den siste beregningsmetoden.
     // Brevet vet hvilke trygdetider den kan bruke til å si noe om beregningsmetode anvendt / i grunnlag

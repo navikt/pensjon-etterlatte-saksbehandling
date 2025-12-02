@@ -61,7 +61,8 @@ class EtteroppgjoerTempService(
     }
 
     /**
-     * Setter status tilbake til MOTTATT_SKATTEOPPGJOER i etteroppgjøret og avbryter forbehandlingen.
+     * Setter status tilbake til MOTTATT_SKATTEOPPGJOER i etteroppgjøret hvis det skal være ny forbehandling, eller
+     * VENTER_PAA_SVAR hvis det ikke skal være en ny forbehandling. Etteroppgjørbehandlingen avbrytes også.
      */
     fun tilbakestillEtteroppgjoerVedAvbruttRevurdering(
         behandling: Behandling,
@@ -106,7 +107,12 @@ class EtteroppgjoerTempService(
                 etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
                     sakId = sakId,
                     inntektsaar = etteroppgjoer.inntektsaar,
-                    status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    status =
+                        if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+                        } else {
+                            EtteroppgjoerStatus.VENTER_PAA_SVAR
+                        },
                 )
                 hendelserService.registrerOgSendEtteroppgjoerHendelse(
                     etteroppgjoerForbehandling = avbruttForbehandling,

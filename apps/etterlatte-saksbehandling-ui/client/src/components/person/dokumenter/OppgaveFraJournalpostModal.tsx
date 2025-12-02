@@ -81,9 +81,12 @@ export const OppgaveFraJournalpostModal = ({
     if (isSuccess(sakStatus)) {
       trackClick(ClickEvent.FLYTT_GOSYS_OPPGAVE)
 
-      flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sakStatus.data.sak.id }, (oppgave) => {
-        navigate(`/oppgave/${oppgave.id}`)
-      })
+      flyttOppgaveTilGjenny(
+        { oppgaveId: oppgave.id, sakId: sakStatus.data.sak.id, enhetsnr: sakStatus.data.sak.enhet },
+        (oppgave) => {
+          navigate(`/oppgave/${oppgave.id}`)
+        }
+      )
     }
   }
 

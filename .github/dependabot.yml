@@ -9,6 +9,8 @@ updates:
     schedule:
       interval: "monthly" 
       day: "sunday"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       avro-og-kafka:
@@ -63,6 +65,8 @@ updates:
     schedule:
       interval: "monthly"
       day: "sunday"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       eslint:
@@ -121,6 +125,8 @@ updates:
     schedule:
       interval: "monthly"
       day: "sunday"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       eslint:
@@ -139,6 +145,8 @@ updates:
     schedule:
       interval: "monthly"
       day: "sunday"
+    cooldown:
+      default-days: 7
 
   # ==============
   # Docker
@@ -150,6 +158,8 @@ updates:
     schedule:
       interval: "monthly"
       day: "sunday"
+    cooldown:
+      default-days: 7
     groups:
       dockerfilene:
         patterns:

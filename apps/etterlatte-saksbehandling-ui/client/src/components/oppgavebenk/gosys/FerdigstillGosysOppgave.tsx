@@ -19,7 +19,7 @@ export const FerdigstillGosysOppgave = ({
   const ferdigstill = () => {
     trackClick(ClickEvent.FERDIGSTILL_GOSYS_OPPGAVE)
 
-    ferdigstillOppgave({ oppgaveId: oppgave.id, versjon: oppgave.versjon || 0 }, () => {
+    ferdigstillOppgave({ oppgaveId: oppgave.id, versjon: oppgave.versjon || 0, enhetsnr: oppgave.enhet }, () => {
       setTimeout(() => window.location.reload(), 2000)
     })
   }

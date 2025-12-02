@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -107,6 +108,7 @@ class VedtakBehandlingService(
                 brukerTokenInfo,
             )
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
+        verifiserEtteroppgjoerIngenEndring(behandling, beregningOgAvkorting, brukerTokenInfo)
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
@@ -168,6 +170,25 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             ),
         )
+    }
+
+    private suspend fun verifiserEtteroppgjoerIngenEndring(
+        behandling: DetaljertBehandling,
+        beregningOgAvkorting: BeregningOgAvkorting?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        if (behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER) {
+            return
+        }
+        if (beregningOgAvkorting?.avkorting == null) {
+            throw InternfeilException("Mangler beregnet resultat")
+        }
+        val etteroppgjoerResultat = behandlingKlient.hentBeregnetEtteroppgjoerResultat(behandling.id, brukerTokenInfo)
+        if (etteroppgjoerResultat.resultatType in
+            listOf(EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING, EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING)
+        ) {
+            throw InternfeilException("Vedtak for etteroppgjør med ingen endring støttes ikke enda. Sak = ${behandling.sak}")
+        }
     }
 
     suspend fun attesterVedtak(

@@ -702,12 +702,9 @@ class EtteroppgjoerForbehandlingService(
     fun kopierOgLagreNyForbehandling(
         forbehandlingId: UUID,
         sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatteBehandling(sakId)
-                ?: throw InternfeilException(
-                    "Fant ikke siste iverksatte behandling for sak=$sakId ved kopiering av forbehandling",
-                )
+        val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo) }
 
         val forbehandling =
             dao.hentForbehandling(forbehandlingId)

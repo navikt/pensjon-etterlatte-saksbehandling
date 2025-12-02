@@ -1,5 +1,5 @@
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
-import { BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
@@ -47,7 +47,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
 
   const ferdigstillUtenBrev =
     beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
-    doedsfallIEtteroppgjoersaaret
+    forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
@@ -82,7 +82,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
         />
       )}
 
-      {!!beregnetEtteroppgjoerResultat && (
+      {!!beregnetEtteroppgjoerResultat && !doedsfallIEtteroppgjoersaaret && (
         <VStack gap="4">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
@@ -99,6 +99,12 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
         <Box maxWidth="42.5rem">
           <SammendragAvSkjemaFeil errors={fastsettFaktiskInntektSkjemaErrors} />
         </Box>
+      )}
+
+      {doedsfallIEtteroppgjoersaaret && (
+        <Alert variant="info">
+          Siden bruker er død i etteroppgjørsåret, skal etteroppgjøret ferdigstilles uten brev og endringer.
+        </Alert>
       )}
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">

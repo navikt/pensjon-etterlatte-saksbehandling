@@ -116,7 +116,12 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val forbehandling = etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(sisteFerdigstilteForbehandlingId, sakId)
+        val forbehandling =
+            etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(
+                sisteFerdigstilteForbehandlingId,
+                sakId,
+                brukerTokenInfo,
+            )
 
         val persongalleri =
             grunnlagService.hentPersongalleri(sakId)

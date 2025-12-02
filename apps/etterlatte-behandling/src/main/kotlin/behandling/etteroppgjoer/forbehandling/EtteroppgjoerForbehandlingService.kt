@@ -789,12 +789,9 @@ class EtteroppgjoerForbehandlingService(
         val ingenEndringUtenUtbetaling =
             etteroppgjoerResultat == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
 
-        val doedsfallMedIngenEndring =
-            etteroppgjoerResultat == EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING &&
-                forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
-                forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+        val doedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA
 
-        return ingenEndringUtenUtbetaling || doedsfallMedIngenEndring
+        return doedsfall || ingenEndringUtenUtbetaling
     }
 
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =
@@ -804,8 +801,8 @@ class EtteroppgjoerForbehandlingService(
         val opphoerSkyldesDoedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA
         val resultatErEtterbetaling = forbehandling.etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
 
-        if(opphoerSkyldesDoedsfall) {
-            krevIkkeNull(forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar){
+        if (opphoerSkyldesDoedsfall) {
+            krevIkkeNull(forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar) {
                 "Mangler svar på opphør skyldes dødsfall i etteroppgjørsåret"
             }
 

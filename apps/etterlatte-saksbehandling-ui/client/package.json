@@ -19,7 +19,7 @@
     "@navikt/ds-react": "~7.34.0",
     "@navikt/ds-tokens": "~7.34.0",
     "@navikt/navspa": "^6.0.1",
-    "@reduxjs/toolkit": "^2.10.1",
+    "@reduxjs/toolkit": "^2.11.0",
     "date-fns": "^4.1.0",
     "error-stack-parser": "^2.1.4",
     "is-hotkey": "^0.2.0",
@@ -46,7 +46,7 @@
     "@types/is-hotkey": "^0.1.10",
     "@types/lodash": "^4.17.21",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/react-tabs": "^5.0.5",
     "@types/styled-components": "^5.1.36",
@@ -61,9 +61,9 @@
     "license-checker-rseidelsohn": "^4.4.2",
     "prettier": "^3.6.2",
     "typescript": "~5.9.3",
-    "vite": "7.2.2",
+    "vite": "7.2.4",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "4.0.10"
+    "vitest": "4.0.14"
   },
   "browserslist": {
     "production": [

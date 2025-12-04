@@ -202,7 +202,9 @@ class EtteroppgjoerService(
             EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
             EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
 
-            null -> throw InternfeilException("Mangler etteroppgjoerResultatType for forbehandling ${forbehandling.id}")
+            null -> throw InternfeilException(
+                "Mangler etteroppgjoerResultatType for forbehandling ${forbehandling.id} og kan derfor ikke oppdatere Etteroppgjør status",
+            )
         }
     }
 

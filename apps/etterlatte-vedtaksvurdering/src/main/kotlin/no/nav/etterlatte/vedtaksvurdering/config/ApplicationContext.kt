@@ -5,6 +5,8 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.JOBB_METRIKKER_OPENING_HOURS
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
@@ -56,6 +58,14 @@ class ApplicationContext {
     val dataSource = DataSourceBuilder.createDataSource(env)
 
     val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
+    val featureToggleService =
+        FeatureToggleService.initialiser(
+            FeatureToggleProperties(
+                applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+                host = config.getString("funksjonsbrytere.unleash.host"),
+                apiKey = config.getString("funksjonsbrytere.unleash.token"),
+            ),
+        )
 
     val leaderElectionHttpClient: HttpClient = httpClient()
     val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
@@ -88,6 +98,7 @@ class ApplicationContext {
     val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
+            featureToggleService = featureToggleService,
         )
     val vedtakKlageService =
         VedtakKlageService(

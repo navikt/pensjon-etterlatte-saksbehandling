@@ -379,16 +379,11 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlagUtenAvdoede
         coEvery { grunnlagKlient.hentGrunnlag(forrigebehandlingId, any()) } returns grunnlagUtenAvdoede
-        val avtale = trygdeavtale(forrigebehandlingId)
-        every { avtaleService.hentAvtaleForBehandling(forrigebehandlingId) } returns avtale
-        val avtaleSlot = slot<Trygdeavtale>()
-        every { avtaleService.opprettAvtale(capture(avtaleSlot)) } just Runs
+        every { avtaleService.hentAvtaleForBehandling(forrigebehandlingId) } returns null
 
         runBlocking {
             service.opprettTrygdetiderForBehandling(behandlingId, saksbehandler)
         }
-
-        avtaleSlot.captured.shouldBeEqualToIgnoringFields(avtale, Trygdeavtale::id, Trygdeavtale::behandlingId)
 
         coVerify {
             grunnlagKlient.hentGrunnlag(any(), saksbehandler)
@@ -401,7 +396,6 @@ internal class TrygdetidServiceTest {
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
             avtaleService.hentAvtaleForBehandling(forrigebehandlingId)
-            avtaleService.opprettAvtale(any())
 
             repository.opprettTrygdetid(oppdatertTrygdetidCaptured.captured)
             with(oppdatertTrygdetidCaptured.captured) {

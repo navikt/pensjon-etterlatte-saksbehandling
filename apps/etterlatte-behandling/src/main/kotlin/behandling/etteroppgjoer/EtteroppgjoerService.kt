@@ -87,9 +87,9 @@ class EtteroppgjoerService(
             throw IkkeTillattException("FORBEHADNLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
         }
 
-        val ferdigstiltStatus = finnStatusPaaEtteroppgjoer(forbehandling)
+        val nyEtteroppgjoerStatus = finnStatusPaaEtteroppgjoer(forbehandling)
 
-        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, ferdigstiltStatus)
+        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, nyEtteroppgjoerStatus)
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
     }
 

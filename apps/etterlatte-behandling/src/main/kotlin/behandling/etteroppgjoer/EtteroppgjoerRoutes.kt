@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInn
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpphoerSkyldesDoedsfallRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpprettNyForbehandlingOppgaveRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
@@ -228,6 +229,18 @@ fun Route.etteroppgjoerRoutes(
                             forbehandlingId,
                             opphoerSkyldesDoedsfall = request.opphoerSkyldesDoedsfall,
                             opphoerSkyldesDoedsfallIEtteroppgjoersaar = request.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+                        )
+                    }
+
+                    call.respond(HttpStatusCode.OK)
+                }
+
+                post("opprett") {
+                    val request = call.receive<OpprettNyForbehandlingOppgaveRequest>()
+
+                    inTransaction {
+                        forbehandlingService.opprettOppgaveForOpprettForbehandling(
+                            request.sakId,
                         )
                     }
 

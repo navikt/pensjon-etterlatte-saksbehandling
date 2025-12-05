@@ -2,13 +2,16 @@ package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
@@ -19,6 +22,7 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -44,6 +48,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
+import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -88,6 +93,23 @@ internal class TrygdetidServiceTest {
             avtaleService,
             vedtaksvurderingKlient,
             DummyFeatureToggleService(),
+        )
+
+    private fun trygdeavtale(behandlingId: UUID) =
+        Trygdeavtale(
+            id = randomUUID(),
+            behandlingId = behandlingId,
+            avtaleKode = "",
+            avtaleDatoKode = "",
+            avtaleKriteriaKode = "",
+            personKrets = JaNei.JA,
+            arbInntekt1G = JaNei.JA,
+            arbInntekt1GKommentar = "",
+            beregArt50 = JaNei.JA,
+            beregArt50Kommentar = "",
+            nordiskTrygdeAvtale = JaNei.JA,
+            nordiskTrygdeAvtaleKommentar = "",
+            kilde = Grunnlagsopplysning.automatiskSaksbehandler,
         )
 
     @BeforeEach
@@ -280,10 +302,16 @@ internal class TrygdetidServiceTest {
         every { repository.opprettTrygdetid(capture(oppdatertTrygdetidCaptured)) } returns forrigeTrygdetid
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        val avtale = trygdeavtale(forrigebehandlingId)
+        every { avtaleService.hentAvtaleForBehandling(forrigebehandlingId) } returns avtale
+        val avtaleSlot = slot<Trygdeavtale>()
+        every { avtaleService.opprettAvtale(capture(avtaleSlot)) } just Runs
 
         runBlocking {
             service.opprettTrygdetiderForBehandling(behandlingId, saksbehandler)
         }
+
+        avtaleSlot.captured.shouldBeEqualToIgnoringFields(avtale, Trygdeavtale::behandlingId, Trygdeavtale::id)
 
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
@@ -292,6 +320,8 @@ internal class TrygdetidServiceTest {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
+            avtaleService.hentAvtaleForBehandling(forrigebehandlingId)
+            avtaleService.opprettAvtale(any())
 
             repository.opprettTrygdetid(oppdatertTrygdetidCaptured.captured)
             with(oppdatertTrygdetidCaptured.captured) {
@@ -349,6 +379,7 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlagUtenAvdoede
         coEvery { grunnlagKlient.hentGrunnlag(forrigebehandlingId, any()) } returns grunnlagUtenAvdoede
+        every { avtaleService.hentAvtaleForBehandling(forrigebehandlingId) } returns null
 
         runBlocking {
             service.opprettTrygdetiderForBehandling(behandlingId, saksbehandler)
@@ -364,6 +395,7 @@ internal class TrygdetidServiceTest {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
+            avtaleService.hentAvtaleForBehandling(forrigebehandlingId)
 
             repository.opprettTrygdetid(oppdatertTrygdetidCaptured.captured)
             with(oppdatertTrygdetidCaptured.captured) {

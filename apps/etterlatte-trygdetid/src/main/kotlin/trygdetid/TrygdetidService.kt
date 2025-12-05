@@ -283,6 +283,7 @@ class TrygdetidServiceImpl(
                 } else {
                     val kopierteTrygdetider =
                         kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider, eksisterendeTrygdetider)
+                    kopierAvtale(behandling.id, sisteIverksatteBehandling.behandlingId)
                     opprettTrygdetiderForRevurdering(behandling, kopierteTrygdetider, avdoede, brukerTokenInfo)
                 }
             }
@@ -663,7 +664,7 @@ class TrygdetidServiceImpl(
         val avtale =
             avtaleService
                 .hentAvtaleForBehandling(forrigeBehandlingId)
-                ?.copy(id = UUID.randomUUID(), behandlingId)
+                ?.copy(id = UUID.randomUUID(), behandlingId = behandlingId)
 
         if (avtale == null) {
             logger.info("Fant ingen avtale på forrigeBehandling – hopper over kopiering av avtale")

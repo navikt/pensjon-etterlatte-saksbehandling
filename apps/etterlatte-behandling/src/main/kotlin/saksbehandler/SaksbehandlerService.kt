@@ -97,5 +97,11 @@ class SaksbehandlerServiceImpl(
 
     private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
         dao.hentSaksbehandlerEnheter(ident)
-            ?: runBlocking { axsysKlient.hentEnheterForIdent(ident) }
+            ?: runBlocking {
+                if (featureToggleService.isEnabled(EtteroppgjoerToggles.HENT_ENHETER_FRA_ENTRA_PROXY, false)) {
+                    entraProxyKlient.hentEnheterForIdent(ident)
+                } else {
+                    axsysKlient.hentEnheterForIdent(ident)
+                }
+            }
 }

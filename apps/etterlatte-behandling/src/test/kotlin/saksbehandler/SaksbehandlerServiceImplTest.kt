@@ -122,6 +122,7 @@ class SaksbehandlerServiceImplTest(
         val ident = "ident"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
+        coEvery { featureToggleService.isEnabled(any(), false) } returns false
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(porsgrunn)
         coVerify { axsysKlient.hentEnheterForIdent(ident) }
@@ -135,6 +136,7 @@ class SaksbehandlerServiceImplTest(
         val navMoldeNavn = "NAV Molde"
         val molde = SaksbehandlerEnhet(navMoldeEnhetsnr, navMoldeNavn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(molde)
+        coEvery { featureToggleService.isEnabled(any(), false) } returns false
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(molde)

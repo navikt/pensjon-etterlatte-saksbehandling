@@ -59,9 +59,11 @@ internal class OmsMeldtInnEndringRiver(
 
             val oppgaverForJournalpost = behandlingKlient.finnOppgaverForReferanse(journalpostResponse.journalpostId)
             if (oppgaverForJournalpost.any { it.type == OppgaveType.MELDT_INN_ENDRING }) {
-                logger.warn(
+                logger.error(
                     "Vi har allerede opprettet en meld inn endring-oppgave for journalposten til endringen, " +
-                        "lager ikke en ny oppgave. Gjelder journalpost=${journalpostResponse.journalpostId} i sak=${sak.id}",
+                        "lager ikke en ny oppgave. Gjelder journalpost=${journalpostResponse.journalpostId} i sak=${sak.id}. " +
+                        "Sjekk om det er riktig match mellom eventname på mottatt-hendelse, og prøv en redeploy av " +
+                        "selvbetjening-backend og behandling-kafka (løste problemet en annen gang).",
                 )
             } else {
                 behandlingKlient.opprettOppgave(

@@ -58,7 +58,7 @@ internal class OmsMeldtInnEndringRiver(
                     }
 
             val oppgaverForJournalpost = behandlingKlient.finnOppgaverForReferanse(journalpostResponse.journalpostId)
-            if (oppgaverForJournalpost.any { it.type == OppgaveType.MELDT_INN_ENDRING }) {
+            if (oppgaverForJournalpost.any { it.sakId == sak.id && it.type == OppgaveType.MELDT_INN_ENDRING }) {
                 logger.error(
                     "Vi har allerede opprettet en meld inn endring-oppgave for journalposten til endringen, " +
                         "lager ikke en ny oppgave. Gjelder journalpost=${journalpostResponse.journalpostId} i sak=${sak.id}. " +

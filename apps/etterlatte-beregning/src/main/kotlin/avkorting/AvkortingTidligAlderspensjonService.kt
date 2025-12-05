@@ -17,7 +17,14 @@ class AvkortingTidligAlderspensjonService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    // Sjekke om Avkorting innvilga måneder overstyres på grunn av tidlig alderspensjon, og opprett oppgave om opphør
+    /*
+     * Hvis innvilga måneder overstyrespå grunn av tidlig alderspensjon,
+     * skal det opprettes en egen oppgave med frist én måned før forventet uttak av
+     * alderspensjon.
+     *
+     * Systemet håndterer automatisk overgang ved 67 år, men har ingen informasjon om
+     * uttak av tidlig alderspensjon. Saksbehandler må derfor legge inn opphøret manuelt.
+     */
     suspend fun opprettOppgaveHvisTidligAlderspensjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -32,9 +39,7 @@ class AvkortingTidligAlderspensjonService(
         if (overstyrtInntektsavkorting != null) {
             logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
 
-            // Vi trekker fra 2 måneder (2L) for å få måneden før opphør (2024.03).
-            // For eksempel, hvis fom = 2024.1 og innvilgaMaaneder = 3:
-            // 01 + 03 = 4 (2024.04), så 4 - 2L = 2 gir oss 2024.02 som er en månede før 2024.03.
+            // Vi trekker fra 2 måneder for å få måneden før stans av ytelsen
             val innvilgaMaaneder = overstyrtInntektsavkorting.grunnlag.innvilgaMaaneder - 2L
             val oppgaveFrist =
                 aarsoppgjoer.fom
@@ -45,7 +50,7 @@ class AvkortingTidligAlderspensjonService(
                 behandling.sak,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
-                "Opphør av ytelse på grunn av alderspensjon.",
+                "Forventet opphør pga. tidlig alderspensjon. Opphør må legges inn manuelt når bruker faktisk tar ut pensjonen, ellers løper saken til 67 år.",
                 Tidspunkt.ofNorskTidssone(oppgaveFrist, LocalTime.now()),
                 OppgaveKilde.BEHANDLING,
                 behandlingId.toString(),

@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -26,7 +27,11 @@ import java.util.UUID
 
 class VedtakTilbakekrevingServiceTest {
     private val repo = mockk<VedtaksvurderingRepository>()
-    private val service = VedtakTilbakekrevingService(repo)
+    private val featureToggleService =
+        mockk<FeatureToggleService> {
+            every { isEnabled(any(), any(), any()) } returnsArgument 1
+        }
+    private val service = VedtakTilbakekrevingService(repo, featureToggleService)
 
     @Test
     fun `opprettEllerOppdaterVedtak oppretter hvis ikke finnes fra foer`() {

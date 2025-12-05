@@ -102,7 +102,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       )}
 
       {doedsfallIEtteroppgjoersaaret && (
-        <Alert variant="info">
+        <Alert size="small" variant="info">
           Siden bruker er død i etteroppgjørsåret, skal etteroppgjøret ferdigstilles uten brev og endringer.
         </Alert>
       )}

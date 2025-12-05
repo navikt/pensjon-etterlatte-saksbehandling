@@ -87,16 +87,9 @@ class EtteroppgjoerService(
             throw IkkeTillattException("FORBEHADNLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
         }
 
-        val ferdigstiltStatus =
-            when (forbehandling.etteroppgjoerResultatType) {
-                EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
-                EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
-                EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
-                EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+        val nyEtteroppgjoerStatus = finnStatusPaaEtteroppgjoer(forbehandling)
 
-                null -> throw InternfeilException("Mangler beregnetResultatType for forbehandling ${forbehandling.id}")
-            }
-        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, ferdigstiltStatus)
+        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, nyEtteroppgjoerStatus)
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
     }
 
@@ -196,6 +189,23 @@ class EtteroppgjoerService(
 
         return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling, status, false)
             .also { dao.lagreEtteroppgjoer(it) }
+    }
+
+    private fun finnStatusPaaEtteroppgjoer(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerStatus {
+        if (forbehandling.skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
+            return EtteroppgjoerStatus.FERDIGSTILT
+        }
+
+        return when (forbehandling.etteroppgjoerResultatType) {
+            EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+            EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+            EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+            EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+
+            null -> throw InternfeilException(
+                "Mangler etteroppgjoerResultatType for forbehandling ${forbehandling.id} og kan derfor ikke oppdatere Etteroppgjør status",
+            )
+        }
     }
 
     private suspend fun etteroppgjoer(

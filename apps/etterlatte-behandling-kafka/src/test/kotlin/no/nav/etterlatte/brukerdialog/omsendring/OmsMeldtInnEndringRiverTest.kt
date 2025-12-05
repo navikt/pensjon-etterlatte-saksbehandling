@@ -64,6 +64,7 @@ class OmsMeldtInnEndringRiverTest {
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { behandlingKlientMock.finnOppgaverForReferanse(any()) } returns emptyList()
         coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns
             OpprettJournalpostResponse(
                 "JournalId123",

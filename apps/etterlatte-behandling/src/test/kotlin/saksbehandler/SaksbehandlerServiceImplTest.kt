@@ -12,9 +12,11 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.Claims
@@ -35,14 +37,16 @@ class SaksbehandlerServiceImplTest(
 ) {
     private lateinit var dao: SaksbehandlerInfoDao
     private val axsysKlient: AxsysKlient = mockk<AxsysKlient>()
+    private val entraProxyKlient: EntraProxyKlient = mockk<EntraProxyKlient>()
     private val navansattKlient: NavAnsattKlient = mockk<NavAnsattKlient>()
+    private val featureToggleService: FeatureToggleService = mockk<FeatureToggleService>()
     private lateinit var service: SaksbehandlerService
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeAll
     fun beforeAll() {
         dao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
-        service = SaksbehandlerServiceImpl(dao, axsysKlient, navansattKlient)
+        service = SaksbehandlerServiceImpl(dao, axsysKlient, navansattKlient, entraProxyKlient, featureToggleService)
         nyKontekstMedBrukerOgDatabase(user.also { every { it.name() } returns this::class.java.simpleName }, dataSource)
     }
 
@@ -51,7 +55,7 @@ class SaksbehandlerServiceImplTest(
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE saksbehandler_info CASCADE;").execute()
         }
-        clearMocks(navansattKlient, axsysKlient)
+        clearMocks(navansattKlient, axsysKlient, entraProxyKlient, featureToggleService)
     }
 
     @Test
@@ -59,6 +63,7 @@ class SaksbehandlerServiceImplTest(
         val nyidentSaksbehandler = "S12345"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
         coEvery { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
+        coEvery { featureToggleService.isEnabled(any(), false) } returns false
         coEvery {
             navansattKlient.hentSaksbehanderNavn(
                 nyidentSaksbehandler,
@@ -117,6 +122,7 @@ class SaksbehandlerServiceImplTest(
         val ident = "ident"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
+        coEvery { featureToggleService.isEnabled(any(), false) } returns false
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(porsgrunn)
         coVerify { axsysKlient.hentEnheterForIdent(ident) }
@@ -130,6 +136,7 @@ class SaksbehandlerServiceImplTest(
         val navMoldeNavn = "NAV Molde"
         val molde = SaksbehandlerEnhet(navMoldeEnhetsnr, navMoldeNavn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(molde)
+        coEvery { featureToggleService.isEnabled(any(), false) } returns false
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(molde)

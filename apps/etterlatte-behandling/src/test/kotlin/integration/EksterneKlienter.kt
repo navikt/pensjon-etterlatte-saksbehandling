@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
@@ -665,6 +666,23 @@ class AxsysKlientTest : AxsysKlient {
 
     override val serviceName: String
         get() = "Axsys"
+    override val beskrivelse: String
+        get() = "Henter enheter for saksbehandlerident"
+    override val endpoint: String
+        get() = "endpoint"
+
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+}
+
+class EntraProxyKlientTest : EntraProxyKlient {
+    override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> =
+        listOf(
+            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
+            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
+        )
+
+    override val serviceName: String
+        get() = "EntraProxy"
     override val beskrivelse: String
         get() = "Henter enheter for saksbehandlerident"
     override val endpoint: String

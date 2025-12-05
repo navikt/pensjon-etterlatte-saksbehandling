@@ -47,6 +47,8 @@
             <env name="KRR_SCOPE" value="api://dev-gcp.team-rocket.digdir-krr-proxy/.default"/>
             <env name="AXSYS_URL" value="https://axsys.dev-fss-pub.nais.io"/>
             <env name="AXSYS_SCOPE" value="api://dev-fss.org.axsys/.default"/>
+            <env name="ENTRA_PROXY_URL" value="http://entra-proxy.sikkerhetstjenesten.svc.cluster.local/api/v1"/>
+            <env name="ENTRA_PROXY_SCOPE" value="api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default"/>
             <env name="JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS" value="00-23"/>
             <env name="JOBB_SAKSBEHANDLER_OPENING_HOURS" value="00-23"/>
             <env name="JOBB_METRIKKER_OPENING_HOURS" value="00-23"/>

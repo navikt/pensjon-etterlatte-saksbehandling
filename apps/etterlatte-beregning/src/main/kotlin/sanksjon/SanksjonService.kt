@@ -5,12 +5,14 @@ import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
@@ -29,6 +31,7 @@ class SanksjonService(
     private val behandlingKlient: BehandlingKlient,
     private val sanksjonRepository: SanksjonRepository,
     private val featureToggleService: FeatureToggleService,
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -63,16 +66,22 @@ class SanksjonService(
             return
         }
 
-        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
+        val alleIverksatteVedtakSomIkkeErOpphoer = vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+        val sisteIkkeOpphoer =
+            alleIverksatteVedtakSomIkkeErOpphoer
+                .filter {
+                    it.vedtakType != VedtakType.OPPHOER
+                }.sortedByDescending { it.datoAttestert }
+                .first()
 
         val sanksjonerIDenneBehandlingen = sanksjonRepository.hentSanksjon(behandlingId)
-        val sanksjonerIForrigeBehandling = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
+        val sanksjonerIForrigeBehandling = sanksjonRepository.hentSanksjon(sisteIkkeOpphoer.behandlingId)
 
         if (sanksjonerIDenneBehandlingen.isNullOrEmpty()) {
             sanksjonerIForrigeBehandling?.forEach {
                 logger.info(
                     "Kopierer sanksjon [${it.id}] fra forrige behandling til behandlingen " +
-                        "med behandlingID=$behandlingId, fra behandling med id=$forrigeBehandlingId",
+                        "med behandlingID=$behandlingId, fra behandling med id=${sisteIkkeOpphoer.behandlingId}",
                 )
                 sanksjonRepository.opprettSanksjonFraKopi(
                     behandlingId,

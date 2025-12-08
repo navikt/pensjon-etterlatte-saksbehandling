@@ -388,7 +388,7 @@ internal class BehandlingServiceImpl(
     override fun hentSisteIverksatteBehandling(sakId: SakId): Behandling? =
         hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
-            .maxByOrNull { it.behandlingOpprettet }
+            .maxByOrNull { it.sistEndret }
 
     override fun avbrytBehandling(
         behandlingId: UUID,

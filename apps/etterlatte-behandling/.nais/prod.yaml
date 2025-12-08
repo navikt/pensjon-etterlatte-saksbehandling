@@ -165,7 +165,7 @@ spec:
     - name: AXSYS_SCOPE
       value: api://prod-fss.org.axsys/.default
     - name: ENTRA_PROXY_URL
-      value: https://entraproxy.intern.dev.nav.no
+      value: https://entraproxy.intern.nav.no
     - name: ENTRA_PROXY_SCOPE
       value: api://prod-gcp.sikkerhetstjenesten.entra-proxy/.default
     - name: INNTEKTSKOMPONENT_URL

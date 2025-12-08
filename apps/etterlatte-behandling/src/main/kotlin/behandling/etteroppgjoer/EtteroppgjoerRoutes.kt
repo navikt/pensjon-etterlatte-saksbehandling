@@ -101,7 +101,8 @@ fun Route.etteroppgjoerRoutes(
                         )
 
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(
-                            sakId,
+                            sakId = sakId,
+                            opprettetManuelt = true,
                         )
                     }
 
@@ -235,17 +236,19 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(HttpStatusCode.OK)
                 }
 
-                post("opprett") {
-                    val request = call.receive<OpprettNyForbehandlingOppgaveRequest>()
+            }
 
-                    inTransaction {
-                        forbehandlingService.opprettOppgaveForOpprettForbehandling(
-                            request.sakId,
-                        )
-                    }
+            post("opprett-oppgave") {
+                val request = call.receive<OpprettNyForbehandlingOppgaveRequest>()
 
-                    call.respond(HttpStatusCode.OK)
+                inTransaction {
+                    forbehandlingService.opprettOppgaveForOpprettForbehandling(
+                        sakId = request.sakId,
+                        opprettetManuelt = true,
+                    )
                 }
+
+                call.respond(HttpStatusCode.OK)
             }
 
             post("bulk") {

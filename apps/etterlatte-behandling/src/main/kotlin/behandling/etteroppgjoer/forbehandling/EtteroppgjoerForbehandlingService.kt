@@ -394,8 +394,10 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun opprettOppgaveForOpprettForbehandling(sakId: SakId) {
-        etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(sakId)
+    fun opprettOppgaveForOpprettForbehandling(sakId: SakId, opprettetManuelt : Boolean) {
+        etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+            sakId = sakId,
+            opprettetManuelt = opprettetManuelt)
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(

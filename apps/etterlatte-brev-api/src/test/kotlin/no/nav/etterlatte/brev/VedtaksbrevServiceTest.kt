@@ -54,6 +54,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.KanIkkeOppretteVedtaksbrev
 import no.nav.etterlatte.brev.vedtaksbrev.SaksbehandlerOgAttestantSammePerson
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -103,6 +104,10 @@ internal class VedtaksbrevServiceTest {
     private val brevKodeMappingVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val featureToggleService =
+        mockk<FeatureToggleService> {
+            every { isEnabled(any(), any(), any()) } returnsArgument 1
+        }
     private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
     private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
@@ -134,6 +139,7 @@ internal class VedtaksbrevServiceTest {
             BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService, trygdetidService),
             brevDataMapperFerdigstilling,
             behandlingService,
+            featureToggleService,
         )
 
     @BeforeEach

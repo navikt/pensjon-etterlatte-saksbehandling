@@ -39,36 +39,6 @@ class Vedtakstidslinje(
         )
     }
 
-    private fun hentSenesteVedtakSomKanLoepePaaDato(dato: LocalDate): Vedtak? =
-        iverksatteVedtak
-            .filter { it.type.vanligBehandling }
-            .filter {
-                it.virkningstidspunkt
-                    .atDay(1)
-                    .isAfter(foersteMuligeVedtaksdag(dato))
-                    .not()
-            }.maxByOrNull { it.attestasjon?.tidspunkt!! }
-            ?.let { senesteVedtak ->
-                return if (senesteVedtak.opphoerFraOgMed == null || senesteVedtak.opphoerFraOgMed!!.atDay(1) > dato) {
-                    senesteVedtak
-                } else {
-                    null
-                }
-            }
-
-    private fun hentIverksatteVedtak(): List<Vedtak> =
-        vedtak
-            .filter { it.status == VedtakStatus.IVERKSATT }
-            .filter { it.innhold !is VedtakInnhold.Tilbakekreving }
-
-    private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
-        val foersteVirkningsdato =
-            (iverksatteVedtak.minBy { it.virkningstidspunkt }.innhold as VedtakInnhold.Behandling)
-                .virkningstidspunkt
-                .atDay(1)
-        return maxOf(foersteVirkningsdato, fraDato)
-    }
-
     /**
      * Opprette en kontinuerlig, "gjeldende" tidslinje med vedtak og underliggende perioder
      */
@@ -96,7 +66,7 @@ class Vedtakstidslinje(
     }
 
     fun innvilgedePerioder(): List<InnvilgetPeriode> {
-        val foersteVirk = vedtak.minOf { it.virkningstidspunkt }
+        val foersteVirk = iverksatteVedtak.minOf { it.virkningstidspunkt }
         val sammenstilt = sammenstill(foersteVirk)
         if (sammenstilt.size == 1) {
             // Håndter special case
@@ -158,6 +128,36 @@ class Vedtakstidslinje(
 
         return innvilgedePerioder
     }
+
+    private fun hentIverksatteVedtak(): List<Vedtak> =
+        vedtak
+            .filter { it.status == VedtakStatus.IVERKSATT }
+            .filter { it.innhold is VedtakInnhold.Behandling }
+
+    private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
+        val foersteVirkningsdato =
+            (iverksatteVedtak.minBy { it.virkningstidspunkt }.innhold as VedtakInnhold.Behandling)
+                .virkningstidspunkt
+                .atDay(1)
+        return maxOf(foersteVirkningsdato, fraDato)
+    }
+
+    private fun hentSenesteVedtakSomKanLoepePaaDato(dato: LocalDate): Vedtak? =
+        iverksatteVedtak
+            .filter { it.type.vanligBehandling }
+            .filter {
+                it.virkningstidspunkt
+                    .atDay(1)
+                    .isAfter(foersteMuligeVedtaksdag(dato))
+                    .not()
+            }.maxByOrNull { it.attestasjon?.tidspunkt!! }
+            ?.let { senesteVedtak ->
+                return if (senesteVedtak.opphoerFraOgMed == null || senesteVedtak.opphoerFraOgMed!!.atDay(1) > dato) {
+                    senesteVedtak
+                } else {
+                    null
+                }
+            }
 
     // Opprette kopier av data class-struktur, med (potensielt) endret liste med utbetalingsperioder
     private fun Vedtak.kopier(gyldighetsperiode: Periode): Vedtak =

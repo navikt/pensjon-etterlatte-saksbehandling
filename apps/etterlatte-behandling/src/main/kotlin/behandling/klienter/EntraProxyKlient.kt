@@ -41,7 +41,7 @@ class EntraProxyKlientImpl(
         }
         return try {
             val response =
-                client.get("$url/api/enhet/ansatt/$ident") {
+                client.get("$url/api/v1/enhet/ansatt/$ident") {
                     navConsumerId("etterlatte-behandling")
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)

@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.beInstanceOf
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.math.BigDecimal
 import java.time.Month
@@ -186,6 +188,34 @@ internal class VedtaksvurderingRepositoryTest(
             innhold should beInstanceOf<VedtakInnhold.Tilbakekreving>()
             (innhold as VedtakInnhold.Tilbakekreving).tilbakekreving shouldBe objectMapper.createObjectNode()
         }
+    }
+
+    @Test
+    fun `skal tilbakestille tilbakekrevingsvedtak riktig hvis de har feilet`() {
+        val nyttVedtak = opprettVedtakTilbakekreving()
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+        val vedtakFattet =
+            VedtakFattet(
+                ansvarligSaksbehandler = "saksbehandler",
+                ansvarligEnhet = Enheter.defaultEnhet.enhetNr,
+                tidspunkt = Tidspunkt.now(),
+            )
+        repository.fattVedtak(vedtak.behandlingId, vedtakFattet)
+        repository.attesterVedtak(
+            vedtak.behandlingId,
+            Attestasjon(
+                attestant = "attestant",
+                attesterendeEnhet = Enheter.defaultEnhet.enhetNr,
+                tidspunkt = Tidspunkt.now(),
+            ),
+        )
+        assertDoesNotThrow {
+            repository.tilbakestillTilbakekrevingsvedtak(vedtak.behandlingId)
+        }
+        val tilbakestiltVedtak = repository.hentVedtak(vedtak.behandlingId)
+        tilbakestiltVedtak shouldNotBe null
+        tilbakestiltVedtak?.status shouldBe VedtakStatus.FATTET_VEDTAK
+        tilbakestiltVedtak?.attestasjon shouldBe null
     }
 
     @Test

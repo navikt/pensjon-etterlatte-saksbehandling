@@ -394,8 +394,10 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun opprettOppgaveForOpprettForbehandling(sakId: SakId) {
-        etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(sakId)
+    fun opprettOppgaveForOpprettForbehandling(sakId: SakId, opprettetManuelt : Boolean) {
+        etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+            sakId = sakId,
+            opprettetManuelt = opprettetManuelt)
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(
@@ -861,6 +863,10 @@ data class InformasjonFraBrukerRequest(
 data class OpphoerSkyldesDoedsfallRequest(
     val opphoerSkyldesDoedsfall: JaNei,
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
+)
+
+data class OpprettNyForbehandlingOppgaveRequest(
+    val sakId: SakId,
 )
 
 data class BeregnetResultatOgBrevSomSkalSlettes(

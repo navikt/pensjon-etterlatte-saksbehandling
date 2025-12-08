@@ -27,6 +27,7 @@ import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentMo
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { SakType } from '~shared/types/sak'
 import { EtteroppgjoerForbehandlingTabell } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingTabell'
+import { SandboxIcon } from '@navikt/aksel-icons'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -192,9 +193,9 @@ export const SakOversikt = ({
               {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
-                  <EtteroppgjoerForbehandlingTabell sakId={sak.id} />
+                  <EtteroppgjoerForbehandlingTabell sakId={sak.id} hentNyeOppgaver={() => oppgaverFetch(sak.id)} />
                   {etteroppgjoerForbehandlingKnappEnabled && (
-                    <Box>
+                    <Box marginBlock="5">
                       {mapResult(opprettForbehandlingStatus, {
                         pending: <Spinner label="Oppretter etteroppgjør" />,
                         error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
@@ -204,8 +205,9 @@ export const SakOversikt = ({
                         loading={isPending(opprettForbehandlingStatus)}
                         variant="secondary"
                         onClick={() => opprettForbehandlingFetch(sak.id)}
+                        icon={<SandboxIcon />}
                       >
-                        Opprett etteroppgjør forbehandling
+                        Opprett etteroppgjør forbehandling (kun i dev)
                       </Button>
                     </Box>
                   )}

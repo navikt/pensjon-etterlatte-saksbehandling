@@ -12,18 +12,36 @@ import {
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { mapResult } from '~shared/api/apiUtils'
 import { HarSvartIModiaModal } from '~components/person/sakOgBehandling/HarSvartIModiaModal'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { OpprettNyForbehandling } from './OpprettNyForbehandling'
 
-export function EtteroppgjoerForbehandlingTabell({ sakId }: { sakId: number }) {
+export function EtteroppgjoerForbehandlingTabell({
+  sakId,
+  hentNyeOppgaver,
+}: {
+  sakId: number
+  hentNyeOppgaver: () => void
+}) {
   const [hentEtteroppgjoerForbehandlingerResult, hentEtteroppgjoerForbehandlingerFetch] = useApiCall(
     hentEtteroppgjoerForbehandlinger
   )
+
+  const opprettForbehandlingKnappEnabled = useFeaturetoggle(FeatureToggle.vis_opprett_forbehandling)
 
   const harFerdigstiltForbehandling = (forbehandlinger: Array<EtteroppgjoerForbehandling>) => {
     const ferdigstilteForbehandlinger = [...forbehandlinger].filter(
       (forbehandling) => forbehandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
     )
 
-    return !!ferdigstilteForbehandlinger?.length
+    return ferdigstilteForbehandlinger.length > 0
+  }
+
+  const harAvbruttForbehandling = (forbehandlinger: Array<EtteroppgjoerForbehandling>) => {
+    const ferdigstilteForbehandlinger = [...forbehandlinger].filter(
+      (forbehandling) => forbehandling.status === EtteroppgjoerForbehandlingStatus.AVBRUTT
+    )
+
+    return ferdigstilteForbehandlinger.length > 0
   }
 
   const relevanteForbehandlinger = (forbehandlinger: Array<EtteroppgjoerForbehandling>) =>
@@ -75,6 +93,11 @@ export function EtteroppgjoerForbehandlingTabell({ sakId }: { sakId: number }) {
               ))}
             </Table.Body>
           </Table>
+
+          {opprettForbehandlingKnappEnabled &&
+            (harFerdigstiltForbehandling(forbehandlinger) || harAvbruttForbehandling(forbehandlinger)) && (
+              <OpprettNyForbehandling sakId={sakId} hentNyeOppgaver={hentNyeOppgaver} />
+            )}
         </>
       )
     },

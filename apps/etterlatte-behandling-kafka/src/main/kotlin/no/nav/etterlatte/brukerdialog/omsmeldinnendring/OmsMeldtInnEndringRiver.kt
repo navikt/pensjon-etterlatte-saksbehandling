@@ -57,17 +57,27 @@ internal class OmsMeldtInnEndringRiver(
                         return
                     }
 
-            behandlingKlient.opprettOppgave(
-                sakId = sak.id,
-                oppgave =
-                    NyOppgaveDto(
-                        oppgaveKilde = OppgaveKilde.BRUKERDIALOG_SELVBETJENING,
-                        oppgaveType = OppgaveType.MELDT_INN_ENDRING,
-                        merknad = mapEndringTilLesbarString(omsEndring = endringer.endring),
-                        referanse = journalpostResponse.journalpostId,
-                        frist = null,
-                    ),
-            )
+            val oppgaverForJournalpost = behandlingKlient.finnOppgaverForReferanse(journalpostResponse.journalpostId)
+            if (oppgaverForJournalpost.any { it.sakId == sak.id && it.type == OppgaveType.MELDT_INN_ENDRING }) {
+                logger.error(
+                    "Vi har allerede opprettet en meld inn endring-oppgave for journalposten til endringen, " +
+                        "lager ikke en ny oppgave. Gjelder journalpost=${journalpostResponse.journalpostId} i sak=${sak.id}. " +
+                        "Sjekk om det er riktig match mellom eventname på mottatt-hendelse, og prøv en redeploy av " +
+                        "selvbetjening-backend og behandling-kafka (løste problemet en annen gang).",
+                )
+            } else {
+                behandlingKlient.opprettOppgave(
+                    sakId = sak.id,
+                    oppgave =
+                        NyOppgaveDto(
+                            oppgaveKilde = OppgaveKilde.BRUKERDIALOG_SELVBETJENING,
+                            oppgaveType = OppgaveType.MELDT_INN_ENDRING,
+                            merknad = mapEndringTilLesbarString(omsEndring = endringer.endring),
+                            referanse = journalpostResponse.journalpostId,
+                            frist = null,
+                        ),
+                )
+            }
             mottatMeldtInnEndringFullfoert(sak.id, endringer.id)
         } catch (e: Exception) {
             // Selvbetjening-backend vil fortsette å sende nye meldinger til dette ikke feiler

@@ -157,6 +157,10 @@ spec:
       value: https://axsys.dev-fss-pub.nais.io
     - name: AXSYS_SCOPE
       value: api://dev-fss.org.axsys/.default
+    - name: ENTRA_PROXY_URL
+      value: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local/api/v1
+    - name: ENTRA_PROXY_SCOPE
+      value: api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default
     - name: INNTEKTSKOMPONENT_URL
       value: https://ikomp-q2.dev-fss-pub.nais.io
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE

@@ -18,6 +18,8 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -32,6 +34,15 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+enum class VedtakToggles(
+    private val toggle: String,
+) : FeatureToggle {
+    TILLAT_DOBBEL_ATTESTERING("tillat-dobbel-attestering"),
+    ;
+
+    override fun key(): String = toggle
+}
+
 class VedtaksbrevService(
     private val db: BrevRepository,
     private val vedtaksvurderingService: VedtaksvurderingService,
@@ -41,6 +52,7 @@ class VedtaksbrevService(
     private val brevDataMapperRedigerbartUtfallVedtak: BrevDataMapperRedigerbartUtfallVedtak,
     private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
@@ -164,7 +176,19 @@ class VedtaksbrevService(
                 brukerTokenInfo,
             )
 
-        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK && !migrering) {
+        val gyldigVedtakStatus =
+            if (brev.brevkoder == Brevkoder.TILBAKEKREVING &&
+                featureToggleService.isEnabled(
+                    VedtakToggles.TILLAT_DOBBEL_ATTESTERING,
+                    false,
+                )
+            ) {
+                listOf(VedtakStatus.FATTET_VEDTAK, VedtakStatus.ATTESTERT)
+            } else {
+                listOf(VedtakStatus.FATTET_VEDTAK)
+            }
+
+        if (vedtakStatus !in gyldigVedtakStatus && !migrering) {
             throw IllegalStateException(
                 "Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=${brev.id})",
             )

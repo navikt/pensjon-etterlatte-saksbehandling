@@ -177,7 +177,12 @@ class VedtaksbrevService(
             )
 
         val gyldigVedtakStatus =
-            if (featureToggleService.isEnabled(VedtakToggles.TILLAT_DOBBEL_ATTESTERING, false)) {
+            if (brev.brevkoder == Brevkoder.TILBAKEKREVING &&
+                featureToggleService.isEnabled(
+                    VedtakToggles.TILLAT_DOBBEL_ATTESTERING,
+                    false,
+                )
+            ) {
                 listOf(VedtakStatus.FATTET_VEDTAK, VedtakStatus.ATTESTERT)
             } else {
                 listOf(VedtakStatus.FATTET_VEDTAK)

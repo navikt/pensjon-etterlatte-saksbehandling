@@ -65,6 +65,8 @@ import no.nav.etterlatte.brev.vedtaksbrev.StrukturertBrevService
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -88,6 +90,14 @@ internal class ApplicationContext {
         BrevbakerKlient(
             httpClient(BREVBAKER_SCOPE),
             env.requireEnvValue(BREVBAKER_URL),
+        )
+    val featureToggleService =
+        FeatureToggleService.initialiser(
+            FeatureToggleProperties(
+                applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+                host = config.getString("funksjonsbrytere.unleash.host"),
+                apiKey = config.getString("funksjonsbrytere.unleash.token"),
+            ),
         )
 
     val regoppslagKlient =
@@ -182,6 +192,7 @@ internal class ApplicationContext {
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
             behandlingService,
+            featureToggleService,
         )
     val brevDataMapperFerdigstillVarsel =
         BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService)

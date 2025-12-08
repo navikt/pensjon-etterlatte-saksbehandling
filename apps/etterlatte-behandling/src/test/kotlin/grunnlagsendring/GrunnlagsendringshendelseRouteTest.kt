@@ -10,7 +10,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -185,29 +184,19 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                     }.also { assertEquals(HttpStatusCode.OK, it.status) }
 
             val hendelser: List<Grunnlagsendringshendelse> = hendelserResponse.body()
-            val grunnlagsendringshendelse =
-                hendelser
-                    .single()
-                    .also {
-                        it.status shouldBe GrunnlagsendringStatus.SJEKKET_AV_JOBB
-                        it.sakId shouldBe sak.id
-                        it.type shouldBe GrunnlagsendringsType.INSTITUSJONSOPPHOLD
-                        it.behandlingId shouldBe null
-                    }
+            val grunnlagsendringshendelse = hendelser.single()
 
-            println(
-                client
-                    .get("/sak/${sak.id}/oppgaver")
-                    .bodyAsText(),
-            )
+            grunnlagsendringshendelse.status shouldBe GrunnlagsendringStatus.SJEKKET_AV_JOBB
+            grunnlagsendringshendelse.sakId shouldBe sak.id
+            grunnlagsendringshendelse.type shouldBe GrunnlagsendringsType.INSTITUSJONSOPPHOLD
+            grunnlagsendringshendelse.behandlingId shouldBe null
 
-            val oppgave: OppgaveIntern =
-                client
-                    .get("/api/oppgaver//sak/${sak.id}/oppgaver")
-                    .body<List<OppgaveIntern>>()
+            val oppgaver = client.get("/oppgaver/sak/${sak.id}/oppgaver").body<List<OppgaveIntern>>()
+            val oppgave =
+                oppgaver
                     .single { it.type == OppgaveType.VURDER_KONSEKVENS }
 
-            oppgave.referanse shouldBe grunnlagsendringshendelse.id
+            oppgave.referanse shouldBe grunnlagsendringshendelse.id.toString()
             oppgave.status shouldBe Status.NY
             oppgave.saksbehandler shouldBe null
         }
@@ -270,8 +259,10 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
         block: HttpRequestBuilder.() -> Unit = {},
     ): HttpResponse =
         get {
-            addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
             url(urlString)
             block()
+            if (headers[HttpHeaders.Authorization] == null) {
+                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
+            }
         }
 }

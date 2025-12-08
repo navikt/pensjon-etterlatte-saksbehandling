@@ -56,7 +56,10 @@ class Vedtakstidslinje(
                 }
             }
 
-    private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.status === VedtakStatus.IVERKSATT }
+    private fun hentIverksatteVedtak(): List<Vedtak> =
+        vedtak
+            .filter { it.status == VedtakStatus.IVERKSATT }
+            .filter { it.innhold !is VedtakInnhold.Tilbakekreving }
 
     private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
         val foersteVirkningsdato =

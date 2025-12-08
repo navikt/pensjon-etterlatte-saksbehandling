@@ -514,8 +514,8 @@ class VedtaksvurderingRepository(
             query =
                 """
                 UPDATE vedtak 
-                SET status = 'FATTET_VEDTAK', attestertvedtakenhet = null, attestant = null, datoattestert = null 
-                WHERE behandlingId = :behandlingId AND type = 'TILBAKEKREVING' AND status = 'ATTESTERT'
+                SET vedtakstatus = 'FATTET_VEDTAK', attestertvedtakenhet = null, attestant = null, datoattestert = null 
+                WHERE behandlingId = :behandlingId AND type = 'TILBAKEKREVING' AND vedtakstatus = 'ATTESTERT'
                 """.trimIndent(),
             params = mapOf("behandlingId" to tilbakekrevingId),
             loggtekst = "Tilbakestiller tilbakerkreving fra attestert siden den feilet mot tilbakekrevingskomponenten",

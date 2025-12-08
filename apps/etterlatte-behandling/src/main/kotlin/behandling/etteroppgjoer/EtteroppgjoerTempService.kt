@@ -26,6 +26,7 @@ class EtteroppgjoerTempService(
     fun opprettOppgaveForOpprettForbehandling(
         sakId: SakId,
         merknad: String? = null,
+        opprettetManuelt: Boolean? = false,
     ) {
         // Samme oppgave brukes for oppretting og behandling av forbehandling.
         // En tom referanse betyr at oppgaven gjelder oppretting.
@@ -44,7 +45,15 @@ class EtteroppgjoerTempService(
             }
 
             eksisterendeOppgaver.isNotEmpty() -> {
-                logger.info("Det eksisterer allerede en oppgave for opprette forbehandling i sak=$sakId, hopper over opprettelse")
+                if(opprettetManuelt == true) {
+                    // Hvis oppgaven prøves å opprettes manuelt skal vi rapportere tilbake feil i saksbehandlingsløsningen
+                    throw InternfeilException("Det eksisterer allerede en oppgave for opprette forbehandling i " +
+                        "sak=$sakId, hopper over opprettelse")
+                }
+                else {
+                    logger.info("Det eksisterer allerede en oppgave for opprette forbehandling i sak=$sakId, " +
+                        "hopper over opprettelse")
+                }
                 return
             }
 

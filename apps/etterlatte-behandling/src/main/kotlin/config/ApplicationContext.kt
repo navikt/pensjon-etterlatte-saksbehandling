@@ -73,8 +73,6 @@ import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
-import no.nav.etterlatte.behandling.klienter.AxsysKlientImpl
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -253,14 +251,6 @@ private fun krrHttKlient(config: Config) =
         azureAppScope = config.getString("krr.scope"),
     )
 
-private fun axsysKlient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("axsys.scope"),
-    )
-
 private fun entraProxyKlient(config: Config) =
     httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),
@@ -330,7 +320,6 @@ internal class ApplicationContext(
         ),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
-    val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val entraProxyKlient: EntraProxyKlient = EntraProxyKlientImpl(entraProxyKlient(config), url = config.getString("entraProxy.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
@@ -414,7 +403,7 @@ internal class ApplicationContext(
     private val klageHendelser = KlageHendelserServiceImpl(rapid)
     private val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val saksbehandlerService: SaksbehandlerService =
-        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient, entraProxyKlient, featureToggleService)
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, navAnsattKlient, entraProxyKlient)
     val oppgaveService =
         OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
     val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
@@ -566,7 +555,6 @@ internal class ApplicationContext(
 
     private val externalServices: List<Pingable> =
         listOf(
-            axsysKlient,
             entraProxyKlient,
             navAnsattKlient,
             skjermingKlient,
@@ -782,7 +770,7 @@ internal class ApplicationContext(
         )
 
     private val saksbehandlerJobService =
-        SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient, entraProxyKlient, featureToggleService)
+        SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, entraProxyKlient)
 
     val opprettEtteroppgjoerJobService =
         OpprettEtteroppgjoerJobService(

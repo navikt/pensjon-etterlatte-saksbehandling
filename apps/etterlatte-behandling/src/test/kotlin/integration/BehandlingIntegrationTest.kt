@@ -118,7 +118,6 @@ abstract class BehandlingIntegrationTest {
                 tilbakekrevingKlient = tilbakekrevingKlient ?: TilbakekrevingKlientTest(),
                 pesysKlient = PesysKlientTest(),
                 krrKlient = KrrklientTest(),
-                axsysKlient = AxsysKlientTest(),
                 entraProxyKlient = EntraProxyKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),

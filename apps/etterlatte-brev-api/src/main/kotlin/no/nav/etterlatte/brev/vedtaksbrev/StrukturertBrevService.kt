@@ -64,8 +64,13 @@ class StrukturertBrevService(
         brevRequest: BrevRequest,
     ): Brev {
         val typeForBrev = brevRequest.brevFastInnholdData.brevKode.brevtype
-        krev(hentBrevAvTypeForBehandling(behandlingId, typeForBrev) == null) {
-            "Strukturert brev av type $typeForBrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
+        val brev = hentBrevAvTypeForBehandling(behandlingId, typeForBrev)
+
+        if (brev != null) {
+            logger.info(
+                "Strukturert brev av type $typeForBrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt. Returnerer brev (id=${brev.id})",
+            )
+            return brev
         }
 
         val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest

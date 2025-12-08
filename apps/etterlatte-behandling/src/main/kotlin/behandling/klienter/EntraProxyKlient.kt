@@ -62,7 +62,7 @@ class EntraProxyKlientImpl(
 
     override suspend fun ping(konsument: String?): PingResult =
         client.ping(
-            pingUrl = url.plus("/internal/isReady"),
+            pingUrl = url.plus("/monitoring/health/readiness"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,

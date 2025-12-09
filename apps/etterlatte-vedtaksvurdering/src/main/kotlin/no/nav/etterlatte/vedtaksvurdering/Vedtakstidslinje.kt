@@ -12,13 +12,14 @@ import java.time.YearMonth
 class Vedtakstidslinje(
     private val vedtak: List<Vedtak>,
 ) {
-    private val iverksatteVedtak = hentIverksatteVedtak()
+    private val behandlingVedtak = vedtak.filter { it.innhold is VedtakInnhold.Behandling }
+    private val iverksatteBehandlingVedtak = hentIverksatteBehandlingVedtak()
 
     fun harLoependeVedtakPaaEllerEtter(dato: LocalDate): LoependeYtelse {
         val erUnderSamordning =
-            vedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
+            behandlingVedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
 
-        if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato)
+        if (iverksatteBehandlingVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato)
 
         val senesteVedtakPaaDato = hentSenesteVedtakSomKanLoepePaaDato(dato)
         val erLoepende = senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
@@ -46,8 +47,7 @@ class Vedtakstidslinje(
         val vedtakByVirkningsdato = mutableMapOf<Periode, Vedtak>()
         var currentVirkningstidspunkt: YearMonth? = null
 
-        for (currentVedtak in vedtak
-            .filter { it.innhold is VedtakInnhold.Behandling }
+        for (currentVedtak in behandlingVedtak
             .filter { it.vedtakFattet != null }
             .sortedByDescending { it.vedtakFattet!!.tidspunkt }) {
             with(currentVedtak) {
@@ -66,7 +66,7 @@ class Vedtakstidslinje(
     }
 
     fun innvilgedePerioder(): List<InnvilgetPeriode> {
-        val foersteVirk = iverksatteVedtak.minOf { it.virkningstidspunkt }
+        val foersteVirk = behandlingVedtak.minOf { it.virkningstidspunkt }
         val sammenstilt = sammenstill(foersteVirk)
         if (sammenstilt.size == 1) {
             // Håndter special case
@@ -129,21 +129,18 @@ class Vedtakstidslinje(
         return innvilgedePerioder
     }
 
-    private fun hentIverksatteVedtak(): List<Vedtak> =
-        vedtak
-            .filter { it.status == VedtakStatus.IVERKSATT }
-            .filter { it.innhold is VedtakInnhold.Behandling }
+    private fun hentIverksatteBehandlingVedtak(): List<Vedtak> = behandlingVedtak.filter { it.status == VedtakStatus.IVERKSATT }
 
     private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
         val foersteVirkningsdato =
-            (iverksatteVedtak.minBy { it.virkningstidspunkt }.innhold as VedtakInnhold.Behandling)
+            (iverksatteBehandlingVedtak.minBy { it.virkningstidspunkt }.innhold as VedtakInnhold.Behandling)
                 .virkningstidspunkt
                 .atDay(1)
         return maxOf(foersteVirkningsdato, fraDato)
     }
 
     private fun hentSenesteVedtakSomKanLoepePaaDato(dato: LocalDate): Vedtak? =
-        iverksatteVedtak
+        iverksatteBehandlingVedtak
             .filter { it.type.vanligBehandling }
             .filter {
                 it.virkningstidspunkt

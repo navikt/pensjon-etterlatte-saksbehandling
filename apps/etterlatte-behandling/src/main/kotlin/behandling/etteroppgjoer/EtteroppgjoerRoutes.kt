@@ -311,9 +311,10 @@ fun Route.etteroppgjoerRoutes(
                         opprettetManuelt = true,
                     )
                 }
+
+                call.respond(HttpStatusCode.OK)
             }
 
-            call.respond(HttpStatusCode.OK)
         }
     }
 }

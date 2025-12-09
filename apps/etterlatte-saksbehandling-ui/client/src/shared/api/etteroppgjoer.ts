@@ -23,7 +23,7 @@ export const opprettEtteroppgjoerForbehandlingIDev = async (
 export const opprettEtteroppgjoerForbehandlingOppgave = async (
   sakId: number
 ): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
-  return apiClient.post(`/etteroppgjoer/forbehandling/opprett-oppgave`, { sakId: sakId })
+  return apiClient.post(`/etteroppgjoer/tilbakestill-og-opprett-forbehandlingsoppgave`, { sakId: sakId })
 }
 
 export const opprettEtteroppgoerForbehandling = async (args: {

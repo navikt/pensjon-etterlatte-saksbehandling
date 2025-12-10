@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInn
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpphoerSkyldesDoedsfallRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpprettNyForbehandlingOppgaveRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
@@ -108,6 +107,34 @@ fun Route.etteroppgjoerRoutes(
 
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+
+            post("tilbakestill-og-opprett-forbehandlingsoppgave") {
+                kunSkrivetilgang {
+                    inTransaction {
+                        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+
+                        krev(etteroppgjoer.kanTilbakestillesMedNyForbehandling()) {
+                            "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke tilbakestille " +
+                                    "og opprette ny forbehandling"
+                        }
+
+                        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                            sakId,
+                            etteroppgjoer.inntektsaar,
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                        )
+
+
+                        forbehandlingService.opprettOppgaveForOpprettForbehandling(
+                            sakId = sakId,
+                            opprettetManuelt = true,
+                        )
+                    }
+
+                    call.respond(HttpStatusCode.OK)
+                }
+
             }
 
             post("/forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
@@ -285,36 +312,6 @@ fun Route.etteroppgjoerRoutes(
 
                 call.respond(HttpStatusCode.OK)
             }
-        }
-
-        post("tilbakestill-og-opprett-forbehandlingsoppgave") {
-            val request = call.receive<OpprettNyForbehandlingOppgaveRequest>()
-
-            kunSkrivetilgang {
-                inTransaction {
-                    val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
-
-                    krev(etteroppgjoer.kanTilbakestillesMedNyForbehandling()) {
-                        "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke tilbakestille " +
-                                "og opprette ny forbehandling"
-                    }
-
-                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                        sakId,
-                        etteroppgjoer.inntektsaar,
-                        EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                    )
-
-
-                    forbehandlingService.opprettOppgaveForOpprettForbehandling(
-                        sakId = request.sakId,
-                        opprettetManuelt = true,
-                    )
-                }
-
-                call.respond(HttpStatusCode.OK)
-            }
-
         }
     }
 }

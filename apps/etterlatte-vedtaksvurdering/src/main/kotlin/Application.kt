@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.config.ApplicationContext
+import no.nav.etterlatte.vedtaksvurdering.etteroppgjoerSystembrukerVedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.samordningSystembrukerVedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
@@ -41,6 +42,7 @@ class Server(
                 )
                 automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
                 samordningSystembrukerVedtakRoute(vedtakSamordningService)
+                etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService)
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
             }

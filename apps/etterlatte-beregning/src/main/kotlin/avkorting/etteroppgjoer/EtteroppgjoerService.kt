@@ -141,6 +141,7 @@ class EtteroppgjoerService(
 
         val sisteIverksatteAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, sisteIverksatteBehandlingId, true)
         val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, forbehandlingId, false)
+
         val inntektsgrunnlag =
             krevIkkeNull(avkortingRepository.hentFaktiskInntekt(nyForbehandlingAvkorting.id)) {
                 "Avkortingen for etteroppgjøret må ha lagret et inntektsgrunnlag"

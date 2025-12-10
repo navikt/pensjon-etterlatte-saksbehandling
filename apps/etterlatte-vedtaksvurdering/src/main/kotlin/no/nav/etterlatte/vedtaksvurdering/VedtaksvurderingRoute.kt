@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakEtteroppgjoerService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -326,6 +327,25 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
                 vedtakSamordningService.hentVedtak(vedtakId)
                     ?: throw GenerellIkkeFunnetException()
             call.respond(vedtak)
+        }
+    }
+}
+
+fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: VedtakEtteroppgjoerService) {
+    route("/api/etteroppgjoer/vedtak") {
+        post {
+            val fomDato =
+                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
+
+            val fnr = call.receive<FoedselsnummerDTO>().foedselsnummer.let { Folkeregisteridentifikator.of(it) }
+
+            val vedtaksliste =
+                vedtakEtteroppgjoerService.hentVedtaksliste(
+                    fnr = fnr,
+                    etteroppgjoersAar = fomDato.year,
+                )
+            call.respond(vedtaksliste)
         }
     }
 }

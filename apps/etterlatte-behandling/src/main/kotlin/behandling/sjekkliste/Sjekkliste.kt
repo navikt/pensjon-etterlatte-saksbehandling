@@ -47,6 +47,7 @@ internal val skjekklisteItemsFoerstegangsbehandlingBP =
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
         "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",
         "Bruker mottar AFP livsvarig. Registreres som inntekt (se tjenestepensjon i Pesys og A-ordningen)",
+        "Dersom bruker er mellom 18 og 20 år, sjekk om bruker har ytelse gjennom ungdomsprogrammet",
     )
 
 internal val sjekklisteItemsFoerstegangsbehandlingOMS =

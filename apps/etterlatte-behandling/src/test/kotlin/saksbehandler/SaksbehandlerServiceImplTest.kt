@@ -11,12 +11,10 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.Claims
@@ -36,17 +34,15 @@ class SaksbehandlerServiceImplTest(
     val dataSource: DataSource,
 ) {
     private lateinit var dao: SaksbehandlerInfoDao
-    private val axsysKlient: AxsysKlient = mockk<AxsysKlient>()
     private val entraProxyKlient: EntraProxyKlient = mockk<EntraProxyKlient>()
     private val navansattKlient: NavAnsattKlient = mockk<NavAnsattKlient>()
-    private val featureToggleService: FeatureToggleService = mockk<FeatureToggleService>()
     private lateinit var service: SaksbehandlerService
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeAll
     fun beforeAll() {
         dao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
-        service = SaksbehandlerServiceImpl(dao, axsysKlient, navansattKlient, entraProxyKlient, featureToggleService)
+        service = SaksbehandlerServiceImpl(dao, navansattKlient, entraProxyKlient)
         nyKontekstMedBrukerOgDatabase(user.also { every { it.name() } returns this::class.java.simpleName }, dataSource)
     }
 
@@ -55,15 +51,14 @@ class SaksbehandlerServiceImplTest(
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE saksbehandler_info CASCADE;").execute()
         }
-        clearMocks(navansattKlient, axsysKlient, entraProxyKlient, featureToggleService)
+        clearMocks(navansattKlient, entraProxyKlient)
     }
 
     @Test
     fun `Skal legge inn enheter og navn for ny ukjent saksbehandler`() {
         val nyidentSaksbehandler = "S12345"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
-        coEvery { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
-        coEvery { featureToggleService.isEnabled(any(), false) } returns false
+        coEvery { entraProxyKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
         coEvery {
             navansattKlient.hentSaksbehanderNavn(
                 nyidentSaksbehandler,
@@ -82,16 +77,16 @@ class SaksbehandlerServiceImplTest(
         every { user.kanSeOppgaveBenken() } returns true
 
         service.hentKomplettSaksbehandler(nyidentSaksbehandler)
-        coVerify(exactly = 1) { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) }
+        coVerify(exactly = 1) { entraProxyKlient.hentEnheterForIdent(nyidentSaksbehandler) }
         coVerify(exactly = 1) { navansattKlient.hentSaksbehanderNavn(nyidentSaksbehandler) }
-        confirmVerified(axsysKlient, navansattKlient)
+        confirmVerified(entraProxyKlient, navansattKlient)
     }
 
     @Test
     fun `Skal ikke legge inn enheter og navn for kjent saksbehandler`() {
         val nyidentSaksbehandler = "S12345"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
-        coEvery { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
+        coEvery { entraProxyKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
         coEvery {
             navansattKlient.hentSaksbehanderNavn(
                 nyidentSaksbehandler,
@@ -112,37 +107,35 @@ class SaksbehandlerServiceImplTest(
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen"))
         dao.upsertSaksbehandlerEnheter(Pair(nyidentSaksbehandler, listOf(porsgrunn)))
         service.hentKomplettSaksbehandler(nyidentSaksbehandler)
-        coVerify(exactly = 0) { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) }
+        coVerify(exactly = 0) { entraProxyKlient.hentEnheterForIdent(nyidentSaksbehandler) }
         coVerify(exactly = 0) { navansattKlient.hentSaksbehanderNavn(nyidentSaksbehandler) }
-        confirmVerified(axsysKlient, navansattKlient)
+        confirmVerified(entraProxyKlient, navansattKlient)
     }
 
     @Test
-    fun `Enheter finnes ikke i database skal hente fra axsys`() {
+    fun `Enheter finnes ikke i database skal hente fra EntraProxy`() {
         val ident = "ident"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
-        coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
-        coEvery { featureToggleService.isEnabled(any(), false) } returns false
+        coEvery { entraProxyKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(porsgrunn)
-        coVerify { axsysKlient.hentEnheterForIdent(ident) }
-        confirmVerified(axsysKlient)
+        coVerify { entraProxyKlient.hentEnheterForIdent(ident) }
+        confirmVerified(entraProxyKlient)
     }
 
     @Test
-    fun `Ikke registrert enhet må kalle axsys`() {
+    fun `Ikke registrert enhet må kalle EntraProxy`() {
         val ident = "ident"
         val navMoldeEnhetsnr = Enhetsnummer("1502")
         val navMoldeNavn = "NAV Molde"
         val molde = SaksbehandlerEnhet(navMoldeEnhetsnr, navMoldeNavn)
-        coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(molde)
-        coEvery { featureToggleService.isEnabled(any(), false) } returns false
+        coEvery { entraProxyKlient.hentEnheterForIdent(ident) } returns listOf(molde)
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(molde)
 
-        coVerify(exactly = 1) { axsysKlient.hentEnheterForIdent(ident) }
-        confirmVerified(axsysKlient)
+        coVerify(exactly = 1) { entraProxyKlient.hentEnheterForIdent(ident) }
+        confirmVerified(entraProxyKlient)
     }
 
     @Test
@@ -150,13 +143,13 @@ class SaksbehandlerServiceImplTest(
         val ident = "ident"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
         val enheterForSaksbehandlerIDb = Pair(ident, listOf(porsgrunn))
-        coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
+        coEvery { entraProxyKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))
         dao.upsertSaksbehandlerEnheter(enheterForSaksbehandlerIDb)
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
 
         hentetEnhetForSaksbehandler shouldBe listOf(porsgrunn)
-        coVerify(exactly = 0) { axsysKlient.hentEnheterForIdent(ident) }
-        confirmVerified(axsysKlient)
+        coVerify(exactly = 0) { entraProxyKlient.hentEnheterForIdent(ident) }
+        confirmVerified(entraProxyKlient)
     }
 }

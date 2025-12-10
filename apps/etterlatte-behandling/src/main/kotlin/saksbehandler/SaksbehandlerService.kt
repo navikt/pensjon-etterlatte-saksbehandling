@@ -2,12 +2,9 @@ package no.nav.etterlatte.saksbehandler
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
 
@@ -37,10 +34,8 @@ interface SaksbehandlerService {
 
 class SaksbehandlerServiceImpl(
     private val dao: SaksbehandlerInfoDao,
-    private val axsysKlient: AxsysKlient,
     private val navAnsattKlient: NavAnsattKlient,
     private val entraProxyKlient: EntraProxyKlient,
-    private val featureToggleService: FeatureToggleService,
 ) : SaksbehandlerService {
     override fun hentKomplettSaksbehandler(ident: String): Saksbehandler {
         val innloggetSaksbehandler = Kontekst.get().appUserAsSaksbehandler()
@@ -63,11 +58,7 @@ class SaksbehandlerServiceImpl(
     private fun updateNySaksbehandler(ident: String) {
         val enheterForSaksbehandler =
             runBlocking {
-                if (featureToggleService.isEnabled(EtteroppgjoerToggles.HENT_ENHETER_FRA_ENTRA_PROXY, false)) {
-                    entraProxyKlient.hentEnheterForIdent(ident)
-                } else {
-                    axsysKlient.hentEnheterForIdent(ident)
-                }
+                entraProxyKlient.hentEnheterForIdent(ident)
             }
 
         dao.upsertSaksbehandlerEnheter(Pair(ident, enheterForSaksbehandler))
@@ -98,10 +89,6 @@ class SaksbehandlerServiceImpl(
     private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
         dao.hentSaksbehandlerEnheter(ident)
             ?: runBlocking {
-                if (featureToggleService.isEnabled(EtteroppgjoerToggles.HENT_ENHETER_FRA_ENTRA_PROXY, false)) {
-                    entraProxyKlient.hentEnheterForIdent(ident)
-                } else {
-                    axsysKlient.hentEnheterForIdent(ident)
-                }
+                entraProxyKlient.hentEnheterForIdent(ident)
             }
 }

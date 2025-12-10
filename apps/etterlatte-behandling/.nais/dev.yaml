@@ -153,10 +153,6 @@ spec:
       value: http://digdir-krr-proxy.team-rocket
     - name: KRR_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
-    - name: AXSYS_URL
-      value: https://axsys.dev-fss-pub.nais.io
-    - name: AXSYS_SCOPE
-      value: api://dev-fss.org.axsys/.default
     - name: ENTRA_PROXY_URL
       value: https://entraproxy.intern.dev.nav.no
     - name: ENTRA_PROXY_SCOPE
@@ -199,7 +195,6 @@ spec:
         - host: oppgave.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io
-        - host: axsys.dev-fss-pub.nais.io
         - host: team-inntekt-proxy.dev-fss-pub.nais.io
         - host: sigrun-q2.dev.adeo.no
         - host: arbeid-og-inntekt-q2.dev-fss-pub.nais.io

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.klienter
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -8,6 +9,7 @@ import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.navConsumerId
@@ -78,5 +80,19 @@ class EntraProxyKlientImpl(
 
 data class EntraEnhet(
     val enhetnummer: String,
+    val navn: String,
+)
+
+class HentEnhetException(
+    override val detail: String,
+    override val cause: Throwable?,
+) : InternfeilException(detail, cause)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Enheter(
+    // Enhetsnummer
+    val enhetId: Enhetsnummer,
+    // EYB EYO
+    val temaer: ArrayList<String>?,
     val navn: String,
 )

@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentenFilter
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
@@ -655,23 +654,6 @@ class KrrklientTest : KrrKlient {
             mobiltelefonnummer = null,
             sikkerDigitalPostkasse = null,
         )
-}
-
-class AxsysKlientTest : AxsysKlient {
-    override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> =
-        listOf(
-            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
-            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
-        )
-
-    override val serviceName: String
-        get() = "Axsys"
-    override val beskrivelse: String
-        get() = "Henter enheter for saksbehandlerident"
-    override val endpoint: String
-        get() = "endpoint"
-
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class EntraProxyKlientTest : EntraProxyKlient {

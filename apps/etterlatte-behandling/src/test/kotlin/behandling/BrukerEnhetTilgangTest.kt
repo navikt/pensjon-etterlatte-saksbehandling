@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
@@ -14,10 +15,10 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
-import no.nav.etterlatte.behandling.klienter.AxsysKlientImpl
-import no.nav.etterlatte.behandling.klienter.Enheter
-import no.nav.etterlatte.behandling.klienter.EnhetslisteResponse
+import no.nav.etterlatte.behandling.klienter.EntraEnhet
+import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
+import no.nav.etterlatte.behandling.klienter.EntraProxyKlientImpl
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
@@ -26,20 +27,22 @@ import org.junit.jupiter.api.Test
 class BrukerEnhetTilgangTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
-    private val saksbehandlerEnheter =
+    private val hentEnheterResponse =
         listOf(
-            SaksbehandlerEnhet(no.nav.etterlatte.common.Enheter.STEINKJER.enhetNr, "navn1"),
-            SaksbehandlerEnhet(no.nav.etterlatte.common.Enheter.PORSGRUNN.enhetNr, "navn2"),
-            SaksbehandlerEnhet(no.nav.etterlatte.common.Enheter.AALESUND.enhetNr, "navn3"),
+            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, "navn1"),
+            SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, "navn2"),
+            SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, "navn3"),
         )
+
+    private val entraProxyResponse = hentEnheterResponse.map { EntraEnhet(it.enhetsNummer.enhetNr, it.navn) }.toSet()
 
     private val testNavIdent = "ident1"
 
-    private fun klient(): AxsysKlient =
-        AxsysKlientImpl(
+    private fun klient(): EntraProxyKlient =
+        EntraProxyKlientImpl(
             mockHttpClient(
-                EnhetslisteResponse(saksbehandlerEnheter.map { Enheter(it.enhetsNummer, null, it.navn) }),
-                testNavIdent,
+                respons = entraProxyResponse,
+                ident = testNavIdent,
             ),
             "",
         )
@@ -53,7 +56,7 @@ class BrukerEnhetTilgangTest {
 
             resultat.size shouldBeExactly 3
 
-            resultat shouldContainExactly saksbehandlerEnheter
+            resultat shouldContainExactlyInAnyOrder hentEnheterResponse
         }
     }
 
@@ -86,7 +89,7 @@ class BrukerEnhetTilgangTest {
     }
 
     private fun mockHttpClient(
-        respons: Any,
+        respons: Set<EntraEnhet>,
         ident: String,
     ): HttpClient {
         val httpClient =
@@ -94,7 +97,7 @@ class BrukerEnhetTilgangTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/api/v2/tilgang/$ident?inkluderAlleEnheter=false" ->
+                            "/api/v1/enhet/ansatt/$ident" ->
                                 respond(
                                     respons.toJson(),
                                     HttpStatusCode.OK,

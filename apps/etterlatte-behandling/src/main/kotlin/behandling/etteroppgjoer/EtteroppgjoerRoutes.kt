@@ -121,6 +121,10 @@ fun Route.etteroppgjoerRoutes(
                                     "og opprette ny forbehandling"
                         }
 
+                        logger.info(
+                            "Tilbakestiller etteroppgjør med sakId ${etteroppgjoer.sakId}",
+                        )
+
                         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                             sakId,
                             etteroppgjoer.inntektsaar,

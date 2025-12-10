@@ -1,12 +1,12 @@
 [plugins]
 avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.9.1" }
 versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
-license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
+license = { id = 'com.github.jk1.dependency-license-report', version = '3.0.1' }
 
 [versions]
-jackson-version = "2.20.0"
-jupiter-version = "6.0.0"
-ktor-version = "3.3.0"
+jackson-version = "2.20.1"
+jupiter-version = "6.0.1"
+ktor-version = "3.3.3"
 navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.3"
@@ -15,11 +15,11 @@ rapidsandrivers-version = "2025081112301754908236.47b364d7b14c" # OBS! tbdlibs b
 tbdlibs-version = "2025.08.16-09.21-71db7cad" # OBS! rapidsandrivers bruker denne. De bør stemme overens
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.3" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "7.0.2" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.13.2" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.13.2" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.18.0" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.18.0" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.8" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
@@ -65,8 +65,8 @@ teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:t
 brevbaker-api-model-common = { module = "no.nav.pensjon.brevbaker:brevbaker-api-model-common", version = "2.7.0"}
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.19" }
-logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.21" }
+logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.16.0" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
@@ -83,21 +83,21 @@ navfelles-tjenestespesifikasjoner-oppdragsimulering = { module = "com.github.nav
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor = { module = "no.nav.security:token-validation-ktor-v3", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "3.0.0" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "3.0.1" }
 
 test-navfelles-rapidsandriversktor = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdlibs-version" }
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "6.0.3" }
+test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "6.0.7" }
 test-mockk = { module = "io.mockk:mockk", version = "1.14.6" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.28.0" }
-unleash-client = { module = "io.getunleash:unleash-client-java", version = "11.1.0" }
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "11.1.1" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

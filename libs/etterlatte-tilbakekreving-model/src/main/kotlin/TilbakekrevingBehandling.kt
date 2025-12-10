@@ -8,6 +8,7 @@ data class TilbakekrevingBehandling(
     val id: UUID,
     val status: TilbakekrevingStatus,
     val sak: Sak,
+    val omgjoeringAvId: UUID?,
     val opprettet: Tidspunkt,
     val aarsakForAvbrytelse: TilbakekrevingAvbruttAarsak?,
     val tilbakekreving: Tilbakekreving,
@@ -52,10 +53,12 @@ data class TilbakekrevingBehandling(
         fun ny(
             kravgrunnlag: Kravgrunnlag,
             sak: Sak,
+            omgjoeringAvId: UUID?,
         ) = TilbakekrevingBehandling(
             id = UUID.randomUUID(),
             status = TilbakekrevingStatus.OPPRETTET,
             sak = sak,
+            omgjoeringAvId = omgjoeringAvId,
             opprettet = Tidspunkt.now(),
             tilbakekreving =
                 Tilbakekreving(

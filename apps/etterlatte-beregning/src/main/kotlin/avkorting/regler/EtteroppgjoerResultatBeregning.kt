@@ -7,6 +7,7 @@ import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -25,7 +26,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 data class EtteroppgjoerDifferanseGrunnlag(
-    val utbetaltStoenad: FaktumNode<Aarsoppgjoer>,
+    val utbetaltStoenad: FaktumNode<List<VedtakSamordningPeriode>>,
     val nyBruttoStoenad: FaktumNode<Aarsoppgjoer>,
     val grunnlagForEtteroppgjoer: FaktumNode<FaktiskInntekt>,
     val harDoedsfall: FaktumNode<Boolean>,
@@ -67,12 +68,12 @@ val nyBruttoStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>
         finnFelt = { it.avkortetYtelse },
     )
 
-val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>> =
+val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<VedtakSamordningPeriode>> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         finnFaktum = EtteroppgjoerDifferanseGrunnlag::utbetaltStoenad,
-        finnFelt = { it.avkortetYtelse },
+        finnFelt = { it },
     )
 
 data class MaanederMedAvkortetYtelse(
@@ -84,6 +85,16 @@ private fun normaliserPerioder(avkortingsperioder: List<AvkortetYtelse>): List<M
     avkortingsperioder.map {
         val tom = it.periode.tom ?: YearMonth.of(it.periode.fom.year, Month.DECEMBER)
         val antallMaaneder = it.periode.fom.until(tom, ChronoUnit.MONTHS) + 1
+        MaanederMedAvkortetYtelse(
+            antallMaaneder = antallMaaneder,
+            ytelseEtterAvkorting = it.ytelseEtterAvkorting,
+        )
+    }
+
+private fun normaliserVedtakPerioder(vedtakPerioder: List<VedtakSamordningPeriode>): List<MaanederMedAvkortetYtelse> =
+    vedtakPerioder.map {
+        val tom = it.tom ?: YearMonth.of(it.fom.year, Month.DECEMBER)
+        val antallMaaneder = it.fom.until(tom, ChronoUnit.MONTHS) + 1
         MaanederMedAvkortetYtelse(
             antallMaaneder = antallMaaneder,
             ytelseEtterAvkorting = it.ytelseEtterAvkorting,
@@ -104,8 +115,8 @@ val normalisertBruttoUtbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, Lis
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør om en periode med brutto avkortet ytelse til en mellomverdi med antall måneder med avkortet ytelse",
         regelReferanse = RegelReferanse("REGEL-ETTEROPPGJOER-NORMALISER-BRUTTO-UTBETALT-STOENAD"),
-    ) benytter utbetaltStoenad med { avkorteYtelse ->
-        normaliserPerioder(avkorteYtelse)
+    ) benytter utbetaltStoenad med { vedtakPerioder ->
+        normaliserVedtakPerioder(vedtakPerioder)
     }
 
 val sumNyBruttoStoenad =

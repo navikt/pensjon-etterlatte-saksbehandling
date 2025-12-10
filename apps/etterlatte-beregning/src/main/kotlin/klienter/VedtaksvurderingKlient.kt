@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -20,6 +21,12 @@ interface VedtaksvurderingKlient {
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto>
+
+    suspend fun hentVedtakslisteForEtteroppgjoersAar(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<VedtakSamordningDto>
 }
 
 class VedtaksvurderingKlientException(
@@ -68,4 +75,40 @@ class VedtaksvurderingKlientImpl(
             }
         }
     }
+
+    override suspend fun hentVedtakslisteForEtteroppgjoersAar(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<VedtakSamordningDto> =
+        retry<List<VedtakSamordningDto>> {
+            downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/etteroppgjoer/vedtak",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = { VedtakslisteEtteroppgjoerRequest(sakId, etteroppgjoersAar) },
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw VedtaksvurderingKlientException(
+                        "Klarte ikke hente vedtaksliste for sak=$sakId i etteroppgjoersAar=$etteroppgjoersAar",
+                        it.samlaExceptions(),
+                    )
+                }
+            }
+        }
 }
+
+data class VedtakslisteEtteroppgjoerRequest(
+    val sakId: SakId,
+    val etteroppgjoersAar: Int,
+)

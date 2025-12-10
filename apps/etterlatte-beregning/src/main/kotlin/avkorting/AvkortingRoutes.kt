@@ -8,6 +8,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
@@ -172,17 +173,19 @@ fun Route.avkorting(
             }
 
             post("beregn-faktisk-inntekt") {
-                val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
-                logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
-                etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
-                val resultat =
-                    etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
-                        forbehandlingId = request.forbehandlingId,
-                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
-                        aar = request.aar,
-                        harDoedsfall = request.harDoedsfall,
-                    )
-                call.respond(resultat.toDto())
+                runBlocking {
+                    val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
+                    logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
+                    etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
+                    val resultat =
+                        etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
+                            forbehandlingId = request.forbehandlingId,
+                            sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                            etteroppgjoersAar = request.aar,
+                            harDoedsfall = request.harDoedsfall,
+                        )
+                    call.respond(resultat.toDto())
+                }
             }
 
             post("hent-beregnet-resultat") {

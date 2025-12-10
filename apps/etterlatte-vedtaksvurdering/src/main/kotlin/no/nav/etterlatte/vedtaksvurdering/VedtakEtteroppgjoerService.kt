@@ -1,7 +1,9 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -12,35 +14,34 @@ import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtakEtteroppgjoerService(
     private val repository: VedtaksvurderingRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
-    fun hentVedtaksliste(
-        fnr: Folkeregisteridentifikator,
+    fun hentVedtakslisteIEtteroppgjoersAar(
+        sakId: SakId,
         etteroppgjoersAar: Int,
-    ): List<VedtakSamordningDto> {
-        val fomDato = LocalDate.of(etteroppgjoersAar, 1, 1)
+    ): List<VedtakSamordningDto> { // TODO: egen dto?
+        val vedtak = repository.hentVedtakForSak(sakId).firstOrNull()
+        krevIkkeNull(vedtak) { "Fant ingen vedtak for sakId=$sakId" }
 
+        val fnr = Folkeregisteridentifikator.of(vedtak.soeker.value)
         val vedtaksliste = repository.hentFerdigstilteVedtak(fnr, SakType.OMSTILLINGSSTOENAD)
+
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
-                .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
+                .sammenstill(YearMonth.of(etteroppgjoersAar, 1))
 
         val avkortetYtelsePerioderByVedtak =
             repository
                 .hentAvkortetYtelsePerioder(tidslinjeJustert.map { it.id }.toSet())
                 .groupBy { it.vedtakId }
 
-        return tidslinjeJustert.map {
-            val avkortetYtelsePerioder = avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()
-            it.toEtteroppgjoervedtakDto(avkortetYtelsePerioder)
-        }
+        return tidslinjeJustert
+            .map { it.toEtteroppgjoervedtakDto(avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()) }
+            .filter { it.virkningstidspunkt.year == etteroppgjoersAar }
     }
 }
 
@@ -65,11 +66,11 @@ private fun Vedtak.toEtteroppgjoervedtakDto(avkortetYtelsePerioder: List<Avkorte
         beregning = innhold.beregning,
         perioder =
             avkortetYtelsePerioder
-                .map { it.toSamordningVedtakPeriode(innhold.utbetalingsperioder) },
+                .map { it.toEtteroppgjoerVedtakPeriode(innhold.utbetalingsperioder) },
     )
 }
 
-private fun AvkortetYtelsePeriode.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
+private fun AvkortetYtelsePeriode.toEtteroppgjoerVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
     val justertPeriode = utbetalingsperioder.firstOrNull { this.fom == it.periode.fom }
 
     return VedtakSamordningPeriode(

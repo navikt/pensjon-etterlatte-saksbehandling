@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -331,19 +332,16 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
     }
 }
 
+// TODO: sikring tilgang
 fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: VedtakEtteroppgjoerService) {
     route("/api/etteroppgjoer/vedtak") {
         post {
-            val fomDato =
-                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: return@post call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
-
-            val fnr = call.receive<FoedselsnummerDTO>().foedselsnummer.let { Folkeregisteridentifikator.of(it) }
+            val request = call.receive<VedtakslisteEtteroppgjoerRequest>()
 
             val vedtaksliste =
-                vedtakEtteroppgjoerService.hentVedtaksliste(
-                    fnr = fnr,
-                    etteroppgjoersAar = fomDato.year,
+                vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
+                    sakId = request.sakId,
+                    etteroppgjoersAar = request.etteroppgjoersAar,
                 )
             call.respond(vedtaksliste)
         }
@@ -483,3 +481,8 @@ private class MismatchingIdException(
         "ID_MISMATCH_MELLOM_PATH_OG_BODY",
         message,
     )
+
+data class VedtakslisteEtteroppgjoerRequest(
+    val sakId: SakId,
+    val etteroppgjoersAar: Int,
+)

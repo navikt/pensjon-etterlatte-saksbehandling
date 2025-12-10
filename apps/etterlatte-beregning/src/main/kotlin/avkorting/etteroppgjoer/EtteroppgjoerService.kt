@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -37,6 +38,7 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.Year
 import java.util.UUID
 
 class EtteroppgjoerService(
@@ -50,13 +52,14 @@ class EtteroppgjoerService(
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
-    fun beregnOgLagreEtteroppgjoerResultat(
+    suspend fun beregnOgLagreEtteroppgjoerResultat(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
-        aar: Int,
+        etteroppgjoersAar: Int,
         harDoedsfall: Boolean,
     ): BeregnetEtteroppgjoerResultat {
-        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId, harDoedsfall)
+        val etteroppgjoerResultat =
+            beregnEtteroppgjoerResultat(etteroppgjoersAar, forbehandlingId, sisteIverksatteBehandlingId, harDoedsfall)
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
         return etteroppgjoerResultat
     }
@@ -128,19 +131,21 @@ class EtteroppgjoerService(
         avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
 
-    private fun beregnEtteroppgjoerResultat(
-        aar: Int,
+    private suspend fun beregnEtteroppgjoerResultat(
+        etteroppgjoersAar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         harDoedsfall: Boolean,
     ): BeregnetEtteroppgjoerResultat {
         // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer, setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
         // vi skal og bruke siste gjeldene rettsgebyr for etteroppgjoersAaret dvs det som er gjeldende 31. Desember
-        val fomTom = LocalDate.of(aar, 12, 31)
+        val fomTom = LocalDate.of(etteroppgjoersAar, 12, 31)
         val regelPeriode = RegelPeriode(fomTom, fomTom)
 
-        val sisteIverksatteAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, sisteIverksatteBehandlingId, true)
-        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, forbehandlingId, false)
+        val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
+
+        val perioderMedYtelseIEtteroppgjoersAar = hentPerioderMedYtelseIEtteroppgjoersAar(sakId, etteroppgjoersAar)
+        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId, false)
 
         val inntektsgrunnlag =
             krevIkkeNull(avkortingRepository.hentFaktiskInntekt(nyForbehandlingAvkorting.id)) {
@@ -149,7 +154,7 @@ class EtteroppgjoerService(
 
         val differanseGrunnlag =
             EtteroppgjoerDifferanseGrunnlag(
-                FaktumNode(sisteIverksatteAvkorting, sisteIverksatteBehandlingId, ""),
+                FaktumNode(perioderMedYtelseIEtteroppgjoersAar, "", ""),
                 FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
                 FaktumNode(inntektsgrunnlag, nyForbehandlingAvkorting.id, ""),
                 FaktumNode(harDoedsfall, forbehandlingId, ""),
@@ -185,16 +190,30 @@ class EtteroppgjoerService(
                     referanseAvkorting =
                         ReferanseEtteroppgjoer(
                             avkortingForbehandling = nyForbehandlingAvkorting.id,
-                            avkortingSisteIverksatte = sisteIverksatteAvkorting.id,
+                            avkortingSisteIverksatte = nyForbehandlingAvkorting.id, // TODO: bytt ut med rett,
                         ),
                     harIngenInntekt = data.harIngenInntekt,
-                    aar = aar,
+                    aar = etteroppgjoersAar,
                 )
             }
 
             is RegelkjoeringResultat.UgyldigPeriode ->
                 throw InternfeilException("Ugyldig regler for periode: ${beregningResultat.ugyldigeReglerForPeriode}")
         }
+    }
+
+    private suspend fun hentPerioderMedYtelseIEtteroppgjoersAar(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+    ): List<VedtakSamordningPeriode> {
+        val vedtaksliste = vedtakKlient.hentVedtakslisteForEtteroppgjoersAar(sakId, etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer)
+        val avkortingPerioder =
+            vedtaksliste
+                .flatMap { it.perioder }
+                .filter { it.fom.year == etteroppgjoersAar || it.tom?.year!! > etteroppgjoersAar }
+        // TODO: validere riktig perioder innenfor etteroppgjoersAar?
+
+        return avkortingPerioder
     }
 
     private fun hentAvkortingForBehandling(

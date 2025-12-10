@@ -102,6 +102,7 @@ internal class TilbakekrevingHendelseRiverTest {
                             ),
                         ),
                 ),
+            omgjoeringAvId = null,
         )
 
     @Test

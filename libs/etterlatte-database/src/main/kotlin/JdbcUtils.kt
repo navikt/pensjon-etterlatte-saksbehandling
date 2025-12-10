@@ -9,7 +9,6 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.time.LocalDate
-import java.util.UUID
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? =
     if (next()) {
@@ -101,12 +100,4 @@ fun PreparedStatement.setNullableBoolean(
 ) = when (value) {
     null -> this.setNull(index, Types.BOOLEAN)
     else -> this.setBoolean(index, value)
-}
-
-fun PreparedStatement.setNullableUuid(
-    index: Int,
-    value: UUID?,
-) = when (value) {
-    null -> this.setNull(index, Types.VARCHAR)
-    else -> this.setObject(index, value)
 }

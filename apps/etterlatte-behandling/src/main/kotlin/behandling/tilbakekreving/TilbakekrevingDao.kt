@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.tilbakekreving.tilbakekrevingsbeloepComparator
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.setJsonb
-import no.nav.etterlatte.libs.database.setNullableUuid
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -202,7 +201,7 @@ class TilbakekrevingDao(
         }
         statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
         statement.setString(8, tilbakekrevingBehandling.aarsakForAvbrytelse?.name)
-        statement.setNullableUuid(9, tilbakekrevingBehandling.omgjoeringAvId)
+        statement.setObject(9, tilbakekrevingBehandling.omgjoeringAvId)
         statement.executeUpdate().also {
             krev(it == 1) {
                 "Kunne ikke lagre tilbaekreving behandling for sakid ${tilbakekrevingBehandling.sak.id}"

@@ -172,6 +172,7 @@ internal class TilgangServiceTest(
                 UUID.randomUUID(),
                 TilbakekrevingStatus.OPPRETTET,
                 sak,
+                null,
                 Tidspunkt.now(),
                 aarsakForAvbrytelse = null,
                 Tilbakekreving(tilbakekrevingVurdering(), emptyList(), kravgrunnlag(sak)),

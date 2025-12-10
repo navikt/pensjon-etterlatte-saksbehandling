@@ -420,6 +420,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                         .ny(
                             sak = sak,
                             kravgrunnlag = kravgrunnlag(sak),
+                            omgjoeringAvId = null,
                         ).let {
                             it.copy(
                                 tilbakekreving =

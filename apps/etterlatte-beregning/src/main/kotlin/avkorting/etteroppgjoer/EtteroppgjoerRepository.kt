@@ -55,7 +55,7 @@ class EtteroppgjoerRepository(
                         "har_ingen_inntekt" to resultat.harIngenInntekt,
                         "referanse_avkorting_sist_iverksatte" to resultat.referanseAvkorting.avkortingSisteIverksatte,
                         "referanse_avkorting_forbehandling" to resultat.referanseAvkorting.avkortingForbehandling,
-                        "vedtak_referanse" to resultat.referanseAvkorting.vedtakReferanse,
+                        "vedtak_referanse" to objectMapper.writeValueAsString(resultat.referanseAvkorting.vedtakReferanse),
                     ),
             ).let { query -> tx.run(query.asUpdate) }
                 .let { antallOppdatert ->

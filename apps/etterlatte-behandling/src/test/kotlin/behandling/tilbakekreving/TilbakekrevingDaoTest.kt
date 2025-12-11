@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -110,10 +111,13 @@ class TilbakekrevingDaoTest(
     }
 
     companion object {
-        private fun tilbakekreving(sak: Sak) =
-            TilbakekrevingBehandling.ny(
-                sak = sak,
-                kravgrunnlag = kravgrunnlag(sak),
-            )
+        private fun tilbakekreving(
+            sak: Sak,
+            omgjoeringAvId: UUID? = null,
+        ) = TilbakekrevingBehandling.ny(
+            sak = sak,
+            kravgrunnlag = kravgrunnlag(sak),
+            omgjoeringAvId = omgjoeringAvId,
+        )
     }
 }

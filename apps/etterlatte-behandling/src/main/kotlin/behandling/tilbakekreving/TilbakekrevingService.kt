@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -58,7 +59,10 @@ class TilbakekrevingService(
             tilbakekrevingDao.hentTilbakekrevinger(sakId)
         }
 
-    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): TilbakekrevingBehandling =
+    fun opprettTilbakekreving(
+        kravgrunnlag: Kravgrunnlag,
+        omgjoeringAvId: UUID?,
+    ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
@@ -78,7 +82,7 @@ class TilbakekrevingService(
 
             val tilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(
-                    TilbakekrevingBehandling.ny(kravgrunnlag, sak),
+                    TilbakekrevingBehandling.ny(kravgrunnlag, sak, omgjoeringAvId),
                 )
 
             varsleOmUkjenteKlasseTyper(kravgrunnlag, tilbakekreving.id)
@@ -89,6 +93,19 @@ class TilbakekrevingService(
                     .filter { it.type == OppgaveType.TILBAKEKREVING }
                     .filter { !it.erAvsluttet() }
                     .maxByOrNull { it.opprettet }
+
+            if (oppgaveFraBehandlingMedFeilutbetaling != null) {
+                try {
+                    UUID.fromString(oppgaveFraBehandlingMedFeilutbetaling.referanse)
+                    throw InternfeilException(
+                        "Vi har en åpen oppgave for tilbakekreving som peker på en id " +
+                            "(${oppgaveFraBehandlingMedFeilutbetaling.referanse}), men vi har ingen åpne " +
+                            "tilbakekrevinger. Sak=${sak.id}",
+                    )
+                } catch (_: IllegalArgumentException) {
+                    // Forventet
+                }
+            }
 
             if (oppgaveFraBehandlingMedFeilutbetaling != null) {
                 logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${oppgaveFraBehandlingMedFeilutbetaling.id}")
@@ -694,5 +711,27 @@ class TilbakekrevingService(
                 "Saksbehandler ${saksbehandler.ident()} er ikke tilknyttet oppgave ${oppgaveForTilbakekreving.id}",
             )
         }
+    }
+
+    suspend fun hentKravgrunnlagForOmgjoering(
+        tilbakekrevingId: UUID,
+        it: Saksbehandler,
+    ): Kravgrunnlag {
+        val tilbakekrevingSomSkalOmgjoeres =
+            inTransaction {
+                tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            }
+        if (tilbakekrevingSomSkalOmgjoeres.underBehandlingEllerFattetVedtak()) {
+            throw UgyldigForespoerselException(
+                "TILBAKEKREVING_UNDER_BEHANDLING",
+                "Kan ikke omgjøre en tilbakekreving som er under behandling",
+            )
+        }
+        return tilbakekrevingKlient.hentKravgrunnlag(
+            it,
+            tilbakekrevingSomSkalOmgjoeres.sak.id,
+            tilbakekrevingSomSkalOmgjoeres.tilbakekreving.kravgrunnlag.kravgrunnlagId.value,
+        )
+            ?: throw InternfeilException("Kunne ikke hente kravgrunnlaget vi vil omgjøre")
     }
 }

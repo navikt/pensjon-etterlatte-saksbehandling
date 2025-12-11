@@ -57,7 +57,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ?
                     """.trimIndent(),
@@ -100,7 +100,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ? 
                     ORDER BY t.opprettet DESC LIMIT 1
@@ -118,7 +118,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse  
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -180,9 +180,9 @@ class TilbakekrevingDao(
             prepareStatement(
                 """
                 INSERT INTO tilbakekreving(
-                    id, status, sak_id, opprettet, kravgrunnlag, vurdering, sende_brev, aarsak_for_avbrytelse
+                    id, status, sak_id, opprettet, kravgrunnlag, vurdering, sende_brev, aarsak_for_avbrytelse, omgjoering_av_id
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
                 ON CONFLICT (id) DO UPDATE SET
                     status = excluded.status,
                     kravgrunnlag = excluded.kravgrunnlag,
@@ -201,6 +201,7 @@ class TilbakekrevingDao(
         }
         statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
         statement.setString(8, tilbakekrevingBehandling.aarsakForAvbrytelse?.name)
+        statement.setObject(9, tilbakekrevingBehandling.omgjoeringAvId)
         statement.executeUpdate().also {
             krev(it == 1) {
                 "Kunne ikke lagre tilbaekreving behandling for sakid ${tilbakekrevingBehandling.sak.id}"
@@ -317,6 +318,7 @@ class TilbakekrevingDao(
                 ),
             sendeBrev = getBoolean("sende_brev"),
             aarsakForAvbrytelse = getString("aarsak_for_avbrytelse")?.let { enumValueOf<TilbakekrevingAvbruttAarsak>(it) },
+            omgjoeringAvId = getString("omgjoering_av_id")?.let { UUID.fromString(it) },
         )
 
     private fun ResultSet.toTilbakekrevingsperiode(): Pair<YearMonth, Tilbakekrevingsbelop> =

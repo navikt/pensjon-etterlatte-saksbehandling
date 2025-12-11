@@ -1,0 +1,1 @@
+alter table tilbakekreving add column omgjoering_av_id UUID;

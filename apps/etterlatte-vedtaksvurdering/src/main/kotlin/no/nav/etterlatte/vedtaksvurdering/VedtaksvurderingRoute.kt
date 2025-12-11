@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -22,6 +23,7 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedta
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakslisteEtteroppgjoerRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -30,6 +32,7 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakEtteroppgjoerService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -326,6 +329,26 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
                 vedtakSamordningService.hentVedtak(vedtakId)
                     ?: throw GenerellIkkeFunnetException()
             call.respond(vedtak)
+        }
+    }
+}
+
+fun Route.etteroppgjoerSystembrukerVedtakRoute(
+    vedtakEtteroppgjoerService: VedtakEtteroppgjoerService,
+    behandlingKlient: BehandlingKlient,
+) {
+    route("/vedtak/etteroppgjoer/{$SAKID_CALL_PARAMETER}") {
+        post {
+            withSakId(behandlingKlient, skrivetilgang = true) {
+                val request = call.receive<VedtakslisteEtteroppgjoerRequest>()
+
+                val vedtaksliste =
+                    vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
+                        sakId = request.sakId,
+                        etteroppgjoersAar = request.etteroppgjoersAar,
+                    )
+                call.respond(vedtaksliste)
+            }
         }
     }
 }

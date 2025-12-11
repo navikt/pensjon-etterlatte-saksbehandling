@@ -8,7 +8,9 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakslisteEtteroppgjoerRequest
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -20,6 +22,12 @@ interface VedtaksvurderingKlient {
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto>
+
+    suspend fun hentVedtakslisteIEtteroppgjoersAar(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<VedtakEtteroppgjoerDto>
 }
 
 class VedtaksvurderingKlientException(
@@ -68,4 +76,35 @@ class VedtaksvurderingKlientImpl(
             }
         }
     }
+
+    override suspend fun hentVedtakslisteIEtteroppgjoersAar(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<VedtakEtteroppgjoerDto> =
+        retry<List<VedtakEtteroppgjoerDto>> {
+            downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/vedtak/etteroppgjoer/$sakId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = VedtakslisteEtteroppgjoerRequest(sakId, etteroppgjoersAar),
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw VedtaksvurderingKlientException(
+                        "Klarte ikke hente vedtaksliste for sak=$sakId i etteroppgjoersAar=$etteroppgjoersAar",
+                        it.samlaExceptions(),
+                    )
+                }
+            }
+        }
 }

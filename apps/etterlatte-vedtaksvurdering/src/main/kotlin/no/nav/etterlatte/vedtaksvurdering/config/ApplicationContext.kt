@@ -113,7 +113,7 @@ class ApplicationContext {
         )
 
     val vedtakEtteroppgjoerService =
-        VedtakEtteroppgjoerService(repository = VedtaksvurderingRepository(dataSource))
+        VedtakEtteroppgjoerService(repository = VedtaksvurderingRepository(dataSource), vedtakSamordningService)
 
     val automatiskBehandlingService =
         AutomatiskBehandlingService(

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakslisteEtteroppgjoerRequest
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -107,8 +108,3 @@ class VedtaksvurderingKlientImpl(
             }
         }
 }
-
-data class VedtakslisteEtteroppgjoerRequest(
-    val sakId: SakId,
-    val etteroppgjoersAar: Int,
-)

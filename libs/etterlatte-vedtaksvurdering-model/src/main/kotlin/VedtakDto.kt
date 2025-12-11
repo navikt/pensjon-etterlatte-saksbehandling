@@ -158,6 +158,11 @@ data class VedtakEtteroppgjoerDto(
     val perioder: List<VedtakEtteroppgjoerPeriode>,
 )
 
+data class VedtakslisteEtteroppgjoerRequest(
+    val sakId: SakId,
+    val etteroppgjoersAar: Int,
+)
+
 data class VedtakEtteroppgjoerPeriode(
     val fom: YearMonth,
     val tom: YearMonth?,

@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedta
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakslisteEtteroppgjoerRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -344,7 +345,7 @@ fun Route.etteroppgjoerSystembrukerVedtakRoute(
                 val vedtaksliste =
                     vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
                         sakId = request.sakId,
-                        aar = request.etteroppgjoersAar,
+                        etteroppgjoersAar = request.etteroppgjoersAar,
                     )
                 call.respond(vedtaksliste)
             }
@@ -485,8 +486,3 @@ private class MismatchingIdException(
         "ID_MISMATCH_MELLOM_PATH_OG_BODY",
         message,
     )
-
-data class VedtakslisteEtteroppgjoerRequest(
-    val sakId: SakId,
-    val etteroppgjoersAar: Int,
-)

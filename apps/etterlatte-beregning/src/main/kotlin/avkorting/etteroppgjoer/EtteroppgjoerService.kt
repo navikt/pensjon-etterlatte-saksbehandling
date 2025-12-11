@@ -214,7 +214,6 @@ class EtteroppgjoerService(
                 .flatMap { it.perioder }
                 .filter { it.fom.year == etteroppgjoersAar || it.tom?.year == etteroppgjoersAar }
 
-        // TODO: validere riktig perioder innenfor etteroppgjoersAar?
         return vedtakReferanse to vedtakPerioder
     }
 

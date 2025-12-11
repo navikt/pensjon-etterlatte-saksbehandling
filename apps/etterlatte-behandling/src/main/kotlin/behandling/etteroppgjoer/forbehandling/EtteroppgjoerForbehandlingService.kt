@@ -865,10 +865,6 @@ data class OpphoerSkyldesDoedsfallRequest(
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
 )
 
-data class OpprettNyForbehandlingOppgaveRequest(
-    val sakId: SakId,
-)
-
 data class BeregnetResultatOgBrevSomSkalSlettes(
     val resultat: BeregnetEtteroppgjoerResultatDto,
     val brevIdOgSakIdSomSkalSlettes: Pair<BrevID, SakId>?,

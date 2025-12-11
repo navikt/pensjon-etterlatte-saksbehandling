@@ -27,7 +27,7 @@ export const enum FeatureToggle {
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
   ny_simuleringsvisning = 'ny-simuleringsvisning',
   etteroppgjoer_opphoer_skyldes_doedsfall = 'etteroppgjoer-opphoer-skyldes-doedsfall',
-  vis_opprett_forbehandling = 'vis-opprett-forbehandling',
+  vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
 }
 
 export interface Toggle {
@@ -115,8 +115,8 @@ const etteroppgjoer_opphoer_skyldes_doedsfall: Toggle = {
   enabled: false,
 }
 
-const vis_opprett_forbehandling: Toggle = {
-  togglename: FeatureToggle.vis_opprett_forbehandling,
+const vis_tilbakestill_etteroppgjoer: Toggle = {
+  togglename: FeatureToggle.vis_tilbakestill_etteroppgjoer,
   enabled: false,
 }
 
@@ -141,7 +141,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
   [FeatureToggle.ny_simuleringsvisning]: ny_simuleringsvisning,
   [FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall]: etteroppgjoer_opphoer_skyldes_doedsfall,
-  [FeatureToggle.vis_opprett_forbehandling]: vis_opprett_forbehandling,
+  [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,
 }
 
 export const Unleashcontext = createContext<{

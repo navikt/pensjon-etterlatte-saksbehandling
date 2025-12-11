@@ -90,7 +90,7 @@ class VedtaksvurderingKlientImpl(
                             url = "$resourceUrl/api/etteroppgjoer/vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody = { VedtakslisteEtteroppgjoerRequest(sakId, etteroppgjoersAar) },
+                    postBody = VedtakslisteEtteroppgjoerRequest(sakId, etteroppgjoersAar),
                 ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },

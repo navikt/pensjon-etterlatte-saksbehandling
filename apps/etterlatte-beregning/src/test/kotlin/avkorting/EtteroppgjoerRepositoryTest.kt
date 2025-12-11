@@ -104,6 +104,7 @@ internal class EtteroppgjoerRepositoryTest(
                 ReferanseEtteroppgjoer(
                     avkortingForbehandling = UUID.randomUUID(),
                     avkortingSisteIverksatte = UUID.randomUUID(),
+                    vedtakReferanse = listOf(1L),
                 ),
         )
 }

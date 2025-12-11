@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -99,31 +100,14 @@ inline val RoutingContext.forbehandlingId: UUID
             "ForbehandlingId er ikke i path params",
         )
 
-val logger = LoggerFactory.getLogger("TilgangsSjekk")
+val logger: Logger = LoggerFactory.getLogger("TilgangsSjekk")
 
 suspend inline fun RoutingContext.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
 ) = withUuidParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
-    when (val bruker = brukerTokenInfo) {
-        is Saksbehandler -> {
-            val harTilgangTilBehandling =
-                behandlingTilgangsSjekk.harTilgangTilBehandling(
-                    behandlingId,
-                    skrivetilgang,
-                    bruker,
-                )
-            if (harTilgangTilBehandling) {
-                onSuccess(behandlingId)
-            } else {
-                logger.info("Har ikke tilgang til behandling")
-                throw IkkeTilgangTilBehandlingException()
-            }
-        }
-
-        else -> onSuccess(behandlingId)
-    }
+    withBehandlingId(behandlingId, behandlingTilgangsSjekk, skrivetilgang, onSuccess)
 }
 
 suspend inline fun RoutingContext.withSakId(
@@ -140,20 +124,7 @@ suspend inline fun RoutingContext.withSakId(
     if (sakId == null) {
         throw UgyldigForespoerselException("SAKID_MANGLER", "Mangler påkrevd sakId som parameter")
     }
-    when (val token = brukerTokenInfo) {
-        is Saksbehandler -> {
-            val harTilgangTilSak =
-                sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, token)
-            if (harTilgangTilSak) {
-                onSuccess(sakId)
-            } else {
-                logger.info("Har ikke tilgang til sak")
-                throw IkkeTilgangTilSakException()
-            }
-        }
-
-        is Systembruker -> onSuccess(sakId)
-    }
+    withSakId(sakId, sakTilgangsSjekk, skrivetilgang, onSuccess)
 }
 
 suspend inline fun RoutingContext.withSakId(

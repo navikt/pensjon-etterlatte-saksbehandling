@@ -156,6 +156,54 @@ suspend inline fun RoutingContext.withSakId(
     }
 }
 
+suspend inline fun RoutingContext.withSakId(
+    sakId: SakId,
+    sakTilgangsSjekk: SakTilgangsSjekk,
+    skrivetilgang: Boolean,
+    onSuccess: (id: SakId) -> Unit,
+) {
+    when (val token = brukerTokenInfo) {
+        is Saksbehandler -> {
+            val harTilgangTilSak =
+                sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, token)
+            if (harTilgangTilSak) {
+                onSuccess(sakId)
+            } else {
+                logger.info("Har ikke tilgang til sak")
+                throw IkkeTilgangTilSakException()
+            }
+        }
+
+        is Systembruker -> onSuccess(sakId)
+    }
+}
+
+suspend inline fun RoutingContext.withBehandlingId(
+    behandlingId: UUID,
+    behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
+    skrivetilgang: Boolean,
+    onSuccess: (id: UUID) -> Unit,
+) {
+    when (val bruker = brukerTokenInfo) {
+        is Saksbehandler -> {
+            val harTilgangTilBehandling =
+                behandlingTilgangsSjekk.harTilgangTilBehandling(
+                    behandlingId,
+                    skrivetilgang,
+                    bruker,
+                )
+            if (harTilgangTilBehandling) {
+                onSuccess(behandlingId)
+            } else {
+                logger.info("Har ikke tilgang til behandling")
+                throw IkkeTilgangTilBehandlingException()
+            }
+        }
+
+        else -> onSuccess(behandlingId)
+    }
+}
+
 suspend inline fun RoutingContext.withFoedselsnummer(
     personTilgangsSjekk: PersonTilgangsSjekk,
     skrivetilgang: Boolean = false,

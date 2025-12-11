@@ -139,6 +139,7 @@ class BehandlingMedBrevRoutesIntegrationTest : BehandlingIntegrationTest() {
         val tilbakekreving =
             applicationContext.tilbakekrevingService.opprettTilbakekreving(
                 kravgrunnlag(sak),
+                null,
             )
         withTestApplication { client ->
             val response =

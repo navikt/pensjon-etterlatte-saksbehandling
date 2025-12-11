@@ -26,7 +26,7 @@ export function EtteroppgjoerForbehandlingTabell({
     hentEtteroppgjoerForbehandlinger
   )
 
-  const opprettForbehandlingKnappEnabled = useFeaturetoggle(FeatureToggle.vis_opprett_forbehandling)
+  const tilbakestillEtteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.vis_tilbakestill_etteroppgjoer)
 
   const harFerdigstiltForbehandling = (forbehandlinger: Array<EtteroppgjoerForbehandling>) => {
     const ferdigstilteForbehandlinger = [...forbehandlinger].filter(
@@ -94,7 +94,7 @@ export function EtteroppgjoerForbehandlingTabell({
             </Table.Body>
           </Table>
 
-          {opprettForbehandlingKnappEnabled &&
+          {tilbakestillEtteroppgjoerEnabled &&
             (harFerdigstiltForbehandling(forbehandlinger) || harAvbruttForbehandling(forbehandlinger)) && (
               <OpprettNyForbehandling sakId={sakId} hentNyeOppgaver={hentNyeOppgaver} />
             )}

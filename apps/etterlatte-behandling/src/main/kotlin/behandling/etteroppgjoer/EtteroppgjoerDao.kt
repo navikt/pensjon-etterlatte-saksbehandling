@@ -29,14 +29,16 @@ class EtteroppgjoerDao(
                         """
                         SELECT *  
                         FROM etteroppgjoer e INNER JOIN etteroppgjoer_behandling eb on e.siste_ferdigstilte_forbehandling = eb.id
-                        WHERE e.status = 'VENTER_PAA_SVAR'
+                        WHERE e.status = ?
                         AND eb.varselbrev_sendt IS NOT NULL
                           AND eb.varselbrev_sendt < (now() - interval '${svarfrist.value}')
-                          AND eb.status = 'FERDIGSTILT'
+                          AND eb.status = ?
                           AND eb.aar = ?
                         """.trimIndent(),
                     )
-                statement.setInt(1, inntektsaar)
+                statement.setString(1, EtteroppgjoerStatus.VENTER_PAA_SVAR.name)
+                statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
+                statement.setInt(3, inntektsaar)
 
                 statement.executeQuery().toList { toEtteroppgjoer() }
             }

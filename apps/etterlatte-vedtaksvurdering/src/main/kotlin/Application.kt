@@ -42,7 +42,7 @@ class Server(
                 )
                 automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
                 samordningSystembrukerVedtakRoute(vedtakSamordningService)
-                etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService)
+                etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService, behandlingKlient)
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
             }

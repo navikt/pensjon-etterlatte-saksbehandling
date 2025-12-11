@@ -87,7 +87,7 @@ class VedtaksvurderingKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/etteroppgjoer/vedtak",
+                            url = "$resourceUrl/vedtak/etteroppgjoer/$sakId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = VedtakslisteEtteroppgjoerRequest(sakId, etteroppgjoersAar),

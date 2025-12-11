@@ -332,18 +332,22 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
     }
 }
 
-// TODO: sikring tilgang
-fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: VedtakEtteroppgjoerService) {
-    route("/api/etteroppgjoer/vedtak") {
+fun Route.etteroppgjoerSystembrukerVedtakRoute(
+    vedtakEtteroppgjoerService: VedtakEtteroppgjoerService,
+    behandlingKlient: BehandlingKlient,
+) {
+    route("/vedtak/etteroppgjoer/{$SAKID_CALL_PARAMETER}") {
         post {
-            val request = call.receive<VedtakslisteEtteroppgjoerRequest>()
+            withSakId(behandlingKlient, skrivetilgang = true) {
+                val request = call.receive<VedtakslisteEtteroppgjoerRequest>()
 
-            val vedtaksliste =
-                vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
-                    sakId = request.sakId,
-                    aar = request.etteroppgjoersAar,
-                )
-            call.respond(vedtaksliste)
+                val vedtaksliste =
+                    vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
+                        sakId = request.sakId,
+                        aar = request.etteroppgjoersAar,
+                    )
+                call.respond(vedtaksliste)
+            }
         }
     }
 }

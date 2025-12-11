@@ -116,6 +116,6 @@ class EtteroppgjoerRepository(
                 ReferanseEtteroppgjoer(
                     avkortingForbehandling = uuid("referanse_avkorting_forbehandling"),
                     avkortingSisteIverksatte = uuid("referanse_avkorting_sist_iverksatte"),
-                ),
+                ), // TODO: introdusere nytt felt for å lagre referanse til vedtak brukt i utbetalt stoenad
         )
 }

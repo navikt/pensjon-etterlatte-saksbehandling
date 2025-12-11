@@ -38,7 +38,6 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.Year
 import java.util.UUID
 
 class EtteroppgjoerService(
@@ -144,7 +143,7 @@ class EtteroppgjoerService(
 
         val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
 
-        val perioderMedYtelseIEtteroppgjoersAar = hentPerioderMedYtelseIEtteroppgjoersAar(sakId, etteroppgjoersAar)
+        val vedtaksperioderIEtteroppgjoersAar = hentVedtaksperioderIEtteroppgjoersAar(sakId, etteroppgjoersAar)
         val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId, false)
 
         val inntektsgrunnlag =
@@ -154,7 +153,7 @@ class EtteroppgjoerService(
 
         val differanseGrunnlag =
             EtteroppgjoerDifferanseGrunnlag(
-                FaktumNode(perioderMedYtelseIEtteroppgjoersAar, "", ""),
+                FaktumNode(vedtaksperioderIEtteroppgjoersAar, "", ""),
                 FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
                 FaktumNode(inntektsgrunnlag, nyForbehandlingAvkorting.id, ""),
                 FaktumNode(harDoedsfall, forbehandlingId, ""),
@@ -202,18 +201,20 @@ class EtteroppgjoerService(
         }
     }
 
-    private suspend fun hentPerioderMedYtelseIEtteroppgjoersAar(
+    private suspend fun hentVedtaksperioderIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
     ): List<VedtakSamordningPeriode> {
         val vedtaksliste = vedtakKlient.hentVedtakslisteForEtteroppgjoersAar(sakId, etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer)
-        val avkortingPerioder =
+
+        val vedtakPerioder =
             vedtaksliste
                 .flatMap { it.perioder }
-                .filter { it.fom.year == etteroppgjoersAar || it.tom?.year!! > etteroppgjoersAar }
+                .filter { it.fom.year == etteroppgjoersAar || it.tom?.year == etteroppgjoersAar }
         // TODO: validere riktig perioder innenfor etteroppgjoersAar?
+        // TODO: reparere så vi får riktig?
 
-        return avkortingPerioder
+        return vedtakPerioder
     }
 
     private fun hentAvkortingForBehandling(

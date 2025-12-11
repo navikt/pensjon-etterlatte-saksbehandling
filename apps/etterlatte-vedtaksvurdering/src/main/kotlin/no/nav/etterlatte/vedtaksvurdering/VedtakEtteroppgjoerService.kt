@@ -14,7 +14,6 @@ import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
-import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtakEtteroppgjoerService(
@@ -33,15 +32,20 @@ class VedtakEtteroppgjoerService(
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
                 .sammenstill(YearMonth.of(etteroppgjoersAar, 1))
+                .filter {
+                    (it.innhold is VedtakInnhold.Behandling) &&
+                        it.innhold.virkningstidspunkt.year == etteroppgjoersAar
+                }
 
         val avkortetYtelsePerioderByVedtak =
             repository
                 .hentAvkortetYtelsePerioder(tidslinjeJustert.map { it.id }.toSet())
                 .groupBy { it.vedtakId }
 
+        // TODO: filtrere eller validere på datofom ? - periode i vedtak ?
+
         return tidslinjeJustert
             .map { it.toEtteroppgjoervedtakDto(avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()) }
-            .filter { it.virkningstidspunkt.year == etteroppgjoersAar }
     }
 }
 
